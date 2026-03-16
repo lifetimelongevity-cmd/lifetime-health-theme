@@ -1,0 +1,485 @@
+<div class="container--large container--vertical-space{% if section.settings.gutter_decrease %}-small{% endif %}{% if section.settings.section_background_color != "rgba(0,0,0,0)" or section.settings.section_background_gradient != blank %} container--has-background{% endif %}{% if section.settings.remove_bottom_margin %} container--negative-margin{% endif %} remove-empty-space">
+
+  {%- assign show_heading_button = false -%}
+{%- if section.settings.show_view_all and section.settings.button_link != blank -%}
+  {%- assign show_heading_button = true -%}
+{%- endif -%}
+
+ {%- render 'section-heading',
+  heading: section.settings.heading,
+  subheading: section.settings.subheading,
+  button: show_heading_button,
+    button_label: section.settings.button_label,
+    link: section.settings.button_link,
+    heading_size: section.settings.section_heading_size,
+    section_layout: section.settings.section_heading_layout,
+    seo_h_tag: section.settings.seo_h_tag
+  -%}
+
+  <ul class="cta-card-grid cta-card-grid--{{ section.settings.columns }}col">
+    {%- for block in section.blocks -%}
+      {%- assign cta_id = 'cta-card-' | append: section.id | append: '-' | append: forloop.index -%}
+      <li class="cta-card-grid__item" {{ block.shopify_attributes }}>
+
+        {%- if block.settings.image_bg != blank -%}
+          {%- assign img_bg_1x = block.settings.image_bg | image_url: width: 345, height: 445, crop: 'center' -%}
+          {%- assign img_bg_2x = block.settings.image_bg | image_url: width: 690, height: 890, crop: 'center' -%}
+          <img
+            src="{{ img_bg_1x }}"
+            srcset="{{ img_bg_1x }} 345w, {{ img_bg_2x }} 690w"
+            sizes="(max-width: 767px) 180px, 345px"
+            width="345" height="445"
+            loading="lazy" decoding="async"
+            alt="{{ block.settings.image_bg.alt | escape }}"
+            class="cta-card-grid__bg"
+          >
+        {%- else -%}
+          <div class="cta-card-grid__bg cta-card-grid__bg--empty"></div>
+        {%- endif -%}
+
+       {%- if block.settings.overlay_color != "rgba(0,0,0,0)" -%}
+  {%- assign overlay_alpha = block.settings.overlay_opacity | divided_by: 100.0 -%}
+  <div class="cta-card-grid__overlay" style="background-color: {{ block.settings.overlay_color | color_modify: 'alpha', overlay_alpha }};"></div>
+{%- endif -%}
+
+
+        {%- if block.settings.image_fg != blank -%}
+          {%- assign img_fg_1x = block.settings.image_fg | image_url: width: 345, height: 445, crop: 'center' -%}
+          {%- assign img_fg_2x = block.settings.image_fg | image_url: width: 690, height: 890, crop: 'center' -%}
+          <img
+            src="{{ img_fg_1x }}"
+            srcset="{{ img_fg_1x }} 345w, {{ img_fg_2x }} 690w"
+            sizes="(max-width: 767px) 180px, 345px"
+            width="345" height="445"
+            loading="lazy" decoding="async"
+            alt="{{ block.settings.image_fg.alt | escape }}"
+            class="cta-card-grid__fg"
+          >
+        {%- endif -%}
+
+        {%- if block.settings.heading != blank -%}
+          <span class="cta-card-grid__title" style="color: {{ block.settings.heading_color }};">
+            {{ block.settings.heading }}
+          </span>
+        {%- endif -%}
+
+        {%- if block.settings.cta_label != blank -%}
+          <span
+            class="cta-card-grid__cta"
+            id="{{ cta_id }}"
+            style="--cta-bg: {{ block.settings.cta_color }}; color: {{ block.settings.cta_text_color }};"
+          >
+            {{ block.settings.cta_label }}
+          </span>
+        {%- endif -%}
+
+        {%- if block.settings.link != blank -%}
+          <a href="{{ block.settings.link }}" class="cta-card-grid__link" aria-labelledby="{{ cta_id }}"></a>
+        {%- endif -%}
+
+      </li>
+    {%- endfor -%}
+  </ul>
+
+  {%- if section.settings.show_view_all and section.settings.button_link != blank -%}
+    {%- render 'section-footer',
+      button: true,
+      button_label: section.settings.button_label,
+      link: section.settings.button_link
+    -%}
+  {%- endif -%}
+
+</div>
+
+<style>
+  /* ── Section background & text colour ── */
+  {%- if section.settings.section_background_color != "rgba(0,0,0,0)" -%}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ section.settings.section_background_color }};
+    }
+  {%- endif -%}
+  {%- if section.settings.section_background_gradient != blank -%}
+    #shopify-section-{{ section.id }} {
+      background-image: {{ section.settings.section_background_gradient }};
+    }
+  {%- endif -%}
+  {%- if section.settings.section_heading_color != "rgba(0,0,0,0)" -%}
+    #shopify-section-{{ section.id }} {
+      --color-text-main: {{ section.settings.section_heading_color }};
+      --color-secondary-text-main: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.6 }};
+      --color-borders-forms-primary: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.3 }};
+      --color-borders-main: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.1 }};
+      --color-secondary-background-main: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.08 }};
+    }
+  {%- endif -%}
+
+  /* ── Grid ── */
+  #shopify-section-{{ section.id }} .cta-card-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: {{ section.settings.grid_gap }}px;
+    margin-top: 22px;
+    list-style: none;
+    padding: 0;
+  }
+
+  @media (min-width: 768px) {
+    #shopify-section-{{ section.id }} .cta-card-grid--3col { grid-template-columns: repeat(3, 1fr); }
+    #shopify-section-{{ section.id }} .cta-card-grid--4col { grid-template-columns: repeat(4, 1fr); }
+    #shopify-section-{{ section.id }} .cta-card-grid--2col { grid-template-columns: repeat(2, 1fr); }
+    #shopify-section-{{ section.id }} .cta-card-grid {
+      gap: {{ section.settings.grid_gap_desktop }}px;
+      margin-top: 55px;
+    }
+  }
+
+  /* ── Card ── */
+  #shopify-section-{{ section.id }} .cta-card-grid__item {
+    position: relative;
+    border-radius: {{ section.settings.image_border_radius }}px;
+    overflow: hidden;
+    aspect-ratio: 345 / 445;
+  }
+
+  /* ── Background image ── */
+  #shopify-section-{{ section.id }} .cta-card-grid__bg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 0.3s ease;
+  }
+  #shopify-section-{{ section.id }} .cta-card-grid__bg--empty {
+    width: 100%;
+    height: 100%;
+    background-color: #e5e5e5;
+  }
+  #shopify-section-{{ section.id }} .cta-card-grid__item:hover .cta-card-grid__bg {
+    filter: grayscale(100%);
+  }
+
+  /* ── Colour overlay ── */
+  #shopify-section-{{ section.id }} .cta-card-grid__overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  /* ── Foreground image ── */
+  #shopify-section-{{ section.id }} .cta-card-grid__fg {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+  }
+
+  /* ── Card title ── */
+  #shopify-section-{{ section.id }} .cta-card-grid__title {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 18px 10px;
+    font-size: 17px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+  @media (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .cta-card-grid__title {
+      font-size: 32px;
+      font-weight: 400;
+      padding: 35px 10px;
+    }
+  }
+
+  /* ── CTA label ── */
+  #shopify-section-{{ section.id }} .cta-card-grid__cta {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: max-content;
+    max-width: 100%;
+    margin-inline: auto;
+    padding: 12px 20px;
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 20px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  @media (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .cta-card-grid__cta {
+      bottom: 24px;
+      padding: 12px 50px;
+      font-size: 14px;
+    }
+  }
+  #shopify-section-{{ section.id }} .cta-card-grid__item:hover .cta-card-grid__cta {
+    background-color: var(--cta-bg);
+    color: #fff !important;
+  }
+
+  /* ── Full-card link overlay ── */
+  #shopify-section-{{ section.id }} .cta-card-grid__link {
+    position: absolute;
+    inset: 0;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "CTA Card Grid",
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "header",
+      "content": "t:sections.bundle-extra-words.sections.headings.name"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "t:sections.local-extra-words.sections.headings.heading",
+      "default": "Shop by category"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "subheading",
+      "label": "t:sections.local-extra-words.sections.headings.subheading"
+    },
+    {
+      "type": "select",
+      "id": "section_heading_size",
+      "label": "t:sections.bundle-extra-words.sections.headings.size.label",
+      "options": [
+        { "value": "text-size--regular", "label": "t:sections.bundle-extra-words.sections.headings.size.option_1" },
+        { "value": "text-size--large",   "label": "t:sections.bundle-extra-words.sections.headings.size.option_2" }
+      ],
+      "default": "text-size--regular"
+    },
+    {
+      "type": "select",
+      "id": "section_heading_layout",
+      "label": "t:sections.bundle-extra-words.sections.headings.alignment.label",
+      "options": [
+        { "value": "section-heading--left section-heading--one-row",   "label": "t:sections.bundle-extra-words.sections.headings.alignment.option_1", "group": "t:sections.bundle-extra-words.sections.headings.layout.option_1" },
+        { "value": "section-heading--left section-heading--two-rows",  "label": "t:sections.bundle-extra-words.sections.headings.alignment.option_1", "group": "t:sections.bundle-extra-words.sections.headings.layout.option_2" },
+        { "value": "section-heading--center section-heading--two-rows","label": "t:sections.bundle-extra-words.sections.headings.alignment.option_2", "group": "t:sections.bundle-extra-words.sections.headings.layout.option_2" }
+      ],
+      "default": "section-heading--center section-heading--two-rows"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_view_all",
+      "label": "t:sections.featured-collection.settings.show_view_all.label",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "View all"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.bundle-extra-words.sections.headings.layout.label"
+    },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "Columns (desktop)",
+      "options": [
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "3"
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "label": "Gap (mobile)",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "grid_gap_desktop",
+      "label": "Gap (desktop)",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "t:sections.bundle-extra-words.sections.main-product-page.settings.gallery.border_radius",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "t:bundle-240.section_design"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "t:bundle-240.background_color",
+      "default": "rgba(0,0,0,0)"
+    },
+    {
+      "type": "color_background",
+      "id": "section_background_gradient",
+      "label": "t:bundle-240.background_gradient"
+    },
+    {
+      "type": "color",
+      "id": "section_heading_color",
+      "label": "t:bundle-240.text_color",
+      "default": "rgba(0,0,0,0)"
+    },
+    {
+      "type": "header",
+      "content": "t:sections.bundle-extra-words.sections.headings.gutter.label"
+    },
+    {
+      "type": "checkbox",
+      "id": "gutter_decrease",
+      "label": "t:sections.bundle-extra-words.sections.headings.gutter.content",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "remove_bottom_margin",
+      "label": "t:sections.local-extra-words.settings_schema.layout.sections.remove_bottom_margin",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "t:sections.refactor_words.seo.name"
+    },
+    {
+      "type": "select",
+      "id": "seo_h_tag",
+      "label": "t:sections.refactor_words.seo.label",
+      "info": "t:sections.refactor_words.seo.info",
+      "options": [
+        { "value": "h1",   "label": "H1" },
+        { "value": "h2",   "label": "H2" },
+        { "value": "h3",   "label": "H3" },
+        { "value": "h4",   "label": "H4" },
+        { "value": "span", "label": "span" }
+      ],
+      "default": "h2"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image_bg",
+          "label": "Background image"
+        },
+        {
+          "type": "image_picker",
+          "id": "image_fg",
+          "label": "Foreground image (overlay)",
+          "info": "Optional product/object image layered on top of the background."
+        },
+        {
+          "type": "color",
+          "id": "overlay_color",
+          "label": "Overlay colour",
+          "default": "rgba(0,0,0,0)"
+        },
+        {
+          "type": "range",
+          "id": "overlay_opacity",
+          "label": "Overlay opacity",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 30
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Card title",
+          "default": "Category name"
+        },
+        {
+          "type": "color",
+          "id": "heading_color",
+          "label": "Title colour",
+          "default": "#ffffff"
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA label",
+          "default": "Shop now"
+        },
+        {
+          "type": "color",
+          "id": "cta_color",
+          "label": "CTA hover colour",
+          "info": "Background colour shown on the label when the card is hovered.",
+          "default": "#000000"
+        },
+        {
+          "type": "color",
+          "id": "cta_text_color",
+          "label": "CTA text colour",
+          "default": "#ffffff"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "CTA Card Grid",
+      "category": "Collection",
+      "blocks": [
+        { "type": "card" },
+        { "type": "card" },
+        { "type": "card" },
+        { "type": "card" },
+        { "type": "card" },
+        { "type": "card" }
+      ]
+    }
+  ],
+  "disabled_on": {
+    "groups": ["header"],
+    "templates": ["password"]
+  }
+}
+{% endschema %}

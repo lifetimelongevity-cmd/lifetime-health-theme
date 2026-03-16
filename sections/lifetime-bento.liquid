@@ -1,0 +1,538 @@
+{% comment %}
+  Shopify Section: Bento Grid (Two-Column)
+  Design inspired by Tally Health — light background, text left, image bottom-right.
+{% endcomment %}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    --card-bg:        {{ section.settings.card_bg_color }};
+    --color-highlight: {{ section.settings.highlight_color }};
+    --card-radius:    {{ section.settings.card_radius }}px;
+    --card-padding:   {{ section.settings.card_padding }}px;
+    --image-width:    {{ section.settings.image_width }}%;
+    --btn-bg:         {{ section.settings.btn_bg_color }};
+    --btn-icon-color: {{ section.settings.btn_icon_color }};
+    --btn-bg-hover:   {{ section.settings.btn_bg_hover_color }};
+    --btn-icon-hover: {{ section.settings.btn_icon_hover_color }};
+    --grid-gap:       {{ section.settings.grid_gap }}px;
+  }
+
+  .bento-grid-section {
+    padding: {{ section.settings.section_padding_v }}px {{ section.settings.section_padding_h }}px;
+  }
+
+  .bento-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--grid-gap);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .bento-card {
+    position: relative;
+    background-color: var(--card-bg);
+    border-radius: var(--card-radius);
+    padding: var(--card-padding);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 340px;
+  }
+
+  .bento-card__content {
+    position: relative;
+    z-index: 2;
+    max-width: 100%;
+  }
+
+  .bento-card__headline {
+    color: var(--color-text-main);
+    margin: 0 0 0.5rem;
+  }
+
+  .bento-card__headline .highlight {
+    color: var(--color-highlight);
+  }
+
+  .bento-card__subline {
+    color: var(--color-secondary-text-main);
+    margin: 0;
+  }
+
+  .bento-card__footer {
+    position: relative;
+    z-index: 2;
+    margin-top: 1.5rem;
+  }
+
+  /* Round icon link button */
+  .bento-card__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: var(--btn-bg);
+    color: var(--btn-icon-color);
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .bento-card__btn:hover,
+  .bento-card__btn:focus-visible {
+    background-color: var(--btn-bg-hover);
+    color: var(--btn-icon-hover);
+    transform: scale(1.08);
+    outline: none;
+  }
+
+  .bento-card__btn svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  /* Image positioned bottom-right */
+  .bento-card__image-wrap {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: var(--image-width);
+    z-index: 1;
+    pointer-events: none;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+  }
+
+  .bento-card__image-wrap img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: contain;
+    border-bottom-right-radius: var(--card-radius);
+  }
+
+  /* Section heading */
+  .bento-grid__header {
+    max-width: 1200px;
+    margin: 0 auto {{ section.settings.header_gap }}px;
+  }
+
+  .bento-grid__header[data-layout="center"] {
+    text-align: center;
+  }
+
+  .bento-grid__heading {
+    color: var(--color-text-main);
+    margin: 0 0 0.4em;
+  }
+
+  .bento-grid__subheading {
+    color: var(--color-secondary-text-main);
+    margin: 0;
+  }
+
+  /* Responsive: single column on mobile */
+  @media screen and (max-width: 749px) {
+    .bento-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .bento-card {
+      min-height: 280px;
+    }
+
+    .bento-card__content {
+      max-width: 100%;
+    }
+
+    #shopify-section-{{ section.id }} {
+      --image-width: {{ section.settings.image_width_mobile }}%;
+    }
+  }
+</style>
+
+<section class="bento-grid-section">
+  {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+    <div class="bento-grid__header" data-layout="{{ section.settings.heading_layout }}">
+      {%- if section.settings.heading != blank -%}
+        <{{ section.settings.seo_h_tag }} class="bento-grid__heading">
+          {{- section.settings.heading -}}
+        </{{ section.settings.seo_h_tag }}>
+      {%- endif -%}
+      {%- if section.settings.subheading != blank -%}
+        <p class="bento-grid__subheading">{{ section.settings.subheading }}</p>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="bento-grid">
+    {% for block in section.blocks %}
+      {% case block.type %}
+        {% when 'bento_card' %}
+          <div class="bento-card" {{ block.shopify_attributes }}>
+
+            <div class="bento-card__content">
+              <{{ block.settings.card_heading_tag }} class="bento-card__headline">
+                {%- if block.settings.headline_highlight != blank -%}
+                  {%- assign parts = block.settings.headline | split: block.settings.headline_highlight -%}
+                  {%- if parts.size > 1 -%}
+                    {{- parts[0] -}}<span class="highlight">{{- block.settings.headline_highlight -}}</span>{{- parts[1] -}}
+                  {%- else -%}
+                    {{- block.settings.headline -}}
+                  {%- endif -%}
+                {%- else -%}
+                  {{- block.settings.headline -}}
+                {%- endif -%}
+              </{{ block.settings.card_heading_tag }}>
+              {%- if block.settings.subline != blank -%}
+                <p class="bento-card__subline">{{ block.settings.subline }}</p>
+              {%- endif -%}
+            </div>
+
+            <div class="bento-card__footer">
+              <a
+                href="{{ block.settings.btn_url | default: '#' }}"
+                class="bento-card__btn"
+                aria-label="{{ block.settings.btn_aria_label | default: block.settings.headline | escape }}"
+                {% if block.settings.btn_url == blank %}aria-disabled="true" tabindex="-1"{% endif %}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </a>
+            </div>
+
+            {%- if block.settings.image != blank -%}
+              <div class="bento-card__image-wrap">
+                {{
+                  block.settings.image
+                  | image_url: width: 600
+                  | image_tag:
+                    loading: 'lazy',
+                    widths: '200,300,400,500,600',
+                    sizes: '(max-width: 749px) 45vw, 30vw',
+                    alt: block.settings.image.alt | default: block.settings.headline | escape
+                }}
+              </div>
+            {%- endif -%}
+
+          </div>
+      {% endcase %}
+    {% endfor %}
+  </div>
+</section>
+
+{%- if section.settings.section_background_color != 'rgba(0,0,0,0)' -%}
+  {% style %}
+    #shopify-section-{{ section.id }} {
+      background-color: {{ section.settings.section_background_color }};
+    }
+  {% endstyle %}
+{%- endif -%}
+
+{%- if section.settings.section_background_gradient != blank -%}
+  {% style %}
+    #shopify-section-{{ section.id }} {
+      background-image: {{ section.settings.section_background_gradient }};
+    }
+  {% endstyle %}
+{%- endif -%}
+
+{%- if section.settings.section_heading_color != 'rgba(0,0,0,0)' -%}
+  {% style %}
+    #shopify-section-{{ section.id }} {
+      --color-text-main: {{ section.settings.section_heading_color }};
+      --color-secondary-text-main: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.6 }};
+      --color-borders-forms-primary: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.3 }};
+      --color-borders-main: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.1 }};
+    }
+  {% endstyle %}
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Bento Grid",
+  "tag": "section",
+  "class": "bento-grid-section-wrapper",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section Heading"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Why it works"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Science-backed formulas designed for lasting results."
+    },
+    {
+      "type": "select",
+      "id": "heading_layout",
+      "label": "Heading alignment",
+      "options": [
+        { "value": "left",   "label": "Left"   },
+        { "value": "center", "label": "Center" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "header_gap",
+      "label": "Space below heading (px)",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "default": 32
+    },
+    {
+      "type": "select",
+      "id": "seo_h_tag",
+      "label": "Heading SEO tag",
+      "options": [
+        { "value": "h1",   "label": "H1"   },
+        { "value": "h2",   "label": "H2"   },
+        { "value": "h3",   "label": "H3"   },
+        { "value": "h4",   "label": "H4"   },
+        { "value": "span", "label": "span" }
+      ],
+      "default": "h2"
+    },
+    {
+      "type": "header",
+      "content": "Section Layout"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_v",
+      "label": "Section vertical padding (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "section_padding_h",
+      "label": "Section horizontal padding (px)",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "grid_gap",
+      "label": "Gap between cards (px)",
+      "min": 0,
+      "max": 64,
+      "step": 2,
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Card Design"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Card background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_radius",
+      "label": "Card border radius (px)",
+      "min": 0,
+      "max": 48,
+      "step": 1,
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Card inner padding (px)",
+      "min": 8,
+      "max": 80,
+      "step": 4,
+      "default": 32
+    },
+    {
+      "type": "color",
+      "id": "highlight_color",
+      "label": "Highlight word color",
+      "default": "#c8a96e"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg_color",
+      "label": "Button background",
+      "default": "#1a1a1a"
+    },
+    {
+      "type": "color",
+      "id": "btn_icon_color",
+      "label": "Button icon color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg_hover_color",
+      "label": "Button background (hover)",
+      "default": "#c8a96e"
+    },
+    {
+      "type": "color",
+      "id": "btn_icon_hover_color",
+      "label": "Button icon color (hover)",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "label": "Image width — desktop (%)",
+      "min": 20,
+      "max": 80,
+      "step": 1,
+      "default": 45
+    },
+    {
+      "type": "range",
+      "id": "image_width_mobile",
+      "label": "Image width — mobile (%)",
+      "min": 20,
+      "max": 80,
+      "step": 1,
+      "default": 42
+    },
+    {
+      "type": "header",
+      "content": "t:bundle-240.section_design"
+    },
+    {
+      "type": "color",
+      "id": "section_background_color",
+      "label": "t:bundle-240.background_color",
+      "default": "rgba(0,0,0,0)"
+    },
+    {
+      "type": "color_background",
+      "id": "section_background_gradient",
+      "label": "t:bundle-240.background_gradient"
+    },
+    {
+      "type": "color",
+      "id": "section_heading_color",
+      "label": "t:bundle-240.text_color",
+      "default": "rgba(0,0,0,0)"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "bento_card",
+      "name": "Bento Card",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Product image"
+        },
+        {
+          "type": "select",
+          "id": "card_heading_tag",
+          "label": "Headline tag",
+          "info": "Controls which heading level (and therefore which theme font style) is used.",
+          "options": [
+            { "value": "h2", "label": "H2" },
+            { "value": "h3", "label": "H3" },
+            { "value": "h4", "label": "H4" },
+            { "value": "h5", "label": "H5" },
+            { "value": "p",  "label": "p (body font)" }
+          ],
+          "default": "h3"
+        },
+        {
+          "type": "text",
+          "id": "headline",
+          "label": "Headline",
+          "default": "Unlock your potential"
+        },
+        {
+          "type": "text",
+          "id": "headline_highlight",
+          "label": "Highlight word (must appear in Headline)",
+          "info": "Enter the exact word or phrase from the Headline that should be highlighted.",
+          "default": "potential"
+        },
+        {
+          "type": "textarea",
+          "id": "subline",
+          "label": "Subline / description",
+          "default": "Science-backed insights for a healthier, longer life."
+        },
+        {
+          "type": "url",
+          "id": "btn_url",
+          "label": "Button / link URL"
+        },
+        {
+          "type": "text",
+          "id": "btn_aria_label",
+          "label": "Button accessible label",
+          "info": "Screen-reader label for the icon button. Defaults to the Headline text.",
+          "default": "Jetzt kaufen"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Bento Grid",
+      "blocks": [
+        {
+          "type": "bento_card",
+          "settings": {
+            "headline": "Live longer, feel better",
+            "headline_highlight": "longer",
+            "subline": "Personalized health scores and actionable recommendations."
+          }
+        },
+        {
+          "type": "bento_card",
+          "settings": {
+            "headline": "Science you can trust",
+            "headline_highlight": "Science",
+            "subline": "Evidence-based biomarker testing at your fingertips."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

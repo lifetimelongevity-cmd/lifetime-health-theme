@@ -1,0 +1,174 @@
+{% if section.settings.show_section %}
+<div class="trust-bar-{{ section.id }}{% if section.settings.background_style == 'transparent' %} trust-bar--transparent{% endif %}"
+     aria-label="Vertrauenssignale"
+     style="{% if section.settings.custom_bg != blank %}background-color: {{ section.settings.custom_bg }};{% endif %}{% if section.settings.custom_text != blank %}--trust-bar-text: {{ section.settings.custom_text }};{% endif %}">
+  <div class="trust-bar__track">
+    <div class="trust-bar__reel" style="--scroll-duration: {{ section.settings.scroll_speed }}s;">
+
+      {%- comment %}Primary copy{% endcomment -%}
+      <span class="trust-bar__item">{{ section.settings.item_1 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item"><span class="trust-bar__stars" aria-hidden="true">★★★★★</span>{{ section.settings.item_2 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item">{{ section.settings.item_3 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item">{{ section.settings.item_4 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item">{{ section.settings.item_5 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;&nbsp;&nbsp;·&nbsp;</span>
+
+      {%- comment %}Duplicate copy for seamless loop{% endcomment -%}
+      <span class="trust-bar__item" aria-hidden="true">{{ section.settings.item_1 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item" aria-hidden="true"><span class="trust-bar__stars" aria-hidden="true">★★★★★</span>{{ section.settings.item_2 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item" aria-hidden="true">{{ section.settings.item_3 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item" aria-hidden="true">{{ section.settings.item_4 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;</span>
+      <span class="trust-bar__item" aria-hidden="true">{{ section.settings.item_5 | escape }}</span>
+      <span class="trust-bar__sep" aria-hidden="true">&nbsp;·&nbsp;&nbsp;&nbsp;·&nbsp;</span>
+
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<style>
+  .trust-bar-{{ section.id }} {
+    border-top: 0.5px solid rgba(var(--color-foreground), 0.15);
+    border-bottom: 0.5px solid rgba(var(--color-foreground), 0.15);
+    background-color: var(--color-background-2, rgba(var(--color-foreground), 0.04));
+    height: 32px;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .trust-bar-{{ section.id }}.trust-bar--transparent {
+    background-color: transparent;
+  }
+
+  .trust-bar-{{ section.id }} .trust-bar__track {
+    overflow: hidden;
+    width: 100%;
+  }
+
+  @keyframes trust-bar-scroll-{{ section.id }} {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  .trust-bar-{{ section.id }} .trust-bar__reel {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    animation: trust-bar-scroll-{{ section.id }} var(--scroll-duration, 40s) linear infinite;
+  }
+
+  .trust-bar-{{ section.id }} .trust-bar__item,
+  .trust-bar-{{ section.id }} .trust-bar__sep {
+    font-family: var(--font-body-family);
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1;
+    color: var(--trust-bar-text, rgb(var(--color-foreground)));
+    white-space: nowrap;
+  }
+
+  .trust-bar-{{ section.id }} .trust-bar__sep {
+    opacity: 0.45;
+  }
+
+  .trust-bar-{{ section.id }} .trust-bar__stars {
+    color: #BA7517;
+    margin-right: 3px;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Trust Bar",
+  "tag": "section",
+  "class": "section-trust-bar",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_section",
+      "label": "Anzeigen",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "background_style",
+      "label": "Hintergrund",
+      "options": [
+        { "value": "subtle", "label": "Subtil" },
+        { "value": "transparent", "label": "Transparent" }
+      ],
+      "default": "subtle"
+    },
+    {
+      "type": "color",
+      "id": "custom_bg",
+      "label": "Hintergrundfarbe",
+      "info": "Überschreibt die Hintergrund-Einstellung oben"
+    },
+    {
+      "type": "color",
+      "id": "custom_text",
+      "label": "Textfarbe"
+    },
+    {
+      "type": "range",
+      "id": "scroll_speed",
+      "label": "Scrollgeschwindigkeit (Sekunden)",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Inhalte"
+    },
+    {
+      "type": "text",
+      "id": "item_1",
+      "label": "Item 1",
+      "default": "Bekannt aus RTL · SAT1 · SWR1"
+    },
+    {
+      "type": "text",
+      "id": "item_2",
+      "label": "Item 2",
+      "info": "Sterne werden automatisch vorangestellt",
+      "default": " 4,8 — Über 1.000 Kunden"
+    },
+    {
+      "type": "text",
+      "id": "item_3",
+      "label": "Item 3",
+      "default": "90 Tage Geld-zurück — kein Formular"
+    },
+    {
+      "type": "text",
+      "id": "item_4",
+      "label": "Item 4",
+      "default": "Gratis Versand ab 35 €"
+    },
+    {
+      "type": "text",
+      "id": "item_5",
+      "label": "Item 5",
+      "default": "Entwickelt von Dr. med. Limmroth · Neurologe"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Trust Bar"
+    }
+  ]
+}
+{% endschema %}

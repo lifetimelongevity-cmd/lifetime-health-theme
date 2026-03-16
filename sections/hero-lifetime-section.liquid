@@ -1,0 +1,835 @@
+{% comment %}
+  LIFETIME Hero DNA – V8 (Shopify Section)
+  - Optionale Subline mit Spacing
+  - Trust-Fakten unter CTA (Icons uploadbar, SVG-Fallback)
+  - Dashboard: vertikale Position & Größe einstellbar
+{% endcomment %}
+
+{%- liquid
+  assign desktop_img_url = 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/Design_ohne_Titel_30.png?v=1772724333'
+  assign mobile_img_url  = 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/hero-lifetime-test-mobile.jpg?v=1773054342'
+  if section.settings.image_desktop != blank
+    assign desktop_img_url = section.settings.image_desktop | image_url: width: 1920
+  endif
+  if section.settings.image_mobile != blank
+    assign mobile_img_url = section.settings.image_mobile | image_url: width: 800
+  endif
+
+  assign cta_url       = section.settings.cta_url        | default: '/products/lifetime-age-dna'
+  assign video_url     = section.settings.video_link_url  | default: 'https://www.lifetime-health.de/pages/agedna-start'
+  assign metric1_color = section.settings.metric1_color   | default: '#65C0B6'
+  assign metric2_color = section.settings.metric2_color   | default: '#F4B740'
+  assign dash_scale    = section.settings.dash_scale      | default: 100 | divided_by: 100.0
+  assign dash_valign   = section.settings.dash_valign     | default: 'center'
+-%}
+
+<section
+  class="lt-hero"
+  aria-label="LIFETIME Hero"
+  id="lt-hero-{{ section.id }}"
+>
+  <style>
+    #lt-hero-{{ section.id }} {
+      --brand-mint:   {{ section.settings.brand_mint   | default: '#65C0B6' }};
+      --brand-gold:   {{ section.settings.brand_gold   | default: '#F4B740' }};
+      --glass-white:  rgba(255, 255, 255, 0.22);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --text-dark:    #0B0F12;
+      --subline-mt:   {{ section.settings.subline_spacing_top    | default: 16 }}px;
+      --subline-mb:   {{ section.settings.subline_spacing_bottom | default: 20 }}px;
+      --dash-scale:   {{ dash_scale }};
+    }
+
+    /* ── Base ── */
+    #lt-hero-{{ section.id }} {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      min-height: 750px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   Helvetica, Arial, sans-serif;
+    }
+
+    /* ── Background ── */
+    #lt-hero-{{ section.id }} .lt-hero__bg-container {
+      position: absolute;
+      inset: -60px 0;
+      width: 100%;
+      height: calc(100% + 120px);
+      z-index: 0;
+    }
+    #lt-hero-{{ section.id }} .lt-hero__img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 20%;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    #lt-hero-{{ section.id }}.is-visible .lt-hero__img { opacity: 1; }
+
+    #lt-hero-{{ section.id }} .lt-hero__overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0.4)  0%,
+        rgba(0,0,0,0.7)  50%,
+        rgba(0,0,0,0.9) 100%
+      );
+    }
+
+    /* ── Layout ── */
+    #lt-hero-{{ section.id }} .lt-hero__container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    @media (min-width: 992px) {
+      #lt-hero-{{ section.id }} .lt-hero__container {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: stretch;
+        text-align: left;
+        padding: 60px 24px;
+      }
+    }
+
+    #lt-hero-{{ section.id }} .lt-hero__content {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    @media (min-width: 992px) {
+      #lt-hero-{{ section.id }} .lt-hero__content { max-width: 540px; }
+    }
+
+    /* ── Headline & Highlight ── */
+    #lt-hero-{{ section.id }} .lt-hero__headline {
+      font-size: clamp(34px, 8vw, 54px);
+      line-height: 1.1;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0;
+      letter-spacing: -0.02em;
+    }
+    #lt-hero-{{ section.id }} .lt-hero__highlight {
+      position: relative;
+      display: inline-block;
+      z-index: 1;
+    }
+    #lt-hero-{{ section.id }} .lt-hero__highlight::after {
+      content: "";
+      position: absolute;
+      left: -2%;
+      bottom: 8%;
+      width: 104%;
+      height: 35%;
+      background: var(--brand-mint);
+      opacity: 0.7;
+      z-index: -1;
+      transform: rotate(-1.2deg) skew(-10deg);
+      border-radius: 2px;
+    }
+
+    /* ── Subline ── */
+    #lt-hero-{{ section.id }} .lt-hero__subline {
+      color: rgba(255, 255, 255, 0.82);
+      font-size: clamp(15px, 2vw, 18px);
+      font-weight: 400;
+      line-height: 1.55;
+      margin-top: var(--subline-mt);
+      margin-bottom: var(--subline-mb);
+    }
+
+    /* ── Trust bar (Sterne) ── */
+    #lt-hero-{{ section.id }} .lt-hero__trust {
+      display: flex;
+      gap: 10px;
+      font-size: 14px;
+      margin-bottom: 20px;
+      color: #fff;
+      justify-content: center;
+    }
+    @media (min-width: 992px) {
+      #lt-hero-{{ section.id }} .lt-hero__trust { justify-content: flex-start; }
+    }
+    #lt-hero-{{ section.id }} .lt-hero__stars {
+      color: var(--brand-gold);
+      letter-spacing: 1px;
+    }
+
+    /* ── Actions ── */
+    #lt-hero-{{ section.id }} .lt-hero__actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 24px;
+    }
+    @media (min-width: 992px) {
+      #lt-hero-{{ section.id }} .lt-hero__actions {
+        align-items: flex-start;
+        margin-bottom: 20px;
+      }
+    }
+    #lt-hero-{{ section.id }} .lt-hero__cta {
+      display: inline-flex;
+      align-items: center;
+      background: #fff;
+      color: var(--text-dark);
+      padding: 16px 36px;
+      border-radius: 100px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 16px;
+    }
+    #lt-hero-{{ section.id }} .lt-hero__video-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+    }
+    #lt-hero-{{ section.id }} .lt-hero__video-icon {
+      width: 30px;
+      height: 30px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(5px);
+    }
+
+    /* ── Trust Facts ── */
+    #lt-hero-{{ section.id }} .lt-hero__facts {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 40px;
+    }
+    @media (min-width: 992px) {
+      #lt-hero-{{ section.id }} .lt-hero__facts { margin-bottom: 30px; }
+    }
+    #lt-hero-{{ section.id }} .lt-hero__fact {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+    }
+    @media (min-width: 992px) {
+      #lt-hero-{{ section.id }} .lt-hero__fact { justify-content: flex-start; }
+    }
+    #lt-hero-{{ section.id }} .lt-hero__fact-icon {
+      flex-shrink: 0;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(101, 192, 182, 0.18);
+      border: 1px solid rgba(101, 192, 182, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--brand-mint);
+      overflow: hidden;
+    }
+    #lt-hero-{{ section.id }} .lt-hero__fact-icon img {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      display: block;
+    }
+    #lt-hero-{{ section.id }} .lt-hero__fact-text {
+      font-size: 13px;
+      color: rgba(255, 255, 255, 0.75);
+      font-weight: 500;
+      line-height: 1.4;
+      text-align: left;
+    }
+
+    /* ── Dashboard / Metrics ── */
+    #lt-hero-{{ section.id }} .lt-hero__dash {
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 20px;
+      transform: scale(var(--dash-scale));
+      transform-origin: top center;
+    }
+    @media (min-width: 992px) {
+      #lt-hero-{{ section.id }} .lt-hero__dash {
+        align-self: {{ dash_valign }};
+        margin-top: 0;
+        transform-origin: top right;
+      }
+    }
+
+    #lt-hero-{{ section.id }} .lt-hero__card {
+      background: var(--glass-white);
+      backdrop-filter: blur(15px) saturate(160%);
+      -webkit-backdrop-filter: blur(15px) saturate(160%);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 20px;
+      color: #fff;
+    }
+    #lt-hero-{{ section.id }} .lt-hero__card--age {
+      background: #fff;
+      color: var(--text-dark);
+      text-align: center;
+    }
+    #lt-hero-{{ section.id }} .lt-hero__age-num {
+      font-size: clamp(64px, 10vw, 80px);
+      font-weight: 900;
+      line-height: 1;
+      margin: 5px 0;
+    }
+    #lt-hero-{{ section.id }} .lt-hero__metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    #lt-hero-{{ section.id }} .lt-hero__card--metric {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100px;
+    }
+    #lt-hero-{{ section.id }} .lt-hero__metric-name {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: block;
+      letter-spacing: 0.05em;
+    }
+    #lt-hero-{{ section.id }} .lt-hero__bar {
+      height: 8px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    #lt-hero-{{ section.id }} .lt-hero__fill {
+      height: 100%;
+      width: 0;
+      transition: width 2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s;
+      border-radius: 100px;
+    }
+
+    /* ── Reveal animations ── */
+    #lt-hero-{{ section.id }} .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+    #lt-hero-{{ section.id }}.is-visible .reveal {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    #lt-hero-{{ section.id }}.is-visible .lt-fill-run {
+      width: var(--w);
+    }
+    /* scale + reveal kombiniert */
+    #lt-hero-{{ section.id }} .lt-hero__dash.reveal {
+      transform: scale(var(--dash-scale)) translateY(20px);
+    }
+    #lt-hero-{{ section.id }}.is-visible .lt-hero__dash.reveal {
+      transform: scale(var(--dash-scale)) translateY(0);
+    }
+  </style>
+
+  <!-- Background -->
+  <div class="lt-hero__bg-container">
+    <picture>
+      <source media="(max-width: 767px)" srcset="{{ mobile_img_url }}">
+      <img
+        src="{{ desktop_img_url }}"
+        alt="{{ section.settings.image_desktop.alt | default: 'Lifetime Health' | escape }}"
+        class="lt-hero__img"
+        id="heroImg-{{ section.id }}"
+        loading="eager"
+      >
+    </picture>
+    <div class="lt-hero__overlay"></div>
+  </div>
+
+  <!-- Content -->
+  <div class="lt-hero__container">
+
+    <!-- Left: Text & CTA -->
+    <div class="lt-hero__content">
+
+      {%- if section.settings.trust_text != blank -%}
+        <div class="lt-hero__trust reveal">
+          <span class="lt-hero__stars">★★★★★</span>
+          <span>{{ section.settings.trust_text }}</span>
+        </div>
+      {%- endif -%}
+
+      <h1 class="lt-hero__headline reveal">
+        {{ section.settings.headline_before }}
+        {%- if section.settings.headline_highlight != blank -%}
+          <span class="lt-hero__highlight">{{ section.settings.headline_highlight }}</span>
+        {%- endif -%}
+      </h1>
+
+      {%- if section.settings.subline != blank -%}
+        <p class="lt-hero__subline reveal">{{ section.settings.subline }}</p>
+      {%- endif -%}
+
+      <div class="lt-hero__actions reveal">
+        {%- if section.settings.cta_text != blank -%}
+          <a href="{{ cta_url }}" class="lt-hero__cta">
+            <span>{{ section.settings.cta_text }}</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="3"
+                 style="margin-left:10px;" aria-hidden="true">
+              <path d="M5 12h14m-7-7l7 7-7 7"/>
+            </svg>
+          </a>
+        {%- endif -%}
+
+        {%- if section.settings.video_link_text != blank -%}
+          <a href="{{ video_url }}" class="lt-hero__video-link">
+            <span class="lt-hero__video-icon" aria-hidden="true">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M8 5v14l11-7z"/>
+              </svg>
+            </span>
+            {{ section.settings.video_link_text }}
+          </a>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.show_trust_facts -%}
+        {%- assign any_fact = false -%}
+        {%- if section.settings.fact1_text != blank or section.settings.fact2_text != blank or section.settings.fact3_text != blank -%}
+          {%- assign any_fact = true -%}
+        {%- endif -%}
+
+        {%- if any_fact -%}
+          <div class="lt-hero__facts reveal">
+
+            {%- if section.settings.fact1_text != blank -%}
+              <div class="lt-hero__fact">
+                <span class="lt-hero__fact-icon" aria-hidden="true">
+                  {%- if section.settings.fact1_icon != blank -%}
+                    <img src="{{ section.settings.fact1_icon | image_url: width: 32 }}" alt="" width="16" height="16">
+                  {%- else -%}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                      <path d="M5 3c0 0 3.5 2 3.5 9S5 21 5 21"/>
+                      <path d="M19 3c0 0-3.5 2-3.5 9s3.5 9 3.5 9"/>
+                      <line x1="7" y1="7.5"  x2="17" y2="7.5"/>
+                      <line x1="5.2" y1="12" x2="18.8" y2="12"/>
+                      <line x1="7" y1="16.5" x2="17" y2="16.5"/>
+                    </svg>
+                  {%- endif -%}
+                </span>
+                <span class="lt-hero__fact-text">{{ section.settings.fact1_text }}</span>
+              </div>
+            {%- endif -%}
+
+            {%- if section.settings.fact2_text != blank -%}
+              <div class="lt-hero__fact">
+                <span class="lt-hero__fact-icon" aria-hidden="true">
+                  {%- if section.settings.fact2_icon != blank -%}
+                    <img src="{{ section.settings.fact2_icon | image_url: width: 32 }}" alt="" width="16" height="16">
+                  {%- else -%}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M9 3h6"/>
+                      <path d="M10 3v6.5L5.5 17A2 2 0 0 0 7.3 20h9.4a2 2 0 0 0 1.8-3L14 9.5V3"/>
+                      <path d="M8.5 16.5h7"/>
+                    </svg>
+                  {%- endif -%}
+                </span>
+                <span class="lt-hero__fact-text">{{ section.settings.fact2_text }}</span>
+              </div>
+            {%- endif -%}
+
+            {%- if section.settings.fact3_text != blank -%}
+              <div class="lt-hero__fact">
+                <span class="lt-hero__fact-icon" aria-hidden="true">
+                  {%- if section.settings.fact3_icon != blank -%}
+                    <img src="{{ section.settings.fact3_icon | image_url: width: 32 }}" alt="" width="16" height="16">
+                  {%- else -%}
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <rect x="3" y="3" width="18" height="18" rx="3"/>
+                      <path d="M7 8h10"/>
+                      <path d="M7 12h6"/>
+                      <path d="M7 16h4"/>
+                    </svg>
+                  {%- endif -%}
+                </span>
+                <span class="lt-hero__fact-text">{{ section.settings.fact3_text }}</span>
+              </div>
+            {%- endif -%}
+
+          </div>
+        {%- endif -%}
+      {%- endif -%}
+
+    </div>
+
+    <!-- Right: Dashboard -->
+    <div class="lt-hero__dash reveal">
+
+      <!-- Age card -->
+      <div class="lt-hero__card lt-hero__card--age">
+        {%- if section.settings.age_label != blank -%}
+          <div style="font-size:11px;font-weight:700;opacity:0.5;text-transform:uppercase;">
+            {{ section.settings.age_label }}
+          </div>
+        {%- endif -%}
+        <div class="lt-hero__age-num">{{ section.settings.bio_age | default: 37 }}</div>
+        {%- if section.settings.chron_age_label != blank -%}
+          <div style="font-size:14px;font-weight:600;opacity:0.4;">
+            {{ section.settings.chron_age_label }}
+          </div>
+        {%- endif -%}
+      </div>
+
+      <!-- Metric cards -->
+      <div class="lt-hero__metrics">
+        <div class="lt-hero__card lt-hero__card--metric">
+          <span class="lt-hero__metric-name">{{ section.settings.metric1_name }}</span>
+          <div class="lt-hero__bar">
+            <div
+              class="lt-hero__fill lt-fill-run"
+              style="--w: {{ section.settings.metric1_value | default: 85 }}%; background: {{ metric1_color }};"
+            ></div>
+          </div>
+        </div>
+        <div class="lt-hero__card lt-hero__card--metric">
+          <span class="lt-hero__metric-name">{{ section.settings.metric2_name }}</span>
+          <div class="lt-hero__bar">
+            <div
+              class="lt-hero__fill lt-fill-run"
+              style="--w: {{ section.settings.metric2_value | default: 72 }}%; background: {{ metric2_color }};"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      var hero = document.getElementById('lt-hero-{{ section.id }}');
+      var img  = document.getElementById('heroImg-{{ section.id }}');
+
+      window.addEventListener('scroll', function () {
+        var scrolled = window.pageYOffset;
+        if (scrolled < 1100) img.style.transform = 'translateY(' + (scrolled * 0.12) + 'px)';
+      });
+
+      var obs = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            hero.classList.add('is-visible');
+            obs.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.1 });
+
+      obs.observe(hero);
+    })();
+  </script>
+</section>
+
+{% schema %}
+{
+  "name": "LIFETIME Hero",
+  "tag": "section",
+  "class": "lt-hero-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Hintergrundbilder"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_desktop",
+      "label": "Desktop-Bild (Querformat)",
+      "info": "Empfohlen: min. 1920 × 1080 px"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_mobile",
+      "label": "Mobil-Bild (Hochformat)",
+      "info": "Empfohlen: min. 800 × 1200 px"
+    },
+    {
+      "type": "header",
+      "content": "Trust-Leiste (Sterne)"
+    },
+    {
+      "type": "text",
+      "id": "trust_text",
+      "label": "Trust-Text",
+      "default": "Über 1.000+ zufriedene Kunden"
+    },
+    {
+      "type": "header",
+      "content": "Headline"
+    },
+    {
+      "type": "textarea",
+      "id": "headline_before",
+      "label": "Headline (Text vor dem Highlight)",
+      "default": "Genetik trifft Epigenetik: Dein Code für ein"
+    },
+    {
+      "type": "text",
+      "id": "headline_highlight",
+      "label": "Highlight-Text (farbig unterstrichen)",
+      "default": "längeres Leben."
+    },
+    {
+      "type": "header",
+      "content": "Subline"
+    },
+    {
+      "type": "textarea",
+      "id": "subline",
+      "label": "Subline (optional)",
+      "info": "Leer lassen = ausgeblendet."
+    },
+    {
+      "type": "range",
+      "id": "subline_spacing_top",
+      "label": "Abstand oben (zur Headline)",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "subline_spacing_bottom",
+      "label": "Abstand unten (zu den Buttons)",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "CTA-Button"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Button-Text",
+      "default": "Biologisches Alter testen"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Button-URL"
+    },
+    {
+      "type": "header",
+      "content": "Video-Link"
+    },
+    {
+      "type": "text",
+      "id": "video_link_text",
+      "label": "Link-Text",
+      "default": "Was bringt mir der Test?"
+    },
+    {
+      "type": "text",
+      "id": "video_link_url",
+      "label": "Link-URL (intern oder extern)",
+      "default": "https://www.lifetime-health.de/pages/agedna-start"
+    },
+    {
+      "type": "header",
+      "content": "Trust-Fakten (unter CTA)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_trust_facts",
+      "label": "Trust-Fakten anzeigen",
+      "default": true
+    },
+    {
+      "type": "image_picker",
+      "id": "fact1_icon",
+      "label": "Fakt 1 – Icon hochladen",
+      "info": "Quadratisch, min. 40×40 px. Überschreibt Standard-Icon (DNA)."
+    },
+    {
+      "type": "text",
+      "id": "fact1_text",
+      "label": "Fakt 1 – Text",
+      "default": "Analyse von +500 Genvarianten & DNA-Methylierung"
+    },
+    {
+      "type": "image_picker",
+      "id": "fact2_icon",
+      "label": "Fakt 2 – Icon hochladen",
+      "info": "Quadratisch, min. 40×40 px. Überschreibt Standard-Icon (Labor)."
+    },
+    {
+      "type": "text",
+      "id": "fact2_text",
+      "label": "Fakt 2 – Text",
+      "default": "Auswertung in ISO-zertifizierten deutschen Laboren"
+    },
+    {
+      "type": "image_picker",
+      "id": "fact3_icon",
+      "label": "Fakt 3 – Icon hochladen",
+      "info": "Quadratisch, min. 40×40 px. Überschreibt Standard-Icon (Plan)."
+    },
+    {
+      "type": "text",
+      "id": "fact3_text",
+      "label": "Fakt 3 – Text",
+      "default": "Inkl. KI-gestütztem Longevity-Fahrplan"
+    },
+    {
+      "type": "header",
+      "content": "Alters-Kachel"
+    },
+    {
+      "type": "text",
+      "id": "age_label",
+      "label": "Bezeichnung",
+      "default": "Dein Biologisches Alter"
+    },
+    {
+      "type": "number",
+      "id": "bio_age",
+      "label": "Biologisches Alter (Zahl)",
+      "default": 37
+    },
+    {
+      "type": "text",
+      "id": "chron_age_label",
+      "label": "Chronologisches Alter (Text)",
+      "default": "Chronologisches Alter: 44"
+    },
+    {
+      "type": "header",
+      "content": "Dashboard – Position & Größe"
+    },
+    {
+      "type": "select",
+      "id": "dash_valign",
+      "label": "Vertikale Position (Desktop)",
+      "options": [
+        { "value": "flex-start", "label": "Oben" },
+        { "value": "center",     "label": "Mitte" },
+        { "value": "flex-end",   "label": "Unten" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "dash_scale",
+      "label": "Größe der Kacheln (%)",
+      "min": 50,
+      "max": 150,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Metrik 1"
+    },
+    {
+      "type": "text",
+      "id": "metric1_name",
+      "label": "Bezeichnung",
+      "default": "Langlebigkeit"
+    },
+    {
+      "type": "range",
+      "id": "metric1_value",
+      "label": "Füllstand (%)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 85
+    },
+    {
+      "type": "color",
+      "id": "metric1_color",
+      "label": "Balken-Farbe",
+      "default": "#65C0B6"
+    },
+    {
+      "type": "header",
+      "content": "Metrik 2"
+    },
+    {
+      "type": "text",
+      "id": "metric2_name",
+      "label": "Bezeichnung",
+      "default": "Kognitive Degeneration"
+    },
+    {
+      "type": "range",
+      "id": "metric2_value",
+      "label": "Füllstand (%)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "unit": "%",
+      "default": 72
+    },
+    {
+      "type": "color",
+      "id": "metric2_color",
+      "label": "Balken-Farbe",
+      "default": "#F4B740"
+    },
+    {
+      "type": "header",
+      "content": "Brand-Farben"
+    },
+    {
+      "type": "color",
+      "id": "brand_mint",
+      "label": "Brand Mint (Highlight-Marker & Icons)",
+      "default": "#65C0B6"
+    },
+    {
+      "type": "color",
+      "id": "brand_gold",
+      "label": "Brand Gold (Sterne)",
+      "default": "#F4B740"
+    }
+  ],
+  "presets": [
+    {
+      "name": "LIFETIME Hero"
+    }
+  ]
+}
+{% endschema %}

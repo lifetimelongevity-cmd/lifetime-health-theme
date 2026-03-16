@@ -1,0 +1,129 @@
+<style>
+  .lt-logos {
+    --black: #0B0F12;
+    background: var(--black);
+    padding: 10px 0 30px 0;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .lt-logos__label {
+    font-family: 'Lato', 'Segoe UI', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.4);
+    text-align: center;
+    margin-bottom: 24px;
+  }
+
+  .lt-logos__track-wrap {
+    position: relative;
+    display: flex;
+    width: 100%;
+  }
+
+  .lt-logos__track-wrap::before,
+  .lt-logos__track-wrap::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .lt-logos__track-wrap::before {
+    left: 0;
+    background: linear-gradient(to right, var(--black), transparent);
+  }
+  .lt-logos__track-wrap::after {
+    right: 0;
+    background: linear-gradient(to left, var(--black), transparent);
+  }
+
+  .lt-logos__track {
+    display: flex;
+    align-items: center;
+    width: max-content;
+    animation: ltLogoScroll 30s linear infinite;
+    will-change: transform;
+  }
+
+  .lt-logos__track:hover {
+    animation-play-state: paused;
+  }
+
+  @keyframes ltLogoScroll {
+    0%   { transform: translateX(0); }
+    100% { transform: translateX(calc(-100% / 3)); }
+  }
+
+  .lt-logos__item {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 40px;
+  }
+
+  .lt-logos__item img {
+    height: 22px;
+    width: auto;
+    object-fit: contain;
+    opacity: 0.8;
+    mix-blend-mode: screen;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+
+  .lt-logos__item:hover img {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+
+  @media (min-width: 768px) {
+    .lt-logos { padding: 40px 0; }
+    .lt-logos__item { padding: 0 60px; }
+    .lt-logos__item img { height: 28px; }
+  }
+</style>
+
+<section class="lt-logos" aria-label="Bekannt aus">
+  <div class="lt-logos__label">Bekannt aus</div>
+  <div class="lt-logos__track-wrap">
+    <div class="lt-logos__track" id="ltLogoTrack-{{ section.id }}">
+      <a class="lt-logos__item" href="https://plus.rtl.de" target="_blank" rel="noopener">
+        <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/rtl-punkt-12-weiss.png?v=1772449860" alt="RTL">
+      </a>
+      <a class="lt-logos__item" href="https://www.sat1.de" target="_blank" rel="noopener">
+        <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/sat1-logo-white.png?v=1772450063" alt="SAT.1">
+      </a>
+      <a class="lt-logos__item" href="https://www.ardmediathek.de" target="_blank" rel="noopener">
+        <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/swr1-logo-white.png?v=1772449860" alt="SWR1">
+      </a>
+      <a class="lt-logos__item" href="https://maxima.at/" target="_blank" rel="noopener">
+        <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/maxima-new-logo-white_1.png?v=1772449952" alt="Maxima">
+      </a>
+      <a class="lt-logos__item" href="https://www.welt.de" target="_blank" rel="noopener">
+        <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/welt-logo-white.png?v=1772451585" alt="WELT">
+      </a>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function() {
+    var track = document.getElementById('ltLogoTrack-{{ section.id }}');
+    if (!track) return;
+    var content = track.innerHTML;
+    track.innerHTML = content + content + content;
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Bekannt aus",
+  "tag": "div",
+  "settings": []
+}
+{% endschema %}

@@ -1,0 +1,378 @@
+{%- liquid
+  assign slide_count = 0
+  for i in (1..5)
+    assign img_key = 'image_' | append: i
+    if section.settings[img_key] != blank
+      assign slide_count = slide_count | plus: 1
+    endif
+  endfor
+  if slide_count == 0
+    assign slide_count = 1
+  endif
+  assign slide_count_minus_1 = slide_count | minus: 1
+  assign slot_pct = 100.0 | divided_by: slide_count | round: 4
+  assign hold_pct = slot_pct | times: 75 | divided_by: 100 | round: 4
+-%}
+
+<style>
+  #shopify-section-{{ section.id }} .result-preview {
+    background-color: {{ section.settings.bg_color }};
+    padding: {{ section.settings.padding_top }}px 20px {{ section.settings.padding_bottom }}px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  #shopify-section-{{ section.id }} .result-preview__container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  #shopify-section-{{ section.id }} .result-preview__header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+  #shopify-section-{{ section.id }} .result-preview__headline {
+    font-size: clamp(32px, 5vw, 48px);
+    font-weight: 800;
+    line-height: 1.1;
+    color: {{ section.settings.heading_color }};
+    margin-bottom: 20px;
+    letter-spacing: -0.02em;
+  }
+  #shopify-section-{{ section.id }} .result-preview__subline {
+    font-size: 18px;
+    color: {{ section.settings.subheading_color }};
+    margin: 0;
+  }
+  #shopify-section-{{ section.id }} .result-preview__content {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  @media (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .result-preview__content {
+      flex-direction: row;
+      align-items: stretch;
+      gap: 30px;
+      height: 500px;
+    }
+  }
+  #shopify-section-{{ section.id }} .result-preview__slider {
+    width: 100%;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    background: #fff;
+    position: relative;
+    aspect-ratio: 3/4;
+  }
+  @media (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .result-preview__slider {
+      width: 350px;
+      height: 100%;
+      flex-shrink: 0;
+      aspect-ratio: unset;
+    }
+  }
+  #shopify-section-{{ section.id }} .slider-track {
+    display: flex;
+    width: {{ slide_count | times: 100 }}%;
+    height: 100%;
+    animation: slideAnim_{{ section.id }} {{ slide_count | times: 4 }}s infinite;
+  }
+  #shopify-section-{{ section.id }} .slider-track img {
+    width: {{ slot_pct }}%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    flex-shrink: 0;
+  }
+  @keyframes slideAnim_{{ section.id }} {
+    {%- for i in (0..slide_count_minus_1) -%}
+      {%- assign start = slot_pct | times: i | round: 2 -%}
+      {%- assign hold_end = start | plus: hold_pct | round: 2 -%}
+      {{ start }}%, {{ hold_end }}% { transform: translateX(-{{ start }}%); }
+    {%- endfor -%}
+    100% { transform: translateX(0%); }
+  }
+  #shopify-section-{{ section.id }} .result-preview__text-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex: 1;
+  }
+  #shopify-section-{{ section.id }} .result-preview__text-card {
+    background: #fff;
+    padding: 25px;
+    border-radius: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: transform 0.3s ease;
+  }
+  @media (min-width: 1024px) {
+    #shopify-section-{{ section.id }} .result-preview__text-card:hover {
+      transform: translateX(10px);
+    }
+  }
+  #shopify-section-{{ section.id }} .text-card__number {
+    font-size: 12px;
+    font-weight: 800;
+    color: {{ section.settings.accent_color }};
+    margin-bottom: 5px;
+    display: block;
+  }
+  #shopify-section-{{ section.id }} .text-card__title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 5px;
+    color: {{ section.settings.heading_color }};
+  }
+  #shopify-section-{{ section.id }} .text-card__text {
+    font-size: 14px;
+    color: {{ section.settings.subheading_color }};
+    line-height: 1.4;
+    margin: 0;
+  }
+</style>
+
+<section class="result-preview">
+  <div class="result-preview__container">
+
+    {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+      <div class="result-preview__header">
+        {%- if section.settings.heading != blank -%}
+          <h2 class="result-preview__headline">{{ section.settings.heading }}</h2>
+        {%- endif -%}
+        {%- if section.settings.subheading != blank -%}
+          <p class="result-preview__subline">{{ section.settings.subheading }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="result-preview__content">
+
+      <div class="result-preview__slider">
+        <div class="slider-track">
+          {%- for i in (1..5) -%}
+            {%- assign img_key = 'image_' | append: i -%}
+            {%- assign alt_key = 'image_' | append: i | append: '_alt' -%}
+            {%- if section.settings[img_key] != blank -%}
+              <img
+                src="{{ section.settings[img_key] | image_url: width: 800 }}"
+                alt="{{ section.settings[alt_key] | default: section.settings[img_key].alt | escape }}"
+                loading="lazy"
+                width="{{ section.settings[img_key].width }}"
+                height="{{ section.settings[img_key].height }}">
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="result-preview__text-cards">
+          {%- for block in section.blocks -%}
+            <article class="result-preview__text-card" {{ block.shopify_attributes }}>
+              {%- if block.settings.number != blank -%}
+                <span class="text-card__number">{{ block.settings.number }}</span>
+              {%- endif -%}
+              {%- if block.settings.title != blank -%}
+                <h3 class="text-card__title">{{ block.settings.title }}</h3>
+              {%- endif -%}
+              {%- if block.settings.text != blank -%}
+                <p class="text-card__text">{{ block.settings.text }}</p>
+              {%- endif -%}
+            </article>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Result Preview",
+  "tag": "div",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Texte"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Verstehe deine Biologie oder frage deinen KI-Coach."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Unterüberschrift",
+      "default": "Erhalte mit dem KI-Coach präzise Antworten auf Fragen, die dich wirklich interessieren."
+    },
+    {
+      "type": "header",
+      "content": "Slider-Bilder"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Bild 1"
+    },
+    {
+      "type": "text",
+      "id": "image_1_alt",
+      "label": "Bild 1 – Alt-Text"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Bild 2"
+    },
+    {
+      "type": "text",
+      "id": "image_2_alt",
+      "label": "Bild 2 – Alt-Text"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Bild 3"
+    },
+    {
+      "type": "text",
+      "id": "image_3_alt",
+      "label": "Bild 3 – Alt-Text"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_4",
+      "label": "Bild 4"
+    },
+    {
+      "type": "text",
+      "id": "image_4_alt",
+      "label": "Bild 4 – Alt-Text"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_5",
+      "label": "Bild 5"
+    },
+    {
+      "type": "text",
+      "id": "image_5_alt",
+      "label": "Bild 5 – Alt-Text"
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Hintergrundfarbe",
+      "default": "#F6F4F1"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Akzentfarbe (Nummern)",
+      "default": "#4A8C85"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Überschriften-Farbe",
+      "default": "#0B0F12"
+    },
+    {
+      "type": "color",
+      "id": "subheading_color",
+      "label": "Text-Farbe (gedimmt)",
+      "default": "#636366"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 150,
+      "step": 10,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 150,
+      "step": 10,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Info-Karte",
+      "settings": [
+        {
+          "type": "text",
+          "id": "number",
+          "label": "Nummer",
+          "default": "01"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel",
+          "default": "Kartenüberschrift"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Beschreibungstext für diese Karte."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Result Preview",
+      "blocks": [
+        {
+          "type": "card",
+          "settings": {
+            "number": "01",
+            "title": "Biologisches Alter",
+            "text": "Erfahre durch unsere präzise DNA-Methylierungsanalyse, wie deine Zellen im Vergleich stehen."
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "number": "02",
+            "title": "180+ DNA-Insights",
+            "text": "Detaillierte Auswertungen zu Nährstoffen, Stoffwechsel und Regeneration."
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "number": "03",
+            "title": "Dein KI-Coach",
+            "text": "Stelle dem Coach Fragen zu deinen Ergebnissen und erhalte fundierte Antworten."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

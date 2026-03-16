@@ -1,0 +1,273 @@
+{% comment %} 
+  LIFETIME Hero DNA – V8 (Responsive Image Logic)
+  - Mobile: Nutzt das neue Hochkant-Bild (hero-lifetime-test-mobile.jpg)
+  - Desktop: Nutzt das ursprüngliche Breitbild
+  - Marker, Video-Link, Pill-Shapes & Kachel-Logik fixiert
+{% endcomment %}
+<section class="lt-hero" aria-label="LIFETIME Hero">
+  <style>
+    :root {
+      --brand-mint: #65C0B6;
+      --brand-gold: #F4B740;
+      --glass-white: rgba(255, 255, 255, 0.22);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --text-dark: #0B0F12;
+    }
+
+    .lt-hero {
+      position: relative;
+      width: 100%;
+      overflow: hidden;
+      min-height: 750px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* --- Parallax & Responsive Images --- */
+    .lt-hero__bg-container {
+      position: absolute;
+      inset: -60px 0;
+      width: 100%;
+      height: calc(100% + 120px);
+      z-index: 0;
+    }
+
+    .lt-hero__img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: 50% 20%; 
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .lt-hero.is-visible .lt-hero__img { opacity: 1; }
+
+    .lt-hero__overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(to bottom, 
+        rgba(0,0,0,0.3) 0%, 
+        rgba(0,0,0,0.6) 50%, 
+        rgba(0,0,0,0.85) 100%);
+    }
+
+    /* --- Layout Container --- */
+    .lt-hero__container {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 40px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    @media (min-width: 992px) {
+      .lt-hero__container { 
+        flex-direction: row; 
+        justify-content: space-between; 
+        text-align: left; 
+        align-items: flex-end;
+        padding: 60px 24px;
+      }
+    }
+
+    .lt-hero__content { width: 100%; }
+    
+    @media (min-width: 992px) {
+      .lt-hero__content { max-width: 540px; }
+    }
+
+    /* --- Headline & Marker --- */
+    .lt-hero__headline {
+      font-size: clamp(34px, 8vw, 54px);
+      line-height: 1.1;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 20px;
+      letter-spacing: -0.02em;
+    }
+
+    .lt-hero__highlight {
+      position: relative;
+      display: inline-block;
+      z-index: 1;
+    }
+
+    .lt-hero__highlight::after {
+      content: "";
+      position: absolute;
+      left: -2%;
+      bottom: 8%;
+      width: 104%;
+      height: 35%; 
+      background: var(--brand-mint);
+      opacity: 0.7;
+      z-index: -1;
+      transform: rotate(-1.2deg) skew(-10deg); 
+      border-radius: 2px;
+    }
+
+    /* --- Trust & Actions --- */
+    .lt-hero__trust { display: flex; gap: 10px; font-size: 14px; margin-bottom: 20px; color: #fff; justify-content: center; }
+    @media (min-width: 992px) { .lt-hero__trust { justify-content: flex-start; } }
+    .lt-hero__stars { color: var(--brand-gold); letter-spacing: 1px; }
+
+    .lt-hero__actions { display: flex; flex-direction: column; align-items: center; gap: 18px; margin-bottom: 40px; }
+    @media (min-width: 992px) { .lt-hero__actions { align-items: flex-start; margin-bottom: 30px; } }
+
+    .lt-hero__cta {
+      display: inline-flex;
+      align-items: center;
+      background: #fff;
+      color: var(--text-dark);
+      padding: 16px 36px;
+      border-radius: 100px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 16px;
+    }
+
+    .lt-hero__video-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .lt-hero__video-icon {
+      width: 30px; height: 30px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(5px);
+    }
+
+    /* --- Dashboard & Metrics --- */
+    .lt-hero__dash { 
+      width: 100%; 
+      max-width: 460px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 12px;
+      margin-top: 20px;
+    }
+    
+    .lt-hero__card {
+      background: var(--glass-white);
+      backdrop-filter: blur(15px) saturate(160%);
+      -webkit-backdrop-filter: blur(15px) saturate(160%);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 20px;
+      color: #fff;
+    }
+
+    .lt-hero__card--age { background: #fff; color: var(--text-dark); text-align: center; }
+    .lt-hero__age-num { font-size: clamp(64px, 10vw, 80px); font-weight: 900; line-height: 1; margin: 5px 0; }
+
+    .lt-hero__metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    .lt-hero__card--metric {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 100px;
+    }
+
+    .lt-hero__metric-name {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+      display: block;
+      letter-spacing: 0.05em;
+    }
+
+    .lt-hero__bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 100px; overflow: hidden; }
+    .lt-hero__fill { height: 100%; width: 0; transition: width 2s cubic-bezier(0.16, 1, 0.3, 1) 0.5s; border-radius: 100px;}
+
+    /* --- Animations --- */
+    .reveal { opacity: 0; transform: translateY(20px); transition: 0.8s ease-out; }
+    .is-visible .reveal { opacity: 1; transform: translateY(0); }
+    .is-visible .lt-fill-run { width: var(--w); }
+  </style>
+
+  <div class="lt-hero__bg-container">
+    <picture>
+      <source media="(max-width: 767px)" srcset="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/hero-lifetime-test-mobile.jpg?v=1773054342">
+      <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/Design_ohne_Titel_30.png?v=1772724333" 
+           alt="Lifetime Health" class="lt-hero__img" id="heroImg">
+    </picture>
+    <div class="lt-hero__overlay"></div>
+  </div>
+
+  <div class="lt-hero__container">
+    <div class="lt-hero__content">
+      <div class="lt-hero__trust reveal">
+        <span class="lt-hero__stars">★★★★★</span>
+        <span>Über 1.000+ zufriedene Kunden</span>
+      </div>
+
+      <h1 class="lt-hero__headline reveal">
+        Genetik trifft Epigenetik: Dein Code für ein <span class="lt-hero__highlight">längeres Leben.</span>
+      </h1>
+
+      <div class="lt-hero__actions reveal">
+        <a href="/products/lifetime-age-dna" class="lt-hero__cta">
+          <span>Biologisches Alter testen</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="margin-left:10px;"><path d="M5 12h14m-7-7l7 7-7 7"/></svg>
+        </a>
+
+        <a href="https://www.lifetime-health.de/pages/agedna-start" class="lt-hero__video-link">
+          <span class="lt-hero__video-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+          Was bringt mir der Test?
+        </a>
+      </div>
+    </div>
+
+    <div class="lt-hero__dash reveal">
+      <div class="lt-hero__card lt-hero__card--age">
+        <div style="font-size: 11px; font-weight: 700; opacity: 0.5; text-transform: uppercase;">Dein Biologisches Alter</div>
+        <div class="lt-hero__age-num">37</div>
+        <div style="font-size: 14px; font-weight: 600; opacity: 0.4;">Chronologisches Alter: 44</div>
+      </div>
+
+      <div class="lt-hero__metrics">
+        <div class="lt-hero__card lt-hero__card--metric">
+          <span class="lt-hero__metric-name">Langlebigkeit</span>
+          <div class="lt-hero__bar"><div class="lt-hero__fill lt-fill-run" style="--w: 85%; background: var(--brand-mint);"></div></div>
+        </div>
+        <div class="lt-hero__card lt-hero__card--metric">
+          <span class="lt-hero__metric-name">Kognitive Degeneration</span>
+          <div class="lt-hero__bar"><div class="lt-hero__fill lt-fill-run" style="--w: 72%; background: var(--brand-gold);"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      const hero = document.querySelector('.lt-hero');
+      const img = document.getElementById('heroImg');
+      window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        if (scrolled < 1100) img.style.transform = `translateY(${scrolled * 0.12}px)`;
+      });
+      const obs = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { hero.classList.add('is-visible'); obs.unobserve(e.target); }});
+      }, { threshold: 0.1 });
+      obs.observe(hero);
+    })();
+  </script>
+</section>

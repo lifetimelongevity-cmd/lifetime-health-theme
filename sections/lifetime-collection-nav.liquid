@@ -1,0 +1,457 @@
+{% comment %}
+  Collection Navigation – horizontal scrolling chip/pill bar.
+
+  • Manual links via blocks (always rendered first)
+  • Auto-detect (checkbox): JS scans the page for elements matching
+    the configured CSS selector inside .shopify-section wrappers and
+    appends anchor chips pointing to those wrapper IDs.
+  • Active state: pathname match for page links,
+    IntersectionObserver for anchor links.
+{% endcomment %}
+
+<div class="section-{{ section.id }}-cnav">
+  <section
+    class="lt-cnav"
+    data-scroll="scrolling"
+    role="region"
+    aria-label="{{ section.settings.aria_label | escape }}"
+  >
+    <ul class="lt-cnav__list" role="list">
+
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'link' -%}
+          <li class="lt-cnav__item" {{ block.shopify_attributes }}>
+            <a
+              class="lt-cnav__chip"
+              href="{{ block.settings.url | default: '#' }}"
+            >
+              {{- block.settings.label | escape -}}
+            </a>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+
+    </ul>
+  </section>
+</div>
+
+<style>
+  .section-{{ section.id }}-cnav {
+    --chip-bg:        {{ section.settings.chip_bg }};
+    --chip-fg:        {{ section.settings.chip_fg }};
+    --chip-bg-hover:  {{ section.settings.chip_bg_hover }};
+    --chip-fg-hover:  {{ section.settings.chip_fg_hover }};
+    --chip-bg-active: {{ section.settings.chip_bg_active }};
+    --chip-fg-active: {{ section.settings.chip_fg_active }};
+    --cnav-pt:        {{ section.settings.padding_top }}px;
+    --cnav-pb:        {{ section.settings.padding_bottom }}px;
+    --gutter:         1rem;
+    --gutter-mobile:  0.5rem;
+  }
+
+  .section-{{ section.id }}-cnav .lt-cnav {
+    background: transparent;
+    padding: var(--cnav-pt) 0 var(--cnav-pb);
+    position: relative;
+  }
+
+  .section-{{ section.id }}-cnav .lt-cnav__list {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0 var(--gutter-mobile);
+    list-style: none;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    justify-content: flex-start;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: var(--gutter-mobile);
+  }
+
+  .section-{{ section.id }}-cnav .lt-cnav__list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .section-{{ section.id }}-cnav .lt-cnav__chip {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--chip-bg);
+    color: var(--chip-fg);
+    padding: 0.75rem 1.25rem;
+    border-radius: 999px;
+    line-height: 1;
+    white-space: nowrap;
+    text-decoration: none;
+    font-size: clamp(0.875rem, 3.5vw, 1rem);
+    font-weight: 500;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+    scroll-snap-align: start;
+    cursor: pointer;
+  }
+
+  .section-{{ section.id }}-cnav .lt-cnav__chip:hover {
+    background: var(--chip-bg-hover);
+    color: var(--chip-fg-hover);
+    transform: translateY(-1px);
+  }
+
+  .section-{{ section.id }}-cnav .lt-cnav__chip:active {
+    transform: translateY(0);
+  }
+
+  .section-{{ section.id }}-cnav .lt-cnav__chip:focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+    background: var(--chip-bg-hover);
+    color: var(--chip-fg-hover);
+  }
+
+  .section-{{ section.id }}-cnav .lt-cnav__chip[aria-current] {
+    background: var(--chip-bg-active);
+    color: var(--chip-fg-active);
+    font-weight: 600;
+  }
+
+  .section-{{ section.id }}-cnav .lt-cnav__chip[aria-current]:hover {
+    transform: none;
+    cursor: default;
+  }
+
+  /* Scroll-hint gradient (mobile & tablet) */
+  @media (max-width: 1099px) {
+    .section-{{ section.id }}-cnav .lt-cnav::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: var(--cnav-pt);
+      bottom: var(--cnav-pb);
+      width: 2rem;
+      background: linear-gradient(to left, rgba(255,255,255,1), rgba(255,255,255,0));
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 0.3s ease;
+    }
+
+    .section-{{ section.id }}-cnav .lt-cnav[data-scroll="end"]::after {
+      opacity: 0;
+    }
+  }
+
+  /* Tablet+ */
+  @media (min-width: 768px) {
+    .section-{{ section.id }}-cnav .lt-cnav__list {
+      gap: 0.75rem;
+      padding: 0 var(--gutter);
+      scroll-padding-inline: var(--gutter);
+    }
+
+    .section-{{ section.id }}-cnav .lt-cnav__chip {
+      padding: 0.875rem 1.5rem;
+      font-size: 1rem;
+    }
+  }
+
+  /* Desktop */
+  @media (min-width: 1100px) {
+    .section-{{ section.id }}-cnav .lt-cnav__list {
+      justify-content: center;
+      scroll-snap-type: none;
+    }
+
+    .section-{{ section.id }}-cnav .lt-cnav__chip:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .section-{{ section.id }}-cnav .lt-cnav__chip[aria-current]:hover {
+      transform: none;
+      box-shadow: none;
+    }
+  }
+
+  /* iOS safe area */
+  @supports (padding: max(0px)) {
+    .section-{{ section.id }}-cnav .lt-cnav__list {
+      padding-inline:
+        max(var(--gutter-mobile), env(safe-area-inset-left))
+        max(var(--gutter-mobile), env(safe-area-inset-right));
+      scroll-padding-inline: max(var(--gutter-mobile), env(safe-area-inset-left));
+    }
+
+    @media (min-width: 768px) {
+      .section-{{ section.id }}-cnav .lt-cnav__list {
+        padding-inline:
+          max(var(--gutter), env(safe-area-inset-left))
+          max(var(--gutter), env(safe-area-inset-right));
+        scroll-padding-inline: max(var(--gutter), env(safe-area-inset-left));
+      }
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .section-{{ section.id }}-cnav .lt-cnav__chip {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+(function () {
+  'use strict';
+
+  var SELF_ID = 'shopify-section-{{ section.id }}';
+
+  // Defer until the full DOM is parsed so sections below this one are available.
+  function init() {
+  var AUTO    = {{ section.settings.detect_auto | json }};
+  var SEL     = {{ section.settings.detect_target | default: '.cg-heading' | json }};
+
+  var wrapper = document.getElementById(SELF_ID);
+  if (!wrapper) return;
+
+  var ltNav = wrapper.querySelector('.lt-cnav');
+  var list  = wrapper.querySelector('.lt-cnav__list');
+  if (!ltNav || !list) return;
+
+  /* ── 1. Auto-detect anchor sections ──────────────────────────── */
+  var anchorPairs = []; // [{ element, chip }] for IntersectionObserver
+
+  if (AUTO) {
+    document.querySelectorAll('.shopify-section').forEach(function (shopifySection) {
+      if (shopifySection.id === SELF_ID) return;
+
+      var heading = shopifySection.querySelector(SEL);
+      if (!heading) return;
+
+      var label = heading.textContent.trim();
+      if (!label) return;
+
+      var li  = document.createElement('li');
+      li.className = 'lt-cnav__item';
+
+      var a   = document.createElement('a');
+      a.className   = 'lt-cnav__chip';
+      a.href        = '#' + shopifySection.id;
+      a.textContent = label;
+
+      li.appendChild(a);
+      list.appendChild(li);
+
+      anchorPairs.push({ element: shopifySection, chip: a });
+    });
+  }
+
+  /* ── 2. Active state – page links ────────────────────────────── */
+  var currentPath = window.location.pathname;
+
+  list.querySelectorAll('.lt-cnav__chip').forEach(function (chip) {
+    var href = chip.getAttribute('href') || '';
+    if (href.charAt(0) === '#') return; // handled below
+
+    try {
+      var url = new URL(href, window.location.origin);
+      if (url.pathname === currentPath) {
+        chip.setAttribute('aria-current', 'page');
+      }
+    } catch (_) {}
+  });
+
+  /* ── 3. Active state – anchor links (IntersectionObserver) ───── */
+  if (anchorPairs.length && 'IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+
+        var pair = null;
+        for (var i = 0; i < anchorPairs.length; i++) {
+          if (anchorPairs[i].element === entry.target) { pair = anchorPairs[i]; break; }
+        }
+        if (!pair) return;
+
+        anchorPairs.forEach(function (p) { p.chip.removeAttribute('aria-current'); });
+        pair.chip.setAttribute('aria-current', 'location');
+        scrollNavChipIntoView(pair.chip);
+      });
+    }, {
+      rootMargin: '-25% 0px -65% 0px',
+      threshold: 0
+    });
+
+    anchorPairs.forEach(function (p) { io.observe(p.element); });
+  }
+
+  /* ── 4. Smooth scroll for anchor chips ───────────────────────── */
+  list.addEventListener('click', function (e) {
+    var chip = e.target.closest && e.target.closest('.lt-cnav__chip');
+    if (!chip) return;
+
+    var href = chip.getAttribute('href') || '';
+    if (href.charAt(0) !== '#') return;
+
+    var target = document.querySelector(href);
+    if (target) {
+      e.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+
+  /* ── 5. Scroll-hint gradient ──────────────────────────────────── */
+  function updateHint() {
+    var atEnd = list.scrollLeft + list.clientWidth >= list.scrollWidth - 10;
+    ltNav.setAttribute('data-scroll', atEnd ? 'end' : 'scrolling');
+  }
+
+  list.addEventListener('scroll', updateHint, { passive: true });
+  updateHint();
+
+  /* ── Helper: scroll only the nav list horizontally – never the page ── */
+  function scrollNavChipIntoView(chip) {
+    var chipLeft  = chip.offsetLeft - list.offsetLeft;
+    var chipRight = chipLeft + chip.offsetWidth;
+    var pad = 16;
+    if (chipLeft < list.scrollLeft + pad) {
+      list.scrollTo({ left: chipLeft - pad, behavior: 'smooth' });
+    } else if (chipRight > list.scrollLeft + list.clientWidth - pad) {
+      list.scrollTo({ left: chipRight - list.clientWidth + pad, behavior: 'smooth' });
+    }
+  }
+
+  } // end init()
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Collection Nav",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Auto-Erkennung"
+    },
+    {
+      "type": "checkbox",
+      "id": "detect_auto",
+      "label": "Sektionen automatisch erkennen",
+      "info": "Scannt die Seite nach Überschriften in anderen Sektionen und erzeugt daraus Anker-Chips. Wird nach den manuellen Links angezeigt.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "detect_target",
+      "label": "CSS-Selektor für Überschriften",
+      "info": "Welches Element innerhalb einer shopify-section als Chip-Label genutzt wird.",
+      "default": ".cg-heading",
+      "placeholder": ".cg-heading"
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "chip_bg",
+      "label": "Chip – Hintergrund",
+      "default": "#F6F4F1"
+    },
+    {
+      "type": "color",
+      "id": "chip_fg",
+      "label": "Chip – Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "chip_bg_hover",
+      "label": "Chip – Hintergrund (Hover)",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "chip_fg_hover",
+      "label": "Chip – Text (Hover)",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "chip_bg_active",
+      "label": "Chip – Hintergrund (Aktiv)",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "chip_fg_active",
+      "label": "Chip – Text (Aktiv)",
+      "default": "#ffffff"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Barrierefreiheit"
+    },
+    {
+      "type": "text",
+      "id": "aria_label",
+      "label": "ARIA-Label der Navigation",
+      "default": "Seitennavigation"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "link",
+      "name": "Link",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Beschriftung",
+          "placeholder": "Alle Produkte"
+        },
+        {
+          "type": "url",
+          "id": "url",
+          "label": "URL"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection Nav"
+    }
+  ]
+}
+{% endschema %}
