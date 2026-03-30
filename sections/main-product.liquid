@@ -2002,15 +2002,18 @@
                     var cta = form.querySelector('[data-js-product-add-to-cart-text][data-lt-nmn-cta]');
                     var addBtn = form.querySelector('[data-js-product-add-to-cart]');
                     var productPage = document.getElementById('product-' + sid);
-                    var variantsEl = (function () {
+
+                    function nmnGetProductVariantsEl() {
                       if (!productPage) return null;
                       var row = productPage.querySelector('[data-nmn-pack-option-row]');
                       if (row) return row.closest('product-variants');
                       return (
                         productPage.querySelector('product-variants[data-nmn-inline-variant-source]') ||
-                        productPage.querySelector('product-variants[data-main-product-variants]')
+                        productPage.querySelector('product-variants[data-main-product-variants]') ||
+                        productPage.querySelector('product-variants')
                       );
-                    })();
+                    }
+
                     var priceRoot = productPage
                       ? productPage.querySelector('[data-update-block="price-compact-main"]')
                       : null;
@@ -2220,26 +2223,61 @@
                       });
                     }
 
-                    function activateNmnPackButton(btn) {
-                      var packRow = nmnPackRowEl();
-                      if (!packRow || btn.disabled) return;
-                      var ovid = btn.getAttribute('data-pack-option-value-id');
-                      if (!ovid) return;
-                      var sel = packRow.querySelector('select[data-js-product-variant-container]');
-                      if (sel) {
-                        var opt = sel.querySelector('option[data-option-value-id="' + ovid + '"]');
-                        if (opt && !opt.disabled) {
-                          sel.value = opt.value;
-                          sel.dispatchEvent(new Event('change', { bubbles: true }));
-                        }
-                        return;
+                    function nmnSetPackButtonsActive(clickedBtn) {
+                      var scope = productPage.querySelector('.nmn-pack-selector');
+                      if (!scope) return;
+                      scope.querySelectorAll('.nmn-pack-selector__btn[data-pack-id]').forEach(function (b) {
+                        b.classList.remove('nmn-pack-selector__btn--active');
+                        b.setAttribute('aria-pressed', 'false');
+                      });
+                      if (clickedBtn && !clickedBtn.disabled) {
+                        clickedBtn.classList.add('nmn-pack-selector__btn--active');
+                        clickedBtn.setAttribute('aria-pressed', 'true');
                       }
-                      var radio = packRow.querySelector(
-                        'input[type="radio"][data-option-value-id="' + ovid + '"]'
-                      );
-                      if (radio && !radio.disabled) {
-                        radio.checked = true;
-                        radio.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+
+                    function activateNmnPackButton(btn) {
+                      if (!btn || btn.disabled || !productPage || !form) return;
+                      var variantId = btn.getAttribute('data-pack-id');
+                      if (!variantId) return;
+                      var pv = nmnGetProductVariantsEl();
+                      if (!pv) return;
+                      var idInput = form.querySelector('input[name="id"]');
+                      if (idInput) idInput.value = String(variantId);
+
+                      var vidStr = String(variantId);
+                      var selects = pv.querySelectorAll('select[data-js-product-variant-container]');
+                      var si;
+                      for (si = 0; si < selects.length; si++) {
+                        var s = selects[si];
+                        var opt = s.querySelector('option[data-variant-id="' + vidStr + '"]');
+                        if (opt && !opt.disabled) {
+                          s.value = opt.value;
+                          s.dispatchEvent(new Event('change', { bubbles: true }));
+                          pv.dispatchEvent(
+                            new CustomEvent('VARIANT_CHANGE', {
+                              bubbles: true,
+                              detail: { variantId: vidStr },
+                            })
+                          );
+                          return;
+                        }
+                      }
+                      var radios = pv.querySelectorAll('input[type="radio"][data-variant-id="' + vidStr + '"]');
+                      var ri;
+                      for (ri = 0; ri < radios.length; ri++) {
+                        var radio = radios[ri];
+                        if (!radio.disabled) {
+                          radio.checked = true;
+                          radio.dispatchEvent(new Event('change', { bubbles: true }));
+                          pv.dispatchEvent(
+                            new CustomEvent('VARIANT_CHANGE', {
+                              bubbles: true,
+                              detail: { variantId: vidStr },
+                            })
+                          );
+                          return;
+                        }
                       }
                     }
 
@@ -2300,29 +2338,45 @@
                     }
                     syncNmnPackSelectorActive();
 
+                    function nmnOnVariantChange(ev) {
+                      var packOnly =
+                        ev &&
+                        ev.detail != null &&
+                        ev.detail.variantId != null &&
+                        String(ev.detail.variantId) !== '';
+                      if (packOnly) {
+                        syncNmnPackSelectorActive();
+                        return;
+                      }
+                      try {
+                        if (jsonEl && jsonEl.textContent.trim()) {
+                          plans = JSON.parse(jsonEl.textContent).plans || [];
+                        }
+                      } catch (err) {}
+                      nmnPricingEl = document.getElementById('nmn-pricing-data-' + sid);
+                      captureOnetimePriceHtml();
+                      syncNmnPackSelectorActive();
+                      syncNmnCardPrice();
+                      syncNmnPriceDisplay();
+                      syncNmnSavingsLabel();
+                      syncCta();
+                    }
+
+                    function nmnBindVariantChange(el) {
+                      if (!el || el.dataset.nmnBoundVariantChange === '1') return;
+                      el.dataset.nmnBoundVariantChange = '1';
+                      el.addEventListener('VARIANT_CHANGE', nmnOnVariantChange);
+                    }
+
+                    nmnBindVariantChange(nmnGetProductVariantsEl());
+
                     productPage.addEventListener('click', function (e) {
-                      var packBtn = e.target.closest('.nmn-pack-selector__btn[data-pack-option-value-id]');
+                      var packBtn = e.target.closest('.nmn-pack-selector__btn[data-pack-id]');
                       if (!packBtn || !productPage.contains(packBtn)) return;
                       e.preventDefault();
+                      nmnSetPackButtonsActive(packBtn);
                       activateNmnPackButton(packBtn);
                     });
-
-                    if (variantsEl) {
-                      variantsEl.addEventListener('VARIANT_CHANGE', function () {
-                        try {
-                          if (jsonEl && jsonEl.textContent.trim()) {
-                            plans = JSON.parse(jsonEl.textContent).plans || [];
-                          }
-                        } catch (err) {}
-                        nmnPricingEl = document.getElementById('nmn-pricing-data-' + sid);
-                        captureOnetimePriceHtml();
-                        syncNmnPackSelectorActive();
-                        syncNmnCardPrice();
-                        syncNmnPriceDisplay();
-                        syncNmnSavingsLabel();
-                        syncCta();
-                      });
-                    }
                   })();
                 </script>
               {%- endif -%}
