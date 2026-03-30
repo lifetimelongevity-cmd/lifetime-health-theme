@@ -85,12 +85,18 @@
 
         /* NMN PDP: subscription-first purchase toggle (logic unchanged; scoped by section). */
         #product-{{ section.id }} .nmn-sub-toggle {
-          margin-bottom: 1rem;
+          margin-bottom: 0.35rem;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle + product-form {
+          margin-top: 0;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle + product-form .flex-buttons > .add-to-cart {
+          margin-top: 0.375rem;
         }
         #product-{{ section.id }} .nmn-sub-toggle__stack {
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
+          gap: 0.4rem;
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn {
           display: flex;
@@ -112,11 +118,33 @@
           gap: 0.35rem;
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn--secondary {
-          padding: 0.55rem 0.85rem;
-          font-size: 0.9375rem;
+          padding: 0.45rem 0.7rem;
+          font-size: 0.8125rem;
+          background: var(--color-background-main);
+          background: color-mix(in srgb, var(--color-borders-main) 18%, var(--color-background-main));
+          border-color: color-mix(in srgb, var(--color-borders-main) 70%, var(--color-background-main));
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn--secondary .nmn-sub-toggle__title {
           font-weight: 500;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__head {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 0.35rem 0.5rem;
+          width: 100%;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__badge {
+          font-size: 0.625rem;
+          font-weight: 600;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          padding: 0.25em 0.5em;
+          border-radius: 4px;
+          line-height: 1.2;
+          color: var(--color-text-main);
+          background: color-mix(in srgb, var(--color-text-main) 10%, var(--color-background-main));
+          border: 1px solid color-mix(in srgb, var(--color-text-main) 18%, var(--color-background-main));
         }
         #product-{{ section.id }} .nmn-sub-toggle__title {
           font-weight: 600;
@@ -147,9 +175,19 @@
         #product-{{ section.id }} .nmn-sub-toggle__btn--secondary.nmn-sub-toggle__btn--active .nmn-sub-toggle__title {
           font-weight: 600;
         }
-        #product-{{ section.id }} .nmn-sub-toggle__btn:not(.nmn-sub-toggle__btn--active) {
-          opacity: 0.78;
+        #product-{{ section.id }} .nmn-sub-toggle__btn--primary:not(.nmn-sub-toggle__btn--active) {
+          opacity: 0.82;
           border-color: color-mix(in srgb, var(--color-borders-main) 85%, var(--color-background-main));
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__btn--secondary:not(.nmn-sub-toggle__btn--active) {
+          opacity: 0.68;
+          border-color: color-mix(in srgb, var(--color-borders-main) 92%, var(--color-background-main));
+          background: color-mix(in srgb, var(--color-borders-main) 10%, var(--color-background-main));
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__btn--secondary.nmn-sub-toggle__btn--active {
+          opacity: 1;
+          background: var(--color-background-main);
+          background: color-mix(in srgb, var(--color-text-main) 5%, var(--color-background-main));
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn:focus-visible {
           outline: 2px solid var(--color-text-main);
@@ -158,6 +196,47 @@
         #product-{{ section.id }} .nmn-sub-toggle__btn[disabled] {
           opacity: 0.45;
           cursor: not-allowed;
+        }
+
+        /* NMN PDP: subscription vs one-time price hints (15 % model; JS-filled). */
+        #product-{{ section.id }} .nmn-sub-toggle__price-sub {
+          display: flex;
+          flex-direction: column;
+          gap: 0.15rem;
+          margin: 0.15rem 0 0.2rem;
+          width: 100%;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__price-sub[hidden] {
+          display: none !important;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__price-row--main {
+          font-size: 1.0625rem;
+          font-weight: 700;
+          line-height: 1.3;
+          color: var(--color-text-main);
+          letter-spacing: -0.01em;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__price-row--statt {
+          font-size: 0.8125rem;
+          font-weight: 400;
+          opacity: 0.66;
+          text-decoration: line-through;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__price-row--save {
+          font-size: 0.8125rem;
+          font-weight: 600;
+          opacity: 0.88;
+          margin-top: 0.05rem;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__onetime-price {
+          font-size: 0.8125rem;
+          font-weight: 500;
+          opacity: 0.7;
+          margin-top: 0.25rem;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__btn--secondary.nmn-sub-toggle__btn--active .nmn-sub-toggle__onetime-price {
+          opacity: 0.9;
+          font-weight: 600;
         }
       {% endstyle %}
     {%- endif -%}
@@ -1268,6 +1347,14 @@
               {%- endif -%}
 
               {%- if template.suffix == '13_nmn' -%}
+                {%- liquid
+                  assign nmn_toggle_plan_count = 0
+                  for group in product.selling_plan_groups
+                    for plan in group.selling_plans
+                      assign nmn_toggle_plan_count = nmn_toggle_plan_count | plus: 1
+                    endfor
+                  endfor
+                -%}
                 <div
                   class="nmn-sub-toggle"
                   data-nmn-sub-root
@@ -1296,9 +1383,24 @@
                       data-nmn-mode="subscription"
                       aria-pressed="true"
                     >
-                      <span class="nmn-sub-toggle__title">Abo &amp; sparen</span>
+                      <span class="nmn-sub-toggle__head">
+                        <span class="nmn-sub-toggle__title">Abo &amp; sparen</span>
+                        <span class="nmn-sub-toggle__badge">Empfohlen</span>
+                      </span>
+                      <span
+                        class="nmn-sub-toggle__price-sub"
+                        data-nmn-price-subscription-wrap
+                        {% unless nmn_toggle_plan_count > 0 %}
+                          hidden
+                        {% endunless %}
+                        aria-live="polite"
+                      >
+                        <span class="nmn-sub-toggle__price-row nmn-sub-toggle__price-row--main" data-nmn-sub-monthly></span>
+                        <span class="nmn-sub-toggle__price-row nmn-sub-toggle__price-row--statt" data-nmn-sub-statt></span>
+                        <span class="nmn-sub-toggle__price-row nmn-sub-toggle__price-row--save" data-nmn-sub-save></span>
+                      </span>
                       <span class="nmn-sub-toggle__subs">
-                        <span class="nmn-sub-toggle__sub">Spare 15&nbsp;% im Abo</span>
+                        <span class="nmn-sub-toggle__sub">Spare 15&nbsp;% bei jeder Lieferung</span>
                         <span class="nmn-sub-toggle__sub nmn-sub-toggle__sub--fine">Jederzeit pausierbar oder kündbar</span>
                       </span>
                     </button>
@@ -1309,6 +1411,7 @@
                       aria-pressed="false"
                     >
                       <span class="nmn-sub-toggle__title">Einmaliger Kauf</span>
+                      <span class="nmn-sub-toggle__onetime-price" data-nmn-onetime-price aria-live="polite"></span>
                     </button>
                   </div>
                 </div>
@@ -1400,6 +1503,17 @@
                         </style>
                       {%- endif -%}
 
+                      {%- liquid
+                        assign nmn_atc_plan_count = 0
+                        if template.suffix == '13_nmn'
+                          for group in product.selling_plan_groups
+                            for plan in group.selling_plans
+                              assign nmn_atc_plan_count = nmn_atc_plan_count | plus: 1
+                            endfor
+                          endfor
+                        endif
+                      -%}
+
                       <button
                         type="submit"
                         name="add"
@@ -1414,6 +1528,9 @@
                         <span
                           class="button__text"
                           data-js-product-add-to-cart-text
+                          {% if template.suffix == '13_nmn' and block.settings.show_preorder == false %}
+                            data-lt-nmn-cta
+                          {% endif %}
                           {% if block.settings.show_preorder %}
                             data-show-preorder-wording
                           {% endif %}
@@ -1428,7 +1545,13 @@
                             else
                               if current_variant.available
                                 unless block.settings.show_preorder
-                                  echo 'products.page.add_to_cart_button' | t
+                                  if template.suffix == '13_nmn' and nmn_atc_plan_count > 0
+                                    echo 'Jetzt im Abo starten'
+                                  elsif template.suffix == '13_nmn'
+                                    echo 'Einmalig kaufen'
+                                  else
+                                    echo 'products.page.add_to_cart_button' | t
+                                  endif
                                 else
                                   echo 'products.page.preorder_button' | t
                                 endunless
@@ -1481,6 +1604,72 @@
 
                     var btnSub = root.querySelector('[data-nmn-mode="subscription"]');
                     var btnOnce = root.querySelector('[data-nmn-mode="onetime"]');
+                    var cta = form.querySelector('[data-js-product-add-to-cart-text][data-lt-nmn-cta]');
+                    var addBtn = form.querySelector('[data-js-product-add-to-cart]');
+                    var productPage = document.getElementById('product-' + sid);
+                    var variantsEl = productPage ? productPage.querySelector('product-variants') : null;
+                    var elSubWrap = root.querySelector('[data-nmn-price-subscription-wrap]');
+                    var elSubMonthly = root.querySelector('[data-nmn-sub-monthly]');
+                    var elSubStatt = root.querySelector('[data-nmn-sub-statt]');
+                    var elSubSave = root.querySelector('[data-nmn-sub-save]');
+                    var elOncePrice = root.querySelector('[data-nmn-onetime-price]');
+
+                    function formatDeEurFromCents(cents) {
+                      var n = Math.round(Number(cents)) / 100;
+                      return new Intl.NumberFormat('de-DE', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      }).format(n);
+                    }
+
+                    function readVariantPriceCents() {
+                      if (!productPage) return null;
+                      var el = productPage.querySelector('[data-js-variant-data]');
+                      if (!el || !el.textContent.trim()) return null;
+                      try {
+                        var v = JSON.parse(el.textContent);
+                        if (!v || v.price == null) return null;
+                        var c = Number(v.price);
+                        return isNaN(c) ? null : c;
+                      } catch (err) {
+                        return null;
+                      }
+                    }
+
+                    function syncPrices() {
+                      var cents = readVariantPriceCents();
+                      if (elOncePrice) {
+                        elOncePrice.textContent =
+                          cents == null ? '' : formatDeEurFromCents(cents) + ' €';
+                      }
+                      if (!elSubWrap || !elSubMonthly || !elSubStatt || !elSubSave) return;
+                      if (!plans.length || cents == null) {
+                        elSubWrap.setAttribute('hidden', '');
+                        elSubMonthly.textContent = '';
+                        elSubStatt.textContent = '';
+                        elSubSave.textContent = '';
+                        return;
+                      }
+                      elSubWrap.removeAttribute('hidden');
+                      var subCents = Math.round(cents * 0.85);
+                      var saveCents = cents - subCents;
+                      elSubMonthly.textContent = formatDeEurFromCents(subCents) + ' € / Monat';
+                      elSubStatt.textContent = 'statt ' + formatDeEurFromCents(cents) + ' €';
+                      elSubSave.textContent =
+                        'Du sparst ' + formatDeEurFromCents(saveCents) + ' € pro Lieferung';
+                    }
+
+                    function syncCta() {
+                      if (!cta || !addBtn) return;
+                      if (form.classList.contains('unavailable-variant')) return;
+                      if (form.classList.contains('disabled-cart')) return;
+                      if (addBtn.classList.contains('disabled')) return;
+                      var isSub =
+                        btnSub &&
+                        btnSub.classList.contains('nmn-sub-toggle__btn--active') &&
+                        plans.length > 0;
+                      cta.textContent = isSub ? 'Jetzt im Abo starten' : 'Einmalig kaufen';
+                    }
 
                     function setMode(mode) {
                       var isSub = mode === 'subscription';
@@ -1501,6 +1690,7 @@
                         btnOnce.classList.toggle('nmn-sub-toggle__btn--active', !isSub);
                         btnOnce.setAttribute('aria-pressed', !isSub ? 'true' : 'false');
                       }
+                      syncCta();
                     }
 
                     if (btnSub) {
@@ -1519,6 +1709,15 @@
                     } else {
                       setMode('onetime');
                       if (btnSub) btnSub.disabled = true;
+                    }
+
+                    syncPrices();
+
+                    if (variantsEl) {
+                      variantsEl.addEventListener('VARIANT_CHANGE', function () {
+                        syncPrices();
+                        syncCta();
+                      });
                     }
                   })();
                 </script>
