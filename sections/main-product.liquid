@@ -127,6 +127,7 @@
         }
         #product-{{ section.id }} .nmn-sub-toggle {
           margin-bottom: 0.25rem;
+          overflow: visible;
         }
         #product-{{ section.id }} .nmn-sub-toggle + product-form {
           margin-top: 0;
@@ -138,6 +139,7 @@
           display: flex;
           flex-direction: column;
           gap: 0.65rem;
+          align-items: stretch;
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn {
           display: flex;
@@ -151,7 +153,12 @@
           cursor: pointer;
           border-style: solid;
           background: var(--color-background-main);
-          transition: border-color 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
+          transition:
+            border-color 0.2s ease,
+            background-color 0.2s ease,
+            opacity 0.2s ease,
+            transform 0.2s ease,
+            box-shadow 0.2s ease;
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn--primary {
           padding: 1rem 1.15rem;
@@ -159,17 +166,22 @@
           border-radius: 12px;
           border-width: 1.5px;
           border-color: var(--color-text-main);
-          background: var(--color-background-main);
+          background: color-mix(in srgb, var(--color-text-main) 4%, var(--color-background-main));
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn--primary.nmn-sub-toggle__btn--active {
           opacity: 1;
           border-color: var(--color-text-main);
-          background: var(--color-background-main);
+          background: color-mix(in srgb, var(--color-text-main) 7%, var(--color-background-main));
+          transform: scale(1.03);
+          transform-origin: center top;
+          box-shadow: 0 2px 14px color-mix(in srgb, var(--color-text-main) 8%, transparent);
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn--primary:not(.nmn-sub-toggle__btn--active) {
           opacity: 0.72;
           border-color: color-mix(in srgb, var(--color-text-main) 35%, var(--color-borders-main));
-          background: var(--color-background-main);
+          background: color-mix(in srgb, var(--color-text-main) 2.5%, var(--color-background-main));
+          transform: scale(0.985);
+          transform-origin: center top;
         }
         #product-{{ section.id }} .nmn-sub-toggle__card-price {
           display: flex;
@@ -207,6 +219,20 @@
           align-items: center;
           gap: 0.5rem 0.65rem;
           width: 100%;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__badge-wrap {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.2rem;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__social-proof {
+          font-size: 0.625rem;
+          font-weight: 400;
+          line-height: 1.25;
+          letter-spacing: 0.02em;
+          opacity: 0.52;
+          color: var(--color-text-main);
         }
         #product-{{ section.id }} .nmn-sub-toggle__badge {
           font-size: 0.625rem;
@@ -274,14 +300,17 @@
           background: var(--color-background-main);
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn--secondary.nmn-sub-toggle__btn--active {
-          opacity: 0.85;
+          opacity: 0.92;
           border-color: var(--color-borders-main);
           background: var(--color-background-main);
+          transform: scale(1);
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn--secondary:not(.nmn-sub-toggle__btn--active) {
-          opacity: 0.68;
+          opacity: 0.6;
           border-color: color-mix(in srgb, var(--color-borders-main) 88%, var(--color-background-main));
           background: var(--color-background-main);
+          transform: scale(0.97);
+          transform-origin: center top;
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn--secondary .nmn-sub-toggle__title {
           font-weight: 500;
@@ -394,6 +423,21 @@
           outline: 2px solid var(--color-text-main);
           outline-offset: 2px;
         }
+        #product-{{ section.id }} .product__cart-functions .flex-buttons {
+          flex-wrap: wrap;
+        }
+        #product-{{ section.id }} .nmn-cta-trust {
+          flex: 1 0 100%;
+          width: 100%;
+          margin: 0.4rem 0 0;
+          padding: 0;
+          text-align: center;
+          font-size: 0.6875rem;
+          line-height: 1.35;
+          font-weight: 400;
+          color: var(--color-text-main);
+          opacity: 0.62;
+        }
       {% endstyle %}
     {%- endif -%}
 
@@ -410,6 +454,20 @@
         endfor
         if nmn_pack_option == nil and product.options.size == 1
           assign nmn_pack_option = product.options_with_values.first
+        endif
+        assign nmn_apply_default_two_pack = false
+        if nmn_pack_option and nmn_pack_option.values.size > 1
+          if product.selected_variant == blank
+            assign nmn_apply_default_two_pack = true
+          endif
+        endif
+        if nmn_apply_default_two_pack
+          for value in nmn_pack_option.values limit: 3
+            if forloop.index == 2 and value.available
+              assign current_variant = value.variant
+              break
+            endif
+          endfor
         endif
       -%}
     {%- endif -%}
@@ -1744,6 +1802,9 @@
                             {% if forloop.index == 2 %}nmn-pack-selector__btn--featured{% endif %}
                           "
                           data-pack-id="{{ value.variant.id }}"
+                          {% if forloop.index == 2 %}
+                            data-nmn-recommended-pack
+                          {% endif %}
                           data-pack-option-value-id="{{ value.id }}"
                           aria-pressed="{% if value == nmn_pack_option.selected_value %}true{% else %}false{% endif %}"
                           {% unless value.available %}
@@ -1776,7 +1837,10 @@
                     >
                       <span class="nmn-sub-toggle__head">
                         <span class="nmn-sub-toggle__title">Abo &amp; sparen</span>
-                        <span class="nmn-sub-toggle__badge">Empfohlen</span>
+                        <span class="nmn-sub-toggle__badge-wrap">
+                          <span class="nmn-sub-toggle__badge">Empfohlen</span>
+                          <span class="nmn-sub-toggle__social-proof">Meistgewählte Option</span>
+                        </span>
                       </span>
                       <div data-nmn-card-price-root></div>
                       <span class="nmn-sub-toggle__subs">
@@ -1940,7 +2004,7 @@
                               if current_variant.available
                                 unless block.settings.show_preorder
                                   if template.suffix == '13_nmn' and nmn_atc_plan_count > 0
-                                    echo 'Jetzt im Abo starten'
+                                    echo 'Jetzt sparen & Abo starten'
                                   elsif template.suffix == '13_nmn'
                                     echo 'Einmalig kaufen'
                                   else
@@ -1963,6 +2027,9 @@
                           </svg>
                         </span>
                       </button>
+                      {%- if template.suffix == '13_nmn' -%}
+                        <p class="nmn-cta-trust">Jederzeit pausierbar · Kein Risiko</p>
+                      {%- endif -%}
 
                       {%- liquid
                         if product.gift_card? and block.settings.show_gift_card_recipient
@@ -2290,7 +2357,7 @@
                         btnSub &&
                         btnSub.classList.contains('nmn-sub-toggle__btn--active') &&
                         plans.length > 0;
-                      cta.textContent = isSub ? 'Jetzt im Abo starten' : 'Einmalig kaufen';
+                      cta.textContent = isSub ? 'Jetzt sparen & Abo starten' : 'Einmalig kaufen';
                     }
 
                     function setMode(mode) {
@@ -2338,6 +2405,23 @@
                     }
                     syncNmnPackSelectorActive();
 
+                    function nmnEnsureRecommendedPackOnLoad() {
+                      try {
+                        var q = window.location.search || '';
+                        if (/[?&]variant=/.test(q)) return;
+                        var rec = productPage.querySelector(
+                          '.nmn-pack-selector__btn[data-nmn-recommended-pack]'
+                        );
+                        if (!rec || rec.disabled) return;
+                        var idInput = form.querySelector('input[name="id"]');
+                        if (!idInput) return;
+                        if (String(idInput.value) === String(rec.getAttribute('data-pack-id'))) return;
+                        nmnSetPackButtonsActive(rec);
+                        activateNmnPackButton(rec);
+                      } catch (err) {}
+                    }
+                    nmnEnsureRecommendedPackOnLoad();
+
                     function nmnOnVariantChange(ev) {
                       var packOnly =
                         ev &&
@@ -2346,6 +2430,7 @@
                         String(ev.detail.variantId) !== '';
                       if (packOnly) {
                         syncNmnPackSelectorActive();
+                        if (plans.length) setMode('subscription');
                         return;
                       }
                       try {
@@ -2356,10 +2441,14 @@
                       nmnPricingEl = document.getElementById('nmn-pricing-data-' + sid);
                       captureOnetimePriceHtml();
                       syncNmnPackSelectorActive();
-                      syncNmnCardPrice();
-                      syncNmnPriceDisplay();
-                      syncNmnSavingsLabel();
-                      syncCta();
+                      if (plans.length) {
+                        setMode('subscription');
+                      } else {
+                        syncNmnCardPrice();
+                        syncNmnPriceDisplay();
+                        syncNmnSavingsLabel();
+                        syncCta();
+                      }
                     }
 
                     function nmnBindVariantChange(el) {
