@@ -66,6 +66,9 @@
     data-id="{{ product.id }}"
     data-availability="{{ product.available }}"
     data-js-product-component
+    {%- if template.suffix == '13_nmn' -%}
+      data-nmn-currency-suffix="{% if settings.show_currency_codes %}{{ localization.country.currency.iso_code | prepend: ' ' | escape }}{% endif %}"
+    {%- endif -%}
   >
     {%- if template.suffix == '13_nmn' -%}
       {% style %}
@@ -166,6 +169,37 @@
           font-size: 0.75rem;
           opacity: 0.75;
         }
+        #product-{{ section.id }} .nmn-sub-toggle__sub--benefit {
+          font-weight: 500;
+          opacity: 0.92;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__trust {
+          display: flex;
+          flex-direction: column;
+          gap: 0.2rem;
+          margin-top: 0.3rem;
+          padding-top: 0.35rem;
+          width: 100%;
+          border-top: 1px solid color-mix(in srgb, var(--color-borders-main) 65%, var(--color-background-main));
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__trust-line {
+          font-size: 0.75rem;
+          line-height: 1.35;
+          font-weight: 400;
+          opacity: 0.8;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__onetime-downsides {
+          display: flex;
+          flex-direction: column;
+          gap: 0.1rem;
+          margin-top: 0.3rem;
+          width: 100%;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__onetime-down {
+          font-size: 0.6875rem;
+          line-height: 1.3;
+          opacity: 0.52;
+        }
         #product-{{ section.id }} .nmn-sub-toggle__btn.nmn-sub-toggle__btn--active {
           border-width: 2px;
           border-color: var(--color-text-main);
@@ -180,8 +214,8 @@
           border-color: color-mix(in srgb, var(--color-borders-main) 85%, var(--color-background-main));
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn--secondary:not(.nmn-sub-toggle__btn--active) {
-          opacity: 0.68;
-          border-color: color-mix(in srgb, var(--color-borders-main) 92%, var(--color-background-main));
+          opacity: 0.62;
+          border-color: color-mix(in srgb, var(--color-borders-main) 94%, var(--color-background-main));
           background: color-mix(in srgb, var(--color-borders-main) 10%, var(--color-background-main));
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn--secondary.nmn-sub-toggle__btn--active {
@@ -197,46 +231,8 @@
           opacity: 0.45;
           cursor: not-allowed;
         }
-
-        /* NMN PDP: subscription vs one-time price hints (15 % model; JS-filled). */
-        #product-{{ section.id }} .nmn-sub-toggle__price-sub {
-          display: flex;
-          flex-direction: column;
-          gap: 0.15rem;
-          margin: 0.15rem 0 0.2rem;
-          width: 100%;
-        }
-        #product-{{ section.id }} .nmn-sub-toggle__price-sub[hidden] {
-          display: none !important;
-        }
-        #product-{{ section.id }} .nmn-sub-toggle__price-row--main {
-          font-size: 1.0625rem;
-          font-weight: 700;
-          line-height: 1.3;
-          color: var(--color-text-main);
-          letter-spacing: -0.01em;
-        }
-        #product-{{ section.id }} .nmn-sub-toggle__price-row--statt {
-          font-size: 0.8125rem;
-          font-weight: 400;
-          opacity: 0.66;
+        #product-{{ section.id }} .main-product-price .product-price.nmn-price--plan .product-price--compare {
           text-decoration: line-through;
-        }
-        #product-{{ section.id }} .nmn-sub-toggle__price-row--save {
-          font-size: 0.8125rem;
-          font-weight: 600;
-          opacity: 0.88;
-          margin-top: 0.05rem;
-        }
-        #product-{{ section.id }} .nmn-sub-toggle__onetime-price {
-          font-size: 0.8125rem;
-          font-weight: 500;
-          opacity: 0.7;
-          margin-top: 0.25rem;
-        }
-        #product-{{ section.id }} .nmn-sub-toggle__btn--secondary.nmn-sub-toggle__btn--active .nmn-sub-toggle__onetime-price {
-          opacity: 0.9;
-          font-weight: 600;
         }
       {% endstyle %}
     {%- endif -%}
@@ -1347,14 +1343,6 @@
               {%- endif -%}
 
               {%- if template.suffix == '13_nmn' -%}
-                {%- liquid
-                  assign nmn_toggle_plan_count = 0
-                  for group in product.selling_plan_groups
-                    for plan in group.selling_plans
-                      assign nmn_toggle_plan_count = nmn_toggle_plan_count | plus: 1
-                    endfor
-                  endfor
-                -%}
                 <div
                   class="nmn-sub-toggle"
                   data-nmn-sub-root
@@ -1376,6 +1364,18 @@
                       ]
                     }
                   </script>
+                  <script type="application/json" id="nmn-pricing-data-{{ section.id }}">
+                    {
+                      "variant": {
+                        "id": {{ current_variant.id | json }},
+                        "price": {{ current_variant.price | json }},
+                        "compare_at_price": {% if current_variant.compare_at_price %}{{ current_variant.compare_at_price | json }}{% else %}null{% endif %},
+                        "unit_price": {% if current_variant.unit_price %}{{ current_variant.unit_price | json }}{% else %}null{% endif %},
+                        "unit_price_measurement": {% if current_variant.unit_price_measurement %}{{ current_variant.unit_price_measurement | json }}{% else %}null{% endif %},
+                        "selling_plan_allocations": {{ current_variant.selling_plan_allocations | json }}
+                      }
+                    }
+                  </script>
                   <div class="nmn-sub-toggle__stack">
                     <button
                       type="button"
@@ -1387,21 +1387,14 @@
                         <span class="nmn-sub-toggle__title">Abo &amp; sparen</span>
                         <span class="nmn-sub-toggle__badge">Empfohlen</span>
                       </span>
-                      <span
-                        class="nmn-sub-toggle__price-sub"
-                        data-nmn-price-subscription-wrap
-                        {% unless nmn_toggle_plan_count > 0 %}
-                          hidden
-                        {% endunless %}
-                        aria-live="polite"
-                      >
-                        <span class="nmn-sub-toggle__price-row nmn-sub-toggle__price-row--main" data-nmn-sub-monthly></span>
-                        <span class="nmn-sub-toggle__price-row nmn-sub-toggle__price-row--statt" data-nmn-sub-statt></span>
-                        <span class="nmn-sub-toggle__price-row nmn-sub-toggle__price-row--save" data-nmn-sub-save></span>
-                      </span>
                       <span class="nmn-sub-toggle__subs">
-                        <span class="nmn-sub-toggle__sub">Spare 15&nbsp;% bei jeder Lieferung</span>
-                        <span class="nmn-sub-toggle__sub nmn-sub-toggle__sub--fine">Jederzeit pausierbar oder kündbar</span>
+                        <span class="nmn-sub-toggle__sub nmn-sub-toggle__sub--benefit">10&nbsp;% sparen bei jeder Lieferung</span>
+                        <span class="nmn-sub-toggle__sub nmn-sub-toggle__sub--benefit">Kostenfreier Versand im Abo</span>
+                      </span>
+                      <span class="nmn-sub-toggle__trust">
+                        <span class="nmn-sub-toggle__trust-line">✔ Jederzeit pausierbar</span>
+                        <span class="nmn-sub-toggle__trust-line">✔ Jederzeit kündbar</span>
+                        <span class="nmn-sub-toggle__trust-line">✔ Kein Risiko</span>
                       </span>
                     </button>
                     <button
@@ -1411,7 +1404,10 @@
                       aria-pressed="false"
                     >
                       <span class="nmn-sub-toggle__title">Einmaliger Kauf</span>
-                      <span class="nmn-sub-toggle__onetime-price" data-nmn-onetime-price aria-live="polite"></span>
+                      <span class="nmn-sub-toggle__onetime-downsides">
+                        <span class="nmn-sub-toggle__onetime-down">Kein Rabatt</span>
+                        <span class="nmn-sub-toggle__onetime-down">Versandkosten können anfallen</span>
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -1595,6 +1591,7 @@
 
                     var input = form.querySelector('[data-lt-selling-plan-input]');
                     var jsonEl = document.getElementById('nmn-selling-plans-data-' + sid);
+                    var nmnPricingEl = document.getElementById('nmn-pricing-data-' + sid);
                     var plans = [];
                     try {
                       if (jsonEl && jsonEl.textContent.trim()) {
@@ -1608,55 +1605,137 @@
                     var addBtn = form.querySelector('[data-js-product-add-to-cart]');
                     var productPage = document.getElementById('product-' + sid);
                     var variantsEl = productPage ? productPage.querySelector('product-variants') : null;
-                    var elSubWrap = root.querySelector('[data-nmn-price-subscription-wrap]');
-                    var elSubMonthly = root.querySelector('[data-nmn-sub-monthly]');
-                    var elSubStatt = root.querySelector('[data-nmn-sub-statt]');
-                    var elSubSave = root.querySelector('[data-nmn-sub-save]');
-                    var elOncePrice = root.querySelector('[data-nmn-onetime-price]');
+                    var priceRoot = productPage
+                      ? productPage.querySelector('[data-update-block="price-compact-main"]')
+                      : null;
+                    var lastOnetimePriceHtml = '';
 
-                    function formatDeEurFromCents(cents) {
-                      var n = Math.round(Number(cents)) / 100;
-                      return new Intl.NumberFormat('de-DE', {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2
-                      }).format(n);
+                    function captureOnetimePriceHtml() {
+                      if (priceRoot) lastOnetimePriceHtml = priceRoot.innerHTML;
                     }
 
-                    function readVariantPriceCents() {
-                      if (!productPage) return null;
-                      var el = productPage.querySelector('[data-js-variant-data]');
-                      if (!el || !el.textContent.trim()) return null;
+                    function readNmnPricingVariant() {
+                      if (!nmnPricingEl || !nmnPricingEl.textContent.trim()) return null;
                       try {
-                        var v = JSON.parse(el.textContent);
-                        if (!v || v.price == null) return null;
-                        var c = Number(v.price);
-                        return isNaN(c) ? null : c;
+                        var o = JSON.parse(nmnPricingEl.textContent);
+                        return o && o.variant ? o.variant : null;
                       } catch (err) {
                         return null;
                       }
                     }
 
-                    function syncPrices() {
-                      var cents = readVariantPriceCents();
-                      if (elOncePrice) {
-                        elOncePrice.textContent =
-                          cents == null ? '' : formatDeEurFromCents(cents) + ' €';
+                    function numCents(v) {
+                      if (v == null || v === '') return null;
+                      var n = Number(v);
+                      return isNaN(n) ? null : Math.round(n);
+                    }
+
+                    function formatDeMoney(cents) {
+                      return new Intl.NumberFormat('de-DE', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      }).format(cents / 100);
+                    }
+
+                    function allocationPlanId(a) {
+                      if (!a) return null;
+                      if (a.selling_plan_id != null) return String(a.selling_plan_id);
+                      if (a.selling_plan && a.selling_plan.id != null) return String(a.selling_plan.id);
+                      return null;
+                    }
+
+                    function findAllocation(variant, planId) {
+                      var list = variant.selling_plan_allocations;
+                      if (!list || !list.length || !planId) return null;
+                      var pid = String(planId);
+                      for (var i = 0; i < list.length; i++) {
+                        if (allocationPlanId(list[i]) === pid) return list[i];
                       }
-                      if (!elSubWrap || !elSubMonthly || !elSubStatt || !elSubSave) return;
-                      if (!plans.length || cents == null) {
-                        elSubWrap.setAttribute('hidden', '');
-                        elSubMonthly.textContent = '';
-                        elSubStatt.textContent = '';
-                        elSubSave.textContent = '';
+                      return null;
+                    }
+
+                    function unitPriceHtml(variant, suffix) {
+                      if (!variant || !variant.unit_price_measurement || variant.unit_price == null) return '';
+                      var up = numCents(variant.unit_price);
+                      if (up == null) return '';
+                      var refVal = variant.unit_price_measurement.reference_value;
+                      var refUnit = variant.unit_price_measurement.reference_unit || '';
+                      var refPart =
+                        refVal != null && Number(refVal) !== 1 ? String(refVal) + '\u00a0' : '';
+                      var line =
+                        formatDeMoney(up) +
+                        '\u00a0€' +
+                        (suffix || '') +
+                        ' / ' +
+                        refPart +
+                        refUnit;
+                      return (
+                        '<span class="product-price--unit pps text-size--small" data-js-product-price-unit>' +
+                        line +
+                        '</span>'
+                      );
+                    }
+
+                    function isSubscriptionUiActive() {
+                      return !!(plans.length && btnSub && btnSub.classList.contains('nmn-sub-toggle__btn--active'));
+                    }
+
+                    function selectedSellingPlanId() {
+                      if (input && !input.disabled && input.value) return String(input.value);
+                      if (plans.length) return String(plans[0].id);
+                      return null;
+                    }
+
+                    function syncNmnPriceDisplay() {
+                      if (!priceRoot) return;
+                      if (!isSubscriptionUiActive()) {
+                        if (lastOnetimePriceHtml) priceRoot.innerHTML = lastOnetimePriceHtml;
                         return;
                       }
-                      elSubWrap.removeAttribute('hidden');
-                      var subCents = Math.round(cents * 0.85);
-                      var saveCents = cents - subCents;
-                      elSubMonthly.textContent = formatDeEurFromCents(subCents) + ' € / Monat';
-                      elSubStatt.textContent = 'statt ' + formatDeEurFromCents(cents) + ' €';
-                      elSubSave.textContent =
-                        'Du sparst ' + formatDeEurFromCents(saveCents) + ' € pro Lieferung';
+                      var variant = readNmnPricingVariant();
+                      if (!variant) {
+                        if (lastOnetimePriceHtml) priceRoot.innerHTML = lastOnetimePriceHtml;
+                        return;
+                      }
+                      var planId = selectedSellingPlanId();
+                      var alloc = findAllocation(variant, planId);
+                      var subC = alloc ? numCents(alloc.price) : null;
+                      if (subC == null) {
+                        if (lastOnetimePriceHtml) priceRoot.innerHTML = lastOnetimePriceHtml;
+                        return;
+                      }
+                      var origC = numCents(alloc.compare_at_price);
+                      if (origC == null) origC = numCents(variant.price);
+                      if (origC == null) origC = subC;
+                      if (origC < subC) origC = subC;
+                      var suff = (productPage.dataset && productPage.dataset.nmnCurrencySuffix) || '';
+                      var saveC = origC - subC;
+                      var html =
+                        '<span class="show-block-if-variant-selected">' +
+                        '<div class="product-price nmn-price--plan" id="product-price-' +
+                        sid +
+                        '">' +
+                        '<span class="product-price--original pps" data-js-product-price-original">' +
+                        formatDeMoney(subC) +
+                        '\u00a0€' +
+                        suff +
+                        '</span>';
+                      if (origC > subC && saveC > 0) {
+                        html +=
+                          '<del class="product-price--compare" data-js-product-price-compare><span>' +
+                          formatDeMoney(origC) +
+                          '\u00a0€' +
+                          suff +
+                          '</span></del>' +
+                          '<span class="product-price--saving pps" data-js-product-price-saving"><span>Du sparst ' +
+                          formatDeMoney(saveC) +
+                          '\u00a0€' +
+                          suff +
+                          '</span></span>';
+                      }
+                      html += unitPriceHtml(variant, suff);
+                      html += '</div></span>';
+                      priceRoot.innerHTML = html;
                     }
 
                     function syncCta() {
@@ -1691,6 +1770,7 @@
                         btnOnce.setAttribute('aria-pressed', !isSub ? 'true' : 'false');
                       }
                       syncCta();
+                      syncNmnPriceDisplay();
                     }
 
                     if (btnSub) {
@@ -1704,6 +1784,7 @@
                       });
                     }
 
+                    captureOnetimePriceHtml();
                     if (plans.length) {
                       setMode('subscription');
                     } else {
@@ -1711,11 +1792,10 @@
                       if (btnSub) btnSub.disabled = true;
                     }
 
-                    syncPrices();
-
                     if (variantsEl) {
                       variantsEl.addEventListener('VARIANT_CHANGE', function () {
-                        syncPrices();
+                        captureOnetimePriceHtml();
+                        syncNmnPriceDisplay();
                         syncCta();
                       });
                     }
