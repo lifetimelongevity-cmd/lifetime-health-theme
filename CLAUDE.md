@@ -88,3 +88,14 @@ Custom templates beyond Shopify defaults:
 - `{{ settings.* }}` — Theme setting values
 - `{{ request.design_mode }}` — True when viewed in Shopify theme editor
 - `{{ customer }}` — Current logged-in customer (nil if guest)
+
+## Implementation Guardrails
+
+This is an existing live Shopify theme.
+
+- Do not propose full rewrites or new design systems.
+- Prefer minimal, incremental changes.
+- Reuse existing sections, snippets, CSS classes, and patterns.
+- Always inspect the current implementation before proposing changes.
+- Be aware that apps and custom code may affect behavior.
+- Favor solutions that work within the current theme structure over idealized architectures.
