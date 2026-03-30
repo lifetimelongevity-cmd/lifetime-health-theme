@@ -309,10 +309,132 @@
           opacity: 0.45;
           cursor: not-allowed;
         }
+
+        /* NMN: native variant UI stays for product-variants / AJAX; visually hidden. */
+        #product-{{ section.id }} .nmn-hide-native-variant-picker {
+          position: absolute !important;
+          width: 1px !important;
+          height: 1px !important;
+          padding: 0 !important;
+          margin: -1px !important;
+          overflow: hidden !important;
+          clip: rect(0, 0, 0, 0) !important;
+          clip-path: inset(50%) !important;
+          white-space: nowrap !important;
+          border: 0 !important;
+        }
+
+        #product-{{ section.id }} .nmn-pack-selector {
+          display: flex;
+          flex-direction: row;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          width: 100%;
+          margin: 0 0 0.75rem;
+        }
+        #product-{{ section.id }} .nmn-pack-selector__btn {
+          flex: 1 1 0;
+          min-width: 5.5rem;
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 0.25rem;
+          margin: 0;
+          padding: 0.55rem 0.65rem;
+          text-align: left;
+          font: inherit;
+          font-size: 0.78125rem;
+          font-weight: 500;
+          line-height: 1.25;
+          color: var(--color-text-main);
+          cursor: pointer;
+          border-radius: 8px;
+          border: 1px solid color-mix(in srgb, var(--color-borders-main) 88%, var(--color-background-main));
+          background: var(--color-background-main);
+          opacity: 0.68;
+          transition: border-color 0.15s ease, background-color 0.15s ease, opacity 0.15s ease;
+        }
+        #product-{{ section.id }} .nmn-pack-selector__btn:hover {
+          opacity: 0.85;
+        }
+        #product-{{ section.id }} .nmn-pack-selector__btn--active {
+          opacity: 1;
+          font-weight: 600;
+          border-color: var(--color-text-main);
+          border-width: 1.5px;
+          padding: calc(0.55rem - 0.5px) calc(0.65rem - 0.5px);
+          background: color-mix(in srgb, var(--color-text-main) 5%, var(--color-background-main));
+        }
+        #product-{{ section.id }} .nmn-pack-selector__btn[disabled] {
+          opacity: 0.45;
+          cursor: not-allowed;
+        }
+        #product-{{ section.id }} .nmn-pack-selector__btn--featured:not(.nmn-pack-selector__btn--active) {
+          border-color: color-mix(in srgb, var(--color-text-main) 28%, var(--color-borders-main));
+        }
+        #product-{{ section.id }} .nmn-pack-selector__btn--featured.nmn-pack-selector__btn--active {
+          box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-text-main) 12%, transparent);
+        }
+        #product-{{ section.id }} .nmn-pack-selector__label {
+          width: 100%;
+        }
+        #product-{{ section.id }} .nmn-pack-selector__badge {
+          font-size: 0.5625rem;
+          font-weight: 600;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+          padding: 0.2em 0.45em;
+          border-radius: 4px;
+          line-height: 1.2;
+          color: #15803d;
+          background: color-mix(in srgb, #15803d 10%, var(--color-background-main));
+          border: 1px solid color-mix(in srgb, #15803d 22%, var(--color-background-main));
+        }
+        #product-{{ section.id }} .nmn-pack-selector__btn:focus-visible {
+          outline: 2px solid var(--color-text-main);
+          outline-offset: 2px;
+        }
       {% endstyle %}
     {%- endif -%}
 
     {%- assign current_variant = product.selected_or_first_available_variant -%}
+    {%- if template.suffix == '13_nmn' -%}
+      {%- liquid
+        assign nmn_pack_option = nil
+        for opt in product.options_with_values
+          assign ol = opt.name | downcase
+          if ol contains 'pack' or ol contains 'packung' or ol contains 'menge' or ol contains 'stück'
+            assign nmn_pack_option = opt
+            break
+          endif
+        endfor
+        if nmn_pack_option == nil and product.options.size == 1
+          assign nmn_pack_option = product.options_with_values.first
+        endif
+      -%}
+    {%- endif -%}
+    {%- liquid
+      assign nmn_has_variant_picker_block = false
+      for b in section.blocks
+        if b.type == 'variant_picker'
+          assign nmn_has_variant_picker_block = true
+          break
+        endif
+      endfor
+      assign nmn_inline_variant_widget = false
+      if template.suffix == '13_nmn' and nmn_has_variant_picker_block == false and product.has_only_default_variant == false
+        assign nmn_inline_variant_widget = true
+      endif
+    -%}
+    {%- if nmn_inline_variant_widget -%}
+      {%- liquid
+        assign nmn_iv_style = 'radio'
+        assign nmn_iv_unavailable = 'disable'
+        assign nmn_iv_labels = false
+        assign nmn_iv_swatches = false
+        assign nmn_iv_color_label = settings.color_swatches_labels | split: ','
+      -%}
+    {%- endif -%}
 
     <div class="{{ child_class }} element--is-sticky">
       <div
@@ -1094,7 +1216,7 @@
             {%- assign color_label = settings.color_swatches_labels | split: ',' -%}
 
             <div
-              class="sidebar-widget sidebar-widget--{{ block.settings.style }}"
+              class="sidebar-widget sidebar-widget--{{ block.settings.style }}{% if template.suffix == '13_nmn' %} nmn-hide-native-variant-picker{% endif %}"
               {% if product.has_only_default_variant %}
                 style="display:none"
               {% endif %}
@@ -1160,6 +1282,9 @@
                         class="product-variant"
                         data-name="product-{{ option.name | escape | downcase | strip | handleize }}-{{ section.id }}"
                         data-js-product-variant
+                        {% if template.suffix == '13_nmn' and nmn_pack_option and option.name == nmn_pack_option.name %}
+                          data-nmn-pack-option-row
+                        {% endif %}
                       >
                         {%- liquid
                           assign swatch_count = option.values | map: 'swatch' | compact | size
@@ -1418,6 +1543,143 @@
               {%- endif -%}
 
               {%- if template.suffix == '13_nmn' -%}
+                {%- if nmn_inline_variant_widget -%}
+                  <div class="nmn-inline-variants-host nmn-hide-native-variant-picker" aria-hidden="true">
+                    <product-variants
+                      data-nmn-inline-variant-source
+                      data-main-product-variants
+                      data-main-product-page-variants
+                      data-variants="{{ product.options_with_values.size }}"
+                      data-hide-variants="disable"
+                      data-url="{{ product.url }}"
+                      data-id="{{ section.id }}"
+                      data-helper-id="{{ section.id }}"
+                      data-style="{{ nmn_iv_style }}"
+                      data-unavailable-variants="{{ nmn_iv_unavailable }}"
+                      {% if nmn_iv_unavailable == 'hide' %}
+                        class="product-variants--hide-unavailable"
+                      {% endif %}
+                      {% unless default_to_first_variant %}
+                        data-variant-required
+                      {% endunless %}
+                      data-has-variants
+                    >
+                      <script type="application/json" data-js-variant-data data-update-block="variant-data-main-product">
+                        {{ current_variant | json }}
+                      </script>
+
+                      <div class="product-variants no-js-hidden">
+                        {%- for option in product.options_with_values -%}
+                          {%- assign option_downcased = option.name | downcase %}
+
+                          <div
+                            class="product-variant"
+                            data-name="product-{{ option.name | escape | downcase | strip | handleize }}-{{ section.id }}"
+                            data-js-product-variant
+                            {% if nmn_pack_option and option.name == nmn_pack_option.name %}
+                              data-nmn-pack-option-row
+                            {% endif %}
+                          >
+                            {%- liquid
+                              assign swatch_count = option.values | map: 'swatch' | compact | size
+                              if nmn_iv_color_label contains option_downcased and nmn_iv_swatches
+                                assign nmn_iv_is_color = true
+                              elsif nmn_iv_swatches and swatch_count > 0
+                                assign nmn_iv_is_color = true
+                              else
+                                assign nmn_iv_is_color = false
+                              endif
+                            -%}
+
+                            {%- if nmn_iv_style == 'select' and nmn_iv_is_color == blank -%}
+                              <label
+                                for="product-{{ option.name | escape | downcase | strip | handleize }}-{{ section.id }}"
+                                class="product-variant__name text-size--small {% unless nmn_iv_labels %} visually-hidden {% endunless %}"
+                              >
+                                {{- 'products.grid.select_variant' | t: variant: option.name -}}
+                              </label>
+                            {%- elsif nmn_iv_labels -%}
+                              <span class="product-variant__name text-size--small">
+                                {{- 'products.grid.select_variant' | t: variant: option.name -}}
+                              </span>
+                            {%- endif -%}
+
+                            {%- if nmn_iv_is_color -%}
+                              <div
+                                class="product-variant__container product-variant__container--radio product-variant__container--radio--wrap"
+                                data-js-product-variant-container="radio"
+                              >
+                                {%- render 'product-variant-options',
+                                  type: 'swatch',
+                                  option: option,
+                                  product: product,
+                                  default_to_first_variant: default_to_first_variant,
+                                  handle_unavailable_variants: nmn_iv_unavailable,
+                                  current_variant: current_variant,
+                                  id: section.id
+                                -%}
+                              </div>
+
+                              <span class="product-variant__item-text-label text-size--small text-line-height--small text-color--opacity">
+                                {%- liquid
+                                  unless default_to_first_variant
+                                    echo 'products.grid.color_variants_count' | t: count: option.values.size
+                                  else
+                                    echo option.selected_value
+                                  endunless
+                                -%}
+                              </span>
+
+                            {%- elsif nmn_iv_style == 'select' -%}
+                              <select
+                                class="product-variant__container product-variant__container--select text-size--small"
+                                id="product-{{ option.name | escape | downcase | strip | handleize }}-{{ section.id }}"
+                                data-js-product-variant-container="select"
+                              >
+                                {%- render 'product-variant-options',
+                                  type: 'select',
+                                  option: option,
+                                  product: product,
+                                  default_to_first_variant: default_to_first_variant,
+                                  handle_unavailable_variants: nmn_iv_unavailable,
+                                  current_variant: current_variant,
+                                  id: section.id
+                                -%}
+                              </select>
+
+                            {%- else -%}
+                              <div
+                                class="product-variant__container product-variant__container--radio product-variant__container--radio--wrap"
+                                data-js-product-variant-container="radio"
+                              >
+                                {%- render 'product-variant-options',
+                                  option: option,
+                                  product: product,
+                                  default_to_first_variant: default_to_first_variant,
+                                  handle_unavailable_variants: nmn_iv_unavailable,
+                                  current_variant: current_variant,
+                                  id: section.id
+                                -%}
+                              </div>
+                            {%- endif -%}
+
+                            {%- if nmn_iv_unavailable == 'hide'
+                              and nmn_iv_style != 'select'
+                              or nmn_iv_is_color
+                            -%}
+                              <span
+                                class="product-variant__out-of-stock text-size--regular text-color--opacity hide"
+                                aria-hidden="true"
+                              >
+                                {{- 'products.page.inventory.no_products' | t -}}
+                              </span>
+                            {%- endif -%}
+                          </div>
+                        {%- endfor -%}
+                      </div>
+                    </product-variants>
+                  </div>
+                {%- endif -%}
                 <div
                   class="nmn-sub-toggle"
                   data-nmn-sub-root
@@ -1425,7 +1687,11 @@
                   role="group"
                   aria-label="Kaufoption"
                 >
-                  <script type="application/json" id="nmn-selling-plans-data-{{ section.id }}">
+                  <script
+                    type="application/json"
+                    id="nmn-selling-plans-data-{{ section.id }}"
+                    data-update-block="nmn-selling-plans-data-{{ section.id }}"
+                  >
                     {
                       "plans": [
                         {%- assign nmn_plan_sep = false -%}
@@ -1439,7 +1705,11 @@
                       ]
                     }
                   </script>
-                  <script type="application/json" id="nmn-pricing-data-{{ section.id }}">
+                  <script
+                    type="application/json"
+                    id="nmn-pricing-data-{{ section.id }}"
+                    data-update-block="nmn-pricing-data-{{ section.id }}"
+                  >
                     {
                       "variant": {
                         "id": {{ current_variant.id | json }},
@@ -1459,25 +1729,44 @@
                       }
                     }
                   </script>
-                  {%- liquid
-                    assign nmn_card_alloc = nil
-                    assign nmn_first_plan_id = nil
-                    assign nmn_first_group = product.selling_plan_groups | first
-                    if nmn_first_group
-                      assign nmn_first_plan = nmn_first_group.selling_plans | first
-                      if nmn_first_plan
-                        assign nmn_first_plan_id = nmn_first_plan.id
-                      endif
-                    endif
-                    if nmn_first_plan_id
-                      for a in current_variant.selling_plan_allocations
-                        if a.selling_plan.id == nmn_first_plan_id
-                          assign nmn_card_alloc = a
-                          break
-                        endif
-                      endfor
-                    endif
-                  -%}
+                  {%- if nmn_pack_option and nmn_pack_option.values.size > 1 -%}
+                    <div
+                      class="nmn-pack-selector"
+                      role="group"
+                      aria-label="Packungsgröße"
+                    >
+                      {%- for value in nmn_pack_option.values limit: 3 -%}
+                        <button
+                          type="button"
+                          class="
+                            nmn-pack-selector__btn
+                            {% if value == nmn_pack_option.selected_value %}nmn-pack-selector__btn--active{% endif %}
+                            {% if forloop.index == 2 %}nmn-pack-selector__btn--featured{% endif %}
+                          "
+                          data-pack-id="{{ value.variant.id }}"
+                          data-pack-option-value-id="{{ value.id }}"
+                          aria-pressed="{% if value == nmn_pack_option.selected_value %}true{% else %}false{% endif %}"
+                          {% unless value.available %}
+                            disabled
+                          {% endunless %}
+                        >
+                          <span class="nmn-pack-selector__label">
+                            {%- case forloop.index0 -%}
+                              {%- when 0 -%}
+                                1 Packung
+                              {%- when 1 -%}
+                                2 Packungen
+                              {%- else -%}
+                                3 Packungen
+                            {%- endcase -%}
+                          </span>
+                          {%- if forloop.index == 2 -%}
+                            <span class="nmn-pack-selector__badge">Beliebteste Wahl</span>
+                          {%- endif -%}
+                        </button>
+                      {%- endfor -%}
+                    </div>
+                  {%- endif -%}
                   <div class="nmn-sub-toggle__stack">
                     <button
                       type="button"
@@ -1489,34 +1778,7 @@
                         <span class="nmn-sub-toggle__title">Abo &amp; sparen</span>
                         <span class="nmn-sub-toggle__badge">Empfohlen</span>
                       </span>
-                      {%- if nmn_card_alloc -%}
-                        {%- liquid
-                          assign nmn_c_sub = nmn_card_alloc.price
-                          assign nmn_c_orig = nmn_card_alloc.compare_at_price | default: current_variant.price
-                          if nmn_c_orig < nmn_c_sub
-                            assign nmn_c_orig = nmn_c_sub
-                          endif
-                          assign nmn_c_save = nmn_c_orig | minus: nmn_c_sub
-                        -%}
-                        <div class="nmn-sub-toggle__card-price">
-                          <span class="nmn-sub-toggle__card-price-main">
-                            {{- nmn_c_sub | money -}}
-                            {%- if settings.show_currency_codes %} {{ localization.country.currency.iso_code }}{% endif -%}
-                          </span>
-                          {%- if nmn_c_orig > nmn_c_sub and nmn_c_save > 0 -%}
-                            <del class="nmn-sub-toggle__card-price-compare">
-                              <span>
-                                {{- nmn_c_orig | money -}}
-                                {%- if settings.show_currency_codes %} {{ localization.country.currency.iso_code }}{% endif -%}
-                              </span>
-                            </del>
-                            <span class="nmn-sub-toggle__card-price-save">
-                              Spare {{ nmn_c_save | money -}}
-                              {%- if settings.show_currency_codes %} {{ localization.country.currency.iso_code }}{% endif -%}
-                            </span>
-                          {%- endif -%}
-                        </div>
-                      {%- endif -%}
+                      <div data-nmn-card-price-root></div>
                       <span class="nmn-sub-toggle__subs">
                         <span
                           class="nmn-sub-toggle__sub nmn-sub-toggle__sub--benefit"
@@ -1740,7 +2002,15 @@
                     var cta = form.querySelector('[data-js-product-add-to-cart-text][data-lt-nmn-cta]');
                     var addBtn = form.querySelector('[data-js-product-add-to-cart]');
                     var productPage = document.getElementById('product-' + sid);
-                    var variantsEl = productPage ? productPage.querySelector('product-variants') : null;
+                    var variantsEl = (function () {
+                      if (!productPage) return null;
+                      var row = productPage.querySelector('[data-nmn-pack-option-row]');
+                      if (row) return row.closest('product-variants');
+                      return (
+                        productPage.querySelector('product-variants[data-nmn-inline-variant-source]') ||
+                        productPage.querySelector('product-variants[data-main-product-variants]')
+                      );
+                    })();
                     var priceRoot = productPage
                       ? productPage.querySelector('[data-update-block="price-compact-main"]')
                       : null;
@@ -1880,6 +2150,99 @@
                       priceRoot.innerHTML = html;
                     }
 
+                    function syncNmnCardPrice() {
+                      if (!root) return;
+                      var cardRoot = root.querySelector('[data-nmn-card-price-root]');
+                      if (!cardRoot) return;
+                      var p = getNmnAllocationPricing();
+                      if (!p) {
+                        cardRoot.innerHTML = '';
+                        return;
+                      }
+                      var subC = p.subC;
+                      var origC = p.origC;
+                      var saveC = p.saveC;
+                      var suff = (productPage.dataset && productPage.dataset.nmnCurrencySuffix) || '';
+                      var html =
+                        '<div class="nmn-sub-toggle__card-price">' +
+                        '<span class="nmn-sub-toggle__card-price-main">' +
+                        formatDeMoney(subC) +
+                        '\u00a0€' +
+                        suff +
+                        '</span>';
+                      if (origC > subC && saveC > 0) {
+                        html +=
+                          '<del class="nmn-sub-toggle__card-price-compare"><span>' +
+                          formatDeMoney(origC) +
+                          '\u00a0€' +
+                          suff +
+                          '</span></del>' +
+                          '<span class="nmn-sub-toggle__card-price-save">Spare ' +
+                          formatDeMoney(saveC) +
+                          '\u00a0€' +
+                          suff +
+                          '</span>';
+                      }
+                      html += '</div>';
+                      cardRoot.innerHTML = html;
+                    }
+
+                    function nmnPackRowEl() {
+                      if (!productPage) return null;
+                      return productPage.querySelector('[data-nmn-pack-option-row]');
+                    }
+
+                    function getSelectedPackOptionValueId() {
+                      var packRow = nmnPackRowEl();
+                      if (!packRow) return null;
+                      var sel = packRow.querySelector('select[data-js-product-variant-container]');
+                      if (sel && sel.selectedOptions && sel.selectedOptions[0]) {
+                        return sel.selectedOptions[0].getAttribute('data-option-value-id');
+                      }
+                      var r = packRow.querySelector('input[type="radio"]:checked');
+                      return r ? r.getAttribute('data-option-value-id') : null;
+                    }
+
+                    function syncNmnPackSelectorActive() {
+                      var scope = productPage.querySelector('.nmn-pack-selector');
+                      if (!scope) return;
+                      var ovid = getSelectedPackOptionValueId();
+                      var idInput = form.querySelector('input[name="id"]');
+                      var vid = idInput ? String(idInput.value) : '';
+                      scope.querySelectorAll('.nmn-pack-selector__btn[data-pack-id]').forEach(function (btn) {
+                        var btnOvid = btn.getAttribute('data-pack-option-value-id');
+                        var btnVid = String(btn.getAttribute('data-pack-id') || '');
+                        var active =
+                          (ovid && btnOvid && String(ovid) === String(btnOvid)) ||
+                          (!ovid && btnVid === vid);
+                        btn.classList.toggle('nmn-pack-selector__btn--active', active);
+                        btn.setAttribute('aria-pressed', active ? 'true' : 'false');
+                      });
+                    }
+
+                    function activateNmnPackButton(btn) {
+                      var packRow = nmnPackRowEl();
+                      if (!packRow || btn.disabled) return;
+                      var ovid = btn.getAttribute('data-pack-option-value-id');
+                      if (!ovid) return;
+                      var sel = packRow.querySelector('select[data-js-product-variant-container]');
+                      if (sel) {
+                        var opt = sel.querySelector('option[data-option-value-id="' + ovid + '"]');
+                        if (opt && !opt.disabled) {
+                          sel.value = opt.value;
+                          sel.dispatchEvent(new Event('change', { bubbles: true }));
+                        }
+                        return;
+                      }
+                      var radio = packRow.querySelector(
+                        'input[type="radio"][data-option-value-id="' + ovid + '"]'
+                      );
+                      if (radio && !radio.disabled) {
+                        radio.checked = true;
+                        radio.dispatchEvent(new Event('change', { bubbles: true }));
+                      }
+                    }
+
                     function syncCta() {
                       if (!cta || !addBtn) return;
                       if (form.classList.contains('unavailable-variant')) return;
@@ -1912,6 +2275,7 @@
                         btnOnce.setAttribute('aria-pressed', !isSub ? 'true' : 'false');
                       }
                       syncCta();
+                      syncNmnCardPrice();
                       syncNmnPriceDisplay();
                       syncNmnSavingsLabel();
                     }
@@ -1934,10 +2298,26 @@
                       setMode('onetime');
                       if (btnSub) btnSub.disabled = true;
                     }
+                    syncNmnPackSelectorActive();
+
+                    productPage.addEventListener('click', function (e) {
+                      var packBtn = e.target.closest('.nmn-pack-selector__btn[data-pack-option-value-id]');
+                      if (!packBtn || !productPage.contains(packBtn)) return;
+                      e.preventDefault();
+                      activateNmnPackButton(packBtn);
+                    });
 
                     if (variantsEl) {
                       variantsEl.addEventListener('VARIANT_CHANGE', function () {
+                        try {
+                          if (jsonEl && jsonEl.textContent.trim()) {
+                            plans = JSON.parse(jsonEl.textContent).plans || [];
+                          }
+                        } catch (err) {}
+                        nmnPricingEl = document.getElementById('nmn-pricing-data-' + sid);
                         captureOnetimePriceHtml();
+                        syncNmnPackSelectorActive();
+                        syncNmnCardPrice();
                         syncNmnPriceDisplay();
                         syncNmnSavingsLabel();
                         syncCta();
