@@ -67,6 +67,24 @@
     data-availability="{{ product.available }}"
     data-js-product-component
   >
+    {%- if template.suffix == '13_nmn' -%}
+      {% style %}
+        /* NMN PDP: Appstle widget stays in DOM for init/selling_plan; visually off-screen (not display:none). */
+        #product-{{ section.id }} .nmn-appstle-widget-shell {
+          position: absolute !important;
+          width: 1px !important;
+          height: 1px !important;
+          padding: 0 !important;
+          margin: -1px !important;
+          overflow: hidden !important;
+          clip: rect(0, 0, 0, 0) !important;
+          clip-path: inset(50%) !important;
+          white-space: nowrap !important;
+          border: 0 !important;
+        }
+      {% endstyle %}
+    {%- endif -%}
+
     {%- assign current_variant = product.selected_or_first_available_variant -%}
 
     <div class="{{ child_class }} element--is-sticky">
@@ -247,7 +265,19 @@
       {%- for block in section.blocks -%}
         {%- case block.type -%}
           {%- when '@app' -%}
-            <div class="has-bg-style--{{ section.settings.style }}" {{ block.shopify_attributes }}>
+            {%- liquid
+              assign app_block_wrapper_class = 'has-bg-style--' | append: section.settings.style
+              if template.suffix == '13_nmn' and block.type contains 'appstle-subscription'
+                assign app_block_wrapper_class = app_block_wrapper_class | append: ' nmn-appstle-widget-shell'
+              endif
+            -%}
+            <div
+              class="{{ app_block_wrapper_class }}"
+              {% if template.suffix == '13_nmn' and block.type contains 'appstle-subscription' %}
+                data-nmn-appstle-minimized
+              {% endif %}
+              {{ block.shopify_attributes }}
+            >
               {%- render block -%}
             </div>
 
@@ -1160,6 +1190,56 @@
                 </div>
               {%- endif -%}
 
+              {%- if template.suffix == '13_nmn' -%}
+                <style>
+                  .nmn-sub-toggle { margin-bottom: 0.75rem; }
+                  .nmn-sub-toggle__btns { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+                  .nmn-sub-toggle__btn { cursor: pointer; padding: 0.5rem 0.75rem; border: 1px solid rgba(0,0,0,0.2); border-radius: 6px; background: transparent; font: inherit; }
+                  .nmn-sub-toggle__btn--active { border-color: currentColor; font-weight: 600; }
+                  .nmn-sub-toggle__btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+                </style>
+                <div
+                  class="nmn-sub-toggle"
+                  data-nmn-sub-root
+                  data-section-id="{{ section.id }}"
+                  role="group"
+                  aria-label="Kaufoption"
+                >
+                  <script type="application/json" id="nmn-selling-plans-data-{{ section.id }}">
+                    {
+                      "plans": [
+                        {%- assign nmn_plan_sep = false -%}
+                        {%- for group in product.selling_plan_groups -%}
+                          {%- for plan in group.selling_plans -%}
+                            {%- if nmn_plan_sep -%},{%- endif -%}
+                            {"id":{{ plan.id }}}
+                            {%- assign nmn_plan_sep = true -%}
+                          {%- endfor -%}
+                        {%- endfor -%}
+                      ]
+                    }
+                  </script>
+                  <div class="nmn-sub-toggle__btns">
+                    <button
+                      type="button"
+                      class="nmn-sub-toggle__btn nmn-sub-toggle__btn--active"
+                      data-nmn-mode="subscription"
+                      aria-pressed="true"
+                    >
+                      Abo &amp; sparen
+                    </button>
+                    <button
+                      type="button"
+                      class="nmn-sub-toggle__btn"
+                      data-nmn-mode="onetime"
+                      aria-pressed="false"
+                    >
+                      Einmaliger Kauf
+                    </button>
+                  </div>
+                </div>
+              {%- endif -%}
+
               <product-form
                 id="add-to-cart-{{ section.id }}"
                 class="product-form"
@@ -1175,6 +1255,15 @@
                   data-type: 'add-to-cart-form'
                 -%}
                   <input type="hidden" name="id" value="{{ current_variant.id }}">
+                  {%- if template.suffix == '13_nmn' -%}
+                    <input
+                      type="hidden"
+                      name="selling_plan"
+                      value=""
+                      data-lt-selling-plan-input
+                      disabled
+                    >
+                  {%- endif -%}
 
                   {%- liquid
                     if product.gift_card? and block.settings.show_gift_card_recipient
@@ -1298,6 +1387,68 @@
                   </div>
                 {%- endform -%}
               </product-form>
+
+              {%- if template.suffix == '13_nmn' -%}
+                <script>
+                  (function () {
+                    var sid = '{{ section.id }}';
+                    var form = document.getElementById('{{ product_form_id }}');
+                    var root = document.querySelector('.nmn-sub-toggle[data-section-id="' + sid + '"]');
+                    if (!form || !root) return;
+
+                    var input = form.querySelector('[data-lt-selling-plan-input]');
+                    var jsonEl = document.getElementById('nmn-selling-plans-data-' + sid);
+                    var plans = [];
+                    try {
+                      if (jsonEl && jsonEl.textContent.trim()) {
+                        plans = JSON.parse(jsonEl.textContent).plans || [];
+                      }
+                    } catch (e) {}
+
+                    var btnSub = root.querySelector('[data-nmn-mode="subscription"]');
+                    var btnOnce = root.querySelector('[data-nmn-mode="onetime"]');
+
+                    function setMode(mode) {
+                      var isSub = mode === 'subscription';
+                      if (input) {
+                        if (isSub && plans.length) {
+                          input.disabled = false;
+                          input.value = String(plans[0].id);
+                        } else {
+                          input.value = '';
+                          input.disabled = true;
+                        }
+                      }
+                      if (btnSub) {
+                        btnSub.classList.toggle('nmn-sub-toggle__btn--active', isSub);
+                        btnSub.setAttribute('aria-pressed', isSub ? 'true' : 'false');
+                      }
+                      if (btnOnce) {
+                        btnOnce.classList.toggle('nmn-sub-toggle__btn--active', !isSub);
+                        btnOnce.setAttribute('aria-pressed', !isSub ? 'true' : 'false');
+                      }
+                    }
+
+                    if (btnSub) {
+                      btnSub.addEventListener('click', function () {
+                        setMode('subscription');
+                      });
+                    }
+                    if (btnOnce) {
+                      btnOnce.addEventListener('click', function () {
+                        setMode('onetime');
+                      });
+                    }
+
+                    if (plans.length) {
+                      setMode('subscription');
+                    } else {
+                      setMode('onetime');
+                      if (btnSub) btnSub.disabled = true;
+                    }
+                  })();
+                </script>
+              {%- endif -%}
 
               {%- form 'product', product, id: 'product-form-installment' -%}
                 <input type="hidden" name="id" value="{{ current_variant.id }}">
