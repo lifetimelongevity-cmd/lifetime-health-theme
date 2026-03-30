@@ -1787,6 +1787,35 @@
                       }
                     }
                   </script>
+                  <script
+                    type="application/json"
+                    id="nmn-all-variants-pricing-{{ section.id }}"
+                    data-update-block="nmn-all-variants-pricing-{{ section.id }}"
+                  >
+                    {
+                      {%- assign nmn_av_sep = false -%}
+                      {%- for variant in product.variants -%}
+                        {%- if nmn_av_sep -%},{%- endif -%}
+                        "{{ variant.id }}": {
+                          "id": {{ variant.id | json }},
+                          "price": {{ variant.price | json }},
+                          "compare_at_price": {% if variant.compare_at_price %}{{ variant.compare_at_price | json }}{% else %}null{% endif %},
+                          "unit_price": {% if variant.unit_price %}{{ variant.unit_price | json }}{% else %}null{% endif %},
+                          "unit_price_measurement": {% if variant.unit_price_measurement %}{{ variant.unit_price_measurement | json }}{% else %}null{% endif %},
+                          "selling_plan_allocations": [
+                            {%- for a in variant.selling_plan_allocations -%}
+                              {
+                                "price": {{ a.price }},
+                                "compare_at_price": {{ a.compare_at_price | default: 'null' }},
+                                "selling_plan_id": {{ a.selling_plan.id }}
+                              }{%- unless forloop.last -%},{%- endunless -%}
+                            {%- endfor -%}
+                          ]
+                        }
+                        {%- assign nmn_av_sep = true -%}
+                      {%- endfor -%}
+                    }
+                  </script>
                   {%- if nmn_pack_option and nmn_pack_option.values.size > 1 -%}
                     <div
                       class="nmn-pack-selector"
@@ -2091,13 +2120,27 @@
                     }
 
                     function readNmnPricingVariant() {
-                      if (!nmnPricingEl || !nmnPricingEl.textContent.trim()) return null;
-                      try {
-                        var o = JSON.parse(nmnPricingEl.textContent);
-                        return o && o.variant ? o.variant : null;
-                      } catch (err) {
-                        return null;
+                      var idInput = form.querySelector('input[name="id"]');
+                      if (!idInput || idInput.value === '') return null;
+                      var vid = String(idInput.value).trim();
+                      var mapEl = document.getElementById('nmn-all-variants-pricing-' + sid);
+                      if (mapEl && mapEl.textContent.trim()) {
+                        try {
+                          var map = JSON.parse(mapEl.textContent);
+                          if (map && typeof map === 'object' && map[vid]) {
+                            var row = map[vid];
+                            if (row && typeof row === 'object') return row;
+                          }
+                        } catch (err1) {}
                       }
+                      var pe = document.getElementById('nmn-pricing-data-' + sid);
+                      if (pe && pe.textContent.trim()) {
+                        try {
+                          var o = JSON.parse(pe.textContent);
+                          if (o && o.variant && String(o.variant.id) === vid) return o.variant;
+                        } catch (err2) {}
+                      }
+                      return null;
                     }
 
                     function numCents(v) {
@@ -2178,10 +2221,52 @@
                         ' pro Lieferung';
                     }
 
+                    function syncNmnOnetimePriceFromMap() {
+                      if (!priceRoot) return;
+                      var v = readNmnPricingVariant();
+                      var suff = (productPage.dataset && productPage.dataset.nmnCurrencySuffix) || '';
+                      if (!v) {
+                        if (lastOnetimePriceHtml) priceRoot.innerHTML = lastOnetimePriceHtml;
+                        return;
+                      }
+                      var priceC = numCents(v.price);
+                      if (priceC == null) {
+                        if (lastOnetimePriceHtml) priceRoot.innerHTML = lastOnetimePriceHtml;
+                        return;
+                      }
+                      var compareC = numCents(v.compare_at_price);
+                      var html =
+                        '<span class="show-block-if-variant-selected">' +
+                        '<div class="product-price" id="product-price-' +
+                        sid +
+                        '">' +
+                        '<span class="product-price--original pps" data-js-product-price-original">' +
+                        formatDeMoney(priceC) +
+                        '\u00a0€' +
+                        suff +
+                        '</span>';
+                      if (compareC != null && compareC > priceC) {
+                        var saveOt = compareC - priceC;
+                        html +=
+                          '<del class="product-price--compare" data-js-product-price-compare><span>' +
+                          formatDeMoney(compareC) +
+                          '\u00a0€' +
+                          suff +
+                          '</span></del>' +
+                          '<span class="product-price--saving pps" data-js-product-price-saving"><span>Spare ' +
+                          formatDeMoney(saveOt) +
+                          '\u00a0€' +
+                          suff +
+                          '</span></span>';
+                      }
+                      html += '</div></span>';
+                      priceRoot.innerHTML = html;
+                    }
+
                     function syncNmnPriceDisplay() {
                       if (!priceRoot) return;
                       if (!isSubscriptionUiActive()) {
-                        if (lastOnetimePriceHtml) priceRoot.innerHTML = lastOnetimePriceHtml;
+                        syncNmnOnetimePriceFromMap();
                         return;
                       }
                       var p = getNmnAllocationPricing();
@@ -2360,6 +2445,13 @@
                       cta.textContent = isSub ? 'Jetzt sparen & Abo starten' : 'Einmalig kaufen';
                     }
 
+                    function nmnRefreshPricingUi() {
+                      syncNmnCardPrice();
+                      syncNmnPriceDisplay();
+                      syncNmnSavingsLabel();
+                      syncCta();
+                    }
+
                     function setMode(mode) {
                       var isSub = mode === 'subscription';
                       if (input) {
@@ -2430,7 +2522,11 @@
                         String(ev.detail.variantId) !== '';
                       if (packOnly) {
                         syncNmnPackSelectorActive();
-                        if (plans.length) setMode('subscription');
+                        if (plans.length) {
+                          setMode('subscription');
+                        } else {
+                          nmnRefreshPricingUi();
+                        }
                         return;
                       }
                       try {
@@ -2444,10 +2540,7 @@
                       if (plans.length) {
                         setMode('subscription');
                       } else {
-                        syncNmnCardPrice();
-                        syncNmnPriceDisplay();
-                        syncNmnSavingsLabel();
-                        syncCta();
+                        nmnRefreshPricingUi();
                       }
                     }
 
@@ -2465,6 +2558,7 @@
                       e.preventDefault();
                       nmnSetPackButtonsActive(packBtn);
                       activateNmnPackButton(packBtn);
+                      nmnRefreshPricingUi();
                     });
                   })();
                 </script>
