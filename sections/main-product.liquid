@@ -1372,7 +1372,15 @@
                         "compare_at_price": {% if current_variant.compare_at_price %}{{ current_variant.compare_at_price | json }}{% else %}null{% endif %},
                         "unit_price": {% if current_variant.unit_price %}{{ current_variant.unit_price | json }}{% else %}null{% endif %},
                         "unit_price_measurement": {% if current_variant.unit_price_measurement %}{{ current_variant.unit_price_measurement | json }}{% else %}null{% endif %},
-                        "selling_plan_allocations": {{ current_variant.selling_plan_allocations | json }}
+                        "selling_plan_allocations": [
+                          {%- for a in current_variant.selling_plan_allocations -%}
+                            {
+                              "price": {{ a.price }},
+                              "compare_at_price": {{ a.compare_at_price | default: 'null' }},
+                              "selling_plan_id": {{ a.selling_plan.id }}
+                            }{%- unless forloop.last -%},{%- endunless -%}
+                          {%- endfor -%}
+                        ]
                       }
                     }
                   </script>
