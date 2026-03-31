@@ -72,7 +72,7 @@
   >
     {%- if template.suffix == '13_nmn' -%}
       {%- liquid
-        assign nmn_icon_guarantee_url = 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/circle-wavy-check-thin-svgrepo-com.svg?v=1762268776'
+        assign nmn_icon_guarantee_url = 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/circle-wavy-check-fill.png?v=1774959731'
         assign nmn_icon_card_benefit_tick_url = 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/icon-tick-green-sm.svg?v=1726236630'
         assign nmn_icon_section_benefits_png_url = 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/tick-2_84d88b03-aa5d-49fe-9ebe-34006f3e8cdb.png?v=1742814881'
         assign nmn_ss_benefits_block_id = ''
@@ -551,18 +551,15 @@
           flex-wrap: wrap;
           align-items: center;
           justify-content: center;
-          gap: var(--nmn-space-2) var(--nmn-space-3);
+          gap: var(--nmn-space-2);
           text-align: center;
           font-family: var(--font-body-family, 'Lato', sans-serif);
-          font-size: var(--nmn-fz-body-sm);
-          line-height: var(--nmn-lh-body);
-          font-weight: 400;
-          color: var(--color-text-main);
         }
-        #product-{{ section.id }} .nmn-cta-footer__guarantee {
+        #product-{{ section.id }} .nmn-cta-footer__segment {
           display: inline-flex;
           align-items: center;
           gap: var(--nmn-space-2);
+          max-width: 100%;
         }
         #product-{{ section.id }} .nmn-cta-footer__icon {
           display: inline-flex;
@@ -572,17 +569,26 @@
           line-height: 0;
         }
         #product-{{ section.id }} .nmn-cta-footer__icon-img {
-          width: 1.5rem;
-          height: 1.5rem;
+          width: 1.25rem;
+          height: 1.25rem;
           display: block;
           object-fit: contain;
         }
-        #product-{{ section.id }} .nmn-cta-footer__sep {
-          color: var(--color-secondary-text-main, var(--nmn-color-gray-400));
+        #product-{{ section.id }} .nmn-cta-footer__text {
+          font-size: var(--nmn-fz-body-sm);
+          line-height: var(--nmn-lh-body);
+          font-weight: 500;
+          color: var(--color-secondary-text-main, var(--nmn-color-gray-600));
+          text-align: left;
         }
-        #product-{{ section.id }} .nmn-cta-footer__ship {
-          color: var(--color-secondary-text-main);
-          font-size: var(--nmn-fz-micro);
+        #product-{{ section.id }} .nmn-cta-footer__dot {
+          flex-shrink: 0;
+          font-size: var(--nmn-fz-body-sm);
+          font-weight: 500;
+          line-height: 1;
+          color: var(--nmn-color-gray-400);
+          padding: 0 var(--nmn-space-1);
+          user-select: none;
         }
         #product-{{ section.id }} .nmn-benefit-list {
           list-style: none;
@@ -1361,16 +1367,35 @@
           {%- when 'price' -%}
             <div {{ block.shopify_attributes }} data-update-block="price-compact-main" class="main-product-price">
               <span class="show-block-if-variant-selected">
-                {%- render 'product-price', variant: current_variant, target: current_variant, id: section.id -%}
+                {%- if template.suffix == '13_nmn' -%}
+                  {%- render 'product-price',
+                    variant: current_variant,
+                    target: current_variant,
+                    id: section.id,
+                    price_extra_class: 'nmn-price--plan'
+                  -%}
+                {%- else -%}
+                  {%- render 'product-price', variant: current_variant, target: current_variant, id: section.id -%}
+                {%- endif -%}
               </span>
               {%- unless default_to_first_variant -%}
                 <span class="show-block-if-variant-not-selected-yet">
-                  {%- render 'product-price',
-                    variant: current_variant,
-                    target: product,
-                    product_price_varies: product.price_varies,
-                    id: section.id
-                  -%}
+                  {%- if template.suffix == '13_nmn' -%}
+                    {%- render 'product-price',
+                      variant: current_variant,
+                      target: product,
+                      product_price_varies: product.price_varies,
+                      id: section.id,
+                      price_extra_class: 'nmn-price--plan'
+                    -%}
+                  {%- else -%}
+                    {%- render 'product-price',
+                      variant: current_variant,
+                      target: product,
+                      product_price_varies: product.price_varies,
+                      id: section.id
+                    -%}
+                  {%- endif -%}
                 </span>
               {%- endunless -%}
             </div>
@@ -2070,16 +2095,16 @@
                             </span>
                           </span>
                           <span class="nmn-sub-toggle__lead">
-                            Konstante Versorgung statt unregelmäßiger Einnahme
+                            Regelmäßige Nachlieferung – damit du nichts vergisst.
                           </span>
                           <ul class="nmn-benefit-list">
                             <li class="nmn-benefit-list__item">
                               <span class="nmn-benefit-list__check" aria-hidden="true"></span>
-                              <span>Alle 8 Wochen geliefert.</span>
+                              <span>Lieferung alle 8 Wochen zu dir nach Hause</span>
                             </li>
                             <li class="nmn-benefit-list__item">
                               <span class="nmn-benefit-list__check" aria-hidden="true"></span>
-                              <span>Automatisch geliefert – ohne Unterbrechung</span>
+                              <span>Automatisch – ohne Versorgungslücken</span>
                             </li>
                             <li class="nmn-benefit-list__item" data-nmn-savings-li hidden>
                               <span class="nmn-benefit-list__check" aria-hidden="true"></span>
@@ -2087,7 +2112,7 @@
                             </li>
                             <li class="nmn-benefit-list__item">
                               <span class="nmn-benefit-list__check" aria-hidden="true"></span>
-                              <span>Jederzeit pausieren oder kündigen</span>
+                              <span>Pause oder Kündigung – jederzeit möglich</span>
                             </li>
                           </ul>
                         </button>
@@ -2100,7 +2125,7 @@
                           <span class="nmn-sub-toggle__head nmn-sub-toggle__head--onetime">
                             <span class="nmn-sub-toggle__title">Einmaliger Kauf</span>
                           </span>
-                          <span class="nmn-sub-toggle__onetime-lead">Zum Einstieg oder Testen</span>
+                          <span class="nmn-sub-toggle__onetime-lead">Ohne Abo – ideal zum Ausprobieren</span>
                         </button>
                       </div>
                     </div>
@@ -2250,22 +2275,24 @@
                       {%- if template.suffix == '13_nmn' -%}
                         <div class="nmn-cta-footer">
                           <div class="nmn-cta-footer__row">
-                            <span class="nmn-cta-footer__guarantee">
+                            <span class="nmn-cta-footer__segment">
                               <span class="nmn-cta-footer__icon" aria-hidden="true">
                                 <img
                                   class="nmn-cta-footer__icon-img"
                                   src="{{ nmn_icon_guarantee_url }}"
                                   alt=""
-                                  width="24"
-                                  height="24"
+                                  width="20"
+                                  height="20"
                                   loading="lazy"
                                   decoding="async"
                                 >
                               </span>
-                              <span>90 Tage Geld-zurück-Garantie</span>
+                              <span class="nmn-cta-footer__text">90 Tage Geld-zurück-Garantie</span>
                             </span>
-                            <span class="nmn-cta-footer__sep" aria-hidden="true">·</span>
-                            <span class="nmn-cta-footer__ship" data-nmn-ship-by></span>
+                            <span class="nmn-cta-footer__dot" aria-hidden="true">·</span>
+                            <span class="nmn-cta-footer__segment">
+                              <span class="nmn-cta-footer__text" data-nmn-ship-by></span>
+                            </span>
                           </div>
                         </div>
                       {%- endif -%}
@@ -2366,6 +2393,30 @@
                       }).format(cents / 100);
                     }
 
+                    function nmnRenderMainPriceHtml(sid, priceC, compareC, suff) {
+                      if (priceC == null) return '';
+                      var html =
+                        '<span class="show-block-if-variant-selected">' +
+                        '<div class="product-price nmn-price--plan" id="product-price-' +
+                        sid +
+                        '">' +
+                        '<span class="product-price--original pps" data-js-product-price-original">' +
+                        formatDeMoney(priceC) +
+                        '\u00a0€' +
+                        suff +
+                        '</span>';
+                      if (compareC != null && compareC > priceC) {
+                        html +=
+                          '<del class="product-price--compare" data-js-product-price-compare><span>' +
+                          formatDeMoney(compareC) +
+                          '\u00a0€' +
+                          suff +
+                          '</span></del>';
+                      }
+                      html += '</div></span>';
+                      return html;
+                    }
+
                     function allocationPlanId(a) {
                       if (!a) return null;
                       if (a.selling_plan_id != null) return String(a.selling_plan_id);
@@ -2453,32 +2504,7 @@
                         return;
                       }
                       var compareC = numCents(v.compare_at_price);
-                      var html =
-                        '<span class="show-block-if-variant-selected">' +
-                        '<div class="product-price" id="product-price-' +
-                        sid +
-                        '">' +
-                        '<span class="product-price--original pps" data-js-product-price-original">' +
-                        formatDeMoney(priceC) +
-                        '\u00a0€' +
-                        suff +
-                        '</span>';
-                      if (compareC != null && compareC > priceC) {
-                        var saveOt = compareC - priceC;
-                        html +=
-                          '<del class="product-price--compare" data-js-product-price-compare><span>' +
-                          formatDeMoney(compareC) +
-                          '\u00a0€' +
-                          suff +
-                          '</span></del>' +
-                          '<span class="product-price--saving pps" data-js-product-price-saving"><span>Spare ' +
-                          formatDeMoney(saveOt) +
-                          '\u00a0€' +
-                          suff +
-                          '</span></span>';
-                      }
-                      html += '</div></span>';
-                      priceRoot.innerHTML = html;
+                      priceRoot.innerHTML = nmnRenderMainPriceHtml(sid, priceC, compareC, suff);
                     }
 
                     function syncNmnPriceDisplay() {
@@ -2496,26 +2522,9 @@
                       var origC = p.origC;
                       var saveC = p.saveC;
                       var suff = (productPage.dataset && productPage.dataset.nmnCurrencySuffix) || '';
-                      var html =
-                        '<span class="show-block-if-variant-selected">' +
-                        '<div class="product-price nmn-price--plan" id="product-price-' +
-                        sid +
-                        '">' +
-                        '<span class="product-price--original pps" data-js-product-price-original">' +
-                        formatDeMoney(subC) +
-                        '\u00a0€' +
-                        suff +
-                        '</span>';
-                      if (origC > subC && saveC > 0) {
-                        html +=
-                          '<del class="product-price--compare" data-js-product-price-compare><span>' +
-                          formatDeMoney(origC) +
-                          '\u00a0€' +
-                          suff +
-                          '</span></del>';
-                      }
-                      html += '</div></span>';
-                      priceRoot.innerHTML = html;
+                      var compareDel =
+                        origC > subC && saveC > 0 ? origC : null;
+                      priceRoot.innerHTML = nmnRenderMainPriceHtml(sid, subC, compareDel, suff);
                     }
 
                     function syncNmnCardPrice() {
@@ -2711,19 +2720,31 @@
                     }
                     nmnEnsureRecommendedPackOnLoad();
 
+                    function nmnFormatShipByDe(d) {
+                      var months = [
+                        'Jan.',
+                        'Feb.',
+                        'März',
+                        'Apr.',
+                        'Mai',
+                        'Juni',
+                        'Juli',
+                        'Aug.',
+                        'Sept.',
+                        'Okt.',
+                        'Nov.',
+                        'Dez.'
+                      ];
+                      return d.getDate() + '. ' + months[d.getMonth()] + ' ' + d.getFullYear();
+                    }
+
                     (function nmnInitShipByLine() {
                       if (!productPage) return;
                       var shipEl = productPage.querySelector('[data-nmn-ship-by]');
                       if (!shipEl) return;
                       var d = new Date();
                       d.setDate(d.getDate() + 1);
-                      shipEl.textContent =
-                        'Versand bis ' +
-                        d.toLocaleDateString('de-DE', {
-                          day: 'numeric',
-                          month: 'short',
-                          year: 'numeric',
-                        });
+                      shipEl.textContent = 'Versand bis ' + nmnFormatShipByDe(d);
                     })();
 
                     function nmnOnVariantChange(ev) {
@@ -3020,16 +3041,35 @@
     {%- if section.settings.sticky_add_to_cart and product.available and section.settings.sticky_atc_variants -%}
       <div style="display:none!important" data-update-block="price-sticky-main">
         <span class="show-block-if-variant-selected">
-          {%- render 'product-price', variant: current_variant, target: current_variant, id: section.id -%}
+          {%- if template.suffix == '13_nmn' -%}
+            {%- render 'product-price',
+              variant: current_variant,
+              target: current_variant,
+              id: section.id,
+              price_extra_class: 'nmn-price--plan'
+            -%}
+          {%- else -%}
+            {%- render 'product-price', variant: current_variant, target: current_variant, id: section.id -%}
+          {%- endif -%}
         </span>
         {%- unless default_to_first_variant -%}
           <span class="show-block-if-variant-not-selected-yet">
-            {%- render 'product-price',
-              variant: current_variant,
-              target: product,
-              product_price_varies: product.price_varies,
-              id: section.id
-            -%}
+            {%- if template.suffix == '13_nmn' -%}
+              {%- render 'product-price',
+                variant: current_variant,
+                target: product,
+                product_price_varies: product.price_varies,
+                id: section.id,
+                price_extra_class: 'nmn-price--plan'
+              -%}
+            {%- else -%}
+              {%- render 'product-price',
+                variant: current_variant,
+                target: product,
+                product_price_varies: product.price_varies,
+                id: section.id
+              -%}
+            {%- endif -%}
           </span>
         {%- endunless -%}
       </div>
