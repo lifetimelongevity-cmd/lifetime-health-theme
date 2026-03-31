@@ -319,20 +319,6 @@
         sticky-add-to-cart[data-id='product-{{ section.id }}'] .nmn-sticky-plan-note[hidden] {
           display: none !important;
         }
-        sticky-add-to-cart[data-id='product-{{ section.id }}'] .nmn-sticky-per-day {
-          margin: 0;
-          padding: 0;
-          font-size: 11px;
-          font-weight: 500;
-          line-height: 1.25;
-          color: var(--color-secondary-text-main, #525252);
-          text-align: left;
-          align-self: flex-start;
-          max-width: 14rem;
-        }
-        sticky-add-to-cart[data-id='product-{{ section.id }}'] .nmn-sticky-per-day:empty {
-          display: none;
-        }
         @media screen and (max-width: 767px) {
           sticky-add-to-cart[data-id='product-{{ section.id }}'] .sticky-add-to-cart__actions {
             align-items: flex-start;
@@ -2198,6 +2184,7 @@
                         "price": {{ current_variant.price | json }},
                         "compare_at_price": {% if current_variant.compare_at_price %}{{ current_variant.compare_at_price | json }}{% else %}null{% endif %},
                         {%- liquid
+                          # Default 60 Tage = 30 g bei 500 mg/Tagesportion; überschreibbar: custom.supply_days
                           assign nmn_cv_supply_days = current_variant.metafields.custom.supply_days.value | default: 60
                           if nmn_cv_supply_days == blank
                             assign nmn_cv_supply_days = 60
@@ -2209,7 +2196,8 @@
                         "selling_plan_allocations": [
                           {%- for a in current_variant.selling_plan_allocations -%}
                             {
-                              "price": {{ a.price }},
+                              "price": {{ a.price | json }},
+                              "per_delivery_price": {{ a.per_delivery_price | json }},
                               "compare_at_price": {{ a.compare_at_price | default: 'null' }},
                               "selling_plan_id": {{ a.selling_plan.id }}
                             }{%- unless forloop.last -%},{%- endunless -%}
@@ -2232,6 +2220,7 @@
                           "price": {{ variant.price | json }},
                           "compare_at_price": {% if variant.compare_at_price %}{{ variant.compare_at_price | json }}{% else %}null{% endif %},
                           {%- liquid
+                            # Default 60 Tage = 30 g bei 500 mg/Tagesportion; überschreibbar: custom.supply_days
                             assign nmn_v_supply_days = variant.metafields.custom.supply_days.value | default: 60
                             if nmn_v_supply_days == blank
                               assign nmn_v_supply_days = 60
@@ -2243,7 +2232,8 @@
                           "selling_plan_allocations": [
                             {%- for a in variant.selling_plan_allocations -%}
                               {
-                                "price": {{ a.price }},
+                                "price": {{ a.price | json }},
+                                "per_delivery_price": {{ a.per_delivery_price | json }},
                                 "compare_at_price": {{ a.compare_at_price | default: 'null' }},
                                 "selling_plan_id": {{ a.selling_plan.id }}
                               }{%- unless forloop.last -%},{%- endunless -%}
@@ -2627,7 +2617,20 @@
                     function numCents(v) {
                       if (v == null || v === '') return null;
                       var n = Number(v);
-                      return isNaN(n) ? null : Math.round(n);
+                      if (isNaN(n)) return null;
+                      if (Math.floor(n) !== n) {
+                        return Math.round(n * 100);
+                      }
+                      return Math.round(n);
+                    }
+
+                    function nmnAllocSellingCents(alloc) {
+                      if (!alloc) return null;
+                      var raw =
+                        alloc.per_delivery_price != null && alloc.per_delivery_price !== ''
+                          ? alloc.per_delivery_price
+                          : alloc.price;
+                      return numCents(raw);
                     }
 
                     function formatDeMoney(cents) {
@@ -2659,11 +2662,7 @@
 
                     function syncNmnPerDay() {
                       var perEl = productPage ? productPage.querySelector('[data-nmn-per-day]') : null;
-                      var bar = document.querySelector(
-                        'sticky-add-to-cart[data-id="product-' + sid + '"]'
-                      );
-                      var perSticky = bar ? bar.querySelector('[data-nmn-sticky-per-day]') : null;
-                      if (!perEl && !perSticky) return;
+                      if (!perEl) return;
                       var v = readNmnPricingVariant();
                       var days = getNmnSupplyDays(v);
                       var cents = null;
@@ -2677,9 +2676,7 @@
                       } else if (v) {
                         cents = numCents(v.price);
                       }
-                      var line = nmnFormatPerDayLine(cents, days);
-                      if (perEl) perEl.textContent = line;
-                      if (perSticky) perSticky.textContent = line;
+                      perEl.textContent = nmnFormatPerDayLine(cents, days);
                     }
 
                     function nmnRenderMainPriceHtml(sid, priceC, compareC, suff, omitPriceId) {
@@ -2742,7 +2739,7 @@
                       if (!variant) return null;
                       var planId = selectedSellingPlanId();
                       var alloc = findAllocation(variant, planId);
-                      var subC = alloc ? numCents(alloc.price) : null;
+                      var subC = alloc ? nmnAllocSellingCents(alloc) : null;
                       if (subC == null) return null;
                       var origC = numCents(alloc.compare_at_price);
                       if (origC == null) origC = numCents(variant.price);
@@ -3475,7 +3472,6 @@
               {%- endif -%}
             </div>
             {%- if template.suffix == '13_nmn' -%}
-              <p class="nmn-sticky-per-day" data-nmn-sticky-per-day aria-live="polite"></p>
               <p class="nmn-sticky-plan-note" data-nmn-sticky-plan-note hidden></p>
             {%- endif -%}
           </div>
