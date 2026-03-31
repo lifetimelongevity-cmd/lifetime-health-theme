@@ -101,10 +101,19 @@ This is an existing live Shopify theme.
 - Favor solutions that work within the current theme structure over idealized architectures.
 
 
-## Design
+## Design & Messaging Governance
 
-Design system and UI rules are defined in:
+Visual design rules are defined in:
 → /docs/design-governance.md
+
+Conversion messaging and copy rules are defined in:
+→ /docs/conversion-messaging.md
+
+Usage:
+- Use design-governance.md for layout, spacing, typography, and UI decisions
+- Use conversion-messaging.md for copy, messaging, and decision framing
+- Do not mix responsibilities
+- Do not introduce new patterns that conflict with these systems
 
 These rules govern all visual and UX decisions.
 Always follow them unless explicitly overridden.

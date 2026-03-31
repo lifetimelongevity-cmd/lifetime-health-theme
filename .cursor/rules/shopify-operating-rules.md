@@ -102,9 +102,9 @@ Good output is:
 - reusable where sensible
 - realistic for a live Shopify storefront
 
-## UI & Design
 
-For all UI-related decisions, refer to:
-→ /docs/design-governance.md
+## For any UI or copy-related task
+→ refer to /docs/design-governance.md and /docs/conversion-messaging.md
 
 Do not introduce design patterns that conflict with it.
+Do not bypass these systems.
