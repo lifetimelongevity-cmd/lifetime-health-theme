@@ -105,6 +105,7 @@ This is an existing live Shopify theme.
 
 Visual design rules are defined in:
 → /docs/design-governance.md
+Always strictly follow design-governance.md and never override critical design elements.
 
 Conversion messaging and copy rules are defined in:
 → /docs/conversion-messaging.md

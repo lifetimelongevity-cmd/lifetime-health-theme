@@ -315,8 +315,49 @@
         }
 
         /* NMN PDP: subscription-first toggle + inline subscription price row (scoped). */
-        #product-{{ section.id }} .main-product-price {
+        /* NMN PDP intro: title → rating → subhead → spec → price → buy */
+        #product-{{ section.id }} .product__title.heading-size--page-title {
+          margin-top: 0;
+          margin-bottom: var(--nmn-space-2);
+        }
+        #product-{{ section.id }} .custom-rating-nmn {
           margin-bottom: var(--nmn-space-3);
+        }
+        #product-{{ section.id }} .custom-rating-nmn .custom-rating-trigger {
+          margin-bottom: 0;
+        }
+        #product-{{ section.id }} .nmn-pdp-subhead {
+          display: block;
+          margin-top: 0;
+          margin-bottom: var(--nmn-space-2);
+        }
+        #product-{{ section.id }} .nmn-pdp-subhead p {
+          margin: 0;
+        }
+        #product-{{ section.id }} .nmn-pdp-spec {
+          display: block;
+          margin-top: 0;
+          margin-bottom: var(--nmn-space-4);
+        }
+        #product-{{ section.id }} .nmn-pdp-spec p {
+          margin: 0;
+        }
+        #product-{{ section.id }} .nmn-pdp-context-below-cta {
+          display: block;
+          margin-top: var(--nmn-space-5);
+          margin-bottom: var(--nmn-space-4);
+          max-width: 36rem;
+        }
+        #product-{{ section.id }} .nmn-pdp-context-below-cta p {
+          margin: 0 0 var(--nmn-space-3);
+        }
+        #product-{{ section.id }} .nmn-pdp-context-below-cta p:last-child {
+          margin-bottom: 0;
+        }
+
+        #product-{{ section.id }} .main-product-price {
+          margin-top: 0;
+          margin-bottom: var(--nmn-space-4);
         }
         #product-{{ section.id }} .main-product-price .product-price.nmn-price--plan {
           display: flex;
@@ -1322,8 +1363,21 @@
             </div>
 
           {%- when 'text' -%}
+            {%- liquid
+              assign nmn_text_extra_class = ''
+              if template.suffix == '13_nmn'
+                case block.id
+                  when 'text_mh6eJ9'
+                    assign nmn_text_extra_class = ' nmn-pdp-subhead'
+                  when 'text_FjYnDK'
+                    assign nmn_text_extra_class = ' nmn-pdp-spec'
+                  when 'text_nmn_after_atc'
+                    assign nmn_text_extra_class = ' nmn-pdp-context-below-cta'
+                endcase
+              endif
+            -%}
             <span
-              class="product__subtitle {{ block.settings.text_size }} {{ block.settings.text_style }}"
+              class="product__subtitle {{ block.settings.text_size }} {{ block.settings.text_style }}{{ nmn_text_extra_class }}"
               style="
                 {% if block.settings.text_transform %} text-transform: uppercase; {% endif %}
                 {% if block.settings.text_color != "rgba(0,0,0,0)" %} color: {{ block.settings.text_color }}; {% endif %}
@@ -2031,7 +2085,7 @@
                     {%- if nmn_pack_option and nmn_pack_option.values.size > 1 -%}
                       <div class="nmn-buy-module__step">
                         <p class="nmn-buy-module__field-label" id="nmn-pack-label-{{ section.id }}">
-                          Anzahl Packungen
+                          Packungen
                         </p>
                         <div
                           class="nmn-pack-selector"
