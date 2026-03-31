@@ -1,0 +1,169 @@
+{% comment %}
+  NMN PDP: compact product-quality cards (differentiation vs. pills/badges).
+  Template: product.13_nmn — placed after NAD mechanism section.
+{% endcomment %}
+
+<div class="container container--large container--vertical-space-small remove-empty-space">
+  <section
+    class="nmn-pdp-quality-trust"
+    aria-labelledby="nmn-quality-trust-heading-{{ section.id }}"
+  >
+    {%- unless section.settings.heading == blank -%}
+      <h2
+        class="nmn-pdp-quality-trust__heading text-font--secondary text-size--large text-weight--bold"
+        id="nmn-quality-trust-heading-{{ section.id }}"
+      >
+        {{- section.settings.heading | escape -}}
+      </h2>
+    {%- endunless -%}
+
+    <div class="nmn-pdp-quality-trust__grid" role="list">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when 'point' -%}
+            <article
+              class="nmn-pdp-quality-trust__card"
+              role="listitem"
+              {{ block.shopify_attributes }}
+            >
+              {%- unless block.settings.title == blank -%}
+                <h3 class="nmn-pdp-quality-trust__title text-weight--bold">
+                  {{- block.settings.title | escape -}}
+                </h3>
+              {%- endunless -%}
+              {%- unless block.settings.text == blank -%}
+                <p class="nmn-pdp-quality-trust__text">{{ block.settings.text | escape }}</p>
+              {%- endunless -%}
+            </article>
+        {%- endcase -%}
+      {%- endfor -%}
+    </div>
+  </section>
+</div>
+
+{% stylesheet %}
+  .nmn-pdp-quality-trust__heading {
+    margin: 0 0 1.25rem;
+    line-height: 1.2;
+    color: var(--color-text-main);
+    max-width: 40ch;
+  }
+
+  .nmn-pdp-quality-trust__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media screen and (min-width: 600px) {
+    .nmn-pdp-quality-trust__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+  }
+
+  .nmn-pdp-quality-trust__card {
+    margin: 0;
+    padding: 1rem 1.125rem;
+    border-radius: 8px;
+    border: 1px solid color-mix(in srgb, var(--color-borders-main) 88%, var(--color-text-main));
+    background: var(--color-third-background-main);
+    border-inline-start: 3px solid #65c0b6;
+  }
+
+  .nmn-pdp-quality-trust__title {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    line-height: 1.3;
+    color: var(--color-text-main);
+  }
+
+  .nmn-pdp-quality-trust__text {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.45;
+    color: var(--color-secondary-text-main);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "NMN PDP — Produktqualität",
+  "tag": "section",
+  "class": "section-nmn-pdp-quality-trust",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Qualität, auf die du dich verlassen kannst"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "point",
+      "name": "Qualitätspunkt",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel",
+          "default": "Titel"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Kurztext",
+          "default": "Kurze Erklärung"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "NMN PDP — Produktqualität",
+      "category": "Product",
+      "settings": {
+        "heading": "Qualität, auf die du dich verlassen kannst"
+      },
+      "blocks": [
+        {
+          "type": "point",
+          "settings": {
+            "title": "Uthever® Markenrohstoff",
+            "text": "Einer der weltweit führenden NMN-Rohstoffe mit geprüfter Qualität"
+          }
+        },
+        {
+          "type": "point",
+          "settings": {
+            "title": ">99 % Reinheit",
+            "text": "Frei von unnötigen Zusätzen – für maximale Qualität"
+          }
+        },
+        {
+          "type": "point",
+          "settings": {
+            "title": "Unabhängig laborgeprüft",
+            "text": "Jede Charge wird zusätzlich extern getestet"
+          }
+        },
+        {
+          "type": "point",
+          "settings": {
+            "title": "Hergestellt nach höchsten Standards",
+            "text": "Produktion unter kontrollierten Bedingungen"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
