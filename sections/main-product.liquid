@@ -71,6 +71,19 @@
     {%- endif -%}
   >
     {%- if template.suffix == '13_nmn' -%}
+      {%- liquid
+        assign nmn_icon_guarantee_url = 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/circle-wavy-check-thin-svgrepo-com.svg?v=1762268776'
+        assign nmn_icon_card_benefit_tick_url = 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/icon-tick-green-sm.svg?v=1726236630'
+        assign nmn_icon_section_benefits_png_url = 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/tick-2_84d88b03-aa5d-49fe-9ebe-34006f3e8cdb.png?v=1742814881'
+        assign nmn_ss_benefits_block_id = ''
+        for block in section.blocks
+          assign nmn_bt = block.type | default: ''
+          if nmn_bt contains 'block-benefits-list'
+            assign nmn_ss_benefits_block_id = block.id
+            break
+          endif
+        endfor
+      -%}
       {% style %}
         /* NMN buy module: design tokens (align with docs/design-governance.md) */
         #product-{{ section.id }} {
@@ -545,21 +558,15 @@
         #product-{{ section.id }} .nmn-cta-footer__icon {
           display: inline-flex;
           flex-shrink: 0;
-          width: 1.25rem;
-          height: 1.25rem;
           align-items: center;
           justify-content: center;
-          border-radius: 50%;
-          background: var(--nmn-color-success);
-          color: #fff;
+          line-height: 0;
         }
-        #product-{{ section.id }} .nmn-cta-footer__icon svg {
-          width: 0.65rem;
-          height: 0.5rem;
+        #product-{{ section.id }} .nmn-cta-footer__icon-img {
+          width: 1.5rem;
+          height: 1.5rem;
           display: block;
-        }
-        #product-{{ section.id }} .nmn-cta-footer__icon svg path {
-          fill: currentColor;
+          object-fit: contain;
         }
         #product-{{ section.id }} .nmn-cta-footer__sep {
           color: var(--color-secondary-text-main, var(--nmn-color-gray-400));
@@ -595,12 +602,12 @@
           width: 1.125rem;
           height: 1.125rem;
           margin-top: 0.12em;
-          border-radius: 50%;
-          background-color: var(--nmn-color-success);
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 10'%3E%3Cpath fill='none' stroke='%23fff' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M1 5.2 4.2 8.4 11 1.6'/%3E%3C/svg%3E");
+          border-radius: 0;
+          background-color: transparent;
+          background-image: url('{{ nmn_icon_card_benefit_tick_url }}');
           background-repeat: no-repeat;
           background-position: center;
-          background-size: 0.55rem auto;
+          background-size: contain;
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn--plan {
           padding: var(--nmn-space-4);
@@ -628,6 +635,20 @@
           background: var(--color-third-background-main, var(--color-background-main));
           box-shadow: none;
         }
+        {%- if nmn_ss_benefits_block_id != '' -%}
+        #shopify-block-{{ nmn_ss_benefits_block_id }} svg {
+          display: none !important;
+        }
+        #shopify-block-{{ nmn_ss_benefits_block_id }} [style*='flex'] > :first-child {
+          min-width: 22px;
+          width: 22px;
+          height: 22px;
+          flex-shrink: 0;
+          align-self: flex-start;
+          margin-top: 0.12em;
+          background: url('{{ nmn_icon_section_benefits_png_url }}') center / contain no-repeat !important;
+        }
+        {%- endif -%}
       {% endstyle %}
     {%- endif -%}
 
@@ -2234,7 +2255,15 @@
                           <div class="nmn-cta-footer__row">
                             <span class="nmn-cta-footer__guarantee">
                               <span class="nmn-cta-footer__icon" aria-hidden="true">
-                                {%- render 'theme-symbols', icon: 'check' -%}
+                                <img
+                                  class="nmn-cta-footer__icon-img"
+                                  src="{{ nmn_icon_guarantee_url }}"
+                                  alt=""
+                                  width="24"
+                                  height="24"
+                                  loading="lazy"
+                                  decoding="async"
+                                >
                               </span>
                               <span>90 Tage Geld-zurück-Garantie</span>
                             </span>
