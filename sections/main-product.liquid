@@ -609,9 +609,6 @@
           font-weight: 500;
           color: var(--color-text-main);
         }
-        #product-{{ section.id }} .nmn-benefit-list__item[data-nmn-savings-li][hidden] {
-          display: none !important;
-        }
         #product-{{ section.id }} .nmn-benefit-list__check {
           flex-shrink: 0;
           width: 1.125rem;
@@ -2104,10 +2101,6 @@
                             </li>
                             <li class="nmn-benefit-list__item">
                               <span class="nmn-benefit-list__check" aria-hidden="true"></span>
-                              <span>Automatisch – ohne Versorgungslücken</span>
-                            </li>
-                            <li class="nmn-benefit-list__item" data-nmn-savings-li hidden>
-                              <span class="nmn-benefit-list__check" aria-hidden="true"></span>
                               <span data-nmn-savings-benefit></span>
                             </li>
                             <li class="nmn-benefit-list__item">
@@ -2463,31 +2456,26 @@
                     var savingsBenefitFallback = '';
 
                     function syncNmnSavingsLabel() {
-                      var li = savingsBenefitEl
-                        ? savingsBenefitEl.closest('[data-nmn-savings-li]')
-                        : null;
-                      function clearSavingsLine() {
-                        if (savingsBenefitEl) savingsBenefitEl.textContent = savingsBenefitFallback;
-                        if (li) li.setAttribute('hidden', '');
-                      }
                       if (!savingsBenefitEl) return;
-                      if (!isSubscriptionUiActive()) {
-                        clearSavingsLine();
+                      if (!plans.length) {
+                        savingsBenefitEl.textContent = savingsBenefitFallback;
                         return;
                       }
                       var p = getNmnAllocationPricing();
-                      if (!p || p.saveC <= 0 || !p.origC || p.origC <= 0) {
-                        clearSavingsLine();
+                      if (!p) {
+                        savingsBenefitEl.textContent =
+                          'Rabatt im Abo gegenüber Einzelkauf';
                         return;
                       }
-                      var pct = Math.round((p.saveC / p.origC) * 100);
-                      if (pct <= 0) {
-                        clearSavingsLine();
-                        return;
+                      if (p.saveC > 0 && p.origC > 0) {
+                        var pct = Math.round((p.saveC / p.origC) * 100);
+                        if (pct > 0) {
+                          savingsBenefitEl.textContent =
+                            'Spare ' + pct + ' % gegenüber Einzelkauf';
+                          return;
+                        }
                       }
-                      savingsBenefitEl.textContent =
-                        'Spare ' + pct + ' % gegenüber Einzelkauf';
-                      if (li) li.removeAttribute('hidden');
+                      savingsBenefitEl.textContent = 'Attraktiver Abo-Preis';
                     }
 
                     function syncNmnOnetimePriceFromMap() {
