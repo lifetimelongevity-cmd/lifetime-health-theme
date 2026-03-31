@@ -530,11 +530,23 @@
           color: var(--color-gray-600, var(--nmn-color-gray-600));
         }
         #product-{{ section.id }} .nmn-sub-toggle__sub--benefit {
+          display: flex;
+          align-items: flex-start;
+          gap: var(--nmn-space-2);
           font-weight: 500;
           color: var(--color-text-main);
         }
-        #product-{{ section.id }} [data-nmn-savings-benefit]:empty {
-          display: none;
+        #product-{{ section.id }} .nmn-sub-toggle__sub--benefit::before {
+          content: '';
+          flex-shrink: 0;
+          width: 1.125rem;
+          height: 1.125rem;
+          margin-top: 0.12em;
+          background-color: transparent;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M13.5 4.5L6.5 11.5L2.5 7.5' stroke='%2365c0b6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: contain;
         }
         #product-{{ section.id }} .nmn-sub-toggle__divider {
           width: 100%;
@@ -2171,6 +2183,9 @@
                           </span>
                           <div data-nmn-card-price-root></div>
                           <span class="nmn-sub-toggle__subs">
+                            <span class="nmn-sub-toggle__sub nmn-sub-toggle__sub--benefit">
+                              Lieferung alle 8 Wochen zu dir nach Hause
+                            </span>
                             <span
                               class="nmn-sub-toggle__sub nmn-sub-toggle__sub--benefit"
                               data-nmn-savings-benefit
@@ -2529,22 +2544,24 @@
 
                     function syncNmnSavingsLabel() {
                       if (!savingsBenefitEl) return;
-                      if (!isSubscriptionUiActive()) {
+                      if (!plans.length) {
                         savingsBenefitEl.textContent = savingsBenefitFallback;
                         return;
                       }
                       var p = getNmnAllocationPricing();
-                      if (!p || p.saveC <= 0) {
-                        savingsBenefitEl.textContent = savingsBenefitFallback;
+                      if (!p) {
+                        savingsBenefitEl.textContent = 'Rabatt im Abo gegenüber Einzelkauf';
                         return;
                       }
-                      var suff = (productPage.dataset && productPage.dataset.nmnCurrencySuffix) || '';
-                      savingsBenefitEl.textContent =
-                        'Spare ' +
-                        formatDeMoney(p.saveC) +
-                        '\u00a0€' +
-                        suff +
-                        ' pro Lieferung';
+                      if (p.saveC > 0 && p.origC > 0) {
+                        var pct = Math.round((p.saveC / p.origC) * 100);
+                        if (pct > 0) {
+                          savingsBenefitEl.textContent =
+                            'Spare ' + pct + ' % gegenüber Einzelkauf';
+                          return;
+                        }
+                      }
+                      savingsBenefitEl.textContent = 'Attraktiver Abo-Preis';
                     }
 
                     function syncNmnOnetimePriceFromMap() {
