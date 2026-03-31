@@ -194,6 +194,18 @@
           margin-top: var(--nmn-space-3);
           margin-bottom: var(--nmn-space-4);
         }
+        #product-{{ section.id }} .main-product-price .nmn-price-per-day {
+          margin: var(--nmn-space-2) 0 0;
+          padding: 0;
+          font-family: var(--font-body-family, 'Lato', sans-serif);
+          font-size: var(--nmn-fz-micro);
+          font-weight: 500;
+          line-height: var(--nmn-lh-body);
+          color: var(--color-secondary-text-main, var(--nmn-color-gray-600));
+        }
+        #product-{{ section.id }} .main-product-price .nmn-price-per-day:empty {
+          display: none;
+        }
         #product-{{ section.id }} .main-product-price .nmn-price-shipping-note {
           display: flex;
           align-items: center;
@@ -265,7 +277,6 @@
           object-fit: contain;
           flex-shrink: 0;
         }
-
         sticky-add-to-cart[data-id='product-{{ section.id }}'] .sticky-add-to-cart__price-col--nmn {
           display: flex;
           flex-direction: column;
@@ -307,6 +318,20 @@
         }
         sticky-add-to-cart[data-id='product-{{ section.id }}'] .nmn-sticky-plan-note[hidden] {
           display: none !important;
+        }
+        sticky-add-to-cart[data-id='product-{{ section.id }}'] .nmn-sticky-per-day {
+          margin: 0;
+          padding: 0;
+          font-size: 11px;
+          font-weight: 500;
+          line-height: 1.25;
+          color: var(--color-secondary-text-main, #525252);
+          text-align: left;
+          align-self: flex-start;
+          max-width: 14rem;
+        }
+        sticky-add-to-cart[data-id='product-{{ section.id }}'] .nmn-sticky-per-day:empty {
+          display: none;
         }
         @media screen and (max-width: 767px) {
           sticky-add-to-cart[data-id='product-{{ section.id }}'] .sticky-add-to-cart__actions {
@@ -1533,6 +1558,7 @@
                 </span>
               {%- endunless -%}
               {%- if template.suffix == '13_nmn' -%}
+                <p class="nmn-price-per-day" data-nmn-per-day aria-live="polite"></p>
                 <p class="nmn-price-shipping-note">
                   <span class="nmn-price-shipping-note__icon" aria-hidden="true">
                     {%- render 'theme-symbols', icon: 'check' -%}
@@ -2171,6 +2197,13 @@
                         "id": {{ current_variant.id | json }},
                         "price": {{ current_variant.price | json }},
                         "compare_at_price": {% if current_variant.compare_at_price %}{{ current_variant.compare_at_price | json }}{% else %}null{% endif %},
+                        {%- liquid
+                          assign nmn_cv_supply_days = current_variant.metafields.custom.supply_days.value | default: 60
+                          if nmn_cv_supply_days == blank
+                            assign nmn_cv_supply_days = 60
+                          endif
+                        -%}
+                        "supply_days": {{ nmn_cv_supply_days | plus: 0 | json }},
                         "unit_price": {% if current_variant.unit_price %}{{ current_variant.unit_price | json }}{% else %}null{% endif %},
                         "unit_price_measurement": {% if current_variant.unit_price_measurement %}{{ current_variant.unit_price_measurement | json }}{% else %}null{% endif %},
                         "selling_plan_allocations": [
@@ -2198,6 +2231,13 @@
                           "id": {{ variant.id | json }},
                           "price": {{ variant.price | json }},
                           "compare_at_price": {% if variant.compare_at_price %}{{ variant.compare_at_price | json }}{% else %}null{% endif %},
+                          {%- liquid
+                            assign nmn_v_supply_days = variant.metafields.custom.supply_days.value | default: 60
+                            if nmn_v_supply_days == blank
+                              assign nmn_v_supply_days = 60
+                            endif
+                          -%}
+                          "supply_days": {{ nmn_v_supply_days | plus: 0 | json }},
                           "unit_price": {% if variant.unit_price %}{{ variant.unit_price | json }}{% else %}null{% endif %},
                           "unit_price_measurement": {% if variant.unit_price_measurement %}{{ variant.unit_price_measurement | json }}{% else %}null{% endif %},
                           "selling_plan_allocations": [
@@ -2597,6 +2637,51 @@
                       }).format(cents / 100);
                     }
 
+                    function getNmnSupplyDays(v) {
+                      if (!v || v.supply_days == null || v.supply_days === '') return 60;
+                      var d = Math.round(Number(v.supply_days));
+                      return d > 0 ? d : 60;
+                    }
+
+                    function nmnFormatPerDayLine(cents, days) {
+                      if (cents == null || days == null || days <= 0) return '';
+                      var perDay = cents / days / 100;
+                      var s = new Intl.NumberFormat('de-DE', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      }).format(perDay);
+                      var suff =
+                        productPage && productPage.dataset && productPage.dataset.nmnCurrencySuffix
+                          ? productPage.dataset.nmnCurrencySuffix
+                          : '';
+                      return 'nur ' + s + '\u00a0€' + suff + '/Tag';
+                    }
+
+                    function syncNmnPerDay() {
+                      var perEl = productPage ? productPage.querySelector('[data-nmn-per-day]') : null;
+                      var bar = document.querySelector(
+                        'sticky-add-to-cart[data-id="product-' + sid + '"]'
+                      );
+                      var perSticky = bar ? bar.querySelector('[data-nmn-sticky-per-day]') : null;
+                      if (!perEl && !perSticky) return;
+                      var v = readNmnPricingVariant();
+                      var days = getNmnSupplyDays(v);
+                      var cents = null;
+                      if (plans.length && isSubscriptionUiActive()) {
+                        var ap = getNmnAllocationPricing();
+                        if (ap && ap.subC != null) {
+                          cents = ap.subC;
+                        } else if (v) {
+                          cents = numCents(v.price);
+                        }
+                      } else if (v) {
+                        cents = numCents(v.price);
+                      }
+                      var line = nmnFormatPerDayLine(cents, days);
+                      if (perEl) perEl.textContent = line;
+                      if (perSticky) perSticky.textContent = line;
+                    }
+
                     function nmnRenderMainPriceHtml(sid, priceC, compareC, suff, omitPriceId) {
                       if (priceC == null) return '';
                       var idAttr =
@@ -2870,6 +2955,7 @@
                       syncNmnPriceDisplay();
                       syncNmnSavingsLabel();
                       syncNmnStickyPlanNote();
+                      syncNmnPerDay();
                       syncCta();
                     }
 
@@ -2897,6 +2983,7 @@
                       syncNmnPriceDisplay();
                       syncNmnSavingsLabel();
                       syncNmnStickyPlanNote();
+                      syncNmnPerDay();
                     }
 
                     if (btnSub) {
@@ -3388,6 +3475,7 @@
               {%- endif -%}
             </div>
             {%- if template.suffix == '13_nmn' -%}
+              <p class="nmn-sticky-per-day" data-nmn-sticky-per-day aria-live="polite"></p>
               <p class="nmn-sticky-plan-note" data-nmn-sticky-plan-note hidden></p>
             {%- endif -%}
           </div>
