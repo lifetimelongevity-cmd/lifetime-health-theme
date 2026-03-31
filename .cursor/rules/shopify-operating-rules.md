@@ -101,3 +101,10 @@ Good output is:
 - maintainable
 - reusable where sensible
 - realistic for a live Shopify storefront
+
+## UI & Design
+
+For all UI-related decisions, refer to:
+→ /docs/design-governance.md
+
+Do not introduce design patterns that conflict with it.

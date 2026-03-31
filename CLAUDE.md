@@ -99,3 +99,12 @@ This is an existing live Shopify theme.
 - Always inspect the current implementation before proposing changes.
 - Be aware that apps and custom code may affect behavior.
 - Favor solutions that work within the current theme structure over idealized architectures.
+
+
+## Design
+
+Design system and UI rules are defined in:
+→ /docs/design-governance.md
+
+These rules govern all visual and UX decisions.
+Always follow them unless explicitly overridden.
