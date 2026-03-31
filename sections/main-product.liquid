@@ -161,6 +161,16 @@
         #product-{{ section.id }} .custom-rating-nmn .custom-rating-trigger {
           margin-bottom: 0;
         }
+        #product-{{ section.id }} .nmn-pdp-title-tagline {
+          display: block;
+          margin: var(--nmn-space-2) 0 var(--nmn-space-3);
+          padding: 0;
+          font-family: var(--font-body-family, 'Lato', sans-serif);
+          font-size: var(--nmn-fz-body-lg);
+          font-weight: 600;
+          line-height: var(--nmn-lh-body);
+          color: var(--color-text-main);
+        }
         #product-{{ section.id }} .nmn-pdp-subhead {
           display: block;
           margin-top: 0;
@@ -194,6 +204,9 @@
           margin-top: var(--nmn-space-3);
           margin-bottom: var(--nmn-space-4);
         }
+        #product-{{ section.id }} .main-product-price .nmn-price-meta .nmn-price-per-day {
+          margin-top: 0;
+        }
         #product-{{ section.id }} .main-product-price .nmn-price-per-day {
           margin: 0.35rem 0 0;
           padding: 0;
@@ -208,33 +221,29 @@
         #product-{{ section.id }} .main-product-price .nmn-price-per-day:empty {
           display: none;
         }
+        #product-{{ section.id }} .main-product-price .nmn-price-meta {
+          margin: 0.5rem 0 0;
+          padding-top: 0.5rem;
+          border-top: 1px solid color-mix(in srgb, var(--nmn-color-gray-200) 75%, transparent);
+        }
+        #product-{{ section.id }} .main-product-price .nmn-price-meta:has(.nmn-price-per-day:empty) {
+          border-top-color: transparent;
+          padding-top: 0;
+          margin-top: 0.35rem;
+        }
+        #product-{{ section.id }} .main-product-price .nmn-price-meta:has(.nmn-price-per-day:empty) .nmn-price-shipping-note {
+          margin-top: 0;
+        }
         #product-{{ section.id }} .main-product-price .nmn-price-shipping-note {
-          display: flex;
-          align-items: center;
-          gap: var(--nmn-space-2);
-          margin: var(--nmn-space-2) 0 0;
+          margin: 0.28rem 0 0;
           padding: 0;
           font-family: var(--font-body-family, 'Lato', sans-serif);
-          font-size: var(--nmn-fz-body-sm);
-          font-weight: 600;
-          line-height: var(--nmn-lh-body);
-          color: var(--color-text-main);
-        }
-        #product-{{ section.id }} .main-product-price .nmn-price-shipping-note__icon {
-          flex-shrink: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 1.125rem;
-          height: 1.125rem;
-          color: #65c0b6;
-        }
-        #product-{{ section.id }} .main-product-price .nmn-price-shipping-note__icon svg {
-          width: 100%;
-          height: auto;
-        }
-        #product-{{ section.id }} .main-product-price .nmn-price-shipping-note__icon svg path {
-          fill: currentColor;
+          font-size: 0.8125rem;
+          font-weight: 400;
+          line-height: 1.35;
+          letter-spacing: 0.01em;
+          color: var(--color-secondary-text-main, var(--nmn-color-gray-600));
+          opacity: 0.88;
         }
         #product-{{ section.id }} .product-text .product-custom-liquid--nmn-quality-pills {
           margin-top: 0 !important;
@@ -458,37 +467,6 @@
           justify-content: space-between;
           gap: var(--nmn-space-2) var(--nmn-space-3);
           width: 100%;
-        }
-        #product-{{ section.id }} .nmn-sub-toggle__badge {
-          flex-shrink: 0;
-          font-family: var(--font-body-family, 'Lato', -apple-system, BlinkMacSystemFont, sans-serif);
-          font-size: var(--nmn-fz-micro);
-          font-weight: 600;
-          letter-spacing: 0.08em;
-          text-transform: uppercase;
-          padding: var(--nmn-space-1) var(--nmn-space-2);
-          border-radius: var(--nmn-radius-sm);
-          line-height: 1.2;
-          color: var(--color-text-main);
-          background: var(--color-secondary-background-main);
-          border: 1px solid var(--nmn-color-gray-200);
-        }
-        #product-{{ section.id }} .nmn-sub-toggle__btn--plan.nmn-sub-toggle__btn--primary {
-          position: relative;
-        }
-        #product-{{ section.id }} .nmn-sub-toggle__btn--plan.nmn-sub-toggle__btn--primary .nmn-sub-toggle__badge {
-          position: absolute;
-          top: 0;
-          inset-inline-end: var(--nmn-space-4);
-          inset-inline-start: auto;
-          transform: translateY(-50%);
-          z-index: 2;
-          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-          background: var(--color-background-main);
-        }
-        #product-{{ section.id }} .nmn-sub-toggle__btn--plan.nmn-sub-toggle__btn--primary .nmn-sub-toggle__head-main {
-          justify-content: flex-start;
-          padding-inline-end: 5.75rem;
         }
         #product-{{ section.id }} .nmn-sub-toggle__title {
           font-family: var(--nmn-font-heading);
@@ -1527,6 +1505,11 @@
             <h1 class="product__title heading-size--page-title" {{ block.shopify_attributes }}>
               {{ product.title | escape }}
             </h1>
+            {%- if template.suffix == '13_nmn' -%}
+              <p class="nmn-pdp-title-tagline">
+                Mehr Zellenergie – mit einem direkten NAD⁺-Baustein
+              </p>
+            {%- endif -%}
 
           {%- when 'price' -%}
             <div {{ block.shopify_attributes }} class="main-product-price">
@@ -1566,13 +1549,10 @@
                 {%- endunless -%}
               </div>
               {%- if template.suffix == '13_nmn' -%}
-                <p class="nmn-price-per-day" data-nmn-per-day aria-live="polite"></p>
-                <p class="nmn-price-shipping-note">
-                  <span class="nmn-price-shipping-note__icon" aria-hidden="true">
-                    {%- render 'theme-symbols', icon: 'check' -%}
-                  </span>
-                  Gratis-Versand
-                </p>
+                <div class="nmn-price-meta">
+                  <p class="nmn-price-per-day" data-nmn-per-day aria-live="polite"></p>
+                  <p class="nmn-price-shipping-note">Versand gratis</p>
+                </div>
               {%- endif -%}
             </div>
 
@@ -2284,12 +2264,11 @@
                         >
                           <span class="nmn-sub-toggle__head">
                             <span class="nmn-sub-toggle__head-main">
-                              <span class="nmn-sub-toggle__title">Für deine tägliche Routine</span>
-                              <span class="nmn-sub-toggle__badge">EMPFOHLEN</span>
+                              <span class="nmn-sub-toggle__title">Deine tägliche Routine (empfohlen)</span>
                             </span>
                           </span>
                           <span class="nmn-sub-toggle__lead">
-                            Regelmäßige Nachlieferung – damit du nichts vergisst.
+                            Für konstante Versorgung – ohne Aufwand
                           </span>
                           <ul class="nmn-benefit-list">
                             <li class="nmn-benefit-list__item">
@@ -2441,7 +2420,7 @@
                               if current_variant.available
                                 unless block.settings.show_preorder
                                   if template.suffix == '13_nmn'
-                                    echo 'In den Warenkorb'
+                                    echo 'Jetzt starten'
                                   else
                                     echo 'products.page.add_to_cart_button' | t
                                   endif
@@ -2526,6 +2505,9 @@
                     var btnSub = root.querySelector('[data-nmn-mode="subscription"]');
                     var btnOnce = root.querySelector('[data-nmn-mode="onetime"]');
                     var cta = form.querySelector('[data-js-product-add-to-cart-text][data-lt-nmn-cta]');
+                    var ctaSticky = document.querySelector(
+                      'sticky-add-to-cart[data-id="product-' + sid + '"] [data-lt-nmn-sticky-cta]'
+                    );
                     var addBtn = form.querySelector('[data-js-product-add-to-cart]');
                     var productPage = document.getElementById('product-' + sid);
 
@@ -2962,11 +2944,14 @@
                         cents = vv ? numCents(vv.price) : null;
                       }
                       if (cents == null) {
-                        cta.textContent = 'In den Warenkorb';
+                        cta.textContent = 'Jetzt starten';
+                        if (ctaSticky) ctaSticky.textContent = 'Jetzt starten';
                         return;
                       }
-                      cta.textContent =
-                        'In den Warenkorb – ' + formatDeMoney(cents) + '\u00a0€' + suff;
+                      var ctaLine =
+                        'Jetzt starten – ' + formatDeMoney(cents) + '\u00a0€' + suff;
+                      cta.textContent = ctaLine;
+                      if (ctaSticky) ctaSticky.textContent = ctaLine;
                     }
 
                     function nmnRefreshPricingUi() {
@@ -3503,7 +3488,11 @@
                 data-js-atc
                 class="button button--solid button--move button--product button--loader {% if default_to_first_variant == false and product.has_only_default_variant == false %} show-block-if-variant-selected {% endif %}"
               >
-                <span class="button__text">{{ 'products.page.add_to_cart_button' | t }}</span>
+                {%- if template.suffix == '13_nmn' -%}
+                  <span class="button__text" data-lt-nmn-sticky-cta>Jetzt starten</span>
+                {%- else -%}
+                  <span class="button__text">{{ 'products.page.add_to_cart_button' | t }}</span>
+                {%- endif -%}
                 <span class="button__preloader">
                   <svg class="button__preloader-element" viewBox="25 25 50 50">
                     <circle cx="50" cy="50" r="20" fill="none" stroke-width="4"/>
