@@ -1,0 +1,175 @@
+{% comment %}
+  NMN PDP: star rating + review count + customer claim (Loox metafields).
+  Optional override: product.metafields.custom.reviews_customer_claim (single line text)
+{% endcomment %}
+{% assign rating = product.metafields.loox.avg_rating | default: 0 | plus: 0 %}
+{% assign rating_count = product.metafields.loox.num_reviews | default: 0 | plus: 0 %}
+
+{% if rating_count > 0 and rating > 0 %}
+  {% assign rating_text = rating | round: 1 | replace: '.', ',' %}
+  {% assign decimal = rating | modulo: 1 %}
+  {% assign rounded = rating | floor %}
+  {% if decimal >= 0.3 and decimal <= 0.7 %}
+    {% assign rounded = rounded | plus: 0.5 %}
+  {% elsif decimal > 0.7 %}
+    {% assign rounded = rounded | plus: 1 %}
+  {% endif %}
+  {% assign pct = rounded | times: 20 %}
+  {% assign star_color = '%23FFCC00' %}
+  {% assign bg_color = '%23E6E6E6' %}
+  {% assign nmn_customers_claim = product.metafields.custom.reviews_customer_claim.value | default: '>1.000 Kunden' %}
+
+  <div class="custom-rating-nmn nmn-pdp-rating-hero" id="custom-rating-nmn-{{ section.id }}">
+    <style>
+      #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__trigger {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 0 0.5rem;
+        padding: 0;
+        border: 0;
+        background: none;
+        font: inherit;
+        color: inherit;
+        text-align: left;
+        cursor: pointer;
+      }
+      #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__trigger:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 3px;
+      }
+      #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.5rem 0.75rem;
+      }
+      #custom-rating-nmn-{{ section.id }} .custom-stars {
+        position: relative;
+        display: inline-block;
+        width: 120px;
+        height: 18px;
+        flex-shrink: 0;
+        background-image: url("data:image/svg+xml;utf8,<svg width='20' height='14' viewBox='0 0 14 13' xmlns='http://www.w3.org/2000/svg'><path d='m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z' fill='{{ bg_color }}'/></svg>");
+        background-repeat: repeat-x;
+        background-size: 24px 18px;
+      }
+      #custom-rating-nmn-{{ section.id }} .custom-stars-active {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 18px;
+        width: {{ pct }}%;
+        overflow: hidden;
+      }
+      #custom-rating-nmn-{{ section.id }} .custom-stars-active::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 120px;
+        height: 18px;
+        background-image: url("data:image/svg+xml;utf8,<svg width='20' height='14' viewBox='0 0 14 13' xmlns='http://www.w3.org/2000/svg'><path d='m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z' fill='{{ star_color }}'/></svg>");
+        background-repeat: repeat-x;
+        background-size: 24px 18px;
+      }
+      #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__copy {
+        font-size: 1rem;
+        line-height: 1.35;
+        font-weight: 500;
+        color: var(--color-text-main, #111);
+      }
+      #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__score {
+        font-weight: 700;
+        font-size: 1.0625rem;
+        letter-spacing: -0.02em;
+      }
+      #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__divider {
+        color: var(--color-secondary-text-main, #737373);
+        font-weight: 400;
+      }
+      #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__customers {
+        font-weight: 600;
+        color: var(--color-text-main, #111);
+      }
+    </style>
+
+    <button
+      type="button"
+      class="nmn-pdp-rating-hero__trigger"
+      data-custom-rating-scroll
+      aria-label="Zu den Bewertungen scrollen – {{ rating_text }} von {{ rating_count }} Bewertungen, {{ nmn_customers_claim | escape }}"
+    >
+      <span class="nmn-pdp-rating-hero__row">
+        <span class="custom-stars" aria-hidden="true">
+          <span class="custom-stars-active"></span>
+        </span>
+        <span class="nmn-pdp-rating-hero__copy">
+          <span class="nmn-pdp-rating-hero__score">{{ rating_text }}</span>
+          <span> von {{ rating_count }} Bewertungen</span>
+          <span class="nmn-pdp-rating-hero__divider" aria-hidden="true">&nbsp;|&nbsp;</span>
+          <span class="nmn-pdp-rating-hero__customers">{{ nmn_customers_claim }}</span>
+        </span>
+      </span>
+    </button>
+  </div>
+
+  <script>
+    (function () {
+      var rootId = 'custom-rating-nmn-{{ section.id }}';
+      var scrollOffsetPx = 80;
+
+      function scrollToEl(el) {
+        var y = el.getBoundingClientRect().top + window.pageYOffset - scrollOffsetPx;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      }
+
+      function findReviewsTarget() {
+        var byId = document.getElementById('shopify-section-loox-reviews');
+        if (byId) return byId;
+
+        var el = document.getElementById('looxReviews');
+        var sec;
+        if (el) {
+          sec = el.closest('[id^="shopify-section-"]');
+          return sec || el;
+        }
+        el = document.querySelector('.loox-dynamic-section, [class*="loox-dynamic-section"], .loox-v2-widget-container');
+        if (el) {
+          sec = el.closest('[id^="shopify-section-"]');
+          return sec || el;
+        }
+        var sections = document.querySelectorAll('[id^="shopify-section-"]');
+        var i;
+        for (i = 0; i < sections.length; i++) {
+          if (
+            /loox/i.test(sections[i].id) &&
+            sections[i].querySelector('[class*="loox"], [id*="loox"]')
+          ) {
+            return sections[i];
+          }
+        }
+        return null;
+      }
+
+      function bind() {
+        var root = document.getElementById(rootId);
+        if (!root) return;
+        var btn = root.querySelector('[data-custom-rating-scroll]');
+        if (!btn || btn.dataset.bound) return;
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', function onClick() {
+          if (window.Shopify && Shopify.designMode) return;
+          var target = findReviewsTarget();
+          if (target) scrollToEl(target);
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bind, { once: true });
+      } else {
+        bind();
+      }
+    })();
+  </script>
+{% endif %}

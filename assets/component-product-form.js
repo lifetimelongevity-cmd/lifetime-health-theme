@@ -392,7 +392,10 @@ if ( typeof ProductVariants !== 'function' ) {
 			// update variant specific blocks
 			html.querySelectorAll('[data-update-block]').forEach(elm=>{
 				if ( ! elm.hasAttribute('data-update-block-inner') ) {
-					this.productPage.querySelector(`[data-update-block="${elm.dataset.updateBlock}"]`).innerHTML = elm.innerHTML;
+					const target = this.productPage.querySelector(`[data-update-block="${elm.dataset.updateBlock}"]`);
+					if ( target ) {
+						target.innerHTML = elm.innerHTML;
+					}
 				}
 			});
 

@@ -71,6 +71,10 @@
     {%- endif -%}
   >
     {%- if template.suffix == '13_nmn' -%}
+      {%- comment -%} AJAX-Ziel für Varianten-Updates (ohne sichtbaren PDP-Preis). {%- endcomment -%}
+      <div class="main-product-price--nmn-ajax-hook" hidden aria-hidden="true">
+        <div data-update-block="price-compact-main"></div>
+      </div>
       {%- liquid
         assign nmn_icon_guarantee_url = 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/circle-wavy-check-fill.png?v=1774959731'
         assign nmn_icon_card_benefit_tick_url = 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/icon-tick-green-sm.svg?v=1726236630'
@@ -156,8 +160,9 @@
           margin-bottom: var(--nmn-space-2);
         }
         #product-{{ section.id }} .custom-rating-nmn {
-          margin-bottom: var(--nmn-space-3);
+          margin-bottom: var(--nmn-space-4);
         }
+        #product-{{ section.id }} .custom-rating-nmn .nmn-pdp-rating-hero__trigger,
         #product-{{ section.id }} .custom-rating-nmn .custom-rating-trigger {
           margin-bottom: 0;
         }
@@ -200,15 +205,36 @@
           margin-bottom: 0;
         }
 
-        #product-{{ section.id }} .main-product-price {
-          margin-top: var(--nmn-space-3);
-          margin-bottom: var(--nmn-space-4);
+        #product-{{ section.id }} .main-product-price--nmn-ajax-hook {
+          margin: 0 !important;
+          padding: 0 !important;
+          border: 0 !important;
+          height: 0 !important;
+          overflow: hidden !important;
+          clip: rect(0, 0, 0, 0) !important;
+          clip-path: inset(50%) !important;
         }
-        #product-{{ section.id }} .main-product-price .nmn-price-meta .nmn-price-per-day {
-          margin-top: 0;
+        #product-{{ section.id }} .nmn-sub-toggle__card-pricing {
+          width: 100%;
+          margin: 0;
+          padding: 0;
         }
-        #product-{{ section.id }} .main-product-price .nmn-price-per-day {
-          margin: 0.35rem 0 0;
+        #product-{{ section.id }} .nmn-sub-toggle__card-price-row {
+          width: 100%;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__card-meta {
+          margin: 0.4rem 0 0;
+          padding-top: 0.45rem;
+          border-top: 1px solid color-mix(in srgb, var(--nmn-color-gray-200) 75%, transparent);
+          width: 100%;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__card-meta:has(.nmn-sub-toggle__card-per-day:empty) {
+          border-top-color: transparent;
+          padding-top: 0.15rem;
+          margin-top: 0.2rem;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__card-per-day {
+          margin: 0 0 0.2rem;
           padding: 0;
           font-family: var(--font-body-family, 'Lato', sans-serif);
           font-size: 0.8125rem;
@@ -218,24 +244,12 @@
           color: var(--color-secondary-text-main, var(--nmn-color-gray-600));
           opacity: 0.92;
         }
-        #product-{{ section.id }} .main-product-price .nmn-price-per-day:empty {
+        #product-{{ section.id }} .nmn-sub-toggle__card-per-day:empty {
           display: none;
+          margin: 0;
         }
-        #product-{{ section.id }} .main-product-price .nmn-price-meta {
-          margin: 0.5rem 0 0;
-          padding-top: 0.5rem;
-          border-top: 1px solid color-mix(in srgb, var(--nmn-color-gray-200) 75%, transparent);
-        }
-        #product-{{ section.id }} .main-product-price .nmn-price-meta:has(.nmn-price-per-day:empty) {
-          border-top-color: transparent;
-          padding-top: 0;
-          margin-top: 0.35rem;
-        }
-        #product-{{ section.id }} .main-product-price .nmn-price-meta:has(.nmn-price-per-day:empty) .nmn-price-shipping-note {
-          margin-top: 0;
-        }
-        #product-{{ section.id }} .main-product-price .nmn-price-shipping-note {
-          margin: 0.28rem 0 0;
+        #product-{{ section.id }} .nmn-sub-toggle__card-ship {
+          margin: 0;
           padding: 0;
           font-family: var(--font-body-family, 'Lato', sans-serif);
           font-size: 0.8125rem;
@@ -347,7 +361,7 @@
             text-align: left !important;
           }
         }
-        #product-{{ section.id }} .main-product-price .product-price.nmn-price--plan {
+        #product-{{ section.id }} .nmn-sub-toggle__card-pricing .product-price.nmn-price--plan {
           display: flex;
           flex-direction: row;
           flex-wrap: wrap;
@@ -355,14 +369,14 @@
           column-gap: var(--nmn-space-4);
           row-gap: var(--nmn-space-2);
         }
-        #product-{{ section.id }} .main-product-price .product-price.nmn-price--plan .product-price--original {
+        #product-{{ section.id }} .nmn-sub-toggle__card-pricing .product-price.nmn-price--plan .product-price--original {
           font-family: var(--nmn-font-heading);
           font-size: var(--nmn-fz-h3);
           font-weight: 700;
           line-height: 1.15;
           letter-spacing: -0.02em;
         }
-        #product-{{ section.id }} .main-product-price .product-price.nmn-price--plan .product-price--compare {
+        #product-{{ section.id }} .nmn-sub-toggle__card-pricing .product-price.nmn-price--plan .product-price--compare {
           margin: 0 0 0 var(--nmn-space-1);
           font-size: var(--nmn-fz-body-sm);
           font-weight: 400;
@@ -371,15 +385,15 @@
           border: 0;
           background: transparent;
         }
-        #product-{{ section.id }} .main-product-price .product-price.nmn-price--plan .product-price--compare span {
+        #product-{{ section.id }} .nmn-sub-toggle__card-pricing .product-price.nmn-price--plan .product-price--compare span {
           text-decoration: inherit;
         }
-        #product-{{ section.id }} .main-product-price .product-price.nmn-price--plan .product-price--saving {
+        #product-{{ section.id }} .nmn-sub-toggle__card-pricing .product-price.nmn-price--plan .product-price--saving {
           font-size: var(--nmn-fz-body-sm);
           font-weight: 600;
           color: var(--nmn-color-success);
         }
-        #product-{{ section.id }} .main-product-price .product-price.nmn-price--plan .product-price--saving span {
+        #product-{{ section.id }} .nmn-sub-toggle__card-pricing .product-price.nmn-price--plan .product-price--saving span {
           color: inherit;
         }
         #product-{{ section.id }} .nmn-sub-toggle {
@@ -467,6 +481,36 @@
           justify-content: space-between;
           gap: var(--nmn-space-2) var(--nmn-space-3);
           width: 100%;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__badge {
+          flex-shrink: 0;
+          font-family: var(--font-body-family, 'Lato', -apple-system, BlinkMacSystemFont, sans-serif);
+          font-size: var(--nmn-fz-micro);
+          font-weight: 600;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+          padding: var(--nmn-space-1) var(--nmn-space-2);
+          border-radius: var(--nmn-radius-sm);
+          line-height: 1.2;
+          color: #fff;
+          background: var(--color-text-main);
+          border: 1px solid var(--color-text-main);
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__btn--plan.nmn-sub-toggle__btn--primary .nmn-sub-toggle__head {
+          position: relative;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__btn--plan.nmn-sub-toggle__btn--primary .nmn-sub-toggle__badge {
+          position: absolute;
+          top: 0;
+          inset-inline-end: 0;
+          inset-inline-start: auto;
+          transform: translateY(-50%);
+          z-index: 2;
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__btn--plan.nmn-sub-toggle__btn--primary .nmn-sub-toggle__head-main {
+          justify-content: flex-start;
+          padding-inline-end: 5.75rem;
         }
         #product-{{ section.id }} .nmn-sub-toggle__title {
           font-family: var(--nmn-font-heading);
@@ -1512,49 +1556,28 @@
             {%- endif -%}
 
           {%- when 'price' -%}
-            <div {{ block.shopify_attributes }} class="main-product-price">
-              {%- comment -%} Nur dieser innere Block wird per JS ersetzt (NMN), damit €/Tag + Versandhinweis erhalten bleiben. {%- endcomment -%}
-              <div data-update-block="price-compact-main">
-                <span class="show-block-if-variant-selected">
-                  {%- if template.suffix == '13_nmn' -%}
-                    {%- render 'product-price',
-                      variant: current_variant,
-                      target: current_variant,
-                      id: section.id,
-                      price_extra_class: 'nmn-price--plan'
-                    -%}
-                  {%- else -%}
+            {%- unless template.suffix == '13_nmn' -%}
+              <div {{ block.shopify_attributes }} class="main-product-price">
+                <div data-update-block="price-compact-main">
+                  <span class="show-block-if-variant-selected">
                     {%- render 'product-price', variant: current_variant, target: current_variant, id: section.id -%}
-                  {%- endif -%}
-                </span>
-                {%- unless default_to_first_variant -%}
-                  <span class="show-block-if-variant-not-selected-yet">
-                    {%- if template.suffix == '13_nmn' -%}
-                      {%- render 'product-price',
-                        variant: current_variant,
-                        target: product,
-                        product_price_varies: product.price_varies,
-                        id: section.id,
-                        price_extra_class: 'nmn-price--plan'
-                      -%}
-                    {%- else -%}
+                  </span>
+                  {%- unless default_to_first_variant -%}
+                    <span class="show-block-if-variant-not-selected-yet">
                       {%- render 'product-price',
                         variant: current_variant,
                         target: product,
                         product_price_varies: product.price_varies,
                         id: section.id
                       -%}
-                    {%- endif -%}
-                  </span>
-                {%- endunless -%}
-              </div>
-              {%- if template.suffix == '13_nmn' -%}
-                <div class="nmn-price-meta">
-                  <p class="nmn-price-per-day" data-nmn-per-day aria-live="polite"></p>
-                  <p class="nmn-price-shipping-note">Versand gratis</p>
+                    </span>
+                  {%- endunless -%}
                 </div>
-              {%- endif -%}
-            </div>
+              </div>
+            {%- else -%}
+              {%- comment -%} NMN: Preis nur in Karten; Platzhalter falls Preis-Block im Editor wieder aktiv ist. {%- endcomment -%}
+              <div {{ block.shopify_attributes }} class="main-product-price--nmn-price-block-placeholder" hidden aria-hidden="true"></div>
+            {%- endunless -%}
 
           {%- when 'tax_info' -%}
             {%- if cart.taxes_included or shop.shipping_policy.body != blank -%}
@@ -2262,9 +2285,23 @@
                           data-nmn-mode="subscription"
                           aria-pressed="true"
                         >
+                          <div class="nmn-sub-toggle__card-pricing">
+                            <div class="nmn-sub-toggle__card-price-row">
+                              <div data-nmn-card-price-root="subscription"></div>
+                            </div>
+                            <div class="nmn-sub-toggle__card-meta">
+                              <p
+                                class="nmn-sub-toggle__card-per-day"
+                                data-nmn-per-day-sub
+                                aria-live="polite"
+                              ></p>
+                              <p class="nmn-sub-toggle__card-ship">Versand gratis</p>
+                            </div>
+                          </div>
                           <span class="nmn-sub-toggle__head">
                             <span class="nmn-sub-toggle__head-main">
-                              <span class="nmn-sub-toggle__title">Deine tägliche Routine (empfohlen)</span>
+                              <span class="nmn-sub-toggle__title">Deine tägliche Routine</span>
+                              <span class="nmn-sub-toggle__badge">Empfohlen</span>
                             </span>
                           </span>
                           <span class="nmn-sub-toggle__lead">
@@ -2291,6 +2328,19 @@
                           data-nmn-mode="onetime"
                           aria-pressed="false"
                         >
+                          <div class="nmn-sub-toggle__card-pricing">
+                            <div class="nmn-sub-toggle__card-price-row">
+                              <div data-nmn-card-price-root="onetime"></div>
+                            </div>
+                            <div class="nmn-sub-toggle__card-meta">
+                              <p
+                                class="nmn-sub-toggle__card-per-day"
+                                data-nmn-per-day-onetime
+                                aria-live="polite"
+                              ></p>
+                              <p class="nmn-sub-toggle__card-ship">Versand gratis</p>
+                            </div>
+                          </div>
                           <span class="nmn-sub-toggle__head nmn-sub-toggle__head--onetime">
                             <span class="nmn-sub-toggle__title">Einmaliger Kauf</span>
                           </span>
@@ -2522,10 +2572,11 @@
                       );
                     }
 
-                    var priceRoot = productPage
-                      ? productPage.querySelector('[data-update-block="price-compact-main"]')
-                      : null;
-                    var lastOnetimePriceHtml = '';
+                    var cardPriceSub = root.querySelector('[data-nmn-card-price-root="subscription"]');
+                    var cardPriceOnce = root.querySelector('[data-nmn-card-price-root="onetime"]');
+                    var perDaySubEl = root.querySelector('[data-nmn-per-day-sub]');
+                    var perDayOnceEl = root.querySelector('[data-nmn-per-day-onetime]');
+                    var lastOnetimeCardPriceHtml = '';
                     var lastOnetimeStickyPriceHtml = '';
 
                     function nmnGetStickyPriceRoot() {
@@ -2535,7 +2586,7 @@
                     }
 
                     function captureOnetimePriceHtml() {
-                      if (priceRoot) lastOnetimePriceHtml = priceRoot.innerHTML;
+                      if (cardPriceOnce) lastOnetimeCardPriceHtml = cardPriceOnce.innerHTML;
                       var sr = nmnGetStickyPriceRoot();
                       if (sr) lastOnetimeStickyPriceHtml = sr.innerHTML;
                     }
@@ -2552,16 +2603,74 @@
                       vis.innerHTML = sr.innerHTML;
                     }
 
-                    function nmnApplyPriceToRoots(priceC, compareC, suff) {
+                    function nmnApplyStickyPriceOnly(priceC, compareC, suff) {
                       var s = suff || '';
-                      if (priceRoot) {
-                        priceRoot.innerHTML = nmnRenderMainPriceHtml(sid, priceC, compareC, s, false);
-                      }
                       var sr = nmnGetStickyPriceRoot();
                       if (sr) {
                         sr.innerHTML = nmnRenderMainPriceHtml(sid, priceC, compareC, s, true);
                       }
                       nmnMirrorStickyPriceToBar();
+                    }
+
+                    function nmnFillCardPrice(el, priceC, compareC, suff) {
+                      if (!el) return;
+                      if (priceC == null) {
+                        el.innerHTML = '';
+                        return;
+                      }
+                      el.innerHTML = nmnRenderMainPriceHtml(sid, priceC, compareC, suff || '', true);
+                    }
+
+                    function syncNmnAllCardAndStickyPrices() {
+                      var v = readNmnPricingVariant();
+                      var suff = (productPage.dataset && productPage.dataset.nmnCurrencySuffix) || '';
+                      var sr = nmnGetStickyPriceRoot();
+
+                      if (!v) {
+                        if (lastOnetimeCardPriceHtml && cardPriceOnce) {
+                          cardPriceOnce.innerHTML = lastOnetimeCardPriceHtml;
+                        }
+                        if (lastOnetimeStickyPriceHtml && sr) {
+                          sr.innerHTML = lastOnetimeStickyPriceHtml;
+                        }
+                        nmnMirrorStickyPriceToBar();
+                        return;
+                      }
+
+                      var onceC = numCents(v.price);
+                      var onceCompareRaw = numCents(v.compare_at_price);
+                      var onceCompare =
+                        onceCompareRaw != null && onceC != null && onceCompareRaw > onceC
+                          ? onceCompareRaw
+                          : null;
+
+                      nmnFillCardPrice(cardPriceOnce, onceC, onceCompare, suff);
+
+                      if (!plans.length || !cardPriceSub) {
+                        nmnFillCardPrice(cardPriceSub, null, null, suff);
+                      } else {
+                        var pAlloc = getNmnAllocationPricing();
+                        if (pAlloc) {
+                          var compareDel =
+                            pAlloc.origC > pAlloc.subC && pAlloc.saveC > 0 ? pAlloc.origC : null;
+                          nmnFillCardPrice(cardPriceSub, pAlloc.subC, compareDel, suff);
+                        } else {
+                          nmnFillCardPrice(cardPriceSub, onceC, onceCompare, suff);
+                        }
+                      }
+
+                      if (isSubscriptionUiActive() && plans.length) {
+                        var pSticky = getNmnAllocationPricing();
+                        if (pSticky) {
+                          var cd =
+                            pSticky.origC > pSticky.subC && pSticky.saveC > 0 ? pSticky.origC : null;
+                          nmnApplyStickyPriceOnly(pSticky.subC, cd, suff);
+                        } else {
+                          nmnApplyStickyPriceOnly(onceC, onceCompare, suff);
+                        }
+                      } else {
+                        nmnApplyStickyPriceOnly(onceC, onceCompare, suff);
+                      }
                     }
 
                     function syncNmnStickyPlanNote() {
@@ -2665,22 +2774,24 @@
                     }
 
                     function syncNmnPerDay() {
-                      var perEl = productPage ? productPage.querySelector('[data-nmn-per-day]') : null;
-                      if (!perEl) return;
                       var v = readNmnPricingVariant();
                       var days = getNmnSupplyDays(v);
-                      var cents = null;
-                      if (plans.length && isSubscriptionUiActive()) {
-                        var ap = getNmnAllocationPricing();
-                        if (ap && ap.subC != null) {
-                          cents = ap.subC;
-                        } else if (v) {
-                          cents = numCents(v.price);
+                      if (perDaySubEl) {
+                        var subCents = null;
+                        if (plans.length) {
+                          var ap = getNmnAllocationPricing();
+                          if (ap && ap.subC != null) {
+                            subCents = ap.subC;
+                          } else if (v) {
+                            subCents = numCents(v.price);
+                          }
                         }
-                      } else if (v) {
-                        cents = numCents(v.price);
+                        perDaySubEl.textContent = nmnFormatPerDayLine(subCents, days);
                       }
-                      perEl.textContent = nmnFormatPerDayLine(cents, days);
+                      if (perDayOnceEl) {
+                        var onceCents = v ? numCents(v.price) : null;
+                        perDayOnceEl.textContent = nmnFormatPerDayLine(onceCents, days);
+                      }
                     }
 
                     function nmnRenderMainPriceHtml(sid, priceC, compareC, suff, omitPriceId) {
@@ -2779,57 +2890,6 @@
                       savingsBenefitEl.textContent = 'Attraktiver Abo-Preis';
                     }
 
-                    function syncNmnOnetimePriceFromMap() {
-                      var sr = nmnGetStickyPriceRoot();
-                      if (!priceRoot && !sr) return;
-                      var v = readNmnPricingVariant();
-                      var suff = (productPage.dataset && productPage.dataset.nmnCurrencySuffix) || '';
-                      if (!v) {
-                        if (lastOnetimePriceHtml && priceRoot) priceRoot.innerHTML = lastOnetimePriceHtml;
-                        sr = nmnGetStickyPriceRoot();
-                        if (lastOnetimeStickyPriceHtml && sr) sr.innerHTML = lastOnetimeStickyPriceHtml;
-                        nmnMirrorStickyPriceToBar();
-                        return;
-                      }
-                      var priceC = numCents(v.price);
-                      if (priceC == null) {
-                        if (lastOnetimePriceHtml && priceRoot) priceRoot.innerHTML = lastOnetimePriceHtml;
-                        sr = nmnGetStickyPriceRoot();
-                        if (lastOnetimeStickyPriceHtml && sr) sr.innerHTML = lastOnetimeStickyPriceHtml;
-                        nmnMirrorStickyPriceToBar();
-                        return;
-                      }
-                      var compareC = numCents(v.compare_at_price);
-                      nmnApplyPriceToRoots(priceC, compareC, suff);
-                    }
-
-                    function syncNmnPriceDisplay() {
-                      var sr0 = nmnGetStickyPriceRoot();
-                      if (!priceRoot && !sr0) return;
-                      if (!isSubscriptionUiActive()) {
-                        syncNmnOnetimePriceFromMap();
-                        return;
-                      }
-                      var p = getNmnAllocationPricing();
-                      if (!p) {
-                        if (lastOnetimePriceHtml && priceRoot) priceRoot.innerHTML = lastOnetimePriceHtml;
-                        var sr = nmnGetStickyPriceRoot();
-                        if (lastOnetimeStickyPriceHtml && sr) sr.innerHTML = lastOnetimeStickyPriceHtml;
-                        nmnMirrorStickyPriceToBar();
-                        return;
-                      }
-                      var subC = p.subC;
-                      var origC = p.origC;
-                      var saveC = p.saveC;
-                      var suff = (productPage.dataset && productPage.dataset.nmnCurrencySuffix) || '';
-                      var compareDel =
-                        origC > subC && saveC > 0 ? origC : null;
-                      nmnApplyPriceToRoots(subC, compareDel, suff);
-                    }
-
-                    function syncNmnCardPrice() {
-                      return;
-                    }
 
                     function nmnPackRowEl() {
                       if (!productPage) return null;
@@ -2955,8 +3015,7 @@
                     }
 
                     function nmnRefreshPricingUi() {
-                      syncNmnCardPrice();
-                      syncNmnPriceDisplay();
+                      syncNmnAllCardAndStickyPrices();
                       syncNmnSavingsLabel();
                       syncNmnStickyPlanNote();
                       syncNmnPerDay();
@@ -2982,12 +3041,7 @@
                         btnOnce.classList.toggle('nmn-sub-toggle__btn--active', !isSub);
                         btnOnce.setAttribute('aria-pressed', !isSub ? 'true' : 'false');
                       }
-                      syncCta();
-                      syncNmnCardPrice();
-                      syncNmnPriceDisplay();
-                      syncNmnSavingsLabel();
-                      syncNmnStickyPlanNote();
-                      syncNmnPerDay();
+                      nmnRefreshPricingUi();
                     }
 
                     if (btnSub) {
@@ -3001,13 +3055,13 @@
                       });
                     }
 
-                    captureOnetimePriceHtml();
                     if (plans.length) {
                       setMode('subscription');
                     } else {
                       setMode('onetime');
                       if (btnSub) btnSub.disabled = true;
                     }
+                    captureOnetimePriceHtml();
                     syncNmnPackSelectorActive();
                     nmnMirrorStickyPriceToBar();
                     if (window.customElements && customElements.whenDefined) {
@@ -3084,6 +3138,7 @@
                         } else {
                           nmnRefreshPricingUi();
                         }
+                        captureOnetimePriceHtml();
                         return;
                       }
                       try {
@@ -3092,13 +3147,13 @@
                         }
                       } catch (err) {}
                       nmnPricingEl = document.getElementById('nmn-pricing-data-' + sid);
-                      captureOnetimePriceHtml();
                       syncNmnPackSelectorActive();
                       if (plans.length) {
                         setMode('subscription');
                       } else {
                         nmnRefreshPricingUi();
                       }
+                      captureOnetimePriceHtml();
                     }
 
                     function nmnBindVariantChange(el) {
