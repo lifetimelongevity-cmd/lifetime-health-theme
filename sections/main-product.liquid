@@ -2485,26 +2485,31 @@
                     var priceRoot = productPage
                       ? productPage.querySelector('[data-update-block="price-compact-main"]')
                       : null;
-                    var stickyPriceRoot = productPage
-                      ? productPage.querySelector('[data-update-block="price-sticky-main"]')
-                      : null;
                     var lastOnetimePriceHtml = '';
                     var lastOnetimeStickyPriceHtml = '';
 
+                    function nmnGetStickyPriceRoot() {
+                      return productPage
+                        ? productPage.querySelector('[data-update-block="price-sticky-main"]')
+                        : null;
+                    }
+
                     function captureOnetimePriceHtml() {
                       if (priceRoot) lastOnetimePriceHtml = priceRoot.innerHTML;
-                      if (stickyPriceRoot) lastOnetimeStickyPriceHtml = stickyPriceRoot.innerHTML;
+                      var sr = nmnGetStickyPriceRoot();
+                      if (sr) lastOnetimeStickyPriceHtml = sr.innerHTML;
                     }
 
                     function nmnMirrorStickyPriceToBar() {
-                      if (!stickyPriceRoot) return;
+                      var sr = nmnGetStickyPriceRoot();
+                      if (!sr) return;
                       var bar = document.querySelector(
                         'sticky-add-to-cart[data-id="product-' + sid + '"]'
                       );
                       if (!bar) return;
                       var vis = bar.querySelector('[data-js-atc-price]');
                       if (!vis) return;
-                      vis.innerHTML = stickyPriceRoot.innerHTML;
+                      vis.innerHTML = sr.innerHTML;
                     }
 
                     function nmnApplyPriceToRoots(priceC, compareC, suff) {
@@ -2512,8 +2517,9 @@
                       if (priceRoot) {
                         priceRoot.innerHTML = nmnRenderMainPriceHtml(sid, priceC, compareC, s, false);
                       }
-                      if (stickyPriceRoot) {
-                        stickyPriceRoot.innerHTML = nmnRenderMainPriceHtml(sid, priceC, compareC, s, true);
+                      var sr = nmnGetStickyPriceRoot();
+                      if (sr) {
+                        sr.innerHTML = nmnRenderMainPriceHtml(sid, priceC, compareC, s, true);
                       }
                       nmnMirrorStickyPriceToBar();
                     }
@@ -2682,23 +2688,22 @@
                     }
 
                     function syncNmnOnetimePriceFromMap() {
-                      if (!priceRoot && !stickyPriceRoot) return;
+                      var sr = nmnGetStickyPriceRoot();
+                      if (!priceRoot && !sr) return;
                       var v = readNmnPricingVariant();
                       var suff = (productPage.dataset && productPage.dataset.nmnCurrencySuffix) || '';
                       if (!v) {
                         if (lastOnetimePriceHtml && priceRoot) priceRoot.innerHTML = lastOnetimePriceHtml;
-                        if (lastOnetimeStickyPriceHtml && stickyPriceRoot) {
-                          stickyPriceRoot.innerHTML = lastOnetimeStickyPriceHtml;
-                        }
+                        sr = nmnGetStickyPriceRoot();
+                        if (lastOnetimeStickyPriceHtml && sr) sr.innerHTML = lastOnetimeStickyPriceHtml;
                         nmnMirrorStickyPriceToBar();
                         return;
                       }
                       var priceC = numCents(v.price);
                       if (priceC == null) {
                         if (lastOnetimePriceHtml && priceRoot) priceRoot.innerHTML = lastOnetimePriceHtml;
-                        if (lastOnetimeStickyPriceHtml && stickyPriceRoot) {
-                          stickyPriceRoot.innerHTML = lastOnetimeStickyPriceHtml;
-                        }
+                        sr = nmnGetStickyPriceRoot();
+                        if (lastOnetimeStickyPriceHtml && sr) sr.innerHTML = lastOnetimeStickyPriceHtml;
                         nmnMirrorStickyPriceToBar();
                         return;
                       }
@@ -2707,7 +2712,8 @@
                     }
 
                     function syncNmnPriceDisplay() {
-                      if (!priceRoot && !stickyPriceRoot) return;
+                      var sr0 = nmnGetStickyPriceRoot();
+                      if (!priceRoot && !sr0) return;
                       if (!isSubscriptionUiActive()) {
                         syncNmnOnetimePriceFromMap();
                         return;
@@ -2715,9 +2721,8 @@
                       var p = getNmnAllocationPricing();
                       if (!p) {
                         if (lastOnetimePriceHtml && priceRoot) priceRoot.innerHTML = lastOnetimePriceHtml;
-                        if (lastOnetimeStickyPriceHtml && stickyPriceRoot) {
-                          stickyPriceRoot.innerHTML = lastOnetimeStickyPriceHtml;
-                        }
+                        var sr = nmnGetStickyPriceRoot();
+                        if (lastOnetimeStickyPriceHtml && sr) sr.innerHTML = lastOnetimeStickyPriceHtml;
                         nmnMirrorStickyPriceToBar();
                         return;
                       }
@@ -2916,6 +2921,14 @@
                     requestAnimationFrame(function () {
                       nmnMirrorStickyPriceToBar();
                     });
+                    function nmnSyncAfterFullDom() {
+                      nmnRefreshPricingUi();
+                    }
+                    if (document.readyState === 'loading') {
+                      document.addEventListener('DOMContentLoaded', nmnSyncAfterFullDom, { once: true });
+                    } else {
+                      setTimeout(nmnSyncAfterFullDom, 0);
+                    }
 
                     function nmnEnsureRecommendedPackOnLoad() {
                       try {
