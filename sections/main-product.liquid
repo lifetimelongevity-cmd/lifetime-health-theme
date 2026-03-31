@@ -194,6 +194,70 @@
           margin-top: 0;
           margin-bottom: var(--nmn-space-4);
         }
+        #product-{{ section.id }} .main-product-price .nmn-price-shipping-note {
+          display: flex;
+          align-items: center;
+          gap: var(--nmn-space-2);
+          margin: var(--nmn-space-2) 0 0;
+          padding: 0;
+          font-family: var(--font-body-family, 'Lato', sans-serif);
+          font-size: var(--nmn-fz-body-sm);
+          font-weight: 600;
+          line-height: var(--nmn-lh-body);
+          color: var(--color-text-main);
+        }
+        #product-{{ section.id }} .main-product-price .nmn-price-shipping-note__icon {
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 1.125rem;
+          height: 1.125rem;
+          color: #65c0b6;
+        }
+        #product-{{ section.id }} .main-product-price .nmn-price-shipping-note__icon svg {
+          width: 100%;
+          height: auto;
+        }
+        #product-{{ section.id }} .main-product-price .nmn-price-shipping-note__icon svg path {
+          fill: currentColor;
+        }
+        #product-{{ section.id }} .nmn-quality-pills {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: stretch;
+          gap: var(--nmn-space-2) var(--nmn-space-3);
+          margin: 0 0 var(--nmn-space-3);
+          padding: 0;
+          list-style: none;
+        }
+        #product-{{ section.id }} .nmn-quality-pills__item {
+          display: inline-flex;
+          align-items: center;
+          gap: var(--nmn-space-2);
+          max-width: 100%;
+          padding: var(--nmn-space-2) var(--nmn-space-3);
+          border-radius: var(--nmn-radius-md);
+          border: 1px solid var(--nmn-color-gray-200);
+          background: color-mix(in srgb, #65c0b6 8%, var(--color-background-main));
+          font-family: var(--font-body-family, 'Lato', sans-serif);
+          font-size: var(--nmn-fz-body-sm);
+          font-weight: 600;
+          line-height: 1.35;
+          color: var(--color-text-main);
+        }
+        #product-{{ section.id }} .nmn-quality-pills__icon-img {
+          width: 1.375rem;
+          height: 1.375rem;
+          object-fit: contain;
+          flex-shrink: 0;
+        }
+        #product-{{ section.id }} .nmn-quality-pills__icon-svg {
+          width: 1.375rem;
+          height: 1.375rem;
+          flex-shrink: 0;
+          display: block;
+        }
         #product-{{ section.id }} .main-product-price .product-price.nmn-price--plan {
           display: flex;
           flex-direction: row;
@@ -580,6 +644,11 @@
           font-weight: 500;
           color: var(--color-secondary-text-main, var(--nmn-color-gray-600));
           text-align: left;
+        }
+        #product-{{ section.id }} .nmn-cta-footer__ship-date {
+          font-weight: 700;
+          color: var(--color-text-main);
+          letter-spacing: -0.02em;
         }
         #product-{{ section.id }} .nmn-cta-footer__dot {
           flex-shrink: 0;
@@ -1395,6 +1464,14 @@
                   {%- endif -%}
                 </span>
               {%- endunless -%}
+              {%- if template.suffix == '13_nmn' -%}
+                <p class="nmn-price-shipping-note">
+                  <span class="nmn-price-shipping-note__icon" aria-hidden="true">
+                    {%- render 'theme-symbols', icon: 'check' -%}
+                  </span>
+                  Gratis-Versand
+                </p>
+              {%- endif -%}
             </div>
 
           {%- when 'tax_info' -%}
@@ -2284,7 +2361,10 @@
                             </span>
                             <span class="nmn-cta-footer__dot" aria-hidden="true">·</span>
                             <span class="nmn-cta-footer__segment">
-                              <span class="nmn-cta-footer__text" data-nmn-ship-by></span>
+                              <span class="nmn-cta-footer__text">
+                                <span class="nmn-cta-footer__ship-prefix">Versand bis </span>
+                                <span class="nmn-cta-footer__ship-date" data-nmn-ship-date></span>
+                              </span>
                             </span>
                           </div>
                         </div>
@@ -2728,11 +2808,11 @@
 
                     (function nmnInitShipByLine() {
                       if (!productPage) return;
-                      var shipEl = productPage.querySelector('[data-nmn-ship-by]');
-                      if (!shipEl) return;
+                      var shipDateEl = productPage.querySelector('[data-nmn-ship-date]');
+                      if (!shipDateEl) return;
                       var d = new Date();
                       d.setDate(d.getDate() + 1);
-                      shipEl.textContent = 'Versand bis ' + nmnFormatShipByDe(d);
+                      shipDateEl.textContent = nmnFormatShipByDe(d);
                     })();
 
                     function nmnOnVariantChange(ev) {
