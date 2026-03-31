@@ -258,6 +258,7 @@
           background: transparent;
         }
         #product-{{ section.id }} .nmn-sub-toggle__card-price-save {
+          display: none;
           font-size: var(--nmn-fz-body-sm);
           font-weight: 600;
           color: var(--nmn-color-success);
@@ -276,14 +277,6 @@
           justify-content: space-between;
           gap: var(--nmn-space-2) var(--nmn-space-3);
           width: 100%;
-        }
-        #product-{{ section.id }} .nmn-sub-toggle__social-proof {
-          font-family: var(--font-body-family, 'Lato', -apple-system, BlinkMacSystemFont, sans-serif);
-          font-size: var(--nmn-fz-micro);
-          font-weight: 400;
-          line-height: var(--nmn-lh-body);
-          letter-spacing: 0.02em;
-          color: var(--color-secondary-text-main);
         }
         #product-{{ section.id }} .nmn-sub-toggle__badge {
           flex-shrink: 0;
@@ -1807,8 +1800,6 @@
                   class="nmn-sub-toggle"
                   data-nmn-sub-root
                   data-section-id="{{ section.id }}"
-                  role="group"
-                  aria-label="Kaufoption"
                 >
                   <script
                     type="application/json"
@@ -1885,7 +1876,7 @@
                     {%- if nmn_pack_option and nmn_pack_option.values.size > 1 -%}
                       <div class="nmn-buy-module__step">
                         <p class="nmn-buy-module__field-label" id="nmn-pack-label-{{ section.id }}">
-                          Packungsgröße
+                          Anzahl Packungen
                         </p>
                         <div
                           class="nmn-pack-selector"
@@ -1921,7 +1912,7 @@
                                 {%- endcase -%}
                               </span>
                               {%- if forloop.index == 2 -%}
-                                <span class="nmn-pack-selector__badge">Beliebteste Wahl</span>
+                                <span class="nmn-pack-selector__badge">Meist gewählt</span>
                               {%- endif -%}
                             </button>
                           {%- endfor -%}
@@ -1929,7 +1920,14 @@
                       </div>
                     {%- endif -%}
                     <div class="nmn-buy-module__step nmn-buy-module__step--options">
-                      <div class="nmn-sub-toggle__stack">
+                      <p class="nmn-buy-module__field-label" id="nmn-mode-label-{{ section.id }}">
+                        Abo oder Einmalkauf
+                      </p>
+                      <div
+                        class="nmn-sub-toggle__stack"
+                        role="group"
+                        aria-labelledby="nmn-mode-label-{{ section.id }}"
+                      >
                         <button
                           type="button"
                           class="nmn-sub-toggle__btn nmn-sub-toggle__btn--primary nmn-sub-toggle__btn--active"
@@ -1938,10 +1936,9 @@
                         >
                           <span class="nmn-sub-toggle__head">
                             <span class="nmn-sub-toggle__head-main">
-                              <span class="nmn-sub-toggle__title">Abo &amp; sparen</span>
+                              <span class="nmn-sub-toggle__title">Regelmäßige Nachlieferung</span>
                               <span class="nmn-sub-toggle__badge">Empfohlen</span>
                             </span>
-                            <span class="nmn-sub-toggle__social-proof">Meistgewählte Option</span>
                           </span>
                           <div data-nmn-card-price-root></div>
                           <span class="nmn-sub-toggle__subs">
@@ -1950,13 +1947,13 @@
                               data-nmn-savings-benefit
                             ></span>
                             <span class="nmn-sub-toggle__sub nmn-sub-toggle__sub--benefit">
-                              Kostenloser Versand im Abo
+                              Versand im Abo kostenlos
                             </span>
                           </span>
                           <div class="nmn-sub-toggle__divider" aria-hidden="true"></div>
                           <span class="nmn-sub-toggle__trust">
                             <span class="nmn-sub-toggle__trust-compact">
-                              Jederzeit pausierbar · Jederzeit kündbar · Kein Risiko
+                              Pausieren oder kündigen – jederzeit
                             </span>
                           </span>
                         </button>
@@ -1968,8 +1965,9 @@
                         >
                           <span class="nmn-sub-toggle__title">Einmaliger Kauf</span>
                           <span class="nmn-sub-toggle__onetime-downsides">
-                            <span class="nmn-sub-toggle__onetime-down">Kein Rabatt</span>
-                            <span class="nmn-sub-toggle__onetime-down">Versandkosten können anfallen</span>
+                            <span class="nmn-sub-toggle__onetime-down">
+                              Einmal bestellen – ohne Folgelieferung
+                            </span>
                           </span>
                         </button>
                       </div>
@@ -2107,9 +2105,9 @@
                               if current_variant.available
                                 unless block.settings.show_preorder
                                   if template.suffix == '13_nmn' and nmn_atc_plan_count > 0
-                                    echo 'Jetzt sparen & Abo starten'
+                                    echo 'Mit Abo in den Warenkorb'
                                   elsif template.suffix == '13_nmn'
-                                    echo 'Einmalig kaufen'
+                                    echo 'Einmalig in den Warenkorb'
                                   else
                                     echo 'products.page.add_to_cart_button' | t
                                   endif
@@ -2131,7 +2129,7 @@
                         </span>
                       </button>
                       {%- if template.suffix == '13_nmn' -%}
-                        <p class="nmn-cta-trust">Jederzeit pausierbar · Kein Risiko</p>
+                        <p class="nmn-cta-trust">Nach dem Kauf: Bestellung und Lieferung im Konto</p>
                       {%- endif -%}
 
                       {%- liquid
@@ -2516,7 +2514,7 @@
                         btnSub &&
                         btnSub.classList.contains('nmn-sub-toggle__btn--active') &&
                         plans.length > 0;
-                      cta.textContent = isSub ? 'Jetzt sparen & Abo starten' : 'Einmalig kaufen';
+                      cta.textContent = isSub ? 'Mit Abo in den Warenkorb' : 'Einmalig in den Warenkorb';
                     }
 
                     function nmnRefreshPricingUi() {
