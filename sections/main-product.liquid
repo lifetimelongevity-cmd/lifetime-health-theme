@@ -195,13 +195,15 @@
           margin-bottom: var(--nmn-space-4);
         }
         #product-{{ section.id }} .main-product-price .nmn-price-per-day {
-          margin: var(--nmn-space-2) 0 0;
+          margin: 0.35rem 0 0;
           padding: 0;
           font-family: var(--font-body-family, 'Lato', sans-serif);
-          font-size: var(--nmn-fz-micro);
-          font-weight: 500;
-          line-height: var(--nmn-lh-body);
+          font-size: 0.8125rem;
+          font-weight: 400;
+          line-height: 1.35;
+          letter-spacing: 0.01em;
           color: var(--color-secondary-text-main, var(--nmn-color-gray-600));
+          opacity: 0.92;
         }
         #product-{{ section.id }} .main-product-price .nmn-price-per-day:empty {
           display: none;
@@ -1510,39 +1512,42 @@
             </h1>
 
           {%- when 'price' -%}
-            <div {{ block.shopify_attributes }} data-update-block="price-compact-main" class="main-product-price">
-              <span class="show-block-if-variant-selected">
-                {%- if template.suffix == '13_nmn' -%}
-                  {%- render 'product-price',
-                    variant: current_variant,
-                    target: current_variant,
-                    id: section.id,
-                    price_extra_class: 'nmn-price--plan'
-                  -%}
-                {%- else -%}
-                  {%- render 'product-price', variant: current_variant, target: current_variant, id: section.id -%}
-                {%- endif -%}
-              </span>
-              {%- unless default_to_first_variant -%}
-                <span class="show-block-if-variant-not-selected-yet">
+            <div {{ block.shopify_attributes }} class="main-product-price">
+              {%- comment -%} Nur dieser innere Block wird per JS ersetzt (NMN), damit €/Tag + Versandhinweis erhalten bleiben. {%- endcomment -%}
+              <div data-update-block="price-compact-main">
+                <span class="show-block-if-variant-selected">
                   {%- if template.suffix == '13_nmn' -%}
                     {%- render 'product-price',
                       variant: current_variant,
-                      target: product,
-                      product_price_varies: product.price_varies,
+                      target: current_variant,
                       id: section.id,
                       price_extra_class: 'nmn-price--plan'
                     -%}
                   {%- else -%}
-                    {%- render 'product-price',
-                      variant: current_variant,
-                      target: product,
-                      product_price_varies: product.price_varies,
-                      id: section.id
-                    -%}
+                    {%- render 'product-price', variant: current_variant, target: current_variant, id: section.id -%}
                   {%- endif -%}
                 </span>
-              {%- endunless -%}
+                {%- unless default_to_first_variant -%}
+                  <span class="show-block-if-variant-not-selected-yet">
+                    {%- if template.suffix == '13_nmn' -%}
+                      {%- render 'product-price',
+                        variant: current_variant,
+                        target: product,
+                        product_price_varies: product.price_varies,
+                        id: section.id,
+                        price_extra_class: 'nmn-price--plan'
+                      -%}
+                    {%- else -%}
+                      {%- render 'product-price',
+                        variant: current_variant,
+                        target: product,
+                        product_price_varies: product.price_varies,
+                        id: section.id
+                      -%}
+                    {%- endif -%}
+                  </span>
+                {%- endunless -%}
+              </div>
               {%- if template.suffix == '13_nmn' -%}
                 <p class="nmn-price-per-day" data-nmn-per-day aria-live="polite"></p>
                 <p class="nmn-price-shipping-note">
