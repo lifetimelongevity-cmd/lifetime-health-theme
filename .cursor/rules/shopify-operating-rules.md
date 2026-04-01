@@ -46,6 +46,19 @@ Discovery should identify where relevant:
 
 Do not jump into implementation without enough theme context.
 
+## Shopify platform limits (avoid `theme push` / Theme Check failures)
+
+These constraints are enforced when validating or pushing themes (observed with German admin locale):
+
+1. **Product JSON templates (`templates/product.*.json`)**  
+   - The `order` array may contain **at most 25 section instances** per product template.  
+   - Before adding a new section to `order`, **count existing entries**; if at the limit, remove or merge a section (or omit the new section from the JSON and add it only after freeing a slot in the Theme Editor).
+
+2. **Section schema `name` (and related editor labels)**  
+   - The section’s top-level `"name"` in `{% schema %}` must be **≤ 25 characters** (failure message: *name ist zu lang*).  
+   - Apply the same length discipline to **`presets[].name`** when Shopify validates them.  
+   - Prefer short German-friendly names (e.g. `LT PDP Trust-Brücke`) over long marketing titles.
+
 ## Implementation rules
 When implementing:
 - reuse existing theme sections, snippets, classes, containers, and UI patterns first
