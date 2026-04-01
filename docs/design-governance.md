@@ -48,6 +48,97 @@ ask: "Does this feel like these references?"
 
 These are directional, not prescriptive. Do not copy layouts — absorb the feeling.
 
+## 2c. VISUAL DIRECTION
+
+### Core principle
+Visuals carry emotional permission. Text carries rational justification.
+Both are required. Neither replaces the other.
+A text-only section is never sufficient for any section above the FAQ.
+Every section must contain at least one non-text visual element:
+image, stat callout, certification badge, or credential row.
+
+---
+
+### Brand visual identity
+LIFETIME is a premium longevity brand. The visual language is:
+- Clinical but warm — science without coldness
+- Minimal but alive — never sterile or empty
+- Premium but accessible — not luxury fashion, not drugstore health
+- The feeling: what your body looks like when it works perfectly
+
+The visual target is closer to Aesop or Withings than to a pharmacy or a fitness brand.
+
+---
+
+### Image hierarchy (priority order)
+1. Human body close-ups — skin, hands, neck, eyes — specific and intimate
+2. Product in context — capsule, bottle, or packaging on a surface with intentional light
+3. Ingredient or scientific macro — powder, molecule, lab equipment
+4. Lifestyle moment — specific and minimal, never generic wellness tropes
+5. Abstract light or texture — only when nothing above fits
+
+---
+
+### Approved visual directions (use these to form Unsplash search queries)
+
+| Section context | Approved search directions |
+|----------------|---------------------------|
+| Mechanism / how it works | "human skin texture natural light minimal", "skin care close-up studio", "collagen skin macro" |
+| Ingredient / science | "laboratory glassware minimal light", "white powder macro minimal", "science lab clean aesthetic" |
+| Quality / trust | "capsule pill white marble minimal", "supplement bottle natural light", "laboratory testing clean" |
+| Energy / vitality | "hands morning light minimal", "neck skin golden hour", "human skin warm light close-up" |
+| General / fallback | "minimal health aesthetic clean light", "skin care product minimal studio" |
+
+---
+
+### Blocked visual directions (never use these)
+- Animals, insects, or nature macro (frogs, plants, leaves)
+- Generic wellness tropes (yoga poses, green smoothies, sunrise meditation)
+- Crowded or busy compositions
+- Dark, moody, or low-key lighting
+- Sports or gym imagery
+- Floating product on pure white (below fold)
+- Any image that could appear in a pharmacy catalogue
+
+---
+
+### Image technical rules
+- Source: Unsplash API via `node scripts/fetch-image.js`
+- Resolution: `urls.regular` (1080px) — sufficient for all section uses
+- Orientation: landscape for split layouts, portrait acceptable for tall columns
+- Aspect ratio in section: 4/5 for portrait columns, 3/2 for landscape fills
+- object-fit: cover always
+- Border-radius: `--radius-md` (12px) always
+- Never place text directly over an image without a dark overlay
+
+---
+
+### Unsplash search query rules
+When choosing a search query:
+1. Refer to the Approved visual directions table above for the section context
+2. Keep queries specific — 4 to 6 words maximum
+3. Always include a lighting or aesthetic qualifier: "natural light", "minimal", "studio", "clean"
+4. Never use brand names, supplement names, or medical terms as search terms — Unsplash won't match them well
+5. If the first result looks wrong (wrong subject, wrong mood), try the next approved direction for that context
+6. Log the chosen query and photographer credit as a code comment in the section file
+
+---
+
+### Image sourcing workflow (mandatory for all split layout sections)
+
+Before writing any Liquid or CSS code for a split layout section:
+
+1. Identify the section context from the table above
+2. Choose the most appropriate search query from the approved directions
+3. Run: `node scripts/fetch-image.js "[chosen query]" [section-name].jpg`
+4. Confirm the file was saved to `assets/` before proceeding
+5. If the download fails or the result is clearly wrong subject matter, try an alternative query from the same context row
+6. Reference the saved file in the Liquid image tag
+7. Add a comment in the code: `{% comment %} Image: [query used] — Photo by [photographer] on Unsplash {% endcomment %}`
+
+This workflow is part of Section 12. It runs automatically whenever a split layout is specified.
+No instruction to "find an image" is needed in the build prompt.
+
 ---
 
 ## 3. DESIGN TOKENS

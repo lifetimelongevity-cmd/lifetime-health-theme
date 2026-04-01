@@ -1,6 +1,14 @@
 {% comment %}
-  LT PDP — Mechanism (Wie es wirkt). design-governance.md §12 — body-only, centered.
+  LT PDP — Mechanism (Wie es wirkt). §12 + §4 split layout (2-col, gap --space-6, ≤768px 1-col).
 {% endcomment %}
+
+{%- liquid
+  assign has_media = false
+  if section.settings.image != blank
+    assign has_media = true
+  endif
+  assign img_alt = section.settings.image_alt | default: section.settings.heading | escape
+-%}
 
 <div class="container container--large remove-empty-space">
   <section
@@ -8,27 +16,39 @@
     class="lt-pdp-mechanism"
     aria-labelledby="lt-pdp-mechanism-heading-{{ section.id }}"
   >
-    <header class="lt-pdp-mechanism__header">
-      <p class="lt-pdp-mechanism__label">{{ section.settings.section_label | escape }}</p>
-      <h2
-        class="lt-pdp-mechanism__title"
-        id="lt-pdp-mechanism-heading-{{ section.id }}"
-      >
-        {{- section.settings.heading | escape -}}
-      </h2>
-    </header>
+    <div
+      class="lt-pdp-mechanism__split{% if has_media %} lt-pdp-mechanism__split--has-media{% endif %}"
+    >
+      {%- if has_media -%}
+        <div class="lt-pdp-mechanism__media">
+          {{
+            section.settings.image
+            | image_url: width: 1400
+            | image_tag: loading: 'lazy', class: 'lt-pdp-mechanism__img', alt: img_alt
+          }}
+        </div>
+      {%- endif -%}
 
-    {%- if section.settings.body != blank -%}
-      <div class="lt-pdp-mechanism__body rte">
-        {{ section.settings.body }}
+      <div class="lt-pdp-mechanism__column lt-pdp-mechanism__column--intro">
+        <p class="lt-pdp-mechanism__label">{{ section.settings.section_label | escape }}</p>
+        <h2 class="lt-pdp-mechanism__title" id="lt-pdp-mechanism-heading-{{ section.id }}">
+          {{- section.settings.heading | escape -}}
+        </h2>
       </div>
-    {%- endif -%}
+
+      {%- if section.settings.body != blank -%}
+        <div class="lt-pdp-mechanism__column lt-pdp-mechanism__column--body rte">
+          {{ section.settings.body }}
+        </div>
+      {%- endif -%}
+    </div>
   </section>
 </div>
 
 {% stylesheet %}
   .lt-pdp-mechanism {
     --dg-space-4: 1rem;
+    --dg-space-5: 1.5rem;
     --dg-space-6: 2rem;
     --dg-space-8: 4rem;
     --dg-space-9: 5rem;
@@ -40,24 +60,41 @@
     --dg-leading-relaxed: 1.6;
     --dg-weight-medium: 500;
     --dg-weight-bold: 700;
-    --dg-body-max: 40rem;
+    --dg-radius-md: 0.75rem;
 
     padding-block: var(--dg-space-9);
     background: var(--color-background-main);
     color: var(--color-text-main);
   }
 
-  @media screen and (max-width: 749px) {
+  @media screen and (max-width: 768px) {
     .lt-pdp-mechanism {
       padding-block: var(--dg-space-8);
     }
   }
 
-  .lt-pdp-mechanism__header {
-    max-width: var(--dg-body-max);
-    margin-inline: auto;
-    margin-bottom: var(--dg-space-6);
-    text-align: center;
+  .lt-pdp-mechanism__split {
+    display: grid;
+    gap: var(--dg-space-6);
+    align-items: start;
+    grid-template-columns: 1fr;
+  }
+
+  .lt-pdp-mechanism__media {
+    margin: 0;
+    border-radius: var(--dg-radius-md);
+    overflow: hidden;
+  }
+
+  .lt-pdp-mechanism__img {
+    width: 100%;
+    height: auto;
+    vertical-align: middle;
+    display: block;
+  }
+
+  .lt-pdp-mechanism__column--intro {
+    text-align: start;
   }
 
   .lt-pdp-mechanism__label {
@@ -80,23 +117,61 @@
     color: var(--color-text-main);
   }
 
-  .lt-pdp-mechanism__body {
-    max-width: var(--dg-body-max);
-    margin-inline: auto;
-    text-align: center;
+  .lt-pdp-mechanism__column--body {
     font-family: var(--font-stack-body-primary);
     font-size: var(--dg-text-body-lg);
     line-height: var(--dg-leading-relaxed);
     font-weight: 400;
     color: var(--color-secondary-text-main);
+    text-align: start;
   }
 
-  .lt-pdp-mechanism__body p {
+  .lt-pdp-mechanism__column--body p {
     margin: 0 0 var(--dg-space-4);
   }
 
-  .lt-pdp-mechanism__body p:last-child {
+  .lt-pdp-mechanism__column--body p:last-child {
     margin-bottom: 0;
+  }
+
+  @media screen and (min-width: 769px) {
+    .lt-pdp-mechanism__split {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .lt-pdp-mechanism__split--has-media .lt-pdp-mechanism__media {
+      grid-column: 1;
+      grid-row: 1 / span 2;
+    }
+
+    .lt-pdp-mechanism__split--has-media .lt-pdp-mechanism__column--intro {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    .lt-pdp-mechanism__split--has-media .lt-pdp-mechanism__column--body {
+      grid-column: 2;
+      grid-row: 2;
+    }
+
+    .lt-pdp-mechanism__split:not(.lt-pdp-mechanism__split--has-media) .lt-pdp-mechanism__column--intro {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .lt-pdp-mechanism__split:not(.lt-pdp-mechanism__split--has-media) .lt-pdp-mechanism__column--body {
+      grid-column: 2;
+      grid-row: 1;
+    }
+  }
+
+  @media screen and (max-width: 768px) {
+    .lt-pdp-mechanism__split--has-media .lt-pdp-mechanism__media,
+    .lt-pdp-mechanism__split--has-media .lt-pdp-mechanism__column--intro,
+    .lt-pdp-mechanism__split--has-media .lt-pdp-mechanism__column--body {
+      grid-column: auto;
+      grid-row: auto;
+    }
   }
 {% endstylesheet %}
 
@@ -124,8 +199,24 @@
     {
       "type": "richtext",
       "id": "body",
-      "label": "Fließtext",
+      "label": "Fließtext (rechte Spalte)",
       "default": "<p>Dein Körper nutzt NAD⁺ in nahezu jeder Zelle – als Grundlage für Energie, Regeneration und viele alltägliche Prozesse.</p><p>Mit zunehmendem Alter kann sich dieses Niveau verändern.</p><p>NMN liefert deinem Körper einen Baustein, aus dem er NAD⁺ bilden kann – einfach integrierbar in deine tägliche Routine.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Bild (optional)"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Abbildung",
+      "info": "Wenn gesetzt: links (Desktop), volle Breite oben (Mobile). Ohne Bild: zweispaltig nur Text — Label + Überschrift links, Fließtext rechts."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Alt-Text Bild",
+      "default": ""
     }
   ],
   "presets": [
