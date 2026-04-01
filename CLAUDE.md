@@ -120,3 +120,12 @@ Usage:
 
 These rules govern all visual and UX decisions.
 Always follow them unless explicitly overridden.
+
+### DESIGN REVIEW STEP (mandatory before any section is finalized)
+
+After generating implementation, run this prompt:
+
+"Review the section above against design-governance.md Section 6b (visual weight),
+Section 11 (subtraction rules), and the Visual Craft QA checklist. List any failures.
+Then produce a revised version that fixes them. Do not explain the changes — just
+output the corrected code."
