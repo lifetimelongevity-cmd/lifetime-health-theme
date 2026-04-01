@@ -59,6 +59,10 @@ These constraints are enforced when validating or pushing themes (observed with 
    - Apply the same length discipline to **`presets[].name`** when Shopify validates them.  
    - Prefer short German-friendly names (e.g. `LT PDP Trust-Brücke`) over long marketing titles.
 
+3. **Section schema setting `default` values**  
+   - A **`default` must not be an empty string** (`""`). Theme Check / push reports: *default darf nicht leer sein* (e.g. German locale).  
+   - For optional text: **omit the `default` key** and handle empties in Liquid (`| default: …`), or use a non-empty placeholder default.
+
 ## Implementation rules
 When implementing:
 - reuse existing theme sections, snippets, classes, containers, and UI patterns first

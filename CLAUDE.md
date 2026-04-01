@@ -36,7 +36,7 @@ Shopify's three-layer rendering stack:
 2. **Templates** (`/templates/`) — JSON files declaring which sections to render per page type
 3. **Sections** (`/sections/`) — Reusable page components (117 files); each has Liquid markup + `{% schema %}` for theme editor settings
 
-**Limits (Theme Check / `theme push`):** Product JSON templates allow **at most 25** sections in `order`. Section schema `"name"` (and preset names where validated) must be **≤ 25 characters** (e.g. German admin: *name ist zu lang*). Details: `.cursor/rules/shopify-operating-rules.md` → *Shopify platform limits*.
+**Limits (Theme Check / `theme push`):** Product JSON templates allow **at most 25** sections in `order`. Section schema `"name"` (and preset names where validated) must be **≤ 25 characters** (e.g. German admin: *name ist zu lang*). Schema settings must not use **`"default": ""`** (*default darf nicht leer sein*); omit `default` or use non-empty text. Details: `.cursor/rules/shopify-operating-rules.md` → *Shopify platform limits*.
 4. **Snippets** (`/snippets/`) — Stateless partials rendered via `{% render 'snippet-name' %}`
 5. **Blocks** (`/blocks/`) — Nested components within sections
 
