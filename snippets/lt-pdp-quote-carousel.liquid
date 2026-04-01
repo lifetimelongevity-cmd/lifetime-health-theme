@@ -23,14 +23,19 @@
     assign qc_slides = qc_slides | plus: 1
   endif
 -%}
+{%- liquid
+  assign qc_surface = block.settings.carousel_surface | default: 'display'
+  assign qc_vmin = block.settings.quote_viewport_min_height | default: 128
+-%}
 {%- if qc_slides == 0 -%}
   {%- comment -%} Editor hint: fill at least one slide quote {%- endcomment -%}
 {%- else -%}
   <div
-    class="lt-quote-carousel lt-quote-carousel--align-{{ block.settings.content_alignment }}"
+    class="lt-quote-carousel lt-quote-carousel--align-{{ block.settings.content_alignment }} lt-quote-carousel--surface-{{ qc_surface }}"
     data-lt-quote-carousel
     data-autoplay-seconds="{{ block.settings.autoplay_seconds }}"
     data-block-id="{{ block.id }}"
+    style="--lt-qc-viewport-min: {{ qc_vmin }}px;"
   >
     <div class="lt-quote-carousel__viewport">
       {%- assign qc_i = -1 -%}
@@ -348,4 +353,29 @@
       </div>
     {%- endif -%}
   </div>
+
+  {%- liquid
+    assign qc_show_seal = false
+    if block.settings.show_trust_seal and block.settings.trust_seal_text != blank
+      assign qc_show_seal = true
+    endif
+  -%}
+  {%- if qc_show_seal -%}
+    <div class="lt-pdp-trust-seal" role="note">
+      <span class="lt-pdp-trust-seal__icon" aria-hidden="true">
+        {%- if block.settings.trust_seal_image != blank -%}
+          {{ block.settings.trust_seal_image | image_url: width: 64 | image_tag: class: 'lt-pdp-trust-seal__icon-img', loading: 'lazy', alt: '' }}
+        {%- else -%}
+          <svg class="lt-pdp-trust-seal__icon-svg" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M12 3 2 8l10 5 8-4v6H4v2h16v-8l2-1-10-5Z" fill="#1a1a1a"/>
+            <path d="M7 14.5 12 17l5-2.5" stroke="#c9a227" stroke-width="1.2" stroke-linecap="round"/>
+            <ellipse cx="18" cy="5.5" rx="1.2" ry="2" fill="#c9a227"/>
+          </svg>
+        {%- endif -%}
+      </span>
+      <span class="lt-pdp-trust-seal__text">{{ block.settings.trust_seal_text | escape }}</span>
+    </div>
+  {%- elsif block.settings.show_footer_line and block.settings.footer_line != blank -%}
+    <p class="lt-quote-carousel__footer-line lt-quote-carousel__footer-line--below">{{ block.settings.footer_line | escape }}</p>
+  {%- endif -%}
 {%- endif -%}
