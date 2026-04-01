@@ -1,0 +1,304 @@
+{% comment %}
+  Stacked campaign panels + optional scarcity CTA band. Modular blocks for theme editor.
+{% endcomment %}
+
+<section
+  id="lt-campaign-stack-{{ section.id }}"
+  class="lt-campaign-stack"
+  aria-label="{{ section.settings.section_aria_label | escape }}"
+>
+  <div class="container container--large">
+    {%- for block in section.blocks -%}
+      {%- case block.type -%}
+        {%- when 'panel' -%}
+          <div class="lt-campaign-stack__panel" {{ block.shopify_attributes }}>
+            {%- if block.settings.label != blank -%}
+              <p class="lt-campaign-stack__label">{{ block.settings.label | escape }}</p>
+            {%- endif -%}
+            {%- if block.settings.title != blank -%}
+              <h2 class="lt-campaign-stack__title">{{ block.settings.title | escape }}</h2>
+            {%- endif -%}
+            {%- if block.settings.body != blank -%}
+              <div class="lt-campaign-stack__body rte">{{ block.settings.body }}</div>
+            {%- endif -%}
+          </div>
+
+        {%- when 'scarcity_cta' -%}
+          {%- liquid
+            assign bar_href = block.settings.cta_url
+            if block.settings.product != blank
+              assign bar_href = block.settings.product.url
+            endif
+          -%}
+          <div class="lt-campaign-stack__scarcity" {{ block.shopify_attributes }}>
+            {%- if block.settings.title != blank -%}
+              <h2 class="lt-campaign-stack__scarcity-title">{{ block.settings.title | escape }}</h2>
+            {%- endif -%}
+            {%- if block.settings.body != blank -%}
+              <div class="lt-campaign-stack__scarcity-body rte">{{ block.settings.body }}</div>
+            {%- endif -%}
+            {%- if bar_href != blank and block.settings.cta_label != blank -%}
+              <a
+                href="{{ bar_href }}"
+                class="lt-campaign-stack__scarcity-cta button button--solid"
+              >
+                <span class="button__text">{{ block.settings.cta_label | escape }}</span>
+              </a>
+            {%- endif -%}
+          </div>
+      {%- endcase -%}
+    {%- endfor -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .lt-campaign-stack {
+    --cs-space-4: 1rem;
+    --cs-space-5: 1.5rem;
+    --cs-space-6: 2rem;
+    --cs-space-8: 4rem;
+    --cs-space-9: 5rem;
+    --cs-text-micro: 0.75rem;
+    --cs-text-h2: 1.75rem;
+    --cs-text-body: 1rem;
+    --cs-text-body-lg: 1.125rem;
+    --cs-leading-heading: 1.15;
+    --cs-leading-body: 1.4;
+    --cs-leading-relaxed: 1.6;
+    --cs-weight-medium: 500;
+    --cs-weight-bold: 700;
+    --cs-max: 40rem;
+    --cs-warm: #f6f4f1;
+    --cs-cta-bg: #c7a39b;
+    --cs-cta-text: #fff;
+    --cs-cta-hover: #b8928a;
+    --cs-radius: 0.75rem;
+
+    padding-bottom: var(--cs-space-8);
+  }
+
+  .lt-campaign-stack__panel {
+    max-width: var(--cs-max);
+    margin: 0 auto var(--cs-space-9);
+    text-align: center;
+  }
+
+  .lt-campaign-stack__panel:last-of-type {
+    margin-bottom: var(--cs-space-8);
+  }
+
+  .lt-campaign-stack__label {
+    margin: 0 0 var(--cs-space-4);
+    font-family: var(--font-stack-body-primary);
+    font-size: var(--cs-text-micro);
+    font-weight: var(--cs-weight-medium);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: var(--cs-leading-body);
+    color: var(--color-secondary-text-main);
+  }
+
+  .lt-campaign-stack__title {
+    margin: 0 0 var(--cs-space-5);
+    font-family: var(--font-stack-headings-primary);
+    font-size: var(--cs-text-h2);
+    line-height: var(--cs-leading-heading);
+    font-weight: var(--cs-weight-bold);
+    color: var(--color-text-main);
+    letter-spacing: -0.02em;
+  }
+
+  .lt-campaign-stack__body {
+    font-family: var(--font-stack-body-primary);
+    font-size: var(--cs-text-body-lg);
+    line-height: var(--cs-leading-relaxed);
+    color: var(--color-secondary-text-main);
+    text-align: start;
+  }
+
+  .lt-campaign-stack__body ul {
+    margin: 0;
+    padding-left: 1.25rem;
+  }
+
+  .lt-campaign-stack__body li {
+    margin-bottom: var(--cs-space-4);
+  }
+
+  .lt-campaign-stack__body li:last-child {
+    margin-bottom: 0;
+  }
+
+  .lt-campaign-stack__scarcity {
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: var(--cs-space-8) var(--cs-space-6);
+    text-align: center;
+    background: var(--cs-warm);
+    border-radius: var(--cs-radius);
+  }
+
+  .lt-campaign-stack__scarcity-title {
+    margin: 0 0 var(--cs-space-4);
+    font-family: var(--font-stack-headings-primary);
+    font-size: var(--cs-text-h2);
+    line-height: var(--cs-leading-heading);
+    font-weight: var(--cs-weight-bold);
+    color: var(--color-text-main);
+  }
+
+  .lt-campaign-stack__scarcity-body {
+    margin-bottom: var(--cs-space-6);
+    font-family: var(--font-stack-body-primary);
+    font-size: var(--cs-text-body-lg);
+    line-height: var(--cs-leading-relaxed);
+    color: var(--color-secondary-text-main);
+  }
+
+  .lt-campaign-stack__scarcity-cta.button--solid {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 48px;
+    padding: 0.875rem 2rem;
+    width: 100%;
+    max-width: 22rem;
+    background: var(--cs-cta-bg);
+    color: var(--cs-cta-text);
+    border: none;
+    border-radius: 999px;
+    font-family: var(--font-stack-body-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .no-touchevents .lt-campaign-stack__scarcity-cta.button--solid:hover {
+    background: var(--cs-cta-hover);
+    color: var(--cs-cta-text);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT Kampagne Inhalt",
+  "tag": "section",
+  "class": "section-lt-campaign-stack",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_aria_label",
+      "label": "Abschnitt (Barrierefreiheit)",
+      "default": "Kampagneninhalt"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "panel",
+      "name": "Textblock",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "HINTERGRUND"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Überschrift",
+          "default": "Warum wir diese Charge separat anbieten"
+        },
+        {
+          "type": "richtext",
+          "id": "body",
+          "label": "Text",
+          "default": "<p>Diese NMN-Kapseln stammen aus einer früheren Produktionscharge mit der bisherigen Verpackung. Parallel haben wir unser Design weiterentwickelt. Der Inhalt erfüllt dieselben Qualitätsanforderungen wie unsere aktuelle Linie und wird unabhängig geprüft.</p>"
+        }
+      ]
+    },
+    {
+      "type": "scarcity_cta",
+      "name": "Knappheit + CTA",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Überschrift",
+          "default": "Nur solange der Vorrat reicht"
+        },
+        {
+          "type": "richtext",
+          "id": "body",
+          "label": "Text",
+          "default": "<p>Die verfügbare Menge ist bewusst begrenzt. Wenn der Restbestand verkauft ist, endet dieses Angebot.</p>"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Produkt (Link)"
+        },
+        {
+          "type": "url",
+          "id": "cta_url",
+          "label": "Link-Fallback"
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "Button-Text",
+          "default": "Jetzt bestellen"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Kampagne Inhalt",
+      "category": "Custom",
+      "settings": {
+        "section_aria_label": "Kampagneninhalt"
+      },
+      "blocks": [
+        {
+          "type": "panel",
+          "settings": {
+            "label": "HINTERGRUND",
+            "title": "Warum wir diese Charge separat anbieten",
+            "body": "<p>Diese NMN-Kapseln stammen aus einer früheren Produktionscharge mit der bisherigen Verpackung. Parallel haben wir unser Design weiterentwickelt. Der Inhalt erfüllt dieselben Qualitätsanforderungen wie unsere aktuelle Linie und wird unabhängig geprüft.</p>"
+          }
+        },
+        {
+          "type": "panel",
+          "settings": {
+            "label": "FAKTEN",
+            "title": "Das Wichtigste auf einen Blick",
+            "body": "<ul><li>60 Kapseln à 250 mg NMN</li><li>Frühere Verpackung, gleiche Qualitätsstandards</li><li>Unabhängige Laborprüfung</li><li>Mindesthaltbarkeit: Juli 2026</li></ul>"
+          }
+        },
+        {
+          "type": "panel",
+          "settings": {
+            "label": "ANWENDUNG",
+            "title": "Für wen ist das sinnvoll?",
+            "body": "<p>Für Sie, wenn Sie NMN in fest dosierter Form in Ihre tägliche Routine integrieren möchten und bewusst einmalig oder ohne Abo bestellen wollen. Bitte beachten Sie die geltenden Hinweise zur Verwendung und rechtliche Einordnung des Produkts auf der Produktseite.</p>"
+          }
+        },
+        {
+          "type": "scarcity_cta",
+          "settings": {
+            "title": "Nur solange der Vorrat reicht",
+            "body": "<p>Die verfügbare Menge ist bewusst begrenzt. Wenn der Restbestand verkauft ist, endet dieses Angebot.</p>",
+            "cta_label": "Jetzt bestellen"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

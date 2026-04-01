@@ -1,0 +1,126 @@
+<!doctype html>
+<html id="html" class="no-js" lang="{{ request.locale.iso_code }}" dir="{%- render 'lang-dir' -%}">
+<head>
+  {% render 'gcm-integration-script' %}
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, height=device-height, minimum-scale=1.0">
+  {%- if settings.favicon -%}
+    <link rel="shortcut icon" href="{{ settings.favicon | image_url: width: 48, height: 48 }}" type="image/png">
+  {%- endif -%}
+  {%- capture seo_title -%}
+    {{ page_title }}{% unless page_title contains shop.name %} – {{ shop.name | escape }}{% endunless %}
+  {%- endcapture -%}
+  <title>{{ seo_title }}</title>
+  {%- if page_description -%}
+    <meta name="description" content="{{ page_description | escape }}">
+  {%- endif -%}
+  {%- liquid
+    render 'open-graph'
+    unless settings.disable_microdata
+      render 'microdata-schema'
+    endunless
+  -%}
+  <link rel="canonical" href="{{ canonical_url }}">
+  <link rel="preconnect" href="https://cdn.shopify.com">
+  {%- unless settings.headings_font.system? and settings.body_font.system? -%}
+    <link rel="preconnect" href="https://fonts.shopifycdn.com" crossorigin>
+  {%- endunless -%}
+  {%- render 'head-variables' -%}
+  {%- render 'head-preloader' -%}
+  {{ 'theme.css' | asset_url | stylesheet_tag }}
+  {{ content_for_header }}
+  <script>
+    const debounce = (fn, wait) => {
+      let t;
+      return (...args) => {
+        clearTimeout(t);
+        t = setTimeout(() => fn.apply(this, args), wait);
+      };
+    };
+    window.KEYCODES = { TAB: 9, ESC: 27, DOWN: 40, RIGHT: 39, UP: 38, LEFT: 37, RETURN: 13 };
+  </script>
+  <!-- Google Tag Manager -->
+  <script>
+    (function (w, d, s, l, i) {
+      w[l] = w[l] || [];
+      w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+      var f = d.getElementsByTagName(s)[0],
+        j = d.createElement(s),
+        dl = l != 'dataLayer' ? '&l=' + l : '';
+      j.async = true;
+      j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
+      f.parentNode.insertBefore(j, f);
+    })(window, document, 'script', 'dataLayer', 'GTM-TMTRXHLQ');
+  </script>
+  <!-- End Google Tag Manager -->
+  {{ 'lt-campaign.css' | asset_url | stylesheet_tag }}
+</head>
+<body
+  id="{{ page_title | handle }}"
+  class="no-touchevents template-{{ template.name }} template-{{ template | replace: '.', ' ' | handle }} lt-campaign-body"
+>
+  <noscript
+    ><iframe
+      src="https://www.googletagmanager.com/ns.html?id=GTM-TMTRXHLQ"
+      height="0"
+      width="0"
+      style="display:none;visibility:hidden"
+    ></iframe
+  ></noscript>
+  <script>
+    if ('ontouchstart' in window || (window.DocumentTouch && document instanceof DocumentTouch)) {
+      document.querySelector('body').classList.remove('no-touchevents');
+      document.querySelector('body').classList.add('touchevents');
+    }
+  </script>
+  <a href="#main" class="visually-hidden skip-to-content" tabindex="0">{{ 'general.accessibility_labels.skip_to_content' | t }}</a>
+
+  <header class="lt-campaign-header" role="banner">
+    <div class="lt-campaign-header__inner container container--large">
+      <a href="{{ routes.root_url }}" class="lt-campaign-header__logo">{{ shop.name }}</a>
+    </div>
+  </header>
+
+  <main id="main" class="main-content lt-campaign-main" role="main">
+    {{ content_for_layout }}
+  </main>
+
+  <footer class="lt-campaign-footer" role="contentinfo">
+    <div class="container container--large lt-campaign-footer__inner">
+      <small>© {{ 'now' | date: '%Y' }} {{ shop.name }}</small>
+    </div>
+  </footer>
+
+  {{ 'component-toggle.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'component-toggle.js' | asset_url }}" defer></script>
+  <script src="{{ 'component-modal.js' | asset_url }}" defer></script>
+  <link rel="stylesheet" href="{{ 'component-modal.css' | asset_url }}" media="print" onload="this.media='all'">
+
+  <script type="text/javascript">
+    KROWN = {
+      themeName: 'Combine',
+      themeVersion: '3.1.1',
+      settings: {
+        cart_action: '{{ settings.cart_action }}',
+        cart_popup: '{{ settings.cart_mini_enabled }}',
+        routes: {
+          cart_url: '{{ routes.cart_url }}',
+          cart_add_url: '{{ routes.cart_add_url }}',
+          cart_change_url: '{{ routes.cart_change_url }}',
+          cart_update_url: '{{ routes.cart_update_url }}',
+          search_url: '{{ routes.search_url }}'
+        },
+        locales: {
+          products_add_to_cart_button: `{{ 'products.page.add_to_cart_button' | t }}`,
+          cart_general_error: `{{ 'cart.general_error' | t }}`
+        },
+        symbols: {
+          toggle_pack_alternate:
+            '<span class="toggle__icon-alternate"><span class="toggle__icon--plus">{%- render 'theme-symbols', icon: 'plus' -%}</span><span class="toggle__icon--minus">{%- render 'theme-symbols', icon: 'minus' -%}</span></span>'
+        }
+      }
+    };
+  </script>
+</body>
+</html>

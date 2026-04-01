@@ -1,0 +1,269 @@
+{% comment %}
+  Campaign landing hero — price, CTA, trust line. Sie-form. No PDP logic.
+{% endcomment %}
+
+{%- liquid
+  assign cta_href = section.settings.cta_url
+  if section.settings.product != blank
+    assign cta_href = section.settings.product.url
+  endif
+-%}
+
+<section
+  id="lt-campaign-hero-{{ section.id }}"
+  class="lt-campaign-hero"
+  aria-labelledby="lt-campaign-hero-title-{{ section.id }}"
+>
+  <div class="container container--large">
+    <div class="lt-campaign-hero__inner">
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="lt-campaign-hero__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+
+      <h1 class="lt-campaign-hero__title" id="lt-campaign-hero-title-{{ section.id }}">
+        {{ section.settings.headline | escape }}
+      </h1>
+
+      {%- if section.settings.subline != blank -%}
+        <p class="lt-campaign-hero__subline">{{ section.settings.subline | escape }}</p>
+      {%- endif -%}
+
+      <div class="lt-campaign-hero__price" aria-label="Preis">
+        {%- if section.settings.old_price != blank -%}
+          <span class="lt-campaign-hero__price-old">{{ section.settings.old_price | escape }}</span>
+        {%- endif -%}
+        <span class="lt-campaign-hero__price-new">{{ section.settings.new_price | escape }}</span>
+      </div>
+
+      {%- if section.settings.price_note != blank -%}
+        <p class="lt-campaign-hero__price-note">{{ section.settings.price_note | escape }}</p>
+      {%- endif -%}
+
+      {%- if cta_href != blank and section.settings.cta_label != blank -%}
+        <a
+          href="{{ cta_href }}"
+          class="lt-campaign-hero__cta button button--solid button--loader button--move"
+        >
+          <span class="button__text">{{ section.settings.cta_label | escape }}</span>
+        </a>
+      {%- endif -%}
+
+      {%- if section.settings.trust_line != blank -%}
+        <p class="lt-campaign-hero__trust">{{ section.settings.trust_line | escape }}</p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .lt-campaign-hero {
+    --ch-space-4: 1rem;
+    --ch-space-5: 1.5rem;
+    --ch-space-6: 2rem;
+    --ch-space-8: 4rem;
+    --ch-space-9: 5rem;
+    --ch-text-micro: 0.75rem;
+    --ch-text-h1: 2.25rem;
+    --ch-text-body: 1rem;
+    --ch-text-body-lg: 1.125rem;
+    --ch-leading-heading: 1.15;
+    --ch-leading-body: 1.4;
+    --ch-leading-relaxed: 1.6;
+    --ch-weight-medium: 500;
+    --ch-weight-bold: 700;
+    --ch-cta-bg: #c7a39b;
+    --ch-cta-text: #fff;
+    --ch-cta-hover: #b8928a;
+    --ch-max: 40rem;
+
+    padding: var(--ch-space-9) 0 var(--ch-space-8);
+  }
+
+  @media screen and (max-width: 768px) {
+    .lt-campaign-hero {
+      padding-top: var(--ch-space-8);
+    }
+  }
+
+  .lt-campaign-hero__inner {
+    max-width: var(--ch-max);
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .lt-campaign-hero__eyebrow {
+    margin: 0 0 var(--ch-space-4);
+    font-family: var(--font-stack-body-primary);
+    font-size: var(--ch-text-micro);
+    font-weight: var(--ch-weight-medium);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    line-height: var(--ch-leading-body);
+    color: var(--color-secondary-text-main);
+  }
+
+  .lt-campaign-hero__title {
+    margin: 0 0 var(--ch-space-5);
+    font-family: var(--font-stack-headings-primary);
+    font-size: clamp(1.625rem, 5vw, var(--ch-text-h1));
+    line-height: var(--ch-leading-heading);
+    font-weight: var(--ch-weight-bold);
+    color: var(--color-text-main);
+    letter-spacing: -0.02em;
+  }
+
+  .lt-campaign-hero__subline {
+    margin: 0 0 var(--ch-space-6);
+    font-family: var(--font-stack-body-primary);
+    font-size: var(--ch-text-body-lg);
+    line-height: var(--ch-leading-relaxed);
+    color: var(--color-secondary-text-main);
+  }
+
+  .lt-campaign-hero__price {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: var(--ch-space-4);
+    margin-bottom: var(--ch-space-4);
+  }
+
+  .lt-campaign-hero__price-old {
+    font-family: var(--font-stack-body-primary);
+    font-size: var(--ch-text-body-lg);
+    color: var(--color-secondary-text-main);
+    text-decoration: line-through;
+    text-decoration-thickness: 1px;
+  }
+
+  .lt-campaign-hero__price-new {
+    font-family: var(--font-stack-headings-primary);
+    font-size: clamp(2rem, 6vw, 2.75rem);
+    font-weight: var(--ch-weight-bold);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--color-text-main);
+  }
+
+  .lt-campaign-hero__price-note {
+    margin: 0 0 var(--ch-space-6);
+    font-family: var(--font-stack-body-primary);
+    font-size: var(--ch-text-body);
+    line-height: var(--ch-leading-body);
+    color: var(--color-secondary-text-main);
+  }
+
+  .lt-campaign-hero__cta.button--solid {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 48px;
+    padding: 0.875rem 2rem;
+    width: 100%;
+    max-width: 22rem;
+    margin: 0 auto var(--ch-space-6);
+    background: var(--ch-cta-bg);
+    color: var(--ch-cta-text);
+    border: none;
+    border-radius: 999px;
+    font-family: var(--font-stack-body-primary);
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .no-touchevents .lt-campaign-hero__cta.button--solid:hover {
+    background: var(--ch-cta-hover);
+    color: var(--ch-cta-text);
+  }
+
+  .lt-campaign-hero__trust {
+    margin: 0;
+    font-family: var(--font-stack-body-primary);
+    font-size: var(--ch-text-body);
+    line-height: var(--ch-leading-relaxed);
+    color: var(--color-secondary-text-main);
+    max-width: 36rem;
+    margin-inline: auto;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT Kampagne Hero",
+  "tag": "section",
+  "class": "section-lt-campaign-hero",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Restbestand · limitierte Menge"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Überschrift",
+      "default": "NMN-Kapseln zum Sonderpreis – 60 × 250 mg"
+    },
+    {
+      "type": "textarea",
+      "id": "subline",
+      "label": "Unterzeile",
+      "default": "Aus einer früheren Charge mit vorheriger Verpackung. Inhalt und Qualität entsprechen den aktuellen LIFETIME-Standards – unabhängig geprüft."
+    },
+    {
+      "type": "text",
+      "id": "old_price",
+      "label": "Alter Preis (Text)",
+      "default": "Statt 84 €"
+    },
+    {
+      "type": "text",
+      "id": "new_price",
+      "label": "Neuer Preis (Text)",
+      "default": "29,90 €"
+    },
+    {
+      "type": "text",
+      "id": "price_note",
+      "label": "Preis-Hinweis",
+      "default": "inkl. Versand innerhalb Deutschlands"
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Produkt (Linkziel CTA)"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA-Link (Fallback ohne Produkt)",
+      "info": "Wird ignoriert, wenn ein Produkt gewählt ist."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA-Text",
+      "default": "Jetzt bestellen"
+    },
+    {
+      "type": "textarea",
+      "id": "trust_line",
+      "label": "Vertrauenszeile",
+      "default": "Unabhängig laborgeprüft · sehr begrenzte Stückzahl · Mindesthaltbarkeit bis Juli 2026"
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Kampagne Hero",
+      "category": "Custom"
+    }
+  ]
+}
+{% endschema %}
