@@ -1,5 +1,6 @@
 {% comment %}
-  LT PDP — Trust + Mechanism Bridge. Aligned to design-governance.md tokens & structure.
+  LT PDP — Trust + Mechanism Bridge.
+  Built per design-governance.md §12 (spec: surface-primary, supporting h2, body + card-info grid, no CTA).
 {% endcomment %}
 
 <div class="container container--large remove-empty-space">
@@ -8,45 +9,44 @@
     class="lt-pdp-trust-mechanism"
     aria-labelledby="lt-pdp-trust-mechanism-heading-{{ section.id }}"
   >
-    <div class="lt-pdp-trust-mechanism__intro">
-      <header class="lt-pdp-trust-mechanism__section-header">
-        {%- if section.settings.heading != blank -%}
-          <h2
-            class="lt-pdp-trust-mechanism__title"
-            id="lt-pdp-trust-mechanism-heading-{{ section.id }}"
-          >
-            {{- section.settings.heading | escape -}}
-          </h2>
-        {%- endif -%}
-        {%- if section.settings.subline != blank -%}
-          <p class="lt-pdp-trust-mechanism__description">{{ section.settings.subline | escape }}</p>
-        {%- endif -%}
-      </header>
-
-      {%- if section.settings.mechanism_body != blank -%}
-        <div class="lt-pdp-trust-mechanism__body rte">
-          {{ section.settings.mechanism_body }}
-        </div>
+    <header class="lt-pdp-trust-mechanism__section-header">
+      {%- if section.settings.section_label != blank -%}
+        <p class="lt-pdp-trust-mechanism__label">{{ section.settings.section_label | escape }}</p>
       {%- endif -%}
-    </div>
+      {%- if section.settings.heading != blank -%}
+        <h2
+          class="lt-pdp-trust-mechanism__title"
+          id="lt-pdp-trust-mechanism-heading-{{ section.id }}"
+        >
+          {{- section.settings.heading | escape -}}
+        </h2>
+      {%- endif -%}
+      {%- if section.settings.subline != blank -%}
+        <p class="lt-pdp-trust-mechanism__description">{{ section.settings.subline | escape }}</p>
+      {%- endif -%}
+    </header>
+
+    {%- if section.settings.mechanism_body != blank -%}
+      <div class="lt-pdp-trust-mechanism__body rte">
+        {{ section.settings.mechanism_body }}
+      </div>
+    {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
-      <div class="lt-pdp-trust-mechanism__trust">
-        <div class="lt-pdp-trust-mechanism__grid" role="list">
-          {%- for block in section.blocks -%}
-            {%- case block.type -%}
-              {%- when 'pillar' -%}
-                <article class="lt-pdp-trust-mechanism__item" role="listitem" {{ block.shopify_attributes }}>
-                  {%- if block.settings.title != blank -%}
-                    <h3 class="lt-pdp-trust-mechanism__item-title">{{ block.settings.title | escape }}</h3>
-                  {%- endif -%}
-                  {%- if block.settings.text != blank -%}
-                    <p class="lt-pdp-trust-mechanism__item-text">{{ block.settings.text | escape }}</p>
-                  {%- endif -%}
-                </article>
-            {%- endcase -%}
-          {%- endfor -%}
-        </div>
+      <div class="lt-pdp-trust-mechanism__grid" role="list">
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+            {%- when 'pillar' -%}
+              <article class="lt-pdp-trust-mechanism__card" role="listitem" {{ block.shopify_attributes }}>
+                {%- if block.settings.title != blank -%}
+                  <h3 class="lt-pdp-trust-mechanism__card-title">{{ block.settings.title | escape }}</h3>
+                {%- endif -%}
+                {%- if block.settings.text != blank -%}
+                  <p class="lt-pdp-trust-mechanism__card-text">{{ block.settings.text | escape }}</p>
+                {%- endif -%}
+              </article>
+          {%- endcase -%}
+        {%- endfor -%}
       </div>
     {%- endif -%}
   </section>
@@ -54,28 +54,31 @@
 
 {% stylesheet %}
   .lt-pdp-trust-mechanism {
-    /* design-governance.md §3 — spacing 8px base */
+    /* §3 tokens (theme-agnostic aliases) */
     --dg-space-2: 0.5rem;
     --dg-space-4: 1rem;
     --dg-space-5: 1.5rem;
     --dg-space-6: 2rem;
-    --dg-space-7: 3rem;
     --dg-space-8: 4rem;
     --dg-space-9: 5rem;
-    /* typography scale */
+    --dg-text-micro: 0.75rem;
     --dg-text-h2: 1.75rem;
-    --dg-text-h3: 1.5rem;
+    --dg-text-section: 1.25rem;
     --dg-text-body: 1rem;
-    --dg-text-body-sm: 0.875rem;
+    --dg-text-body-lg: 1.125rem;
     --dg-leading-heading: 1.15;
+    --dg-leading-tight: 1.25;
     --dg-leading-body: 1.4;
     --dg-leading-relaxed: 1.6;
+    --dg-weight-medium: 500;
     --dg-weight-bold: 700;
+    --dg-radius-md: 0.75rem;
+    --dg-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
     --dg-header-max: 40rem;
 
     padding-block: var(--dg-space-9);
-    color: var(--color-text-main);
     background: var(--color-background-main);
+    color: var(--color-text-main);
   }
 
   @media screen and (max-width: 749px) {
@@ -84,16 +87,27 @@
     }
   }
 
-  .lt-pdp-trust-mechanism__intro {
+  /* §6 Section header: centered, max-width 640px */
+  .lt-pdp-trust-mechanism__section-header {
     max-width: var(--dg-header-max);
     margin-inline: auto;
-  }
-
-  .lt-pdp-trust-mechanism__section-header {
     margin-bottom: var(--dg-space-6);
     text-align: center;
   }
 
+  /* §6 Section label: micro, uppercase, tracking, medium, muted */
+  .lt-pdp-trust-mechanism__label {
+    margin: 0 0 var(--dg-space-4);
+    font-family: var(--font-stack-body-primary);
+    font-size: var(--dg-text-micro);
+    line-height: var(--dg-leading-body);
+    font-weight: var(--dg-weight-medium);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-secondary-text-main);
+  }
+
+  /* Supporting PDP section: dominant focal = title (§6b) — --text-h2 */
   .lt-pdp-trust-mechanism__title {
     margin: 0;
     font-family: var(--font-stack-headings-primary);
@@ -103,16 +117,20 @@
     color: var(--color-text-main);
   }
 
+  /* §6 Section header description: body-lg, secondary */
   .lt-pdp-trust-mechanism__description {
     margin: var(--dg-space-4) 0 0;
     font-family: var(--font-stack-body-primary);
-    font-size: var(--dg-text-body);
+    font-size: var(--dg-text-body-lg);
     line-height: var(--dg-leading-body);
     font-weight: 400;
     color: var(--color-secondary-text-main);
   }
 
   .lt-pdp-trust-mechanism__body {
+    max-width: var(--dg-header-max);
+    margin-inline: auto;
+    margin-bottom: var(--dg-space-8);
     font-family: var(--font-stack-body-primary);
     font-size: var(--dg-text-body);
     line-height: var(--dg-leading-relaxed);
@@ -129,16 +147,12 @@
     margin-bottom: 0;
   }
 
-  .lt-pdp-trust-mechanism__trust {
-    margin-top: var(--dg-space-8);
-    padding-top: var(--dg-space-7);
-    border-top: 1px solid var(--color-borders-main);
-  }
-
+  /* §12 card-info grid: gap --space-5, max 3 items */
   .lt-pdp-trust-mechanism__grid {
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--dg-space-5);
+    align-items: stretch;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -156,27 +170,33 @@
     }
   }
 
-  .lt-pdp-trust-mechanism__item {
+  /* §6 Card info: white bg, radius-md, padding space-5, shadow-sm on white */
+  .lt-pdp-trust-mechanism__card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     margin: 0;
-    padding: 0;
+    padding: var(--dg-space-5);
     border: 0;
-    background: transparent;
+    border-radius: var(--dg-radius-md);
+    background: var(--color-background-main);
+    box-shadow: var(--dg-shadow-sm);
   }
 
-  .lt-pdp-trust-mechanism__item-title {
+  .lt-pdp-trust-mechanism__card-title {
     margin: 0 0 var(--dg-space-2);
     font-family: var(--font-stack-headings-primary);
-    font-size: var(--dg-text-h3);
-    line-height: 1.25;
+    font-size: var(--dg-text-section);
+    line-height: var(--dg-leading-tight);
     font-weight: var(--dg-weight-bold);
     color: var(--color-text-main);
   }
 
-  .lt-pdp-trust-mechanism__item-text {
+  .lt-pdp-trust-mechanism__card-text {
     margin: 0;
     font-family: var(--font-stack-body-primary);
-    font-size: var(--dg-text-body-sm);
-    line-height: var(--dg-leading-relaxed);
+    font-size: var(--dg-text-body);
+    line-height: var(--dg-leading-body);
     font-weight: 400;
     color: var(--color-secondary-text-main);
   }
@@ -193,6 +213,13 @@
   "settings": [
     {
       "type": "text",
+      "id": "section_label",
+      "label": "Sektions-Label",
+      "info": "Kurzes Label über der Überschrift (Großbuchstaben im Layout).",
+      "default": "WISSEN & VERTRAUEN"
+    },
+    {
+      "type": "text",
       "id": "heading",
       "label": "Überschrift (H2)",
       "default": "Warum NMN für dich Sinn macht"
@@ -200,7 +227,7 @@
     {
       "type": "textarea",
       "id": "subline",
-      "label": "Unterzeile",
+      "label": "Beschreibung unter der Überschrift",
       "default": "Was hinter NMN steckt – einfach erklärt und auf das Wesentliche reduziert."
     },
     {
@@ -236,6 +263,7 @@
       "name": "LT PDP Trust-Brücke",
       "category": "Product",
       "settings": {
+        "section_label": "WISSEN & VERTRAUEN",
         "heading": "Warum NMN für dich Sinn macht",
         "subline": "Was hinter NMN steckt – einfach erklärt und auf das Wesentliche reduziert.",
         "mechanism_body": "<p>Dein Körper nutzt NAD⁺ in nahezu jeder Zelle – als Grundlage für Energie, Regeneration und viele alltägliche Prozesse.</p><p>Mit zunehmendem Alter kann sich dieses Niveau verändern.</p><p>NMN liefert deinem Körper einen Baustein, aus dem er NAD⁺ bilden kann – einfach integrierbar in deine tägliche Routine.</p>"

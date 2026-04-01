@@ -35,6 +35,21 @@ It does not control Shopify architecture, theme structure, or deployment workflo
 
 ---
 
+## 2b. VISUAL REFERENCES
+
+These sites define the aesthetic target. When uncertain about a design decision,
+ask: "Does this feel like these references?"
+
+- **Overall feel:** ag1.com — spacing rhythm, typographic hierarchy, section breathing room
+- **Product trust:** withings.com — clinical clarity without coldness
+- **Typography + restraint:** monocle.com/shop — information density, nothing decorative
+- **CTA proportion:** ritual.com — white space around CTAs, button weight
+- **Surface alternation:** oatly.com — how section transitions feel when done right
+
+These are directional, not prescriptive. Do not copy layouts — absorb the feeling.
+
+---
+
 ## 3. DESIGN TOKENS
 
 ```css
@@ -195,6 +210,14 @@ section (surface + padding)
 | Standard | `--space-9` (80px) | `--space-8` (64px) |
 | Hero | `--space-10` (120px) | `--space-9` (80px) |
 | Compact (trust bars, logo rows) | `--space-7` (48px) | `--space-6` (32px) |
+
+### Spacing Philosophy
+
+- Between unrelated sections: always `--space-9` or `--space-10`. Never less.
+- Within a section, between elements: `--space-4` to `--space-6` only.
+- The most common mistake is under-spacing. When in doubt, go one step up the scale.
+- Negative space is not emptiness — it is the signal that something matters.
+- A section that feels "too empty" is usually correctly spaced. Add nothing.
 
 ### PDP Layout
 
@@ -394,6 +417,26 @@ If a UI need arises that doesn't fit existing components:
 - Section labels are an exception: Lato at `--text-micro`, uppercase, letter-spacing 0.1em
 - Avoid font sizes between these defined steps
 
+### Typographic Contrast Rules
+
+- A section title (`--text-h1`, 36px) must be followed by body text at `--text-body` (16px) or `--text-body-lg` (18px). Never place two type sizes within 8px of each other in adjacent elements.
+- Section labels (`--text-micro`, uppercase) exist to create vertical rhythm breaks. Every major section must have one. They signal "new topic" to the eye.
+- A section containing only body text (16px) is visually flat. Always pair with at least one heading-scale element.
+- Maximum 3 type sizes visible in any single section. 2 is preferred.
+- Size contrast between heading and body must be clearly perceptible — if it looks like the same size, the heading is too small.
+
+---
+
+## 6b. VISUAL WEIGHT RULES
+
+- Every section must have one dominant element — a heading, stat, or image. Exactly one.
+- Supporting elements must be visually subordinate: smaller, lighter, or muted in color.
+- Equal-weight distribution across all elements is always wrong. Create a clear focal point.
+- Stat callouts (`--text-stat`, 56px) must always be the heaviest element in their section.
+- On dark surfaces: reduce element count by one compared to the equivalent light section. Dark backgrounds amplify density.
+- CTA buttons must have more vertical breathing room than any other element in their section — minimum `--space-6` (32px) margin-top from the element above.
+- If you cannot identify the dominant element in a section, the section needs to be redesigned before it is built.
+
 ---
 
 ## 7. ANTI-PATTERNS
@@ -421,6 +464,7 @@ If a UI need arises that doesn't fit existing components:
 - ✗ Font sizes between token steps (e.g., 15px, 22px, 30px)
 - ✗ Bold body text as a substitute for heading hierarchy
 - ✗ More than 2 text sizes within a single card
+- ✗ Section missing a `--text-micro` uppercase label above the heading
 
 ### Color
 - ✗ Teal on buttons (teal is for accents, progress bars, icons)
@@ -433,7 +477,7 @@ If a UI need arises that doesn't fit existing components:
 
 ## 8. VISUAL QA CHECKLIST
 
-Run after every UI change. Fix failures before proceeding.
+Run after every UI change. Fix all failures before proceeding.
 
 ### Spacing
 - [ ] Section padding matches defined sizes (80/120/48 desktop, 64/80/32 mobile)
@@ -454,6 +498,7 @@ Run after every UI change. Fix failures before proceeding.
 - [ ] Body text uses Body font (Lato)
 - [ ] No Lato text larger than `--text-quote` (28px)
 - [ ] No Helvetica text smaller than `--text-h3` (24px)
+- [ ] Every section has a `--text-micro` uppercase label above the heading
 
 ### Color
 - [ ] No `#000000` backgrounds (use `#364F56`)
@@ -471,6 +516,7 @@ Run after every UI change. Fix failures before proceeding.
 - [ ] Maximum 3 card types per page
 - [ ] CTA (sand) button count reasonable per viewport (default: 1)
 - [ ] Dark surface text uses `--color-text-on-dark` or `--color-text-on-dark-muted` only
+- [ ] Pillar/feature items use `card-info` pattern (padding `--space-5`, `--radius-md`, correct shadow rule)
 
 ### Mobile
 - [ ] Grids collapse to 1 column at ≤768px
@@ -478,6 +524,15 @@ Run after every UI change. Fix failures before proceeding.
 - [ ] Container padding is 16px
 - [ ] Buttons remain 48px height
 - [ ] No horizontal scroll on any viewport
+
+### Visual Craft QA
+- [ ] Does this section have exactly one dominant focal point?
+- [ ] Is the dominant element clearly heavier than all supporting elements?
+- [ ] Does the CTA button have `--space-6` minimum margin-top above it?
+- [ ] Does the section feel too dense? If yes: remove one element or increase spacing one step.
+- [ ] Does this section look visually distinct from the one above it? (surface change OR type size shift)
+- [ ] Is every element earning its place? (Apply Section 11 — remove anything that isn't.)
+- [ ] Would this section look at home on ag1.com or ritual.com?
 
 ---
 
@@ -495,11 +550,68 @@ These existing patterns should be preserved. Restyle them to match tokens, but d
 - Footer: shipping + payment icons display
 - Announcement bar: position and scroll behavior
 
+---
 
-## 10. Theme Compatibility / Conflict Resolution
+## 10. THEME COMPATIBILITY / CONFLICT RESOLUTION
+
 Reuse existing Shopify theme structure, settings, and classes whenever possible.
 If existing theme values are close to the design token system, use them as-is.
 If they differ slightly, map them to the closest design token in implementation logic.
 If no clean mapping exists, introduce a reusable token-based utility or section class.
 Never use negative margins, one-off spacing hacks, or inline overrides to visually compensate for theme conflicts.
 Do not replace global theme settings unless the task explicitly requires a system-wide design refactor.
+
+---
+
+## 11. SUBTRACTION RULES
+
+Before finalizing any section, remove:
+
+- Any decorative divider that isn't a surface change
+- Any icon that duplicates what the text already communicates
+- Any label if the heading already makes the context clear
+- Any secondary CTA if the primary CTA already covers the decision
+- Any card that carries the same message as an adjacent card
+- Any body text block that repeats what the section's sub-components already explain
+
+A section is complete not when nothing can be added, but when nothing can be removed.
+This rule overrides "more content = more conversion." Clarity converts. Noise does not.
+
+---
+
+## 12. SECTION BUILD TEMPLATE
+
+**Every section must follow this process. No exceptions.**
+
+This is not a checklist to run after building. It is the build process itself.
+
+### Step 1 — Confirm the spec before writing any code
+
+Answer each item explicitly. If an answer is unclear, resolve it before proceeding.
+
+| Decision | Answer required |
+|----------|----------------|
+| Surface color | Which token from the Surface Selection table (§6)? |
+| Section label | What is the `--text-micro` uppercase label text? |
+| Dominant element | What does the eye land on first — heading, stat, or image? |
+| Heading size | `--text-h1` (36px) for major sections, `--text-h2` (28px) for supporting sections |
+| Content pattern | card-info / card-feature / card-review / stat-callout / quote-block / body text |
+| Card count | Max 3 items for pillar/feature grids. Each item needs padding `--space-5` + `--radius-md`. |
+| CTA | Which variant and label from the CTA table (§6)? Or explicitly: none. |
+| Elements to remove | Apply §11 Subtraction Rules. List what is being removed and why. |
+
+### Step 2 — Build from the confirmed spec
+
+- Use only tokens from §3 for all spacing, color, typography, radius, and shadow values
+- Apply `card-info` pattern to any pillar or feature item (padding `--space-5`, `--radius-md`, correct shadow rule)
+- Section label goes above the heading, always — `--text-micro`, uppercase, `--weight-medium`, `letter-spacing: 0.1em`, muted color
+- Heading is `--text-h1` for standard sections unless spec says otherwise
+- Body text and card content are subordinate — smaller, lighter, never competing with the heading
+
+### Step 3 — Run the full QA checklist (§8) before output
+
+Run both the Structural QA and the Visual Craft QA.
+List any failures found. Fix them before producing final output.
+Do not output code that has known QA failures.
+
+---
