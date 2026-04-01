@@ -1,5 +1,6 @@
 {% comment %}
   Stacked campaign panels + optional scarcity CTA band. Modular blocks for theme editor.
+  Scarcity CTA uses theme .button--solid (dark); do not override with sand hex in CSS.
 {% endcomment %}
 
 <section
@@ -11,7 +12,22 @@
     {%- for block in section.blocks -%}
       {%- case block.type -%}
         {%- when 'panel' -%}
+          {%- assign panel_img_alt = block.settings.image_alt | default: block.settings.title | escape -%}
           <div class="lt-campaign-stack__panel" {{ block.shopify_attributes }}>
+            {%- if block.settings.image != blank -%}
+              <figure class="lt-campaign-stack__figure">
+                {{
+                  block.settings.image
+                  | image_url: width: 1200
+                  | image_tag:
+                    loading: 'lazy',
+                    class: 'lt-campaign-stack__img',
+                    alt: panel_img_alt,
+                    sizes: '(min-width: 768px) min(36rem, 90vw), 100vw',
+                    widths: '400, 600, 800, 1000, 1200'
+                }}
+              </figure>
+            {%- endif -%}
             {%- if block.settings.label != blank -%}
               <p class="lt-campaign-stack__label">{{ block.settings.label | escape }}</p>
             {%- endif -%}
@@ -69,12 +85,22 @@
     --cs-weight-bold: 700;
     --cs-max: 40rem;
     --cs-warm: #f6f4f1;
-    --cs-cta-bg: #c7a39b;
-    --cs-cta-text: #fff;
-    --cs-cta-hover: #b8928a;
     --cs-radius: 0.75rem;
 
     padding-bottom: var(--cs-space-8);
+  }
+
+  .lt-campaign-stack__figure {
+    margin: 0 0 var(--cs-space-6);
+  }
+
+  .lt-campaign-stack__img {
+    width: 100%;
+    max-width: 36rem;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    border-radius: var(--cs-radius);
   }
 
   .lt-campaign-stack__panel {
@@ -155,6 +181,7 @@
     color: var(--color-secondary-text-main);
   }
 
+  /* Layout only — colors from theme .button--solid */
   .lt-campaign-stack__scarcity-cta.button--solid {
     display: inline-flex;
     justify-content: center;
@@ -163,20 +190,15 @@
     padding: 0.875rem 2rem;
     width: 100%;
     max-width: 22rem;
-    background: var(--cs-cta-bg);
-    color: var(--cs-cta-text);
-    border: none;
     border-radius: 999px;
     font-family: var(--font-stack-body-primary);
     font-size: 1rem;
     font-weight: 600;
     text-decoration: none;
-    transition: background 0.2s ease;
   }
 
   .no-touchevents .lt-campaign-stack__scarcity-cta.button--solid:hover {
-    background: var(--cs-cta-hover);
-    color: var(--cs-cta-text);
+    filter: brightness(0.92);
   }
 {% endstylesheet %}
 
@@ -212,6 +234,17 @@
           "id": "title",
           "label": "Überschrift",
           "default": "Warum wir diese Charge separat anbieten"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Bild (optional)"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Alt-Text Bild",
+          "info": "Ohne Eintrag wird die Überschrift des Blocks verwendet."
         },
         {
           "type": "richtext",

@@ -1242,6 +1242,23 @@
               </div>
             {%- endif -%}
 
+          {%- when 'lt_quote_carousel' -%}
+            {%- if template.suffix == '13_nmn' -%}
+              <div class="nmn-pdp-post-cta" {{ block.shopify_attributes }}>
+                {%- render 'lt-pdp-quote-carousel', block: block -%}
+                {%- if block.settings.show_footer_line and block.settings.footer_line != blank -%}
+                  <p class="nmn-pdp-social-proof-line">{{ block.settings.footer_line | escape }}</p>
+                {%- endif -%}
+              </div>
+            {%- else -%}
+              <div {{ block.shopify_attributes }}>
+                {%- render 'lt-pdp-quote-carousel', block: block -%}
+                {%- if block.settings.show_footer_line and block.settings.footer_line != blank -%}
+                  <p class="lt-quote-carousel__footer-line">{{ block.settings.footer_line | escape }}</p>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+
           {%- when 'variant_metafield' -%}
             <div
               class="product-variant-metafield rte"
@@ -4824,6 +4841,276 @@
           "type": "text",
           "label": "t:sections.local-extra-words.sections.main-header.settings.promotion_block.title.label",
           "id": "title"
+        }
+      ]
+    },
+    {
+      "type": "lt_quote_carousel",
+      "name": "Zitat-Karussell",
+      "limit": 2,
+      "settings": [
+        {
+          "type": "paragraph",
+          "content": "Bis zu sechs Zitate. Leere Zitate werden ausgeblendet. Punkte erscheinen ab zwei Zitaten."
+        },
+        {
+          "type": "range",
+          "id": "autoplay_seconds",
+          "min": 0,
+          "max": 10,
+          "step": 1,
+          "unit": "s",
+          "label": "Autoplay-Wechsel",
+          "info": "0 = kein automatischer Wechsel",
+          "default": 3
+        },
+        {
+          "type": "checkbox",
+          "id": "show_dots",
+          "label": "Punkte-Navigation",
+          "default": true
+        },
+        {
+          "type": "select",
+          "id": "content_alignment",
+          "label": "Textausrichtung",
+          "options": [
+            { "value": "left", "label": "Links" },
+            { "value": "center", "label": "Zentriert" }
+          ],
+          "default": "center"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_footer_line",
+          "label": "Zeile unter dem Karussell",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "footer_line",
+          "label": "Text unter dem Karussell",
+          "default": "Über 1.000 Kunden vertrauen uns"
+        },
+        {
+          "type": "text",
+          "id": "dots_aria_label",
+          "label": "ARIA Label Punkte",
+          "default": "Zitate"
+        },
+        {
+          "type": "text",
+          "id": "dot_label",
+          "label": "ARIA Label einzelner Punkt",
+          "default": "Zitat"
+        },
+        {
+          "type": "text",
+          "id": "verified_label",
+          "label": "Tooltip Verifiziert-Häkchen",
+          "default": "Verifizierter Kunde"
+        },
+        {
+          "type": "color",
+          "id": "star_color",
+          "label": "Sternfarbe",
+          "default": "#F4B740"
+        },
+        {
+          "type": "color",
+          "id": "card_bg_color",
+          "label": "Karten-Hintergrund",
+          "default": "#fafafa"
+        },
+        {
+          "type": "color",
+          "id": "card_border_color",
+          "label": "Karten-Rahmen",
+          "default": "#d7d7d7"
+        },
+        {
+          "type": "range",
+          "id": "card_border_radius",
+          "min": 0,
+          "max": 24,
+          "step": 1,
+          "unit": "px",
+          "label": "Karten-Radius",
+          "default": 10
+        },
+        {
+          "type": "header",
+          "content": "Zitat 1"
+        },
+        {
+          "type": "richtext",
+          "id": "slide_1_quote",
+          "label": "Zitat"
+        },
+        {
+          "type": "text",
+          "id": "slide_1_author",
+          "label": "Name / @handle"
+        },
+        {
+          "type": "range",
+          "id": "slide_1_stars",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "label": "Sterne",
+          "default": 5
+        },
+        {
+          "type": "checkbox",
+          "id": "slide_1_verified",
+          "label": "Verifiziert-Häkchen",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Zitat 2"
+        },
+        {
+          "type": "richtext",
+          "id": "slide_2_quote",
+          "label": "Zitat"
+        },
+        {
+          "type": "text",
+          "id": "slide_2_author",
+          "label": "Name / @handle"
+        },
+        {
+          "type": "range",
+          "id": "slide_2_stars",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "label": "Sterne",
+          "default": 5
+        },
+        {
+          "type": "checkbox",
+          "id": "slide_2_verified",
+          "label": "Verifiziert-Häkchen",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Zitat 3"
+        },
+        {
+          "type": "richtext",
+          "id": "slide_3_quote",
+          "label": "Zitat"
+        },
+        {
+          "type": "text",
+          "id": "slide_3_author",
+          "label": "Name / @handle"
+        },
+        {
+          "type": "range",
+          "id": "slide_3_stars",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "label": "Sterne",
+          "default": 5
+        },
+        {
+          "type": "checkbox",
+          "id": "slide_3_verified",
+          "label": "Verifiziert-Häkchen",
+          "default": true
+        },
+        {
+          "type": "header",
+          "content": "Zitat 4"
+        },
+        {
+          "type": "richtext",
+          "id": "slide_4_quote",
+          "label": "Zitat"
+        },
+        {
+          "type": "text",
+          "id": "slide_4_author",
+          "label": "Name / @handle"
+        },
+        {
+          "type": "range",
+          "id": "slide_4_stars",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "label": "Sterne",
+          "default": 5
+        },
+        {
+          "type": "checkbox",
+          "id": "slide_4_verified",
+          "label": "Verifiziert-Häkchen",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Zitat 5"
+        },
+        {
+          "type": "richtext",
+          "id": "slide_5_quote",
+          "label": "Zitat"
+        },
+        {
+          "type": "text",
+          "id": "slide_5_author",
+          "label": "Name / @handle"
+        },
+        {
+          "type": "range",
+          "id": "slide_5_stars",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "label": "Sterne",
+          "default": 5
+        },
+        {
+          "type": "checkbox",
+          "id": "slide_5_verified",
+          "label": "Verifiziert-Häkchen",
+          "default": false
+        },
+        {
+          "type": "header",
+          "content": "Zitat 6"
+        },
+        {
+          "type": "richtext",
+          "id": "slide_6_quote",
+          "label": "Zitat"
+        },
+        {
+          "type": "text",
+          "id": "slide_6_author",
+          "label": "Name / @handle"
+        },
+        {
+          "type": "range",
+          "id": "slide_6_stars",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "label": "Sterne",
+          "default": 5
+        },
+        {
+          "type": "checkbox",
+          "id": "slide_6_verified",
+          "label": "Verifiziert-Häkchen",
+          "default": false
         }
       ]
     }

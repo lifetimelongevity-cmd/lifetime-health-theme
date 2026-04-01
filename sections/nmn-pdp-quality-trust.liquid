@@ -8,14 +8,19 @@
     class="nmn-pdp-quality-trust"
     aria-labelledby="nmn-quality-trust-heading-{{ section.id }}"
   >
-    {%- unless section.settings.heading == blank -%}
-      <h2
-        class="nmn-pdp-quality-trust__heading text-font--secondary text-size--large text-weight--bold"
-        id="nmn-quality-trust-heading-{{ section.id }}"
-      >
-        {{- section.settings.heading | escape -}}
-      </h2>
-    {%- endunless -%}
+    <header class="nmn-pdp-quality-trust__header">
+      {%- unless section.settings.section_label == blank -%}
+        <p class="nmn-pdp-quality-trust__label">{{ section.settings.section_label | escape }}</p>
+      {%- endunless -%}
+      {%- unless section.settings.heading == blank -%}
+        <h2
+          class="nmn-pdp-quality-trust__heading text-weight--bold"
+          id="nmn-quality-trust-heading-{{ section.id }}"
+        >
+          {{- section.settings.heading | escape -}}
+        </h2>
+      {%- endunless -%}
+    </header>
 
     <div class="nmn-pdp-quality-trust__grid" role="list">
       {%- for block in section.blocks -%}
@@ -42,9 +47,27 @@
 </div>
 
 {% stylesheet %}
+  .nmn-pdp-quality-trust__header {
+    margin-bottom: 2rem;
+    max-width: 40rem;
+  }
+
+  .nmn-pdp-quality-trust__label {
+    margin: 0 0 1rem;
+    font-family: var(--font-stack-body-primary);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-secondary-text-main);
+  }
+
   .nmn-pdp-quality-trust__heading {
-    margin: 0 0 1.5rem;
-    line-height: 1.22;
+    margin: 0;
+    font-family: var(--font-stack-headings-primary);
+    font-size: clamp(1.5rem, 2.5vw, 1.75rem);
+    line-height: 1.15;
     letter-spacing: -0.02em;
     color: var(--color-text-main);
     max-width: 36ch;
@@ -58,7 +81,7 @@
     padding: 0;
     list-style: none;
     border: 1px solid color-mix(in srgb, var(--color-borders-main) 92%, var(--color-text-main));
-    border-radius: 10px;
+    border-radius: 0.75rem;
     background: var(--color-background-main);
     overflow: hidden;
   }
@@ -71,7 +94,7 @@
 
   .nmn-pdp-quality-trust__card {
     margin: 0;
-    padding: 1.125rem 1.25rem;
+    padding: 1.5rem;
     border: 0;
     border-radius: 0;
     background: transparent;
@@ -96,17 +119,20 @@
   }
 
   .nmn-pdp-quality-trust__title {
-    margin: 0 0 0.4rem;
-    font-size: 1rem;
-    line-height: 1.3;
+    margin: 0 0 0.5rem;
+    font-family: var(--font-stack-headings-primary);
+    font-size: 1.25rem;
+    line-height: 1.25;
+    font-weight: 700;
     letter-spacing: -0.01em;
     color: var(--color-text-main);
   }
 
   .nmn-pdp-quality-trust__text {
     margin: 0;
-    font-size: 0.875rem;
-    line-height: 1.5;
+    font-family: var(--font-stack-body-primary);
+    font-size: 1rem;
+    line-height: 1.4;
     color: var(--color-secondary-text-main);
   }
 {% endstylesheet %}
@@ -120,6 +146,12 @@
     "templates": ["product"]
   },
   "settings": [
+    {
+      "type": "text",
+      "id": "section_label",
+      "label": "Sektions-Label",
+      "default": "PRODUKTQUALITÄT"
+    },
     {
       "type": "text",
       "id": "heading",
@@ -153,6 +185,7 @@
       "name": "NMN PDP — Produktqualität",
       "category": "Product",
       "settings": {
+        "section_label": "PRODUKTQUALITÄT",
         "heading": "Qualität, auf die du dich verlassen kannst"
       },
       "blocks": [

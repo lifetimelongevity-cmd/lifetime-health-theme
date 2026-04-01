@@ -1,0 +1,351 @@
+{% comment %}
+  Renders from main-product block type `lt_quote_carousel`.
+  Expects: block (shopify block object)
+{% endcomment %}
+{%- liquid
+  assign qc_slides = 0
+  if block.settings.slide_1_quote != blank
+    assign qc_slides = qc_slides | plus: 1
+  endif
+  if block.settings.slide_2_quote != blank
+    assign qc_slides = qc_slides | plus: 1
+  endif
+  if block.settings.slide_3_quote != blank
+    assign qc_slides = qc_slides | plus: 1
+  endif
+  if block.settings.slide_4_quote != blank
+    assign qc_slides = qc_slides | plus: 1
+  endif
+  if block.settings.slide_5_quote != blank
+    assign qc_slides = qc_slides | plus: 1
+  endif
+  if block.settings.slide_6_quote != blank
+    assign qc_slides = qc_slides | plus: 1
+  endif
+-%}
+{%- if qc_slides == 0 -%}
+  {%- comment -%} Editor hint: fill at least one slide quote {%- endcomment -%}
+{%- else -%}
+  <div
+    class="lt-quote-carousel lt-quote-carousel--align-{{ block.settings.content_alignment }}"
+    data-lt-quote-carousel
+    data-autoplay-seconds="{{ block.settings.autoplay_seconds }}"
+    data-block-id="{{ block.id }}"
+  >
+    <div class="lt-quote-carousel__viewport">
+      {%- assign qc_i = -1 -%}
+
+      {%- if block.settings.slide_1_quote != blank -%}
+        {%- assign qc_i = qc_i | plus: 1 -%}
+        <div
+          class="lt-quote-carousel__slide{% if qc_i == 0 %} is-active{% endif %}"
+          data-lt-quote-slide
+          data-index="{{ qc_i }}"
+          aria-hidden="{% if qc_i == 0 %}false{% else %}true{% endif %}"
+        >
+          <div
+            class="lt-quote-carousel__card"
+            style="
+              --lt-qc-card-bg: {{ block.settings.card_bg_color }};
+              --lt-qc-card-border: {{ block.settings.card_border_color }};
+              --lt-qc-card-radius: {{ block.settings.card_border_radius }}px;
+              --lt-qc-star: {{ block.settings.star_color }};
+            "
+          >
+            {%- if block.settings.slide_1_stars > 0 -%}
+              <div class="lt-quote-carousel__stars" aria-hidden="true">
+                {%- for s in (1..block.settings.slide_1_stars) -%}
+                  <svg class="lt-quote-carousel__star" width="16" height="16" viewBox="0 0 14 13" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z"/></svg>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+            <div class="lt-quote-carousel__quote rte">{{ block.settings.slide_1_quote }}</div>
+            {%- if block.settings.slide_1_author != blank -%}
+              <div class="lt-quote-carousel__author-row">
+                <span class="lt-quote-carousel__author">{{ block.settings.slide_1_author | escape }}</span>
+                {%- if block.settings.slide_1_verified -%}
+                  <span class="lt-quote-carousel__verified" title="{{ block.settings.verified_label | escape }}" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="7.5" stroke="currentColor" stroke-opacity="0.35"/><path d="M4.8 8.2 7 10.4l4.2-4.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if block.settings.slide_2_quote != blank -%}
+        {%- assign qc_i = qc_i | plus: 1 -%}
+        <div
+          class="lt-quote-carousel__slide{% if qc_i == 0 %} is-active{% endif %}"
+          data-lt-quote-slide
+          data-index="{{ qc_i }}"
+          aria-hidden="{% if qc_i == 0 %}false{% else %}true{% endif %}"
+        >
+          <div
+            class="lt-quote-carousel__card"
+            style="
+              --lt-qc-card-bg: {{ block.settings.card_bg_color }};
+              --lt-qc-card-border: {{ block.settings.card_border_color }};
+              --lt-qc-card-radius: {{ block.settings.card_border_radius }}px;
+              --lt-qc-star: {{ block.settings.star_color }};
+            "
+          >
+            {%- if block.settings.slide_2_stars > 0 -%}
+              <div class="lt-quote-carousel__stars" aria-hidden="true">
+                {%- for s in (1..block.settings.slide_2_stars) -%}
+                  <svg class="lt-quote-carousel__star" width="16" height="16" viewBox="0 0 14 13" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z"/></svg>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+            <div class="lt-quote-carousel__quote rte">{{ block.settings.slide_2_quote }}</div>
+            {%- if block.settings.slide_2_author != blank -%}
+              <div class="lt-quote-carousel__author-row">
+                <span class="lt-quote-carousel__author">{{ block.settings.slide_2_author | escape }}</span>
+                {%- if block.settings.slide_2_verified -%}
+                  <span class="lt-quote-carousel__verified" title="{{ block.settings.verified_label | escape }}" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="7.5" stroke="currentColor" stroke-opacity="0.35"/><path d="M4.8 8.2 7 10.4l4.2-4.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if block.settings.slide_3_quote != blank -%}
+        {%- assign qc_i = qc_i | plus: 1 -%}
+        <div
+          class="lt-quote-carousel__slide{% if qc_i == 0 %} is-active{% endif %}"
+          data-lt-quote-slide
+          data-index="{{ qc_i }}"
+          aria-hidden="{% if qc_i == 0 %}false{% else %}true{% endif %}"
+        >
+          <div
+            class="lt-quote-carousel__card"
+            style="
+              --lt-qc-card-bg: {{ block.settings.card_bg_color }};
+              --lt-qc-card-border: {{ block.settings.card_border_color }};
+              --lt-qc-card-radius: {{ block.settings.card_border_radius }}px;
+              --lt-qc-star: {{ block.settings.star_color }};
+            "
+          >
+            {%- if block.settings.slide_3_stars > 0 -%}
+              <div class="lt-quote-carousel__stars" aria-hidden="true">
+                {%- for s in (1..block.settings.slide_3_stars) -%}
+                  <svg class="lt-quote-carousel__star" width="16" height="16" viewBox="0 0 14 13" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z"/></svg>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+            <div class="lt-quote-carousel__quote rte">{{ block.settings.slide_3_quote }}</div>
+            {%- if block.settings.slide_3_author != blank -%}
+              <div class="lt-quote-carousel__author-row">
+                <span class="lt-quote-carousel__author">{{ block.settings.slide_3_author | escape }}</span>
+                {%- if block.settings.slide_3_verified -%}
+                  <span class="lt-quote-carousel__verified" title="{{ block.settings.verified_label | escape }}" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="7.5" stroke="currentColor" stroke-opacity="0.35"/><path d="M4.8 8.2 7 10.4l4.2-4.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if block.settings.slide_4_quote != blank -%}
+        {%- assign qc_i = qc_i | plus: 1 -%}
+        <div
+          class="lt-quote-carousel__slide{% if qc_i == 0 %} is-active{% endif %}"
+          data-lt-quote-slide
+          data-index="{{ qc_i }}"
+          aria-hidden="{% if qc_i == 0 %}false{% else %}true{% endif %}"
+        >
+          <div
+            class="lt-quote-carousel__card"
+            style="
+              --lt-qc-card-bg: {{ block.settings.card_bg_color }};
+              --lt-qc-card-border: {{ block.settings.card_border_color }};
+              --lt-qc-card-radius: {{ block.settings.card_border_radius }}px;
+              --lt-qc-star: {{ block.settings.star_color }};
+            "
+          >
+            {%- if block.settings.slide_4_stars > 0 -%}
+              <div class="lt-quote-carousel__stars" aria-hidden="true">
+                {%- for s in (1..block.settings.slide_4_stars) -%}
+                  <svg class="lt-quote-carousel__star" width="16" height="16" viewBox="0 0 14 13" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z"/></svg>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+            <div class="lt-quote-carousel__quote rte">{{ block.settings.slide_4_quote }}</div>
+            {%- if block.settings.slide_4_author != blank -%}
+              <div class="lt-quote-carousel__author-row">
+                <span class="lt-quote-carousel__author">{{ block.settings.slide_4_author | escape }}</span>
+                {%- if block.settings.slide_4_verified -%}
+                  <span class="lt-quote-carousel__verified" title="{{ block.settings.verified_label | escape }}" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="7.5" stroke="currentColor" stroke-opacity="0.35"/><path d="M4.8 8.2 7 10.4l4.2-4.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if block.settings.slide_5_quote != blank -%}
+        {%- assign qc_i = qc_i | plus: 1 -%}
+        <div
+          class="lt-quote-carousel__slide{% if qc_i == 0 %} is-active{% endif %}"
+          data-lt-quote-slide
+          data-index="{{ qc_i }}"
+          aria-hidden="{% if qc_i == 0 %}false{% else %}true{% endif %}"
+        >
+          <div
+            class="lt-quote-carousel__card"
+            style="
+              --lt-qc-card-bg: {{ block.settings.card_bg_color }};
+              --lt-qc-card-border: {{ block.settings.card_border_color }};
+              --lt-qc-card-radius: {{ block.settings.card_border_radius }}px;
+              --lt-qc-star: {{ block.settings.star_color }};
+            "
+          >
+            {%- if block.settings.slide_5_stars > 0 -%}
+              <div class="lt-quote-carousel__stars" aria-hidden="true">
+                {%- for s in (1..block.settings.slide_5_stars) -%}
+                  <svg class="lt-quote-carousel__star" width="16" height="16" viewBox="0 0 14 13" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z"/></svg>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+            <div class="lt-quote-carousel__quote rte">{{ block.settings.slide_5_quote }}</div>
+            {%- if block.settings.slide_5_author != blank -%}
+              <div class="lt-quote-carousel__author-row">
+                <span class="lt-quote-carousel__author">{{ block.settings.slide_5_author | escape }}</span>
+                {%- if block.settings.slide_5_verified -%}
+                  <span class="lt-quote-carousel__verified" title="{{ block.settings.verified_label | escape }}" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="7.5" stroke="currentColor" stroke-opacity="0.35"/><path d="M4.8 8.2 7 10.4l4.2-4.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if block.settings.slide_6_quote != blank -%}
+        {%- assign qc_i = qc_i | plus: 1 -%}
+        <div
+          class="lt-quote-carousel__slide{% if qc_i == 0 %} is-active{% endif %}"
+          data-lt-quote-slide
+          data-index="{{ qc_i }}"
+          aria-hidden="{% if qc_i == 0 %}false{% else %}true{% endif %}"
+        >
+          <div
+            class="lt-quote-carousel__card"
+            style="
+              --lt-qc-card-bg: {{ block.settings.card_bg_color }};
+              --lt-qc-card-border: {{ block.settings.card_border_color }};
+              --lt-qc-card-radius: {{ block.settings.card_border_radius }}px;
+              --lt-qc-star: {{ block.settings.star_color }};
+            "
+          >
+            {%- if block.settings.slide_6_stars > 0 -%}
+              <div class="lt-quote-carousel__stars" aria-hidden="true">
+                {%- for s in (1..block.settings.slide_6_stars) -%}
+                  <svg class="lt-quote-carousel__star" width="16" height="16" viewBox="0 0 14 13" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z"/></svg>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
+            <div class="lt-quote-carousel__quote rte">{{ block.settings.slide_6_quote }}</div>
+            {%- if block.settings.slide_6_author != blank -%}
+              <div class="lt-quote-carousel__author-row">
+                <span class="lt-quote-carousel__author">{{ block.settings.slide_6_author | escape }}</span>
+                {%- if block.settings.slide_6_verified -%}
+                  <span class="lt-quote-carousel__verified" title="{{ block.settings.verified_label | escape }}" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="7.5" stroke="currentColor" stroke-opacity="0.35"/><path d="M4.8 8.2 7 10.4l4.2-4.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </span>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- if block.settings.show_dots and qc_slides > 1 -%}
+      {%- assign qc_j = -1 -%}
+      <div class="lt-quote-carousel__dots" role="tablist" aria-label="{{ block.settings.dots_aria_label | escape }}">
+        {%- if block.settings.slide_1_quote != blank -%}
+          {%- assign qc_j = qc_j | plus: 1 -%}
+          <button
+            type="button"
+            class="lt-quote-carousel__dot{% if qc_j == 0 %} is-active{% endif %}"
+            data-lt-quote-dot
+            data-index="{{ qc_j }}"
+            role="tab"
+            aria-selected="{% if qc_j == 0 %}true{% else %}false{% endif %}"
+            aria-label="{{ block.settings.dot_label | escape }} {{ qc_j | plus: 1 }}"
+          ></button>
+        {%- endif -%}
+        {%- if block.settings.slide_2_quote != blank -%}
+          {%- assign qc_j = qc_j | plus: 1 -%}
+          <button
+            type="button"
+            class="lt-quote-carousel__dot{% if qc_j == 0 %} is-active{% endif %}"
+            data-lt-quote-dot
+            data-index="{{ qc_j }}"
+            role="tab"
+            aria-selected="{% if qc_j == 0 %}true{% else %}false{% endif %}"
+            aria-label="{{ block.settings.dot_label | escape }} {{ qc_j | plus: 1 }}"
+          ></button>
+        {%- endif -%}
+        {%- if block.settings.slide_3_quote != blank -%}
+          {%- assign qc_j = qc_j | plus: 1 -%}
+          <button
+            type="button"
+            class="lt-quote-carousel__dot{% if qc_j == 0 %} is-active{% endif %}"
+            data-lt-quote-dot
+            data-index="{{ qc_j }}"
+            role="tab"
+            aria-selected="{% if qc_j == 0 %}true{% else %}false{% endif %}"
+            aria-label="{{ block.settings.dot_label | escape }} {{ qc_j | plus: 1 }}"
+          ></button>
+        {%- endif -%}
+        {%- if block.settings.slide_4_quote != blank -%}
+          {%- assign qc_j = qc_j | plus: 1 -%}
+          <button
+            type="button"
+            class="lt-quote-carousel__dot{% if qc_j == 0 %} is-active{% endif %}"
+            data-lt-quote-dot
+            data-index="{{ qc_j }}"
+            role="tab"
+            aria-selected="{% if qc_j == 0 %}true{% else %}false{% endif %}"
+            aria-label="{{ block.settings.dot_label | escape }} {{ qc_j | plus: 1 }}"
+          ></button>
+        {%- endif -%}
+        {%- if block.settings.slide_5_quote != blank -%}
+          {%- assign qc_j = qc_j | plus: 1 -%}
+          <button
+            type="button"
+            class="lt-quote-carousel__dot{% if qc_j == 0 %} is-active{% endif %}"
+            data-lt-quote-dot
+            data-index="{{ qc_j }}"
+            role="tab"
+            aria-selected="{% if qc_j == 0 %}true{% else %}false{% endif %}"
+            aria-label="{{ block.settings.dot_label | escape }} {{ qc_j | plus: 1 }}"
+          ></button>
+        {%- endif -%}
+        {%- if block.settings.slide_6_quote != blank -%}
+          {%- assign qc_j = qc_j | plus: 1 -%}
+          <button
+            type="button"
+            class="lt-quote-carousel__dot{% if qc_j == 0 %} is-active{% endif %}"
+            data-lt-quote-dot
+            data-index="{{ qc_j }}"
+            role="tab"
+            aria-selected="{% if qc_j == 0 %}true{% else %}false{% endif %}"
+            aria-label="{{ block.settings.dot_label | escape }} {{ qc_j | plus: 1 }}"
+          ></button>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+{%- endif -%}

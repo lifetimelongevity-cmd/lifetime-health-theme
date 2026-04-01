@@ -185,10 +185,10 @@ No instruction to "find an image" is needed in the build prompt.
   /* Buttons */
   --color-button-primary-bg: var(--color-dark);
   --color-button-primary-text: var(--color-white);
-  --color-button-primary-hover: #2A3E44;
-  --color-cta-bg: var(--color-sand);
+  --color-button-primary-hover:var(--color-dark)
+  --color-cta-bg: var(--color-dark);
   --color-cta-text: var(--color-white);
-  --color-cta-hover: #B8928A;
+  --color-cta-hover:var(--color-dark)
 
   /* === TYPOGRAPHY === */
 

@@ -1,0 +1,694 @@
+{% comment %}
+  LT PDP — Testimonials carousel (replaces Section Store ss-testimonial-12).
+  Horizontal scroll + snap, dot nav (one per slide), optional Shopify video + poster.
+{% endcomment %}
+
+{%- liquid
+  assign slide_count = section.blocks.size
+  assign show_dots = false
+  if slide_count > 1
+    assign show_dots = true
+  endif
+-%}
+
+<div class="lt-pdp-testimonials container container--large remove-empty-space" data-lt-pdp-tst>
+  <div
+    class="lt-pdp-testimonials__inner"
+    id="lt-pdp-testimonials-{{ section.id }}"
+    aria-labelledby="lt-pdp-testimonials-heading-{{ section.id }}"
+  >
+    {%- if section.settings.section_label != blank -%}
+      <p class="lt-pdp-testimonials__label">{{ section.settings.section_label | escape }}</p>
+    {%- endif -%}
+
+    {%- if section.settings.heading != blank -%}
+      <div class="lt-pdp-testimonials__heading rte" id="lt-pdp-testimonials-heading-{{ section.id }}">
+        {{ section.settings.heading }}
+      </div>
+    {%- endif -%}
+
+    {%- if slide_count > 0 -%}
+      <div
+        class="lt-pdp-testimonials__viewport"
+        data-lt-tst-viewport
+        tabindex="0"
+        role="region"
+        aria-roledescription="carousel"
+        aria-label="{{ section.settings.carousel_label | default: 'Kundenstimmen' | escape }}"
+      >
+        <div class="lt-pdp-testimonials__track" data-lt-tst-track>
+          {%- for block in section.blocks -%}
+            {%- case block.type -%}
+              {%- when 'testimonial' -%}
+                <article
+                  class="lt-pdp-testimonials__slide"
+                  data-lt-tst-slide
+                  {{ block.shopify_attributes }}
+                >
+                  <div class="lt-pdp-testimonials__card">
+                    <div class="lt-pdp-testimonials__media">
+                      {%- if block.settings.media_style == 'video' and block.settings.video != blank -%}
+                        <div class="lt-pdp-testimonials__media-inner lt-pdp-testimonials__media-inner--video">
+                          {{
+                            block.settings.video
+                            | video_tag:
+                              image_size: '800x',
+                              class: 'lt-pdp-testimonials__video',
+                              muted: true,
+                              loop: false,
+                              controls: false,
+                              playsinline: true,
+                              preload: 'metadata'
+                          }}
+                          {%- liquid
+                            assign tst_poster = block.settings.image
+                            if tst_poster == blank and block.settings.video.preview_image
+                              assign tst_poster = block.settings.video.preview_image
+                            endif
+                          -%}
+                          {%- if tst_poster != blank -%}
+                            <div class="lt-pdp-testimonials__poster" data-lt-tst-poster>
+                              {{
+                                tst_poster
+                                | image_url: width: 800
+                                | image_tag:
+                                  loading: 'lazy',
+                                  class: 'lt-pdp-testimonials__poster-img',
+                                  sizes: '(min-width: 1024px) 25vw, 80vw',
+                                  widths: '400,600,800'
+                              }}
+                            </div>
+                          {%- endif -%}
+                          <button
+                            type="button"
+                            class="lt-pdp-testimonials__play"
+                            data-lt-tst-play
+                            aria-label="Video abspielen"
+                          >
+                            <span class="visually-hidden">Video abspielen</span>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                              <circle cx="12" cy="12" r="11" fill="currentColor" opacity="0.92"/>
+                              <path d="M10 8l6 4-6 4V8z" fill="#fff"/>
+                            </svg>
+                          </button>
+                        </div>
+                      {%- elsif block.settings.image != blank -%}
+                        <div class="lt-pdp-testimonials__media-inner">
+                          {{
+                            block.settings.image
+                            | image_url: width: 800
+                            | image_tag:
+                              loading: 'lazy',
+                              class: 'lt-pdp-testimonials__image',
+                              sizes: '(min-width: 1024px) 25vw, 80vw',
+                              widths: '400,600,800'
+                          }}
+                        </div>
+                      {%- else -%}
+                        <div class="lt-pdp-testimonials__media-inner lt-pdp-testimonials__media-inner--placeholder">
+                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
+                        </div>
+                      {%- endif -%}
+                    </div>
+
+                    {%- assign stars_n = block.settings.stars_count | times: 1 | floor | at_most: 5 | at_least: 0 -%}
+                    {%- if stars_n > 0 -%}
+                      <div class="lt-pdp-testimonials__stars" aria-hidden="true">
+                        {%- for i in (1..stars_n) -%}
+                          <svg class="lt-pdp-testimonials__star" width="18" height="18" viewBox="0 0 14 13" xmlns="http://www.w3.org/2000/svg">
+                            <path fill="currentColor" d="m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z"/>
+                          </svg>
+                        {%- endfor -%}
+                      </div>
+                    {%- endif -%}
+
+                    {%- if block.settings.text != blank -%}
+                      <div class="lt-pdp-testimonials__quote rte">{{ block.settings.text }}</div>
+                    {%- endif -%}
+
+                    {%- if block.settings.author != blank -%}
+                      <div class="lt-pdp-testimonials__author rte">{{ block.settings.author }}</div>
+                    {%- endif -%}
+                  </div>
+                </article>
+            {%- endcase -%}
+          {%- endfor -%}
+        </div>
+      </div>
+
+      {%- if show_dots -%}
+        <div class="lt-pdp-testimonials__dots" role="tablist" aria-label="{{ section.settings.dots_label | default: 'Folien' | escape }}">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'testimonial' -%}
+              <button
+                type="button"
+                class="lt-pdp-testimonials__dot{% if forloop.first %} is-active{% endif %}"
+                data-lt-tst-dot
+                data-index="{{ forloop.index0 }}"
+                role="tab"
+                aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+                aria-label="{{ section.settings.dot_aria_label | default: 'Kundenstimme' | escape }} {{ forloop.index }}"
+              ></button>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .lt-pdp-testimonials {
+    --tst-gap-mobile: 20px;
+    --tst-gap-desktop: 28px;
+    --tst-visible-mobile: 1.3;
+    --tst-visible-tablet: 2.5;
+    --tst-visible-desktop: 4.1;
+    --tst-pad-block: 5rem;
+    --tst-pad-inline: 1.5rem;
+    padding-block: var(--tst-pad-block);
+    background: var(--color-background-main);
+    color: var(--color-text-main);
+  }
+
+  @media screen and (max-width: 768px) {
+    .lt-pdp-testimonials {
+      --tst-pad-block: 4rem;
+      --tst-pad-inline: 1rem;
+    }
+  }
+
+  .lt-pdp-testimonials__inner {
+    max-width: 100%;
+  }
+
+  .lt-pdp-testimonials__label {
+    margin: 0 0 1rem;
+    font-family: var(--font-stack-body-primary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    line-height: 1.4;
+    text-transform: uppercase;
+    color: var(--color-secondary-text-main);
+  }
+
+  .lt-pdp-testimonials__heading {
+    margin: 0 0 3rem;
+    max-width: 48rem;
+    font-family: var(--font-stack-headings-primary);
+    font-size: clamp(1.625rem, 2.2vw, 2rem);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--color-text-main);
+  }
+
+  .lt-pdp-testimonials__heading p {
+    margin: 0;
+  }
+
+  .lt-pdp-testimonials__viewport {
+    container-type: inline-size;
+    container-name: lt-tst;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-inline: calc(var(--tst-pad-inline) * -1);
+    padding-inline: var(--tst-pad-inline);
+    outline: none;
+  }
+
+  .lt-pdp-testimonials__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lt-pdp-testimonials__track {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: var(--tst-gap-mobile);
+    padding-bottom: 0.25rem;
+  }
+
+  @media screen and (min-width: 768px) {
+    .lt-pdp-testimonials__track {
+      gap: 24px;
+    }
+  }
+
+  @media screen and (min-width: 1024px) {
+    .lt-pdp-testimonials__track {
+      gap: var(--tst-gap-desktop);
+    }
+  }
+
+  .lt-pdp-testimonials__slide {
+    flex: 0 0 auto;
+    scroll-snap-align: start;
+    width: calc((100cqi - 0 * var(--tst-gap-mobile)) / var(--tst-visible-mobile));
+    min-width: 0;
+  }
+
+  @media screen and (min-width: 768px) {
+    .lt-pdp-testimonials__slide {
+      width: calc((100cqi - 1 * 24px) / var(--tst-visible-tablet));
+    }
+  }
+
+  @media screen and (min-width: 1024px) {
+    .lt-pdp-testimonials__slide {
+      width: calc((100cqi - 3 * var(--tst-gap-desktop)) / var(--tst-visible-desktop));
+    }
+  }
+
+  @supports not (width: 1cqi) {
+    .lt-pdp-testimonials__slide {
+      width: min(78vw, 22rem);
+    }
+    @media screen and (min-width: 768px) {
+      .lt-pdp-testimonials__slide {
+        width: min(38vw, 20rem);
+      }
+    }
+    @media screen and (min-width: 1024px) {
+      .lt-pdp-testimonials__slide {
+        width: min(24vw, 18rem);
+      }
+    }
+  }
+
+  .lt-pdp-testimonials__card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 1.25rem;
+    border: 1px solid color-mix(in srgb, var(--color-borders-main) 85%, transparent);
+    border-radius: 0.75rem;
+    background: var(--color-background-main);
+    box-sizing: border-box;
+  }
+
+  @media screen and (min-width: 1024px) {
+    .lt-pdp-testimonials__card {
+      padding: 1.5rem;
+    }
+  }
+
+  .lt-pdp-testimonials__media {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-borders-main) 80%, transparent);
+  }
+
+  .lt-pdp-testimonials__media-inner {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .lt-pdp-testimonials__media-inner--placeholder {
+    background: var(--color-secondary-background-main);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 8rem;
+  }
+
+  .lt-pdp-testimonials__image,
+  .lt-pdp-testimonials__video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    vertical-align: middle;
+  }
+
+  .lt-pdp-testimonials__media-inner--video .lt-pdp-testimonials__video {
+    position: relative;
+    z-index: 1;
+  }
+
+  .lt-pdp-testimonials__poster {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+
+  .lt-pdp-testimonials__poster-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .lt-pdp-testimonials__media-inner--video.is-playing .lt-pdp-testimonials__poster {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .lt-pdp-testimonials__play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    width: 3.125rem;
+    height: 3.125rem;
+    border: 0;
+    padding: 0;
+    border-radius: 50%;
+    background: #fff;
+    color: var(--color-text-main);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .lt-pdp-testimonials__play:hover {
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+
+  .lt-pdp-testimonials__play:focus-visible {
+    outline: 2px solid var(--color-text-main);
+    outline-offset: 3px;
+  }
+
+  .lt-pdp-testimonials__play[hidden] {
+    display: none;
+  }
+
+  .lt-pdp-testimonials__stars {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 2px;
+    margin-bottom: 0.75rem;
+    color: #f4b740;
+  }
+
+  .lt-pdp-testimonials__quote {
+    flex: 1 1 auto;
+    margin: 0 0 1rem;
+    font-family: var(--font-stack-body-primary);
+    font-size: 1.125rem;
+    line-height: 1.45;
+    text-align: center;
+    color: var(--color-text-main);
+  }
+
+  @media screen and (min-width: 1024px) {
+    .lt-pdp-testimonials__quote {
+      font-size: 1.1875rem;
+    }
+  }
+
+  .lt-pdp-testimonials__quote p {
+    margin: 0;
+  }
+
+  .lt-pdp-testimonials__author {
+    margin: 0;
+    font-family: var(--font-stack-body-primary);
+    font-size: 1rem;
+    line-height: 1.4;
+    text-align: center;
+    color: var(--color-secondary-text-main);
+  }
+
+  @media screen and (min-width: 1024px) {
+    .lt-pdp-testimonials__author {
+      font-size: 1.0625rem;
+    }
+  }
+
+  .lt-pdp-testimonials__author p {
+    margin: 0;
+  }
+
+  .lt-pdp-testimonials__dots {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2.5rem;
+  }
+
+  .lt-pdp-testimonials__dot {
+    width: 10px;
+    height: 10px;
+    padding: 0;
+    border: 1px solid var(--color-text-main);
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0.35;
+    transition: opacity 0.2s ease, background 0.2s ease;
+  }
+
+  .lt-pdp-testimonials__dot:hover {
+    opacity: 0.65;
+  }
+
+  .lt-pdp-testimonials__dot.is-active {
+    opacity: 1;
+    background: var(--color-text-main);
+  }
+
+  .lt-pdp-testimonials__dot:focus-visible {
+    outline: 2px solid var(--color-text-main);
+    outline-offset: 2px;
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    function playHandler(ev) {
+      var btn = ev.currentTarget;
+      var inner = btn.closest('.lt-pdp-testimonials__media-inner--video');
+      if (!inner) return;
+      var video = inner.querySelector('video');
+      if (!video) return;
+      video.setAttribute('controls', '');
+      video.play().catch(function () {});
+      inner.classList.add('is-playing');
+      btn.setAttribute('hidden', '');
+    }
+
+    function bindPlays(root) {
+      root.querySelectorAll('[data-lt-tst-play]').forEach(function (btn) {
+        if (btn.dataset.ltTstPlayBound) return;
+        btn.dataset.ltTstPlayBound = '1';
+        btn.addEventListener('click', playHandler);
+      });
+    }
+
+    function scrollSlideIntoView(viewport, slide) {
+      if (!viewport || !slide) return;
+      var delta = slide.getBoundingClientRect().left - viewport.getBoundingClientRect().left;
+      viewport.scrollTo({ left: viewport.scrollLeft + delta, behavior: 'smooth' });
+    }
+
+    function initCarousel(root) {
+      var viewport = root.querySelector('[data-lt-tst-viewport]');
+      var slides = root.querySelectorAll('[data-lt-tst-slide]');
+      var dots = root.querySelectorAll('[data-lt-tst-dot]');
+      if (!viewport || slides.length === 0) return;
+
+      dots.forEach(function (dot) {
+        if (dot.dataset.ltTstDotBound) return;
+        dot.dataset.ltTstDotBound = '1';
+        dot.addEventListener('click', function () {
+          var idx = parseInt(dot.getAttribute('data-index'), 10);
+          if (slides[idx]) scrollSlideIntoView(viewport, slides[idx]);
+        });
+      });
+
+      if (dots.length === 0) return;
+
+      var setActive = function () {
+        var vpRect = viewport.getBoundingClientRect();
+        var mid = vpRect.left + vpRect.width * 0.35;
+        var best = 0;
+        var bestDist = Infinity;
+        slides.forEach(function (slide, i) {
+          var r = slide.getBoundingClientRect();
+          var c = r.left + r.width * 0.5;
+          var d = Math.abs(c - mid);
+          if (d < bestDist) {
+            bestDist = d;
+            best = i;
+          }
+        });
+        dots.forEach(function (d, i) {
+          var on = i === best;
+          d.classList.toggle('is-active', on);
+          d.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+      };
+
+      var t;
+      viewport.addEventListener(
+        'scroll',
+        function () {
+          clearTimeout(t);
+          t = setTimeout(setActive, 60);
+        },
+        { passive: true }
+      );
+      window.addEventListener(
+        'resize',
+        function () {
+          clearTimeout(t);
+          t = setTimeout(setActive, 120);
+        },
+        { passive: true }
+      );
+      setActive();
+    }
+
+    function init(root) {
+      bindPlays(root);
+      initCarousel(root);
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('[data-lt-pdp-tst]').forEach(function (el) {
+        init(el);
+      });
+    });
+    document.addEventListener('shopify:section:load', function (ev) {
+      var r = ev.target;
+      if (r && r.querySelector && r.querySelector('[data-lt-pdp-tst]')) {
+        init(r.querySelector('[data-lt-pdp-tst]'));
+      }
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "LT PDP Testimonials",
+  "tag": "section",
+  "class": "section-lt-pdp-testimonials",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "max_blocks": 12,
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_label",
+      "label": "Sektions-Label",
+      "default": "KUNDENSTIMMEN"
+    },
+    {
+      "type": "richtext",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "<p>Über 1.000+ zufriedene Kunden vertrauen der Qualität von LIFETIME</p>"
+    },
+    {
+      "type": "text",
+      "id": "carousel_label",
+      "label": "ARIA Label Karussell",
+      "default": "Kundenstimmen"
+    },
+    {
+      "type": "text",
+      "id": "dots_label",
+      "label": "ARIA Label Punkte",
+      "default": "Folien"
+    },
+    {
+      "type": "text",
+      "id": "dot_aria_label",
+      "label": "ARIA Label pro Punkt",
+      "default": "Kundenstimme"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "select",
+          "id": "media_style",
+          "label": "Medientyp",
+          "default": "image",
+          "options": [
+            { "value": "image", "label": "Bild" },
+            { "value": "video", "label": "Video (Shopify)" }
+          ]
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Bild / Video-Poster"
+        },
+        {
+          "type": "video",
+          "id": "video",
+          "label": "Video (Shopify)"
+        },
+        {
+          "type": "range",
+          "id": "stars_count",
+          "min": 0,
+          "max": 5,
+          "step": 1,
+          "label": "Sterne",
+          "default": 5
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Zitat",
+          "default": "<p>Zitat</p>"
+        },
+        {
+          "type": "richtext",
+          "id": "author",
+          "label": "Autor",
+          "default": "<p>@name</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT PDP Testimonials",
+      "category": "Product",
+      "settings": {
+        "section_label": "KUNDENSTIMMEN",
+        "heading": "<p>Über 1.000+ zufriedene Kunden vertrauen der Qualität von LIFETIME</p>"
+      },
+      "blocks": [
+        {
+          "type": "testimonial",
+          "settings": {
+            "media_style": "image",
+            "stars_count": 5,
+            "text": "<p>Text</p>",
+            "author": "<p>@kunde</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
