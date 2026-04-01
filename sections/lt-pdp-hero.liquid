@@ -172,16 +172,6 @@
         {%- assign lt_trust_1 = section.settings.trust_1 | default: '90-Tage-Zell-Versprechen — kein Formular, kein Aufwand' -%}
         {%- assign lt_trust_2 = 'Laborgeprüft · Vegan · Ohne Zusatzstoffe' -%}
         {%- assign lt_trust_3 = section.settings.trust_3 | default: 'Über 1.000 zufriedene Kund:innen' -%}
-        {%- assign lt_stack_header = section.settings.stack_header | default: 'Was du heute bekommst' -%}
-        {%- assign lt_stack_product_sub = section.settings.stack_product_sub | default: '30 Tage Vorrat · liposomal · 250 mg' -%}
-        {%- assign lt_stack_guide_title = section.settings.stack_guide_title | default: 'Longevity-Protokoll PDF' -%}
-        {%- assign lt_stack_guide_sub = section.settings.stack_guide_sub | default: 'Wann & womit · Dr. Limmroth' -%}
-        {%- assign lt_stack_bonus_title = section.settings.stack_bonus_title | default: '10 % Rabatt auf den AGE & DNA-Test' -%}
-        {%- assign lt_stack_bonus_sub = section.settings.stack_bonus_sub | default: 'Exklusiv für Neukund:innen' -%}
-        {%- assign lt_stack_total_label = section.settings.stack_total_label | default: 'Gesamtwert' -%}
-        {%- assign lt_stack_old_total = section.settings.stack_old_total | default: '69,80 €' -%}
-        {%- assign lt_stack_guide_price = section.settings.stack_guide_price | default: 'Gratis' -%}
-        {%- assign lt_stack_bonus_price = section.settings.stack_bonus_price | default: '10 % Rabatt' -%}
         {%- assign lt_pill_1_label = section.settings.pill_1_label | default: '1 Monat' -%}
         {%- assign lt_pill_2_label = section.settings.pill_2_label | default: '2 Monate' -%}
         {%- assign lt_pill_3_label = section.settings.pill_3_label | default: '3 Monate' -%}
@@ -249,15 +239,35 @@
           </div>
         </div>
 
-        <p class="lt-price-context">Wähle deine Kaufoption</p>
+        {%- liquid
+          assign bb_sub1_title = section.settings.bb_sub1_title | default: 'Einzel-Abo'
+          assign bb_sub2_title = section.settings.bb_sub2_title | default: 'Doppel-Abo'
+          assign bb_once_title = section.settings.bb_once_title | default: 'Einmaliger Kauf'
+          assign bb_or_label = section.settings.bb_or_label | default: 'ODER'
+          assign bb_unit_suffix = section.settings.bb_unit_suffix | default: 'Monat'
+          assign bb_b1 = section.settings.bb_benefit_1 | default: 'Gratis Versand bei Abo-Lieferungen'
+          assign bb_b2 = section.settings.bb_benefit_2 | default: 'Jederzeit kündbar'
+          assign bb_b3 = section.settings.bb_benefit_3 | default: 'Willkommens-Angebote zur ersten Lieferung'
+          if section.settings.bb_sub1_subline != blank
+            assign bb_sub1_sub = section.settings.bb_sub1_subline
+          else
+            assign bb_sub1_sub = lt_pill_1_label
+          endif
+          if section.settings.bb_sub2_subline != blank
+            assign bb_sub2_sub = section.settings.bb_sub2_subline
+          else
+            assign bb_sub2_sub = lt_pill_2_label
+          endif
+          if section.settings.bb_once_subline != blank
+            assign bb_once_sub = section.settings.bb_once_subline
+          else
+            assign bb_once_sub = lt_pill_1_label
+          endif
+        -%}
 
-        <div class="lt-price-row" data-update-block="price-compact-main">
-          <div class="lt-price-row__line">
-            <span class="lt-price-row__current lt-price-main" data-js-product-price-original>{{ lt_base_price | money }}</span>
-            <del class="lt-price-row__compare" data-js-product-price-compare>{% if lt_compare_price > lt_base_price %}{{ lt_compare_price | money }}{% endif %}</del>
-            <span class="lt-price-row__saving lt-save-badge" data-js-product-price-saving>{% if lt_compare_price > lt_base_price %}Du sparst {{ lt_compare_price | minus: lt_base_price | money }}{% endif %}</span>
-          </div>
-        </div>
+        {%- if section.settings.bb_intro != blank -%}
+          <div class="lt-bb__intro rte">{{ section.settings.bb_intro }}</div>
+        {%- endif -%}
 
         <script id="lt-selling-plans-data" type="application/json">
           {
@@ -286,132 +296,173 @@
         </script>
 
         <div class="lt-purchase-block">
-
-          <div class="lt-toggle-container">
-            <button id="lt-toggle-once" class="lt-toggle-pill lt-toggle--active" type="button">
-              Einmalig
-            </button>
-            <button id="lt-toggle-sub" class="lt-toggle-pill" type="button">
-              <span class="lt-pill-popular">{{ section.settings.sub_toggle_badge | default: 'Beliebt' }}</span>
-              Abo &amp; Sparen
-            </button>
-          </div>
-
-          <div class="lt-sub-banner" style="display:none">
-            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-              <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.5"></circle>
-              <path d="M4.5 7l2 2 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path>
-            </svg>
-            {{ section.settings.sub_banner_text | default: 'Spare 15 % auf jede Lieferung · jederzeit kündbar' }}
-          </div>
-
-          <div class="lt-quantity-grid">
-            <div class="lt-quantity-pill lt-quantity-pill--active" data-quantity="{{ lt_pill_1_qty }}" data-once-price="{{ lt_pill_1_once }}" data-sub-price="{{ lt_pill_1_sub }}">
-              {%- if section.settings.pill_1_show_badge -%}
-                <span class="lt-pill-recommended">{{ section.settings.pill_1_badge_text | default: 'Empfohlen' }}</span>
-              {%- endif -%}
-              <span class="lt-pill-name">{{ lt_pill_1_label }}</span>
-              <span class="lt-pill-price">{{ lt_pill_1_once | money }}</span>
-              <span class="lt-pill-discount">−15 %</span>
-            </div>
-
-            <div class="lt-quantity-pill" data-quantity="{{ lt_pill_2_qty }}" data-once-price="{{ lt_pill_2_once }}" data-sub-price="{{ lt_pill_2_sub }}">
-              {%- if section.settings.pill_2_show_badge -%}
-                <span class="lt-pill-recommended">{{ section.settings.pill_2_badge_text | default: 'Empfohlen' }}</span>
-              {%- endif -%}
-              <span class="lt-pill-name">{{ lt_pill_2_label }}</span>
-              <span class="lt-pill-price">{{ lt_pill_2_once | money }}</span>
-              <span class="lt-pill-discount">−15 %</span>
-            </div>
-
-            <div class="lt-quantity-pill" data-quantity="{{ lt_pill_3_qty }}" data-once-price="{{ lt_pill_3_once }}" data-sub-price="{{ lt_pill_3_sub }}">
-              {%- if section.settings.pill_3_show_badge -%}
-                <span class="lt-pill-recommended">{{ section.settings.pill_3_badge_text | default: 'Empfohlen' }}</span>
-              {%- endif -%}
-              <span class="lt-pill-name">{{ lt_pill_3_label }}</span>
-              <span class="lt-pill-price">{{ lt_pill_3_once | money }}</span>
-              <span class="lt-pill-discount">−15 %</span>
+          <div class="visually-hidden" data-update-block="price-compact-main">
+            <div class="lt-price-row__line">
+              <span class="lt-price-row__current lt-price-main" data-js-product-price-original>{{ lt_base_price | money }}</span>
+              <del class="lt-price-row__compare" data-js-product-price-compare>{% if lt_compare_price > lt_base_price %}{{ lt_compare_price | money }}{% endif %}</del>
+              <span class="lt-price-row__saving lt-save-badge" data-js-product-price-saving>{% if lt_compare_price > lt_base_price %}Du sparst {{ lt_compare_price | minus: lt_base_price | money }}{% endif %}</span>
             </div>
           </div>
 
-          <div class="lt-value-stack">
-            <p class="lt-stack-header">{{ lt_stack_header }}</p>
+          {%- if section.settings.sub_banner_text != blank -%}
+            <div class="lt-bb__banner">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.5"></circle>
+                <path d="M4.5 7l2 2 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path>
+              </svg>
+              <span>{{ section.settings.sub_banner_text }}</span>
+            </div>
+          {%- endif -%}
 
-            <div class="lt-stack-row">
-              <div class="lt-stack-icon lt-stack-icon--image">
-                {%- if product.featured_image != blank -%}
-                  {{
-                    product.featured_image
-                    | image_url: width: 96
-                    | image_tag: loading: 'lazy', alt: product.title, widths: '48,72,96'
-                  }}
-                {%- else -%}
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <rect x="3" y="2" width="10" height="12" rx="2" stroke="currentColor" stroke-width="1" opacity="0.6"></rect>
-                    <path d="M6 6h4M6 9h3" stroke="currentColor" stroke-width="1" stroke-linecap="round" opacity="0.5"></path>
-                  </svg>
-                {%- endif -%}
-              </div>
-              <div class="lt-stack-text">
-                <p class="lt-stack-title">{{ product.title }} · 60 Kapseln</p>
-                <p class="lt-stack-sub">{{ lt_stack_product_sub }}</p>
-              </div>
-              <span class="lt-stack-price-col" data-lt-stack-product-price>{{ lt_base_price | money }}</span>
+          <div
+            class="lt-bb"
+            data-lt-buy-box
+            data-unit-suffix="{{ bb_unit_suffix | escape }}"
+            role="radiogroup"
+            aria-label="Kaufoption wählen"
+          >
+            <label
+              class="lt-bb-card lt-bb-card--sub is-selected"
+              data-lt-bb-card
+              data-bb-kind="sub"
+            >
+              <input
+                type="radio"
+                class="lt-bb-card__input"
+                name="lt-bb-{{ section.id }}"
+                value="sub-1"
+                checked
+                data-quantity="{{ lt_pill_1_qty }}"
+                data-once-price="{{ lt_pill_1_once }}"
+                data-sub-price="{{ lt_pill_1_sub }}"
+              >
+              <span class="lt-bb-card__radio" aria-hidden="true"></span>
+              <span class="lt-bb-card__body">
+                <span class="lt-bb-card__row">
+                  <span class="lt-bb-card__meta">
+                    <span class="lt-bb-card__title-row">
+                      <span class="lt-bb-card__title">{{ bb_sub1_title | escape }}</span>
+                      <span class="lt-bb-card__badge lt-bb-card__badge--strong" data-lt-bb-badge>SPARE 0%</span>
+                    </span>
+                    <span class="lt-bb-card__sub">{{ bb_sub1_sub | escape }}</span>
+                  </span>
+                  <span class="lt-bb-card__prices">
+                    <del class="lt-bb-card__compare" data-lt-bb-compare></del>
+                    <span class="lt-bb-card__current" data-lt-bb-current></span>
+                    <span class="lt-bb-card__unit" data-lt-bb-unit></span>
+                  </span>
+                </span>
+                <span class="lt-bb-card__perks">
+                  <span class="lt-bb-card__perk">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
+                      <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span>{{ bb_b1 | escape }}</span>
+                  </span>
+                  <span class="lt-bb-card__perk">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
+                      <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span>{{ bb_b2 | escape }}</span>
+                  </span>
+                  <span class="lt-bb-card__perk">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
+                      <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span>{{ bb_b3 | escape }}</span>
+                  </span>
+                </span>
+              </span>
+            </label>
+
+            <label class="lt-bb-card lt-bb-card--sub" data-lt-bb-card data-bb-kind="sub">
+              <input
+                type="radio"
+                class="lt-bb-card__input"
+                name="lt-bb-{{ section.id }}"
+                value="sub-2"
+                data-quantity="{{ lt_pill_2_qty }}"
+                data-once-price="{{ lt_pill_2_once }}"
+                data-sub-price="{{ lt_pill_2_sub }}"
+              >
+              <span class="lt-bb-card__radio" aria-hidden="true"></span>
+              <span class="lt-bb-card__body">
+                <span class="lt-bb-card__row">
+                  <span class="lt-bb-card__meta">
+                    <span class="lt-bb-card__title-row">
+                      <span class="lt-bb-card__title">{{ bb_sub2_title | escape }}</span>
+                      <span class="lt-bb-card__badge lt-bb-card__badge--muted" data-lt-bb-badge>SPARE 0%</span>
+                    </span>
+                    <span class="lt-bb-card__sub">{{ bb_sub2_sub | escape }}</span>
+                  </span>
+                  <span class="lt-bb-card__prices">
+                    <del class="lt-bb-card__compare" data-lt-bb-compare></del>
+                    <span class="lt-bb-card__current" data-lt-bb-current></span>
+                    <span class="lt-bb-card__unit" data-lt-bb-unit></span>
+                  </span>
+                </span>
+                <span class="lt-bb-card__perks">
+                  <span class="lt-bb-card__perk">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
+                      <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span>{{ bb_b1 | escape }}</span>
+                  </span>
+                  <span class="lt-bb-card__perk">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
+                      <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span>{{ bb_b2 | escape }}</span>
+                  </span>
+                  <span class="lt-bb-card__perk">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
+                      <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span>{{ bb_b3 | escape }}</span>
+                  </span>
+                </span>
+              </span>
+            </label>
+
+            <div class="lt-bb__or" role="presentation">
+              <span class="lt-bb__or-line" aria-hidden="true"></span>
+              <span class="lt-bb__or-text">{{ bb_or_label | escape }}</span>
+              <span class="lt-bb__or-line" aria-hidden="true"></span>
             </div>
 
-            <div class="lt-stack-row">
-              <div class="lt-stack-icon lt-stack-icon--image">
-                {%- if section.settings.stack_guide_image != blank -%}
-                  {{
-                    section.settings.stack_guide_image
-                    | image_url: width: 96
-                    | image_tag: loading: 'lazy', alt: lt_stack_guide_title, widths: '48,72,96'
-                  }}
-                {%- else -%}
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <path d="M8 2l1.5 4H14l-3.5 2.5 1.5 4L8 10l-4 2.5 1.5-4L2 6h4.5L8 2Z" fill="currentColor" opacity="0.3"></path>
-                  </svg>
-                {%- endif -%}
-              </div>
-              <div class="lt-stack-text">
-                <p class="lt-stack-title">{{ lt_stack_guide_title }}</p>
-                <p class="lt-stack-sub">{{ lt_stack_guide_sub }}</p>
-              </div>
-              <span class="lt-stack-free">{{ lt_stack_guide_price }}</span>
-            </div>
-
-            <div class="lt-stack-row">
-              <div class="lt-stack-icon lt-stack-icon--image">
-                {%- if section.settings.stack_bonus_image != blank -%}
-                  {{
-                    section.settings.stack_bonus_image
-                    | image_url: width: 96
-                    | image_tag: loading: 'lazy', alt: lt_stack_bonus_title, widths: '48,72,96'
-                  }}
-                {%- else -%}
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                    <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.2" opacity="0.55"></circle>
-                    <path d="M5.2 10.8 10.8 5.2M6 5.4a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8Zm4 5.2a.9.9 0 1 0 0-1.8.9.9 0 0 0 0 1.8Z" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"></path>
-                  </svg>
-                {%- endif -%}
-              </div>
-              <div class="lt-stack-text">
-                <p class="lt-stack-title">{{ lt_stack_bonus_title }}</p>
-                <p class="lt-stack-sub">{{ lt_stack_bonus_sub }}</p>
-              </div>
-              <span class="lt-stack-free">{{ lt_stack_bonus_price }}</span>
-            </div>
-
-            <div class="lt-stack-total">
-              <div class="lt-stack-total-left">
-                <span class="lt-stack-total-label">{{ lt_stack_total_label }}</span>
-                <span class="lt-stack-total-was" data-lt-stack-total-was>{{ lt_stack_old_total }}</span>
-              </div>
-              <div class="lt-stack-total-right">
-                <span class="lt-stack-total-price" data-lt-stack-total-price>{{ lt_base_price | money }}</span>
-                <span class="lt-stack-total-day" data-lt-stack-total-day></span>
-              </div>
-            </div>
+            <label class="lt-bb-card lt-bb-card--once" data-lt-bb-card data-bb-kind="once">
+              <input
+                type="radio"
+                class="lt-bb-card__input"
+                name="lt-bb-{{ section.id }}"
+                value="once"
+                data-quantity="{{ lt_pill_1_qty }}"
+                data-once-price="{{ lt_pill_1_once }}"
+                data-sub-price="{{ lt_pill_1_sub }}"
+              >
+              <span class="lt-bb-card__radio" aria-hidden="true"></span>
+              <span class="lt-bb-card__body">
+                <span class="lt-bb-card__row lt-bb-card__row--once">
+                  <span class="lt-bb-card__meta">
+                    <span class="lt-bb-card__title-row">
+                      <span class="lt-bb-card__title">{{ bb_once_title | escape }}</span>
+                    </span>
+                    <span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>
+                  </span>
+                  <span class="lt-bb-card__prices">
+                    <del class="lt-bb-card__compare" data-lt-bb-compare></del>
+                    <span class="lt-bb-card__current" data-lt-bb-current></span>
+                    <span class="lt-bb-card__unit" data-lt-bb-unit></span>
+                  </span>
+                </span>
+              </span>
+            </label>
           </div>
         </div>
 
@@ -688,99 +739,36 @@
       });
     }
 
+    const buyBox = section.querySelector('[data-lt-buy-box]');
     const plansData = section.querySelector('#lt-selling-plans-data');
     const ltPlans = plansData ? JSON.parse(plansData.textContent).plans : [];
 
     const planInput = section.querySelector('#lt-selling-plan-input');
     const quantityInput = section.querySelector('[data-lt-quantity-input]');
-    const toggleOnce = section.querySelector('#lt-toggle-once');
-    const toggleSub = section.querySelector('#lt-toggle-sub');
-    const subBanner = section.querySelector('.lt-sub-banner');
-    const pills = section.querySelectorAll('.lt-quantity-pill');
     const mainPrice = section.querySelector('.lt-price-main');
     const priceCompare = section.querySelector('[data-js-product-price-compare]');
     const priceSaving = section.querySelector('[data-js-product-price-saving]');
-    const stackProductPrice = section.querySelector('[data-lt-stack-product-price]');
-    const stackTotalPrice = section.querySelector('[data-lt-stack-total-price]');
-    const stackTotalDay = section.querySelector('[data-lt-stack-total-day]');
-    const stackTotalWas = section.querySelector('[data-lt-stack-total-was]');
-    const guideWasBase = {{ section.settings.stack_guide_value_cents | default: 2990 }};
-    const bonusWasBase = {{ section.settings.stack_bonus_value_cents | default: 0 }};
     const baseComparePrice = {{ lt_compare_price | default: 0 }};
 
-    let mode = 'once';
+    if (!buyBox) return;
+
+    const unitSuffix = buyBox.dataset.unitSuffix || 'Monat';
 
     function formatPrice(cents) {
       return (cents / 100).toFixed(2).replace('.', ',') + ' €';
     }
 
-    function updatePillDisplay() {
-      pills.forEach(pill => {
-        const priceEl = pill.querySelector('.lt-pill-price');
-        const discountEl = pill.querySelector('.lt-pill-discount');
-        const cents = parseInt(mode === 'sub' ? pill.dataset.subPrice : pill.dataset.oncePrice, 10);
-
-        if (priceEl) {
-          const qty = Math.max(1, parseInt(pill.dataset.quantity, 10) || 1);
-          const perMonth = cents / qty;
-          priceEl.textContent = qty === 1 ? formatPrice(cents) : formatPrice(perMonth) + '/Mo.';
-        }
-
-        if (discountEl) {
-          discountEl.style.display = mode === 'sub' ? 'block' : 'none';
-        }
-      });
+    function savingsPct(onceC, subC) {
+      if (!onceC || onceC <= subC) return 0;
+      return Math.round((1 - subC / onceC) * 100);
     }
 
-    function setMode(newMode) {
-      mode = newMode;
-
-      if (toggleOnce) toggleOnce.classList.toggle('lt-toggle--active', mode === 'once');
-      if (toggleSub) toggleSub.classList.toggle('lt-toggle--active', mode === 'sub');
-
-      if (subBanner) {
-        subBanner.style.display = mode === 'sub' ? 'flex' : 'none';
-      }
-
-      if (planInput) {
-        planInput.value = mode === 'sub' && ltPlans.length ? ltPlans[0].id : '';
-      }
-
-      updatePillDisplay();
-
-      const activePill = section.querySelector('.lt-quantity-pill--active');
-      if (activePill && mainPrice) {
-        const cents = parseInt(mode === 'sub' ? activePill.dataset.subPrice : activePill.dataset.oncePrice, 10);
-        mainPrice.textContent = formatPrice(cents);
-      }
-
-      updateStackPricing();
-      updatePriceMeta();
+    function getRadio(card) {
+      return card.querySelector('.lt-bb-card__input');
     }
 
-    function updateStackPricing() {
-      const activePill = section.querySelector('.lt-quantity-pill--active');
-      if (!activePill) return;
-
-      const qty = Math.max(1, parseInt(activePill.dataset.quantity, 10) || 1);
-      const onceCents = parseInt(activePill.dataset.oncePrice, 10);
-      const currentCents = parseInt(mode === 'sub' ? activePill.dataset.subPrice : activePill.dataset.oncePrice, 10);
-      const perDay = (currentCents / 100) / (qty * 30);
-
-      if (stackProductPrice) stackProductPrice.textContent = formatPrice(onceCents);
-      if (stackTotalPrice) stackTotalPrice.textContent = formatPrice(currentCents);
-      if (stackTotalWas) stackTotalWas.textContent = formatPrice(onceCents + guideWasBase + bonusWasBase);
-      if (stackTotalDay) stackTotalDay.textContent = 'nur ' + perDay.toFixed(2).replace('.', ',') + ' € pro Tag';
-    }
-
-    function updatePriceMeta() {
-      const activePill = section.querySelector('.lt-quantity-pill--active');
-      if (!activePill) return;
-
-      const qty = Math.max(1, parseInt(activePill.dataset.quantity, 10) || 1);
-      const onceCents = parseInt(activePill.dataset.oncePrice, 10);
-      const currentCents = parseInt(mode === 'sub' ? activePill.dataset.subPrice : activePill.dataset.oncePrice, 10);
-      const compareCents = mode === 'sub' ? onceCents : (baseComparePrice > 0 ? baseComparePrice * qty : 0);
+    function updatePriceMeta(isSub, qty, onceCents, currentCents) {
+      const compareCents = isSub ? onceCents : (baseComparePrice > 0 ? baseComparePrice * qty : 0);
       const savingCents = compareCents > currentCents ? compareCents - currentCents : 0;
 
       if (priceCompare) {
@@ -791,34 +779,128 @@
       }
     }
 
-    pills.forEach(pill => {
-      pill.addEventListener('click', function() {
-        pills.forEach(p => p.classList.remove('lt-quantity-pill--active'));
-        this.classList.add('lt-quantity-pill--active');
-        if (quantityInput) quantityInput.value = String(Math.max(1, parseInt(this.dataset.quantity, 10) || 1));
+    function updateCardFacades() {
+      const cards = section.querySelectorAll('[data-lt-bb-card]');
+      const subCards = [];
 
-        if (mainPrice) {
-          const cents = parseInt(mode === 'sub' ? this.dataset.subPrice : this.dataset.oncePrice, 10);
-          mainPrice.textContent = formatPrice(cents);
+      cards.forEach(card => {
+        const input = getRadio(card);
+        if (!input) return;
+
+        const kind = card.dataset.bbKind;
+        const qty = Math.max(1, parseInt(input.dataset.quantity, 10) || 1);
+        const onceC = parseInt(input.dataset.oncePrice, 10) || 0;
+        const subC = parseInt(input.dataset.subPrice, 10) || 0;
+        const compareEl = card.querySelector('[data-lt-bb-compare]');
+        const currentEl = card.querySelector('[data-lt-bb-current]');
+        const unitEl = card.querySelector('[data-lt-bb-unit]');
+        const badgeEl = card.querySelector('[data-lt-bb-badge]');
+
+        if (kind === 'sub') {
+          const pct = savingsPct(onceC, subC);
+          subCards.push({ card, badgeEl, pct });
+
+          if (badgeEl) {
+            if (pct > 0) {
+              badgeEl.textContent = 'SPARE ' + pct + '%';
+              badgeEl.hidden = false;
+            } else {
+              badgeEl.textContent = '';
+              badgeEl.hidden = true;
+            }
+          }
+          if (compareEl) {
+            if (onceC > subC) {
+              compareEl.textContent = formatPrice(onceC);
+              compareEl.hidden = false;
+            } else {
+              compareEl.textContent = '';
+              compareEl.hidden = true;
+            }
+          }
+          if (currentEl) currentEl.textContent = formatPrice(subC);
+          if (unitEl) {
+            const per = (subC / 100) / qty;
+            unitEl.textContent = per.toFixed(2).replace('.', ',') + ' €/' + unitSuffix;
+          }
+        } else {
+          const shopCompare = baseComparePrice > 0 ? baseComparePrice * qty : 0;
+          if (compareEl) {
+            if (shopCompare > onceC) {
+              compareEl.textContent = formatPrice(shopCompare);
+              compareEl.hidden = false;
+            } else {
+              compareEl.textContent = '';
+              compareEl.hidden = true;
+            }
+          }
+          if (currentEl) currentEl.textContent = formatPrice(onceC);
+          if (unitEl) {
+            const per = (onceC / 100) / qty;
+            unitEl.textContent = per.toFixed(2).replace('.', ',') + ' €/' + unitSuffix;
+          }
         }
-        updateStackPricing();
-        updatePriceMeta();
+      });
+
+      if (subCards.length === 2) {
+        const a = subCards[0].pct;
+        const b = subCards[1].pct;
+        const firstStrong = a >= b;
+        [subCards[0], subCards[1]].forEach((entry, i) => {
+          const el = entry.badgeEl;
+          if (!el || el.hidden) return;
+          const strong = i === 0 ? firstStrong : !firstStrong;
+          el.classList.toggle('lt-bb-card__badge--strong', strong);
+          el.classList.toggle('lt-bb-card__badge--muted', !strong);
+        });
+      }
+    }
+
+    function syncFromCard(card) {
+      const input = getRadio(card);
+      if (!input) return;
+
+      const kind = card.dataset.bbKind;
+      const qty = Math.max(1, parseInt(input.dataset.quantity, 10) || 1);
+      const onceCents = parseInt(input.dataset.oncePrice, 10) || 0;
+      const subCents = parseInt(input.dataset.subPrice, 10) || 0;
+      const isSub = kind === 'sub';
+      const currentCents = isSub ? subCents : onceCents;
+
+      if (quantityInput) quantityInput.value = String(qty);
+      if (planInput) {
+        planInput.value = isSub && ltPlans.length ? String(ltPlans[0].id) : '';
+      }
+      if (mainPrice) mainPrice.textContent = formatPrice(currentCents);
+
+      updateCardFacades();
+      updatePriceMeta(isSub, qty, onceCents, currentCents);
+    }
+
+    function selectCard(card) {
+      if (!card) return;
+      section.querySelectorAll('[data-lt-bb-card]').forEach(c => {
+        c.classList.toggle('is-selected', c === card);
+        const inp = getRadio(c);
+        if (inp) inp.checked = c === card;
+      });
+      syncFromCard(card);
+    }
+
+    section.querySelectorAll('[data-lt-bb-card]').forEach(card => {
+      const input = getRadio(card);
+      if (!input) return;
+      input.addEventListener('change', function() {
+        if (this.checked) selectCard(card);
       });
     });
 
-    if (toggleOnce) {
-      toggleOnce.addEventListener('click', () => setMode('once'));
+    const initialCard = section.querySelector('.lt-bb-card__input:checked')?.closest('[data-lt-bb-card]');
+    if (initialCard) {
+      selectCard(initialCard);
+    } else {
+      updateCardFacades();
     }
-    if (toggleSub) {
-      toggleSub.addEventListener('click', () => setMode('sub'));
-    }
-
-    console.log('LT Selling Plans:', ltPlans);
-    const initialPill = section.querySelector('.lt-quantity-pill--active');
-    if (quantityInput && initialPill) {
-      quantityInput.value = String(Math.max(1, parseInt(initialPill.dataset.quantity, 10) || 1));
-    }
-    setMode('once');
   })();
 </script>
 
@@ -879,6 +961,78 @@
       "id": "benefit_3_text",
       "label": "Benefit 3",
       "default": "Leicht löslich und geschmacksneutral"
+    },
+    {
+      "type": "header",
+      "content": "Buy-Box Karten"
+    },
+    {
+      "type": "richtext",
+      "id": "bb_intro",
+      "label": "Intro über der Buy-Box"
+    },
+    {
+      "type": "text",
+      "id": "bb_sub1_title",
+      "label": "Abo-Karte 1 Titel",
+      "default": "Einzel-Abo"
+    },
+    {
+      "type": "text",
+      "id": "bb_sub2_title",
+      "label": "Abo-Karte 2 Titel",
+      "default": "Doppel-Abo"
+    },
+    {
+      "type": "text",
+      "id": "bb_once_title",
+      "label": "Einmalig Titel",
+      "default": "Einmaliger Kauf"
+    },
+    {
+      "type": "text",
+      "id": "bb_sub1_subline",
+      "label": "Abo-Karte 1 Unterzeile (leer = Pillen-Label 1)"
+    },
+    {
+      "type": "text",
+      "id": "bb_sub2_subline",
+      "label": "Abo-Karte 2 Unterzeile (leer = Pillen-Label 2)"
+    },
+    {
+      "type": "text",
+      "id": "bb_once_subline",
+      "label": "Einmalig Unterzeile (leer = Pillen-Label 1)"
+    },
+    {
+      "type": "text",
+      "id": "bb_or_label",
+      "label": "Trenner Abo / Einmalig",
+      "default": "ODER"
+    },
+    {
+      "type": "text",
+      "id": "bb_unit_suffix",
+      "label": "Stückpreis-Einheit",
+      "default": "Monat"
+    },
+    {
+      "type": "text",
+      "id": "bb_benefit_1",
+      "label": "Abo-Vorteil 1",
+      "default": "Gratis Versand bei Abo-Lieferungen"
+    },
+    {
+      "type": "text",
+      "id": "bb_benefit_2",
+      "label": "Abo-Vorteil 2",
+      "default": "Jederzeit kündbar"
+    },
+    {
+      "type": "text",
+      "id": "bb_benefit_3",
+      "label": "Abo-Vorteil 3",
+      "default": "Willkommens-Angebote zur ersten Lieferung"
     },
     {
       "type": "header",

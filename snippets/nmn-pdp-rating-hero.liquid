@@ -1,8 +1,10 @@
 {% comment %}
-  NMN PDP: star rating + review count + customer claim (Loox metafields).
-  Desktop: stars + „4,7 von …“ und Kundenzeile in einer Reihe.
-  Mobil: zweite Zeile für die Kundenzeile.
-  Optional override: product.metafields.custom.reviews_customer_claim (single line text)
+  NMN PDP: Loox rating bar (IAM8-style hierarchy).
+  Desktop: eine Zeile — Sterne + Bewertungstext | Social-Proof-Stat(en).
+  Mobile: zwei Zeilen — oben primär (Sterne + Score), unten sekundär (Stats, | dazwischen).
+  Metafields:
+  - custom.reviews_customer_claim (optional) — erste Stat-Zeile, z. B. „760K+ Kundenkäufe“
+  - custom.reviews_stat_2 (optional) — zweite Stat, z. B. „23 Mio.+ Portionen“
 {% endcomment %}
 {% assign rating = product.metafields.loox.avg_rating | default: 0 | plus: 0 %}
 {% assign rating_count = product.metafields.loox.num_reviews | default: 0 | plus: 0 %}
@@ -19,119 +21,57 @@
   {% assign pct = rounded | times: 20 %}
   {% assign star_color = '%23F4B740' %}
   {% assign bg_color = '%23E5E5E5' %}
-  {% assign nmn_customers_claim = product.metafields.custom.reviews_customer_claim.value | default: '>1.000 zufriedene Kunden' %}
+  {% assign nmn_stat_1 = product.metafields.custom.reviews_customer_claim.value | default: '>1.000 zufriedene Kunden' %}
+  {% assign nmn_stat_2 = product.metafields.custom.reviews_stat_2.value | default: '' %}
+  {% assign nmn_show_secondary = false %}
+  {% if nmn_stat_1 != blank or nmn_stat_2 != blank %}
+    {% assign nmn_show_secondary = true %}
+  {% endif %}
 
   <div class="custom-rating-nmn nmn-pdp-rating-hero" id="custom-rating-nmn-{{ section.id }}">
-    <style>
-      #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__trigger {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 0.35rem 0.75rem;
-        width: 100%;
-        max-width: 100%;
-        margin: 0 0 0.5rem;
-        padding: 0;
-        border: 0;
-        background: none;
-        font: inherit;
-        color: inherit;
-        text-align: left;
-        cursor: pointer;
-      }
-      #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__trigger:focus-visible {
-        outline: 2px solid currentColor;
-        outline-offset: 3px;
-      }
-      #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__row--primary {
-        display: flex;
-        flex-wrap: nowrap;
-        align-items: center;
-        gap: 0.5rem 0.75rem;
-        min-width: 0;
-      }
-      #custom-rating-nmn-{{ section.id }} .custom-stars {
-        position: relative;
-        display: inline-block;
-        width: 120px;
-        height: 18px;
-        flex-shrink: 0;
-        background-image: url("data:image/svg+xml;utf8,<svg width='20' height='14' viewBox='0 0 14 13' xmlns='http://www.w3.org/2000/svg'><path d='m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z' fill='{{ bg_color }}'/></svg>");
-        background-repeat: repeat-x;
-        background-size: 24px 18px;
-      }
-      #custom-rating-nmn-{{ section.id }} .custom-stars-active {
-        position: absolute;
-        left: 0;
-        top: 0;
-        height: 18px;
-        width: {{ pct }}%;
-        overflow: hidden;
-      }
-      #custom-rating-nmn-{{ section.id }} .custom-stars-active::before {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 120px;
-        height: 18px;
-        background-image: url("data:image/svg+xml;utf8,<svg width='20' height='14' viewBox='0 0 14 13' xmlns='http://www.w3.org/2000/svg'><path d='m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z' fill='{{ star_color }}'/></svg>");
-        background-repeat: repeat-x;
-        background-size: 24px 18px;
-      }
-      #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__copy {
-        font-size: 1rem;
-        line-height: 1.35;
-        font-weight: 500;
-        color: var(--color-text-main, #111);
-        white-space: nowrap;
-      }
-      #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__score {
-        font-weight: 700;
-        font-size: 1.0625rem;
-        letter-spacing: -0.02em;
-      }
-      #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__divider-desktop {
-        color: var(--color-secondary-text-main, #737373);
-        font-weight: 400;
-        flex-shrink: 0;
-      }
-      #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__customers-line {
-        font-weight: 600;
-        font-size: 1rem;
-        line-height: 1.35;
-        color: var(--color-text-main, #111);
-      }
-      @media screen and (max-width: 767px) {
-        #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__divider-desktop {
-          display: none;
-        }
-        #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__customers-line {
-          flex: 1 0 100%;
-          width: 100%;
-        }
-      }
-    </style>
+    <div class="nmn-pdp-rating-hero__bar">
+      <button
+        type="button"
+        class="nmn-pdp-rating-hero__trigger"
+        data-custom-rating-scroll
+        aria-label="Zu den Bewertungen scrollen – {{ rating_text }} von {{ rating_count }} Bewertungen{% if nmn_stat_1 != blank %}, {{ nmn_stat_1 | strip_html | escape }}{% endif %}{% if nmn_stat_2 != blank %}, {{ nmn_stat_2 | strip_html | escape }}{% endif %}"
+      >
+        <span class="nmn-pdp-rating-hero__primary">
+          <span class="nmn-pdp-rating-hero__stars custom-stars" aria-hidden="true">
+            <span class="custom-stars-active" style="width: {{ pct }}%;"></span>
+          </span>
+          <span class="nmn-pdp-rating-hero__copy">
+            <span class="nmn-pdp-rating-hero__score">{{ rating_text }}</span>
+            <span class="nmn-pdp-rating-hero__reviews-label"> von {{ rating_count }} Bewertungen</span>
+          </span>
+        </span>
 
-    <button
-      type="button"
-      class="nmn-pdp-rating-hero__trigger"
-      data-custom-rating-scroll
-      aria-label="Zu den Bewertungen scrollen – {{ rating_text }} von {{ rating_count }} Bewertungen, {{ nmn_customers_claim | escape }}"
-    >
-      <span class="nmn-pdp-rating-hero__row--primary">
-        <span class="custom-stars" aria-hidden="true">
-          <span class="custom-stars-active"></span>
-        </span>
-        <span class="nmn-pdp-rating-hero__copy">
-          <span class="nmn-pdp-rating-hero__score">{{ rating_text }}</span>
-          <span> von {{ rating_count }} Bewertungen</span>
-        </span>
-      </span>
-      <span class="nmn-pdp-rating-hero__divider-desktop" aria-hidden="true">&nbsp;|&nbsp;</span>
-      <span class="nmn-pdp-rating-hero__customers-line">{{ nmn_customers_claim }}</span>
-    </button>
+        {% if nmn_show_secondary %}
+          <span class="nmn-pdp-rating-hero__sep nmn-pdp-rating-hero__sep--between" aria-hidden="true">|</span>
+          <span class="nmn-pdp-rating-hero__secondary">
+            {% if nmn_stat_1 != blank %}
+              <span class="nmn-pdp-rating-hero__stat">{{ nmn_stat_1 | escape }}</span>
+            {% endif %}
+            {% if nmn_stat_1 != blank and nmn_stat_2 != blank %}
+              <span class="nmn-pdp-rating-hero__sep nmn-pdp-rating-hero__sep--inline" aria-hidden="true">|</span>
+            {% endif %}
+            {% if nmn_stat_2 != blank %}
+              <span class="nmn-pdp-rating-hero__stat">{{ nmn_stat_2 | escape }}</span>
+            {% endif %}
+          </span>
+        {% endif %}
+      </button>
+    </div>
   </div>
+
+  <style>
+    #custom-rating-nmn-{{ section.id }} .nmn-pdp-rating-hero__stars {
+      background-image: url("data:image/svg+xml;utf8,<svg width='20' height='14' viewBox='0 0 14 13' xmlns='http://www.w3.org/2000/svg'><path d='m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z' fill='{{ bg_color }}'/></svg>");
+    }
+    #custom-rating-nmn-{{ section.id }} .custom-stars-active::before {
+      background-image: url("data:image/svg+xml;utf8,<svg width='20' height='14' viewBox='0 0 14 13' xmlns='http://www.w3.org/2000/svg'><path d='m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z' fill='{{ star_color }}'/></svg>");
+    }
+  </style>
 
   <script>
     (function () {
