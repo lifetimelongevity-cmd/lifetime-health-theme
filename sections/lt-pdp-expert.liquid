@@ -1,0 +1,207 @@
+{% comment %}
+  LT PDP — Expert credential card.
+  Stage: Trust — scientific advisor identity only.
+  Rule: NO quotes unless externally verified. Credential only.
+  Pattern: expert-card from _examples/pdp-reference.html
+{% endcomment %}
+
+<section
+  class="lt-pdp-expert"
+  id="lt-pdp-expert-{{ section.id }}"
+>
+  <div class="container container--large remove-empty-space">
+    <div class="lt-pdp-expert__inner">
+
+      {%- if section.settings.section_label != blank -%}
+        <p class="lt-pdp-expert__section-label">{{ section.settings.section_label | escape }}</p>
+      {%- endif -%}
+
+      <div class="lt-pdp-expert__card">
+        <div class="lt-pdp-expert__top">
+
+          <div class="lt-pdp-expert__avatar" aria-hidden="true">
+            {%- if section.settings.image != blank -%}
+              {{
+                section.settings.image
+                | image_url: width: 200
+                | image_tag:
+                  loading: 'lazy',
+                  class: 'lt-pdp-expert__photo',
+                  width: 64,
+                  height: 64
+              }}
+            {%- else -%}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="M9 12l2 2 4-4"/>
+              </svg>
+            {%- endif -%}
+          </div>
+
+          <div class="lt-pdp-expert__meta">
+            {%- if section.settings.expert_label != blank -%}
+              <p class="lt-pdp-expert__label">{{ section.settings.expert_label | escape }}</p>
+            {%- endif -%}
+            {%- if section.settings.expert_name != blank -%}
+              <p class="lt-pdp-expert__name">{{ section.settings.expert_name | escape }}</p>
+            {%- endif -%}
+            {%- if section.settings.expert_credential != blank -%}
+              <p class="lt-pdp-expert__credential">{{ section.settings.expert_credential | escape }}</p>
+            {%- endif -%}
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .lt-pdp-expert {
+    padding-block: var(--space-9);
+    background: var(--color-surface-primary);
+  }
+
+  @media screen and (max-width: 749px) {
+    .lt-pdp-expert {
+      padding-block: var(--space-8);
+    }
+  }
+
+  .lt-pdp-expert__section-label {
+    margin: 0 0 var(--space-5);
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-secondary);
+  }
+
+  .lt-pdp-expert__card {
+    background: var(--color-surface-secondary);
+    border: 1px solid rgba(94, 171, 161, 0.18); /* intentional: teal-tinted trust border per reference spec */
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+  }
+
+  .lt-pdp-expert__top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .lt-pdp-expert__avatar {
+    width: 64px; /* intrinsic: expert avatar container size */
+    height: 64px;
+    border-radius: var(--radius-md);
+    background: var(--color-surface-benefit);
+    border: 1px solid rgba(94, 171, 161, 0.25); /* intentional: teal-tinted, matches reference */
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .lt-pdp-expert__avatar svg {
+    width: 28px; /* intrinsic: icon at 64px container */
+    height: 28px;
+    color: var(--color-teal-dark);
+  }
+
+  .lt-pdp-expert__photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .lt-pdp-expert__meta {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .lt-pdp-expert__label {
+    margin: 0 0 3px; /* intrinsic: tight label-to-name gap per reference */
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.08em; /* intrinsic: tighter tracking for badge label */
+    text-transform: uppercase;
+    color: var(--color-teal-dark);
+  }
+
+  .lt-pdp-expert__name {
+    margin: 0 0 var(--space-1);
+    font-family: var(--font-heading);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-tight);
+    color: var(--color-text-primary);
+  }
+
+  .lt-pdp-expert__credential {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    line-height: var(--leading-body);
+    color: var(--color-text-muted);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT PDP Expert",
+  "tag": "section",
+  "class": "section-lt-pdp-expert",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_label",
+      "label": "Sektions-Label",
+      "default": "WISSENSCHAFTLICHER BEIRAT"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Expertenfoto (optional)",
+      "info": "Quadratisch empfohlen. Ohne Foto: Shield-Icon als Platzhalter."
+    },
+    {
+      "type": "text",
+      "id": "expert_label",
+      "label": "Badge-Text",
+      "default": "Wissenschaftlich entwickelt"
+    },
+    {
+      "type": "text",
+      "id": "expert_name",
+      "label": "Name",
+      "default": "Prof. Dr. med. Volker Limmroth"
+    },
+    {
+      "type": "text",
+      "id": "expert_credential",
+      "label": "Titel / Funktion",
+      "default": "Neurologe · Wissenschaftlicher Beirat LIFETIME"
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT PDP Expert",
+      "category": "Product",
+      "settings": {
+        "section_label": "WISSENSCHAFTLICHER BEIRAT",
+        "expert_label": "Wissenschaftlich entwickelt",
+        "expert_name": "Prof. Dr. med. Volker Limmroth",
+        "expert_credential": "Neurologe · Wissenschaftlicher Beirat LIFETIME"
+      }
+    }
+  ]
+}
+{% endschema %}

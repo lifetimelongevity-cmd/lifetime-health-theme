@@ -31,6 +31,11 @@
               role="listitem"
               {{ block.shopify_attributes }}
             >
+              {%- if block.settings.icon != blank -%}
+                <div class="nmn-pdp-quality-trust__card-icon" aria-hidden="true">
+                  {{ block.settings.icon }}
+                </div>
+              {%- endif -%}
               {%- unless block.settings.title == blank -%}
                 <h3 class="nmn-pdp-quality-trust__title text-weight--bold">
                   {{- block.settings.title | escape -}}
@@ -48,29 +53,29 @@
 
 {% stylesheet %}
   .nmn-pdp-quality-trust__header {
-    margin-bottom: 2rem;
-    max-width: 40rem;
+    margin-bottom: var(--space-6);
+    max-width: 40rem; /* intrinsic: heading constraint */
   }
 
   .nmn-pdp-quality-trust__label {
-    margin: 0 0 1rem;
-    font-family: var(--font-stack-body-primary);
-    font-size: 0.75rem;
-    line-height: 1.4;
-    font-weight: 500;
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    line-height: var(--leading-body);
+    font-weight: var(--weight-medium);
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-secondary-text-main);
+    color: var(--color-text-secondary);
   }
 
   .nmn-pdp-quality-trust__heading {
     margin: 0;
-    font-family: var(--font-stack-headings-primary);
-    font-size: clamp(1.5rem, 2.5vw, 1.75rem);
-    line-height: 1.15;
-    letter-spacing: -0.02em;
-    color: var(--color-text-main);
-    max-width: 36ch;
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    line-height: var(--leading-heading);
+    letter-spacing: -0.02em; /* intrinsic: display heading optical tightening */
+    color: var(--color-text-primary);
+    max-width: 36ch; /* intrinsic: heading line-length constraint */
   }
 
   .nmn-pdp-quality-trust__grid {
@@ -80,9 +85,9 @@
     margin: 0;
     padding: 0;
     list-style: none;
-    border: 1px solid color-mix(in srgb, var(--color-borders-main) 92%, var(--color-text-main));
-    border-radius: 0.75rem;
-    background: var(--color-background-main);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-secondary);
     overflow: hidden;
   }
 
@@ -94,12 +99,12 @@
 
   .nmn-pdp-quality-trust__card {
     margin: 0;
-    padding: 1.5rem;
+    padding: var(--space-5);
     border: 0;
     border-radius: 0;
     background: transparent;
     box-shadow: none;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-borders-main) 94%, var(--color-text-main));
+    border-bottom: 1px solid var(--color-border-default);
   }
 
   @media screen and (max-width: 599px) {
@@ -110,7 +115,7 @@
 
   @media screen and (min-width: 600px) {
     .nmn-pdp-quality-trust__card:nth-child(odd) {
-      border-inline-end: 1px solid color-mix(in srgb, var(--color-borders-main) 94%, var(--color-text-main));
+      border-inline-end: 1px solid var(--color-border-default);
     }
 
     .nmn-pdp-quality-trust__card:nth-last-child(-n + 2) {
@@ -118,22 +123,40 @@
     }
   }
 
+  .nmn-pdp-quality-trust__card-icon {
+    width: 48px; /* intrinsic: card-info icon container per spec */
+    height: 48px;
+    border-radius: var(--radius-md);
+    background: var(--color-surface-benefit);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-4);
+    flex-shrink: 0;
+  }
+
+  .nmn-pdp-quality-trust__card-icon svg {
+    width: 24px; /* intrinsic: icon size per spec */
+    height: 24px;
+    color: var(--color-teal-dark);
+  }
+
   .nmn-pdp-quality-trust__title {
-    margin: 0 0 0.5rem;
-    font-family: var(--font-stack-headings-primary);
-    font-size: 1.25rem;
-    line-height: 1.25;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: var(--color-text-main);
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-heading);
+    font-size: var(--text-section);
+    line-height: var(--leading-tight);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.01em; /* intrinsic: display heading optical tightening */
+    color: var(--color-text-primary);
   }
 
   .nmn-pdp-quality-trust__text {
     margin: 0;
-    font-family: var(--font-stack-body-primary);
-    font-size: 1rem;
-    line-height: 1.4;
-    color: var(--color-secondary-text-main);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    color: var(--color-text-secondary);
   }
 {% endstylesheet %}
 
@@ -164,6 +187,12 @@
       "type": "point",
       "name": "Qualitätspunkt",
       "settings": [
+        {
+          "type": "html",
+          "id": "icon",
+          "label": "Icon (SVG)",
+          "info": "Inline SVG einfügen. Empfohlen: 24×24px, stroke=\"currentColor\"."
+        },
         {
           "type": "text",
           "id": "title",
