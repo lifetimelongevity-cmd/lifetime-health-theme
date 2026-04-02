@@ -1141,7 +1141,7 @@
 
         /* Benefit list: token-aligned text + teal checkmark */
         #product-{{ section.id }} .nmn-benefit-list {
-          margin-top: var(--space-4);
+          margin-top: 0;
           gap: var(--space-2);
         }
         #product-{{ section.id }} .nmn-benefit-list__item {
@@ -1161,6 +1161,77 @@
           background-size: contain;
           border-radius: 0;
           margin-top: 0.15em; /* optical alignment with text cap-height */
+        }
+
+        /* ── CTA Button: reference visual layer ── */
+        #add-to-cart-{{ section.id }} .flex-buttons > .add-to-cart.button--product {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 2px; /* intrinsic: sub-token micro-gap between label and price line */
+          width: 100%;
+          height: 60px; /* intrinsic: reference spec button height */
+          background: var(--color-dark);
+          color: var(--color-text-on-dark);
+          border: none;
+          border-radius: var(--radius-full);
+          padding: 0 var(--space-5);
+          transition: opacity var(--ease-default);
+        }
+        #add-to-cart-{{ section.id }} .flex-buttons > .add-to-cart.button--product:hover:not(.disabled) {
+          opacity: 0.88;
+          background: var(--color-dark);
+        }
+        #add-to-cart-{{ section.id }} .flex-buttons > .add-to-cart.button--product .button__text {
+          display: block;
+          width: auto;
+          font-family: var(--font-body);
+          font-size: var(--text-body-sm);
+          font-weight: var(--weight-bold);
+          letter-spacing: 0.07em;
+          text-transform: uppercase;
+          line-height: 1; /* intrinsic */
+          color: var(--color-text-on-dark);
+        }
+        #add-to-cart-{{ section.id }} .flex-buttons > .add-to-cart.button--product .nmn-btn-price {
+          display: block;
+          font-family: var(--font-body);
+          font-size: var(--text-micro);
+          font-weight: var(--weight-regular);
+          letter-spacing: 0.03em;
+          line-height: 1; /* intrinsic */
+          color: var(--color-text-on-dark);
+          opacity: 0.65;
+        }
+        #add-to-cart-{{ section.id }} .flex-buttons > .add-to-cart.button--product .nmn-btn-price[hidden],
+        #add-to-cart-{{ section.id }} .flex-buttons > .add-to-cart.button--product.working .nmn-btn-price {
+          display: none !important;
+        }
+
+        /* ── Trust line ── */
+        #product-{{ section.id }} .nmn-cta-footer--single {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px; /* intrinsic: sub-token micro-gap per spec */
+          margin-top: var(--space-2);
+          margin-bottom: var(--space-5);
+          text-align: left;
+        }
+        #product-{{ section.id }} .nmn-cta-trust-icon {
+          width: 16px; /* intrinsic: icon size per spec */
+          height: 16px;
+          color: var(--color-teal-dark);
+          flex-shrink: 0;
+        }
+        #product-{{ section.id }} .nmn-cta-footer--single .nmn-cta-footer__promise {
+          font-family: var(--font-body);
+          font-size: var(--text-body-sm);
+          font-weight: var(--weight-regular);
+          line-height: 1; /* intrinsic */
+          color: var(--color-gray-400);
+          margin: 0;
         }
       {% endstyle %}
     {%- endif -%}
@@ -2837,6 +2908,9 @@
                             endunless
                           -%}
                         </span>
+                        {%- if template.suffix == '13_nmn' -%}
+                          <span class="nmn-btn-price" data-nmn-btn-price aria-hidden="true" hidden></span>
+                        {%- endif -%}
                         <span class="button__preloader">
                           <svg class="button__preloader-element" viewBox="25 25 50 50">
                             <circle cx="50" cy="50" r="20" fill="none" stroke-width="4"/>
@@ -2845,6 +2919,10 @@
                       </button>
                       {%- if template.suffix == '13_nmn' -%}
                         <div class="nmn-cta-footer nmn-cta-footer--single">
+                          <svg class="nmn-cta-trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                            <path d="M9 12l2 2 4-4"/>
+                          </svg>
                           <p class="nmn-cta-footer__promise">90 Tage risikofrei testen</p>
                         </div>
                       {%- endif -%}
@@ -2889,6 +2967,7 @@
                       'sticky-add-to-cart[data-id="product-' + sid + '"] [data-lt-nmn-sticky-cta]'
                     );
                     var addBtn = form.querySelector('[data-js-product-add-to-cart]');
+                    var btnPriceEl = addBtn ? addBtn.querySelector('[data-nmn-btn-price]') : null;
                     var productPage = document.getElementById('product-' + sid);
 
                     function nmnGetProductVariantsEl() {
@@ -3317,15 +3396,21 @@
                         var vv = readNmnPricingVariant();
                         cents = vv ? numCents(vv.price) : null;
                       }
-                      if (cents == null) {
-                        cta.textContent = 'Jetzt bestellen';
-                        if (ctaSticky) ctaSticky.textContent = 'Jetzt bestellen';
-                        return;
+                      var formattedPrice = cents != null ? formatDeMoney(cents) + '\u00a0€' + suff : null;
+                      cta.textContent = 'Jetzt bestellen';
+                      if (btnPriceEl) {
+                        if (formattedPrice) {
+                          btnPriceEl.textContent = formattedPrice;
+                          btnPriceEl.removeAttribute('hidden');
+                        } else {
+                          btnPriceEl.setAttribute('hidden', '');
+                        }
                       }
-                      var ctaLine =
-                        'Jetzt bestellen – ' + formatDeMoney(cents) + '\u00a0€' + suff;
-                      cta.textContent = ctaLine;
-                      if (ctaSticky) ctaSticky.textContent = ctaLine;
+                      if (ctaSticky) {
+                        ctaSticky.textContent = formattedPrice
+                          ? 'Jetzt bestellen \u2013 ' + formattedPrice
+                          : 'Jetzt bestellen';
+                      }
                     }
 
                     function nmnRefreshPricingUi() {
