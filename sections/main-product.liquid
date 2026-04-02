@@ -196,7 +196,7 @@
           font-family: var(--nmn-font-heading);
           font-size: var(--text-h1);
           font-weight: var(--weight-bold);
-          line-height: 1.1;
+          line-height: var(--leading-heading);
           color: var(--color-text-primary, #000);
           margin-top: 0;
           margin-bottom: var(--space-3);
@@ -215,7 +215,7 @@
           font-family: var(--font-body-family, 'Lato', sans-serif);
           font-size: var(--text-body);
           font-weight: var(--weight-regular);
-          line-height: 1.5;
+          line-height: var(--leading-body);
           color: var(--color-gray-600);
         }
         #product-{{ section.id }} .nmn-pdp-subhead {
@@ -225,7 +225,7 @@
         }
         #product-{{ section.id }} .nmn-pdp-subhead p {
           margin: 0;
-          line-height: 1.45;
+          line-height: var(--leading-body);
         }
         #product-{{ section.id }} .nmn-pdp-spec {
           display: block;
@@ -1039,6 +1039,129 @@
           background: url('{{ nmn_icon_card_benefit_tick_url }}') center / contain no-repeat !important;
         }
         {%- endif -%}
+
+        /* ── Purchase Cards: reference visual layer (pdp-reference.html)
+           CSS-only overrides — no HTML or JS changes.
+           All logic (card switching, selling_plan, price rendering) is unchanged. ── */
+
+        #product-{{ section.id }} .nmn-buy-module__field-label {
+          font-family: var(--font-heading);
+          font-size: var(--text-body-lg);
+          font-weight: var(--weight-bold);
+          line-height: var(--leading-tight);
+          color: var(--color-text-primary);
+          margin: 0 0 var(--space-5);
+        }
+
+        #product-{{ section.id }} .nmn-sub-toggle__stack {
+          gap: var(--space-3);
+        }
+
+        /* Base: uniform 2px border on all states — eliminates padding-compensation need */
+        #product-{{ section.id }} .nmn-sub-toggle__btn--plan,
+        #product-{{ section.id }} .nmn-sub-toggle__btn--primary.nmn-sub-toggle__btn--plan,
+        #product-{{ section.id }} .nmn-sub-toggle__btn--secondary.nmn-sub-toggle__btn--plan,
+        #product-{{ section.id }} .nmn-sub-toggle__btn--primary.nmn-sub-toggle__btn--plan.nmn-sub-toggle__btn--active,
+        #product-{{ section.id }} .nmn-sub-toggle__btn--secondary.nmn-sub-toggle__btn--plan.nmn-sub-toggle__btn--active {
+          border-radius: var(--radius-lg);
+          border-width: 2px; /* intentional: no --border-width token; matches reference spec */
+          padding: var(--space-5);
+        }
+
+        /* Active card: teal border + white bg + elevated shadow */
+        #product-{{ section.id }} .nmn-sub-toggle__btn--plan.nmn-sub-toggle__btn--active {
+          background: var(--color-surface-primary);
+          border-color: var(--color-teal-dark);
+          box-shadow: var(--shadow-md);
+          opacity: 1;
+        }
+
+        /* Inactive card: no border + neutral bg */
+        #product-{{ section.id }} .nmn-sub-toggle__btn--plan:not(.nmn-sub-toggle__btn--active) {
+          background: #f2f2f2; /* per reference spec — no token equivalent (between gray-200 and white) */
+          border-color: transparent;
+          opacity: 1;
+          box-shadow: none;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__btn--plan:not(.nmn-sub-toggle__btn--active):hover {
+          border-color: var(--color-border-default);
+        }
+
+        /* Savings badge: teal variant */
+        #product-{{ section.id }} .nmn-sub-toggle__badge--save {
+          background: var(--color-surface-primary);
+          border: 1px solid rgba(74, 140, 133, 0.3); /* per spec: rgba(74,140,133,0.3) */
+          color: var(--color-teal-dark);
+          font-family: var(--font-body);
+          font-size: var(--text-micro);
+          font-weight: var(--weight-semibold);
+          letter-spacing: 0.02em;
+          text-transform: none;
+          box-shadow: var(--shadow-sm);
+        }
+
+        /* Card title: design system typography */
+        #product-{{ section.id }} .nmn-sub-toggle__title,
+        #product-{{ section.id }} .nmn-sub-toggle__btn--secondary .nmn-sub-toggle__title {
+          font-family: var(--font-heading);
+          font-size: var(--text-section);
+          font-weight: var(--weight-bold);
+          line-height: var(--leading-tight);
+          letter-spacing: 0;
+          color: var(--color-text-primary);
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__btn--plan:not(.nmn-sub-toggle__btn--active) .nmn-sub-toggle__title {
+          color: var(--color-gray-600);
+        }
+
+        /* Sublines */
+        #product-{{ section.id }} .nmn-sub-toggle__lead,
+        #product-{{ section.id }} .nmn-sub-toggle__onetime-lead {
+          font-family: var(--font-body);
+          font-size: var(--text-body-sm);
+          font-weight: var(--weight-regular);
+          line-height: var(--leading-body);
+          color: var(--color-gray-400);
+          margin: 0 0 var(--space-4);
+        }
+        #product-{{ section.id }} .nmn-sub-toggle__onetime-lead {
+          margin: 0;
+        }
+
+        /* Per-day price */
+        #product-{{ section.id }} .nmn-sub-toggle__card-per-day {
+          font-family: var(--font-body);
+          font-size: var(--text-micro);
+          font-weight: var(--weight-regular);
+          line-height: 1; /* intrinsic: single-line price label */
+          color: var(--color-gray-400);
+          opacity: 1;
+          letter-spacing: 0;
+        }
+
+        /* Benefit list: token-aligned text + teal checkmark */
+        #product-{{ section.id }} .nmn-benefit-list {
+          margin-top: var(--space-4);
+          gap: var(--space-2);
+        }
+        #product-{{ section.id }} .nmn-benefit-list__item {
+          font-family: var(--font-body);
+          font-size: var(--text-body-sm);
+          font-weight: var(--weight-regular);
+          line-height: var(--leading-body);
+          color: var(--color-text-primary);
+        }
+        #product-{{ section.id }} .nmn-benefit-list__check {
+          width: 15px; /* intrinsic: icon size per spec */
+          height: 15px;
+          background-color: transparent;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234A8C85' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 13l4 4L19 7'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: center;
+          background-size: contain;
+          border-radius: 0;
+          margin-top: 0.15em; /* optical alignment with text cap-height */
+        }
       {% endstyle %}
     {%- endif -%}
 

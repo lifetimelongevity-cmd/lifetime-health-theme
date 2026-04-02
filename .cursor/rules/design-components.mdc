@@ -140,3 +140,54 @@ Before outputting code, ask:
 4. Is there anything here that exists only because it was easy to build?
 
 If any answer is no — refine before output.
+
+---
+
+## Learned Patterns
+
+Derived from NMN PDP build (April 2026). Each pattern maps to a real bug found and fixed.
+
+### Token Discipline
+
+**DO** use `var(--leading-heading)` for h1–h3 line-heights, `var(--leading-body)` for body/subtitle, `var(--leading-tight)` for dense labels and captions.
+**DON'T** write raw values like `1.1`, `1.45`, `1.5`, `1.3` — even if they "look right", they bypass the token system and diverge silently during refactors.
+
+**DO** annotate genuinely sub-token values (no token equivalent exists) with a comment:
+```css
+gap: 6px; /* intentional: between --space-1 (4px) and --space-2 (8px) per spec */
+```
+**DON'T** leave raw px values without explanation — auditors can't tell intent from oversight.
+
+**DO** replace all `12px` with `var(--space-3)`, `16px` with `var(--space-4)`, `24px` with `var(--space-5)`, etc. even inside shorthand:
+```css
+padding: 6px var(--space-3); /* NOT: padding: 6px 12px */
+```
+
+**DO** use `stroke="white"` (CSS named color) for white SVG strokes.
+**DON'T** use `stroke="#ffffff"` — hex values in inline SVG violate the no-hardcoded-hex rule even though SVG attributes look different from CSS.
+
+### Global Rule Safety
+
+**DON'T** write `display: none !important` for app-injected classes (e.g. `.icon-block-container`) in a global CSS file. If a block is removed from a template's `block_order`, it won't render — no CSS suppression needed.
+**DO** remove blocks from `block_order` to stop them rendering. CSS hiding of app blocks is always a regression risk for other pages.
+
+**DON'T** use `[class*="foo"]` wildcards in global CSS. They are unpredictable across themes.
+
+### Dead Code
+
+**DO** remove CSS classes immediately when their corresponding Liquid snippet or block is removed from a template. Dead CSS creates audit confusion and may conflict with future elements using the same class name.
+**Checklist:** When removing a snippet from a template, search for `.snippet-class-name` in all `.css` files and delete the matching rule block.
+
+### Spacing Architecture
+
+**DON'T** rely on `product-custom-liquid` (or any theme wrapper) to provide spacing between blocks. Wrapper margins vary per theme and viewport.
+**DO** reset wrapper margins to `0` in the scoped `{% style %}` block and own all spacing via component-level `margin-bottom` on the rendered element itself.
+
+**Rule:** Spacing chain = component `margin-bottom` only. One value to change, one place to find it.
+
+### Duplicate Content / Hardcoded Fragments
+
+**DO** search for hardcoded text and markup in `sections/main-product.liquid` before creating a new snippet for the same content (e.g. subtitle, tagline). The theme may already render the element.
+**Workflow:** Before adding a `custom_liquid` block, run a search for the content string or class name in `sections/main-product.liquid`.
+
+**DON'T** have two mechanisms rendering the same content. A hardcoded element + a custom-liquid block = duplicate on every page load.

@@ -1,0 +1,19 @@
+{
+    "commands": [
+      {
+        "name": "audit",
+        "description": "Full design + token audit of the current build",
+        "prompt": "Run a full audit of all files touched in this chat.\n\nCheck systematically:\n1. CSS: Any hardcoded hex values, px values, or font names instead of token references?\n2. Schema: Any name > 25 characters or empty default values?\n3. Structure: Duplicate classes, redundant wrappers, or patterns not from _examples/?\n4. JS: Console errors or fragile selectors?\n5. Mobile: All grids collapsing correctly?\n6. Token discipline: Are all spacing, colors, radii consistently using CSS variables?\n7. Wrapper margin collisions: Do theme wrappers like .product-custom-liquid, .shopify-section, .section-wrapper have their own margin-top/bottom that collide with component-own spacing? If yes: set them to 0 in a scoped {% style %} block so only component token spacing applies.\n8. Hidden spacing: Any place where the actual rendered gap exceeds var(--space-6) without a token explaining it?\n\nFor every problem found:\n- Name the file and line\n- Fix it directly\n\nThen: Write new rules as ## Learned Patterns at the end of .cursor/rules/design-components.mdc\nAnd: Write ## Theme Wrapper Awareness rules into .cursor/rules/shopify-rules.mdc\nFormat as concrete Do/Don't rules, not explanations."
+      },
+      {
+        "name": "section-start",
+        "description": "Start a new section build correctly",
+        "prompt": "Before writing any code:\n1. Read _examples/README.md\n2. Open _examples/pdp-reference.html\n3. Find the closest approved example in _examples/sections/\n4. Read its {% comment %} block and its CSS file\n5. Inspect the current theme structure — which files are involved?\n6. Report what you found before touching anything.\n\nOnly proceed after reporting."
+      },
+      {
+        "name": "qa",
+        "description": "Visual QA check against design-components.mdc",
+        "prompt": "Run the full Visual Craft QA checklist from .cursor/rules/design-components.mdc against the current build.\n\nCheck every item:\n- One dominant element per section?\n- Supporting elements visually subordinate?\n- CTA has var(--space-7) minimum above it?\n- All tokens used correctly — no hardcoded values?\n- Section feels designed, not assembled?\n- Would hierarchy still look convincing without copy?\n- Does this look premium enough for LIFETIME?\n\nList every failure with file + line.\nFix all failures directly.\nOutput corrected code only — no explanations."
+      }
+    ]
+  }
