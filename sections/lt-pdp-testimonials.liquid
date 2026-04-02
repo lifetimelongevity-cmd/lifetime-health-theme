@@ -126,9 +126,25 @@
                       <div class="lt-pdp-testimonials__quote rte">{{ block.settings.text }}</div>
                     {%- endif -%}
 
-                    {%- if block.settings.author != blank -%}
-                      <div class="lt-pdp-testimonials__author rte">{{ block.settings.author }}</div>
-                    {%- endif -%}
+                    <footer class="lt-pdp-testimonials__author-row">
+                      <div class="lt-pdp-testimonials__author-meta">
+                        {%- if block.settings.author != blank -%}
+                          <div class="lt-pdp-testimonials__author rte">{{ block.settings.author }}</div>
+                        {%- endif -%}
+                        {%- if block.settings.verified -%}
+                          <span class="lt-pdp-testimonials__verified" aria-label="Verifizierter Kauf">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                              <circle cx="6" cy="6" r="5.5" fill="var(--color-success)"/>
+                              <path d="M3.5 6l1.75 1.75L8.5 4.5" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Verifiziert
+                          </span>
+                        {%- endif -%}
+                      </div>
+                      {%- if block.settings.date != blank -%}
+                        <time class="lt-pdp-testimonials__date">{{ block.settings.date | escape }}</time>
+                      {%- endif -%}
+                    </footer>
                   </div>
                 </article>
             {%- endcase -%}
@@ -159,22 +175,19 @@
 
 {% stylesheet %}
   .lt-pdp-testimonials {
-    --tst-gap-mobile: 20px;
-    --tst-gap-desktop: 28px;
-    --tst-visible-mobile: 1.3;
+    --tst-gap-mobile: 20px; /* intrinsic: no exact token equivalent */
+    --tst-gap-desktop: 28px; /* intrinsic: no exact token equivalent */
+    --tst-visible-mobile: 1.3; /* intrinsic: carousel overflow ratio */
     --tst-visible-tablet: 2.5;
     --tst-visible-desktop: 4.1;
-    --tst-pad-block: 5rem;
-    --tst-pad-inline: 1.5rem;
-    padding-block: var(--tst-pad-block);
-    background: var(--color-background-main);
-    color: var(--color-text-main);
+    padding-block: var(--space-9);
+    background: var(--color-surface-primary);
+    color: var(--color-text-primary);
   }
 
   @media screen and (max-width: 768px) {
     .lt-pdp-testimonials {
-      --tst-pad-block: 4rem;
-      --tst-pad-inline: 1rem;
+      padding-block: var(--space-8);
     }
   }
 
@@ -183,24 +196,24 @@
   }
 
   .lt-pdp-testimonials__label {
-    margin: 0 0 1rem;
-    font-family: var(--font-stack-body-primary);
-    font-size: 0.75rem;
-    font-weight: 500;
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
     letter-spacing: 0.1em;
-    line-height: 1.4;
+    line-height: var(--leading-body);
     text-transform: uppercase;
-    color: var(--color-secondary-text-main);
+    color: var(--color-text-secondary);
   }
 
   .lt-pdp-testimonials__heading {
-    margin: 0 0 3rem;
-    max-width: 48rem;
-    font-family: var(--font-stack-headings-primary);
-    font-size: clamp(1.625rem, 2.2vw, 2rem);
-    font-weight: 700;
-    line-height: 1.15;
-    color: var(--color-text-main);
+    margin: 0 0 var(--space-7);
+    max-width: 48rem; /* intrinsic: heading width constraint */
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    color: var(--color-text-primary);
   }
 
   .lt-pdp-testimonials__heading p {
@@ -216,9 +229,16 @@
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    margin-inline: calc(var(--tst-pad-inline) * -1);
-    padding-inline: var(--tst-pad-inline);
+    margin-inline: calc(-1 * var(--space-4));
+    padding-inline: var(--space-4);
     outline: none;
+  }
+
+  @media screen and (min-width: 769px) {
+    .lt-pdp-testimonials__viewport {
+      margin-inline: calc(-1 * var(--space-5));
+      padding-inline: var(--space-5);
+    }
   }
 
   .lt-pdp-testimonials__viewport::-webkit-scrollbar {
@@ -230,12 +250,12 @@
     flex-direction: row;
     align-items: stretch;
     gap: var(--tst-gap-mobile);
-    padding-bottom: 0.25rem;
+    padding-bottom: 0.25rem; /* intrinsic: shadow clearance */
   }
 
   @media screen and (min-width: 768px) {
     .lt-pdp-testimonials__track {
-      gap: 24px;
+      gap: var(--space-5);
     }
   }
 
@@ -254,7 +274,7 @@
 
   @media screen and (min-width: 768px) {
     .lt-pdp-testimonials__slide {
-      width: calc((100cqi - 1 * 24px) / var(--tst-visible-tablet));
+      width: calc((100cqi - 1 * var(--space-5)) / var(--tst-visible-tablet));
     }
   }
 
@@ -284,27 +304,21 @@
     display: flex;
     flex-direction: column;
     height: 100%;
-    padding: 1.25rem;
-    border: 1px solid color-mix(in srgb, var(--color-borders-main) 85%, transparent);
-    border-radius: 0.75rem;
-    background: var(--color-background-main);
+    padding: var(--space-5);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-primary);
     box-sizing: border-box;
-  }
-
-  @media screen and (min-width: 1024px) {
-    .lt-pdp-testimonials__card {
-      padding: 1.5rem;
-    }
   }
 
   .lt-pdp-testimonials__media {
     position: relative;
     width: 100%;
     aspect-ratio: 1;
-    border-radius: 0.75rem;
+    border-radius: var(--radius-md);
     overflow: hidden;
-    margin-bottom: 1rem;
-    border: 1px solid color-mix(in srgb, var(--color-borders-main) 80%, transparent);
+    margin-bottom: var(--space-4);
+    border: 1px solid var(--color-border-default);
   }
 
   .lt-pdp-testimonials__media-inner {
@@ -315,11 +329,11 @@
   }
 
   .lt-pdp-testimonials__media-inner--placeholder {
-    background: var(--color-secondary-background-main);
+    background: var(--color-surface-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 8rem;
+    min-height: 8rem; /* intrinsic: media placeholder height */
   }
 
   .lt-pdp-testimonials__image,
@@ -341,7 +355,7 @@
     inset: 0;
     z-index: 2;
     pointer-events: none;
-    transition: opacity 0.25s ease;
+    transition: opacity var(--ease-default);
   }
 
   .lt-pdp-testimonials__poster-img {
@@ -362,19 +376,19 @@
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 3;
-    width: 3.125rem;
-    height: 3.125rem;
+    width: 50px; /* intrinsic: play button size */
+    height: 50px;
     border: 0;
     padding: 0;
-    border-radius: 50%;
-    background: #fff;
-    color: var(--color-text-main);
+    border-radius: var(--radius-full);
+    background: var(--color-surface-primary);
+    color: var(--color-text-primary);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    box-shadow: var(--shadow-md);
+    transition: opacity var(--ease-default), transform var(--ease-default);
   }
 
   .lt-pdp-testimonials__play:hover {
@@ -382,8 +396,8 @@
   }
 
   .lt-pdp-testimonials__play:focus-visible {
-    outline: 2px solid var(--color-text-main);
-    outline-offset: 3px;
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 3px; /* intrinsic: focus ring clearance */
   }
 
   .lt-pdp-testimonials__play[hidden] {
@@ -394,48 +408,67 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 2px;
-    margin-bottom: 0.75rem;
-    color: #f4b740;
+    gap: var(--space-1);
+    margin-bottom: var(--space-3);
+    color: var(--color-star);
   }
 
   .lt-pdp-testimonials__quote {
     flex: 1 1 auto;
-    margin: 0 0 1rem;
-    font-family: var(--font-stack-body-primary);
-    font-size: 1.125rem;
-    line-height: 1.45;
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-body);
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-body);
     text-align: center;
-    color: var(--color-text-main);
-  }
-
-  @media screen and (min-width: 1024px) {
-    .lt-pdp-testimonials__quote {
-      font-size: 1.1875rem;
-    }
+    color: var(--color-text-primary);
   }
 
   .lt-pdp-testimonials__quote p {
     margin: 0;
   }
 
-  .lt-pdp-testimonials__author {
-    margin: 0;
-    font-family: var(--font-stack-body-primary);
-    font-size: 1rem;
-    line-height: 1.4;
-    text-align: center;
-    color: var(--color-secondary-text-main);
+  .lt-pdp-testimonials__author-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-2);
   }
 
-  @media screen and (min-width: 1024px) {
-    .lt-pdp-testimonials__author {
-      font-size: 1.0625rem;
-    }
+  .lt-pdp-testimonials__author-meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .lt-pdp-testimonials__author {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-body);
+    text-align: left;
+    color: var(--color-text-secondary);
   }
 
   .lt-pdp-testimonials__author p {
     margin: 0;
+  }
+
+  .lt-pdp-testimonials__verified {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    color: var(--color-success);
+  }
+
+  .lt-pdp-testimonials__date {
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    padding-top: 2px; /* intrinsic: optical alignment with author name */
   }
 
   .lt-pdp-testimonials__dots {
@@ -443,20 +476,20 @@
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
-    gap: 0.5rem;
-    margin-top: 2.5rem;
+    gap: var(--space-2);
+    margin-top: 2.5rem; /* 40px: between --space-6 (32px) and --space-7 (48px), no exact token */
   }
 
   .lt-pdp-testimonials__dot {
-    width: 10px;
+    width: 10px; /* intrinsic: dot nav size */
     height: 10px;
     padding: 0;
-    border: 1px solid var(--color-text-main);
-    border-radius: 50%;
+    border: 1px solid var(--color-text-primary);
+    border-radius: var(--radius-full);
     background: transparent;
     cursor: pointer;
     opacity: 0.35;
-    transition: opacity 0.2s ease, background 0.2s ease;
+    transition: opacity var(--ease-default), background var(--ease-default);
   }
 
   .lt-pdp-testimonials__dot:hover {
@@ -465,12 +498,12 @@
 
   .lt-pdp-testimonials__dot.is-active {
     opacity: 1;
-    background: var(--color-text-main);
+    background: var(--color-text-primary);
   }
 
   .lt-pdp-testimonials__dot:focus-visible {
-    outline: 2px solid var(--color-text-main);
-    outline-offset: 2px;
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 2px; /* intrinsic: focus ring clearance */
   }
 {% endstylesheet %}
 
@@ -665,6 +698,18 @@
           "id": "author",
           "label": "Autor",
           "default": "<p>@name</p>"
+        },
+        {
+          "type": "checkbox",
+          "id": "verified",
+          "label": "Verifizierter Kauf",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "date",
+          "label": "Datum",
+          "default": "März 2024"
         }
       ]
     }
