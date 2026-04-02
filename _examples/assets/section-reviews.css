@@ -1,0 +1,183 @@
+/*
+  LIFETIME — section-reviews.css
+  Approved example: white-surface reviews, card-review pattern
+  Token references: §3, §5 (Card Review), §6 (Decision Rules)
+*/
+
+/* ── Section shell ──────────────────────────────────────────── */
+.reviews--white {
+  background-color: var(--color-surface-primary);
+  padding-top: var(--space-9);
+  padding-bottom: var(--space-9);
+}
+
+.reviews__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+@media screen and (max-width: 768px) {
+  .reviews--white {
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+  }
+  .reviews__container {
+    padding: 0 var(--space-4);
+  }
+}
+
+/* ── Section header ─────────────────────────────────────────── */
+.reviews__header {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto var(--space-6);
+}
+
+.reviews__label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.reviews__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* ── Card grid ───────────────────────────────────────────────── */
+.reviews__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media screen and (max-width: 1024px) {
+  .reviews__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .reviews__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Card (card-review pattern) ──────────────────────────────── */
+/*
+  DECISION: white bg, border (not shadow) as primary structure signal.
+  Border is cleaner than shadow on white-on-white context.
+  Shadow-sm added as secondary lift — subtle, not compensatory.
+  Padding: --space-5 per §5 Card Review spec.
+  Layout: flex column with space-between pushes author-row to bottom.
+*/
+.reviews__card {
+  background-color: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);   /* #E5E5E5 */
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);                             /* 16px between elements */
+}
+
+/* ── Stars ───────────────────────────────────────────────────── */
+.reviews__stars {
+  display: flex;
+  gap: var(--space-1);                             /* 4px between stars */
+}
+
+.reviews__star {
+  color: var(--color-gray-200);                    /* unfilled: light gray */
+  flex-shrink: 0;
+}
+
+.reviews__star--filled {
+  color: var(--color-star);                        /* #F4B740 */
+}
+
+.reviews__star--filled path {
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+/* ── Review text ─────────────────────────────────────────────── */
+/*
+  DECISION: text is the dominant element within the card.
+  --text-body-sm keeps density readable at 3-column width.
+  secondary color — neutral, not heavy, not muted.
+  flex-grow pushes author row down.
+*/
+.reviews__text {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);   /* 14px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: 0;
+  flex-grow: 1;
+}
+
+/* ── Author row ──────────────────────────────────────────────── */
+/*
+  DECISION: author-meta (name + verified) left, date right.
+  Date is micro/muted — least important element, visually recedes.
+*/
+.reviews__author-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: auto;                  /* pushes to card bottom */
+}
+
+.reviews__author-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);               /* 8px between name and badge */
+}
+
+.reviews__author-name {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+}
+
+/* ── Verified badge ──────────────────────────────────────────── */
+/*
+  DECISION: inline text + icon, success color, no background.
+  §5 Badge spec: "transparent bg, success color, with icon" (verified variant).
+  Never a filled pill — that would over-emphasise a credibility mark.
+*/
+.reviews__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);      /* 12px */
+  font-weight: var(--weight-medium);
+  color: var(--color-success);       /* #22C55E */
+}
+
+/* ── Date ────────────────────────────────────────────────────── */
+.reviews__date {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);      /* 12px */
+  font-weight: var(--weight-regular);
+  color: var(--color-text-muted);    /* #A3A3A3 */
+  white-space: nowrap;
+}

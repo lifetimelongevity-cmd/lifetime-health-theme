@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LIFETIME — PDP Mobile</title>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --color-teal: #65C0B6;
+  --color-teal-dark: #4A8C85;
+  --color-dark: #364F56;
+  --color-white: #FFFFFF;
+  --color-light-warm: #F6F4F1;
+  --color-gray-200: #E5E5E5;
+  --color-gray-400: #A3A3A3;
+  --color-gray-600: #525252;
+  --color-star: #F4B740;
+  --color-success: #22C55E;
+  --color-benefit-bg: #E6F4F1;
+  --color-border-strong: rgba(54,79,86,0.14);
+  --font-heading: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-body: 'Lato', -apple-system, sans-serif;
+  --text-h1: 36px;
+  --text-h2: 28px;
+  --text-body-lg: 18px;
+  --text-body: 16px;
+  --text-body-sm: 14px;
+  --text-micro: 12px;
+  --weight-regular: 400;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px;
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-full: 999px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --ease-default: 0.2s ease;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* Phone shell */
+body {
+  background: #e8e8e8;
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 32px 16px;
+  font-family: var(--font-body);
+}
+
+.phone {
+  width: 390px;
+  min-height: 1100px;
+  background: #F9F9F9;
+  border-radius: 40px;
+  overflow: hidden;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.1);
+  position: relative;
+}
+
+/* Status bar */
+.status-bar {
+  height: 44px;
+  background: #F9F9F9;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
+.status-time {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 600;
+  color: #000;
+}
+.status-icons {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.status-icons svg { fill: #000; }
+
+/* Content */
+.pdp {
+  padding: 0 var(--space-4) var(--space-7);
+}
+
+/* ── Product image ─────────────────────────────────────────── */
+.product-image-wrap {
+  margin: 0 0 var(--space-5);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  aspect-ratio: 4/3;
+  background: #2a2e2e;
+  position: relative;
+}
+.product-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* Fallback: rendered product image via CSS if no img */
+.product-image-placeholder {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, #3a3f3f 0%, #22292a 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.product-bottle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+}
+.bottle-cap {
+  width: 52px;
+  height: 16px;
+  background: #8a8f8f;
+  border-radius: 4px 4px 2px 2px;
+}
+.bottle-body {
+  width: 80px;
+  height: 110px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 6px 6px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  backdrop-filter: blur(4px);
+}
+.bottle-label-top { font-size: 7px; font-weight: 700; letter-spacing: 0.15em; color: rgba(255,255,255,0.5); text-transform: uppercase; }
+.bottle-label-main { font-size: 18px; font-weight: 700; color: rgba(255,255,255,0.9); letter-spacing: 0.02em; font-family: var(--font-heading); }
+.bottle-label-sub { font-size: 8px; color: rgba(255,255,255,0.4); letter-spacing: 0.1em; text-transform: uppercase; }
+.bottle-powder {
+  width: 80px;
+  height: 14px;
+  background: rgba(255,255,255,0.08);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+}
+
+/* ── Rating row ────────────────────────────────────────────── */
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.stars {
+  display: flex;
+  gap: 2px;
+}
+.star-full, .star-half {
+  width: 16px;
+  height: 16px;
+  color: var(--color-star);
+}
+.rating-number {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-bold);
+  color: var(--color-gray-600);
+}
+.rating-count {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-regular);
+  color: var(--color-gray-400);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ── Product title ─────────────────────────────────────────── */
+.product-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: 1.1;
+  color: #000;
+  margin-bottom: var(--space-3);
+}
+.product-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: 1.5;
+  color: var(--color-gray-600);
+  margin-bottom: var(--space-5);
+}
+
+/* ── Trust strip ───────────────────────────────────────────── */
+.trust-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+.trust-strip::-webkit-scrollbar { display: none; }
+.trust-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-gray-200);
+  background: #fff;
+}
+.trust-item svg {
+  width: 15px;
+  height: 15px;
+  color: var(--color-gray-600);
+  flex-shrink: 0;
+}
+.trust-label {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-gray-600);
+}
+
+/* ── Benefit surface ───────────────────────────────────────── */
+.benefit-surface {
+  background: var(--color-benefit-bg);
+  border: 1px solid rgba(94,171,161,0.18);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+.benefit-surface__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-bold);
+  color: #000;
+  margin-bottom: var(--space-4);
+}
+.benefit-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+.benefit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+.benefit-check {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--color-teal-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.benefit-check svg {
+  width: 11px;
+  height: 11px;
+  stroke: white;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.benefit-text { display: flex; flex-direction: column; gap: 2px; }
+.benefit-name {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-bold);
+  color: #000;
+  line-height: 1.2;
+}
+.benefit-sub {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-regular);
+  color: var(--color-gray-600);
+  line-height: 1.3;
+}
+
+/* ── Review carousel ───────────────────────────────────────── */
+.review-carousel {
+  background: var(--color-light-warm);
+  border: 1px solid rgba(94,171,161,0.18);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-5) var(--space-4);
+  margin-bottom: var(--space-3);
+  overflow: hidden;
+}
+.review-carousel__track {
+  display: flex;
+  transition: transform 0.35s ease;
+}
+.review-carousel__slide {
+  min-width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+}
+.review-carousel__stars {
+  display: flex;
+  gap: 3px;
+  justify-content: center;
+  color: var(--color-star);
+}
+.review-carousel__stars svg {
+  width: 14px;
+  height: 14px;
+}
+.review-carousel__check {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.review-carousel__text {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: 1.6;
+  color: var(--color-text-primary);
+  max-width: 280px;
+}
+.review-carousel__author {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-gray-600);
+}
+.review-carousel__author svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* dots */
+.review-carousel__dots {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--color-gray-400);
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.dot--active {
+  background: var(--color-dark);
+  border-color: var(--color-dark);
+}
+
+/* ── Expert trust line ─────────────────────────────────────── */
+.expert-trust {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  background: #fff;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-4);
+  margin-bottom: var(--space-5);
+}
+.expert-trust svg {
+  width: 20px;
+  height: 20px;
+  color: var(--color-gray-400);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.expert-trust__text {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: 1.5;
+  color: var(--color-gray-600);
+}
+
+/* ── Purchase block ────────────────────────────────────────── */
+.purchase-block { display: flex; flex-direction: column; gap: var(--space-3); }
+.purchase-block .cta-heading { margin-bottom: var(--space-5); }
+
+.purchase-card {
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  cursor: pointer;
+  position: relative;
+  transition: box-shadow 0.2s ease;
+}
+.purchase-card--selected {
+  background: #fff;
+  border: 2px solid var(--color-teal-dark);
+  box-shadow: var(--shadow-md);
+}
+.purchase-card--default {
+  background: #f2f2f2;
+  border: 2px solid transparent;
+}
+.purchase-card--default:hover {
+  border-color: var(--color-gray-200);
+}
+
+/* savings badge */
+.purchase-card__savings {
+  position: absolute;
+  top: -14px;
+  right: var(--space-4);
+  background: #fff;
+  border: 1px solid rgba(74,140,133,0.3);
+  border-radius: var(--radius-full);
+  padding: 4px 12px;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  color: var(--color-teal-dark);
+  white-space: nowrap;
+  box-shadow: var(--shadow-sm);
+}
+
+.purchase-card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.purchase-card__left { flex: 1; }
+.purchase-card__right { text-align: right; flex-shrink: 0; }
+
+.purchase-card__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+}
+.purchase-card--default .purchase-card__title {
+  color: var(--color-gray-600);
+}
+.purchase-card__desc {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-gray-400);
+  line-height: 1.4;
+}
+.purchase-card__price {
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+}
+.purchase-card--default .purchase-card__price {
+  color: var(--color-gray-600);
+}
+.purchase-card__per-day {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  color: var(--color-gray-400);
+  margin-top: 2px;
+}
+
+/* benefit list */
+.purchase-card__benefits {
+  list-style: none;
+  margin-top: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.purchase-card__benefits li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+.purchase-check {
+  color: var(--color-teal-dark);
+  font-size: 15px;
+  font-weight: var(--weight-bold);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* CTA */
+.btn-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  height: 60px;
+  background: var(--color-dark);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  cursor: pointer;
+  margin-top: var(--space-2);
+  transition: opacity var(--ease-default);
+}
+.btn-cta:hover { opacity: 0.88; }
+.btn-cta__label {
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.07em;
+  line-height: 1;
+}
+.btn-cta__price {
+  font-size: var(--text-micro);
+  font-weight: var(--weight-regular);
+  opacity: 0.65;
+  letter-spacing: 0.03em;
+  line-height: 1;
+}
+
+.purchase-trust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-gray-400);
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-5);
+}
+.purchase-trust svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--color-teal-dark);
+}
+
+/* ── Expert card ───────────────────────────────────────────── */
+.expert-card {
+  background: var(--color-light-warm);
+  border: 1px solid rgba(94,171,161,0.18);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  margin-bottom: var(--space-3);
+}
+.expert-card__top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.expert-card__avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-sm);
+  background: var(--color-benefit-bg);
+  border: 1px solid rgba(94,171,161,0.25);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.expert-card__avatar svg {
+  width: 24px;
+  height: 24px;
+  color: var(--color-teal-dark);
+}
+.expert-card__meta { flex: 1; }
+.expert-card__label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-teal-dark);
+  margin-bottom: 3px;
+}
+.expert-card__name {
+  font-family: var(--font-heading);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+.expert-card__title {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  color: var(--color-gray-400);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+/* ── NAD+ Section ──────────────────────────────────────────── */
+.nad-section {
+  margin-top: var(--space-5);
+  padding-top: var(--space-2);
+}
+.nad-section__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  line-height: 1.2;
+  color: var(--color-text-primary);
+  margin-bottom: var(--space-5);
+}
+.nad-section__visual {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: #E6F4F1;
+  margin-bottom: var(--space-5);
+  border: 1px solid rgba(94,171,161,0.2);
+}
+.nad-section__visual svg {
+  width: 100%;
+  display: block;
+}
+
+/* Points list */
+.nad-points {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.nad-point {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.nad-point__icon {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--color-benefit-bg);
+  border: 1px solid rgba(94,171,161,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-teal-dark);
+}
+.nad-point__icon svg {
+  width: 16px;
+  height: 16px;
+}
+.nad-point__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 2px;
+}
+.nad-point__title {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+.nad-point__desc {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-regular);
+  color: var(--color-gray-400);
+  line-height: 1.5;
+}
+.nad-point__title sup.ref {
+  font-size: 9px;
+  font-weight: var(--weight-regular);
+  color: var(--color-teal-dark);
+  vertical-align: super;
+  margin-left: 1px;
+  font-style: normal;
+}
+
+/* Sources toggle */
+.nad-sources {
+  margin-top: var(--space-4);
+}
+.nad-sources__toggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  color: var(--color-gray-400);
+}
+.nad-sources__toggle svg:first-child {
+  width: 13px; height: 13px; flex-shrink: 0; color: var(--color-gray-400);
+}
+.nad-sources__chevron {
+  width: 13px; height: 13px; flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+.nad-sources__toggle.open .nad-sources__chevron {
+  transform: rotate(180deg);
+}
+.nad-sources__panel {
+  display: none;
+  margin-top: var(--space-3);
+  padding: var(--space-4);
+  background: #f7f7f7;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-gray-200);
+}
+.nad-sources__panel.open { display: block; }
+.nad-sources__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.nad-sources__list li {
+  display: flex;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--color-gray-400);
+}
+.nad-sources__num {
+  color: var(--color-teal-dark);
+  font-weight: var(--weight-medium);
+  flex-shrink: 0;
+}
+.nad-sources__doi {
+  color: var(--color-teal-dark);
+  opacity: 0.8;
+  word-break: break-all;
+}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <!-- Status bar -->
+  <div class="status-bar">
+    <span class="status-time">9:41</span>
+    <div class="status-icons">
+      <svg width="17" height="12" viewBox="0 0 17 12"><rect x="0" y="3" width="3" height="9" rx="1"/><rect x="4.5" y="2" width="3" height="10" rx="1"/><rect x="9" y="0" width="3" height="12" rx="1"/><rect x="13.5" y="1" width="3" height="11" rx="1"/></svg>
+      <svg width="16" height="12" viewBox="0 0 16 12"><path d="M8 2.4C5.6 2.4 3.4 3.4 1.8 5L0 3.2C2.2 1.2 5 0 8 0s5.8 1.2 8 3.2L14.2 5C12.6 3.4 10.4 2.4 8 2.4z" fill-rule="evenodd"/><path d="M8 5.6c-1.6 0-3 .6-4 1.6L2.4 5.6C3.8 4.2 5.8 3.2 8 3.2s4.2 1 5.6 2.4L12 7.2c-1-1-2.4-1.6-4-1.6z" fill-rule="evenodd"/><circle cx="8" cy="10" r="2"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0" y="1" width="21" height="10" rx="2.5" stroke="#000" stroke-width="1" fill="none"/><rect x="1.5" y="2.5" width="16" height="7" rx="1.5" fill="#000"/><path d="M22.5 4.5v3a1.5 1.5 0 000-3z" fill="#000"/></svg>
+    </div>
+  </div>
+
+  <div class="pdp">
+
+    <!-- Product image -->
+    <div class="product-image-wrap">
+      <div class="product-image-placeholder">
+        <div class="product-bottle">
+          <div class="bottle-cap"></div>
+          <div class="bottle-body">
+            <span class="bottle-label-top">Premium</span>
+            <span class="bottle-label-main">NMN</span>
+            <span class="bottle-label-sub">Powder</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rating -->
+    <div class="rating-row">
+      <div class="stars" aria-label="4,7 von 5 Sternen">
+        <svg class="star-full" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+        <svg class="star-full" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+        <svg class="star-full" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+        <svg class="star-full" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+        <svg class="star-half" viewBox="0 0 16 16"><defs><clipPath id="h"><rect x="0" y="0" width="8" height="16"/></clipPath></defs><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z" fill="#E5E5E5"/><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z" fill="currentColor" clip-path="url(#h)"/></svg>
+      </div>
+      <span class="rating-number">4,7</span>
+      <span class="rating-count">(102 Bewertungen)</span>
+    </div>
+
+    <!-- Title + subtitle -->
+    <h1 class="product-title">NMN Pulver</h1>
+    <p class="product-subtitle">Dein direkter NAD⁺-Booster für zelluläre Vitalität und langlebige Performance.</p>
+
+    <!-- Trust strip -->
+    <div class="trust-strip" role="list">
+      <div class="trust-item" role="listitem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12"/></svg>
+        <span class="trust-label">Uthever®</span>
+      </div>
+      <div class="trust-item" role="listitem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3H6a2 2 0 00-2 2v14a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2h-3"/><path d="M9 3a2 2 0 004 0H9z"/><path d="M9 12l2 2 4-4"/></svg>
+        <span class="trust-label">&gt;99&thinsp;% Reinheit</span>
+      </div>
+      <div class="trust-item" role="listitem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6l1 7H8L9 3z"/><path d="M8 10l-3 8a1 1 0 001 1h12a1 1 0 001-1l-3-8"/></svg>
+        <span class="trust-label">Laborgeprüft</span>
+      </div>
+      <div class="trust-item" role="listitem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span class="trust-label">Hochdosiert</span>
+      </div>
+    </div>
+
+    <!-- Benefit surface -->
+    <div class="benefit-surface">
+      <p class="benefit-surface__title">Wissenschaftliche Vorteile</p>
+      <div class="benefit-grid">
+        <div class="benefit-item">
+          <div class="benefit-check">
+            <svg viewBox="0 0 12 12"><path d="M2 6l2.5 2.5L10 3.5"/></svg>
+          </div>
+          <div class="benefit-text">
+            <span class="benefit-name">Energie</span>
+            <span class="benefit-sub">Zell-Stoffwechsel</span>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-check">
+            <svg viewBox="0 0 12 12"><path d="M2 6l2.5 2.5L10 3.5"/></svg>
+          </div>
+          <div class="benefit-text">
+            <span class="benefit-name">Alterung</span>
+            <span class="benefit-sub">Sirtuin-Aktivierung</span>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-check">
+            <svg viewBox="0 0 12 12"><path d="M2 6l2.5 2.5L10 3.5"/></svg>
+          </div>
+          <div class="benefit-text">
+            <span class="benefit-name">Leistung</span>
+            <span class="benefit-sub">Kognitive Ausdauer</span>
+          </div>
+        </div>
+        <div class="benefit-item">
+          <div class="benefit-check">
+            <svg viewBox="0 0 12 12"><path d="M2 6l2.5 2.5L10 3.5"/></svg>
+          </div>
+          <div class="benefit-text">
+            <span class="benefit-name">Regeneration</span>
+            <span class="benefit-sub">DNA-Reparatur</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Purchase options -->
+    <div class="purchase-block">
+      <h2 class="cta-heading">Wie möchtest du starten?</h2>
+
+      <!-- Abo card (selected) -->
+      <div class="purchase-card purchase-card--selected" id="card-abo" onclick="selectCard('abo')">
+        <div class="purchase-card__savings">Du sparst 3,99 €/Lieferung</div>
+        <div class="purchase-card__top">
+          <div class="purchase-card__left">
+            <div class="purchase-card__title">Liefer-Abo</div>
+            <div class="purchase-card__desc">Regelmäßige Lieferung</div>
+          </div>
+          <div class="purchase-card__right">
+            <div class="purchase-card__price">35,91 €</div>
+            <div class="purchase-card__per-day">ca. 0,60 €/Tag</div>
+          </div>
+        </div>
+        <ul class="purchase-card__benefits">
+          <li><span class="purchase-check">✓</span>Alle 8 Wochen geliefert</li>
+          <li><span class="purchase-check">✓</span>Gratisversand</li>
+          <li><span class="purchase-check">✓</span>Jederzeit pausieren &amp; kündigen</li>
+          <li><span class="purchase-check">✓</span>Perfekt für langfristige Routine</li>
+        </ul>
+      </div>
+
+      <!-- Einmalkauf card -->
+      <div class="purchase-card purchase-card--default" id="card-einmal" onclick="selectCard('einmal')">
+        <div class="purchase-card__top">
+          <div class="purchase-card__left">
+            <div class="purchase-card__title">Einmaliger Kauf</div>
+            <div class="purchase-card__desc">Volle Flexibilität</div>
+          </div>
+          <div class="purchase-card__right">
+            <div class="purchase-card__price">39,90 €</div>
+            <div class="purchase-card__per-day">ca. 0,67 €/Tag</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA button -->
+      <button class="btn-cta" id="cta-btn" onclick="">
+        <span class="btn-cta__label">JETZT BESTELLEN</span>
+        <span class="btn-cta__price" id="cta-price">35,91 €</span>
+      </button>
+      <p class="purchase-trust">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        90 Tage risikofrei testen
+      </p>
+    </div>
+
+    <!-- Review carousel -->
+    <div class="review-carousel">
+      <div class="review-carousel__track" id="carousel-track">
+
+        <div class="review-carousel__slide">
+          <div class="review-carousel__stars">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+          </div>
+          <p class="review-carousel__text">„Endlich ein NMN, bei dem ich CoA und Reinheit nachvollziehen kann."</p>
+          <div class="review-carousel__author">
+            Dr. med. Felix W.
+            <svg class="review-carousel__check" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#65C0B6" stroke-width="1.5"/><path d="M6.5 10l2.5 2.5 4.5-4.5" stroke="#65C0B6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+
+        <div class="review-carousel__slide">
+          <div class="review-carousel__stars">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+          </div>
+          <p class="review-carousel__text">„Nach 12 Wochen sind meine NAD⁺-Werte messbar gestiegen. Bin begeistert."</p>
+          <div class="review-carousel__author">
+            Sarah K.
+            <svg class="review-carousel__check" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#65C0B6" stroke-width="1.5"/><path d="M6.5 10l2.5 2.5 4.5-4.5" stroke="#65C0B6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+
+        <div class="review-carousel__slide">
+          <div class="review-carousel__stars">
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+            <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z"/></svg>
+          </div>
+          <p class="review-carousel__text">„Qualität und Transparenz überzeugen. Das Pulver löst sich perfekt auf."</p>
+          <div class="review-carousel__author">
+            Thomas M.
+            <svg class="review-carousel__check" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="9" stroke="#65C0B6" stroke-width="1.5"/><path d="M6.5 10l2.5 2.5 4.5-4.5" stroke="#65C0B6" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Dots -->
+      <div class="review-carousel__dots" id="carousel-dots">
+        <button class="dot dot--active" onclick="goTo(0)" aria-label="Review 1"></button>
+        <button class="dot" onclick="goTo(1)" aria-label="Review 2"></button>
+        <button class="dot" onclick="goTo(2)" aria-label="Review 3"></button>
+      </div>
+    </div>
+
+    <!-- Expert card -->
+    <div class="expert-card">
+      <div class="expert-card__top">
+        <div class="expert-card__avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+        </div>
+        <div class="expert-card__meta">
+          <div class="expert-card__label">Wissenschaftlich entwickelt</div>
+          <div class="expert-card__name">Prof. Dr. med. Volker Limmroth</div>
+          <div class="expert-card__title">Neurologe · Wissenschaftlicher Beirat LIFETIME</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NAD+ Section -->
+    <div class="nad-section">
+      <h2 class="nad-section__title">Warum NAD⁺ für deine Zellen so wichtig ist</h2>
+
+      <!-- Cell illustration -->
+      <div class="nad-section__visual">
+        <svg viewBox="0 0 340 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Outer cell membrane -->
+          <ellipse cx="170" cy="110" rx="158" ry="98" fill="#E6F4F1" stroke="#65C0B6" stroke-width="1.5"/>
+          <!-- Membrane texture dots -->
+          <circle cx="30" cy="85" r="3.5" fill="#65C0B6" opacity="0.4"/>
+          <circle cx="18" cy="110" r="3.5" fill="#65C0B6" opacity="0.4"/>
+          <circle cx="30" cy="135" r="3.5" fill="#65C0B6" opacity="0.4"/>
+          <circle cx="310" cy="85" r="3.5" fill="#65C0B6" opacity="0.4"/>
+          <circle cx="322" cy="110" r="3.5" fill="#65C0B6" opacity="0.4"/>
+          <circle cx="310" cy="135" r="3.5" fill="#65C0B6" opacity="0.4"/>
+          <circle cx="85" cy="18" r="3.5" fill="#65C0B6" opacity="0.4"/>
+          <circle cx="170" cy="13" r="3.5" fill="#65C0B6" opacity="0.4"/>
+          <circle cx="255" cy="18" r="3.5" fill="#65C0B6" opacity="0.4"/>
+          <circle cx="85" cy="202" r="3.5" fill="#65C0B6" opacity="0.4"/>
+          <circle cx="170" cy="207" r="3.5" fill="#65C0B6" opacity="0.4"/>
+          <circle cx="255" cy="202" r="3.5" fill="#65C0B6" opacity="0.4"/>
+
+          <!-- Nucleus -->
+          <ellipse cx="170" cy="108" rx="52" ry="44" fill="#4A8C85" opacity="0.15" stroke="#4A8C85" stroke-width="1.2"/>
+          <ellipse cx="170" cy="108" rx="38" ry="30" fill="#4A8C85" opacity="0.2"/>
+          <!-- DNA helix hint inside nucleus -->
+          <path d="M155 96 Q170 108 185 96" stroke="#364F56" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
+          <path d="M155 108 Q170 120 185 108" stroke="#364F56" stroke-width="1.2" stroke-linecap="round" opacity="0.5"/>
+          <path d="M155 102 Q170 114 185 102" stroke="#65C0B6" stroke-width="1" stroke-linecap="round" opacity="0.6" stroke-dasharray="2 2"/>
+
+          <!-- Mitochondria -->
+          <ellipse cx="100" cy="70" rx="22" ry="11" fill="#4A8C85" opacity="0.25" stroke="#4A8C85" stroke-width="1"/>
+          <path d="M86 70 Q93 64 100 70 Q107 76 114 70" stroke="#4A8C85" stroke-width="0.8" stroke-linecap="round" opacity="0.5"/>
+          <ellipse cx="240" cy="75" rx="20" ry="10" fill="#4A8C85" opacity="0.2" stroke="#4A8C85" stroke-width="1"/>
+          <path d="M228 75 Q234 69 240 75 Q246 81 252 75" stroke="#4A8C85" stroke-width="0.8" stroke-linecap="round" opacity="0.5"/>
+          <ellipse cx="108" cy="152" rx="18" ry="9" fill="#4A8C85" opacity="0.2" stroke="#4A8C85" stroke-width="1"/>
+          <ellipse cx="235" cy="148" rx="19" ry="9" fill="#4A8C85" opacity="0.2" stroke="#4A8C85" stroke-width="1"/>
+
+          <!-- NAD+ molecules floating -->
+          <circle cx="68" cy="110" r="6" fill="#65C0B6" opacity="0.7"/>
+          <text x="68" y="114" text-anchor="middle" font-size="5" fill="white" font-family="Helvetica Neue, sans-serif" font-weight="700">NAD</text>
+          <circle cx="272" cy="105" r="6" fill="#65C0B6" opacity="0.7"/>
+          <text x="272" y="109" text-anchor="middle" font-size="5" fill="white" font-family="Helvetica Neue, sans-serif" font-weight="700">NAD</text>
+          <circle cx="170" cy="165" r="6" fill="#65C0B6" opacity="0.6"/>
+          <text x="170" y="169" text-anchor="middle" font-size="5" fill="white" font-family="Helvetica Neue, sans-serif" font-weight="700">NAD</text>
+          <circle cx="130" cy="55" r="5" fill="#65C0B6" opacity="0.5"/>
+          <circle cx="215" cy="160" r="5" fill="#65C0B6" opacity="0.5"/>
+
+          <!-- Energy arrows from mitochondria -->
+          <path d="M122 70 L138 80" stroke="#65C0B6" stroke-width="1" stroke-linecap="round" marker-end="url(#arr)" opacity="0.6"/>
+          <path d="M228 80 L212 88" stroke="#65C0B6" stroke-width="1" stroke-linecap="round" marker-end="url(#arr)" opacity="0.6"/>
+
+          <defs>
+            <marker id="arr" viewBox="0 0 6 6" refX="5" refY="3" markerWidth="4" markerHeight="4" orient="auto">
+              <path d="M0 0L6 3L0 6" fill="none" stroke="#65C0B6" stroke-width="1"/>
+            </marker>
+          </defs>
+
+          <!-- Label: Mitochondrium -->
+          <text x="83" y="57" text-anchor="middle" font-size="7" fill="#364F56" font-family="Helvetica Neue, sans-serif" opacity="0.7">Mitochondrium</text>
+          <!-- Label: Zellkern -->
+          <text x="170" y="108" text-anchor="middle" font-size="7.5" fill="#364F56" font-family="Helvetica Neue, sans-serif" font-weight="600" opacity="0.8">Zellkern</text>
+        </svg>
+      </div>
+
+      <!-- 4 benefit points -->
+      <ul class="nad-points">
+        <li class="nad-point">
+          <div class="nad-point__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+          </div>
+          <div class="nad-point__text">
+            <span class="nad-point__title">Energieproduktion<sup class="ref">[1]</sup></span>
+            <span class="nad-point__desc">NAD⁺ ist zentraler Kofaktor im Mitochondrien-Stoffwechsel</span>
+          </div>
+        </li>
+        <li class="nad-point">
+          <div class="nad-point__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>
+          </div>
+          <div class="nad-point__text">
+            <span class="nad-point__title">DNA-Reparatur<sup class="ref">[2]</sup></span>
+            <span class="nad-point__desc">Aktiviert PARP-Enzyme, die beschädigte DNA erkennen und reparieren</span>
+          </div>
+        </li>
+        <li class="nad-point">
+          <div class="nad-point__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          </div>
+          <div class="nad-point__text">
+            <span class="nad-point__title">Sirtuin-Aktivierung<sup class="ref">[3]</sup></span>
+            <span class="nad-point__desc">Reguliert Alterungsprozesse und Entzündungsreaktionen auf Genebene</span>
+          </div>
+        </li>
+        <li class="nad-point">
+          <div class="nad-point__icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
+          </div>
+          <div class="nad-point__text">
+            <span class="nad-point__title">Zelluläre Gesundheit<sup class="ref">[4]</sup></span>
+            <span class="nad-point__desc">NAD⁺-Spiegel sinken mit dem Alter — gezielte Supplementierung verlangsamt diesen Prozess</span>
+          </div>
+        </li>
+      </ul>
+
+      <!-- Sources toggle -->
+      <div class="nad-sources">
+        <button class="nad-sources__toggle" onclick="toggleSources()" id="sources-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          Quellen ansehen
+          <svg class="nad-sources__chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="nad-sources__panel" id="sources-panel">
+          <ol class="nad-sources__list">
+            <li><span class="nad-sources__num">[1]</span>Huang H. — NMN increases cellular NAD⁺ and energy levels. <em>Front. Aging</em>, 2022. <span class="nad-sources__doi">doi:10.3389/fragi.2022.851698</span></li>
+            <li><span class="nad-sources__num">[2]</span>Katayoshi et al. — NMN supplementation & NAD⁺ metabolism. <em>Sci. Rep.</em>, 2023. <span class="nad-sources__doi">doi:10.1038/s41598-023-29787-3</span></li>
+            <li><span class="nad-sources__num">[3]</span>Yi et al. — RCT: NMN in healthy middle-aged adults. <em>Geroscience</em>, 2023. <span class="nad-sources__doi">doi:10.1007/s11357-022-00705-1</span></li>
+            <li><span class="nad-sources__num">[4]</span>Igarashi et al. — NMN elevates NAD⁺, alters muscle function. <em>NPJ Aging</em>, 2022. <span class="nad-sources__doi">doi:10.1038/s41514-022-00084-z</span></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Carousel
+let current = 0;
+const slides = document.querySelectorAll('.review-carousel__slide');
+function goTo(i) {
+  current = i;
+  document.getElementById('carousel-track').style.transform = `translateX(-${i * 100}%)`;
+  document.querySelectorAll('.dot').forEach((d, idx) => {
+    d.classList.toggle('dot--active', idx === i);
+  });
+}
+// Swipe support
+let startX = 0;
+const track = document.getElementById('carousel-track');
+track.addEventListener('touchstart', e => startX = e.touches[0].clientX, { passive: true });
+track.addEventListener('touchend', e => {
+  const diff = startX - e.changedTouches[0].clientX;
+  if (Math.abs(diff) > 40) goTo(Math.max(0, Math.min(slides.length - 1, current + (diff > 0 ? 1 : -1))));
+}, { passive: true });
+
+// Purchase card switcher
+const priceData = {
+  abo:    { price: '35,91 €' },
+  einmal: { price: '39,90 €' }
+};
+function toggleSources() {
+  const btn = document.getElementById('sources-btn');
+  const panel = document.getElementById('sources-panel');
+  btn.classList.toggle('open');
+  panel.classList.toggle('open');
+}
+function selectCard(type) {
+  document.getElementById('card-abo').classList.toggle('purchase-card--selected', type === 'abo');
+  document.getElementById('card-abo').classList.toggle('purchase-card--default', type !== 'abo');
+  document.getElementById('card-einmal').classList.toggle('purchase-card--selected', type === 'einmal');
+  document.getElementById('card-einmal').classList.toggle('purchase-card--default', type !== 'einmal');
+  document.getElementById('cta-price').textContent = priceData[type].price;
+  document.querySelector('.purchase-card__savings').style.display = type === 'abo' ? '' : 'none';
+}
+</script>
+</body>
+</html>

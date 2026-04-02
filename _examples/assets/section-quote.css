@@ -1,0 +1,140 @@
+/*
+  LIFETIME — section-quote.css
+  Approved example: dark-surface quote block
+  Token references: §3, §5 (Quote Block), §6 (Surface Selection)
+*/
+
+/* ── Section shell ──────────────────────────────────────────── */
+.quote-section--dark {
+  background-color: var(--color-surface-dark);     /* #364F56 */
+  padding-top: var(--space-9);
+  padding-bottom: var(--space-9);
+}
+
+.quote-section__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media screen and (max-width: 768px) {
+  .quote-section--dark {
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+  }
+  .quote-section__container {
+    padding: 0 var(--space-4);
+  }
+}
+
+/* ── Figure ──────────────────────────────────────────────────── */
+/*
+  DECISION: <figure> + <blockquote> + <figcaption> — correct semantic HTML.
+  Centered, max-width 720px per §5 Quote Block spec.
+  No decorative quotation marks — text alone is sufficient (§11 Subtraction).
+*/
+.quote-section__figure {
+  text-align: center;
+  max-width: 720px;
+  width: 100%;
+  margin: 0;
+}
+
+/* ── Quote text ──────────────────────────────────────────────── */
+/*
+  DECISION: --text-quote (28px), italic, regular weight.
+  This is the dominant element — carries the entire section.
+  Line-height: --leading-body (1.4) — generous for italic reading.
+  No opening/closing quote characters in CSS — the italic style is enough.
+*/
+.quote-section__text {
+  font-family: var(--font-body);
+  font-size: var(--text-quote);    /* 28px */
+  font-weight: var(--weight-regular);
+  font-style: italic;
+  line-height: var(--leading-body);
+  color: var(--color-text-on-dark);
+  margin: 0 0 var(--space-6);     /* 32px below quote */
+}
+
+@media screen and (max-width: 768px) {
+  .quote-section__text {
+    font-size: var(--text-h3);     /* 24px on mobile — still legible */
+  }
+}
+
+/* ── Attribution ─────────────────────────────────────────────── */
+/*
+  DECISION: inline row — name · title.
+  Dot separator: editorial style, not a UI element.
+  Name: semibold, white. Title: regular, muted.
+  Both: --text-body-sm per §5 Quote Block spec.
+  This is the "quality move": the inline attribution reads like a magazine
+  caption — not a structured form layout.
+*/
+.quote-section__attribution {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);             /* 8px between elements */
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);  /* 14px */
+  line-height: var(--leading-body);
+}
+
+.quote-section__author-name {
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-on-dark);
+  font-style: normal;
+}
+
+.quote-section__separator {
+  color: var(--color-text-on-dark-muted);
+  font-style: normal;
+  user-select: none;
+}
+
+.quote-section__author-title {
+  font-weight: var(--weight-regular);
+  color: var(--color-text-on-dark-muted);  /* rgba(255,255,255,0.65) */
+  font-style: normal;
+}
+
+/* ── CTA ─────────────────────────────────────────────────────── */
+/*
+  DECISION: inverted outline on dark surface — white text, white border.
+  Not a CTA/primary button: this section is trust, not conversion.
+  §5 Button spec: "dark surface behavior: cta/primary invert to white bg / dark text"
+  For outline on dark: white border + white text (no fill inversion needed).
+*/
+.quote-section__cta {
+  margin-top: var(--space-7);      /* 48px — CTA needs breathing room (§6b) */
+}
+
+.btn--outline-inverted {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 14px 32px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  color: var(--color-text-on-dark);
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color var(--ease-default), opacity var(--ease-default);
+}
+
+.btn--outline-inverted:hover {
+  border-color: rgba(255, 255, 255, 0.8);
+  opacity: 0.9;
+}

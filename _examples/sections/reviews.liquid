@@ -1,0 +1,174 @@
+{% comment %}
+  LIFETIME — Approved Example: Reviews Section (card-review pattern)
+  ──────────────────────────────────────────────────────────────────
+  §12 Build Spec:
+  - Surface:         --color-surface-primary (white — comes after warm section)
+  - Section label:   yes — "Erfahrungen" — anchors credibility signal
+  - Dominant element: section heading (--text-h1)
+  - Content pattern: card-review × 3, 3-column grid
+  - CTA:             none (reviews are a trust signal, not a conversion moment)
+  - Removed:         overall star average (duplicated by individual stars),
+                     "Verified by X" platform logo (logo list is separate section),
+                     card CTAs (reviews don't need them)
+  - Quality move:    verified badge is inline text with success color icon —
+                     never a heavy badge, just a controlled credibility mark.
+                     Date is micro/muted, pushed to bottom — information hierarchy
+                     matches how humans read reviews (text first, meta last).
+{% endcomment %}
+
+{{ 'section-reviews.css' | asset_url | stylesheet_tag }}
+
+<section class="reviews reviews--white">
+  <div class="reviews__container">
+
+    <div class="reviews__header">
+      {%- if section.settings.label != blank -%}
+        <p class="reviews__label">{{ section.settings.label | escape }}</p>
+      {%- endif -%}
+      <h2 class="reviews__title">{{ section.settings.title | escape }}</h2>
+    </div>
+
+    <ul class="reviews__grid" role="list">
+      {%- for block in section.blocks -%}
+        <li class="reviews__card" {{ block.shopify_attributes }}>
+
+          {%- comment -%} Stars {%- endcomment -%}
+          <div class="reviews__stars" aria-label="{{ block.settings.rating }} von 5 Sternen">
+            {%- assign rating = block.settings.rating | default: 5 -%}
+            {%- for i in (1..5) -%}
+              <svg class="reviews__star{% if i <= rating %} reviews__star--filled{% endif %}" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+              </svg>
+            {%- endfor -%}
+          </div>
+
+          {%- comment -%} Review text {%- endcomment -%}
+          {%- if block.settings.text != blank -%}
+            <p class="reviews__text">{{ block.settings.text | escape }}</p>
+          {%- endif -%}
+
+          {%- comment -%} Author row {%- endcomment -%}
+          <div class="reviews__author-row">
+            <div class="reviews__author-meta">
+              <span class="reviews__author-name">{{ block.settings.name | escape }}</span>
+              {%- if block.settings.verified -%}
+                <span class="reviews__verified" aria-label="Verifizierter Kauf">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                    <circle cx="6" cy="6" r="5.5" fill="var(--color-success)"/>
+                    <path d="M3.5 6l1.75 1.75L8.5 4.5" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Verifiziert
+                </span>
+              {%- endif -%}
+            </div>
+            {%- if block.settings.date != blank -%}
+              <time class="reviews__date">{{ block.settings.date | escape }}</time>
+            {%- endif -%}
+          </div>
+
+        </li>
+      {%- endfor -%}
+    </ul>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Reviews",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Section label",
+      "default": "Erfahrungen"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Was unsere Kunden berichten"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Rating",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Review text",
+          "default": "Nach drei Monaten merke ich den Unterschied deutlich. Mehr Energie, besserer Schlaf — und das ohne Änderungen in meiner sonstigen Routine."
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Sarah K."
+        },
+        {
+          "type": "checkbox",
+          "id": "verified",
+          "label": "Verifizierter Kauf",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "date",
+          "label": "Date",
+          "default": "März 2024"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Reviews",
+      "blocks": [
+        {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "text": "Nach drei Monaten merke ich den Unterschied deutlich. Mehr Energie, besserer Schlaf — und das ohne Änderungen in meiner sonstigen Routine.",
+            "name": "Sarah K.",
+            "verified": true,
+            "date": "März 2024"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "text": "Ich war skeptisch, aber die Blutbildveränderung nach 12 Wochen war klar messbar. Mein Arzt war überrascht.",
+            "name": "Thomas M.",
+            "verified": true,
+            "date": "Februar 2024"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "text": "Endlich ein Supplement, das keine leeren Versprechen macht. Die Qualität der Rohstoffe und die Transparenz über die Inhaltsstoffe haben mich überzeugt.",
+            "name": "Jana W.",
+            "verified": true,
+            "date": "Januar 2024"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

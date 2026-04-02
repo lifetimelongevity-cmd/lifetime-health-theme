@@ -1,0 +1,142 @@
+---
+description: LIFETIME component system and visual quality rules
+globs: ["sections/**/*.liquid", "snippets/**/*.liquid", "assets/**/*.css"]
+alwaysApply: false
+---
+
+# LIFETIME Component System
+
+## Visual Standard
+
+Every section must look like it belongs to a premium clinical-editorial brand.
+References: ag1.com (spacing), withings.com (clinical clarity), ritual.com (CTA proportion).
+
+A result that technically follows the rules but feels generic is a FAILED result.
+
+## MANDATORY: Before building any section
+
+1. Open `_examples/README.md`
+2. Find the closest approved example in `_examples/sections/`
+3. Read its `{% comment %}` block — it documents every decision
+4. Read its CSS — every non-obvious choice is explained
+5. Match token usage exactly. Adapt content. Keep the discipline.
+
+The visual target for all PDP work is `_examples/pdp-reference.html`.
+Open it before building any PDP section.
+
+## Section Build Process (§12)
+
+Before writing any code, answer these:
+
+| Decision | Required answer |
+|---|---|
+| Surface | Which surface token? |
+| Dominant element | What does the eye land on first? |
+| Heading size | `--text-h1` major / `--text-h2` supporting |
+| Content pattern | card-info / card-review / stat-callout / quote-block / benefit-surface |
+| CTA | Which variant and label? Or: none. |
+| What to remove | Apply subtraction rules. List what and why. |
+| Quality move | One decision that makes this feel premium, not generic. |
+
+## Section Surface Rhythm
+
+Default alternating: white → warm → white → warm
+Dark sections are intentional breaks. Max 1–2 per page.
+
+| Context | Token |
+|---|---|
+| Default | `--color-surface-primary` |
+| Alternating | `--color-surface-secondary` |
+| Emphasis / quote | `--color-surface-dark` |
+| Benefit areas | `--color-surface-benefit` |
+
+## Component Specs
+
+### Button
+- Height: 48px, padding: 14px 32px, radius: `--radius-full`
+- `cta` → dark bg, white text (revenue actions)
+- `outline` → transparent, dark text, currentColor border
+- `outline-inverted` → on dark surfaces: white border + white text
+- Font: `--font-body`, `--text-body-sm`, `--weight-semibold`
+
+### Card Info (benefits, features, steps)
+- White bg, `--radius-md`, padding `--space-5`
+- Border: `1px solid var(--color-border-default)` on white sections
+- Shadow: `--shadow-sm` on white bg only
+- Icon: 48px container, `--color-surface-benefit` bg, `--color-teal-dark` icon
+- Title: `--font-heading`, `--text-section`, bold
+- Description: `--font-body`, `--text-body`, secondary color
+
+### Card Review
+- White bg, `--radius-md`, padding `--space-5`
+- Border: `1px solid var(--color-border-default)`
+- Stars: `--color-star`
+- Verified badge: `--color-success`, transparent bg, inline with icon
+- Date: `--text-micro`, muted
+
+### Stat Callout
+- Number: `--font-heading`, `--text-stat`, bold, white on dark
+- Suffix: `--font-heading`, `--text-h3`, bold, `--color-teal-dark`
+- Label: `--font-body`, `--text-body-sm`, `--color-text-on-dark-muted`
+
+### Section Header
+- Centered, max-width 640px
+- Label: `--text-micro`, uppercase, letter-spacing 0.1em, muted
+- Title: `--font-heading`, `--text-h1` or `--text-h2`, bold
+- Description: `--font-body`, `--text-body-lg`, secondary
+
+### Trust Strip (PDP)
+- Pills with border: `1px solid var(--color-border-default)`, `--radius-full`
+- Icon 15px + label `--text-body-sm`
+- Wrap to second line (no horizontal scroll)
+
+### Benefit Surface
+- Background: `--color-surface-benefit` (#E6F4F1)
+- Border: `1px solid rgba(94,171,161,0.18)`
+- Radius: `--radius-lg`
+- Checkmarks: `--color-teal-dark` (NOT green)
+
+## Typography Rules
+
+- Headings (`≥ --text-h3`): always `--font-heading`
+- Body, labels, badges: always `--font-body`
+- Never body text in Helvetica
+- Never headings in Lato
+- Max 3 type sizes per section (2 preferred)
+- Size contrast between heading and body must be clearly visible at a glance
+
+## Visual Weight Rules
+
+- Every section has exactly ONE dominant element
+- Supporting elements must be visually subordinate
+- CTA buttons must have `--space-7` minimum above them
+- On dark surfaces: reduce element count by one vs. equivalent light section
+
+## Subtraction Rules (apply before finalizing)
+
+Remove:
+- decorative dividers not needed for structure
+- icons that duplicate what text already says
+- labels if the heading already makes context clear
+- secondary CTAs if primary CTA covers the decision
+- body text that repeats what sub-components already say
+
+## Anti-Patterns — Never Do These
+
+- Hardcoded hex, px, or font names in CSS
+- `#000000` as background
+- Multiple CTAs fighting in same viewport
+- Shadow to compensate for weak hierarchy
+- Generic "UI kit" cards that could be any health brand
+- Shrinking headings because layout is poorly composed
+- Tight spacing — air looks premium, tight looks cheap
+
+## Final Quality Gate
+
+Before outputting code, ask:
+1. Does this look premium enough for LIFETIME?
+2. Does this feel designed, not assembled?
+3. If stripped of copy, would hierarchy still look convincing?
+4. Is there anything here that exists only because it was easy to build?
+
+If any answer is no — refine before output.

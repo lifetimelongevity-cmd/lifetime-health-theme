@@ -1,0 +1,130 @@
+---
+description: Shopify platform limits and operating rules for LIFETIME theme
+globs: ["**/*.liquid", "**/*.json", "templates/**", "sections/**", "snippets/**"]
+alwaysApply: false
+---
+
+# Shopify Operating Rules (LIFETIME)
+
+Theme: Combine by KrownThemes v3.1.1
+Store: Lifetime Health (German, Du-form)
+Dev: Shopify CLI (theme pull / dev / push)
+
+## Core Principle
+
+This is a LIVE theme. Treat it as the source of truth.
+- Minimal-invasive over elegant rewrites
+- Reuse existing sections, snippets, classes
+- Extend, don't replace
+- Prefer small refactors over broad changes
+
+## Discovery-First Rule
+
+Before implementing, inspect:
+- Which templates are involved
+- Which sections/snippets already exist
+- Existing CSS classes and patterns to reuse
+- Schema/settings patterns in use
+- Potential app conflicts
+- Regression points
+
+**Do not jump into implementation without theme context.**
+
+## Platform Hard Limits
+
+These cause `theme push` / Theme Check failures:
+
+### 1. Product JSON templates
+- `order` array: **max 25 section instances** per product template
+- Count existing entries before adding. Remove or merge if at limit.
+
+### 2. Section schema `name`
+- Top-level `"name"` in `{% schema %}`: **≤ 25 characters**
+- Same for `presets[].name`
+- Error message: *name ist zu lang*
+- Use short names: `LT PDP Benefits` not `LIFETIME PDP Wissenschaftliche Vorteile`
+
+### 3. Schema setting `default` values
+- **Never use `"default": ""`** (empty string)
+- Error: *default darf nicht leer sein*
+- Either omit `default` and handle in Liquid with `| default: 'fallback'`
+- Or use a non-empty placeholder
+
+## Section Schema Pattern
+
+```liquid
+{% schema %}
+{
+  "name": "LT PDP Benefits",  ← max 25 chars
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading"
+      ← no "default": "" here
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT PDP Benefits"  ← max 25 chars
+    }
+  ]
+}
+{% endschema %}
+```
+
+## CSS Architecture
+
+- Modular CSS in `/assets/` — no preprocessor
+- Section styles: `section-[name].css`
+- Load via: `{{ 'section-name.css' | asset_url | stylesheet_tag }}`
+- All values via CSS custom properties (tokens)
+- Never inline styles except for dynamic Liquid values
+
+## Liquid Patterns
+
+```liquid
+{%- if section.settings.title != blank -%}
+  <h2>{{ section.settings.title | escape }}</h2>
+{%- endif -%}
+
+{%- for block in section.blocks -%}
+  <div {{ block.shopify_attributes }}>
+    {{ block.settings.text | escape }}
+  </div>
+{%- endfor -%}
+```
+
+- Always use `| escape` on user-facing text settings
+- Always use `{%- -%}` (whitespace-stripping) for performance
+- Use `{{ block.shopify_attributes }}` on block wrappers for Theme Editor
+
+## Implementation Output Requirements
+
+Always report:
+- Files inspected
+- Files changed
+- What was added / modified / reused
+- Technical risks
+- App interaction concerns
+- Theme Editor friendly: yes/no
+
+## QA Checklist After Implementation
+
+- [ ] Desktop layout correct
+- [ ] Mobile collapse correct
+- [ ] Theme Editor: section appears and settings work
+- [ ] No console errors
+- [ ] No horizontal scroll
+- [ ] Add-to-cart / variant logic unaffected
+- [ ] schema `name` ≤ 25 chars
+- [ ] No empty `default` values in schema
+
+## Design & Messaging
+
+For all visual decisions → follow `_examples/` and `.cursor/rules/design-components.mdc`
+For all copy decisions → follow `docs/conversion-messaging.md`
+Do not mix responsibilities.
+Do not introduce patterns that conflict with design-governance.

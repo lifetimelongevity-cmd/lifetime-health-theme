@@ -1,0 +1,152 @@
+{% comment %}
+  LIFETIME — Approved Example: Benefits Section (card-info pattern)
+  ─────────────────────────────────────────────────────────────────
+  §12 Build Spec:
+  - Surface:         --color-surface-secondary (warm, alternates with white)
+  - Section label:   yes — micro uppercase, positions the section in page flow
+  - Dominant element: section heading (--text-h1)
+  - Heading size:    --text-h1 for section, --text-section for cards
+  - Content pattern: card-info × 3 (icon + title + description)
+  - CTA:             outline variant — "Mehr erfahren" (secondary conversion)
+  - Removed:         card images (icons communicate function faster here),
+                     individual card CTAs (one section CTA is enough),
+                     card borders on warm bg surface (shadow-sm only)
+  - Quality move:    teal icon background with dark icon — benefit-bg surface
+                     on card icon container creates a soft, premium accent
+                     without colour-flooding the card
+{% endcomment %}
+
+{{ 'section-benefits.css' | asset_url | stylesheet_tag }}
+
+<section class="benefits benefits--warm">
+  <div class="benefits__container">
+
+    <div class="benefits__header">
+      {%- if section.settings.label != blank -%}
+        <p class="benefits__label">{{ section.settings.label | escape }}</p>
+      {%- endif -%}
+      <h2 class="benefits__title">{{ section.settings.title | escape }}</h2>
+      {%- if section.settings.description != blank -%}
+        <p class="benefits__description">{{ section.settings.description | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <ul class="benefits__grid" role="list">
+      {%- for block in section.blocks -%}
+        <li class="benefits__card" {{ block.shopify_attributes }}>
+          {%- if block.settings.icon != blank -%}
+            <div class="benefits__card-icon" aria-hidden="true">
+              {{ block.settings.icon }}
+            </div>
+          {%- endif -%}
+          <h3 class="benefits__card-title">{{ block.settings.title | escape }}</h3>
+          {%- if block.settings.description != blank -%}
+            <p class="benefits__card-description">{{ block.settings.description | escape }}</p>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+
+    {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+      <div class="benefits__cta">
+        <a href="{{ section.settings.cta_url }}" class="btn btn--outline">
+          {{ section.settings.cta_label | escape }}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Benefits",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Section label",
+      "default": "Wirkungsweise"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Drei Mechanismen. Ein Ergebnis."
+    },
+    {
+      "type": "text",
+      "id": "description",
+      "label": "Description",
+      "default": "Entwickelt mit führenden Longevity-Forschern für messbaren Effekt."
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA link"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA label",
+      "default": "Mehr erfahren"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Benefit",
+      "settings": [
+        {
+          "type": "html",
+          "id": "icon",
+          "label": "Icon (SVG)",
+          "info": "Paste inline SVG. Recommended: 24×24px, currentColor stroke."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Zelluläre Regeneration"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Description",
+          "default": "Unterstützt die natürliche Reparatur von DNA-Schäden und fördert die Mitochondrienfunktion auf Zellebene."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Benefits",
+      "blocks": [
+        {
+          "type": "benefit",
+          "settings": {
+            "title": "Zelluläre Regeneration",
+            "description": "Unterstützt die natürliche Reparatur von DNA-Schäden und fördert die Mitochondrienfunktion auf Zellebene."
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "title": "Entzündungsregulation",
+            "description": "Moduliert chronisch-stille Entzündungsprozesse — einem der zentralen Treiber beschleunigten Alterns."
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "title": "Hormonelle Balance",
+            "description": "Unterstützt die Cortisol-Regulierung und den zirkadianen Rhythmus für nachhaltige Energie ohne Peaks."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

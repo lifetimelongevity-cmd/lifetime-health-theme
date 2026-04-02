@@ -1,0 +1,93 @@
+{% comment %}
+  LIFETIME — Approved Example: Quote / Testimonial Section (quote-block pattern)
+  ───────────────────────────────────────────────────────────────────────────────
+  §12 Build Spec:
+  - Surface:         --color-surface-dark (intentional rhythm break)
+  - Section label:   no — quote format is self-evident, label would be redundant (§11)
+  - Dominant element: quote text (--text-quote, italic)
+  - Heading size:    n/a — no heading; quote IS the heading
+  - Content pattern: single quote-block, centered, max-width 720px
+  - CTA:             optional outline (inverted: white bg / dark text on dark surface)
+  - Removed:         decorative quotation mark graphic (text is sufficient),
+                     author photo (name and title carry authority without image),
+                     divider lines (dark surface provides rhythm without separators)
+  - Quality move:    attribution line splits name (semibold, white) and title
+                     (muted, smaller) onto one line with a centered dot separator —
+                     editorial punctuation that reads like a magazine caption,
+                     not a form field.
+{% endcomment %}
+
+{{ 'section-quote.css' | asset_url | stylesheet_tag }}
+
+<section class="quote-section quote-section--dark">
+  <div class="quote-section__container">
+
+    <figure class="quote-section__figure">
+      <blockquote class="quote-section__text">
+        {{ section.settings.quote | escape }}
+      </blockquote>
+      {%- if section.settings.author_name != blank -%}
+        <figcaption class="quote-section__attribution">
+          <span class="quote-section__author-name">{{ section.settings.author_name | escape }}</span>
+          {%- if section.settings.author_title != blank -%}
+            <span class="quote-section__separator" aria-hidden="true">·</span>
+            <span class="quote-section__author-title">{{ section.settings.author_title | escape }}</span>
+          {%- endif -%}
+        </figcaption>
+      {%- endif -%}
+    </figure>
+
+    {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+      <div class="quote-section__cta">
+        <a href="{{ section.settings.cta_url }}" class="btn btn--outline-inverted">
+          {{ section.settings.cta_label | escape }}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Quote",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "quote",
+      "label": "Quote",
+      "default": "Biologisches Altern ist kein unausweichliches Schicksal. Es ist ein Prozess, den wir heute beeinflussen können — mit den richtigen Werkzeugen."
+    },
+    {
+      "type": "text",
+      "id": "author_name",
+      "label": "Author name",
+      "default": "Dr. med. Markus Steiner"
+    },
+    {
+      "type": "text",
+      "id": "author_title",
+      "label": "Author title / role",
+      "default": "Longevity-Mediziner, Berlin"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA link"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA label",
+      "default": ""
+    }
+  ],
+  "presets": [
+    {
+      "name": "Quote"
+    }
+  ]
+}
+{% endschema %}

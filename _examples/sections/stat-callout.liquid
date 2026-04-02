@@ -1,0 +1,106 @@
+{% comment %}
+  LIFETIME — Approved Example: Stat Callout Section
+  ─────────────────────────────────────────────────
+  §12 Build Spec:
+  - Surface:         --color-surface-dark (dark section, breaks white→warm rhythm)
+  - Dominant element: stat numbers (--text-stat, heading font, bold)
+  - Heading size:    --text-h2 for section title
+  - Content pattern: stat-callout × 3, centered grid
+  - CTA:             none (stats carry the section)
+  - Removed:         section label (heading already provides context),
+                     body text below stats (numbers are self-explanatory),
+                     border separators (dark surface handles rhythm)
+  - Quality move:    stat suffix in teal-dark creates color hierarchy within
+                     a monochrome surface — number commands, unit guides, label recedes
+{% endcomment %}
+
+{{ 'section-stat-callout.css' | asset_url | stylesheet_tag }}
+
+<section class="stat-callout stat-callout--dark">
+  <div class="stat-callout__container">
+
+    {%- if section.settings.title != blank -%}
+      <div class="stat-callout__header">
+        <h2 class="stat-callout__title">{{ section.settings.title | escape }}</h2>
+        {%- if section.settings.description != blank -%}
+          <p class="stat-callout__description">{{ section.settings.description | escape }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <ul class="stat-callout__grid" role="list">
+      {%- for block in section.blocks -%}
+        <li class="stat-callout__item" {{ block.shopify_attributes }}>
+          <div class="stat-callout__number-row">
+            <span class="stat-callout__number">{{ block.settings.number | escape }}</span>
+            {%- if block.settings.suffix != blank -%}
+              <span class="stat-callout__suffix">{{ block.settings.suffix | escape }}</span>
+            {%- endif -%}
+          </div>
+          {%- if block.settings.label != blank -%}
+            <p class="stat-callout__label">{{ block.settings.label | escape }}</p>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Stat Callout",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Was die Forschung zeigt"
+    },
+    {
+      "type": "text",
+      "id": "description",
+      "label": "Description",
+      "default": ""
+    }
+  ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stat",
+      "settings": [
+        {
+          "type": "text",
+          "id": "number",
+          "label": "Number",
+          "default": "87"
+        },
+        {
+          "type": "text",
+          "id": "suffix",
+          "label": "Suffix (%, +, x …)",
+          "default": "%"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "der Teilnehmer berichteten mehr Energie"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Stat Callout",
+      "blocks": [
+        { "type": "stat", "settings": { "number": "87", "suffix": "%", "label": "der Teilnehmer berichteten mehr Energie" } },
+        { "type": "stat", "settings": { "number": "12", "suffix": "x", "label": "höhere Bioverfügbarkeit vs. Standard" } },
+        { "type": "stat", "settings": { "number": "94", "suffix": "%", "label": "Weiterempfehlungsrate nach 90 Tagen" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
