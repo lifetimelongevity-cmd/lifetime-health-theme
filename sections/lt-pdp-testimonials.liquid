@@ -1,214 +1,109 @@
 {% comment %}
-  LT PDP — Testimonials carousel (replaces Section Store ss-testimonial-12).
-  Horizontal scroll + snap, dot nav (one per slide), optional Shopify video + poster.
+  LT PDP — Reviews (card-review grid).
+  §12: Surface white, 3-col desktop / 1-col mobile.
+  Pattern: _examples/sections/reviews.liquid
 {% endcomment %}
 
-{%- liquid
-  assign slide_count = section.blocks.size
-  assign show_dots = false
-  if slide_count > 1
-    assign show_dots = true
-  endif
--%}
+<section
+  class="lt-pdp-reviews"
+  id="lt-pdp-reviews-{{ section.id }}"
+  aria-labelledby="lt-pdp-reviews-heading-{{ section.id }}"
+>
+  <div class="container container--large remove-empty-space">
+    <div class="lt-pdp-reviews__inner">
 
-<div class="lt-pdp-testimonials container container--large remove-empty-space" data-lt-pdp-tst>
-  <div
-    class="lt-pdp-testimonials__inner"
-    id="lt-pdp-testimonials-{{ section.id }}"
-    aria-labelledby="lt-pdp-testimonials-heading-{{ section.id }}"
-  >
-    {%- if section.settings.section_label != blank -%}
-      <p class="lt-pdp-testimonials__label">{{ section.settings.section_label | escape }}</p>
-    {%- endif -%}
+      <header class="lt-pdp-reviews__header">
+        {%- if section.settings.section_label != blank -%}
+          <p class="lt-pdp-reviews__label">{{ section.settings.section_label | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          <h2 class="lt-pdp-reviews__title" id="lt-pdp-reviews-heading-{{ section.id }}">
+            {{- section.settings.heading | escape -}}
+          </h2>
+        {%- endif -%}
+      </header>
 
-    {%- if section.settings.heading != blank -%}
-      <div class="lt-pdp-testimonials__heading rte" id="lt-pdp-testimonials-heading-{{ section.id }}">
-        {{ section.settings.heading }}
-      </div>
-    {%- endif -%}
-
-    {%- if slide_count > 0 -%}
-      <div
-        class="lt-pdp-testimonials__viewport"
-        data-lt-tst-viewport
-        tabindex="0"
-        role="region"
-        aria-roledescription="carousel"
-        aria-label="{{ section.settings.carousel_label | default: 'Kundenstimmen' | escape }}"
-      >
-        <div class="lt-pdp-testimonials__track" data-lt-tst-track>
+      {%- if section.blocks.size > 0 -%}
+        <ul class="lt-pdp-reviews__grid" role="list">
           {%- for block in section.blocks -%}
             {%- case block.type -%}
-              {%- when 'testimonial' -%}
-                <article
-                  class="lt-pdp-testimonials__slide"
-                  data-lt-tst-slide
-                  {{ block.shopify_attributes }}
-                >
-                  <div class="lt-pdp-testimonials__card">
-                    <div class="lt-pdp-testimonials__media">
-                      {%- if block.settings.media_style == 'video' and block.settings.video != blank -%}
-                        <div class="lt-pdp-testimonials__media-inner lt-pdp-testimonials__media-inner--video">
-                          {{
-                            block.settings.video
-                            | video_tag:
-                              image_size: '800x',
-                              class: 'lt-pdp-testimonials__video',
-                              muted: true,
-                              loop: false,
-                              controls: false,
-                              playsinline: true,
-                              preload: 'metadata'
-                          }}
-                          {%- liquid
-                            assign tst_poster = block.settings.image
-                            if tst_poster == blank and block.settings.video.preview_image
-                              assign tst_poster = block.settings.video.preview_image
-                            endif
-                          -%}
-                          {%- if tst_poster != blank -%}
-                            <div class="lt-pdp-testimonials__poster" data-lt-tst-poster>
-                              {{
-                                tst_poster
-                                | image_url: width: 800
-                                | image_tag:
-                                  loading: 'lazy',
-                                  class: 'lt-pdp-testimonials__poster-img',
-                                  sizes: '(min-width: 1024px) 25vw, 80vw',
-                                  widths: '400,600,800'
-                              }}
-                            </div>
-                          {%- endif -%}
-                          <button
-                            type="button"
-                            class="lt-pdp-testimonials__play"
-                            data-lt-tst-play
-                            aria-label="Video abspielen"
-                          >
-                            <span class="visually-hidden">Video abspielen</span>
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                              <circle cx="12" cy="12" r="11" fill="currentColor" opacity="0.92"/>
-                              <path d="M10 8l6 4-6 4V8z" fill="#fff"/>
-                            </svg>
-                          </button>
-                        </div>
-                      {%- elsif block.settings.image != blank -%}
-                        <div class="lt-pdp-testimonials__media-inner">
-                          {{
-                            block.settings.image
-                            | image_url: width: 800
-                            | image_tag:
-                              loading: 'lazy',
-                              class: 'lt-pdp-testimonials__image',
-                              sizes: '(min-width: 1024px) 25vw, 80vw',
-                              widths: '400,600,800'
-                          }}
-                        </div>
-                      {%- else -%}
-                        <div class="lt-pdp-testimonials__media-inner lt-pdp-testimonials__media-inner--placeholder">
-                          {{ 'image' | placeholder_svg_tag: 'placeholder-svg' }}
-                        </div>
+              {%- when 'review' -%}
+                {%- assign stars_n = block.settings.stars_count | times: 1 | floor | at_most: 5 | at_least: 1 -%}
+                <li class="lt-pdp-reviews__card" {{ block.shopify_attributes }}>
+
+                  <div class="lt-pdp-reviews__stars" aria-label="{{ stars_n }} von 5 Sternen">
+                    {%- for i in (1..5) -%}
+                      <svg
+                        class="lt-pdp-reviews__star{% if i <= stars_n %} lt-pdp-reviews__star--filled{% endif %}"
+                        width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"
+                      >
+                        <path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+                      </svg>
+                    {%- endfor -%}
+                  </div>
+
+                  {%- if block.settings.text != blank -%}
+                    <p class="lt-pdp-reviews__text">{{ block.settings.text | escape }}</p>
+                  {%- endif -%}
+
+                  <footer class="lt-pdp-reviews__author-row">
+                    <div class="lt-pdp-reviews__author-meta">
+                      {%- if block.settings.name != blank -%}
+                        <span class="lt-pdp-reviews__author-name">{{ block.settings.name | escape }}</span>
+                      {%- endif -%}
+                      {%- if block.settings.verified -%}
+                        <span class="lt-pdp-reviews__verified" aria-label="Verifizierter Kauf">
+                          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                            <circle cx="6" cy="6" r="5.5" fill="var(--color-success)"/>
+                            <path d="M3.5 6l1.75 1.75L8.5 4.5" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                          </svg>
+                          Verifiziert
+                        </span>
                       {%- endif -%}
                     </div>
-
-                    {%- assign stars_n = block.settings.stars_count | times: 1 | floor | at_most: 5 | at_least: 0 -%}
-                    {%- if stars_n > 0 -%}
-                      <div class="lt-pdp-testimonials__stars" aria-hidden="true">
-                        {%- for i in (1..stars_n) -%}
-                          <svg class="lt-pdp-testimonials__star" width="18" height="18" viewBox="0 0 14 13" xmlns="http://www.w3.org/2000/svg">
-                            <path fill="currentColor" d="m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z"/>
-                          </svg>
-                        {%- endfor -%}
-                      </div>
+                    {%- if block.settings.date != blank -%}
+                      <time class="lt-pdp-reviews__date">{{ block.settings.date | escape }}</time>
                     {%- endif -%}
+                  </footer>
 
-                    {%- if block.settings.text != blank -%}
-                      <div class="lt-pdp-testimonials__quote rte">{{ block.settings.text }}</div>
-                    {%- endif -%}
-
-                    <footer class="lt-pdp-testimonials__author-row">
-                      <div class="lt-pdp-testimonials__author-meta">
-                        {%- if block.settings.author != blank -%}
-                          <div class="lt-pdp-testimonials__author rte">{{ block.settings.author }}</div>
-                        {%- endif -%}
-                        {%- if block.settings.verified -%}
-                          <span class="lt-pdp-testimonials__verified" aria-label="Verifizierter Kauf">
-                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                              <circle cx="6" cy="6" r="5.5" fill="var(--color-success)"/>
-                              <path d="M3.5 6l1.75 1.75L8.5 4.5" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            Verifiziert
-                          </span>
-                        {%- endif -%}
-                      </div>
-                      {%- if block.settings.date != blank -%}
-                        <time class="lt-pdp-testimonials__date">{{ block.settings.date | escape }}</time>
-                      {%- endif -%}
-                    </footer>
-                  </div>
-                </article>
+                </li>
             {%- endcase -%}
           {%- endfor -%}
-        </div>
-      </div>
-
-      {%- if show_dots -%}
-        <div class="lt-pdp-testimonials__dots" role="tablist" aria-label="{{ section.settings.dots_label | default: 'Folien' | escape }}">
-          {%- for block in section.blocks -%}
-            {%- if block.type == 'testimonial' -%}
-              <button
-                type="button"
-                class="lt-pdp-testimonials__dot{% if forloop.first %} is-active{% endif %}"
-                data-lt-tst-dot
-                data-index="{{ forloop.index0 }}"
-                role="tab"
-                aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
-                aria-label="{{ section.settings.dot_aria_label | default: 'Kundenstimme' | escape }} {{ forloop.index }}"
-              ></button>
-            {%- endif -%}
-          {%- endfor -%}
-        </div>
+        </ul>
       {%- endif -%}
-    {%- endif -%}
+
+    </div>
   </div>
-</div>
+</section>
 
 {% stylesheet %}
-  .lt-pdp-testimonials {
-    --tst-gap-mobile: 20px; /* intrinsic: no exact token equivalent */
-    --tst-gap-desktop: 28px; /* intrinsic: no exact token equivalent */
-    --tst-visible-mobile: 1.3; /* intrinsic: carousel overflow ratio */
-    --tst-visible-tablet: 2.5;
-    --tst-visible-desktop: 4.1;
+  .lt-pdp-reviews {
     padding-block: var(--space-9);
     background: var(--color-surface-primary);
-    color: var(--color-text-primary);
   }
 
-  @media screen and (max-width: 768px) {
-    .lt-pdp-testimonials {
+  @media screen and (max-width: 749px) {
+    .lt-pdp-reviews {
       padding-block: var(--space-8);
     }
   }
 
-  .lt-pdp-testimonials__inner {
-    max-width: 100%;
+  .lt-pdp-reviews__header {
+    margin-bottom: var(--space-6);
   }
 
-  .lt-pdp-testimonials__label {
+  .lt-pdp-reviews__label {
     margin: 0 0 var(--space-4);
     font-family: var(--font-body);
     font-size: var(--text-micro);
     font-weight: var(--weight-medium);
     letter-spacing: 0.1em;
-    line-height: var(--leading-body);
     text-transform: uppercase;
     color: var(--color-text-secondary);
   }
 
-  .lt-pdp-testimonials__heading {
-    margin: 0 0 var(--space-7);
-    max-width: 48rem; /* intrinsic: heading width constraint */
+  .lt-pdp-reviews__title {
+    margin: 0;
     font-family: var(--font-heading);
     font-size: var(--text-h2);
     font-weight: var(--weight-bold);
@@ -216,244 +111,82 @@
     color: var(--color-text-primary);
   }
 
-  .lt-pdp-testimonials__heading p {
+  .lt-pdp-reviews__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
     margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  .lt-pdp-testimonials__viewport {
-    container-type: inline-size;
-    container-name: lt-tst;
-    overflow-x: auto;
-    overflow-y: hidden;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    margin-inline: calc(-1 * var(--space-4));
-    padding-inline: var(--space-4);
-    outline: none;
-  }
-
-  @media screen and (min-width: 769px) {
-    .lt-pdp-testimonials__viewport {
-      margin-inline: calc(-1 * var(--space-5));
-      padding-inline: var(--space-5);
+  @media screen and (min-width: 750px) {
+    .lt-pdp-reviews__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
-  .lt-pdp-testimonials__viewport::-webkit-scrollbar {
-    display: none;
-  }
-
-  .lt-pdp-testimonials__track {
-    display: flex;
-    flex-direction: row;
-    align-items: stretch;
-    gap: var(--tst-gap-mobile);
-    padding-bottom: 0.25rem; /* intrinsic: shadow clearance */
-  }
-
-  @media screen and (min-width: 768px) {
-    .lt-pdp-testimonials__track {
-      gap: var(--space-5);
+  @media screen and (min-width: 1025px) {
+    .lt-pdp-reviews__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 
-  @media screen and (min-width: 1024px) {
-    .lt-pdp-testimonials__track {
-      gap: var(--tst-gap-desktop);
-    }
-  }
-
-  .lt-pdp-testimonials__slide {
-    flex: 0 0 auto;
-    scroll-snap-align: start;
-    width: calc((100cqi - 0 * var(--tst-gap-mobile)) / var(--tst-visible-mobile));
-    min-width: 0;
-  }
-
-  @media screen and (min-width: 768px) {
-    .lt-pdp-testimonials__slide {
-      width: calc((100cqi - 1 * var(--space-5)) / var(--tst-visible-tablet));
-    }
-  }
-
-  @media screen and (min-width: 1024px) {
-    .lt-pdp-testimonials__slide {
-      width: calc((100cqi - 3 * var(--tst-gap-desktop)) / var(--tst-visible-desktop));
-    }
-  }
-
-  @supports not (width: 1cqi) {
-    .lt-pdp-testimonials__slide {
-      width: min(78vw, 22rem);
-    }
-    @media screen and (min-width: 768px) {
-      .lt-pdp-testimonials__slide {
-        width: min(38vw, 20rem);
-      }
-    }
-    @media screen and (min-width: 1024px) {
-      .lt-pdp-testimonials__slide {
-        width: min(24vw, 18rem);
-      }
-    }
-  }
-
-  .lt-pdp-testimonials__card {
+  .lt-pdp-reviews__card {
     display: flex;
     flex-direction: column;
-    height: 100%;
     padding: var(--space-5);
     border: 1px solid var(--color-border-default);
     border-radius: var(--radius-md);
     background: var(--color-surface-primary);
-    box-sizing: border-box;
+    box-shadow: var(--shadow-sm);
   }
 
-  .lt-pdp-testimonials__media {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1;
-    border-radius: var(--radius-md);
-    overflow: hidden;
-    margin-bottom: var(--space-4);
-    border: 1px solid var(--color-border-default);
-  }
-
-  .lt-pdp-testimonials__media-inner {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-  }
-
-  .lt-pdp-testimonials__media-inner--placeholder {
-    background: var(--color-surface-secondary);
+  .lt-pdp-reviews__stars {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 8rem; /* intrinsic: media placeholder height */
-  }
-
-  .lt-pdp-testimonials__image,
-  .lt-pdp-testimonials__video {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    vertical-align: middle;
-  }
-
-  .lt-pdp-testimonials__media-inner--video .lt-pdp-testimonials__video {
-    position: relative;
-    z-index: 1;
-  }
-
-  .lt-pdp-testimonials__poster {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    pointer-events: none;
-    transition: opacity var(--ease-default);
-  }
-
-  .lt-pdp-testimonials__poster-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .lt-pdp-testimonials__media-inner--video.is-playing .lt-pdp-testimonials__poster {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  .lt-pdp-testimonials__play {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 3;
-    width: 50px; /* intrinsic: play button size */
-    height: 50px;
-    border: 0;
-    padding: 0;
-    border-radius: var(--radius-full);
-    background: var(--color-surface-primary);
-    color: var(--color-text-primary);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: var(--shadow-md);
-    transition: opacity var(--ease-default), transform var(--ease-default);
-  }
-
-  .lt-pdp-testimonials__play:hover {
-    transform: translate(-50%, -50%) scale(1.04);
-  }
-
-  .lt-pdp-testimonials__play:focus-visible {
-    outline: 2px solid var(--color-text-primary);
-    outline-offset: 3px; /* intrinsic: focus ring clearance */
-  }
-
-  .lt-pdp-testimonials__play[hidden] {
-    display: none;
-  }
-
-  .lt-pdp-testimonials__stars {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
     gap: var(--space-1);
     margin-bottom: var(--space-3);
+  }
+
+  .lt-pdp-reviews__star {
+    color: var(--color-gray-200);
+  }
+
+  .lt-pdp-reviews__star--filled {
     color: var(--color-star);
   }
 
-  .lt-pdp-testimonials__quote {
+  .lt-pdp-reviews__text {
     flex: 1 1 auto;
     margin: 0 0 var(--space-4);
     font-family: var(--font-body);
-    font-size: var(--text-body-lg);
-    line-height: var(--leading-body);
-    text-align: center;
+    font-size: var(--text-body);
+    line-height: var(--leading-relaxed);
     color: var(--color-text-primary);
   }
 
-  .lt-pdp-testimonials__quote p {
-    margin: 0;
-  }
-
-  .lt-pdp-testimonials__author-row {
+  .lt-pdp-reviews__author-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     gap: var(--space-2);
+    margin-top: auto;
   }
 
-  .lt-pdp-testimonials__author-meta {
+  .lt-pdp-reviews__author-meta {
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
   }
 
-  .lt-pdp-testimonials__author {
-    margin: 0;
+  .lt-pdp-reviews__author-name {
     font-family: var(--font-body);
     font-size: var(--text-body-sm);
-    line-height: var(--leading-body);
-    text-align: left;
-    color: var(--color-text-secondary);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
   }
 
-  .lt-pdp-testimonials__author p {
-    margin: 0;
-  }
-
-  .lt-pdp-testimonials__verified {
+  .lt-pdp-reviews__verified {
     display: inline-flex;
     align-items: center;
     gap: var(--space-1);
@@ -463,154 +196,14 @@
     color: var(--color-success);
   }
 
-  .lt-pdp-testimonials__date {
+  .lt-pdp-reviews__date {
     font-family: var(--font-body);
     font-size: var(--text-micro);
     color: var(--color-text-muted);
     white-space: nowrap;
-    padding-top: 2px; /* intrinsic: optical alignment with author name */
-  }
-
-  .lt-pdp-testimonials__dots {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: var(--space-2);
-    margin-top: 2.5rem; /* 40px: between --space-6 (32px) and --space-7 (48px), no exact token */
-  }
-
-  .lt-pdp-testimonials__dot {
-    width: 10px; /* intrinsic: dot nav size */
-    height: 10px;
-    padding: 0;
-    border: 1px solid var(--color-text-primary);
-    border-radius: var(--radius-full);
-    background: transparent;
-    cursor: pointer;
-    opacity: 0.35;
-    transition: opacity var(--ease-default), background var(--ease-default);
-  }
-
-  .lt-pdp-testimonials__dot:hover {
-    opacity: 0.65;
-  }
-
-  .lt-pdp-testimonials__dot.is-active {
-    opacity: 1;
-    background: var(--color-text-primary);
-  }
-
-  .lt-pdp-testimonials__dot:focus-visible {
-    outline: 2px solid var(--color-text-primary);
-    outline-offset: 2px; /* intrinsic: focus ring clearance */
+    padding-top: 2px; /* intrinsic: optical alignment with name baseline */
   }
 {% endstylesheet %}
-
-{% javascript %}
-  (function () {
-    function playHandler(ev) {
-      var btn = ev.currentTarget;
-      var inner = btn.closest('.lt-pdp-testimonials__media-inner--video');
-      if (!inner) return;
-      var video = inner.querySelector('video');
-      if (!video) return;
-      video.setAttribute('controls', '');
-      video.play().catch(function () {});
-      inner.classList.add('is-playing');
-      btn.setAttribute('hidden', '');
-    }
-
-    function bindPlays(root) {
-      root.querySelectorAll('[data-lt-tst-play]').forEach(function (btn) {
-        if (btn.dataset.ltTstPlayBound) return;
-        btn.dataset.ltTstPlayBound = '1';
-        btn.addEventListener('click', playHandler);
-      });
-    }
-
-    function scrollSlideIntoView(viewport, slide) {
-      if (!viewport || !slide) return;
-      var delta = slide.getBoundingClientRect().left - viewport.getBoundingClientRect().left;
-      viewport.scrollTo({ left: viewport.scrollLeft + delta, behavior: 'smooth' });
-    }
-
-    function initCarousel(root) {
-      var viewport = root.querySelector('[data-lt-tst-viewport]');
-      var slides = root.querySelectorAll('[data-lt-tst-slide]');
-      var dots = root.querySelectorAll('[data-lt-tst-dot]');
-      if (!viewport || slides.length === 0) return;
-
-      dots.forEach(function (dot) {
-        if (dot.dataset.ltTstDotBound) return;
-        dot.dataset.ltTstDotBound = '1';
-        dot.addEventListener('click', function () {
-          var idx = parseInt(dot.getAttribute('data-index'), 10);
-          if (slides[idx]) scrollSlideIntoView(viewport, slides[idx]);
-        });
-      });
-
-      if (dots.length === 0) return;
-
-      var setActive = function () {
-        var vpRect = viewport.getBoundingClientRect();
-        var mid = vpRect.left + vpRect.width * 0.35;
-        var best = 0;
-        var bestDist = Infinity;
-        slides.forEach(function (slide, i) {
-          var r = slide.getBoundingClientRect();
-          var c = r.left + r.width * 0.5;
-          var d = Math.abs(c - mid);
-          if (d < bestDist) {
-            bestDist = d;
-            best = i;
-          }
-        });
-        dots.forEach(function (d, i) {
-          var on = i === best;
-          d.classList.toggle('is-active', on);
-          d.setAttribute('aria-selected', on ? 'true' : 'false');
-        });
-      };
-
-      var t;
-      viewport.addEventListener(
-        'scroll',
-        function () {
-          clearTimeout(t);
-          t = setTimeout(setActive, 60);
-        },
-        { passive: true }
-      );
-      window.addEventListener(
-        'resize',
-        function () {
-          clearTimeout(t);
-          t = setTimeout(setActive, 120);
-        },
-        { passive: true }
-      );
-      setActive();
-    }
-
-    function init(root) {
-      bindPlays(root);
-      initCarousel(root);
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-      document.querySelectorAll('[data-lt-pdp-tst]').forEach(function (el) {
-        init(el);
-      });
-    });
-    document.addEventListener('shopify:section:load', function (ev) {
-      var r = ev.target;
-      if (r && r.querySelector && r.querySelector('[data-lt-pdp-tst]')) {
-        init(r.querySelector('[data-lt-pdp-tst]'));
-      }
-    });
-  })();
-{% endjavascript %}
 
 {% schema %}
 {
@@ -620,7 +213,7 @@
   "enabled_on": {
     "templates": ["product"]
   },
-  "max_blocks": 12,
+  "max_blocks": 9,
   "settings": [
     {
       "type": "text",
@@ -629,75 +222,37 @@
       "default": "KUNDENSTIMMEN"
     },
     {
-      "type": "richtext",
+      "type": "text",
       "id": "heading",
       "label": "Überschrift",
-      "default": "<p>Über 1.000+ zufriedene Kunden vertrauen der Qualität von LIFETIME</p>"
-    },
-    {
-      "type": "text",
-      "id": "carousel_label",
-      "label": "ARIA Label Karussell",
-      "default": "Kundenstimmen"
-    },
-    {
-      "type": "text",
-      "id": "dots_label",
-      "label": "ARIA Label Punkte",
-      "default": "Folien"
-    },
-    {
-      "type": "text",
-      "id": "dot_aria_label",
-      "label": "ARIA Label pro Punkt",
-      "default": "Kundenstimme"
+      "default": "Was unsere Kunden berichten"
     }
   ],
   "blocks": [
     {
-      "type": "testimonial",
-      "name": "Testimonial",
+      "type": "review",
+      "name": "Review",
       "settings": [
-        {
-          "type": "select",
-          "id": "media_style",
-          "label": "Medientyp",
-          "default": "image",
-          "options": [
-            { "value": "image", "label": "Bild" },
-            { "value": "video", "label": "Video (Shopify)" }
-          ]
-        },
-        {
-          "type": "image_picker",
-          "id": "image",
-          "label": "Bild / Video-Poster"
-        },
-        {
-          "type": "video",
-          "id": "video",
-          "label": "Video (Shopify)"
-        },
         {
           "type": "range",
           "id": "stars_count",
-          "min": 0,
+          "min": 1,
           "max": 5,
           "step": 1,
           "label": "Sterne",
           "default": 5
         },
         {
-          "type": "richtext",
+          "type": "textarea",
           "id": "text",
           "label": "Zitat",
-          "default": "<p>Zitat</p>"
+          "default": "Mehr Energie im Alltag, bessere Regeneration – ich bin überzeugt."
         },
         {
-          "type": "richtext",
-          "id": "author",
-          "label": "Autor",
-          "default": "<p>@name</p>"
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Sarah K."
         },
         {
           "type": "checkbox",
@@ -720,16 +275,37 @@
       "category": "Product",
       "settings": {
         "section_label": "KUNDENSTIMMEN",
-        "heading": "<p>Über 1.000+ zufriedene Kunden vertrauen der Qualität von LIFETIME</p>"
+        "heading": "Was unsere Kunden berichten"
       },
       "blocks": [
         {
-          "type": "testimonial",
+          "type": "review",
           "settings": {
-            "media_style": "image",
             "stars_count": 5,
-            "text": "<p>Text</p>",
-            "author": "<p>@kunde</p>"
+            "text": "Nach drei Monaten merke ich den Unterschied. Mehr Energie, besserer Schlaf – und das ohne Änderungen in meiner sonstigen Routine.",
+            "name": "Sarah K.",
+            "verified": true,
+            "date": "März 2024"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "stars_count": 5,
+            "text": "Ich war skeptisch, aber die Blutbildveränderung nach 12 Wochen war messbar. Mein Arzt war überrascht.",
+            "name": "Thomas M.",
+            "verified": true,
+            "date": "Februar 2024"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "stars_count": 5,
+            "text": "Endlich ein Supplement, das keine leeren Versprechen macht. Qualität der Rohstoffe und Transparenz haben mich überzeugt.",
+            "name": "Jana W.",
+            "verified": true,
+            "date": "Januar 2024"
           }
         }
       ]
