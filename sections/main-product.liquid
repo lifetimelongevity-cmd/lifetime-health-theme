@@ -79,14 +79,6 @@
         assign nmn_icon_guarantee_url = 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/circle-wavy-check-fill.png?v=1774959731'
         assign nmn_icon_card_benefit_tick_url = 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/icon-tick-green-sm.svg?v=1726236630'
         assign nmn_icon_section_benefits_png_url = 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/tick-2_84d88b03-aa5d-49fe-9ebe-34006f3e8cdb.png?v=1742814881'
-        assign nmn_ss_benefits_block_id = ''
-        for block in section.blocks
-          assign nmn_bt = block.type | default: ''
-          if nmn_bt contains 'block-benefits-list'
-            assign nmn_ss_benefits_block_id = block.id
-            break
-          endif
-        endfor
       -%}
       {% style %}
         /* NMN buy module: design tokens (align with docs/design-governance.md) */
@@ -137,6 +129,32 @@
           letter-spacing: 0;
           text-transform: none;
           color: var(--color-text-main);
+          text-align: center;
+        }
+        #product-{{ section.id }} #add-to-cart-{{ section.id }} .button--product.button--solid {
+          background-color: #0b0f0f !important;
+          border-color: #0b0f0f !important;
+          border-radius: 12px;
+          padding-top: 1.15rem;
+          padding-bottom: 1.15rem;
+          box-shadow: 0 10px 28px -8px rgba(11, 15, 15, 0.35);
+        }
+        #product-{{ section.id }} #add-to-cart-{{ section.id }} .button--product.button--solid .button__text {
+          color: #fff !important;
+        }
+        #product-{{ section.id }} #add-to-cart-{{ section.id }} .button--product.button--solid .button__preloader circle {
+          stroke: #fff !important;
+        }
+        sticky-add-to-cart[data-id='product-{{ section.id }}'] .button--solid {
+          background-color: #0b0f0f !important;
+          border-color: #0b0f0f !important;
+          border-radius: 12px;
+        }
+        sticky-add-to-cart[data-id='product-{{ section.id }}'] .button--solid .button__text {
+          color: #fff !important;
+        }
+        sticky-add-to-cart[data-id='product-{{ section.id }}'] .button--solid .button__preloader circle {
+          stroke: #fff !important;
         }
         @media screen and (max-width: 749px) {
           #product-{{ section.id }} .nmn-pdp-title-tagline {
@@ -189,9 +207,67 @@
         #product-{{ section.id }} .product__title.heading-size--page-title {
           margin-top: 0;
           margin-bottom: var(--nmn-space-2);
+          letter-spacing: -0.03em;
+          line-height: 1.1;
+          color: #2c3435;
+          font-size: clamp(1.85rem, 5.5vw, 2.35rem);
+        }
+        #product-{{ section.id }} .product-gallery-item:first-of-type .lazy-image img,
+        #product-{{ section.id }} .product-gallery-item:first-of-type > a img,
+        #product-{{ section.id }} .product-gallery-item:first-of-type img {
+          border-radius: 12px;
         }
         #product-{{ section.id }} .custom-rating-nmn {
-          margin-bottom: var(--nmn-space-4);
+          margin-bottom: var(--nmn-space-5);
+          display: flex;
+          justify-content: center;
+          width: 100%;
+        }
+        /* Editorial rating pill (Mockup) */
+        #product-{{ section.id }} .nmn-pdp-rating-hero--editorial .nmn-pdp-rating-hero__bar {
+          display: inline-flex;
+          justify-content: center;
+          align-items: center;
+          width: auto;
+          max-width: 100%;
+          margin: 0 auto;
+          padding: 0.45rem 1rem;
+          background: #f0f4f4;
+          border: 1px solid rgba(172, 179, 180, 0.35);
+          border-radius: 999px;
+          box-sizing: border-box;
+        }
+        #product-{{ section.id }} .nmn-pdp-rating-hero--editorial .nmn-pdp-rating-hero__trigger {
+          flex-direction: row;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: center;
+          gap: 0.4rem 0.65rem;
+          text-align: center;
+        }
+        #product-{{ section.id }} .nmn-pdp-rating-hero--editorial .nmn-pdp-rating-hero__primary {
+          justify-content: center;
+        }
+        #product-{{ section.id }} .nmn-pdp-rating-hero--editorial .nmn-pdp-rating-hero__copy--compact {
+          font-size: 0.75rem;
+          font-weight: 600;
+          line-height: 1.3;
+          letter-spacing: 0.02em;
+          color: #596061;
+          white-space: nowrap;
+        }
+        @media screen and (max-width: 380px) {
+          #product-{{ section.id }} .nmn-pdp-rating-hero--editorial .nmn-pdp-rating-hero__copy--compact {
+            white-space: normal;
+            text-align: center;
+          }
+        }
+        #product-{{ section.id }} .nmn-pdp-rating-hero--editorial .nmn-pdp-rating-hero__secondary {
+          width: 100%;
+          justify-content: center;
+          text-align: center;
+          font-size: 0.6875rem;
+          color: #596061;
         }
         #product-{{ section.id }} .custom-rating-nmn .nmn-pdp-rating-hero__trigger,
         #product-{{ section.id }} .custom-rating-nmn .custom-rating-trigger {
@@ -201,11 +277,12 @@
           display: block;
           margin: var(--nmn-space-2) 0 var(--nmn-space-3);
           padding: 0;
+          max-width: 36rem;
           font-family: var(--font-body-family, 'Lato', sans-serif);
-          font-size: var(--nmn-fz-body);
-          font-weight: 600;
-          line-height: var(--nmn-lh-body);
-          color: var(--color-text-main);
+          font-size: 1.125rem;
+          font-weight: 400;
+          line-height: 1.55;
+          color: #596061;
         }
         #product-{{ section.id }} .nmn-pdp-subhead {
           display: block;
@@ -303,34 +380,74 @@
           display: none;
         }
         #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap {
-          margin-top: var(--nmn-space-3) !important;
+          margin-top: var(--nmn-space-4) !important;
           margin-bottom: 0 !important;
+          padding: 2rem 1.25rem !important;
+          background: color-mix(in srgb, #a3f1e6 18%, #f8fafa) !important;
+          border: 1px solid rgba(172, 179, 180, 0.35) !important;
+          border-radius: 12px !important;
+          box-shadow: none !important;
+          box-sizing: border-box;
+        }
+        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap::before {
+          content: 'Wissenschaftliche Vorteile';
+          display: block;
+          margin: 0 0 1.25rem;
+          font-family: var(--nmn-font-heading);
+          font-size: 1.125rem;
+          font-weight: 700;
+          line-height: 1.25;
+          color: #005e56;
+        }
+        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap [style*='flex-direction: column'],
+        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap [style*='flex-direction:column'] {
+          gap: var(--nmn-space-4) !important;
+        }
+        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap p {
+          margin: 0 !important;
+          font-family: var(--font-body-family, 'Lato', sans-serif) !important;
+          font-size: 0.875rem !important;
+          font-weight: 400 !important;
+          line-height: 1.45 !important;
+          color: #596061 !important;
+        }
+        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap strong {
+          font-weight: 700;
+          color: #2c3435;
+        }
+        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap .pill--has-icon {
+          width: 100% !important;
+          max-width: 100%;
+          align-self: stretch;
+          gap: 0.75rem !important;
           padding: 0 !important;
           background: transparent !important;
           border: none !important;
           box-shadow: none !important;
         }
-        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap [style*='flex-direction: column'],
-        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap [style*='flex-direction:column'] {
-          gap: var(--nmn-space-3) !important;
-        }
-        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap p {
+        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap .pill__icon {
+          flex-shrink: 0;
+          width: 1.5rem !important;
+          height: 1.5rem !important;
+          min-width: 1.5rem !important;
+          min-height: 1.5rem !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
           margin: 0 !important;
-          font-family: var(--font-body-family, 'Lato', sans-serif) !important;
-          font-size: var(--nmn-fz-body) !important;
-          font-weight: 600 !important;
-          line-height: 1.45 !important;
-          color: var(--color-text-main);
+          padding: 0 !important;
+          background: #106b62 !important;
+          border-radius: 999px !important;
+          border: none !important;
         }
-        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap strong {
-          font-weight: 600;
+        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap .pill__icon img,
+        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap .pill__icon svg {
+          width: 14px !important;
+          height: 14px !important;
+          object-fit: contain;
         }
-        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap .pill--has-icon {
-          width: auto !important;
-          max-width: 100%;
-          align-self: flex-start;
-          background: var(--color-light-warm, #f6f4f1) !important;
-          border-color: color-mix(in srgb, var(--nmn-color-gray-200) 88%, var(--color-text-main)) !important;
+        #product-{{ section.id }} .nmn-pdp-customer-benefits-wrap .pill__icon svg * {
+          stroke: #fff !important;
         }
         #product-{{ section.id }} .product-text .product-custom-liquid--nmn-quality-pills {
           margin-top: var(--nmn-space-4) !important;
@@ -386,6 +503,52 @@
         }
         #product-{{ section.id }} .nmn-quality-pills--trust .nmn-quality-pills__text {
           text-wrap: balance;
+        }
+        #product-{{ section.id }} .nmn-quality-pills--bento.nmn-quality-pills--trust {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 0.75rem;
+          align-items: stretch;
+        }
+        #product-{{ section.id }} .nmn-quality-pills--bento .nmn-quality-pills__item {
+          flex-direction: column;
+          align-items: flex-start;
+          justify-content: flex-start;
+          gap: 0.5rem;
+          width: 100%;
+          max-width: none;
+          flex: 1 1 auto;
+          min-height: 0;
+          padding: 1rem;
+          border-radius: 12px;
+          background: #fff;
+          border: 1px solid rgba(172, 179, 180, 0.35);
+          box-sizing: border-box;
+          font-size: inherit;
+          line-height: inherit;
+          color: #2c3435;
+        }
+        #product-{{ section.id }} .nmn-quality-pills--bento .nmn-quality-pills__icon-wrap {
+          opacity: 1;
+        }
+        #product-{{ section.id }} .nmn-quality-pills--bento .nmn-quality-pills__icon-img {
+          height: 1.35rem;
+        }
+        #product-{{ section.id }} .nmn-quality-pills__label {
+          display: block;
+          font-family: var(--font-body-family, 'Lato', sans-serif);
+          font-size: 11px;
+          font-weight: 700;
+          line-height: 1.2;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: #596061;
+        }
+        #product-{{ section.id }} .nmn-quality-pills--bento .nmn-quality-pills__text {
+          font-size: 0.875rem;
+          font-weight: 600;
+          line-height: 1.35;
+          color: #2c3435;
         }
         sticky-add-to-cart[data-id='product-{{ section.id }}'] .sticky-add-to-cart__price-col--nmn {
           display: flex;
@@ -572,9 +735,9 @@
           font-size: 0.6875rem;
           font-weight: 600;
           line-height: 1.3;
-          color: var(--color-text-main);
-          background: var(--color-light-warm, #f6f4f1);
-          border: 1px solid color-mix(in srgb, var(--nmn-color-gray-200) 82%, var(--color-text-main));
+          color: #fff;
+          background: #0b0f0f;
+          border: 1px solid #0b0f0f;
           white-space: normal;
           text-align: center;
           hyphens: none;
@@ -823,18 +986,34 @@
           padding: 0;
         }
         #product-{{ section.id }} .nmn-cta-footer--single {
-          display: block;
+          display: flex;
+          justify-content: center;
+          width: 100%;
           text-align: center;
         }
         #product-{{ section.id }} .nmn-cta-footer__promise {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
           margin: 0;
-          width: 100%;
-          text-align: center;
+          max-width: 100%;
           font-family: var(--font-body-family, 'Lato', sans-serif);
           font-size: var(--nmn-fz-body-sm);
           font-weight: 500;
           line-height: var(--nmn-lh-body);
           color: var(--color-secondary-text-main, var(--nmn-color-gray-600));
+        }
+        #product-{{ section.id }} .nmn-cta-footer__promise-icon {
+          flex-shrink: 0;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          line-height: 0;
+          color: #106b62;
+        }
+        #product-{{ section.id }} .nmn-cta-footer__promise-icon svg {
+          display: block;
         }
         #product-{{ section.id }} .nmn-cta-footer__row {
           display: flex;
@@ -992,21 +1171,21 @@
         #product-{{ section.id }} .nmn-sub-toggle__btn--plan {
           padding: var(--nmn-space-4);
           gap: var(--nmn-space-2);
-          border-radius: var(--nmn-radius-md);
+          border-radius: 12px;
           border-width: 1px;
           border-style: solid;
-          border-color: var(--nmn-color-gray-200);
-          background: var(--color-background-main);
+          border-color: rgba(172, 179, 180, 0.45);
+          background: #fff;
           justify-content: flex-start;
           font-size: var(--nmn-fz-body-sm);
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn--plan.nmn-sub-toggle__btn--active {
           opacity: 1;
           border-width: 2px;
-          border-color: var(--color-text-main);
+          border-color: #106b62;
           box-shadow:
             0 1px 3px rgba(0, 0, 0, 0.05),
-            0 0 0 1px color-mix(in srgb, var(--color-text-main) 8%, transparent);
+            0 0 0 1px color-mix(in srgb, #106b62 12%, transparent);
         }
         #product-{{ section.id }} .nmn-sub-toggle__btn--plan:not(.nmn-sub-toggle__btn--active) {
           opacity: 0.9;
@@ -1014,20 +1193,6 @@
           background: var(--color-third-background-main, var(--color-background-main));
           box-shadow: none;
         }
-        {%- if nmn_ss_benefits_block_id != '' -%}
-        #shopify-block-{{ nmn_ss_benefits_block_id }} svg {
-          display: none !important;
-        }
-        #shopify-block-{{ nmn_ss_benefits_block_id }} [style*='flex'] > :first-child {
-          min-width: 1.125rem;
-          width: 1.125rem;
-          height: 1.125rem;
-          flex-shrink: 0;
-          align-self: flex-start;
-          margin-top: 0.2em;
-          background: url('{{ nmn_icon_card_benefit_tick_url }}') center / contain no-repeat !important;
-        }
-        {%- endif -%}
       {% endstyle %}
     {%- endif -%}
 
@@ -2711,7 +2876,33 @@
                       </button>
                       {%- if template.suffix == '13_nmn' -%}
                         <div class="nmn-cta-footer nmn-cta-footer--single">
-                          <p class="nmn-cta-footer__promise">90 Tage risikofrei testen</p>
+                          <p class="nmn-cta-footer__promise">
+                            <span class="nmn-cta-footer__promise-icon" aria-hidden="true">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                width="20"
+                                height="20"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  d="M12 3 4 7v6c0 5 4.5 8 8 8s8-3 8-8V7l-8-4Z"
+                                  stroke="currentColor"
+                                  stroke-width="1.5"
+                                  stroke-linejoin="round"
+                                />
+                                <path
+                                  d="m9 12 2 2 4-4"
+                                  stroke="currentColor"
+                                  stroke-width="1.5"
+                                  stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                />
+                              </svg>
+                            </span>
+                            <span class="nmn-cta-footer__promise-text">90 Tage risikofrei testen</span>
+                          </p>
                         </div>
                       {%- endif -%}
 
