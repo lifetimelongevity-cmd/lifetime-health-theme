@@ -1,0 +1,317 @@
+{% comment %}
+  LT PDP — Final CTA section.
+  Stage: Action — close the page with a conversion-focused dark section.
+  Pattern: stat-callout (dark) + CTA button + reassurance row.
+  Reference: _examples/sections/stat-callout.liquid, pdp-architecture.mdc §9
+{% endcomment %}
+
+<section class="lt-pdp-final-cta" id="lt-pdp-final-cta-{{ section.id }}">
+  <div class="container container--large">
+
+    {%- if section.settings.heading != blank -%}
+      <h2 class="lt-pdp-final-cta__heading">{{ section.settings.heading | escape }}</h2>
+    {%- endif -%}
+
+    {%- if section.settings.subheading != blank -%}
+      <p class="lt-pdp-final-cta__subheading">{{ section.settings.subheading | escape }}</p>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <ul class="lt-pdp-final-cta__stats" role="list">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'stat' -%}
+            <li class="lt-pdp-final-cta__stat" {{ block.shopify_attributes }}>
+              <div class="lt-pdp-final-cta__stat-number">
+                <span class="lt-pdp-final-cta__num">{{ block.settings.number | escape }}</span>
+                {%- if block.settings.suffix != blank -%}
+                  <span class="lt-pdp-final-cta__suffix">{{ block.settings.suffix | escape }}</span>
+                {%- endif -%}
+              </div>
+              {%- if block.settings.label != blank -%}
+                <p class="lt-pdp-final-cta__stat-label">{{ block.settings.label | escape }}</p>
+              {%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- assign cta_url = section.settings.button_url | default: product.url -%}
+    {%- if section.settings.button_label != blank -%}
+      <div class="lt-pdp-final-cta__cta">
+        <a href="{{ cta_url }}" class="lt-pdp-final-cta__btn">
+          {{ section.settings.button_label | escape }}
+        </a>
+      </div>
+    {%- endif -%}
+
+    <div class="lt-pdp-final-cta__trust" aria-label="Kaufversprechen">
+      {%- if section.settings.trust_1 != blank -%}
+        <span class="lt-pdp-final-cta__trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 6L9 17l-5-5"/>
+          </svg>
+          {{ section.settings.trust_1 | escape }}
+        </span>
+      {%- endif -%}
+      {%- if section.settings.trust_2 != blank -%}
+        <span class="lt-pdp-final-cta__trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 6L9 17l-5-5"/>
+          </svg>
+          {{ section.settings.trust_2 | escape }}
+        </span>
+      {%- endif -%}
+      {%- if section.settings.trust_3 != blank -%}
+        <span class="lt-pdp-final-cta__trust-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 6L9 17l-5-5"/>
+          </svg>
+          {{ section.settings.trust_3 | escape }}
+        </span>
+      {%- endif -%}
+    </div>
+
+  </div>
+</section>
+
+{% stylesheet %}
+  .lt-pdp-final-cta {
+    padding-block: var(--space-10);
+    background: var(--color-surface-dark);
+    text-align: center;
+  }
+
+  @media screen and (max-width: 749px) {
+    .lt-pdp-final-cta {
+      padding-block: var(--space-8);
+    }
+  }
+
+  .lt-pdp-final-cta .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .lt-pdp-final-cta__heading {
+    margin: 0 0 var(--space-3);
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    color: var(--color-text-on-dark);
+  }
+
+  .lt-pdp-final-cta__subheading {
+    margin: 0 0 var(--space-7);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    color: var(--color-text-on-dark-muted);
+    max-width: 520px; /* intrinsic: readable line length for subheading */
+  }
+
+  .lt-pdp-final-cta__stats {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-8);
+    list-style: none;
+    margin: 0 0 var(--space-7);
+    padding: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .lt-pdp-final-cta__stats {
+      gap: var(--space-5);
+    }
+  }
+
+  .lt-pdp-final-cta__stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .lt-pdp-final-cta__stat-number {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-1);
+  }
+
+  .lt-pdp-final-cta__num {
+    font-family: var(--font-heading);
+    font-size: var(--text-stat);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-stat);
+    color: var(--color-text-on-dark);
+  }
+
+  .lt-pdp-final-cta__suffix {
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-stat);
+    color: var(--color-teal);
+  }
+
+  .lt-pdp-final-cta__stat-label {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-body);
+    color: var(--color-text-on-dark-muted);
+    max-width: 160px; /* intrinsic: keeps 3-col stat labels from overflowing */
+  }
+
+  .lt-pdp-final-cta__cta {
+    margin-bottom: var(--space-5);
+  }
+
+  .lt-pdp-final-cta__btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 0 var(--space-7);
+    background: var(--color-white);
+    color: var(--color-dark);
+    border-radius: var(--radius-full);
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-bold);
+    letter-spacing: 0.07em;
+    text-decoration: none;
+    text-transform: uppercase;
+    transition: opacity var(--ease-default);
+  }
+
+  .lt-pdp-final-cta__btn:hover {
+    opacity: 0.88;
+  }
+
+  .lt-pdp-final-cta__trust {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-5);
+  }
+
+  .lt-pdp-final-cta__trust-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    color: var(--color-text-on-dark-muted);
+  }
+
+  .lt-pdp-final-cta__trust-item svg {
+    width: 16px; /* intrinsic: inline icon at body-sm baseline */
+    height: 16px;
+    color: var(--color-teal);
+    flex-shrink: 0;
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT PDP Final CTA",
+  "tag": "section",
+  "class": "section-lt-pdp-final-cta",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Starte jetzt deine Longevity-Routine"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Unterzeile",
+      "default": "Wissenschaftlich entwickelt. Täglich wirksam. 90 Tage risikofrei."
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button-Text",
+      "default": "Jetzt bestellen"
+    },
+    {
+      "type": "url",
+      "id": "button_url",
+      "label": "Button-Link"
+    },
+    {
+      "type": "text",
+      "id": "trust_1",
+      "label": "Trust-Punkt 1",
+      "default": "90 Tage Rückgabe"
+    },
+    {
+      "type": "text",
+      "id": "trust_2",
+      "label": "Trust-Punkt 2",
+      "default": "Kostenloser Versand"
+    },
+    {
+      "type": "text",
+      "id": "trust_3",
+      "label": "Trust-Punkt 3",
+      "default": "Abo jederzeit kündigen"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stat",
+      "settings": [
+        {
+          "type": "text",
+          "id": "number",
+          "label": "Zahl",
+          "default": "87"
+        },
+        {
+          "type": "text",
+          "id": "suffix",
+          "label": "Suffix (%, +, x …)",
+          "default": "%"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Beschriftung",
+          "default": "der Teilnehmer berichteten mehr Energie"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 3,
+  "presets": [
+    {
+      "name": "LT PDP Final CTA",
+      "category": "Product",
+      "settings": {
+        "heading": "Starte jetzt deine Longevity-Routine",
+        "subheading": "Wissenschaftlich entwickelt. Täglich wirksam. 90 Tage risikofrei.",
+        "button_label": "Jetzt bestellen",
+        "trust_1": "90 Tage Rückgabe",
+        "trust_2": "Kostenloser Versand",
+        "trust_3": "Abo jederzeit kündigen"
+      },
+      "blocks": [
+        { "type": "stat", "settings": { "number": "87", "suffix": "%", "label": "der Teilnehmer berichteten mehr Energie" } },
+        { "type": "stat", "settings": { "number": ">99", "suffix": "%", "label": "bestätigte Reinheit, jede Charge" } },
+        { "type": "stat", "settings": { "number": "90", "suffix": "", "label": "Tage Rückgaberecht — ohne Fragen" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
