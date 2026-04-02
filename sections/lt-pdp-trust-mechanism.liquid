@@ -28,6 +28,11 @@
           {%- case block.type -%}
             {%- when 'pillar' -%}
               <article class="lt-pdp-trust-mechanism__card" role="listitem" {{ block.shopify_attributes }}>
+                {%- if block.settings.icon != blank -%}
+                  <div class="lt-pdp-trust-mechanism__card-icon" aria-hidden="true">
+                    {{ block.settings.icon }}
+                  </div>
+                {%- endif -%}
                 {%- if block.settings.title != blank -%}
                   <h3 class="lt-pdp-trust-mechanism__card-title">{{ block.settings.title | escape }}</h3>
                 {%- endif -%}
@@ -44,67 +49,48 @@
 
 {% stylesheet %}
   .lt-pdp-trust-mechanism {
-    --dg-space-2: 0.5rem;
-    --dg-space-4: 1rem;
-    --dg-space-5: 1.5rem;
-    --dg-space-6: 2rem;
-    --dg-space-8: 4rem;
-    --dg-space-9: 5rem;
-    --dg-text-micro: 0.75rem;
-    --dg-text-h2: 1.75rem;
-    --dg-text-section: 1.25rem;
-    --dg-text-body: 1rem;
-    --dg-leading-heading: 1.15;
-    --dg-leading-tight: 1.25;
-    --dg-leading-body: 1.4;
-    --dg-weight-medium: 500;
-    --dg-weight-bold: 700;
-    --dg-radius-md: 0.75rem;
-    --dg-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
-    --dg-header-max: 40rem;
-
-    padding-block: var(--dg-space-9);
-    background: var(--color-background-main-alternate, #f6f4f1);
-    color: var(--color-text-main);
+    padding-block: var(--space-9);
+    background: var(--color-surface-secondary);
+    color: var(--color-text-primary);
   }
 
   @media screen and (max-width: 749px) {
     .lt-pdp-trust-mechanism {
-      padding-block: var(--dg-space-8);
+      padding-block: var(--space-8);
     }
   }
 
   .lt-pdp-trust-mechanism__section-header {
-    max-width: var(--dg-header-max);
+    max-width: 40rem; /* intrinsic: centered header max-width per section-header spec */
     margin-inline: auto;
-    margin-bottom: var(--dg-space-6);
+    margin-bottom: var(--space-6);
     text-align: center;
   }
 
   .lt-pdp-trust-mechanism__label {
-    margin: 0 0 var(--dg-space-4);
-    font-family: var(--font-stack-body-primary);
-    font-size: var(--dg-text-micro);
-    line-height: var(--dg-leading-body);
-    font-weight: var(--dg-weight-medium);
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    line-height: var(--leading-body);
+    font-weight: var(--weight-medium);
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-secondary-text-main);
+    color: var(--color-text-secondary);
   }
 
   .lt-pdp-trust-mechanism__title {
     margin: 0;
-    font-family: var(--font-stack-headings-primary);
-    font-size: var(--dg-text-h2);
-    line-height: var(--dg-leading-heading);
-    font-weight: var(--dg-weight-bold);
-    color: var(--color-text-main);
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    line-height: var(--leading-heading);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
   }
 
   .lt-pdp-trust-mechanism__grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: var(--dg-space-5);
+    gap: var(--space-5);
     align-items: stretch;
     margin: 0;
     padding: 0;
@@ -128,29 +114,47 @@
     flex-direction: column;
     height: 100%;
     margin: 0;
-    padding: var(--dg-space-5);
-    border: 1px solid color-mix(in srgb, var(--color-borders-main) 88%, transparent);
-    border-radius: var(--dg-radius-md);
-    background: var(--color-background-main);
-    box-shadow: none;
+    padding: var(--space-5);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .lt-pdp-trust-mechanism__card-icon {
+    width: 48px; /* intrinsic: card-info icon container per spec */
+    height: 48px;
+    border-radius: var(--radius-md);
+    background: var(--color-surface-benefit);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-4);
+    flex-shrink: 0;
+  }
+
+  .lt-pdp-trust-mechanism__card-icon svg {
+    width: 24px; /* intrinsic: icon size per spec */
+    height: 24px;
+    color: var(--color-teal-dark);
   }
 
   .lt-pdp-trust-mechanism__card-title {
-    margin: 0 0 var(--dg-space-2);
-    font-family: var(--font-stack-headings-primary);
-    font-size: var(--dg-text-section);
-    line-height: var(--dg-leading-tight);
-    font-weight: var(--dg-weight-bold);
-    color: var(--color-text-main);
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-heading);
+    font-size: var(--text-section);
+    line-height: var(--leading-tight);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
   }
 
   .lt-pdp-trust-mechanism__card-text {
     margin: 0;
-    font-family: var(--font-stack-body-primary);
-    font-size: var(--dg-text-body);
-    line-height: var(--dg-leading-body);
-    font-weight: 400;
-    color: var(--color-secondary-text-main);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    font-weight: var(--weight-regular);
+    color: var(--color-text-secondary);
   }
 {% endstylesheet %}
 
@@ -181,6 +185,12 @@
       "type": "pillar",
       "name": "Vertrauenssäule",
       "settings": [
+        {
+          "type": "html",
+          "id": "icon",
+          "label": "Icon (SVG)",
+          "info": "Inline SVG einfügen. Empfohlen: 24×24px, stroke=\"currentColor\"."
+        },
         {
           "type": "text",
           "id": "title",
