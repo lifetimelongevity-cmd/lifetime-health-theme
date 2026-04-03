@@ -9,12 +9,20 @@
   class="lt-pdp-expert"
   id="lt-pdp-expert-{{ section.id }}"
 >
-  <div class="container container--large remove-empty-space">
+  <div class="container container--large">
     <div class="lt-pdp-expert__inner">
 
-      {%- if section.settings.section_label != blank -%}
-        <p class="lt-pdp-expert__section-label">{{ section.settings.section_label | escape }}</p>
-      {%- endif -%}
+      <div class="lt-pdp-expert__copy">
+        {%- if section.settings.section_label != blank -%}
+          <p class="lt-pdp-expert__section-label">{{ section.settings.section_label | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.heading != blank -%}
+          <h2 class="lt-pdp-expert__heading">{{ section.settings.heading | escape }}</h2>
+        {%- endif -%}
+        {%- if section.settings.body_text != blank -%}
+          <p class="lt-pdp-expert__body">{{ section.settings.body_text | escape }}</p>
+        {%- endif -%}
+      </div>
 
       <div class="lt-pdp-expert__card">
         <div class="lt-pdp-expert__top">
@@ -60,7 +68,7 @@
 {% stylesheet %}
   .lt-pdp-expert {
     padding-block: var(--space-9);
-    background: var(--color-surface-primary);
+    background: var(--color-surface-secondary);
   }
 
   @media screen and (max-width: 749px) {
@@ -69,8 +77,27 @@
     }
   }
 
+  .lt-pdp-expert__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-7);
+  }
+
+  @media screen and (min-width: 900px) {
+    .lt-pdp-expert__inner {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-8);
+    }
+  }
+
+  .lt-pdp-expert__copy {
+    flex: 1;
+    min-width: 0;
+  }
+
   .lt-pdp-expert__section-label {
-    margin: 0 0 var(--space-5);
+    margin: 0 0 var(--space-4);
     font-family: var(--font-body);
     font-size: var(--text-micro);
     font-weight: var(--weight-medium);
@@ -79,11 +106,39 @@
     color: var(--color-text-secondary);
   }
 
+  .lt-pdp-expert__heading {
+    margin: 0 0 var(--space-4);
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    letter-spacing: -0.02em; /* intrinsic: display heading optical tightening */
+    color: var(--color-text-primary);
+    max-width: 28ch; /* intrinsic: prevent overly long heading line */
+  }
+
+  .lt-pdp-expert__body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+    max-width: 52ch; /* intrinsic: comfortable reading line length */
+  }
+
   .lt-pdp-expert__card {
-    background: var(--color-surface-secondary);
+    flex-shrink: 0;
+    background: var(--color-surface-primary);
     border: 1px solid rgba(94, 171, 161, 0.18); /* intentional: teal-tinted trust border per reference spec */
     border-radius: var(--radius-lg);
     padding: var(--space-5);
+    box-shadow: var(--shadow-md);
+  }
+
+  @media screen and (min-width: 900px) {
+    .lt-pdp-expert__card {
+      min-width: 320px; /* intrinsic: card min-width for credential legibility */
+    }
   }
 
   .lt-pdp-expert__top {
@@ -165,6 +220,18 @@
       "id": "section_label",
       "label": "Sektions-Label",
       "default": "WISSENSCHAFTLICHER BEIRAT"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Wissenschaft, der du vertrauen kannst"
+    },
+    {
+      "type": "textarea",
+      "id": "body_text",
+      "label": "Fließtext",
+      "default": "LIFETIME NMN wurde in enger Zusammenarbeit mit Spezialisten für Neurologie und Longevity-Forschung entwickelt. Qualität und Wirksamkeit sind keine Versprechen — sie sind dokumentiert."
     },
     {
       "type": "image_picker",

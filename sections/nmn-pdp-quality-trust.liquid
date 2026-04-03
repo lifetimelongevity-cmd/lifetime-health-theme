@@ -3,18 +3,18 @@
   Template: product.13_nmn — placed after NAD mechanism section.
 {% endcomment %}
 
-<div class="container container--large container--vertical-space-small remove-empty-space">
-  <section
-    class="nmn-pdp-quality-trust"
-    aria-labelledby="nmn-quality-trust-heading-{{ section.id }}"
-  >
+<section
+  class="nmn-pdp-quality-trust"
+  aria-labelledby="nmn-quality-trust-heading-{{ section.id }}"
+>
+  <div class="container container--large">
     <header class="nmn-pdp-quality-trust__header">
       {%- unless section.settings.section_label == blank -%}
         <p class="nmn-pdp-quality-trust__label">{{ section.settings.section_label | escape }}</p>
       {%- endunless -%}
       {%- unless section.settings.heading == blank -%}
         <h2
-          class="nmn-pdp-quality-trust__heading text-weight--bold"
+          class="nmn-pdp-quality-trust__heading"
           id="nmn-quality-trust-heading-{{ section.id }}"
         >
           {{- section.settings.heading | escape -}}
@@ -37,7 +37,7 @@
                 </div>
               {%- endif -%}
               {%- unless block.settings.title == blank -%}
-                <h3 class="nmn-pdp-quality-trust__title text-weight--bold">
+                <h3 class="nmn-pdp-quality-trust__title">
                   {{- block.settings.title | escape -}}
                 </h3>
               {%- endunless -%}
@@ -48,13 +48,26 @@
         {%- endcase -%}
       {%- endfor -%}
     </div>
-  </section>
-</div>
+  </div>
+</section>
 
 {% stylesheet %}
+  .nmn-pdp-quality-trust {
+    padding-block: var(--space-9);
+    background: var(--color-surface-dark);
+  }
+
+  @media screen and (max-width: 749px) {
+    .nmn-pdp-quality-trust {
+      padding-block: var(--space-8);
+    }
+  }
+
   .nmn-pdp-quality-trust__header {
     margin-bottom: var(--space-6);
     max-width: 40rem; /* intrinsic: heading constraint */
+    text-align: center;
+    margin-inline: auto;
   }
 
   .nmn-pdp-quality-trust__label {
@@ -65,30 +78,27 @@
     font-weight: var(--weight-medium);
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--color-text-secondary);
+    color: var(--color-text-on-dark-muted);
   }
 
   .nmn-pdp-quality-trust__heading {
     margin: 0;
     font-family: var(--font-heading);
     font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
     line-height: var(--leading-heading);
     letter-spacing: -0.02em; /* intrinsic: display heading optical tightening */
-    color: var(--color-text-primary);
+    color: var(--color-text-on-dark);
     max-width: 36ch; /* intrinsic: heading line-length constraint */
   }
 
   .nmn-pdp-quality-trust__grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 0;
+    gap: var(--space-5);
     margin: 0;
     padding: 0;
     list-style: none;
-    border: 1px solid var(--color-border-default);
-    border-radius: var(--radius-md);
-    background: var(--color-surface-secondary);
-    overflow: hidden;
   }
 
   @media screen and (min-width: 600px) {
@@ -98,29 +108,13 @@
   }
 
   .nmn-pdp-quality-trust__card {
+    display: flex;
+    flex-direction: column;
     margin: 0;
     padding: var(--space-5);
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-    border-bottom: 1px solid var(--color-border-default);
-  }
-
-  @media screen and (max-width: 599px) {
-    .nmn-pdp-quality-trust__card:last-child {
-      border-bottom: 0;
-    }
-  }
-
-  @media screen and (min-width: 600px) {
-    .nmn-pdp-quality-trust__card:nth-child(odd) {
-      border-inline-end: 1px solid var(--color-border-default);
-    }
-
-    .nmn-pdp-quality-trust__card:nth-last-child(-n + 2) {
-      border-bottom: 0;
-    }
+    border-radius: var(--radius-md);
+    background: var(--color-surface-primary);
+    box-shadow: var(--shadow-md);
   }
 
   .nmn-pdp-quality-trust__card-icon {
