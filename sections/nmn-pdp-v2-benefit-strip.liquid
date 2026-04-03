@@ -2,9 +2,23 @@
   NMN PDP alternative (product.13-2_nmn): benefit strip — 4 cols desktop, 2 cols mobile.
 {% endcomment %}
 
-<section
-  class="nmn2-benefit-strip"
+{%- liquid
+  assign nmn2_bs_dark = false
+  if section.settings.surface == 'dark'
+    assign nmn2_bs_dark = true
+  endif
+-%}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    margin-top: 0;
+  }
+{% endstyle %}
+
+<div
+  class="nmn2-benefit-strip{% if nmn2_bs_dark %} nmn2-benefit-strip--surface-dark{% endif %}"
   id="nmn2-benefit-strip-{{ section.id }}"
+  role="region"
   {% if section.settings.heading != blank %}
     aria-labelledby="nmn2-benefit-strip-heading-{{ section.id }}"
   {% else %}
@@ -41,7 +55,7 @@
       {%- endfor -%}
     </ul>
   </div>
-</section>
+</div>
 
 {% stylesheet %}
   .nmn2-benefit-strip {
@@ -55,6 +69,10 @@
     }
   }
 
+  .nmn2-benefit-strip--surface-dark {
+    background: var(--color-surface-dark);
+  }
+
   .nmn2-benefit-strip__heading {
     margin: 0 0 var(--space-6);
     font-family: var(--font-heading);
@@ -63,6 +81,10 @@
     line-height: var(--leading-heading);
     color: var(--color-text-primary);
     text-align: center;
+  }
+
+  .nmn2-benefit-strip--surface-dark .nmn2-benefit-strip__heading {
+    color: var(--color-text-on-dark);
   }
 
   .nmn2-benefit-strip__grid {
@@ -98,6 +120,10 @@
     color: var(--color-teal-dark);
   }
 
+  .nmn2-benefit-strip--surface-dark .nmn2-benefit-strip__icon-wrap {
+    color: var(--color-teal);
+  }
+
   .nmn2-benefit-strip__icon-wrap svg {
     width: var(--space-6);
     height: var(--space-6);
@@ -112,6 +138,10 @@
     color: var(--color-text-primary);
   }
 
+  .nmn2-benefit-strip--surface-dark .nmn2-benefit-strip__title {
+    color: var(--color-text-on-dark);
+  }
+
   .nmn2-benefit-strip__text {
     margin: 0;
     font-family: var(--font-body);
@@ -119,6 +149,10 @@
     font-weight: var(--weight-regular);
     line-height: var(--leading-body);
     color: var(--color-text-secondary);
+  }
+
+  .nmn2-benefit-strip--surface-dark .nmn2-benefit-strip__text {
+    color: var(--color-text-on-dark-muted);
   }
 {% endstylesheet %}
 
@@ -128,6 +162,22 @@
   "tag": "section",
   "class": "section-nmn2-benefit-strip",
   "settings": [
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Hintergrund",
+      "options": [
+        {
+          "value": "warm",
+          "label": "Warm (abwechselnd)"
+        },
+        {
+          "value": "dark",
+          "label": "Kontrast dunkel"
+        }
+      ],
+      "default": "warm"
+    },
     {
       "type": "text",
       "id": "heading",
@@ -165,6 +215,9 @@
   "presets": [
     {
       "name": "NMN V2 Benefit Strip",
+      "settings": {
+        "surface": "warm"
+      },
       "blocks": [
         {
           "type": "benefit",
