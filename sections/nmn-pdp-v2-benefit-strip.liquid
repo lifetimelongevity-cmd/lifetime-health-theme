@@ -1,0 +1,205 @@
+{% comment %}
+  NMN PDP alternative (product.13-2_nmn): benefit strip — 4 cols desktop, 2 cols mobile.
+{% endcomment %}
+
+<section
+  class="nmn2-benefit-strip"
+  id="nmn2-benefit-strip-{{ section.id }}"
+  {% if section.settings.heading != blank %}
+    aria-labelledby="nmn2-benefit-strip-heading-{{ section.id }}"
+  {% else %}
+    aria-label="Leistungsmerkmale"
+  {% endif %}
+>
+  <div class="container container--large">
+    {%- if section.settings.heading != blank -%}
+      <h2
+        class="nmn2-benefit-strip__heading visually-hidden"
+        id="nmn2-benefit-strip-heading-{{ section.id }}"
+      >
+        {{- section.settings.heading | escape -}}
+      </h2>
+    {%- endif -%}
+    <ul class="nmn2-benefit-strip__grid" role="list">
+      {%- for block in section.blocks -%}
+        {%- case block.type -%}
+          {%- when 'benefit' -%}
+            <li class="nmn2-benefit-strip__cell" {{ block.shopify_attributes }}>
+              {%- if block.settings.icon_svg != blank -%}
+                <div class="nmn2-benefit-strip__icon-wrap" aria-hidden="true">
+                  {{ block.settings.icon_svg }}
+                </div>
+              {%- endif -%}
+              {%- if block.settings.title != blank -%}
+                <h3 class="nmn2-benefit-strip__title">{{ block.settings.title | escape }}</h3>
+              {%- endif -%}
+              {%- if block.settings.text != blank -%}
+                <p class="nmn2-benefit-strip__text">{{ block.settings.text | escape }}</p>
+              {%- endif -%}
+            </li>
+        {%- endcase -%}
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% stylesheet %}
+  .nmn2-benefit-strip {
+    padding-block: var(--space-9);
+    background: var(--color-surface-secondary);
+  }
+
+  @media screen and (max-width: 749px) {
+    .nmn2-benefit-strip {
+      padding-block: var(--space-8);
+    }
+  }
+
+  .nmn2-benefit-strip__heading {
+    margin: 0 0 var(--space-6);
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    color: var(--color-text-primary);
+    text-align: center;
+  }
+
+  .nmn2-benefit-strip__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media screen and (min-width: 990px) {
+    .nmn2-benefit-strip__grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .nmn2-benefit-strip__cell {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .nmn2-benefit-strip__icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--color-teal-dark);
+  }
+
+  .nmn2-benefit-strip__icon-wrap svg {
+    width: var(--space-6);
+    height: var(--space-6);
+  }
+
+  .nmn2-benefit-strip__title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: var(--text-section);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-tight);
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-benefit-strip__text {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-body);
+    color: var(--color-text-secondary);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "NMN V2 Benefit Strip",
+  "tag": "section",
+  "class": "section-nmn2-benefit-strip",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading (screen reader)",
+      "default": "Warum NMN für deine Routine",
+      "info": "Visuell ausgeblendet; dient der Barrierefreiheit."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Benefit",
+      "settings": [
+        {
+          "type": "html",
+          "id": "icon_svg",
+          "label": "Icon (SVG)",
+          "default": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z\"/></svg>"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Energie"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "NMN ist ein Baustein für NAD⁺ — ein Molekül, das in vielen Zellen eine Rolle bei der Energieversorgung spielt."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "NMN V2 Benefit Strip",
+      "blocks": [
+        {
+          "type": "benefit",
+          "settings": {
+            "icon_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z\"/></svg>",
+            "title": "Energie",
+            "text": "NMN ist ein Baustein für NAD⁺ — ein Molekül, das in vielen Zellen eine Rolle bei der Energieversorgung spielt."
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "icon_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/></svg>",
+            "title": "Zellschutz",
+            "text": "Trägt zur NAD⁺-Versorgung bei — NAD⁺ ist an zahlreichen zellulären Vorgängen beteiligt."
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "icon_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5a5.5 5.5 0 0 0-1.5-3.78\"/><path d=\"M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27\"/></svg>",
+            "title": "Stoffwechsel",
+            "text": "Am zellulären Energiestoffwechsel ist NAD⁺ beteiligt — NMN unterstützt die Bereitstellung dieses Bausteins."
+          }
+        },
+        {
+          "type": "benefit",
+          "settings": {
+            "icon_svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z\"/><path d=\"M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z\"/><path d=\"M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4\"/><path d=\"M12.861 8.993 12 11l-.86-2.007\"/></svg>",
+            "title": "Gehirn",
+            "text": "Für Klarheit und Fokus im Alltag — NAD⁺ kommt auch in neurologischen Zellprozessen vor."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
