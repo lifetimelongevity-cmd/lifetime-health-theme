@@ -41,6 +41,18 @@
   if settings.show_currency_codes
     assign iso_code = localization.country.currency.iso_code | prepend: ' '
   endif
+  assign lt_nmn_suffix_v1 = false
+  assign lt_nmn_suffix_v2 = false
+  if template.suffix == '13_nmn'
+    assign lt_nmn_suffix_v1 = true
+  endif
+  if template.suffix == '13-2_nmn'
+    assign lt_nmn_suffix_v2 = true
+  endif
+  assign lt_nmn_pdp = false
+  if lt_nmn_suffix_v1 or lt_nmn_suffix_v2
+    assign lt_nmn_pdp = true
+  endif
 -%}
 
 <div class="container container--large container--vertical-space-small {% unless settings.show_breadcrumb %} container--no-space-mobile {% endunless %}">
@@ -66,11 +78,11 @@
     data-id="{{ product.id }}"
     data-availability="{{ product.available }}"
     data-js-product-component
-    {%- if template.suffix == '13_nmn' -%}
+    {%- if lt_nmn_pdp -%}
       data-nmn-currency-suffix="{% if settings.show_currency_codes %}{{ localization.country.currency.iso_code | prepend: ' ' | escape }}{% endif %}"
     {%- endif -%}
   >
-    {%- if template.suffix == '13_nmn' -%}
+    {%- if lt_nmn_pdp -%}
       {%- comment -%} AJAX-Ziel für Varianten-Updates (ohne sichtbaren PDP-Preis). {%- endcomment -%}
       <div class="main-product-price--nmn-ajax-hook" hidden aria-hidden="true">
         <div data-update-block="price-compact-main"></div>
@@ -1235,11 +1247,170 @@
           width: auto; /* override inherited width: 100% — allows flex siblings to sit side-by-side */
           text-align: left;
         }
+        {%- if lt_nmn_suffix_v2 -%}
+        #product-{{ section.id }} .nmn2-pdp__title {
+          margin-bottom: var(--space-3);
+        }
+        #product-{{ section.id }} .nmn2-pdp__subtitle {
+          margin: 0 0 var(--space-5);
+          font-family: var(--font-body);
+          font-size: var(--text-body);
+          font-weight: var(--weight-regular);
+          line-height: var(--leading-body);
+          color: var(--color-text-secondary);
+        }
+        #product-{{ section.id }} .nmn2-pdp__subtitle p {
+          margin: 0;
+        }
+        #product-{{ section.id }} .nmn-sub-toggle--pdp-v2 {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-4);
+          width: 100%;
+          margin-bottom: var(--space-4);
+        }
+        #product-{{ section.id }} .nmn2-pdp__price-row {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: baseline;
+          gap: var(--space-2) var(--space-3);
+        }
+        #product-{{ section.id }} .nmn2-pdp__price-main {
+          font-family: var(--font-heading);
+          font-size: var(--text-h3);
+          font-weight: var(--weight-bold);
+          line-height: var(--leading-tight);
+          color: var(--color-text-primary);
+        }
+        #product-{{ section.id }} .nmn2-pdp__price-compare {
+          font-family: var(--font-body);
+          font-size: var(--text-body-sm);
+          font-weight: var(--weight-regular);
+          text-decoration: line-through;
+          color: var(--color-text-muted);
+        }
+        #product-{{ section.id }} .nmn2-pdp__toggle-row {
+          display: flex;
+          flex-direction: row;
+          gap: var(--space-2);
+          width: 100%;
+        }
+        #product-{{ section.id }} .nmn2-pdp__toggle-btn {
+          flex: 1 1 0;
+          min-width: 0;
+          display: flex;
+          flex-direction: column;
+          align-items: stretch;
+          justify-content: flex-start;
+          text-align: left;
+          border-radius: var(--radius-md);
+          padding: var(--space-4);
+          gap: var(--space-2);
+          transition: border-color var(--ease-default), background-color var(--ease-default), box-shadow var(--ease-default);
+        }
+        #product-{{ section.id }} .nmn2-pdp__toggle-btn.nmn-sub-toggle__btn--plan {
+          border: 1px solid var(--color-border-default);
+          cursor: pointer;
+        }
+        #product-{{ section.id }} .nmn2-pdp__toggle-btn.nmn-sub-toggle__btn--plan:not(.nmn-sub-toggle__btn--active) {
+          background: var(--color-surface-secondary);
+          color: var(--color-text-primary);
+        }
+        #product-{{ section.id }} .nmn2-pdp__toggle-btn.nmn-sub-toggle__btn--plan.nmn-sub-toggle__btn--active {
+          background: var(--color-button-primary-bg);
+          border-color: var(--color-button-primary-bg);
+          color: var(--color-button-primary-text);
+          box-shadow: var(--shadow-sm);
+        }
+        #product-{{ section.id }}
+          .nmn2-pdp__toggle-btn.nmn-sub-toggle__btn--plan:not(.nmn-sub-toggle__btn--active)
+          .nmn2-pdp__btn-line1,
+        #product-{{ section.id }}
+          .nmn2-pdp__toggle-btn.nmn-sub-toggle__btn--plan:not(.nmn-sub-toggle__btn--active)
+          .nmn2-pdp__btn-line2 {
+          color: var(--color-text-primary);
+        }
+        #product-{{ section.id }} .nmn2-pdp__btn-lines {
+          display: flex;
+          flex-direction: column;
+          gap: var(--space-1);
+          align-items: flex-start;
+          width: 100%;
+        }
+        #product-{{ section.id }} .nmn2-pdp__btn-line1 {
+          font-family: var(--font-body);
+          font-size: var(--text-body-sm);
+          font-weight: var(--weight-semibold);
+          line-height: var(--leading-tight);
+        }
+        #product-{{ section.id }} .nmn2-pdp__btn-line2 {
+          font-family: var(--font-heading);
+          font-size: var(--text-body-lg);
+          font-weight: var(--weight-bold);
+          line-height: var(--leading-tight);
+        }
+        #product-{{ section.id }} .nmn2-pdp__toggle-btn.nmn-sub-toggle__btn--active .nmn2-pdp__btn-line1,
+        #product-{{ section.id }} .nmn2-pdp__toggle-btn.nmn-sub-toggle__btn--active .nmn2-pdp__btn-line2 {
+          color: var(--color-button-primary-text);
+        }
+        #product-{{ section.id }} .nmn2-pdp__btn-badge {
+          display: inline-block;
+          margin-top: var(--space-1);
+          padding: var(--space-1) var(--space-2);
+          border-radius: var(--radius-sm);
+          font-family: var(--font-body);
+          font-size: var(--text-micro);
+          font-weight: var(--weight-medium);
+          line-height: var(--leading-body);
+          background: color-mix(in srgb, var(--color-success) 14%, transparent);
+          color: var(--color-text-primary);
+        }
+        #product-{{ section.id }} .nmn2-pdp__toggle-btn.nmn-sub-toggle__btn--active .nmn2-pdp__btn-badge {
+          background: color-mix(in srgb, var(--color-button-primary-text) 18%, transparent);
+          color: var(--color-button-primary-text);
+        }
+        #product-{{ section.id }} .nmn2-pdp__info-line {
+          margin: 0;
+          font-family: var(--font-body);
+          font-size: var(--text-body-sm);
+          font-weight: var(--weight-regular);
+          line-height: var(--leading-relaxed);
+          color: var(--color-text-secondary);
+        }
+        #product-{{ section.id }} .nmn2-trust-trio {
+          list-style: none;
+          margin: var(--space-4) 0 0;
+          padding: 0;
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: space-between;
+          gap: var(--space-3) var(--space-5);
+        }
+        #product-{{ section.id }} .nmn2-trust-trio__item {
+          display: flex;
+          align-items: center;
+          gap: var(--space-2);
+          font-family: var(--font-body);
+          font-size: var(--text-body-sm);
+          font-weight: var(--weight-regular);
+          line-height: var(--leading-tight);
+          color: var(--color-text-secondary);
+        }
+        #product-{{ section.id }} .nmn2-trust-trio__icon {
+          flex-shrink: 0;
+          color: var(--color-teal-dark);
+        }
+        @media screen and (max-width: 749px) {
+          #product-{{ section.id }} .nmn2-pdp__toggle-row {
+            flex-direction: column;
+          }
+        }
+        {%- endif -%}
       {% endstyle %}
     {%- endif -%}
 
     {%- assign current_variant = product.selected_or_first_available_variant -%}
-    {%- if template.suffix == '13_nmn' -%}
+    {%- if lt_nmn_pdp -%}
       {%- liquid
         assign nmn_pack_option = nil
         for opt in product.options_with_values
@@ -1258,15 +1429,8 @@
             assign nmn_apply_default_two_pack = true
           endif
         endif
-        if nmn_apply_default_two_pack and template.suffix != '13_nmn'
-          for value in nmn_pack_option.values limit: 3
-            if forloop.index == 2 and value.available
-              assign current_variant = value.variant
-              break
-            endif
-          endfor
-        endif
       -%}
+      {%- comment -%} NMN PDP: no auto multi-pack selection; variant from URL or selected_or_first_available_variant. {%- endcomment -%}
     {%- endif -%}
     {%- liquid
       assign nmn_has_variant_picker_block = false
@@ -1277,7 +1441,7 @@
         endif
       endfor
       assign nmn_inline_variant_widget = false
-      if template.suffix == '13_nmn' and nmn_has_variant_picker_block == false and product.has_only_default_variant == false
+      if lt_nmn_pdp and lt_nmn_suffix_v2 == false and nmn_has_variant_picker_block == false and product.has_only_default_variant == false
         assign nmn_inline_variant_widget = true
       endif
     -%}
@@ -1471,14 +1635,14 @@
           {%- when '@app' -%}
             {%- liquid
               assign app_block_wrapper_class = 'has-bg-style--' | append: section.settings.style
-              if template.suffix == '13_nmn' and block.type contains 'appstle-subscription'
+              if lt_nmn_pdp and block.type contains 'appstle-subscription'
                 assign app_block_wrapper_class = app_block_wrapper_class | append: ' nmn-appstle-widget-shell'
               endif
-              if template.suffix == '13_nmn' and block.type contains 'block-benefits-list'
+              if lt_nmn_pdp and block.type contains 'block-benefits-list'
                 assign app_block_wrapper_class = app_block_wrapper_class | append: ' nmn-pdp-customer-benefits-wrap'
               endif
               assign nmn_wrap_post_cta_comments = false
-              if template.suffix == '13_nmn' and block.type contains 'block-comments'
+              if lt_nmn_pdp and block.type contains 'block-comments'
                 assign nmn_wrap_post_cta_comments = true
               endif
             -%}
@@ -1497,7 +1661,7 @@
             {%- else -%}
               <div
                 class="{{ app_block_wrapper_class }}"
-                {% if template.suffix == '13_nmn' and block.type contains 'appstle-subscription' %}
+                {% if lt_nmn_pdp and block.type contains 'appstle-subscription' %}
                   data-nmn-appstle-minimized
                 {% endif %}
                 {{ block.shopify_attributes }}
@@ -1507,7 +1671,7 @@
             {%- endif -%}
 
           {%- when 'lt_quote_carousel' -%}
-            {%- if template.suffix == '13_nmn' -%}
+            {%- if lt_nmn_suffix_v1 -%}
               <div class="nmn-pdp-post-cta nmn-pdp-quote-below-cta" {{ block.shopify_attributes }}>
                 {%- render 'lt-pdp-quote-carousel', block: block -%}
               </div>
@@ -1940,7 +2104,7 @@
           {%- when 'text' -%}
             {%- liquid
               assign nmn_text_extra_class = ''
-              if template.suffix == '13_nmn'
+              if lt_nmn_suffix_v1
                 case block.id
                   when 'text_mh6eJ9'
                     assign nmn_text_extra_class = ' nmn-pdp-subhead'
@@ -1963,17 +2127,23 @@
             </span>
 
           {%- when 'title' -%}
-            <h1 class="product__title heading-size--page-title" {{ block.shopify_attributes }}>
-              {{ product.title | escape }}
-            </h1>
-            {%- if template.suffix == '13_nmn' -%}
+            {%- if lt_nmn_suffix_v2 -%}
+              <h1 class="product__title heading-size--page-title nmn2-pdp__title" {{ block.shopify_attributes }}>
+                NMN Pulver – Dein täglicher NAD⁺-Baustein
+              </h1>
+            {%- else -%}
+              <h1 class="product__title heading-size--page-title" {{ block.shopify_attributes }}>
+                {{ product.title | escape }}
+              </h1>
+            {%- endif -%}
+            {%- if lt_nmn_suffix_v1 -%}
               <p class="nmn-pdp-title-tagline">
                 Dein direkter NAD⁺-Booster für maximale Zellenergie und optimale Regeneration bis ins hohe Alter.
               </p>
             {%- endif -%}
 
           {%- when 'price' -%}
-            {%- unless template.suffix == '13_nmn' -%}
+            {%- unless lt_nmn_pdp -%}
               <div {{ block.shopify_attributes }} class="main-product-price">
                 <div data-update-block="price-compact-main">
                   <span class="show-block-if-variant-selected">
@@ -2128,7 +2298,7 @@
             {%- assign color_label = settings.color_swatches_labels | split: ',' -%}
 
             <div
-              class="sidebar-widget sidebar-widget--{{ block.settings.style }}{% if template.suffix == '13_nmn' %} nmn-hide-native-variant-picker{% endif %}"
+              class="sidebar-widget sidebar-widget--{{ block.settings.style }}{% if lt_nmn_pdp %} nmn-hide-native-variant-picker{% endif %}"
               {% if product.has_only_default_variant %}
                 style="display:none"
               {% endif %}
@@ -2194,7 +2364,7 @@
                         class="product-variant"
                         data-name="product-{{ option.name | escape | downcase | strip | handleize }}-{{ section.id }}"
                         data-js-product-variant
-                        {% if template.suffix == '13_nmn' and nmn_pack_option and option.name == nmn_pack_option.name %}
+                        {% if lt_nmn_pdp and nmn_pack_option and option.name == nmn_pack_option.name %}
                           data-nmn-pack-option-row
                         {% endif %}
                       >
@@ -2454,7 +2624,7 @@
                 </div>
               {%- endif -%}
 
-              {%- if template.suffix == '13_nmn' -%}
+              {%- if lt_nmn_suffix_v1 -%}
                 {%- if nmn_inline_variant_widget -%}
                   <div class="nmn-inline-variants-host nmn-hide-native-variant-picker" aria-hidden="true">
                     <product-variants
@@ -2592,11 +2762,9 @@
                     </product-variants>
                   </div>
                 {%- endif -%}
-                <div
-                  class="nmn-sub-toggle"
-                  data-nmn-sub-root
-                  data-section-id="{{ section.id }}"
-                >
+              {%- endif -%}
+              {%- if lt_nmn_pdp -%}
+                <div class="nmn-pdp-shared-json" hidden aria-hidden="true">
                   <script
                     type="application/json"
                     id="nmn-selling-plans-data-{{ section.id }}"
@@ -2626,7 +2794,6 @@
                         "price": {{ current_variant.price | json }},
                         "compare_at_price": {% if current_variant.compare_at_price %}{{ current_variant.compare_at_price | json }}{% else %}null{% endif %},
                         {%- liquid
-                          # Default 60 Tage = 30 g bei 500 mg/Tagesportion; überschreibbar: custom.supply_days
                           assign nmn_cv_supply_days = current_variant.metafields.custom.supply_days.value | default: 60
                           if nmn_cv_supply_days == blank
                             assign nmn_cv_supply_days = 60
@@ -2662,7 +2829,6 @@
                           "price": {{ variant.price | json }},
                           "compare_at_price": {% if variant.compare_at_price %}{{ variant.compare_at_price | json }}{% else %}null{% endif %},
                           {%- liquid
-                            # Default 60 Tage = 30 g bei 500 mg/Tagesportion; überschreibbar: custom.supply_days
                             assign nmn_v_supply_days = variant.metafields.custom.supply_days.value | default: 60
                             if nmn_v_supply_days == blank
                               assign nmn_v_supply_days = 60
@@ -2686,6 +2852,13 @@
                       {%- endfor -%}
                     }
                   </script>
+                </div>
+              {%- if lt_nmn_suffix_v1 -%}
+                <div
+                  class="nmn-sub-toggle"
+                  data-nmn-sub-root
+                  data-section-id="{{ section.id }}"
+                >
                   <div class="nmn-buy-module">
                     <div class="nmn-buy-module__step nmn-buy-module__step--options">
                       <p class="nmn-buy-module__field-label" id="nmn-mode-label-{{ section.id }}">
@@ -2775,6 +2948,58 @@
                     </div>
                   </div>
                 </div>
+              {%- elsif lt_nmn_suffix_v2 -%}
+                <div
+                  class="nmn-sub-toggle nmn-sub-toggle--pdp-v2"
+                  data-nmn-pdp-v2
+                  data-nmn-sub-root
+                  data-section-id="{{ section.id }}"
+                >
+                  <div class="nmn2-pdp__price-row">
+                    <span class="nmn2-pdp__price-main" data-nmn-v2-price-main></span>
+                    <span class="nmn2-pdp__price-compare" data-nmn-v2-price-compare hidden></span>
+                  </div>
+                  <div
+                    class="nmn2-pdp__toggle-row"
+                    role="group"
+                    aria-label="Kaufmöglichkeit: Abo oder Einmalkauf"
+                  >
+                    <button
+                      type="button"
+                      class="nmn-sub-toggle__btn nmn-sub-toggle__btn--plan nmn-sub-toggle__btn--primary nmn-sub-toggle__btn--active nmn2-pdp__toggle-btn"
+                      data-nmn-mode="subscription"
+                      aria-pressed="true"
+                    >
+                      <span class="nmn2-pdp__btn-lines">
+                        <span class="nmn2-pdp__btn-line1">Monatliche Lieferung</span>
+                        <span class="nmn2-pdp__btn-line2" data-nmn-v2-toggle-sub-price></span>
+                        <span class="nmn2-pdp__btn-badge">✓ Empfohlen · 12,5% gespart</span>
+                      </span>
+                      <span class="visually-hidden" data-nmn-save-badge hidden></span>
+                      <div class="visually-hidden" aria-hidden="true">
+                        <div data-nmn-card-price-root="subscription"></div>
+                      </div>
+                      <span class="visually-hidden" data-nmn-per-day-sub aria-live="polite"></span>
+                    </button>
+                    <button
+                      type="button"
+                      class="nmn-sub-toggle__btn nmn-sub-toggle__btn--plan nmn-sub-toggle__btn--secondary nmn2-pdp__toggle-btn"
+                      data-nmn-mode="onetime"
+                      aria-pressed="false"
+                    >
+                      <span class="nmn2-pdp__btn-lines">
+                        <span class="nmn2-pdp__btn-line1">Einmaliger Kauf</span>
+                        <span class="nmn2-pdp__btn-line2" data-nmn-v2-toggle-once-price></span>
+                      </span>
+                      <div class="visually-hidden" aria-hidden="true">
+                        <div data-nmn-card-price-root="onetime"></div>
+                      </div>
+                      <span class="visually-hidden" data-nmn-per-day-onetime aria-live="polite"></span>
+                    </button>
+                  </div>
+                  <p class="nmn2-pdp__info-line" data-nmn-v2-info-line></p>
+                </div>
+              {%- endif -%}
               {%- endif -%}
 
               <product-form
@@ -2792,7 +3017,7 @@
                   data-type: 'add-to-cart-form'
                 -%}
                   <input type="hidden" name="id" value="{{ current_variant.id }}">
-                  {%- if template.suffix == '13_nmn' -%}
+                  {%- if lt_nmn_pdp -%}
                     <input
                       type="hidden"
                       name="selling_plan"
@@ -2877,7 +3102,7 @@
                         <span
                           class="button__text"
                           data-js-product-add-to-cart-text
-                          {% if template.suffix == '13_nmn' and block.settings.show_preorder == false %}
+                          {% if lt_nmn_pdp and block.settings.show_preorder == false %}
                             data-lt-nmn-cta
                           {% endif %}
                           {% if block.settings.show_preorder %}
@@ -2894,7 +3119,7 @@
                             else
                               if current_variant.available
                                 unless block.settings.show_preorder
-                                  if template.suffix == '13_nmn'
+                                  if lt_nmn_pdp
                                     echo 'Jetzt bestellen'
                                   else
                                     echo 'products.page.add_to_cart_button' | t
@@ -2910,7 +3135,7 @@
                             endunless
                           -%}
                         </span>
-                        {%- if template.suffix == '13_nmn' -%}
+                        {%- if lt_nmn_suffix_v1 -%}
                           <span class="nmn-btn-price" data-nmn-btn-price aria-hidden="true" hidden></span>
                         {%- endif -%}
                         <span class="button__preloader">
@@ -2919,7 +3144,7 @@
                           </svg>
                         </span>
                       </button>
-                      {%- if template.suffix == '13_nmn' -%}
+                      {%- if lt_nmn_suffix_v1 -%}
                         <div class="nmn-cta-footer nmn-cta-footer--single">
                           <svg class="nmn-cta-trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
@@ -2927,6 +3152,67 @@
                           </svg>
                           <p class="nmn-cta-footer__promise">90 Tage risikofrei testen</p>
                         </div>
+                      {%- elsif lt_nmn_suffix_v2 -%}
+                        <ul class="nmn2-trust-trio" role="list">
+                          <li class="nmn2-trust-trio__item">
+                            <svg
+                              class="nmn2-trust-trio__icon"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              aria-hidden="true"
+                            >
+                              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/>
+                              <path d="m9 12 2 2 4-4"/>
+                            </svg>
+                            <span>90-Tage Garantie</span>
+                          </li>
+                          <li class="nmn2-trust-trio__item">
+                            <svg
+                              class="nmn2-trust-trio__icon"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              aria-hidden="true"
+                            >
+                              <circle cx="12" cy="12" r="10"/>
+                              <line x1="10" x2="10" y1="15" y2="9"/>
+                              <line x1="14" x2="14" y1="15" y2="9"/>
+                            </svg>
+                            <span>Abo jederzeit flexibel</span>
+                          </li>
+                          <li class="nmn2-trust-trio__item">
+                            <svg
+                              class="nmn2-trust-trio__icon"
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              aria-hidden="true"
+                            >
+                              <path d="m7.5 4.27 9 5.15"/>
+                              <path d="M21 8V2a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6"/>
+                              <path d="M3 3v18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3"/>
+                              <path d="m3.29 7 9.71 5.71"/>
+                              <path d="M12 22V12"/>
+                            </svg>
+                            <span>Gratis Versand</span>
+                          </li>
+                        </ul>
                       {%- endif -%}
 
                       {%- liquid
@@ -2944,13 +3230,14 @@
                 {%- endform -%}
               </product-form>
 
-              {%- if template.suffix == '13_nmn' -%}
+              {%- if lt_nmn_pdp -%}
                 <script>
                   (function () {
                     var sid = '{{ section.id }}';
                     var form = document.getElementById('{{ product_form_id }}');
                     var root = document.querySelector('.nmn-sub-toggle[data-section-id="' + sid + '"]');
                     if (!form || !root) return;
+                    var isV2 = root.hasAttribute('data-nmn-pdp-v2');
 
                     var input = form.querySelector('[data-lt-selling-plan-input]');
                     var jsonEl = document.getElementById('nmn-selling-plans-data-' + sid);
@@ -3377,6 +3664,95 @@
                       }
                     }
 
+                    function syncNmnV2Hero() {
+                      if (!isV2) return;
+                      var suff =
+                        productPage && productPage.dataset && productPage.dataset.nmnCurrencySuffix
+                          ? productPage.dataset.nmnCurrencySuffix
+                          : '';
+                      var v = readNmnPricingVariant();
+                      var ap = getNmnAllocationPricing();
+                      var days = getNmnSupplyDays(v);
+                      var mainEl = root.querySelector('[data-nmn-v2-price-main]');
+                      var compEl = root.querySelector('[data-nmn-v2-price-compare]');
+                      var infoEl = root.querySelector('[data-nmn-v2-info-line]');
+                      var toggleSub = root.querySelector('[data-nmn-v2-toggle-sub-price]');
+                      var toggleOnce = root.querySelector('[data-nmn-v2-toggle-once-price]');
+                      var onetimeC = v ? numCents(v.price) : null;
+                      var subC = ap && ap.subC != null ? ap.subC : null;
+                      var origCompare = ap && ap.origC != null ? ap.origC : onetimeC;
+
+                      if (isSubscriptionUiActive() && plans.length) {
+                        if (mainEl && subC != null) {
+                          mainEl.textContent = formatDeMoney(subC) + '\u00a0€' + suff + ' / Monat';
+                        }
+                        if (compEl) {
+                          if (origCompare != null && subC != null && origCompare > subC) {
+                            compEl.textContent = formatDeMoney(origCompare) + '\u00a0€' + suff;
+                            compEl.removeAttribute('hidden');
+                          } else {
+                            compEl.textContent = '';
+                            compEl.setAttribute('hidden', '');
+                          }
+                        }
+                      } else {
+                        if (mainEl && onetimeC != null) {
+                          mainEl.textContent = formatDeMoney(onetimeC) + '\u00a0€' + suff;
+                        }
+                        if (compEl) {
+                          compEl.textContent = '';
+                          compEl.setAttribute('hidden', '');
+                        }
+                      }
+
+                      if (toggleSub) {
+                        toggleSub.textContent =
+                          subC != null ? formatDeMoney(subC) + '\u00a0€' + suff + ' / Monat' : '';
+                      }
+                      if (toggleOnce) {
+                        toggleOnce.textContent =
+                          onetimeC != null ? formatDeMoney(onetimeC) + '\u00a0€' + suff : '';
+                      }
+
+                      if (infoEl) {
+                        var centsForDay =
+                          isSubscriptionUiActive() && plans.length && subC != null ? subC : onetimeC;
+                        var perDay = '';
+                        if (centsForDay != null && days > 0) {
+                          var pd = centsForDay / days / 100;
+                          perDay =
+                            ' · ca. ' +
+                            new Intl.NumberFormat('de-DE', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            }).format(pd) +
+                            '\u00a0€' +
+                            suff +
+                            '/Tag';
+                        }
+                        var base = '30\u00a0g · ca. ' + days + ' Portionen · ca. ' + days + ' Tage' + perDay;
+                        if (
+                          isSubscriptionUiActive() &&
+                          plans.length &&
+                          onetimeC != null &&
+                          subC != null &&
+                          onetimeC > subC
+                        ) {
+                          var yearlyCents = (onetimeC - subC) * 12;
+                          base +=
+                            ' · ' +
+                            formatDeMoney(yearlyCents) +
+                            '\u00a0€' +
+                            suff +
+                            ' günstiger im Jahr';
+                        }
+                        if (!isSubscriptionUiActive() && plans.length) {
+                          base += ' — Mit Abo sparst du 5\u00a0€ / Monat';
+                        }
+                        infoEl.textContent = base;
+                      }
+                    }
+
                     function syncCta() {
                       if (!cta || !addBtn) return;
                       if (form.classList.contains('unavailable-variant')) return;
@@ -3392,13 +3768,31 @@
                         plans.length > 0;
                       var cents = null;
                       if (isSub) {
-                        var ap = getNmnAllocationPricing();
-                        cents = ap ? ap.subC : null;
+                        var apCta = getNmnAllocationPricing();
+                        cents = apCta ? apCta.subC : null;
                       } else {
-                        var vv = readNmnPricingVariant();
-                        cents = vv ? numCents(vv.price) : null;
+                        var vvCta = readNmnPricingVariant();
+                        cents = vvCta ? numCents(vvCta.price) : null;
                       }
                       var formattedPrice = cents != null ? formatDeMoney(cents) + '\u00a0€' + suff : null;
+                      if (isV2) {
+                        if (isSub && plans.length) {
+                          cta.textContent =
+                            formattedPrice != null
+                              ? 'Longevity-Routine starten — ' + formattedPrice + '/Monat'
+                              : 'Longevity-Routine starten';
+                        } else {
+                          cta.textContent =
+                            formattedPrice != null
+                              ? 'Einmalig kaufen — ' + formattedPrice
+                              : 'Einmalig kaufen';
+                        }
+                        if (btnPriceEl) btnPriceEl.setAttribute('hidden', '');
+                        if (ctaSticky) {
+                          ctaSticky.textContent = cta.textContent;
+                        }
+                        return;
+                      }
                       cta.textContent = 'Jetzt bestellen';
                       if (btnPriceEl) {
                         if (formattedPrice) {
@@ -3420,6 +3814,7 @@
                       syncNmnSaveEuroLine();
                       syncNmnStickyPlanNote();
                       syncNmnPerDay();
+                      syncNmnV2Hero();
                       syncCta();
                     }
 
@@ -3648,7 +4043,7 @@
 
           {%- when 'custom_liquid' -%}
             <div
-              class="product-custom-liquid{% if template.suffix == '13_nmn' and block.id == 'text_FjYnDK' %} product-custom-liquid--nmn-quality-pills{% endif %}"
+              class="product-custom-liquid{% if lt_nmn_suffix_v1 and block.id == 'text_FjYnDK' %} product-custom-liquid--nmn-quality-pills{% endif %}"
               data-index="{{ forloop.index }}"
               {{ block.shopify_attributes }}
             >
@@ -3798,7 +4193,7 @@
     {%- if section.settings.sticky_add_to_cart and product.available and section.settings.sticky_atc_variants -%}
       <div style="display:none!important" data-update-block="price-sticky-main">
         <span class="show-block-if-variant-selected">
-          {%- if template.suffix == '13_nmn' -%}
+          {%- if lt_nmn_pdp -%}
             {%- render 'product-price',
               variant: current_variant,
               target: current_variant,
@@ -3811,7 +4206,7 @@
         </span>
         {%- unless default_to_first_variant -%}
           <span class="show-block-if-variant-not-selected-yet">
-            {%- if template.suffix == '13_nmn' -%}
+            {%- if lt_nmn_pdp -%}
               {%- render 'product-price',
                 variant: current_variant,
                 target: product,
@@ -3882,7 +4277,7 @@
         </div>
         <div class="sticky-add-to-cart__actions">
           <div
-            class="sticky-add-to-cart__price-col{% if template.suffix == '13_nmn' %} sticky-add-to-cart__price-col--nmn{% endif %}"
+            class="sticky-add-to-cart__price-col{% if lt_nmn_pdp %} sticky-add-to-cart__price-col--nmn{% endif %}"
           >
             <div class="sticky-add-to-cart__price text-size--large" data-js-atc-price>
               {%- if product.price_varies -%}
@@ -3907,7 +4302,7 @@
                 {%- endif -%}
               {%- endif -%}
             </div>
-            {%- if template.suffix == '13_nmn' -%}
+            {%- if lt_nmn_pdp -%}
               <p class="nmn-sticky-plan-note" data-nmn-sticky-plan-note hidden></p>
             {%- endif -%}
           </div>
@@ -3917,7 +4312,7 @@
                 data-js-atc
                 class="button button--solid button--move button--product button--loader {% if default_to_first_variant == false and product.has_only_default_variant == false %} show-block-if-variant-selected {% endif %}"
               >
-                {%- if template.suffix == '13_nmn' -%}
+                {%- if lt_nmn_pdp -%}
                   <span class="button__text" data-lt-nmn-sticky-cta>Jetzt bestellen</span>
                 {%- else -%}
                   <span class="button__text">{{ 'products.page.add_to_cart_button' | t }}</span>
