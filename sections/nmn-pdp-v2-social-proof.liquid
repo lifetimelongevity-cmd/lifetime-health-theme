@@ -1,0 +1,541 @@
+{% comment %}
+  NMN PDP alternative (product.13-2_nmn): Social proof — Aggregate + 3 Review-Karten.
+{% endcomment %}
+
+<div
+  class="nmn2-sp"
+  id="nmn2-sp-{{ section.id }}"
+  role="region"
+  aria-labelledby="nmn2-sp-heading-{{ section.id }}"
+>
+  <div class="container container--large">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="nmn2-sp__title" id="nmn2-sp-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+    {%- endif -%}
+
+    <div class="nmn2-sp__aggregate">
+      <div class="nmn2-sp__score-block">
+        <p class="nmn2-sp__rating" aria-label="{{ section.settings.rating_score | escape }} von 5 Sternen">
+          {{- section.settings.rating_score | escape -}}
+        </p>
+        {%- if section.settings.reviews_count_label != blank -%}
+          <p class="nmn2-sp__count">{{ section.settings.reviews_count_label | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      <div class="nmn2-sp__bars" aria-hidden="true">
+        <div class="nmn2-sp__bar-line">
+          <span class="nmn2-sp__bar-label">5</span>
+          <div class="nmn2-sp__track">
+            <div class="nmn2-sp__fill" style="width: {{ section.settings.bar_5 }}%;"></div>
+          </div>
+        </div>
+        <div class="nmn2-sp__bar-line">
+          <span class="nmn2-sp__bar-label">4</span>
+          <div class="nmn2-sp__track">
+            <div class="nmn2-sp__fill" style="width: {{ section.settings.bar_4 }}%;"></div>
+          </div>
+        </div>
+        <div class="nmn2-sp__bar-line">
+          <span class="nmn2-sp__bar-label">3</span>
+          <div class="nmn2-sp__track">
+            <div class="nmn2-sp__fill" style="width: {{ section.settings.bar_3 }}%;"></div>
+          </div>
+        </div>
+        <div class="nmn2-sp__bar-line">
+          <span class="nmn2-sp__bar-label">2</span>
+          <div class="nmn2-sp__track">
+            <div class="nmn2-sp__fill" style="width: {{ section.settings.bar_2 }}%;"></div>
+          </div>
+        </div>
+        <div class="nmn2-sp__bar-line">
+          <span class="nmn2-sp__bar-label">1</span>
+          <div class="nmn2-sp__track">
+            <div class="nmn2-sp__fill" style="width: {{ section.settings.bar_1 }}%;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ul class="nmn2-sp__grid" role="list">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'review' -%}
+          <li class="nmn2-sp__card" {{ block.shopify_attributes }}>
+            <div class="nmn2-sp__card-top">
+              <div class="nmn2-sp__avatar" aria-hidden="true">{{ block.settings.initials | escape }}</div>
+              <div class="nmn2-sp__identity">
+                <p class="nmn2-sp__name-row">
+                  <span class="nmn2-sp__name">{{ block.settings.name | escape }}</span>
+                  {%- if block.settings.handle != blank -%}
+                    {%- assign h = block.settings.handle | strip -%}
+                    {%- unless h contains '@' -%}
+                      {%- assign h = h | prepend: '@' -%}
+                    {%- endunless -%}
+                    <span class="nmn2-sp__handle">{{ h | escape }}</span>
+                  {%- endif -%}
+                </p>
+                <div
+                  class="nmn2-sp__stars"
+                  aria-label="{{ block.settings.rating | default: 5 }} von 5 Sternen"
+                >
+                  {%- assign rating = block.settings.rating | default: 5 | plus: 0 -%}
+                  {%- for i in (1..5) -%}
+                    <svg
+                      class="nmn2-sp__star{% if i <= rating %} nmn2-sp__star--filled{% endif %}"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path d="M8 1.5l1.854 3.756 4.146.602-3 2.924.708 4.128L8 10.677l-3.708 2.233.708-4.128-3-2.924 4.146-.602L8 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+                    </svg>
+                  {%- endfor -%}
+                </div>
+                {%- if block.settings.date != blank -%}
+                  <time class="nmn2-sp__date">{{ block.settings.date | escape }}</time>
+                {%- endif -%}
+              </div>
+            </div>
+
+            {%- if block.settings.text != blank -%}
+              <p class="nmn2-sp__text">{{ block.settings.text | escape }}</p>
+            {%- endif -%}
+
+            {%- if block.settings.verified -%}
+              <p class="nmn2-sp__verified">
+                <svg class="nmn2-sp__verified-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                  <path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Verifizierter Kauf</span>
+              </p>
+            {%- endif -%}
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+
+{% stylesheet %}
+  .nmn2-sp {
+    padding-block: var(--space-9);
+    background: var(--color-surface-primary);
+  }
+
+  @media screen and (max-width: 749px) {
+    .nmn2-sp {
+      padding-block: var(--space-8);
+    }
+  }
+
+  .nmn2-sp__title {
+    margin: 0 0 var(--space-7);
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    text-align: center;
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-sp__aggregate {
+    display: grid;
+    gap: var(--space-7);
+    align-items: center;
+    max-width: 40rem;
+    margin: 0 auto var(--space-9);
+    padding: var(--space-6);
+    background: var(--color-surface-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-default);
+  }
+
+  @media screen and (min-width: 750px) {
+    .nmn2-sp__aggregate {
+      grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+      max-width: 48rem;
+      gap: var(--space-8);
+    }
+  }
+
+  .nmn2-sp__score-block {
+    text-align: center;
+  }
+
+  @media screen and (min-width: 750px) {
+    .nmn2-sp__score-block {
+      text-align: left;
+    }
+  }
+
+  .nmn2-sp__rating {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: var(--text-stat);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-stat);
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-sp__count {
+    margin: var(--space-2) 0 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-body);
+    color: var(--color-text-secondary);
+  }
+
+  .nmn2-sp__bars {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .nmn2-sp__bar-line {
+    display: grid;
+    grid-template-columns: var(--space-3) 1fr;
+    gap: var(--space-3);
+    align-items: center;
+  }
+
+  .nmn2-sp__bar-label {
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-muted);
+    text-align: right;
+  }
+
+  .nmn2-sp__track {
+    height: var(--space-2);
+    border-radius: var(--radius-full);
+    background: var(--color-gray-200);
+    overflow: hidden;
+  }
+
+  .nmn2-sp__fill {
+    height: 100%;
+    border-radius: var(--radius-full);
+    background: var(--color-dark);
+    transition: width var(--ease-default);
+  }
+
+  .nmn2-sp__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media screen and (min-width: 990px) {
+    .nmn2-sp__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-5);
+    }
+  }
+
+  .nmn2-sp__card {
+    margin: 0;
+    padding: var(--space-5);
+    background: var(--color-surface-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-default);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .nmn2-sp__card-top {
+    display: flex;
+    gap: var(--space-4);
+    align-items: flex-start;
+  }
+
+  .nmn2-sp__avatar {
+    flex-shrink: 0;
+    width: var(--space-8);
+    height: var(--space-8);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-heading);
+    font-size: var(--text-section);
+    font-weight: var(--weight-bold);
+    line-height: 1;
+    color: var(--color-text-on-dark);
+    background: var(--color-dark);
+  }
+
+  .nmn2-sp__identity {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .nmn2-sp__name-row {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: baseline;
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-tight);
+  }
+
+  .nmn2-sp__name {
+    font-weight: var(--weight-semibold);
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-sp__handle {
+    font-weight: var(--weight-regular);
+    color: var(--color-text-muted);
+  }
+
+  .nmn2-sp__stars {
+    display: flex;
+    gap: var(--space-1);
+    color: var(--color-gray-400);
+  }
+
+  .nmn2-sp__star path {
+    fill: none;
+  }
+
+  .nmn2-sp__star--filled {
+    color: var(--color-star);
+  }
+
+  .nmn2-sp__star--filled path {
+    fill: currentColor;
+  }
+
+  .nmn2-sp__date {
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-body);
+    color: var(--color-text-muted);
+  }
+
+  .nmn2-sp__text {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+  }
+
+  .nmn2-sp__verified {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-body);
+    color: var(--color-success);
+  }
+
+  .nmn2-sp__verified-icon {
+    flex-shrink: 0;
+    color: var(--color-success);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "NMN V2 Social Proof",
+  "tag": "section",
+  "class": "section-nmn2-social-proof",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Das sagen Kundinnen und Kunden"
+    },
+    {
+      "type": "text",
+      "id": "rating_score",
+      "label": "Bewertung (Anzeige)",
+      "default": "4,7"
+    },
+    {
+      "type": "text",
+      "id": "reviews_count_label",
+      "label": "Anzahl Bewertungen",
+      "default": "102 Bewertungen"
+    },
+    {
+      "type": "header",
+      "content": "Verteilung (Balkenbreite in %)"
+    },
+    {
+      "type": "range",
+      "id": "bar_5",
+      "label": "5 Sterne",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 72,
+      "unit": "%"
+    },
+    {
+      "type": "range",
+      "id": "bar_4",
+      "label": "4 Sterne",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 18,
+      "unit": "%"
+    },
+    {
+      "type": "range",
+      "id": "bar_3",
+      "label": "3 Sterne",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 6,
+      "unit": "%"
+    },
+    {
+      "type": "range",
+      "id": "bar_2",
+      "label": "2 Sterne",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 2,
+      "unit": "%"
+    },
+    {
+      "type": "range",
+      "id": "bar_1",
+      "label": "1 Stern",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 2,
+      "unit": "%"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        {
+          "type": "text",
+          "id": "initials",
+          "label": "Initialen (Avatar)",
+          "default": "S"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Sven"
+        },
+        {
+          "type": "text",
+          "id": "handle",
+          "label": "Handle (optional)",
+          "info": "Ohne @ möglich — wird ergänzt."
+        },
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Sterne",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "text",
+          "id": "date",
+          "label": "Datum",
+          "default": "Januar 2025"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Rezension",
+          "default": "Ich habe das Buch von David Sinclair gelesen und wollte es ausprobieren. Ich fühle mich insgesamt energiegeladener und weniger erschöpft im Alltag."
+        },
+        {
+          "type": "checkbox",
+          "id": "verified",
+          "label": "Verifizierter Kauf",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "NMN V2 Social Proof",
+      "settings": {
+        "heading": "Das sagen Kundinnen und Kunden",
+        "rating_score": "4,7",
+        "reviews_count_label": "102 Bewertungen",
+        "bar_5": 72,
+        "bar_4": 18,
+        "bar_3": 6,
+        "bar_2": 2,
+        "bar_1": 2
+      },
+      "blocks": [
+        {
+          "type": "review",
+          "settings": {
+            "initials": "S",
+            "name": "Sven",
+            "rating": 5,
+            "date": "Januar 2025",
+            "text": "Ich habe das Buch von David Sinclair gelesen und wollte es ausprobieren. Ich fühle mich insgesamt energiegeladener und weniger erschöpft im Alltag.",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "initials": "C",
+            "name": "Christine",
+            "handle": "@christinehei",
+            "rating": 5,
+            "date": "Dezember 2024",
+            "text": "Ich bin 58 Jahre alt und arbeite als Best-Age Model — und hier kommt mein Geheimnis für mehr Energie und kürzere Regenerationszeit.",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "initials": "M",
+            "name": "@misscasiraghi",
+            "rating": 5,
+            "date": "November 2024",
+            "text": "Es ist nicht nur ein Longevity-Trend, es ist wissenschaftlich bewiesen.",
+            "verified": true
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

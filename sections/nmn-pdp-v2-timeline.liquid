@@ -1,0 +1,477 @@
+{% comment %}
+  NMN PDP alternative (product.13-2_nmn): Timeline „Was kannst du erwarten?“
+{% endcomment %}
+
+<div
+  class="nmn2-timeline"
+  id="nmn2-timeline-{{ section.id }}"
+  data-nmn2-timeline
+  role="region"
+  aria-labelledby="nmn2-timeline-heading-{{ section.id }}"
+>
+  <div class="container container--large">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="nmn2-timeline__title" id="nmn2-timeline-heading-{{ section.id }}">
+        {{- section.settings.heading | escape -}}
+      </h2>
+    {%- endif -%}
+
+    {%- comment -%} Mobile: dots + horizontal snap cards {%- endcomment -%}
+    <div class="nmn2-timeline__mobile">
+      <div class="nmn2-timeline__dots" role="group" aria-label="Timeline-Schritte">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'step' -%}
+            <button
+              type="button"
+              class="nmn2-timeline__dot-btn{% if block.settings.dot_style == 'outline' %} nmn2-timeline__dot-btn--outline{% endif %}"
+              data-nmn2-timeline-dot
+              data-nmn2-timeline-index="{{ forloop.index0 }}"
+              aria-label="{% if block.settings.title != blank %}{{ block.settings.title | escape }}{% else %}{{ block.settings.eyebrow | escape }}{% endif %} anzeigen"
+              aria-current="{% if forloop.first %}true{% else %}false{% endif %}"
+            >
+              <span class="visually-hidden">{{ block.settings.eyebrow | escape }} — {{ block.settings.title | escape }}</span>
+            </button>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      <div
+        class="nmn2-timeline__scroller"
+        data-nmn2-timeline-scroller
+        tabindex="0"
+      >
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'step' -%}
+            <article
+              class="nmn2-timeline__card"
+              data-nmn2-timeline-card
+              data-nmn2-timeline-index="{{ forloop.index0 }}"
+              {{ block.shopify_attributes }}
+            >
+              <p class="nmn2-timeline__eyebrow">{{ block.settings.eyebrow | escape }}</p>
+              <h3 class="nmn2-timeline__card-title">{{ block.settings.title | escape }}</h3>
+              {%- if block.settings.body != blank -%}
+                <div class="nmn2-timeline__card-body rte">{{ block.settings.body }}</div>
+              {%- endif -%}
+              {%- if block.settings.callout != blank -%}
+                <div class="nmn2-timeline__callout" role="note">
+                  {{- block.settings.callout | escape | newline_to_br -}}
+                </div>
+              {%- endif -%}
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    {%- comment -%} Desktop: vertical rail {%- endcomment -%}
+    <ol class="nmn2-timeline__desktop" role="list">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'step' -%}
+          <li class="nmn2-timeline__row" {{ block.shopify_attributes }}>
+            <div class="nmn2-timeline__rail" aria-hidden="true">
+              <span
+                class="nmn2-timeline__dot{% if block.settings.dot_style == 'outline' %} nmn2-timeline__dot--outline{% endif %}"
+              ></span>
+            </div>
+            <div class="nmn2-timeline__panel">
+              <p class="nmn2-timeline__eyebrow">{{ block.settings.eyebrow | escape }}</p>
+              <h3 class="nmn2-timeline__card-title">{{ block.settings.title | escape }}</h3>
+              {%- if block.settings.body != blank -%}
+                <div class="nmn2-timeline__card-body rte">{{ block.settings.body }}</div>
+              {%- endif -%}
+              {%- if block.settings.callout != blank -%}
+                <div class="nmn2-timeline__callout" role="note">
+                  {{- block.settings.callout | escape | newline_to_br -}}
+                </div>
+              {%- endif -%}
+            </div>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ol>
+  </div>
+</div>
+
+{% stylesheet %}
+  .nmn2-timeline {
+    padding-block: var(--space-9);
+    background: var(--color-surface-secondary);
+  }
+
+  @media screen and (max-width: 749px) {
+    .nmn2-timeline {
+      padding-block: var(--space-8);
+    }
+  }
+
+  .nmn2-timeline__title {
+    margin: 0 0 var(--space-7);
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    text-align: center;
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-timeline__mobile {
+    display: block;
+  }
+
+  .nmn2-timeline__desktop {
+    display: none;
+  }
+
+  @media screen and (min-width: 990px) {
+    .nmn2-timeline__mobile {
+      display: none;
+    }
+
+    .nmn2-timeline__desktop {
+      display: block;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-width: 48rem;
+      margin-inline: auto;
+    }
+  }
+
+  .nmn2-timeline__dots {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
+  }
+
+  .nmn2-timeline__dot-btn {
+    width: var(--space-4);
+    height: var(--space-4);
+    padding: 0;
+    border: 2px solid var(--color-teal-dark);
+    border-radius: var(--radius-full);
+    background: var(--color-teal-dark);
+    cursor: pointer;
+    transition:
+      transform var(--ease-default),
+      box-shadow var(--ease-default),
+      opacity var(--ease-default);
+  }
+
+  .nmn2-timeline__dot-btn--outline {
+    background: transparent;
+  }
+
+  .nmn2-timeline__dot-btn:hover,
+  .nmn2-timeline__dot-btn:focus-visible {
+    transform: scale(1.08);
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-surface-secondary), 0 0 0 4px var(--color-teal-dark);
+  }
+
+  .nmn2-timeline__dot-btn[aria-current='true'] {
+    box-shadow: 0 0 0 2px var(--color-surface-secondary), 0 0 0 4px var(--color-dark);
+  }
+
+  .nmn2-timeline__dot-btn--outline[aria-current='true'] {
+    background: color-mix(in srgb, var(--color-teal-dark) 22%, transparent);
+  }
+
+  .nmn2-timeline__scroller {
+    display: flex;
+    gap: var(--space-4);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--space-4);
+    padding-bottom: var(--space-2);
+    margin-inline: calc(-1 * var(--space-4));
+    padding-inline: var(--space-4);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nmn2-timeline__scroller:focus-visible {
+    outline: 2px solid var(--color-teal-dark);
+    outline-offset: var(--space-2);
+  }
+
+  .nmn2-timeline__card {
+    flex: 0 0 min(calc(100% - var(--space-5)), calc(var(--space-9) * 3 + var(--space-7)));
+    scroll-snap-align: start;
+    padding: var(--space-5);
+    background: var(--color-surface-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-default);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .nmn2-timeline__eyebrow {
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-tight);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+  }
+
+  .nmn2-timeline__card-title {
+    margin: 0 0 var(--space-3);
+    font-family: var(--font-heading);
+    font-size: var(--text-section);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-tight);
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-timeline__card-body {
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+  }
+
+  .nmn2-timeline__card-body p {
+    margin: 0 0 var(--space-3);
+  }
+
+  .nmn2-timeline__card-body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .nmn2-timeline__callout {
+    margin-top: var(--space-4);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-benefit);
+    border: 1px solid var(--color-border-strong);
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-primary);
+  }
+
+  @media screen and (min-width: 990px) {
+    .nmn2-timeline__row {
+      display: grid;
+      grid-template-columns: var(--space-7) 1fr;
+      gap: var(--space-5) var(--space-6);
+      align-items: start;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nmn2-timeline__row:not(:last-child) {
+      margin-bottom: var(--space-7);
+    }
+
+    .nmn2-timeline__rail {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      padding-top: var(--space-2);
+    }
+
+    .nmn2-timeline__rail::after {
+      content: '';
+      position: absolute;
+      top: calc(var(--space-4) + var(--space-2));
+      bottom: calc(-1 * var(--space-7));
+      left: 50%;
+      width: 2px;
+      transform: translateX(-50%);
+      background: var(--color-border-default);
+    }
+
+    .nmn2-timeline__row:last-child .nmn2-timeline__rail::after {
+      display: none;
+    }
+
+    .nmn2-timeline__dot {
+      position: relative;
+      z-index: 1;
+      width: var(--space-4);
+      height: var(--space-4);
+      border-radius: var(--radius-full);
+      border: 2px solid var(--color-teal-dark);
+      background: var(--color-teal-dark);
+      flex-shrink: 0;
+    }
+
+    .nmn2-timeline__dot--outline {
+      background: var(--color-surface-primary);
+    }
+
+    .nmn2-timeline__panel {
+      padding-bottom: var(--space-1);
+    }
+
+    .nmn2-timeline__panel .nmn2-timeline__card-title {
+      font-size: var(--text-h3);
+    }
+
+    .nmn2-timeline__panel .nmn2-timeline__card-body {
+      font-size: var(--text-body);
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    function setActive(dots, index) {
+      dots.forEach(function (d, j) {
+        d.setAttribute('aria-current', j === index ? 'true' : 'false');
+      });
+    }
+
+    function init(root) {
+      if (!root || root.dataset.nmn2TimelineReady === 'true') return;
+      root.dataset.nmn2TimelineReady = 'true';
+
+      var scroller = root.querySelector('[data-nmn2-timeline-scroller]');
+      var cards = root.querySelectorAll('[data-nmn2-timeline-card]');
+      var dots = root.querySelectorAll('[data-nmn2-timeline-dot]');
+      if (!scroller || !cards.length || !dots.length) return;
+
+      dots.forEach(function (dot, i) {
+        dot.addEventListener('click', function () {
+          var card = cards[i];
+          if (card) {
+            card.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+            setActive(dots, i);
+          }
+        });
+      });
+
+      if ('IntersectionObserver' in window) {
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (!entry.isIntersecting) return;
+              var idx = parseInt(entry.target.getAttribute('data-nmn2-timeline-index'), 10);
+              if (!isNaN(idx)) setActive(dots, idx);
+            });
+          },
+          { root: scroller, threshold: 0.55 }
+        );
+        cards.forEach(function (c) {
+          observer.observe(c);
+        });
+      }
+    }
+
+    document.querySelectorAll('[data-nmn2-timeline]').forEach(init);
+    document.addEventListener('shopify:section:load', function (event) {
+      var el = event.target.querySelector('[data-nmn2-timeline]');
+      if (el) init(el);
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "NMN V2 Timeline",
+  "tag": "section",
+  "class": "section-nmn2-timeline",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Was kannst du erwarten?"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Schritt",
+      "settings": [
+        {
+          "type": "text",
+          "id": "eyebrow",
+          "label": "Zeile (klein)",
+          "default": "Woche 4"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel",
+          "default": "Mehr Energie"
+        },
+        {
+          "type": "richtext",
+          "id": "body",
+          "label": "Text",
+          "default": "<p>NAD⁺-Stoffwechsel: erste messbare Veränderungen. Viele berichten von einem konstanteren Energiegefühl im Alltag.</p>"
+        },
+        {
+          "type": "select",
+          "id": "dot_style",
+          "label": "Punkt",
+          "options": [
+            { "value": "filled", "label": "Gefüllt" },
+            { "value": "outline", "label": "Outline" }
+          ],
+          "default": "filled"
+        },
+        {
+          "type": "textarea",
+          "id": "callout",
+          "label": "Hinweis-Box (optional)"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "NMN V2 Timeline",
+      "settings": {
+        "heading": "Was kannst du erwarten?"
+      },
+      "blocks": [
+        {
+          "type": "step",
+          "settings": {
+            "eyebrow": "Woche 4",
+            "title": "Mehr Energie",
+            "body": "<p>NAD⁺-Stoffwechsel: erste messbare Veränderungen. Viele berichten von einem konstanteren Energiegefühl im Alltag.</p>",
+            "dot_style": "filled"
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "eyebrow": "Monat 2 · 1. Abo-Lieferung",
+            "title": "Spürbar fitter",
+            "body": "<p>Teilnehmer einer 60-Tage-Studie legten im 6-Minuten-Gehtest signifikant mehr Strecke zurück als Placebo. Biologisches Alter blieb stabil.</p>",
+            "dot_style": "filled"
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "eyebrow": "Monat 3",
+            "title": "Herz & Stoffwechsel",
+            "body": "<p>Verbesserte Insulinsensitivität. Tendenz zu reduzierter arterieller Steifheit. NAD⁺-Werte im Blut mehr als verdoppelt.</p>",
+            "dot_style": "filled"
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "eyebrow": "Monat 4",
+            "title": "Deep Longevity Benefits",
+            "body": "<p>Kumulative Effekte auf Stoffwechsel, Gefäßgesundheit, Zellreparatur.</p>",
+            "dot_style": "outline",
+            "callout": "Nach Absetzen: NAD⁺ fällt in 4 Wochen auf Ausgangswert zurück — Kontinuität ist entscheidend."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

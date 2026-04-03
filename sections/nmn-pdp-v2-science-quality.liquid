@@ -1,0 +1,615 @@
+{% comment %}
+  NMN PDP alternative (product.13-2_nmn): Bento Wirkungsweise + Qualität.
+{% endcomment %}
+
+<div
+  class="nmn2-bento"
+  id="nmn2-bento-{{ section.id }}"
+  role="region"
+  aria-labelledby="nmn2-bento-heading-{{ section.id }}"
+>
+  <div class="container container--large">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="nmn2-bento__title" id="nmn2-bento-heading-{{ section.id }}">
+        {{- section.settings.heading | escape -}}
+      </h2>
+    {%- endif -%}
+
+    <div class="nmn2-bento__grid">
+      <div class="nmn2-bento__tile nmn2-bento__tile--science">
+        {%- if section.settings.left_title != blank -%}
+          <h3 class="nmn2-bento__tile-title">{{ section.settings.left_title | escape }}</h3>
+        {%- endif -%}
+
+        {%- if section.settings.gif_url != blank -%}
+          <div class="nmn2-bento__media">
+            <img
+              src="{{ section.settings.gif_url | escape }}"
+              alt="{{ section.settings.gif_alt | escape }}"
+              class="nmn2-bento__gif"
+              width="600"
+              height="400"
+              loading="lazy"
+              decoding="async"
+            >
+          </div>
+        {%- endif -%}
+
+        <ul class="nmn2-bento__studies" role="list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'study' -%}
+              <li class="nmn2-bento__study" {{ block.shopify_attributes }}>
+                {%- if block.settings.headline != blank -%}
+                  <h4 class="nmn2-bento__study-headline">{{ block.settings.headline | escape }}</h4>
+                {%- endif -%}
+                {%- if block.settings.result != blank -%}
+                  <p class="nmn2-bento__study-result">{{ block.settings.result | escape }}</p>
+                {%- endif -%}
+                {%- if block.settings.source != blank -%}
+                  <p class="nmn2-bento__study-source">{{ block.settings.source | escape }}</p>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+
+      <div class="nmn2-bento__tile nmn2-bento__tile--quality">
+        {%- if section.settings.right_title != blank -%}
+          <h3 class="nmn2-bento__tile-title">{{ section.settings.right_title | escape }}</h3>
+        {%- endif -%}
+
+        <ul class="nmn2-bento__features" role="list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'feature' -%}
+              <li class="nmn2-bento__feature" {{ block.shopify_attributes }}>
+                <span class="nmn2-bento__feature-icon" aria-hidden="true">
+                  {%- case block.settings.icon -%}
+                    {%- when 'leaf' -%}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 3.5 2 8.8a7.9 7.9 0 0 1-7 8.2c-1.2.2-2.7.3-4 .3Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
+                    {%- when 'flask' -%}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.527c0 .876 0 1.315-.148 1.686a2 2 0 0 1-.62.838c-.329.268-.753.401-1.603.666l-.392.13c-1.079.36-1.618.54-2.034.964-.415.424-.55 1.03-.821 2.246l-.1.45A2 2 0 0 0 4.055 18H20a2 2 0 0 0 1.793-2.807l-.099-.45c-.271-1.216-.406-1.822-.82-2.246-.417-.424-.956-.604-2.034-.963l-.393-.131c-.85-.265-1.274-.398-1.603-.666a2 2 0 0 1-.62-.838C14 10.842 14 10.403 14 9.527V2"/><path d="M8.5 2h7"/><path d="M7 16h10"/></svg>
+                    {%- when 'badge_check' -%}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
+                    {%- when 'shield_check' -%}
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+                  {%- endcase -%}
+                </span>
+                {%- if block.settings.label != blank -%}
+                  <span class="nmn2-bento__feature-label">{{ block.settings.label | escape }}</span>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+
+        {%- if section.settings.pdf_url != blank and section.settings.pdf_label != blank -%}
+          <a
+            class="nmn2-bento__pdf"
+            href="{{ section.settings.pdf_url }}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{- section.settings.pdf_label | escape -}}
+          </a>
+        {%- endif -%}
+
+        {%- if section.settings.uthever_label != blank -%}
+          <p class="nmn2-bento__pill">{{ section.settings.uthever_label | escape }}</p>
+        {%- endif -%}
+
+        <div
+          class="nmn2-bento__compare"
+          role="table"
+          aria-label="{{ section.settings.compare_caption | default: 'Produktvergleich' | escape }}"
+        >
+          <div class="nmn2-bento__compare-row nmn2-bento__compare-row--head" role="row">
+            <div class="nmn2-bento__compare-cell" role="columnheader">{{ section.settings.col_criterion | escape }}</div>
+            <div class="nmn2-bento__compare-cell nmn2-bento__compare-cell--brand" role="columnheader">
+              {{ section.settings.col_brand | escape }}
+            </div>
+            <div class="nmn2-bento__compare-cell" role="columnheader">{{ section.settings.col_typical | escape }}</div>
+          </div>
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'compare_row' -%}
+              <div class="nmn2-bento__compare-row" role="row" {{ block.shopify_attributes }}>
+                <div class="nmn2-bento__compare-cell" role="cell">{{ block.settings.criterion | escape }}</div>
+                <div class="nmn2-bento__compare-cell nmn2-bento__compare-cell--brand" role="cell">
+                  {{ block.settings.ours | escape }}
+                </div>
+                <div class="nmn2-bento__compare-cell" role="cell">{{ block.settings.typical | escape }}</div>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+  .nmn2-bento {
+    padding-block: var(--space-9);
+    background: var(--color-surface-secondary);
+  }
+
+  @media screen and (max-width: 749px) {
+    .nmn2-bento {
+      padding-block: var(--space-8);
+    }
+  }
+
+  .nmn2-bento__title {
+    margin: 0 0 var(--space-7);
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    text-align: center;
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-bento__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+    align-items: start;
+  }
+
+  @media screen and (min-width: 990px) {
+    .nmn2-bento__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-5);
+    }
+  }
+
+  .nmn2-bento__tile {
+    padding: var(--space-6);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-default);
+    background: var(--color-surface-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .nmn2-bento__tile-title {
+    margin: 0 0 var(--space-5);
+    font-family: var(--font-heading);
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-bento__media {
+    margin-bottom: var(--space-5);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--color-surface-secondary);
+    border: 1px solid var(--color-border-default);
+  }
+
+  .nmn2-bento__gif {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .nmn2-bento__studies {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .nmn2-bento__study {
+    margin: 0;
+    padding: var(--space-5);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-surface-secondary);
+  }
+
+  .nmn2-bento__study-headline {
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-heading);
+    font-size: var(--text-section);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-tight);
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-bento__study-result {
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+  }
+
+  .nmn2-bento__study-source {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-body);
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+
+  .nmn2-bento__features {
+    list-style: none;
+    margin: 0 0 var(--space-5);
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  @media screen and (min-width: 500px) {
+    .nmn2-bento__features {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .nmn2-bento__feature {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .nmn2-bento__feature-icon {
+    flex-shrink: 0;
+    display: flex;
+    color: var(--color-teal-dark);
+  }
+
+  .nmn2-bento__feature-icon svg {
+    width: var(--space-6);
+    height: var(--space-6);
+  }
+
+  .nmn2-bento__feature-label {
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-tight);
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-bento__pdf {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-body);
+    color: var(--color-teal-dark);
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+    transition: color var(--ease-default);
+  }
+
+  .nmn2-bento__pdf:hover,
+  .nmn2-bento__pdf:focus-visible {
+    color: var(--color-dark);
+    outline: none;
+  }
+
+  .nmn2-bento__pdf:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-surface-primary), 0 0 0 4px var(--color-teal-dark);
+    border-radius: var(--radius-sm);
+  }
+
+  .nmn2-bento__pill {
+    display: inline-block;
+    margin: 0 0 var(--space-5);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-full);
+    font-family: var(--font-heading);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-tight);
+    letter-spacing: 0.04em;
+    color: var(--color-text-primary);
+    background: var(--color-surface-benefit);
+    border: 1px solid var(--color-border-strong);
+  }
+
+  .nmn2-bento__compare {
+    width: 100%;
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  .nmn2-bento__compare-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr) minmax(0, 0.8fr);
+    gap: 0;
+    border-bottom: 1px solid var(--color-border-default);
+  }
+
+  .nmn2-bento__compare-row:last-child {
+    border-bottom: none;
+  }
+
+  .nmn2-bento__compare-row--head {
+    background: var(--color-surface-secondary);
+  }
+
+  .nmn2-bento__compare-cell {
+    padding: var(--space-3) var(--space-4);
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-tight);
+    color: var(--color-text-secondary);
+    border-right: 1px solid var(--color-border-default);
+  }
+
+  .nmn2-bento__compare-cell:last-child {
+    border-right: none;
+  }
+
+  .nmn2-bento__compare-row--head .nmn2-bento__compare-cell {
+    font-size: var(--text-micro);
+    font-weight: var(--weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+  }
+
+  .nmn2-bento__compare-row:not(.nmn2-bento__compare-row--head) .nmn2-bento__compare-cell {
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-regular);
+  }
+
+  .nmn2-bento__compare-cell--brand {
+    text-align: center;
+    color: var(--color-text-primary);
+    font-weight: var(--weight-semibold);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "NMN V2 Sci Quality",
+  "tag": "section",
+  "class": "section-nmn2-science-quality",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Sektionsüberschrift",
+      "default": "Wissenschaft & Qualität"
+    },
+    {
+      "type": "header",
+      "content": "Linke Spalte"
+    },
+    {
+      "type": "text",
+      "id": "left_title",
+      "label": "Titel",
+      "default": "Wirkungsweise"
+    },
+    {
+      "type": "text",
+      "id": "gif_url",
+      "label": "Grafik / GIF URL",
+      "default": "https://www.lifetime-health.de/cdn/shop/files/graph-nad-level-sinken-im-alter-v2.gif"
+    },
+    {
+      "type": "text",
+      "id": "gif_alt",
+      "label": "Alt-Text Grafik",
+      "default": "NAD+ sinkt mit dem Alter"
+    },
+    {
+      "type": "header",
+      "content": "Rechte Spalte"
+    },
+    {
+      "type": "text",
+      "id": "right_title",
+      "label": "Titel",
+      "default": "Qualität"
+    },
+    {
+      "type": "text",
+      "id": "pdf_label",
+      "label": "PDF-Link Text",
+      "default": "Prüfbericht ansehen →"
+    },
+    {
+      "type": "text",
+      "id": "pdf_url",
+      "label": "PDF URL",
+      "default": "https://cdn.shopify.com/s/files/1/0621/2173/8340/files/Pruefbericht_L-24-04702.pdf"
+    },
+    {
+      "type": "text",
+      "id": "uthever_label",
+      "label": "Marken-Badge",
+      "default": "Uthever®"
+    },
+    {
+      "type": "header",
+      "content": "Vergleichstabelle"
+    },
+    {
+      "type": "text",
+      "id": "compare_caption",
+      "label": "Aria-Label Tabelle",
+      "default": "Vergleich LIFETIME und typisches Produkt"
+    },
+    {
+      "type": "text",
+      "id": "col_criterion",
+      "label": "Spalte 1 Kopf",
+      "default": "Kriterium"
+    },
+    {
+      "type": "text",
+      "id": "col_brand",
+      "label": "Spalte 2 Kopf",
+      "default": "LIFETIME ✓"
+    },
+    {
+      "type": "text",
+      "id": "col_typical",
+      "label": "Spalte 3 Kopf",
+      "default": "Typisch ✗"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "study",
+      "name": "Studie",
+      "settings": [
+        {
+          "type": "text",
+          "id": "headline",
+          "label": "Kurztitel",
+          "default": "NMN & NAD⁺-Spiegel"
+        },
+        {
+          "type": "textarea",
+          "id": "result",
+          "label": "Ergebnis (ein Satz)",
+          "default": "NMN erhöhte NAD⁺-Spiegel signifikant bei Erwachsenen mittleren Alters."
+        },
+        {
+          "type": "text",
+          "id": "source",
+          "label": "Quelle",
+          "default": "Yi et al., GeroScience 2022"
+        }
+      ]
+    },
+    {
+      "type": "feature",
+      "name": "Merkmal",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Icon",
+          "options": [
+            { "value": "leaf", "label": "Blatt" },
+            { "value": "flask", "label": "Laborflasche" },
+            { "value": "badge_check", "label": "Badge Haken" },
+            { "value": "shield_check", "label": "Schild Haken" }
+          ],
+          "default": "leaf"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Text",
+          "default": "Natürliche Rohstoffe"
+        }
+      ]
+    },
+    {
+      "type": "compare_row",
+      "name": "Vergleichszeile",
+      "settings": [
+        {
+          "type": "text",
+          "id": "criterion",
+          "label": "Kriterium",
+          "default": "Reinheit >99%"
+        },
+        {
+          "type": "text",
+          "id": "ours",
+          "label": "LIFETIME",
+          "default": "✓"
+        },
+        {
+          "type": "text",
+          "id": "typical",
+          "label": "Typisch",
+          "default": "?"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "NMN V2 Sci Quality",
+      "settings": {
+        "heading": "Wissenschaft & Qualität",
+        "left_title": "Wirkungsweise",
+        "gif_url": "https://www.lifetime-health.de/cdn/shop/files/graph-nad-level-sinken-im-alter-v2.gif",
+        "gif_alt": "NAD+ sinkt mit dem Alter",
+        "right_title": "Qualität",
+        "pdf_label": "Prüfbericht ansehen →",
+        "pdf_url": "https://cdn.shopify.com/s/files/1/0621/2173/8340/files/Pruefbericht_L-24-04702.pdf",
+        "uthever_label": "Uthever®"
+      },
+      "blocks": [
+        {
+          "type": "study",
+          "settings": {
+            "headline": "NMN & NAD⁺-Spiegel",
+            "result": "NMN erhöhte NAD⁺-Spiegel signifikant bei Erwachsenen mittleren Alters.",
+            "source": "Yi et al., GeroScience 2022"
+          }
+        },
+        {
+          "type": "study",
+          "settings": {
+            "headline": "Ausdauer & Kraft",
+            "result": "Verbesserte aerobe Kapazität und Muskelkraft bei älteren Erwachsenen.",
+            "source": "Liao et al."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": { "icon": "leaf", "label": "Hochwertige Rohstoffauswahl" }
+        },
+        {
+          "type": "feature",
+          "settings": { "icon": "flask", "label": "Laborgeprüft in Deutschland" }
+        },
+        {
+          "type": "feature",
+          "settings": { "icon": "badge_check", "label": "Transparente Qualität" }
+        },
+        {
+          "type": "feature",
+          "settings": { "icon": "shield_check", "label": "GMP & HACCP" }
+        },
+        {
+          "type": "compare_row",
+          "settings": { "criterion": "Reinheit >99%", "ours": "✓", "typical": "?" }
+        },
+        {
+          "type": "compare_row",
+          "settings": { "criterion": "Made in Germany", "ours": "✓", "typical": "?" }
+        },
+        {
+          "type": "compare_row",
+          "settings": { "criterion": "Drittlabor COA", "ours": "✓", "typical": "✗" }
+        },
+        {
+          "type": "compare_row",
+          "settings": { "criterion": "Ohne Füllstoffe", "ours": "✓", "typical": "?" }
+        },
+        {
+          "type": "compare_row",
+          "settings": { "criterion": "90-Tage Garantie", "ours": "✓", "typical": "✗" }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,416 @@
+{% comment %}
+  NMN PDP alternative (product.13-2_nmn): FAQ Accordion.
+{% endcomment %}
+
+<div
+  class="nmn2-faq"
+  id="nmn2-faq-{{ section.id }}"
+  data-nmn2-faq
+  role="region"
+  aria-labelledby="nmn2-faq-heading-{{ section.id }}"
+>
+  <div class="nmn2-faq__inner container container--large">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="nmn2-faq__title" id="nmn2-faq-heading-{{ section.id }}">{{ section.settings.heading | escape }}</h2>
+    {%- endif -%}
+
+    <div class="nmn2-faq__list">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'item' -%}
+          <div class="nmn2-faq__item" data-nmn2-faq-item {{ block.shopify_attributes }}>
+            <button
+              type="button"
+              class="nmn2-faq__trigger"
+              data-nmn2-faq-trigger
+              id="nmn2-faq-btn-{{ block.id }}"
+              aria-expanded="false"
+              aria-controls="nmn2-faq-panel-{{ block.id }}"
+            >
+              <span class="nmn2-faq__trigger-inner">
+                <span class="nmn2-faq__question">
+                  {%- if block.settings.show_shield -%}
+                    <span class="nmn2-faq__shield" aria-hidden="true">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+                        <path d="m9 12 2 2 4-4"/>
+                      </svg>
+                    </span>
+                  {%- endif -%}
+                  <span class="nmn2-faq__question-text">{{ block.settings.question | escape }}</span>
+                </span>
+                <span class="nmn2-faq__icon" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+                    <path d="M12 5v14M5 12h14"/>
+                  </svg>
+                </span>
+              </span>
+            </button>
+            <div
+              class="nmn2-faq__panel"
+              id="nmn2-faq-panel-{{ block.id }}"
+              role="region"
+              aria-labelledby="nmn2-faq-btn-{{ block.id }}"
+            >
+              <div class="nmn2-faq__panel-measure">
+                <div class="nmn2-faq__answer rte">{{ block.settings.answer }}</div>
+              </div>
+            </div>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- if section.settings.footer_label != blank and section.settings.footer_url != blank -%}
+      <p class="nmn2-faq__footer">
+        <a class="nmn2-faq__footer-link" href="{{ section.settings.footer_url }}">{{ section.settings.footer_label | escape }}</a>
+      </p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+  .nmn2-faq {
+    padding-block: var(--space-9);
+    background: var(--color-surface-primary);
+  }
+
+  @media screen and (max-width: 749px) {
+    .nmn2-faq {
+      padding-block: var(--space-8);
+    }
+  }
+
+  .nmn2-faq__inner {
+    max-width: 45rem;
+    margin-inline: auto;
+  }
+
+  .nmn2-faq__title {
+    margin: 0 0 var(--space-7);
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    text-align: center;
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-faq__list {
+    border-top: 1px solid var(--color-border-default);
+  }
+
+  .nmn2-faq__item {
+    border-bottom: 1px solid var(--color-border-default);
+  }
+
+  .nmn2-faq__trigger {
+    width: 100%;
+    margin: 0;
+    padding: var(--space-5) 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    text-align: left;
+    color: inherit;
+    transition: color var(--ease-default);
+  }
+
+  .nmn2-faq__trigger:hover {
+    color: var(--color-teal-dark);
+  }
+
+  .nmn2-faq__trigger:focus-visible {
+    outline: 2px solid var(--color-teal-dark);
+    outline-offset: var(--space-2);
+    border-radius: var(--radius-sm);
+  }
+
+  .nmn2-faq__trigger-inner {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    width: 100%;
+  }
+
+  .nmn2-faq__question {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    min-width: 0;
+    flex: 1;
+  }
+
+  .nmn2-faq__shield {
+    flex-shrink: 0;
+    display: flex;
+    color: var(--color-teal-dark);
+    margin-top: var(--space-1);
+  }
+
+  .nmn2-faq__shield svg {
+    width: var(--space-5);
+    height: var(--space-5);
+  }
+
+  .nmn2-faq__question-text {
+    font-family: var(--font-heading);
+    font-size: var(--text-body-lg);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-tight);
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-faq__icon {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--space-6);
+    height: var(--space-6);
+    color: var(--color-teal-dark);
+    transition: transform var(--ease-default);
+  }
+
+  .nmn2-faq__icon svg {
+    width: var(--space-5);
+    height: var(--space-5);
+  }
+
+  .nmn2-faq__item.is-open .nmn2-faq__icon {
+    transform: rotate(45deg);
+  }
+
+  .nmn2-faq__panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nmn2-faq__panel {
+      transition-duration: 0.01ms;
+    }
+
+    .nmn2-faq__icon {
+      transition-duration: 0.01ms;
+    }
+  }
+
+  .nmn2-faq__item.is-open .nmn2-faq__panel {
+    grid-template-rows: 1fr;
+  }
+
+  .nmn2-faq__panel-measure {
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .nmn2-faq__answer {
+    padding: 0 0 var(--space-5);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+  }
+
+  .nmn2-faq__answer p {
+    margin: 0 0 var(--space-3);
+  }
+
+  .nmn2-faq__answer p:last-child {
+    margin-bottom: 0;
+  }
+
+  .nmn2-faq__answer a {
+    color: var(--color-teal-dark);
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+  }
+
+  .nmn2-faq__footer {
+    margin: var(--space-6) 0 0;
+    text-align: center;
+  }
+
+  .nmn2-faq__footer-link {
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-body);
+    color: var(--color-teal-dark);
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+    transition: color var(--ease-default);
+  }
+
+  .nmn2-faq__footer-link:hover,
+  .nmn2-faq__footer-link:focus-visible {
+    color: var(--color-dark);
+    outline: none;
+  }
+
+  .nmn2-faq__footer-link:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-surface-primary), 0 0 0 4px var(--color-teal-dark);
+    border-radius: var(--radius-sm);
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    function init(root) {
+      if (!root || root.dataset.nmn2FaqReady === 'true') return;
+      root.dataset.nmn2FaqReady = 'true';
+
+      root.querySelectorAll('[data-nmn2-faq-trigger]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var item = btn.closest('[data-nmn2-faq-item]');
+          if (!item) return;
+          var wasOpen = item.classList.contains('is-open');
+
+          root.querySelectorAll('[data-nmn2-faq-item]').forEach(function (i) {
+            i.classList.remove('is-open');
+            var b = i.querySelector('[data-nmn2-faq-trigger]');
+            if (b) b.setAttribute('aria-expanded', 'false');
+          });
+
+          if (!wasOpen) {
+            item.classList.add('is-open');
+            btn.setAttribute('aria-expanded', 'true');
+          }
+        });
+      });
+    }
+
+    document.querySelectorAll('[data-nmn2-faq]').forEach(init);
+    document.addEventListener('shopify:section:load', function (e) {
+      var r = e.target.querySelector('[data-nmn2-faq]');
+      if (r) init(r);
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "NMN V2 FAQ",
+  "tag": "section",
+  "class": "section-nmn2-faq",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Häufige Fragen"
+    },
+    {
+      "type": "text",
+      "id": "footer_label",
+      "label": "Link unter dem Accordion",
+      "default": "Weitere Fragen? Schreib uns →"
+    },
+    {
+      "type": "text",
+      "id": "footer_url",
+      "label": "Link-Ziel",
+      "default": "mailto:team@lifetime-health.de"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Eintrag",
+      "settings": [
+        {
+          "type": "checkbox",
+          "id": "show_shield",
+          "label": "Schild-Icon vor der Frage",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Frage",
+          "default": "Was bedeutet Novel Food?"
+        },
+        {
+          "type": "richtext",
+          "id": "answer",
+          "label": "Antwort",
+          "default": "<p>NMN ist in der EU als Novel Food eingestuft. Dieses Produkt wird daher nicht als Lebensmittel oder Nahrungsergänzungsmittel angeboten. Die Abgabe erfolgt ausschließlich zu Forschungs- und Analysezwecken.</p>"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "NMN V2 FAQ",
+      "settings": {
+        "heading": "Häufige Fragen",
+        "footer_label": "Weitere Fragen? Schreib uns →",
+        "footer_url": "mailto:team@lifetime-health.de"
+      },
+      "blocks": [
+        {
+          "type": "item",
+          "settings": {
+            "show_shield": false,
+            "question": "Was bedeutet Novel Food?",
+            "answer": "<p>NMN ist in der EU als Novel Food eingestuft. Dieses Produkt wird daher nicht als Lebensmittel oder Nahrungsergänzungsmittel angeboten. Die Abgabe erfolgt ausschließlich zu Forschungs- und Analysezwecken.</p>"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "question": "Wann spüre ich erste Ergebnisse?",
+            "answer": "<p>Erste messbare Veränderungen berichten viele nach 4 Wochen. Maximale Effekte entwickeln sich nach 3–4 Monaten kontinuierlicher Einnahme.</p>"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "question": "Wie nehme ich das Pulver ein?",
+            "answer": "<p>Morgens 1 Messlöffel (ca. 500 mg) in Wasser, Saft oder Smoothie einrühren. Der Messlöffel liegt dem Beutel bei.</p>"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "question": "Kann ich das Abo jederzeit kündigen?",
+            "answer": "<p>Ja, das Abo ist jederzeit flexibel anpassbar, pausierbar oder kündbar — direkt in deinem Kundenkonto, ohne Angabe von Gründen.</p>"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "question": "Was ist Uthever® NMN?",
+            "answer": "<p>Uthever® ist ein patentierter Markenrohstoff — klinisch untersucht, nach GMP hergestellt, mit öffentlich einsehbarem COA.</p>"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "question": "Ist NMN in Deutschland legal?",
+            "answer": "<p>Ja. NMN ist legal erhältlich und wird von LIFETIME zu Forschungs- und Analysezwecken angeboten.</p>"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "question": "Wie lange reicht ein Beutel?",
+            "answer": "<p>30 g enthält ca. 60 Portionen à 500 mg (1 Messlöffel). Das entspricht ca. 60 Tagen Versorgung — also 2 Monate pro Beutel.</p>"
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "show_shield": true,
+            "question": "Gilt die 90-Tage-Garantie auch für Abo-Bestellungen?",
+            "answer": "<p>Ja. Die 90-Tage Geld-zurück-Garantie gilt für alle Bestellungen — einmalig und Abo. Einfach E-Mail an <a href=\"mailto:team@lifetime-health.de\">team@lifetime-health.de</a>.</p>"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

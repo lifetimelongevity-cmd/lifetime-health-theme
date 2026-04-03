@@ -1,0 +1,218 @@
+{% comment %}
+  NMN PDP alternative (product.13-2_nmn): 90-Tage-Garantie Karte.
+{% endcomment %}
+
+<section
+  class="nmn2-guarantee"
+  id="nmn2-guarantee-{{ section.id }}"
+  {% if section.settings.stat_number != blank or section.settings.headline != blank %}
+    aria-labelledby="nmn2-guarantee-heading-{{ section.id }}"
+  {% else %}
+    aria-label="Garantie"
+  {% endif %}
+>
+  <div class="container container--large">
+    <div class="nmn2-guarantee__card">
+      <div class="nmn2-guarantee__icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+      </div>
+
+      {%- if section.settings.stat_number != blank or section.settings.headline != blank -%}
+        <h2 class="nmn2-guarantee__title" id="nmn2-guarantee-heading-{{ section.id }}">
+          {%- if section.settings.stat_number != blank -%}
+            <span class="nmn2-guarantee__stat">{{ section.settings.stat_number | escape }}</span>
+          {%- endif -%}
+          {%- if section.settings.headline != blank -%}
+            <span class="nmn2-guarantee__title-line">{{ section.settings.headline | escape }}</span>
+          {%- endif -%}
+        </h2>
+      {%- endif -%}
+
+      {%- if section.settings.body != blank -%}
+        <p class="nmn2-guarantee__body">{{ section.settings.body | escape }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.email != blank -%}
+        <p class="nmn2-guarantee__mail">
+          {%- if section.settings.email_prefix != blank -%}
+            <span class="nmn2-guarantee__mail-prefix">{{ section.settings.email_prefix | escape }}</span>
+          {%- endif -%}
+          <a class="nmn2-guarantee__mail-link" href="mailto:{{- section.settings.email | strip -}}">
+            {{- section.settings.email | escape -}}
+          </a>
+        </p>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .nmn2-guarantee {
+    padding-block: var(--space-9);
+    background: var(--color-surface-primary);
+  }
+
+  @media screen and (max-width: 749px) {
+    .nmn2-guarantee {
+      padding-block: var(--space-8);
+    }
+  }
+
+  .nmn2-guarantee__card {
+    max-width: 30rem;
+    margin-inline: auto;
+    padding: var(--space-8) var(--space-6);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    background: var(--color-surface-benefit);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-sm);
+  }
+
+  @media screen and (min-width: 750px) {
+    .nmn2-guarantee__card {
+      padding: var(--space-9) var(--space-7);
+    }
+  }
+
+  .nmn2-guarantee__icon {
+    display: flex;
+    color: var(--color-teal-dark);
+  }
+
+  .nmn2-guarantee__icon svg {
+    width: var(--space-7);
+    height: var(--space-7);
+  }
+
+  .nmn2-guarantee__title {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    max-width: 22rem;
+  }
+
+  .nmn2-guarantee__stat {
+    font-family: var(--font-heading);
+    font-size: var(--text-stat);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-stat);
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-guarantee__title-line {
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    color: var(--color-text-primary);
+    text-wrap: balance;
+  }
+
+  .nmn2-guarantee__body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+    max-width: 26rem;
+  }
+
+  .nmn2-guarantee__mail {
+    margin: var(--space-2) 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-body);
+    color: var(--color-text-secondary);
+  }
+
+  .nmn2-guarantee__mail-prefix {
+    font-weight: var(--weight-medium);
+  }
+
+  .nmn2-guarantee__mail-link {
+    font-weight: var(--weight-semibold);
+    color: var(--color-teal-dark);
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+    word-break: break-all;
+    transition: color var(--ease-default);
+  }
+
+  .nmn2-guarantee__mail-link:hover,
+  .nmn2-guarantee__mail-link:focus-visible {
+    color: var(--color-dark);
+    outline: none;
+  }
+
+  .nmn2-guarantee__mail-link:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-surface-benefit), 0 0 0 4px var(--color-teal-dark);
+    border-radius: var(--radius-sm);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "NMN V2 Guarantee",
+  "tag": "section",
+  "class": "section-nmn2-guarantee",
+  "settings": [
+    {
+      "type": "text",
+      "id": "stat_number",
+      "label": "Große Zahl",
+      "default": "90"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Zeile unter der Zahl",
+      "default": "Tage – Volle Geld-zurück-Garantie"
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Fließtext",
+      "default": "Nicht überzeugt? Wir erstatten jeden Cent — kein Kommentar, kein Kleingedrucktes."
+    },
+    {
+      "type": "text",
+      "id": "email_prefix",
+      "label": "Zeile vor E-Mail",
+      "default": "Einfach schreiben an:"
+    },
+    {
+      "type": "text",
+      "id": "email",
+      "label": "E-Mail-Adresse",
+      "default": "team@lifetime-health.de"
+    }
+  ],
+  "presets": [
+    {
+      "name": "NMN V2 Guarantee",
+      "settings": {
+        "stat_number": "90",
+        "headline": "Tage – Volle Geld-zurück-Garantie",
+        "body": "Nicht überzeugt? Wir erstatten jeden Cent — kein Kommentar, kein Kleingedrucktes.",
+        "email_prefix": "Einfach schreiben an:",
+        "email": "team@lifetime-health.de"
+      }
+    }
+  ]
+}
+{% endschema %}

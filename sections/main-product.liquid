@@ -3091,6 +3091,9 @@
                       <button
                         type="submit"
                         name="add"
+                        {% if lt_nmn_suffix_v2 %}
+                          id="hero-cta-button"
+                        {% endif %}
                         class="
                           add-to-cart button button--solid button--product button--loader button--move
                           {% unless current_variant.available %} disabled {% endunless %}
@@ -3751,6 +3754,11 @@
                         }
                         infoEl.textContent = base;
                       }
+
+                      var stickyBarPrice = document.querySelector('[data-nmn-v2-sticky-bar-price]');
+                      if (stickyBarPrice && mainEl) {
+                        stickyBarPrice.textContent = mainEl.textContent;
+                      }
                     }
 
                     function syncCta() {
@@ -3791,6 +3799,10 @@
                         if (ctaSticky) {
                           ctaSticky.textContent = cta.textContent;
                         }
+                        var ctaStickyBar = document.querySelector('[data-nmn-v2-sticky-bar-cta]');
+                        if (ctaStickyBar) {
+                          ctaStickyBar.textContent = cta.textContent;
+                        }
                         return;
                       }
                       cta.textContent = 'Jetzt bestellen';
@@ -3809,6 +3821,19 @@
                       }
                     }
 
+                    function syncNmnV2StickyBarChrome() {
+                      if (!isV2) return;
+                      var sbBtn = document.querySelector('[data-nmn-v2-sticky-bar-submit]');
+                      var hero = document.getElementById('hero-cta-button');
+                      if (!sbBtn || !hero) return;
+                      var dis =
+                        hero.disabled ||
+                        hero.classList.contains('disabled') ||
+                        hero.getAttribute('aria-disabled') === 'true';
+                      sbBtn.disabled = !!dis;
+                      sbBtn.setAttribute('aria-disabled', dis ? 'true' : 'false');
+                    }
+
                     function nmnRefreshPricingUi() {
                       syncNmnAllCardAndStickyPrices();
                       syncNmnSaveEuroLine();
@@ -3816,6 +3841,7 @@
                       syncNmnPerDay();
                       syncNmnV2Hero();
                       syncCta();
+                      syncNmnV2StickyBarChrome();
                     }
 
                     function setMode(mode) {

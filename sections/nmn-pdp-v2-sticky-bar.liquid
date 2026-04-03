@@ -1,0 +1,230 @@
+{% comment %}
+  NMN PDP alternative (product.13-2_nmn): Mobile Sticky-Leiste, sichtbar wenn Hero-CTA (#hero-cta-button) aus dem Viewport scrollt.
+{% endcomment %}
+
+{%- liquid
+  assign nmn2_sb_label = section.settings.aria_label
+  if nmn2_sb_label == blank
+    assign nmn2_sb_label = 'Schnellkauf'
+  endif
+-%}
+
+{%- if product -%}
+<div
+  class="nmn2-sticky-bar"
+  data-nmn-v2-sticky-bar
+  id="nmn2-sticky-bar-{{ section.id }}"
+  role="region"
+  aria-label="{{ nmn2_sb_label | escape }}"
+  aria-hidden="true"
+>
+  <div class="nmn2-sticky-bar__inner">
+    <div class="nmn2-sticky-bar__row container container--large">
+      <div class="nmn2-sticky-bar__left">
+        <span class="nmn2-sticky-bar__title">{{ product.title | escape }}</span>
+        <span class="nmn2-sticky-bar__price" data-nmn-v2-sticky-bar-price></span>
+      </div>
+      <button
+        type="button"
+        class="nmn2-sticky-bar__cta"
+        data-nmn-v2-sticky-bar-submit
+        data-nmn-v2-sticky-bar-cta
+      >
+        {{- 'products.page.add_to_cart_button' | t -}}
+      </button>
+    </div>
+  </div>
+</div>
+{%- endif -%}
+
+{% stylesheet %}
+  .nmn2-sticky-bar {
+    display: none;
+  }
+
+  @media screen and (max-width: 767px) {
+    .nmn2-sticky-bar {
+      display: block;
+    }
+  }
+
+  .nmn2-sticky-bar__inner {
+    position: fixed;
+    z-index: 100;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    min-height: var(--space-8);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    background: var(--color-surface-primary);
+    border-top: 1px solid var(--color-border-default);
+    box-shadow: var(--shadow-md);
+    visibility: hidden;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .nmn2-sticky-bar--visible .nmn2-sticky-bar__inner {
+    visibility: visible;
+    pointer-events: auto;
+    opacity: 1;
+  }
+
+  .nmn2-sticky-bar__row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    width: 100%;
+    padding-block: var(--space-3);
+    box-sizing: border-box;
+  }
+
+  .nmn2-sticky-bar__left {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .nmn2-sticky-bar__title {
+    display: block;
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-tight);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .nmn2-sticky-bar__price {
+    display: block;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-tight);
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-sticky-bar__cta {
+    flex-shrink: 0;
+    max-width: min(100%, 45vw);
+    margin: 0;
+    padding: var(--space-3) var(--space-4);
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-tight);
+    text-align: center;
+    background: var(--color-button-primary-bg);
+    color: var(--color-button-primary-text);
+    transition: opacity var(--ease-default);
+  }
+
+  .nmn2-sticky-bar__cta:hover:not(:disabled) {
+    opacity: 0.92;
+  }
+
+  .nmn2-sticky-bar__cta:focus-visible {
+    outline: 2px solid var(--color-teal-dark);
+    outline-offset: var(--space-1);
+  }
+
+  .nmn2-sticky-bar__cta:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    var observer = null;
+
+    function disconnectStickyObserver() {
+      if (observer) {
+        observer.disconnect();
+        observer = null;
+      }
+    }
+
+    function initStickyBar(root) {
+      if (!root) return;
+      disconnectStickyObserver();
+
+      var heroBtn = document.getElementById('hero-cta-button');
+      var body = document.body;
+
+      function setBarVisible(show) {
+        root.classList.toggle('nmn2-sticky-bar--visible', show);
+        root.setAttribute('aria-hidden', show ? 'false' : 'true');
+        body.classList.toggle('nmn2-sticky-bar-active', show);
+      }
+
+      setBarVisible(false);
+
+      if (!heroBtn || !('IntersectionObserver' in window)) return;
+
+      observer = new IntersectionObserver(
+        function (entries) {
+          var e = entries[0];
+          setBarVisible(!e.isIntersecting);
+        },
+        { root: null, threshold: 0, rootMargin: '0px' }
+      );
+      observer.observe(heroBtn);
+    }
+
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest('[data-nmn-v2-sticky-bar-submit]');
+      if (!t) return;
+      var hero = document.getElementById('hero-cta-button');
+      if (!hero || hero.disabled || hero.classList.contains('disabled')) return;
+      hero.click();
+    });
+
+    document.querySelectorAll('[data-nmn-v2-sticky-bar]').forEach(initStickyBar);
+
+    document.addEventListener('shopify:section:load', function (e) {
+      var sticky = document.querySelector('[data-nmn-v2-sticky-bar]');
+      if (sticky && e.target.querySelector && e.target.querySelector('#hero-cta-button')) {
+        initStickyBar(sticky);
+      }
+      var r = e.target.querySelector('[data-nmn-v2-sticky-bar]');
+      if (r) initStickyBar(r);
+    });
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "NMN V2 Sticky Bar",
+  "tag": "section",
+  "class": "section-nmn2-sticky-bar",
+  "settings": [
+    {
+      "type": "text",
+      "id": "aria_label",
+      "label": "Bereichsname (Barrierefreiheit)",
+      "default": "Schnellkauf"
+    }
+  ],
+  "presets": [
+    {
+      "name": "NMN V2 Sticky Bar",
+      "settings": {
+        "aria_label": "Schnellkauf"
+      }
+    }
+  ]
+}
+{% endschema %}
