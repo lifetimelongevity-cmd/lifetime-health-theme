@@ -1,0 +1,955 @@
+<div class="ckb-section" id="section-{{ section.id }}">
+  <div class="ckb-container">
+    <div class="ckb-card">
+
+      {%- comment -%} LEFT COLUMN — text content {%- endcomment -%}
+      <div class="ckb-content">
+        <div class="ckb-text-block">
+          <h2 class="ckb-heading">{{ section.settings.heading | escape }}</h2>
+          <p class="ckb-subheading">{{ section.settings.subheading | escape }}</p>
+        </div>
+
+        <figure class="ckb-quote">
+          <blockquote>
+            <p class="ckb-quote-body">{{ section.settings.quote_text | escape }}</p>
+          </blockquote>
+          <figcaption class="ckb-author">
+            {%- if section.settings.author_image != blank -%}
+              <div class="ckb-avatar">
+                {{
+                  section.settings.author_image
+                  | image_url: width: 84
+                  | image_tag:
+                    width: 42,
+                    height: 42,
+                    loading: 'lazy',
+                    alt: section.settings.author_name | escape
+                }}
+              </div>
+            {%- endif -%}
+            <div class="ckb-author-info">
+              <span class="ckb-author-name">{{ section.settings.author_name | escape }}</span>
+              <span class="ckb-author-role">{{ section.settings.author_role | escape }}</span>
+            </div>
+          </figcaption>
+        </figure>
+      </div>
+
+      {%- comment -%} RIGHT COLUMN — background + IDE mockup {%- endcomment -%}
+      <div class="ckb-visual">
+        {%- if section.settings.background_image != blank -%}
+          <div class="ckb-visual-bg" aria-hidden="true">
+            {{
+              section.settings.background_image
+              | image_url: width: 1600
+              | image_tag:
+                loading: 'lazy',
+                class: 'ckb-bg-img',
+                alt: ''
+            }}
+          </div>
+        {%- endif -%}
+
+        {%- comment -%} IDE Window Mockup {%- endcomment -%}
+        <div class="ckb-ide" aria-hidden="true">
+
+          {%- comment -%} Title bar {%- endcomment -%}
+          <div class="ckb-ide__titlebar">
+            <div class="ckb-ide__dots">
+              <span class="ckb-ide__dot"></span>
+              <span class="ckb-ide__dot"></span>
+              <span class="ckb-ide__dot"></span>
+            </div>
+            <span class="ckb-ide__title">{{ section.settings.ide_window_title | default: 'Cursor' | escape }}</span>
+            <div class="ckb-ide__actions"></div>
+          </div>
+
+          {%- comment -%} IDE Body {%- endcomment -%}
+          <div class="ckb-ide__body">
+
+            {%- comment -%} Sidebar {%- endcomment -%}
+            <aside class="ckb-ide__sidebar">
+              <div class="ckb-ide__sidebar-group">
+                <div class="ckb-ide__group-label">
+                  {{ 'sections.cursor_kb.in_progress' | t }}
+                  <span class="ckb-ide__group-count">{{ section.settings.ide_in_progress_count | default: 3 }}</span>
+                </div>
+                {%- for block in section.blocks -%}
+                  {%- if block.type == 'task_in_progress' -%}
+                    <div class="ckb-ide__task" {{ block.shopify_attributes }}>
+                      <span class="ckb-ide__task-icon">
+                        <svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M136,32V64a8,8,0,0,1-16,0V32a8,8,0,0,1,16,0Zm37.25,58.75a8,8,0,0,0,5.66-2.35l22.63-22.62a8,8,0,0,0-11.32-11.32L167.6,77.09a8,8,0,0,0,5.65,13.66ZM224,120H192a8,8,0,0,0,0,16h32a8,8,0,0,0,0-16Zm-45.09,47.6a8,8,0,0,0-11.31,11.31l22.62,22.63a8,8,0,0,0,11.32-11.32ZM128,184a8,8,0,0,0-8,8v32a8,8,0,0,0,16,0V192A8,8,0,0,0,128,184ZM77.09,167.6,54.46,190.22a8,8,0,0,0,11.32,11.32L88.4,178.91A8,8,0,0,0,77.09,167.6ZM72,128a8,8,0,0,0-8-8H32a8,8,0,0,0,0,16H64A8,8,0,0,0,72,128ZM65.78,54.46A8,8,0,0,0,54.46,65.78L77.09,88.4A8,8,0,0,0,88.4,77.09Z"/></svg>
+                      </span>
+                      <div class="ckb-ide__task-info">
+                        <span class="ckb-ide__task-name">{{ block.settings.task_name | escape }}</span>
+                        <span class="ckb-ide__task-status">{{ block.settings.task_status | escape }}</span>
+                      </div>
+                    </div>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+
+              <div class="ckb-ide__sidebar-group">
+                <div class="ckb-ide__group-label">
+                  {{ 'sections.cursor_kb.ready_for_review' | t }}
+                  <span class="ckb-ide__group-count">{{ section.settings.ide_review_count | default: 3 }}</span>
+                </div>
+                {%- for block in section.blocks -%}
+                  {%- if block.type == 'task_review' -%}
+                    <div class="ckb-ide__task" {{ block.shopify_attributes }}>
+                      <span class="ckb-ide__task-icon ckb-ide__task-icon--done">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M8 13.9766C4.70117 13.9766 2.02344 11.2988 2.02344 8C2.02344 4.70117 4.70117 2.02344 8 2.02344C11.2988 2.02344 13.9766 4.70117 13.9766 8C13.9766 11.2988 11.2988 13.9766 8 13.9766ZM8 12.9805C10.7539 12.9805 12.9805 10.7539 12.9805 8C12.9805 5.24609 10.7539 3.01953 8 3.01953C5.24609 3.01953 3.01953 5.24609 3.01953 8C3.01953 10.7539 5.24609 12.9805 8 12.9805ZM7.35547 10.7832C7.16211 10.7832 7.00391 10.7012 6.85742 10.5078L5.42773 8.75C5.3457 8.63867 5.29297 8.51562 5.29297 8.38672C5.29297 8.12891 5.49219 7.92383 5.74414 7.92383C5.9082 7.92383 6.03711 7.9707 6.17773 8.1582L7.33203 9.65234L9.76367 5.75C9.875 5.58008 10.0215 5.48633 10.168 5.48633C10.4141 5.48633 10.6484 5.65625 10.6484 5.91992C10.6484 6.04883 10.5723 6.17773 10.5078 6.29492L7.83008 10.5078C7.71289 10.6895 7.54883 10.7832 7.35547 10.7832Z"/></svg>
+                      </span>
+                      <div class="ckb-ide__task-info">
+                        <div class="ckb-ide__task-row">
+                          <span class="ckb-ide__task-name">{{ block.settings.task_name | escape }}</span>
+                          <span class="ckb-ide__task-time">{{ block.settings.task_time | escape }}</span>
+                        </div>
+                        <div class="ckb-ide__task-meta">
+                          {%- if block.settings.task_additions != blank or block.settings.task_deletions != blank -%}
+                            <span class="ckb-ide__additions">+{{ block.settings.task_additions }}</span>
+                            <span class="ckb-ide__deletions">-{{ block.settings.task_deletions }}</span>
+                            <span class="ckb-ide__dot-sep">·</span>
+                          {%- endif -%}
+                          <span class="ckb-ide__task-sub">{{ block.settings.task_subtitle | default: block.settings.task_name | escape }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </aside>
+
+            {%- comment -%} Main panel {%- endcomment -%}
+            <div class="ckb-ide__main">
+              <div class="ckb-ide__main-header">
+                <span>{{ section.settings.ide_chat_title | escape }}</span>
+              </div>
+              <div class="ckb-ide__chat">
+                <div class="ckb-ide__chat-prompt">
+                  {{ section.settings.ide_prompt_text | escape }}
+                </div>
+                {%- for block in section.blocks -%}
+                  {%- if block.type == 'chat_message' -%}
+                    <div class="ckb-ide__msg" {{ block.shopify_attributes }}>{{ block.settings.message | escape }}</div>
+                  {%- endif -%}
+                  {%- if block.type == 'chat_file' -%}
+                    <div class="ckb-ide__file" {{ block.shopify_attributes }}>
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M4.14746 12.7578C3.03564 12.7578 2.48242 12.1992 2.48242 11.0767V2.92871C2.48242 1.81152 3.04102 1.24219 4.14746 1.24219H6.69873C7.30029 1.24219 7.63867 1.3335 8.04688 1.75244L11.0063 4.76562C11.436 5.20605 11.5166 5.50684 11.5166 6.19971V11.0767C11.5166 12.1938 10.9634 12.7578 9.85156 12.7578H4.14746ZM4.18506 11.8931H9.80859C10.3672 11.8931 10.6519 11.5977 10.6519 11.0605V6.2373H7.59033C6.91895 6.2373 6.58057 5.9043 6.58057 5.22754V2.10693H4.19043C3.63184 2.10693 3.34717 2.41309 3.34717 2.94482V11.0605C3.34717 11.5977 3.63184 11.8931 4.18506 11.8931ZM7.68701 5.42627H10.4854L7.3916 2.27344V5.12549C7.3916 5.34033 7.47217 5.42627 7.68701 5.42627Z"/></svg>
+                      <span class="ckb-ide__file-name">{{ block.settings.file_name | escape }}</span>
+                      {%- if block.settings.additions != blank -%}
+                        <span class="ckb-ide__additions">+{{ block.settings.additions }}</span>
+                        <span class="ckb-ide__deletions">-{{ block.settings.deletions }}</span>
+                      {%- endif -%}
+                    </div>
+                  {%- endif -%}
+                {%- endfor -%}
+                <div class="ckb-ide__features">
+                  {%- for block in section.blocks -%}
+                    {%- if block.type == 'feature_item' -%}
+                      <div class="ckb-ide__feature" {{ block.shopify_attributes }}>
+                        <span class="ckb-ide__feature-bullet">•</span>
+                        <span><strong>{{ block.settings.feature_label | escape }}</strong>{{ block.settings.feature_desc | prepend: ': ' | escape }}</span>
+                      </div>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </div>
+              </div>
+              <div class="ckb-ide__input">
+                <span class="ckb-ide__input-placeholder">{{ section.settings.ide_input_placeholder | default: 'Plan, search, build anything...' | escape }}</span>
+                <div class="ckb-ide__input-actions">
+                  <span class="ckb-ide__btn-pill">
+                    <svg width="12" height="12" viewBox="0 0 24.7969 11.3555" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M0 5.67188C0 9.11719 2.13281 11.3438 5.30859 11.3438C6.98438 11.3438 8.41406 10.6406 9.9375 9.17578L12.2227 6.96094L14.5078 9.17578C16.0312 10.6406 17.4609 11.3438 19.1367 11.3438C22.3125 11.3438 24.4453 9.11719 24.4453 5.67188C24.4453 2.22656 22.3125 0 19.1367 0C17.4609 0 16.0312 0.703125 14.5078 2.16797L12.2227 4.38281L9.9375 2.16797C8.41406 0.703125 6.98438 0 5.30859 0C2.13281 0 0 2.22656 0 5.67188ZM1.91016 5.67188C1.91016 3.36328 3.28125 1.91016 5.30859 1.91016C6.44531 1.91016 7.45312 2.44922 8.60156 3.52734L10.8867 5.67188L8.60156 7.81641C7.45312 8.89453 6.44531 9.43359 5.30859 9.43359C3.28125 9.43359 1.91016 7.98047 1.91016 5.67188ZM13.5586 5.67188L15.8438 3.52734C16.9922 2.44922 18 1.91016 19.1367 1.91016C21.1641 1.91016 22.5352 3.36328 22.5352 5.67188C22.5352 7.98047 21.1641 9.43359 19.1367 9.43359C18 9.43359 16.9922 8.89453 15.8438 7.81641Z"/></svg>
+                    Agent
+                  </span>
+                  <span class="ckb-ide__btn-ghost">Composer 2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+/* =====================================================
+   Cursor Knowledge Base Section — cursor-knowledge-base.liquid
+   ===================================================== */
+
+.ckb-section {
+  padding: 60px 0;
+  background: var(--color-background-main, #fff);
+}
+
+.ckb-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Card */
+.ckb-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 560px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 4px 24px rgba(0,0,0,.06);
+  background: var(--color-background-main, #fafaf9);
+}
+
+/* Left column */
+.ckb-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 56px 48px 56px 52px;
+  gap: 28px;
+}
+
+.ckb-heading {
+  font-size: clamp(1.5rem, 2.2vw, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -.02em;
+  color: var(--color-foreground-main, #111);
+  margin: 0 0 8px;
+}
+
+.ckb-subheading {
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--color-secondary-text-main, #666);
+  margin: 0;
+}
+
+/* Quote */
+.ckb-quote {
+  margin: 0;
+  border-left: 2px solid rgba(0,0,0,.15);
+  padding-left: 20px;
+}
+
+.ckb-quote-body {
+  font-size: .9375rem;
+  line-height: 1.6;
+  color: var(--color-foreground-main, #111);
+  margin: 0 0 16px;
+}
+
+.ckb-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ckb-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 2px solid rgba(0,0,0,.08);
+}
+
+.ckb-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ckb-author-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ckb-author-name {
+  font-size: .875rem;
+  font-weight: 600;
+  color: var(--color-foreground-main, #111);
+}
+
+.ckb-author-role {
+  font-size: .8125rem;
+  color: var(--color-secondary-text-main, #666);
+}
+
+/* Right column */
+.ckb-visual {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+}
+
+.ckb-visual-bg {
+  position: absolute;
+  inset: 0;
+}
+
+.ckb-bg-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.05);
+}
+
+/* IDE Mockup */
+.ckb-ide {
+  position: relative;
+  z-index: 2;
+  width: min(640px, 90%);
+  background: #1e1e1e;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 28px 70px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.08);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 12px;
+  color: #ccc;
+  margin: 32px;
+}
+
+/* Titlebar */
+.ckb-ide__titlebar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  padding: 0 10px;
+  background: #252525;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+  position: relative;
+}
+
+.ckb-ide__dots {
+  display: flex;
+  gap: 6px;
+}
+
+.ckb-ide__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.18);
+}
+
+.ckb-ide__title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: rgba(255,255,255,.5);
+  white-space: nowrap;
+}
+
+.ckb-ide__actions {
+  width: 40px;
+}
+
+/* Body */
+.ckb-ide__body {
+  display: flex;
+  height: 460px;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.ckb-ide__sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: #1a1a1a;
+  border-right: 1px solid rgba(255,255,255,.06);
+  overflow-y: auto;
+  padding: 4px 0;
+}
+
+.ckb-ide__sidebar-group {
+  padding: 8px 0;
+}
+
+.ckb-ide__group-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.35);
+  padding: 4px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ckb-ide__group-count {
+  opacity: .4;
+}
+
+.ckb-ide__task {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: default;
+}
+
+.ckb-ide__task-icon {
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: rgba(255,255,255,.35);
+  margin-top: 1px;
+}
+
+.ckb-ide__task-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ckb-ide__task-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.ckb-ide__task-name {
+  font-size: 11.5px;
+  color: rgba(255,255,255,.55);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 130px;
+  display: block;
+}
+
+.ckb-ide__task-status,
+.ckb-ide__task-sub {
+  font-size: 10.5px;
+  color: rgba(255,255,255,.28);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 145px;
+  display: block;
+}
+
+.ckb-ide__task-time {
+  font-size: 10.5px;
+  color: rgba(255,255,255,.28);
+  flex-shrink: 0;
+}
+
+.ckb-ide__task-meta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10.5px;
+}
+
+.ckb-ide__additions {
+  color: #4ec9a0;
+  font-variant-numeric: tabular-nums;
+}
+
+.ckb-ide__deletions {
+  color: #f48771;
+  font-variant-numeric: tabular-nums;
+}
+
+.ckb-ide__dot-sep {
+  color: rgba(255,255,255,.2);
+}
+
+/* Main panel */
+.ckb-ide__main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #1e1e1e;
+  min-width: 0;
+}
+
+.ckb-ide__main-header {
+  height: 32px;
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(255,255,255,.75);
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.ckb-ide__chat {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.1) transparent;
+}
+
+.ckb-ide__chat-prompt {
+  background: #2a2a2a;
+  border: 1px solid rgba(255,255,255,.09);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: rgba(255,255,255,.8);
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+
+.ckb-ide__msg {
+  font-size: 11.5px;
+  color: rgba(255,255,255,.5);
+  line-height: 1.5;
+  padding: 2px 4px;
+}
+
+.ckb-ide__file {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #252525;
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 11.5px;
+  color: rgba(255,255,255,.65);
+  cursor: default;
+}
+
+.ckb-ide__file svg {
+  flex-shrink: 0;
+  color: rgba(255,255,255,.35);
+}
+
+.ckb-ide__file-name {
+  font-weight: 600;
+}
+
+.ckb-ide__features {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.ckb-ide__feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11.5px;
+  color: rgba(255,255,255,.65);
+  line-height: 1.5;
+}
+
+.ckb-ide__feature-bullet {
+  color: rgba(255,255,255,.3);
+  flex-shrink: 0;
+}
+
+/* Input bar */
+.ckb-ide__input {
+  padding: 10px 14px;
+  border-top: 1px solid rgba(255,255,255,.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: #1e1e1e;
+}
+
+.ckb-ide__input-placeholder {
+  font-size: 11.5px;
+  color: rgba(255,255,255,.22);
+  flex: 1;
+}
+
+.ckb-ide__input-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.ckb-ide__btn-pill {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: 99px;
+  background: rgba(255,255,255,.07);
+  font-size: 11px;
+  color: rgba(255,255,255,.5);
+  cursor: default;
+}
+
+.ckb-ide__btn-ghost {
+  font-size: 11px;
+  color: rgba(255,255,255,.38);
+  cursor: default;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .ckb-card {
+    grid-template-columns: 1fr;
+  }
+
+  .ckb-content {
+    padding: 40px 32px;
+  }
+
+  .ckb-visual {
+    min-height: 420px;
+  }
+
+  .ckb-ide {
+    width: min(560px, 92%);
+    margin: 24px auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .ckb-section {
+    padding: 40px 0;
+  }
+
+  .ckb-container {
+    padding: 0 16px;
+  }
+
+  .ckb-content {
+    padding: 32px 20px;
+  }
+
+  .ckb-ide__body {
+    height: 380px;
+  }
+
+  .ckb-ide__sidebar {
+    display: none;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Cursor Knowledge Base",
+  "tag": "section",
+  "class": "cursor-knowledge-base",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Linke Spalte — Text"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Deine Wissensdatenbank fürs Engineering"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Unterüberschrift",
+      "default": "Ausgelegt für komplexe Codebasen, an denen Tausende von Entwicklern arbeiten."
+    },
+    {
+      "type": "header",
+      "content": "Testimonial"
+    },
+    {
+      "type": "textarea",
+      "id": "quote_text",
+      "label": "Zitat",
+      "default": "Über alle Rollen und Erfahrungsstufen hinweg sehen wir einen Anstieg des PR-Volumens um über 25 % und der durchschnittlichen PR-Größe um über 100 %. Zusammengenommen bedeutet das, dass wir rund 50 % mehr Code ausliefern."
+    },
+    {
+      "type": "image_picker",
+      "id": "author_image",
+      "label": "Autorenfoto"
+    },
+    {
+      "type": "text",
+      "id": "author_name",
+      "label": "Name",
+      "default": "Anton Andreev"
+    },
+    {
+      "type": "text",
+      "id": "author_role",
+      "label": "Position",
+      "default": "Principal Software Engineer, Upwork"
+    },
+    {
+      "type": "header",
+      "content": "Rechte Spalte — IDE Mockup"
+    },
+    {
+      "type": "image_picker",
+      "id": "background_image",
+      "label": "Hintergrundbild"
+    },
+    {
+      "type": "text",
+      "id": "ide_window_title",
+      "label": "Fenstertitel",
+      "default": "Cursor"
+    },
+    {
+      "type": "number",
+      "id": "ide_in_progress_count",
+      "label": "Anzahl \"In Bearbeitung\"",
+      "default": 3
+    },
+    {
+      "type": "number",
+      "id": "ide_review_count",
+      "label": "Anzahl \"Bereit für Review\"",
+      "default": 3
+    },
+    {
+      "type": "text",
+      "id": "ide_chat_title",
+      "label": "Chat-Panel Titel",
+      "default": "Autonome Flottendisposition"
+    },
+    {
+      "type": "textarea",
+      "id": "ide_prompt_text",
+      "label": "Prompt-Text im Chat",
+      "default": "Ein Dispatcher-Pattern für Ride-Matching mit Geofence-Validierung, Result-basierter Fehlerbehandlung und Fluent-Builder-API implementieren"
+    },
+    {
+      "type": "text",
+      "id": "ide_input_placeholder",
+      "label": "Eingabefeld Platzhalter",
+      "default": "Planen, suchen, alles erstellen..."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "task_in_progress",
+      "name": "Aufgabe — In Bearbeitung",
+      "settings": [
+        {
+          "type": "text",
+          "id": "task_name",
+          "label": "Aufgabenname",
+          "default": "Landingpage erstellen"
+        },
+        {
+          "type": "text",
+          "id": "task_status",
+          "label": "Status",
+          "default": "Reading docs"
+        }
+      ]
+    },
+    {
+      "type": "task_review",
+      "name": "Aufgabe — Bereit für Review",
+      "settings": [
+        {
+          "type": "text",
+          "id": "task_name",
+          "label": "Aufgabenname",
+          "default": "PyTorch-MNIST-Experimente"
+        },
+        {
+          "type": "text",
+          "id": "task_subtitle",
+          "label": "Untertitel",
+          "default": "PyTorch-MNIST-Experimente"
+        },
+        {
+          "type": "text",
+          "id": "task_time",
+          "label": "Zeitangabe (z.B. 10m)",
+          "default": "10m"
+        },
+        {
+          "type": "text",
+          "id": "task_additions",
+          "label": "Hinzugefügte Zeilen (z.B. 135)",
+          "default": ""
+        },
+        {
+          "type": "text",
+          "id": "task_deletions",
+          "label": "Gelöschte Zeilen (z.B. 21)",
+          "default": ""
+        }
+      ]
+    },
+    {
+      "type": "chat_message",
+      "name": "Chat-Nachricht",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "message",
+          "label": "Nachrichtentext",
+          "default": "Ich implementiere ein asynchrones Dispatcher-Pattern…"
+        }
+      ]
+    },
+    {
+      "type": "chat_file",
+      "name": "Dateiänderung",
+      "settings": [
+        {
+          "type": "text",
+          "id": "file_name",
+          "label": "Dateiname",
+          "default": "builder.rs"
+        },
+        {
+          "type": "text",
+          "id": "additions",
+          "label": "Hinzugefügte Zeilen",
+          "default": "89"
+        },
+        {
+          "type": "text",
+          "id": "deletions",
+          "label": "Gelöschte Zeilen",
+          "default": "12"
+        }
+      ]
+    },
+    {
+      "type": "feature_item",
+      "name": "Feature-Punkt",
+      "settings": [
+        {
+          "type": "text",
+          "id": "feature_label",
+          "label": "Label (fett)",
+          "default": "Haversine"
+        },
+        {
+          "type": "text",
+          "id": "feature_desc",
+          "label": "Beschreibung",
+          "default": "Präzise Großkreisdistanz für die Geofence-Validierung"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Cursor Knowledge Base",
+      "blocks": [
+        {
+          "type": "task_in_progress",
+          "settings": {
+            "task_name": "Landingpage erstellen",
+            "task_status": "Reading docs"
+          }
+        },
+        {
+          "type": "task_in_progress",
+          "settings": {
+            "task_name": "Nutzungsmuster von Tab und Agent analysieren",
+            "task_status": "Fetching data"
+          }
+        },
+        {
+          "type": "task_in_progress",
+          "settings": {
+            "task_name": "Mission Control planen",
+            "task_status": "Generating plan"
+          }
+        },
+        {
+          "type": "task_review",
+          "settings": {
+            "task_name": "PyTorch-MNIST-Experimente",
+            "task_subtitle": "PyTorch-MNIST-Experimente",
+            "task_time": "10m"
+          }
+        },
+        {
+          "type": "task_review",
+          "settings": {
+            "task_name": "Cursor-Regeln für das Dashboard einrichten",
+            "task_subtitle": "Cursor-Regeln für das Dashb...",
+            "task_time": "30m"
+          }
+        },
+        {
+          "type": "task_review",
+          "settings": {
+            "task_name": "Bioinformatik-Tools",
+            "task_subtitle": "Bioinformatik-Tools",
+            "task_time": "45m",
+            "task_additions": "135",
+            "task_deletions": "21"
+          }
+        },
+        {
+          "type": "chat_message",
+          "settings": {
+            "message": "Ich implementiere ein asynchrones Dispatcher-Pattern mit Rusts Result-Typ und thiserror für eine ergonomische Fehlerbehandlung sowie eine Fluent-Builder-API."
+          }
+        },
+        {
+          "type": "chat_file",
+          "settings": {
+            "file_name": "builder.rs",
+            "additions": "89",
+            "deletions": "12"
+          }
+        },
+        {
+          "type": "chat_file",
+          "settings": {
+            "file_name": "mod.rs",
+            "additions": "24",
+            "deletions": "0"
+          }
+        },
+        {
+          "type": "feature_item",
+          "settings": {
+            "feature_label": "#[must_use]",
+            "feature_desc": "Compiler-Warnungen für ungenutzte Results verhindern unbemerkte Fehler"
+          }
+        },
+        {
+          "type": "feature_item",
+          "settings": {
+            "feature_label": "Haversine",
+            "feature_desc": "Präzise Großkreisdistanz für die Geofence-Validierung"
+          }
+        },
+        {
+          "type": "feature_item",
+          "settings": {
+            "feature_label": "sqlx",
+            "feature_desc": "Zur Compile-Zeit geprüfte SQL-Abfragen mit PostGIS für räumliche Lookups"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
