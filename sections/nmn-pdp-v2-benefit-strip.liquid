@@ -1,5 +1,5 @@
 {% comment %}
-  NMN PDP alternative (product.13-2_nmn): benefit strip — 4 cols desktop, 2 cols mobile.
+  NMN PDP alternative (product.13-2_nmn): Benefit-Strip — Karten mit optionalen Literatur-Popups (native dialog).
 {% endcomment %}
 
 {%- liquid
@@ -7,12 +7,18 @@
   if section.settings.surface == 'dark'
     assign nmn2_bs_dark = true
   endif
+  assign nmn2_heading_sr_only = false
+  if section.settings.heading_mode == 'sr_only'
+    assign nmn2_heading_sr_only = true
+  endif
+  assign nmn2_foot = 0
 -%}
 
 <div
   class="nmn2-benefit-strip{% if nmn2_bs_dark %} nmn2-benefit-strip--surface-dark{% endif %}"
   id="nmn2-benefit-strip-{{ section.id }}"
   role="region"
+  data-nmn2-benefit-strip
   {% if section.settings.heading != blank %}
     aria-labelledby="nmn2-benefit-strip-heading-{{ section.id }}"
   {% else %}
@@ -22,32 +28,115 @@
   <div class="container container--large">
     {%- if section.settings.heading != blank -%}
       <h2
-        class="nmn2-benefit-strip__heading visually-hidden"
+        class="nmn2-benefit-strip__heading{% if nmn2_heading_sr_only %} visually-hidden{% endif %}"
         id="nmn2-benefit-strip-heading-{{ section.id }}"
       >
         {{- section.settings.heading | escape -}}
       </h2>
     {%- endif -%}
+
     <ul class="nmn2-benefit-strip__grid" role="list">
       {%- for block in section.blocks -%}
         {%- case block.type -%}
           {%- when 'benefit' -%}
+            {%- liquid
+              assign nmn2_show_source = false
+              if block.settings.source_note != blank
+                assign nmn2_show_source = true
+                assign nmn2_foot = nmn2_foot | plus: 1
+                assign nmn2_this_foot = nmn2_foot
+              endif
+            -%}
             <li class="nmn2-benefit-strip__cell" {{ block.shopify_attributes }}>
-              {%- if block.settings.icon_svg != blank -%}
-                <div class="nmn2-benefit-strip__icon-wrap" aria-hidden="true">
-                  {{ block.settings.icon_svg }}
-                </div>
-              {%- endif -%}
-              {%- if block.settings.title != blank -%}
-                <h3 class="nmn2-benefit-strip__title">{{ block.settings.title | escape }}</h3>
-              {%- endif -%}
-              {%- if block.settings.text != blank -%}
-                <p class="nmn2-benefit-strip__text">{{ block.settings.text | escape }}</p>
-              {%- endif -%}
+              <div class="nmn2-benefit-strip__card">
+                {%- if block.settings.icon_svg != blank -%}
+                  <div class="nmn2-benefit-strip__icon-wrap" aria-hidden="true">
+                    {{ block.settings.icon_svg }}
+                  </div>
+                {%- endif -%}
+                {%- if block.settings.title != blank -%}
+                  <h3 class="nmn2-benefit-strip__title">{{ block.settings.title | escape }}</h3>
+                {%- endif -%}
+                {%- if block.settings.text != blank -%}
+                  <p class="nmn2-benefit-strip__text">{{ block.settings.text | escape }}</p>
+                {%- endif -%}
+
+                {%- if nmn2_show_source -%}
+                  <div class="nmn2-benefit-strip__fn-row">
+                    <button
+                      type="button"
+                      class="nmn2-benefit-strip__fn"
+                      data-nmn2-benefit-source-open
+                      aria-haspopup="dialog"
+                      aria-controls="nmn2-benefit-dialog-{{ section.id }}-{{ block.id }}"
+                      id="nmn2-benefit-trigger-{{ section.id }}-{{ block.id }}"
+                    >
+                      <span class="nmn2-benefit-strip__fn-label">{{ section.settings.source_button_label | escape }}</span>
+                      <span class="nmn2-benefit-strip__fn-mark" aria-hidden="true">{{ nmn2_this_foot }}</span>
+                    </button>
+                  </div>
+                {%- endif -%}
+              </div>
             </li>
         {%- endcase -%}
       {%- endfor -%}
     </ul>
+
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'benefit' and block.settings.source_note != blank -%}
+        <dialog
+          class="nmn2-benefit-strip__dialog"
+          id="nmn2-benefit-dialog-{{ section.id }}-{{ block.id }}"
+          aria-labelledby="nmn2-benefit-dlg-title-{{ section.id }}-{{ block.id }}"
+          aria-modal="true"
+        >
+          <div class="nmn2-benefit-strip__dialog-panel">
+            <div class="nmn2-benefit-strip__dialog-head">
+              <h2
+                class="nmn2-benefit-strip__dialog-title"
+                id="nmn2-benefit-dlg-title-{{ section.id }}-{{ block.id }}"
+                tabindex="-1"
+              >
+                {{- section.settings.source_popup_title | escape -}}
+                {%- if block.settings.title != blank -%}
+                  <span class="nmn2-benefit-strip__dialog-title-sub">
+                    {{- block.settings.title | escape -}}
+                  </span>
+                {%- endif -%}
+              </h2>
+              <button
+                type="button"
+                class="nmn2-benefit-strip__dialog-close"
+                data-nmn2-benefit-source-close
+                aria-label="{{ section.settings.source_close_label | escape }}"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true" class="nmn2-benefit-strip__dialog-close-icon">
+                  <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+            <div class="nmn2-benefit-strip__dialog-body rte">
+              {{ block.settings.source_note }}
+            </div>
+            {%- if block.settings.source_url != blank -%}
+              <p class="nmn2-benefit-strip__dialog-link-wrap">
+                <a
+                  class="nmn2-benefit-strip__dialog-link"
+                  href="{{ block.settings.source_url }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{- block.settings.source_link_label | escape -}}
+                </a>
+              </p>
+            {%- endif -%}
+            {%- if section.settings.source_popup_footer != blank -%}
+              <p class="nmn2-benefit-strip__dialog-foot">{{ section.settings.source_popup_footer | escape }}</p>
+            {%- endif -%}
+          </div>
+        </dialog>
+      {%- endif -%}
+    {%- endfor -%}
   </div>
 </div>
 
@@ -68,13 +157,16 @@
   }
 
   .nmn2-benefit-strip__heading {
-    margin: 0 0 var(--space-6);
+    margin: 0 0 var(--space-7);
+    max-width: var(--nmn2-section-title-max, min(100%, 40rem));
+    margin-inline: auto;
     font-family: var(--font-heading);
     font-size: var(--text-h2);
     font-weight: var(--weight-bold);
     line-height: var(--leading-heading);
     color: var(--color-text-primary);
     text-align: center;
+    text-wrap: balance;
   }
 
   .nmn2-benefit-strip--surface-dark .nmn2-benefit-strip__heading {
@@ -100,10 +192,38 @@
     margin: 0;
     padding: 0;
     display: flex;
+    min-width: 0;
+  }
+
+  .nmn2-benefit-strip__card {
+    width: 100%;
+    display: flex;
     flex-direction: column;
-    gap: var(--space-3);
     align-items: flex-start;
     text-align: left;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    background: var(--color-surface-primary);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border-default);
+    box-shadow: var(--shadow-sm);
+    transition:
+      border-color var(--ease-default),
+      box-shadow var(--ease-default);
+  }
+
+  .nmn2-benefit-strip__cell:hover .nmn2-benefit-strip__card {
+    border-color: var(--color-border-strong);
+    box-shadow: var(--shadow-md);
+  }
+
+  .nmn2-benefit-strip--surface-dark .nmn2-benefit-strip__card {
+    background: color-mix(in srgb, var(--color-white) 7%, var(--color-surface-dark));
+    border-color: var(--color-border-strong);
+  }
+
+  .nmn2-benefit-strip--surface-dark .nmn2-benefit-strip__cell:hover .nmn2-benefit-strip__card {
+    border-color: color-mix(in srgb, var(--color-teal) 35%, var(--color-border-strong));
   }
 
   .nmn2-benefit-strip__icon-wrap {
@@ -111,10 +231,15 @@
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    width: var(--space-7);
+    height: var(--space-7);
+    border-radius: var(--radius-md);
+    background: var(--color-surface-benefit);
     color: var(--color-teal-dark);
   }
 
   .nmn2-benefit-strip--surface-dark .nmn2-benefit-strip__icon-wrap {
+    background: color-mix(in srgb, var(--color-teal) 14%, transparent);
     color: var(--color-teal);
   }
 
@@ -138,17 +263,259 @@
 
   .nmn2-benefit-strip__text {
     margin: 0;
+    flex: 1;
     font-family: var(--font-body);
     font-size: var(--text-body);
     font-weight: var(--weight-regular);
-    line-height: var(--leading-body);
+    line-height: var(--leading-relaxed);
     color: var(--color-text-secondary);
   }
 
   .nmn2-benefit-strip--surface-dark .nmn2-benefit-strip__text {
     color: var(--color-text-on-dark-muted);
   }
+
+  .nmn2-benefit-strip__fn-row {
+    margin-top: auto;
+    padding-top: var(--space-2);
+    width: 100%;
+  }
+
+  .nmn2-benefit-strip__fn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-tight);
+    color: var(--color-teal-dark);
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+    transition: color var(--ease-default);
+  }
+
+  .nmn2-benefit-strip--surface-dark .nmn2-benefit-strip__fn {
+    color: var(--color-teal);
+  }
+
+  .nmn2-benefit-strip__fn:hover {
+    color: var(--color-dark);
+  }
+
+  .nmn2-benefit-strip--surface-dark .nmn2-benefit-strip__fn:hover {
+    color: var(--color-text-on-dark);
+  }
+
+  .nmn2-benefit-strip__fn:focus-visible {
+    outline: 2px solid var(--color-teal-dark);
+    outline-offset: var(--space-2);
+    border-radius: var(--radius-sm);
+  }
+
+  .nmn2-benefit-strip--surface-dark .nmn2-benefit-strip__fn:focus-visible {
+    outline-color: var(--color-teal);
+  }
+
+  .nmn2-benefit-strip__fn-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--space-5);
+    height: var(--space-5);
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-full);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-semibold);
+    text-decoration: none;
+    background: color-mix(in srgb, var(--color-teal-dark) 12%, transparent);
+    color: var(--color-teal-dark);
+  }
+
+  .nmn2-benefit-strip--surface-dark .nmn2-benefit-strip__fn-mark {
+    background: color-mix(in srgb, var(--color-teal) 18%, transparent);
+    color: var(--color-teal);
+  }
+
+  .nmn2-benefit-strip__dialog {
+    margin: auto;
+    padding: 0;
+    max-width: min(calc(100vw - var(--space-7)), 32rem);
+    width: 100%;
+    border: none;
+    border-radius: var(--radius-lg);
+    background: transparent;
+  }
+
+  .nmn2-benefit-strip__dialog::backdrop {
+    background: color-mix(in srgb, var(--color-dark) 42%, transparent);
+  }
+
+  .nmn2-benefit-strip__dialog-panel {
+    padding: var(--space-6) var(--space-5);
+    background: var(--color-surface-primary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border-default);
+    box-shadow: var(--shadow-md);
+  }
+
+  .nmn2-benefit-strip__dialog-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin-bottom: var(--space-4);
+  }
+
+  .nmn2-benefit-strip__dialog-title {
+    margin: 0;
+    flex: 1;
+    min-width: 0;
+    font-family: var(--font-heading);
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-heading);
+    color: var(--color-text-primary);
+  }
+
+  .nmn2-benefit-strip__dialog-title-sub {
+    display: block;
+    margin-top: var(--space-2);
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-body);
+    color: var(--color-text-secondary);
+  }
+
+  .nmn2-benefit-strip__dialog-close {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--space-7);
+    height: var(--space-7);
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-full);
+    background: var(--color-surface-secondary);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition:
+      background var(--ease-default),
+      color var(--ease-default);
+  }
+
+  .nmn2-benefit-strip__dialog-close:hover {
+    background: var(--color-border-default);
+  }
+
+  .nmn2-benefit-strip__dialog-close:focus-visible {
+    outline: 2px solid var(--color-teal-dark);
+    outline-offset: var(--space-1);
+  }
+
+  .nmn2-benefit-strip__dialog-close-icon {
+    width: var(--space-4);
+    height: var(--space-4);
+  }
+
+  .nmn2-benefit-strip__dialog-body {
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-secondary);
+  }
+
+  .nmn2-benefit-strip__dialog-body p {
+    margin: 0 0 var(--space-3);
+  }
+
+  .nmn2-benefit-strip__dialog-body p:last-child {
+    margin-bottom: 0;
+  }
+
+  .nmn2-benefit-strip__dialog-link-wrap {
+    margin: var(--space-5) 0 0;
+  }
+
+  .nmn2-benefit-strip__dialog-link {
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-body);
+    color: var(--color-teal-dark);
+    text-decoration: underline;
+    text-underline-offset: var(--space-1);
+  }
+
+  .nmn2-benefit-strip__dialog-link:hover,
+  .nmn2-benefit-strip__dialog-link:focus-visible {
+    color: var(--color-dark);
+    outline: none;
+  }
+
+  .nmn2-benefit-strip__dialog-foot {
+    margin: var(--space-5) 0 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border-default);
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-muted);
+  }
 {% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    function wireDialog(root) {
+      if (!root || root.dataset.nmn2BenefitDlgReady === 'true') return;
+      root.dataset.nmn2BenefitDlgReady = 'true';
+
+      root.querySelectorAll('[data-nmn2-benefit-source-open]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var id = btn.getAttribute('aria-controls');
+          var dlg = id ? document.getElementById(id) : null;
+          if (!dlg || typeof dlg.showModal !== 'function') return;
+          dlg._nmnTrigger = btn;
+          dlg.showModal();
+          var titleEl = dlg.querySelector('.nmn2-benefit-strip__dialog-title');
+          if (titleEl && typeof titleEl.focus === 'function') titleEl.focus();
+        });
+      });
+
+      root.querySelectorAll('.nmn2-benefit-strip__dialog').forEach(function (dlg) {
+        dlg.addEventListener('click', function (e) {
+          if (e.target === dlg) dlg.close();
+        });
+        dlg.addEventListener('close', function () {
+          var t = dlg._nmnTrigger;
+          if (t && typeof t.focus === 'function') t.focus();
+          dlg._nmnTrigger = null;
+        });
+        dlg.querySelectorAll('[data-nmn2-benefit-source-close]').forEach(function (closeBtn) {
+          closeBtn.addEventListener('click', function () {
+            dlg.close();
+          });
+        });
+      });
+    }
+
+    document.querySelectorAll('[data-nmn2-benefit-strip]').forEach(wireDialog);
+    document.addEventListener('shopify:section:load', function (e) {
+      var r = e.target.querySelector('[data-nmn2-benefit-strip]');
+      if (r) wireDialog(r);
+    });
+  })();
+{% endjavascript %}
 
 {% schema %}
 {
@@ -173,11 +540,50 @@
       "default": "warm"
     },
     {
+      "type": "select",
+      "id": "heading_mode",
+      "label": "Überschrift sichtbar",
+      "options": [
+        {
+          "value": "visible",
+          "label": "Ja (empfohlen)"
+        },
+        {
+          "value": "sr_only",
+          "label": "Nur für Screenreader"
+        }
+      ],
+      "default": "visible"
+    },
+    {
       "type": "text",
       "id": "heading",
-      "label": "Heading (screen reader)",
-      "default": "Warum NMN für deine Routine",
-      "info": "Visuell ausgeblendet; dient der Barrierefreiheit."
+      "label": "Überschrift",
+      "default": "Warum NMN für deine Routine"
+    },
+    {
+      "type": "text",
+      "id": "source_popup_title",
+      "label": "Titel im Quellen-Popup",
+      "default": "Literaturhinweis"
+    },
+    {
+      "type": "text",
+      "id": "source_button_label",
+      "label": "Button-Text Fußnote",
+      "default": "Quelle"
+    },
+    {
+      "type": "text",
+      "id": "source_close_label",
+      "label": "Schließen (Barrierefreiheit)",
+      "default": "Popup schließen"
+    },
+    {
+      "type": "textarea",
+      "id": "source_popup_footer",
+      "label": "Hinweis unten im Popup",
+      "default": "Zur Einordnung im Forschungskontext. Keine Werbeaussage zu Wirkungen dieses Produkts bei dir."
     }
   ],
   "blocks": [
@@ -202,6 +608,23 @@
           "id": "text",
           "label": "Text",
           "default": "NMN ist ein Baustein für NAD⁺ — ein Molekül, das in vielen Zellen eine Rolle bei der Energieversorgung spielt."
+        },
+        {
+          "type": "richtext",
+          "id": "source_note",
+          "label": "Literatur / Fußnote (Popup-Inhalt)",
+          "info": "Erscheint als „Quelle“ mit Nummer. Optional Link unten."
+        },
+        {
+          "type": "url",
+          "id": "source_url",
+          "label": "Link (optional, z. B. DOI / PubMed)"
+        },
+        {
+          "type": "text",
+          "id": "source_link_label",
+          "label": "Link-Text",
+          "default": "Zur Publikation"
         }
       ]
     }
@@ -210,7 +633,8 @@
     {
       "name": "NMN V2 Benefit Strip",
       "settings": {
-        "surface": "warm"
+        "surface": "warm",
+        "heading_mode": "visible"
       },
       "blocks": [
         {
