@@ -194,15 +194,12 @@
         {%- assign lt_trust_2 = 'Laborgeprüft · Vegan · Ohne Zusatzstoffe' -%}
         {%- assign lt_trust_3 = section.settings.trust_3 | default: '>1.000 Kund:innen vertrauen LIFETIME' -%}
         {%- assign lt_pill_1_label = section.settings.pill_1_label | default: '1 Monat' -%}
-        {%- assign lt_pill_2_label = section.settings.pill_2_label | default: '2 Monate' -%}
         {%- assign lt_pill_1_qty = section.settings.pill_1_quantity | default: 1 -%}
-        {%- assign lt_pill_2_qty = section.settings.pill_2_quantity | default: 2 -%}
         {%- assign lt_pill_1_once = section.settings.pill_1_once_price_cents | default: 3990 -%}
-        {%- assign lt_pill_2_once = section.settings.pill_2_once_price_cents | default: 7980 -%}
         {%- assign lt_pill_1_sub = section.settings.pill_1_sub_price_cents | default: 3392 -%}
-        {%- assign lt_pill_2_sub = section.settings.pill_2_sub_price_cents | default: 6783 -%}
         {%- assign lt_rating = product.metafields.loox.avg_rating | default: 0 | plus: 0 -%}
         {%- assign lt_count = product.metafields.loox.num_reviews | default: 0 | plus: 0 -%}
+        {%- if section.settings.show_rating -%}
         <button type="button" class="lt-pdp-hero__rating lt-hero-stars" data-lt-reviews-scroll>
           <span class="lt-pdp-hero__stars">★★★★★</span>
           <span class="lt-pdp-hero__score">
@@ -221,6 +218,7 @@
             {%- endif -%}
           </span>
         </button>
+        {%- endif -%}
 
         <h1 class="lt-pdp-hero__title lt-hero-title">{{ product.title | escape }}</h1>
 
@@ -258,7 +256,6 @@
 
         {%- liquid
           assign bb_sub1_title = section.settings.bb_sub1_title | default: 'Einzel-Abo'
-          assign bb_sub2_title = section.settings.bb_sub2_title | default: 'Doppel-Abo'
           assign bb_once_title = section.settings.bb_once_title | default: 'Einmaliger Kauf'
           assign bb_or_label = section.settings.bb_or_label | default: 'ODER'
           assign bb_unit_suffix = section.settings.bb_unit_suffix | default: 'Monat'
@@ -269,11 +266,6 @@
             assign bb_sub1_sub = section.settings.bb_sub1_subline
           else
             assign bb_sub1_sub = lt_pill_1_label
-          endif
-          if section.settings.bb_sub2_subline != blank
-            assign bb_sub2_sub = section.settings.bb_sub2_subline
-          else
-            assign bb_sub2_sub = lt_pill_2_label
           endif
           if section.settings.bb_once_subline != blank
             assign bb_once_sub = section.settings.bb_once_subline
@@ -465,6 +457,14 @@
           {%- endform -%}
         </product-form>
 
+        {%- if shop.enabled_payment_types.size > 0 -%}
+          <div class="lt-payment-icons" aria-label="Zahlungsmethoden">
+            {%- for type in shop.enabled_payment_types -%}
+              {{ type | payment_type_svg_tag: class: 'lt-payment-icon' }}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
         <div
           id="lt-appstle-widget"
           data-product-id="{{ product.id }}"
@@ -482,15 +482,15 @@
           };
         </script>
 
-        {%- unless lt_trust_1 contains '90-Tage-Zell-Versprechen' -%}
+        {%- if section.settings.show_guarantee_badge -%}
           <div class="lt-pdp-hero__guarantee">
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
               <path d="M6 1L2 3v3c0 2.5 1.8 4.5 4 5 2.2-.5 4-2.5 4-5V3L6 1Z" stroke="currentColor" stroke-width="0.8" fill="none"></path>
               <path d="M4 6l1.5 1.5 2.5-2.5" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path>
             </svg>
-            <span>Das 90-Tage-Zell-Versprechen — kein Formular, kein Aufwand</span>
+            <span>{{ section.settings.guarantee_text | default: 'Das 90-Tage-Zell-Versprechen — kein Formular, kein Aufwand' | escape }}</span>
           </div>
-        {%- endunless -%}
+        {%- endif -%}
 
         <div class="lt-pdp-hero__trust lt-trust">
           <div class="lt-pdp-hero__trust-item">
@@ -541,15 +541,13 @@
 
               <div class="lt-founder-meta">
                 <p class="lt-founder-endorsed">
-                  Wissenschaftlich entwickelt von
+                  {{ section.settings.founder_endorsed | default: 'Wissenschaftlich entwickelt von' | escape }}
                 </p>
                 <p class="lt-founder-name">
-                  Prof. Dr. med. Volker Limmroth
+                  {{ section.settings.founder_name | default: 'Prof. Dr. med. Volker Limmroth' | escape }}
                 </p>
                 <p class="lt-founder-title">
-                  Chefarzt Neurologie ·
-                  Longevity-Experte ·
-                  Spiegel-Bestseller-Autor
+                  {{ section.settings.founder_title | default: 'Chefarzt Neurologie · Longevity-Experte · Spiegel-Bestseller-Autor' | escape }}
                 </p>
               </div>
 
@@ -889,6 +887,9 @@
       }
       if (mainPrice) mainPrice.textContent = formatPrice(currentCents);
 
+      const stickyPrice = document.querySelector('#lt-sticky-atc .sticky-add-to-cart__price-original');
+      if (stickyPrice) stickyPrice.textContent = formatPrice(currentCents);
+
       updateCardFacades();
       updatePriceMeta(isSub, qty, onceCents, currentCents);
     }
@@ -1152,6 +1153,33 @@
   color: var(--lt-text, #26251e);
 }
 
+/* Unselected cards — muted */
+.lt-bb-card:not(.is-selected) {
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+
+.lt-bb-card:not(.is-selected):hover {
+  opacity: 0.85;
+}
+
+/* Payment icons */
+.lt-payment-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.lt-payment-icon {
+  height: 24px;
+  width: auto;
+  border-radius: 3px;
+  opacity: 0.65;
+}
+
 /* Radio button — pin to top-left of card, aligned with row content */
 .lt-bb-card {
   position: relative !important;
@@ -1236,19 +1264,19 @@
       "type": "text",
       "id": "benefit_1_text",
       "label": "Benefit 1",
-      "default": "Kollagen Typ I kommt in Haut, Knochen, Sehnen und Bändern vor"
+      "default": ">99,9 % NMN-Reinheit — unabhängig laborgeprüft in Deutschland"
     },
     {
       "type": "text",
       "id": "benefit_2_text",
       "label": "Benefit 2",
-      "default": "Kollagen Typ III kommt in Blutgefäßen, Organen und im Darm vor"
+      "default": "Liposomal — für optimale Bioverfügbarkeit und zellulare Aufnahme"
     },
     {
       "type": "text",
       "id": "benefit_3_text",
       "label": "Benefit 3",
-      "default": "Leicht löslich und geschmacksneutral"
+      "default": "250 mg NMN pro Portion · 30 Tage Vorrat"
     },
     {
       "type": "header",
@@ -1267,12 +1295,6 @@
     },
     {
       "type": "text",
-      "id": "bb_sub2_title",
-      "label": "Abo-Karte 2 Titel",
-      "default": "Doppel-Abo"
-    },
-    {
-      "type": "text",
       "id": "bb_once_title",
       "label": "Einmalig Titel",
       "default": "Einmaliger Kauf"
@@ -1281,11 +1303,6 @@
       "type": "text",
       "id": "bb_sub1_subline",
       "label": "Abo-Karte 1 Unterzeile (leer = Pillen-Label 1)"
-    },
-    {
-      "type": "text",
-      "id": "bb_sub2_subline",
-      "label": "Abo-Karte 2 Unterzeile (leer = Pillen-Label 2)"
     },
     {
       "type": "text",
@@ -1328,12 +1345,6 @@
     },
     {
       "type": "text",
-      "id": "sub_banner_text",
-      "label": "Abo-Banner Text",
-      "default": "Spare 15 % auf jede Lieferung · jederzeit kündbar"
-    },
-    {
-      "type": "text",
       "id": "pill_1_label",
       "label": "Option 1 — Label",
       "default": "1 Monat"
@@ -1359,32 +1370,6 @@
       "default": 3392
     },
     {
-      "type": "text",
-      "id": "pill_2_label",
-      "label": "Option 2 — Label",
-      "default": "2 Monate"
-    },
-    {
-      "type": "number",
-      "id": "pill_2_quantity",
-      "label": "Option 2 — Menge (Cart)",
-      "default": 2
-    },
-    {
-      "type": "number",
-      "id": "pill_2_once_price_cents",
-      "label": "Option 2 — Einmalpreis",
-      "info": "Preis in Cent. Beispiel: 79,80 € → 7980",
-      "default": 7980
-    },
-    {
-      "type": "number",
-      "id": "pill_2_sub_price_cents",
-      "label": "Option 2 — Abo-Preis",
-      "info": "Preis in Cent. Beispiel: 67,83 € → 6783",
-      "default": 6783
-    },
-    {
       "type": "header",
       "content": "Trust-Zeilen"
     },
@@ -1408,23 +1393,31 @@
     },
     {
       "type": "header",
-      "content": "Arzt-Badge"
+      "content": "Wissenschafts-Badge"
     },
     {
       "type": "checkbox",
       "id": "show_doctor_badge",
-      "label": "Arzt-Badge anzeigen",
+      "label": "Badge anzeigen",
       "default": true
     },
     {
-      "type": "textarea",
-      "id": "doctor_badge",
-      "label": "Arzt-Badge Text",
-      "default": "Dr. Volker Limmroth, Neurologe & Longevity-Experte, steht für den wissenschaftlichen Anspruch hinter LIFETIME — nicht für ein einzelnes Produkt. Spiegel-Bestseller-Autor · Bekannt aus ARD, RTL, SAT1."
+      "type": "checkbox",
+      "id": "show_rating",
+      "label": "Bewertungs-Zeile anzeigen",
+      "default": true
     },
     {
-      "type": "header",
-      "content": "Gründer"
+      "type": "checkbox",
+      "id": "show_guarantee_badge",
+      "label": "Garantie-Badge anzeigen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "guarantee_text",
+      "label": "Garantie-Text",
+      "default": "Das 90-Tage-Zell-Versprechen — kein Formular, kein Aufwand"
     },
     {
       "type": "image_picker",
@@ -1436,6 +1429,24 @@
       "id": "founder_image_url",
       "label": "Foto URL (Fallback)",
       "default": "https://cdn.shopify.com/s/files/1/0621/2173/8340/files/volker-podcast.png?v=1766075350"
+    },
+    {
+      "type": "text",
+      "id": "founder_endorsed",
+      "label": "Kürzel über dem Namen",
+      "default": "Wissenschaftlich entwickelt von"
+    },
+    {
+      "type": "text",
+      "id": "founder_name",
+      "label": "Name",
+      "default": "Prof. Dr. med. Volker Limmroth"
+    },
+    {
+      "type": "text",
+      "id": "founder_title",
+      "label": "Titel / Rolle",
+      "default": "Chefarzt Neurologie · Longevity-Experte · Spiegel-Bestseller-Autor"
     },
     {
       "type": "header",
