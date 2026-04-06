@@ -1,0 +1,230 @@
+{% style %}
+  #section-{{ section.id }} {
+    --gb-text:     {{ settings.color_text_main | default: '#26251e' }};
+    --gb-text-sec: {{ settings.color_text_main | color_modify: 'alpha', 0.65 | default: 'rgba(38,37,30,0.65)' }};
+    --gb-text-ter: {{ settings.color_text_main | color_modify: 'alpha', 0.4 | default: 'rgba(38,37,30,0.4)' }};
+    --gb-bg:       {{ settings.color_background_main | color_modify: 'lightness', -3 | default: '#f2f1ed' }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    background:     var(--gb-bg);
+  }
+{% endstyle %}
+
+<div class="gb-section" id="section-{{ section.id }}">
+  <div class="gb-container">
+    <div class="gb-inner">
+
+      {%- if section.settings.show_shield_icon -%}
+        <div class="gb-icon" aria-hidden="true">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.days_number != blank -%}
+        <div class="gb-number-row">
+          <span class="gb-number">{{ section.settings.days_number | escape }}</span>
+          {%- if section.settings.days_label != blank -%}
+            <span class="gb-days-label">{{ section.settings.days_label | escape }}</span>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.headline != blank -%}
+        <h2 class="gb-headline">{{ section.settings.headline | escape }}</h2>
+      {%- endif -%}
+
+      {%- if section.settings.body_text != blank -%}
+        <p class="gb-body">{{ section.settings.body_text | escape }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.contact_url != blank and section.settings.contact_label != blank -%}
+        <a href="{{ section.settings.contact_url }}" class="gb-link">
+          {{ section.settings.contact_label | escape }} ↗
+        </a>
+      {%- endif -%}
+
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+/* ===================================================
+   Guarantee Block — crs-guarantee-block.liquid
+   =================================================== */
+
+.gb-section {
+  background: var(--gb-bg, #f2f1ed);
+}
+
+.gb-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.gb-inner {
+  max-width: 480px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Shield icon */
+.gb-icon {
+  color: var(--gb-text, #26251e);
+  opacity: 0.8;
+}
+
+.gb-icon svg {
+  display: block;
+}
+
+/* Number row */
+.gb-number-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.gb-number {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-size: 72px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -2px;
+  color: var(--gb-text, #26251e);
+}
+
+.gb-days-label {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--gb-text-ter, rgba(38,37,30,0.4));
+  line-height: 1;
+}
+
+/* Headline */
+.gb-headline {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
+  font-size: 22px !important;
+  font-weight: 400 !important;
+  line-height: 1.3 !important;
+  letter-spacing: -0.3px !important;
+  color: var(--gb-text, #26251e) !important;
+  margin: 0 !important;
+}
+
+/* Body */
+.gb-body {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--gb-text-sec, rgba(38,37,30,0.65));
+  max-width: 400px;
+  margin: 0;
+}
+
+/* Contact link */
+.gb-link {
+  font-size: 14px;
+  font-weight: 400;
+  color: #F54E00;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.gb-link:hover {
+  opacity: 0.75;
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .gb-number {
+    font-size: 56px;
+    letter-spacing: -1.5px;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Guarantee Block",
+  "tag": "section",
+  "class": "crs-guarantee-block",
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_shield_icon",
+      "label": "Shield-Icon anzeigen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "days_number",
+      "label": "Zahl (groß)",
+      "default": "90"
+    },
+    {
+      "type": "text",
+      "id": "days_label",
+      "label": "Einheit / Label",
+      "default": "Tage"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Überschrift",
+      "default": "Volle Geld-zurück-Garantie"
+    },
+    {
+      "type": "textarea",
+      "id": "body_text",
+      "label": "Beschreibungstext",
+      "default": "Nicht überzeugt? Wir erstatten jeden Cent — kein Kommentar, kein Kleingedrucktes."
+    },
+    {
+      "type": "text",
+      "id": "contact_label",
+      "label": "Link-Text",
+      "default": "Schreib uns"
+    },
+    {
+      "type": "url",
+      "id": "contact_url",
+      "label": "Link-URL"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    {
+      "name": "Guarantee Block"
+    }
+  ]
+}
+{% endschema %}

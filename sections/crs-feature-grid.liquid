@@ -1,0 +1,258 @@
+{% style %}
+  #section-{{ section.id }} {
+    --fg-text:     {{ settings.color_text_main | default: '#26251e' }};
+    --fg-text-sec: {{ settings.color_text_main | color_modify: 'alpha', 0.6 | default: 'rgba(38,37,30,0.6)' }};
+    --fg-bg:       {{ settings.color_background_main | default: '#f7f7f4' }};
+    --fg-card-bg:  {{ settings.color_background_main | color_modify: 'lightness', -3 | default: '#f2f1ed' }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<div class="fg-section" id="section-{{ section.id }}">
+  <div class="fg-container">
+
+    {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+      <div class="fg-header">
+        {%- if section.settings.heading != blank -%}
+          <h2 class="fg-heading">{{ section.settings.heading | escape }}</h2>
+        {%- endif -%}
+        {%- if section.settings.subheading != blank -%}
+          <p class="fg-subheading">{{ section.settings.subheading | escape }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="fg-grid fg-grid--cols-{{ section.settings.columns }}">
+        {%- for block in section.blocks -%}
+          <div class="fg-card" {{ block.shopify_attributes }}>
+            {%- if block.settings.title != blank -%}
+              <h3 class="fg-card-title">{{ block.settings.title | escape }}</h3>
+            {%- endif -%}
+            {%- if block.settings.description != blank -%}
+              <div class="fg-card-desc">{{ block.settings.description | escape }}</div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+  </div>
+</div>
+
+{% stylesheet %}
+/* ===================================================
+   Feature Grid — crs-feature-grid.liquid
+   =================================================== */
+
+.fg-section {
+  background: var(--fg-bg, #f7f7f4);
+}
+
+.fg-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Header */
+.fg-header {
+  margin-bottom: 32px;
+}
+
+.fg-heading {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
+  font-size: 36px !important;
+  font-weight: 400 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.72px !important;
+  color: var(--fg-text, #26251e) !important;
+  margin: 0 0 8px !important;
+}
+
+.fg-subheading {
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--fg-text-sec, rgba(38,37,30,0.6));
+  margin: 0;
+}
+
+/* Grid */
+.fg-grid {
+  display: grid;
+  gap: 10px;
+  align-items: stretch;
+}
+
+.fg-grid--cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.fg-grid--cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Card */
+.fg-card {
+  background: var(--fg-card-bg, #f2f1ed);
+  border-radius: 4px;
+  padding: 13.4px 15px 15px;
+  min-height: 102.4px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fg-card-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0 !important;
+  color: var(--fg-text, #26251e) !important;
+  margin: 0 !important;
+}
+
+.fg-card-desc {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--fg-text-sec, rgba(38,37,30,0.6));
+}
+
+/* Tablet — 2 columns for 3-col grid */
+@media (max-width: 1280px) {
+  .fg-grid--cols-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile — 1 column */
+@media (max-width: 640px) {
+  .fg-grid--cols-3,
+  .fg-grid--cols-2 {
+    grid-template-columns: 1fr;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Feature Grid",
+  "tag": "section",
+  "class": "crs-feature-grid",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift (optional)"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Unterüberschrift (optional)"
+    },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "Spalten",
+      "options": [
+        { "value": "2", "label": "2 Spalten" },
+        { "value": "3", "label": "3 Spalten" }
+      ],
+      "default": "3"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel",
+          "default": "Dedicated guidance"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Beschreibung",
+          "default": "Deploy AI at scale with professional expertise."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 9,
+  "presets": [
+    {
+      "name": "Feature Grid",
+      "blocks": [
+        {
+          "type": "feature",
+          "settings": {
+            "title": ">99,9% Reinheit",
+            "description": "Unabhängig bestätigt durch Drittlabor in Deutschland."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "title": "Uthever® Rohstoff",
+            "description": "Patentierter Markenrohstoff, klinisch untersucht."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "title": "GMP & HACCP",
+            "description": "Hergestellt nach höchsten Produktionsstandards."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "title": "100% vegan",
+            "description": "Ohne Füllstoffe, glutenfrei, kein Magnesiumstearat."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "title": "Frei von Schwermetallen",
+            "description": "Jede Charge einzeln getestet und zertifiziert."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "title": "COA öffentlich",
+            "description": "Prüfbericht jeder Charge online einsehbar."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,318 @@
+{% style %}
+  #section-{{ section.id }} {
+    --faq-text:     {{ settings.color_text_main | default: '#26251e' }};
+    --faq-text-sec: {{ settings.color_text_main | color_modify: 'alpha', 0.65 | default: 'rgba(38,37,30,0.65)' }};
+    --faq-text-ter: {{ settings.color_text_main | color_modify: 'alpha', 0.4 | default: 'rgba(38,37,30,0.4)' }};
+    --faq-bg:       {{ settings.color_background_main | color_modify: 'lightness', -3 | default: '#f2f1ed' }};
+    --faq-border:   {{ settings.color_text_main | color_modify: 'alpha', 0.1 | default: 'rgba(38,37,30,0.1)' }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    background:     var(--faq-bg);
+  }
+{% endstyle %}
+
+<div class="faq-section" id="section-{{ section.id }}">
+  <div class="faq-container">
+    <div class="faq-layout">
+
+      {%- comment -%} Left: sticky heading {%- endcomment -%}
+      <div class="faq-left">
+        {%- if section.settings.heading != blank -%}
+          <h2 class="faq-heading">{{ section.settings.heading | escape }}</h2>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} Right: accordion items {%- endcomment -%}
+      <div class="faq-right">
+        {%- for block in section.blocks -%}
+          <div class="faq-item{% if forloop.last %} faq-item--last{% endif %}" {{ block.shopify_attributes }}>
+            <button
+              class="faq-question"
+              aria-expanded="false"
+              aria-controls="faq-panel-{{ section.id }}-{{ forloop.index }}"
+            >
+              <span class="faq-question-text">{{ block.settings.question | escape }}</span>
+              <span class="faq-toggle" aria-hidden="true">↓</span>
+            </button>
+            <div
+              class="faq-panel"
+              id="faq-panel-{{ section.id }}-{{ forloop.index }}"
+              role="region"
+            >
+              <div class="faq-answer">
+                <p>{{ block.settings.answer | escape }}</p>
+              </div>
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+/* ===================================================
+   FAQ Accordion — crs-faq-accordion.liquid
+   =================================================== */
+
+.faq-section {
+  background: var(--faq-bg, #f2f1ed);
+}
+
+.faq-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.faq-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+
+/* Left */
+.faq-left {
+  padding-right: 48px;
+  padding-top: 4px;
+}
+
+.faq-left-inner {
+  position: sticky;
+  top: 80px;
+}
+
+.faq-heading {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
+  font-size: 36px !important;
+  font-weight: 400 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.72px !important;
+  color: var(--faq-text, #26251e) !important;
+  margin: 0 !important;
+  position: sticky;
+  top: 80px;
+}
+
+/* Right — accordion */
+.faq-right {
+  padding-top: 0;
+}
+
+.faq-item {
+  border-top: 1px solid var(--faq-border, rgba(38,37,30,0.1));
+}
+
+.faq-item--last {
+  border-bottom: 1px solid var(--faq-border, rgba(38,37,30,0.1));
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 15.68px 0 16.8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  gap: 16px;
+  text-align: left;
+}
+
+.faq-question-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--faq-text, #26251e);
+}
+
+.faq-toggle {
+  font-size: 16px;
+  color: var(--faq-text-ter, rgba(38,37,30,0.4));
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+  line-height: 1;
+  display: inline-block;
+}
+
+.faq-question[aria-expanded="true"] .faq-toggle {
+  content: '↑';
+}
+
+/* Panel */
+.faq-panel {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.28s ease;
+}
+
+.faq-panel.is-open {
+  max-height: 600px;
+}
+
+.faq-answer {
+  padding-bottom: 16px;
+}
+
+.faq-answer p {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--faq-text-sec, rgba(38,37,30,0.65));
+  margin: 0;
+}
+
+/* Mobile — stack */
+@media (max-width: 1024px) {
+  .faq-layout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .faq-left {
+    padding-right: 0;
+  }
+
+  .faq-heading {
+    position: static;
+    font-size: clamp(24px, 4vw, 36px) !important;
+  }
+}
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  var section = document.currentScript.closest('.faq-section') ||
+    document.querySelector('#section-{{ section.id }}');
+  if (!section) return;
+
+  var buttons = section.querySelectorAll('.faq-question');
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var expanded = btn.getAttribute('aria-expanded') === 'true';
+      var panelId = btn.getAttribute('aria-controls');
+      var panel = section.querySelector('#' + panelId);
+      var toggle = btn.querySelector('.faq-toggle');
+
+      // Close all others
+      buttons.forEach(function (other) {
+        if (other !== btn) {
+          other.setAttribute('aria-expanded', 'false');
+          var otherId = other.getAttribute('aria-controls');
+          var otherPanel = section.querySelector('#' + otherId);
+          var otherToggle = other.querySelector('.faq-toggle');
+          if (otherPanel) otherPanel.classList.remove('is-open');
+          if (otherToggle) otherToggle.textContent = '↓';
+        }
+      });
+
+      if (!expanded) {
+        btn.setAttribute('aria-expanded', 'true');
+        if (panel) panel.classList.add('is-open');
+        if (toggle) toggle.textContent = '↑';
+      } else {
+        btn.setAttribute('aria-expanded', 'false');
+        if (panel) panel.classList.remove('is-open');
+        if (toggle) toggle.textContent = '↓';
+      }
+    });
+  });
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "FAQ Accordion",
+  "tag": "section",
+  "class": "crs-faq-accordion",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Häufige Fragen"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "FAQ-Item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Frage",
+          "default": "Was bedeutet Novel Food?"
+        },
+        {
+          "type": "textarea",
+          "id": "answer",
+          "label": "Antwort",
+          "default": "NMN ist in der EU als Novel Food eingestuft und darf nicht als Nahrungsergänzungsmittel verkauft werden. Unser Produkt wird als Forschungsreagenz angeboten."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "FAQ Accordion",
+      "blocks": [
+        {
+          "type": "item",
+          "settings": {
+            "question": "Was bedeutet Novel Food?",
+            "answer": "NMN ist in der EU als Novel Food eingestuft und darf daher nicht als Nahrungsergänzungsmittel vermarktet werden. Unser Produkt wird als Forschungsreagenz angeboten – zur wissenschaftlichen Anwendung."
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "question": "Wann spüre ich erste Ergebnisse?",
+            "answer": "Viele Nutzer berichten nach 4–6 Wochen konsistenter Einnahme von mehr Energie und besserer Erholung. Messbare NAD⁺-Veränderungen im Blut zeigen sich typischerweise nach 8–12 Wochen."
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "question": "Wie nehme ich das Pulver ein?",
+            "answer": "Löse die Tagesdosis (250–500 mg) in Wasser oder einem anderen Getränk auf. Morgens auf nüchternen Magen oder zum Frühstück – was sich für dich besser anfühlt."
+          }
+        },
+        {
+          "type": "item",
+          "settings": {
+            "question": "Kann ich das Abo jederzeit kündigen?",
+            "answer": "Ja, du kannst dein Abo jederzeit ohne Angabe von Gründen kündigen – direkt in deinem Kundenkonto oder per E-Mail. Keine Fristen, kein Kleingedrucktes."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

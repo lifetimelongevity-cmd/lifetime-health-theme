@@ -1,0 +1,218 @@
+{% style %}
+  #section-{{ section.id }} {
+    --lc-text:     {{ settings.color_text_main | default: '#161514' }};
+    --lc-text-sec: {{ settings.color_text_main | color_modify: 'alpha', 0.5 | default: 'rgba(22,21,20,0.5)' }};
+    --lc-bg:       {{ settings.color_background_main | default: '#ffffff' }};
+    --lc-border:   {{ settings.color_text_main | color_modify: 'alpha', 0.1 | default: 'rgba(22,21,20,0.1)' }};
+  }
+{% endstyle %}
+
+<div class="lc-section" id="section-{{ section.id }}">
+  <div class="lc-container">
+    {%- if section.blocks.size > 0 -%}
+      <div class="lc-grid">
+        {%- for block in section.blocks -%}
+          <div class="lc-card" {{ block.shopify_attributes }}>
+            <div class="lc-card-body">
+              {%- if block.settings.title != blank -%}
+                <h2 class="lc-card-title">{{ block.settings.title | escape }}</h2>
+              {%- endif -%}
+              {%- if block.settings.description != blank -%}
+                <p class="lc-card-desc">{{ block.settings.description | escape }}</p>
+              {%- endif -%}
+            </div>
+            {%- if block.settings.link_url != blank and block.settings.link_label != blank -%}
+              <div class="lc-card-footer">
+                <a
+                  href="{{ block.settings.link_url }}"
+                  class="lc-link"
+                  {% unless block.settings.link_url contains 'javascript' %}
+                    target="_blank" rel="noopener noreferrer"
+                  {% endunless %}
+                >{{ block.settings.link_label | escape }} ↗</a>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+/* ===================================================
+   Link Cards — crs-link-cards.liquid
+   =================================================== */
+
+.lc-section {
+  padding: 48px 0;
+  background: var(--lc-bg, #fff);
+}
+
+.lc-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Grid */
+.lc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  align-items: stretch;
+}
+
+/* Card */
+.lc-card {
+  background: var(--lc-bg, #fff);
+  border: 1px solid var(--lc-border, rgba(22,21,20,0.1));
+  border-radius: 14px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.lc-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.lc-card-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
+  font-size: .9375rem !important;
+  font-weight: 600 !important;
+  line-height: 1.3 !important;
+  letter-spacing: 0 !important;
+  color: var(--lc-text, #161514) !important;
+  margin: 0 !important;
+}
+
+.lc-card-desc {
+  font-size: .9375rem;
+  line-height: 1.6;
+  color: var(--lc-text-sec, rgba(22,21,20,0.5));
+  margin: 0;
+}
+
+/* Footer link */
+.lc-card-footer {
+  margin-top: 24px;
+}
+
+.lc-link {
+  font-size: .875rem;
+  font-weight: 500;
+  color: var(--lc-text, #161514);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--lc-border, rgba(22,21,20,0.3));
+  transition: text-decoration-color 0.15s ease, opacity 0.15s ease;
+}
+
+.lc-link:hover {
+  text-decoration-color: var(--lc-text, #161514);
+  opacity: .75;
+}
+
+/* Tablet — 2 columns */
+@media (max-width: 1024px) {
+  .lc-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Mobile — 1 column */
+@media (max-width: 640px) {
+  .lc-section {
+    padding: 32px 0;
+  }
+
+  .lc-container {
+    padding: 0 16px;
+  }
+
+  .lc-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .lc-card {
+    padding: 22px;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Link Cards",
+  "tag": "section",
+  "class": "crs-link-cards",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Karte",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel",
+          "default": "Forum"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Beschreibung",
+          "default": "Erhalte Antworten von unserem Team und der Community."
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link-URL"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link-Text",
+          "default": "Forum besuchen"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Link Cards",
+      "blocks": [
+        {
+          "type": "card",
+          "settings": {
+            "title": "Forum",
+            "description": "Erhalte Antworten von unserem Team und der Community.",
+            "link_label": "Forum besuchen"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "title": "Discord",
+            "description": "Lerne andere Nutzer kennen und entdecke, was sie bauen.",
+            "link_label": "Discord besuchen"
+          }
+        },
+        {
+          "type": "card",
+          "settings": {
+            "title": "Reddit",
+            "description": "Bleib über die neuesten Updates auf dem Laufenden und sieh, was die Community erschafft.",
+            "link_label": "Reddit besuchen"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
