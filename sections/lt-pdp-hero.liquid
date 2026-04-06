@@ -321,15 +321,6 @@
             </div>
           </div>
 
-          {%- if section.settings.sub_banner_text != blank -%}
-            <div class="lt-bb__banner">
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.5"></circle>
-                <path d="M4.5 7l2 2 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path>
-              </svg>
-              <span>{{ section.settings.sub_banner_text }}</span>
-            </div>
-          {%- endif -%}
 
           <div
             class="lt-bb"
@@ -362,58 +353,6 @@
                       <span class="lt-bb-card__badge lt-bb-card__badge--strong" data-lt-bb-badge>SPARE 0%</span>
                     </span>
                     <span class="lt-bb-card__sub">{{ bb_sub1_sub | escape }}</span>
-                  </span>
-                  <span class="lt-bb-card__prices">
-                    <del class="lt-bb-card__compare" data-lt-bb-compare></del>
-                    <span class="lt-bb-card__current" data-lt-bb-current></span>
-                    <span class="lt-bb-card__unit" data-lt-bb-unit></span>
-                  </span>
-                </span>
-                <span class="lt-bb-card__perks">
-                  <span class="lt-bb-card__perk">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                      <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
-                      <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
-                    </svg>
-                    <span>{{ bb_b1 | escape }}</span>
-                  </span>
-                  <span class="lt-bb-card__perk">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                      <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
-                      <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
-                    </svg>
-                    <span>{{ bb_b2 | escape }}</span>
-                  </span>
-                  <span class="lt-bb-card__perk">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                      <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
-                      <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
-                    </svg>
-                    <span>{{ bb_b3 | escape }}</span>
-                  </span>
-                </span>
-              </span>
-            </label>
-
-            <label class="lt-bb-card lt-bb-card--sub" data-lt-bb-card data-bb-kind="sub">
-              <input
-                type="radio"
-                class="lt-bb-card__input"
-                name="lt-bb-{{ section.id }}"
-                value="sub-2"
-                data-quantity="{{ lt_pill_2_qty }}"
-                data-once-price="{{ lt_pill_2_once }}"
-                data-sub-price="{{ lt_pill_2_sub }}"
-              >
-              <span class="lt-bb-card__radio" aria-hidden="true"></span>
-              <span class="lt-bb-card__body">
-                <span class="lt-bb-card__row">
-                  <span class="lt-bb-card__meta">
-                    <span class="lt-bb-card__title-row">
-                      <span class="lt-bb-card__title">{{ bb_sub2_title | escape }}</span>
-                      <span class="lt-bb-card__badge lt-bb-card__badge--muted" data-lt-bb-badge>SPARE 0%</span>
-                    </span>
-                    <span class="lt-bb-card__sub">{{ bb_sub2_sub | escape }}</span>
                   </span>
                   <span class="lt-bb-card__prices">
                     <del class="lt-bb-card__compare" data-lt-bb-compare></del>
@@ -638,6 +577,66 @@
             </div>
           </div>
         {%- endif -%}
+
+        {%- if section.settings.stack_header != blank -%}
+          <div class="lt-value-stack">
+            <h3 class="lt-value-stack__header">{{ section.settings.stack_header | escape }}</h3>
+
+            <div class="lt-value-stack__item">
+              <div class="lt-value-stack__item-info">
+                <span class="lt-value-stack__item-title">{{ product.title | escape }}</span>
+                {%- if section.settings.stack_product_sub != blank -%}
+                  <span class="lt-value-stack__item-sub">{{ section.settings.stack_product_sub | escape }}</span>
+                {%- endif -%}
+              </div>
+              <div class="lt-value-stack__item-price">
+                <span class="lt-value-stack__item-label" data-lt-stack-product-price>{{ lt_base_price | money }}</span>
+              </div>
+            </div>
+
+            {%- if section.settings.stack_guide_title != blank -%}
+              {%- assign guide_cents = section.settings.stack_guide_value_cents | default: 0 -%}
+              <div class="lt-value-stack__item">
+                <div class="lt-value-stack__item-info">
+                  <span class="lt-value-stack__item-title">{{ section.settings.stack_guide_title | escape }}</span>
+                  {%- if section.settings.stack_guide_sub != blank -%}
+                    <span class="lt-value-stack__item-sub">{{ section.settings.stack_guide_sub | escape }}</span>
+                  {%- endif -%}
+                </div>
+                <div class="lt-value-stack__item-price">
+                  {%- if guide_cents > 0 -%}
+                    <del class="lt-value-stack__item-was">{{ guide_cents | money }}</del>
+                  {%- endif -%}
+                  <span class="lt-value-stack__item-label lt-value-stack__item-label--free">{{ section.settings.stack_guide_price | default: 'Gratis' | escape }}</span>
+                </div>
+              </div>
+            {%- endif -%}
+
+            {%- if section.settings.stack_bonus_title != blank -%}
+              {%- assign bonus_cents = section.settings.stack_bonus_value_cents | default: 0 -%}
+              <div class="lt-value-stack__item">
+                <div class="lt-value-stack__item-info">
+                  <span class="lt-value-stack__item-title">{{ section.settings.stack_bonus_title | escape }}</span>
+                  {%- if section.settings.stack_bonus_sub != blank -%}
+                    <span class="lt-value-stack__item-sub">{{ section.settings.stack_bonus_sub | escape }}</span>
+                  {%- endif -%}
+                </div>
+                <div class="lt-value-stack__item-price">
+                  {%- if bonus_cents > 0 -%}
+                    <del class="lt-value-stack__item-was">{{ bonus_cents | money }}</del>
+                  {%- endif -%}
+                  <span class="lt-value-stack__item-label lt-value-stack__item-label--free">{{ section.settings.stack_bonus_price | default: 'Gratis' | escape }}</span>
+                </div>
+              </div>
+            {%- endif -%}
+
+            <div class="lt-value-stack__total">
+              <span class="lt-value-stack__total-label">{{ section.settings.stack_total_label | default: 'Gesamtwert' | escape }}</span>
+              <span class="lt-value-stack__total-value" data-lt-stack-total>{{ section.settings.stack_old_total | escape }}</span>
+            </div>
+          </div>
+        {%- endif -%}
+
       </div>
 
       {%- if section.settings.show_sticky_atc and product.available -%}
@@ -1015,6 +1014,22 @@
 .lt-sticky-atc__right .button,
 #lt-sticky-atc .lt-sticky-btn {
   border-radius: 999px !important;
+  background: var(--lt-cta-bg, #26251e) !important;
+  color: #fff !important;
+  border-color: var(--lt-cta-bg, #26251e) !important;
+}
+
+/* Gallery slider — hide navigation controls */
+.lt-pdp-hero .css-slider-dot-navigation,
+.lt-pdp-hero .css-slider-button,
+.lt-pdp-hero .css-slider-nav,
+.lt-pdp-hero .css-slider-progress {
+  display: none !important;
+}
+
+/* Once card — remove focus outline (shows as double border) */
+.lt-bb-card:focus-within {
+  outline: none !important;
 }
 
 /* Trust bar — adjust border color */
@@ -1049,14 +1064,109 @@
   color: var(--lt-text, #26251e) !important;
 }
 
-/* Radio button — vertically centered in card row */
-.lt-bb-card__row {
-  align-items: center !important;
+/* Value stack */
+.lt-value-stack {
+  border: 1px solid var(--lt-border, rgba(38,37,30,0.1));
+  border-radius: 4px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.lt-value-stack__header {
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.07em !important;
+  text-transform: uppercase !important;
+  color: var(--lt-muted, rgba(38,37,30,0.55)) !important;
+  margin: 0 0 8px !important;
+}
+
+.lt-value-stack__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--lt-border, rgba(38,37,30,0.08));
+  gap: 12px;
+}
+
+.lt-value-stack__item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.lt-value-stack__item-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--lt-text, #26251e);
+}
+
+.lt-value-stack__item-sub {
+  font-size: 12px;
+  color: var(--lt-muted, rgba(38,37,30,0.55));
+}
+
+.lt-value-stack__item-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  flex-shrink: 0;
+}
+
+.lt-value-stack__item-was {
+  font-size: 11px;
+  color: var(--lt-muted, rgba(38,37,30,0.4));
+  text-decoration: line-through;
+}
+
+.lt-value-stack__item-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lt-text, #26251e);
+}
+
+.lt-value-stack__item-label--free {
+  color: var(--lt-text, #26251e);
+}
+
+.lt-value-stack__total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 12px;
+}
+
+.lt-value-stack__total-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lt-text, #26251e);
+}
+
+.lt-value-stack__total-value {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--lt-text, #26251e);
+}
+
+/* Radio button — pin to top-left of card, aligned with row content */
+.lt-bb-card {
+  position: relative !important;
 }
 
 .lt-bb-card__radio {
+  position: absolute !important;
+  top: 17px !important;
+  left: 16px !important;
   margin-top: 0 !important;
-  align-self: center !important;
+}
+
+/* Indent row content to clear the radio (16px left pad + 20px radio + 10px gap) */
+.lt-bb-card__row {
+  padding-left: 46px !important;
 }
 {% endstylesheet %}
 
