@@ -1,0 +1,574 @@
+{% style %}
+  #section-{{ section.id }} {
+    --hero-text:     {{ settings.color_text_main | default: '#161514' }};
+    --hero-text-sec: {{ settings.color_text_main | color_modify: 'alpha', 0.45 | default: 'rgba(22,21,20,0.45)' }};
+    --hero-bg:       {{ settings.color_background_main | default: '#efede6' }};
+    --hero-btn-r:    {{ settings.border_radius_buttons | default: 30 }}px;
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<section id="section-{{ section.id }}" class="ltw-section">
+  <div class="ltw-container">
+
+    {%- comment -%} LEFT — text + CTA {%- endcomment -%}
+    <div class="ltw-content">
+
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="ltw-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+
+      <h1 class="ltw-heading" aria-label="{{ section.settings.heading_before | escape }} {{ section.blocks | map: 'settings' | map: 'word' | join: ', ' }} {{ section.settings.heading_after | escape }}">
+        {%- if section.settings.heading_before != blank -%}
+          <span class="ltw-heading__static">{{ section.settings.heading_before | escape }} </span>
+        {%- endif -%}
+        <span class="ltw-heading__animated" aria-hidden="true">
+          <span class="ltw-word" id="ltw-word-{{ section.id }}"></span><span class="ltw-cursor" aria-hidden="true">|</span>
+        </span>
+        {%- if section.settings.heading_after != blank -%}
+          <span class="ltw-heading__static"> {{ section.settings.heading_after | escape }}</span>
+        {%- endif -%}
+      </h1>
+
+      {%- if section.settings.subheading != blank -%}
+        <p class="ltw-subheading">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.cta_label != blank -%}
+        <div class="ltw-cta">
+          <a href="{{ section.settings.cta_url }}" class="ltw-btn">
+            {{ section.settings.cta_label | escape }}
+            {%- if section.settings.cta_icon != blank -%}
+              <span class="ltw-btn__icon" aria-hidden="true">{{ section.settings.cta_icon }}</span>
+            {%- endif -%}
+          </a>
+        </div>
+      {%- endif -%}
+
+    </div>
+
+    {%- comment -%} RIGHT — image or dashboard card {%- endcomment -%}
+    <div class="ltw-visual">
+      {%- if section.settings.right_type == 'image' -%}
+        {%- if section.settings.image != blank -%}
+          {{
+            section.settings.image
+            | image_url: width: 1200
+            | image_tag:
+              loading: 'lazy',
+              class: 'ltw-visual__img',
+              alt: section.settings.image.alt | escape
+          }}
+        {%- else -%}
+          <div class="ltw-visual__placeholder">{{ 'image' | placeholder_svg_tag: 'ltw-placeholder-svg' }}</div>
+        {%- endif -%}
+
+      {%- elsif section.settings.right_type == 'dashboard' -%}
+        <div class="ltw-dash">
+
+          {%- comment -%} Age card {%- endcomment -%}
+          <div class="ltw-card ltw-card--age">
+            <div class="ltw-card__label">{{ section.settings.dash_age_label | escape }}</div>
+            <div class="ltw-card__age-num">{{ section.settings.dash_bio_age | escape }}</div>
+            <div class="ltw-card__age-sub">{{ section.settings.dash_chron_label | escape }}: {{ section.settings.dash_chron_age | escape }}</div>
+          </div>
+
+          {%- comment -%} Metric cards {%- endcomment -%}
+          <div class="ltw-metrics">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'metric' -%}
+                <div class="ltw-card ltw-card--metric" {{ block.shopify_attributes }}>
+                  <span class="ltw-metric__name">{{ block.settings.metric_name | escape }}</span>
+                  <div class="ltw-bar">
+                    <div class="ltw-bar__fill" style="--w: {{ block.settings.metric_value }}%; background: {{ block.settings.metric_color }};"></div>
+                  </div>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+
+        </div>
+      {%- endif -%}
+    </div>
+
+  </div>
+</section>
+
+{%- assign words_json = section.blocks | map: 'settings' | map: 'word' | join: '","' | prepend: '["' | append: '"]' -%}
+
+<script>
+(function () {
+  var words  = {{ words_json }}.filter(Boolean);
+  var elWord = document.getElementById('ltw-word-{{ section.id }}');
+
+  if (!elWord || words.length === 0) return;
+
+  var current    = 0;
+  var charIndex  = 0;
+  var isDeleting = false;
+
+  var TYPING_SPEED = 80;
+  var DELETE_SPEED = 45;
+  var PAUSE_AFTER  = 2200;
+  var PAUSE_BEFORE = 320;
+
+  function tick() {
+    var word = words[current];
+
+    if (!isDeleting) {
+      elWord.textContent = word.slice(0, charIndex + 1);
+      charIndex++;
+      if (charIndex === word.length) {
+        isDeleting = true;
+        setTimeout(tick, PAUSE_AFTER);
+        return;
+      }
+      setTimeout(tick, TYPING_SPEED);
+    } else {
+      elWord.textContent = word.slice(0, charIndex - 1);
+      charIndex--;
+      if (charIndex === 0) {
+        isDeleting = false;
+        current = (current + 1) % words.length;
+        setTimeout(tick, PAUSE_BEFORE);
+        return;
+      }
+      setTimeout(tick, DELETE_SPEED);
+    }
+  }
+
+  elWord.textContent = words[0];
+  charIndex = words[0].length;
+  isDeleting = true;
+  setTimeout(tick, PAUSE_AFTER);
+
+  /* Animate dashboard bars on load */
+  document.querySelectorAll('#section-{{ section.id }} .ltw-bar__fill').forEach(function(el) {
+    el.style.width = '0';
+    setTimeout(function() {
+      el.style.transition = 'width 1s cubic-bezier(.4,0,.2,1)';
+      el.style.width = el.style.getPropertyValue('--w') || el.dataset.w;
+    }, 600);
+  });
+})();
+</script>
+
+{% stylesheet %}
+/* ===================================================
+   Hero Typewriter — lt-hero-typewriter.liquid
+   =================================================== */
+
+.ltw-section {
+  background: var(--hero-bg, #efede6);
+  overflow: hidden;
+}
+
+/* Two-column layout */
+.ltw-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+
+/* Left column */
+.ltw-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+/* Eyebrow */
+.ltw-eyebrow {
+  font-size: .875rem;
+  font-weight: 500;
+  letter-spacing: .01em;
+  color: var(--hero-text-sec, rgba(22,21,20,.45));
+  margin: 0 0 12px;
+}
+
+/* Headline */
+.ltw-heading {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
+  font-size: clamp(2rem, 4vw, 3.25rem) !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+  letter-spacing: -.03em !important;
+  color: var(--hero-text, #161514) !important;
+  margin: 0 0 16px !important;
+}
+
+.ltw-heading__static {
+  color: var(--hero-text, #161514);
+}
+
+.ltw-heading__animated {
+  display: inline;
+  white-space: nowrap;
+}
+
+.ltw-cursor {
+  display: inline-block;
+  font-weight: 300;
+  color: var(--hero-text, #161514);
+  margin-left: 1px;
+  animation: ltw-blink .9s step-end infinite;
+}
+
+@keyframes ltw-blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* Subheading */
+.ltw-subheading {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
+  font-size: clamp(2rem, 4vw, 3.25rem) !important;
+  font-weight: 700 !important;
+  line-height: 1.1 !important;
+  letter-spacing: -.03em !important;
+  color: var(--hero-text-sec, rgba(22,21,20,.45)) !important;
+  margin: 0 0 40px !important;
+}
+
+/* CTA */
+.ltw-cta {
+  display: flex;
+}
+
+.ltw-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--hero-text, #161514);
+  color: var(--hero-bg, #efede6);
+  font-size: .9375rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 14px 22px;
+  border-radius: var(--hero-btn-r, 30px);
+  text-decoration: none;
+  transition: opacity .15s ease;
+}
+
+.ltw-btn:hover { opacity: .82; }
+
+.ltw-btn__icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* ---- Right column ---- */
+.ltw-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Image variant */
+.ltw-visual__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+  display: block;
+}
+
+.ltw-visual__placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: rgba(0,0,0,.06);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ltw-placeholder-svg {
+  width: 60px;
+  height: 60px;
+  opacity: .25;
+}
+
+/* Dashboard variant */
+.ltw-dash {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ltw-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.07), 0 0 0 1px rgba(0,0,0,.04);
+  padding: 20px 24px;
+}
+
+/* Age card */
+.ltw-card--age {
+  text-align: center;
+  padding: 28px 24px;
+}
+
+.ltw-card__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  opacity: .5;
+  margin-bottom: 8px;
+  color: #161514;
+}
+
+.ltw-card__age-num {
+  font-size: 4rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.04em;
+  color: #161514;
+  margin-bottom: 6px;
+}
+
+.ltw-card__age-sub {
+  font-size: 14px;
+  font-weight: 600;
+  opacity: .4;
+  color: #161514;
+}
+
+/* Metric cards */
+.ltw-metrics {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ltw-card--metric {
+  padding: 14px 20px;
+}
+
+.ltw-metric__name {
+  display: block;
+  font-size: .8125rem;
+  font-weight: 600;
+  color: #161514;
+  margin-bottom: 10px;
+  opacity: .8;
+}
+
+.ltw-bar {
+  height: 7px;
+  background: rgba(0,0,0,.07);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.ltw-bar__fill {
+  height: 100%;
+  border-radius: 99px;
+  width: 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .ltw-container {
+    grid-template-columns: 1fr;
+    gap: 48px;
+    padding: 0 24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .ltw-container {
+    padding: 0 20px;
+    gap: 36px;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Hero Typewriter",
+  "tag": "section",
+  "class": "lt-hero-typewriter",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 120,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 120,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Inhalt — Links"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Tab"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Text vor Animationswort",
+      "default": "Next-action"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Text nach Animationswort",
+      "info": "Optional"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Tab anticipates where you're headed and suggests changes."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button Text",
+      "default": "Jetzt entdecken"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Button Link"
+    },
+    {
+      "type": "text",
+      "id": "cta_icon",
+      "label": "Button Icon",
+      "default": "↓",
+      "info": "z.B. → ↓ ⤓"
+    },
+    {
+      "type": "header",
+      "content": "Rechte Seite"
+    },
+    {
+      "type": "select",
+      "id": "right_type",
+      "label": "Inhalt rechts",
+      "options": [
+        { "value": "none",      "label": "Nichts" },
+        { "value": "image",     "label": "Bild" },
+        { "value": "dashboard", "label": "Dashboard-Karte" }
+      ],
+      "default": "dashboard"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Bild",
+      "info": "Wird angezeigt wenn \"Bild\" ausgewählt ist"
+    },
+    {
+      "type": "header",
+      "content": "Dashboard — Alter"
+    },
+    {
+      "type": "text",
+      "id": "dash_age_label",
+      "label": "Label Biologisches Alter",
+      "default": "Dein Biologisches Alter"
+    },
+    {
+      "type": "text",
+      "id": "dash_bio_age",
+      "label": "Biologisches Alter",
+      "default": "37"
+    },
+    {
+      "type": "text",
+      "id": "dash_chron_label",
+      "label": "Label Chronologisches Alter",
+      "default": "Chronologisches Alter"
+    },
+    {
+      "type": "text",
+      "id": "dash_chron_age",
+      "label": "Chronologisches Alter",
+      "default": "44"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "animated_word",
+      "name": "Animationswort",
+      "settings": [
+        {
+          "type": "text",
+          "id": "word",
+          "label": "Wort",
+          "default": "prediction"
+        }
+      ]
+    },
+    {
+      "type": "metric",
+      "name": "Metrik",
+      "settings": [
+        {
+          "type": "text",
+          "id": "metric_name",
+          "label": "Name",
+          "default": "Langlebigkeit"
+        },
+        {
+          "type": "range",
+          "id": "metric_value",
+          "label": "Wert",
+          "min": 0,
+          "max": 100,
+          "step": 1,
+          "default": 85
+        },
+        {
+          "type": "color",
+          "id": "metric_color",
+          "label": "Farbe",
+          "default": "#65c0b6"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Hero Typewriter",
+      "blocks": [
+        { "type": "animated_word", "settings": { "word": "prediction" } },
+        { "type": "animated_word", "settings": { "word": "acceleration" } },
+        { "type": "animated_word", "settings": { "word": "suggestion" } },
+        { "type": "metric", "settings": { "metric_name": "Langlebigkeit", "metric_value": 85, "metric_color": "#65c0b6" } },
+        { "type": "metric", "settings": { "metric_name": "Kognitive Degeneration", "metric_value": 72, "metric_color": "#f4b740" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
