@@ -1,9 +1,11 @@
 {% style %}
   #section-{{ section.id }} {
-    --fg-text:     {{ settings.color_text_main | default: '#26251e' }};
-    --fg-text-sec: {{ settings.color_text_main | color_modify: 'alpha', 0.6 | default: 'rgba(38,37,30,0.6)' }};
-    --fg-bg:       {{ settings.color_background_main | default: '#f7f7f4' }};
-    --fg-card-bg:  {{ settings.color_background_main | color_modify: 'lightness', -3 | default: '#f2f1ed' }};
+    --crs-bg:       {{ section.settings.color_bg }};
+    --crs-card-bg:  {{ section.settings.color_card_bg }};
+    --crs-text:     {{ section.settings.color_text }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.1 }};
     padding-top:    {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
   }
@@ -47,7 +49,7 @@
    =================================================== */
 
 .fg-section {
-  background: var(--fg-bg, #f7f7f4);
+  background: var(--crs-bg, #f7f7f4);
 }
 
 .fg-container {
@@ -67,14 +69,14 @@
   font-weight: 400 !important;
   line-height: 1.15 !important;
   letter-spacing: -0.72px !important;
-  color: var(--fg-text, #26251e) !important;
+  color: var(--crs-text, #26251e) !important;
   margin: 0 0 8px !important;
 }
 
 .fg-subheading {
   font-size: 16px;
   line-height: 1.6;
-  color: var(--fg-text-sec, rgba(38,37,30,0.6));
+  color: var(--crs-text-sec, rgba(38,37,30,0.6));
   margin: 0;
 }
 
@@ -95,7 +97,7 @@
 
 /* Card */
 .fg-card {
-  background: var(--fg-card-bg, #f2f1ed);
+  background: var(--crs-card-bg, #f2f1ed);
   border-radius: 4px;
   padding: 13.4px 15px 15px;
   min-height: 102.4px;
@@ -110,7 +112,7 @@
   font-weight: 400 !important;
   line-height: 1.4 !important;
   letter-spacing: 0 !important;
-  color: var(--fg-text, #26251e) !important;
+  color: var(--crs-text, #26251e) !important;
   margin: 0 !important;
 }
 
@@ -118,7 +120,7 @@
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
-  color: var(--fg-text-sec, rgba(38,37,30,0.6));
+  color: var(--crs-text-sec, rgba(38,37,30,0.6));
 }
 
 /* Tablet — 2 columns for 3-col grid */
@@ -144,24 +146,30 @@
   "class": "crs-feature-grid",
   "settings": [
     {
-      "type": "text",
-      "id": "heading",
-      "label": "Überschrift (optional)"
+      "type": "header",
+      "content": "Farben"
     },
     {
-      "type": "text",
-      "id": "subheading",
-      "label": "Unterüberschrift (optional)"
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f7f7f4"
     },
     {
-      "type": "select",
-      "id": "columns",
-      "label": "Spalten",
-      "options": [
-        { "value": "2", "label": "2 Spalten" },
-        { "value": "3", "label": "3 Spalten" }
-      ],
-      "default": "3"
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
     },
     {
       "type": "range",
@@ -182,6 +190,30 @@
       "step": 8,
       "unit": "px",
       "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift (optional)"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Unterüberschrift (optional)"
+    },
+    {
+      "type": "select",
+      "id": "columns",
+      "label": "Spalten",
+      "options": [
+        { "value": "2", "label": "2 Spalten" },
+        { "value": "3", "label": "3 Spalten" }
+      ],
+      "default": "3"
     }
   ],
   "blocks": [

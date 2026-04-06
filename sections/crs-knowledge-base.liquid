@@ -1,8 +1,13 @@
 {% style %}
   #section-{{ section.id }} {
-    --ckb-text: {{ settings.color_text_main | default: '#161514' }};
-    --ckb-text-sec: {{ settings.color_text_main | color_modify: 'alpha', 0.55 | default: 'rgba(22,21,20,0.55)' }};
-    --ckb-bg: {{ settings.color_background_main | default: '#ffffff' }};
+    --crs-bg:       {{ section.settings.color_bg }};
+    --crs-card-bg:  {{ section.settings.color_card_bg }};
+    --crs-text:     {{ section.settings.color_text }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.1 }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
   }
 {% endstyle %}
 
@@ -69,18 +74,17 @@
 
 {% stylesheet %}
 /* ===================================================
-   Cursor Knowledge Base — cursor-knowledge-base.liquid
+   Knowledge Base — crs-knowledge-base.liquid
    =================================================== */
 
 .ckb-section {
-  padding: 60px 0;
-  background: var(--ckb-bg, #fff);
+  background: var(--crs-bg, #f7f7f4);
 }
 
 .ckb-container {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 20px;
 }
 
 /* Card */
@@ -88,11 +92,9 @@
   display: grid;
   grid-template-columns: 1fr 2fr;
   min-height: 560px;
-  border-radius: 16px;
+  border-radius: 4px;
   overflow: hidden;
-  border: 1px solid rgba(0, 0, 0, .08);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
-  background: var(--ckb-bg, #fafaf9);
+  background: var(--crs-card-bg, #f2f1ed);
 }
 
 /* Left column */
@@ -113,34 +115,34 @@
 .ckb-heading {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
   font-size: clamp(1.4rem, 2vw, 2rem) !important;
-  font-weight: 700 !important;
+  font-weight: 400 !important;
   line-height: 1.15 !important;
-  letter-spacing: -.025em !important;
-  color: var(--ckb-text, #161514) !important;
+  letter-spacing: -0.025em !important;
+  color: var(--crs-text, #26251e) !important;
   margin: 0 !important;
 }
 
 .ckb-subheading {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
   font-size: clamp(1.4rem, 2vw, 2rem) !important;
-  font-weight: 700 !important;
+  font-weight: 400 !important;
   line-height: 1.15 !important;
-  letter-spacing: -.025em !important;
-  color: var(--ckb-text-sec, rgba(22,21,20,0.55)) !important;
+  letter-spacing: -0.025em !important;
+  color: var(--crs-text-sec, rgba(38,37,30,0.6)) !important;
   margin: 0 !important;
 }
 
 /* Testimonial quote */
 .ckb-quote {
   margin: 0;
-  border-left: 2px solid rgba(0, 0, 0, .15);
+  border-left: 2px solid var(--crs-border, rgba(38,37,30,0.1));
   padding-left: 20px;
 }
 
 .ckb-quote-body {
   font-size: .9375rem;
   line-height: 1.6;
-  color: var(--ckb-text, #161514);
+  color: var(--crs-text, #26251e);
   margin: 0 0 16px;
 }
 
@@ -157,7 +159,7 @@
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  border: 2px solid rgba(0, 0, 0, .08);
+  border: 1.5px solid var(--crs-border, rgba(38,37,30,0.1));
 }
 
 .ckb-avatar img {
@@ -176,12 +178,12 @@
 .ckb-author-name {
   font-size: .875rem;
   font-weight: 600;
-  color: var(--ckb-text, #161514);
+  color: var(--crs-text, #26251e);
 }
 
 .ckb-author-role {
   font-size: .8125rem;
-  color: var(--ckb-text-sec, rgba(22,21,20,0.55));
+  color: var(--crs-text-sec, rgba(38,37,30,0.6));
 }
 
 /* Right column — image */
@@ -201,7 +203,7 @@
   width: 100%;
   height: 100%;
   min-height: 400px;
-  background: var(--color-background-main-alternate, #f0f0f0);
+  background: var(--crs-card-bg, #f2f1ed);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -231,14 +233,6 @@
 
 /* Responsive — mobile */
 @media (max-width: 640px) {
-  .ckb-section {
-    padding: 40px 0;
-  }
-
-  .ckb-container {
-    padding: 0 16px;
-  }
-
   .ckb-content {
     padding: 32px 20px;
     gap: 20px;
@@ -254,8 +248,54 @@
 {
   "name": "Cursor Knowledge Base",
   "tag": "section",
-  "class": "cursor-knowledge-base",
+  "class": "crs-knowledge-base",
   "settings": [
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    },
     {
       "type": "header",
       "content": "Linke Spalte — Text"
@@ -280,7 +320,7 @@
       "type": "textarea",
       "id": "quote_text",
       "label": "Zitat",
-      "default": "Über alle Rollen und Erfahrungsstufen hinweg sehen wir einen Anstieg des PR-Volumens um über 25 % und der durchschnittlichen PR-Größe um über 100 %. Zusammengenommen bedeutet das, dass wir rund 50 % mehr Code ausliefern."
+      "default": "Über alle Rollen und Erfahrungsstufen hinweg sehen wir einen Anstieg des PR-Volumens um über 25 % und der durchschnittlichen PR-Größe um über 100 %."
     },
     {
       "type": "image_picker",

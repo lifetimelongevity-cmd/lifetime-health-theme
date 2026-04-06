@@ -1,12 +1,11 @@
 {% style %}
   #section-{{ section.id }} {
-    --tl-text:     {{ settings.color_text_main | default: '#26251e' }};
-    --tl-text-sec: {{ settings.color_text_main | color_modify: 'alpha', 0.65 | default: 'rgba(38,37,30,0.65)' }};
-    --tl-text-ter: {{ settings.color_text_main | color_modify: 'alpha', 0.4 | default: 'rgba(38,37,30,0.4)' }};
-    --tl-bg:       {{ settings.color_background_main | default: '#f7f7f4' }};
-    --tl-card-bg:  {{ settings.color_background_main | color_modify: 'lightness', -3 | default: '#f2f1ed' }};
-    --tl-border:   {{ settings.color_text_main | color_modify: 'alpha', 0.12 | default: 'rgba(38,37,30,0.12)' }};
-    --tl-dot-active: {{ settings.color_text_main | color_modify: 'alpha', 0.8 | default: 'rgba(38,37,30,0.8)' }};
+    --crs-bg:       {{ section.settings.color_bg }};
+    --crs-card-bg:  {{ section.settings.color_card_bg }};
+    --crs-text:     {{ section.settings.color_text }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.1 }};
     padding-top:    {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
   }
@@ -27,7 +26,6 @@
             {%- if section.settings.kicker != blank -%}
               <p class="tl-kicker">{{ section.settings.kicker | escape }}</p>
             {%- endif -%}
-
             {%- if section.settings.headline != blank -%}
               <h2 class="tl-headline">{{ section.settings.headline | escape }}</h2>
             {%- endif -%}
@@ -65,7 +63,7 @@
 
       </div>
 
-      {%- comment -%} Right: Image (optional; no placeholder — matches single-column CRS sections) {%- endcomment -%}
+      {%- comment -%} Right: Image (only if set) {%- endcomment -%}
       {%- if section.settings.image != blank -%}
         <div class="tl-right">
           {{
@@ -89,7 +87,7 @@
    =================================================== */
 
 .tl-section {
-  background: var(--tl-bg, #f7f7f4);
+  background: var(--crs-bg, #f7f7f4);
 }
 
 .tl-container {
@@ -98,7 +96,7 @@
   padding: 0 20px;
 }
 
-/* Layout — aligned with crs-feature-grid / crs-metrics-row rhythm */
+/* Layout */
 .tl-layout {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -110,7 +108,7 @@
   grid-template-columns: 1fr;
 }
 
-/* Header block (matches .fg-header spacing) */
+/* Header block */
 .tl-header {
   margin-bottom: 32px;
 }
@@ -120,7 +118,7 @@
   font-weight: 400;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--tl-text-ter, rgba(38,37,30,0.4));
+  color: var(--crs-text-ter, rgba(38,37,30,0.4));
   margin: 0 0 12px;
 }
 
@@ -130,7 +128,7 @@
   font-weight: 400 !important;
   line-height: 1.15 !important;
   letter-spacing: -0.72px !important;
-  color: var(--tl-text, #26251e) !important;
+  color: var(--crs-text, #26251e) !important;
   margin: 0 !important;
 }
 
@@ -138,7 +136,7 @@
 .tl-items {
   position: relative;
   padding-left: 24px;
-  border-left: 1px solid var(--tl-border, rgba(38,37,30,0.12));
+  border-left: 1px solid var(--crs-border, rgba(38,37,30,0.12));
 }
 
 .tl-item {
@@ -150,7 +148,7 @@
   margin-bottom: 0;
 }
 
-/* Dot via pseudo-element */
+/* Dot */
 .tl-item::before {
   content: '';
   position: absolute;
@@ -159,14 +157,14 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--tl-card-bg, #f2f1ed);
+  background: var(--crs-card-bg, #f2f1ed);
   border: 1.5px solid rgba(38,37,30,0.3);
   box-sizing: border-box;
 }
 
 .tl-item--active::before {
-  background: var(--tl-dot-active, rgba(38,37,30,0.8));
-  border-color: var(--tl-dot-active, rgba(38,37,30,0.8));
+  background: rgba(38,37,30,0.8);
+  border-color: rgba(38,37,30,0.8);
 }
 
 /* Time badge */
@@ -174,9 +172,9 @@
   display: inline-block;
   font-size: 11px;
   font-weight: 400;
-  color: var(--tl-text-sec, rgba(38,37,30,0.65));
-  background: var(--tl-card-bg, #f2f1ed);
-  border: 1px solid var(--tl-border, rgba(38,37,30,0.1));
+  color: var(--crs-text-sec, rgba(38,37,30,0.6));
+  background: var(--crs-card-bg, #f2f1ed);
+  border: 1px solid var(--crs-border, rgba(38,37,30,0.1));
   border-radius: 20px;
   padding: 2px 10px;
   margin-bottom: 6px;
@@ -189,7 +187,7 @@
   font-weight: 500 !important;
   line-height: 1.4 !important;
   letter-spacing: 0 !important;
-  color: var(--tl-text, #26251e) !important;
+  color: var(--crs-text, #26251e) !important;
   margin: 0 0 4px !important;
 }
 
@@ -198,7 +196,7 @@
   font-size: 14px;
   font-weight: 400;
   line-height: 1.65;
-  color: var(--tl-text-sec, rgba(38,37,30,0.65));
+  color: var(--crs-text-sec, rgba(38,37,30,0.6));
   margin: 0;
 }
 
@@ -211,15 +209,10 @@
   margin-top: 8px;
   font-size: 13px;
   line-height: 1.6;
-  color: var(--tl-text-sec, rgba(38,37,30,0.65));
+  color: var(--crs-text-sec, rgba(38,37,30,0.6));
 }
 
 /* Right image */
-.tl-right {
-  position: sticky;
-  top: 80px;
-}
-
 .tl-image {
   width: 100%;
   height: auto;
@@ -228,15 +221,11 @@
   display: block;
 }
 
-/* Mobile — content first, then image (natural DOM order) */
+/* Mobile */
 @media (max-width: 1024px) {
   .tl-layout {
     grid-template-columns: 1fr;
     gap: 32px;
-  }
-
-  .tl-right {
-    position: static;
   }
 }
 {% endstylesheet %}
@@ -248,33 +237,30 @@
   "class": "crs-timeline",
   "settings": [
     {
-      "type": "text",
-      "id": "kicker",
-      "label": "Kicker (optional)",
-      "default": "WAS KANNST DU ERWARTEN?"
+      "type": "header",
+      "content": "Farben"
     },
     {
-      "type": "text",
-      "id": "headline",
-      "label": "Überschrift",
-      "default": "Aus Forschung wird Alltag"
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f7f7f4"
     },
     {
-      "type": "checkbox",
-      "id": "show_callout",
-      "label": "Hinweis-Boxen (Callouts) anzeigen",
-      "default": true,
-      "info": "Wenn aus, werden Callout-Texte der Schritte nicht gerendert — unabhängig von den Block-Einstellungen."
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f2f1ed"
     },
     {
-      "type": "image_picker",
-      "id": "image",
-      "label": "Bild (rechte Spalte)"
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
     },
     {
-      "type": "text",
-      "id": "image_alt",
-      "label": "Bild Alt-Text"
+      "type": "header",
+      "content": "Abstände"
     },
     {
       "type": "range",
@@ -295,6 +281,39 @@
       "step": 8,
       "unit": "px",
       "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": "WAS KANNST DU ERWARTEN?"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Überschrift",
+      "default": "Aus Forschung wird Alltag"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_callout",
+      "label": "Hinweis-Boxen (Callouts) anzeigen",
+      "default": true,
+      "info": "Wenn aus, werden Callout-Texte der Schritte nicht gerendert."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Bild (rechte Spalte)"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Bild Alt-Text"
     }
   ],
   "blocks": [

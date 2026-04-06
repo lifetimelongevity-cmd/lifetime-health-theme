@@ -1,10 +1,13 @@
 {% style %}
   #section-{{ section.id }} {
-    --sq-text:     {{ settings.color_text_main | default: '#161514' }};
-    --sq-text-sec: {{ settings.color_text_main | color_modify: 'alpha', 0.5 | default: 'rgba(22,21,20,0.5)' }};
-    --sq-bg:       {{ settings.color_background_main | default: '#ffffff' }};
-    --sq-card-bg:  {{ settings.color_background_main | default: '#ffffff' }};
-    --sq-border:   {{ settings.color_text_main | color_modify: 'alpha', 0.1 | default: 'rgba(22,21,20,0.1)' }};
+    --crs-bg:       {{ section.settings.color_bg }};
+    --crs-card-bg:  {{ section.settings.color_card_bg }};
+    --crs-text:     {{ section.settings.color_text }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.1 }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
   }
 {% endstyle %}
 
@@ -57,40 +60,38 @@
    =================================================== */
 
 .sq-section {
-  padding: 64px 0;
-  background: var(--sq-bg, #fff);
+  background: var(--crs-bg, #f7f7f4);
 }
 
 .sq-container {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 20px;
 }
 
 /* Optional section heading */
 .sq-section-heading {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
-  font-size: clamp(1.5rem, 2.5vw, 2.25rem) !important;
-  font-weight: 700 !important;
+  font-size: 36px !important;
+  font-weight: 400 !important;
   line-height: 1.15 !important;
-  letter-spacing: -.025em !important;
-  color: var(--sq-text, #161514) !important;
-  margin: 0 0 40px !important;
+  letter-spacing: -0.72px !important;
+  color: var(--crs-text, #26251e) !important;
+  margin: 0 0 32px !important;
 }
 
 /* Grid */
 .sq-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 10px;
 }
 
 /* Card */
 .sq-card {
-  background: var(--sq-card-bg, #fff);
-  border: 1px solid var(--sq-border, rgba(22,21,20,0.1));
-  border-radius: 14px;
-  padding: 28px;
+  background: var(--crs-card-bg, #f2f1ed);
+  border-radius: 4px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
 }
@@ -111,9 +112,9 @@
 
 .sq-quote-text {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
-  font-size: .9375rem;
+  font-size: 16px;
   line-height: 1.65;
-  color: var(--sq-text, #161514);
+  color: var(--crs-text, #26251e);
   margin: 0;
   white-space: pre-wrap;
 }
@@ -132,7 +133,7 @@
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  border: 1.5px solid var(--sq-border, rgba(22,21,20,0.1));
+  border: 1.5px solid var(--crs-border, rgba(38,37,30,0.1));
 }
 
 .sq-avatar img {
@@ -152,13 +153,13 @@
   font-size: .875rem;
   font-weight: 600;
   line-height: 1.3;
-  color: var(--sq-text, #161514);
+  color: var(--crs-text, #26251e);
 }
 
 .sq-role {
   font-size: .8125rem;
   line-height: 1.3;
-  color: var(--sq-text-sec, rgba(22,21,20,0.5));
+  color: var(--crs-text-sec, rgba(38,37,30,0.6));
 }
 
 /* Tablet — 2 columns */
@@ -170,21 +171,8 @@
 
 /* Mobile — 1 column */
 @media (max-width: 640px) {
-  .sq-section {
-    padding: 40px 0;
-  }
-
-  .sq-container {
-    padding: 0 16px;
-  }
-
   .sq-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .sq-card {
-    padding: 22px;
   }
 }
 {% endstylesheet %}
@@ -195,6 +183,56 @@
   "tag": "section",
   "class": "crs-social-quotes",
   "settings": [
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
     {
       "type": "text",
       "id": "heading",

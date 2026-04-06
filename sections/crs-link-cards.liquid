@@ -1,9 +1,13 @@
 {% style %}
   #section-{{ section.id }} {
-    --lc-text:     {{ settings.color_text_main | default: '#161514' }};
-    --lc-text-sec: {{ settings.color_text_main | color_modify: 'alpha', 0.5 | default: 'rgba(22,21,20,0.5)' }};
-    --lc-bg:       {{ settings.color_background_main | default: '#ffffff' }};
-    --lc-border:   {{ settings.color_text_main | color_modify: 'alpha', 0.1 | default: 'rgba(22,21,20,0.1)' }};
+    --crs-bg:       {{ section.settings.color_bg }};
+    --crs-card-bg:  {{ section.settings.color_card_bg }};
+    --crs-text:     {{ section.settings.color_text }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.1 }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
   }
 {% endstyle %}
 
@@ -45,30 +49,28 @@
    =================================================== */
 
 .lc-section {
-  padding: 48px 0;
-  background: var(--lc-bg, #fff);
+  background: var(--crs-bg, #f7f7f4);
 }
 
 .lc-container {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 20px;
 }
 
 /* Grid */
 .lc-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
+  gap: 10px;
   align-items: stretch;
 }
 
 /* Card */
 .lc-card {
-  background: var(--lc-bg, #fff);
-  border: 1px solid var(--lc-border, rgba(22,21,20,0.1));
-  border-radius: 14px;
-  padding: 28px;
+  background: var(--crs-card-bg, #f2f1ed);
+  border-radius: 4px;
+  padding: 15px;
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -83,18 +85,18 @@
 
 .lc-card-title {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
-  font-size: .9375rem !important;
-  font-weight: 600 !important;
-  line-height: 1.3 !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
   letter-spacing: 0 !important;
-  color: var(--lc-text, #161514) !important;
+  color: var(--crs-text, #26251e) !important;
   margin: 0 !important;
 }
 
 .lc-card-desc {
-  font-size: .9375rem;
+  font-size: 16px;
   line-height: 1.6;
-  color: var(--lc-text-sec, rgba(22,21,20,0.5));
+  color: var(--crs-text-sec, rgba(38,37,30,0.6));
   margin: 0;
 }
 
@@ -104,17 +106,17 @@
 }
 
 .lc-link {
-  font-size: .875rem;
-  font-weight: 500;
-  color: var(--lc-text, #161514);
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--crs-text, #26251e);
   text-decoration: underline;
   text-underline-offset: 3px;
-  text-decoration-color: var(--lc-border, rgba(22,21,20,0.3));
+  text-decoration-color: var(--crs-border, rgba(38,37,30,0.2));
   transition: text-decoration-color 0.15s ease, opacity 0.15s ease;
 }
 
 .lc-link:hover {
-  text-decoration-color: var(--lc-text, #161514);
+  text-decoration-color: var(--crs-text, #26251e);
   opacity: .75;
 }
 
@@ -127,21 +129,8 @@
 
 /* Mobile — 1 column */
 @media (max-width: 640px) {
-  .lc-section {
-    padding: 32px 0;
-  }
-
-  .lc-container {
-    padding: 0 16px;
-  }
-
   .lc-grid {
     grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .lc-card {
-    padding: 22px;
   }
 }
 {% endstylesheet %}
@@ -151,7 +140,54 @@
   "name": "Link Cards",
   "tag": "section",
   "class": "crs-link-cards",
-  "settings": [],
+  "settings": [
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
   "blocks": [
     {
       "type": "card",
