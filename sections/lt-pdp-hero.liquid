@@ -37,6 +37,27 @@
   endif
 -%}
 
+{% style %}
+  #lt-pdp-hero-{{ section.id }} {
+    /* Cursor design tokens — override lt-* vars at section scope */
+    --lt-bg:           {{ section.settings.color_bg }};
+    --lt-surface:      {{ section.settings.color_card_bg }};
+    --lt-border:       {{ section.settings.color_text | color_modify: 'alpha', 0.1 }};
+    --lt-text:         {{ section.settings.color_text }};
+    --lt-muted:        {{ section.settings.color_text | color_modify: 'alpha', 0.55 }};
+    --lt-cta-bg:       {{ section.settings.color_text }};
+    --lt-cta-hover:    {{ section.settings.color_text | color_modify: 'alpha', 0.82 }};
+    --lt-primary:      {{ section.settings.color_text }};
+    --lt-primary-dark: {{ section.settings.color_text }};
+    --lt-success-bg:   {{ section.settings.color_text | color_modify: 'alpha', 0.06 }};
+    --lt-success-text: {{ section.settings.color_text }};
+    --lt-radius-sm:    4px;
+    --lt-radius-md:    4px;
+    --lt-radius-lg:    4px;
+    --lt-shadow:       none;
+  }
+{% endstyle %}
+
 <section id="lt-pdp-hero-{{ section.id }}" class="lt-pdp-hero-section">
   <div class="lt-pdp-hero__container">
     <product-page
@@ -904,10 +925,161 @@
   })();
 </script>
 
+{% stylesheet %}
+/* ===================================================
+   LT PDP Hero — Cursor-Style Overrides
+   lt-pdp.css tokens are remapped via {% style %} above.
+   This block handles structural overrides that need
+   CSS (not just token swaps).
+   =================================================== */
+
+/* Section background */
+.lt-pdp-hero-section {
+  background: var(--lt-bg, #f7f7f4);
+}
+
+/* Title — cursor H2 style (36px / weight 400 / tight tracking) */
+.lt-pdp-hero__title {
+  font-size: 36px !important;
+  font-weight: 400 !important;
+  line-height: 1.15 !important;
+  letter-spacing: -0.72px !important;
+}
+
+/* Tagline — lighter, no italic */
+.lt-pdp-hero__tagline {
+  font-style: normal !important;
+  opacity: 1 !important;
+  font-size: 13px !important;
+}
+
+/* Gallery frame — sharp corners */
+.lt-pdp-hero__gallery-frame {
+  border-radius: 4px !important;
+}
+
+.lt-pdp-hero .product-gallery-item,
+.lt-pdp-hero .product-gallery-item img {
+  border-radius: 4px !important;
+}
+
+/* Purchase block — flat, no border */
+.lt-purchase-block {
+  border: none !important;
+  background: var(--lt-surface, #f2f1ed) !important;
+  border-radius: 4px !important;
+}
+
+/* Buy-box cards — flat cursor style */
+.lt-bb-card {
+  background: var(--lt-bg, #f7f7f4) !important;
+  border: 1px solid var(--lt-border, rgba(38,37,30,0.1)) !important;
+  border-radius: 4px !important;
+  box-shadow: none !important;
+}
+
+.lt-bb-card.is-selected {
+  background: var(--lt-surface, #f2f1ed) !important;
+  border-color: var(--lt-text, #26251e) !important;
+  border-width: 1.5px !important;
+  box-shadow: none !important;
+}
+
+.lt-bb-card__perks {
+  background: transparent !important;
+  border-radius: 0 0 4px 4px !important;
+}
+
+.lt-bb-card__radio {
+  border-color: var(--lt-border, rgba(38,37,30,0.2)) !important;
+}
+
+.lt-bb-card.is-selected .lt-bb-card__radio {
+  border-color: var(--lt-text, #26251e) !important;
+}
+
+.lt-bb-card.is-selected .lt-bb-card__radio::after {
+  background: var(--lt-text, #26251e) !important;
+}
+
+/* Card title — weight 400 */
+.lt-bb-card__title {
+  font-weight: 400 !important;
+}
+
+/* ATC button — dark, sharp corners */
+.lt-pdp-hero__atc.button,
+#lt-hero-atc {
+  border-radius: 4px !important;
+  font-weight: 400 !important;
+  font-size: 15px !important;
+}
+
+/* Sticky ATC button */
+.lt-sticky-atc__right .button,
+#lt-sticky-atc .lt-sticky-btn {
+  border-radius: 4px !important;
+}
+
+/* Trust bar — adjust border color */
+.lt-pdp-hero__trust {
+  border-top-color: var(--lt-border, rgba(38,37,30,0.1)) !important;
+  border-bottom-color: var(--lt-border, rgba(38,37,30,0.1)) !important;
+}
+
+/* Doctor/founder block — no teal accent */
+.lt-pdp-hero__doctor {
+  background: var(--lt-surface, #f2f1ed) !important;
+  border-left: 2px solid var(--lt-border, rgba(38,37,30,0.15)) !important;
+}
+
+/* Savings badge — muted cursor tone */
+.lt-price-row__saving {
+  border-radius: 4px !important;
+}
+
+.lt-bb-card__badge {
+  border-radius: 4px !important;
+}
+
+/* Subscription banner */
+.lt-bb__banner {
+  border-radius: 4px !important;
+  background: var(--lt-success-bg, rgba(38,37,30,0.06)) !important;
+  color: var(--lt-text, #26251e) !important;
+}
+
+.lt-bb__banner svg {
+  color: var(--lt-text, #26251e) !important;
+}
+{% endstylesheet %}
+
 {% schema %}
 {
   "name": "LT — PDP Hero",
   "settings": [
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
     {
       "type": "header",
       "content": "Badge"
