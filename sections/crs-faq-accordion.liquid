@@ -142,7 +142,7 @@
 }
 
 .faq-panel.is-open {
-  max-height: 600px;
+  max-height: min(120vh, 2000px);
 }
 
 .faq-answer {
@@ -178,41 +178,48 @@
 
 {% javascript %}
 (function () {
-  var section = document.currentScript.closest('.faq-section') ||
-    document.querySelector('#section-{{ section.id }}');
-  if (!section) return;
+  if (window.__crsFaqAccordionBound) return;
+  window.__crsFaqAccordionBound = true;
 
-  var buttons = section.querySelectorAll('.faq-question');
+  function panelById(root, id) {
+    if (!id) return null;
+    var el = document.getElementById(id);
+    return el && root.contains(el) ? el : null;
+  }
 
-  buttons.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      var expanded = btn.getAttribute('aria-expanded') === 'true';
-      var panelId = btn.getAttribute('aria-controls');
-      var panel = section.querySelector('#' + panelId);
-      var toggle = btn.querySelector('.faq-toggle');
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.faq-section .faq-question');
+    if (!btn) return;
 
-      // Close all others
-      buttons.forEach(function (other) {
-        if (other !== btn) {
-          other.setAttribute('aria-expanded', 'false');
-          var otherId = other.getAttribute('aria-controls');
-          var otherPanel = section.querySelector('#' + otherId);
-          var otherToggle = other.querySelector('.faq-toggle');
-          if (otherPanel) otherPanel.classList.remove('is-open');
-          if (otherToggle) otherToggle.textContent = '↓';
-        }
-      });
+    var section = btn.closest('.faq-section');
+    if (!section) return;
 
-      if (!expanded) {
-        btn.setAttribute('aria-expanded', 'true');
-        if (panel) panel.classList.add('is-open');
-        if (toggle) toggle.textContent = '↑';
-      } else {
-        btn.setAttribute('aria-expanded', 'false');
-        if (panel) panel.classList.remove('is-open');
-        if (toggle) toggle.textContent = '↓';
+    var buttons = section.querySelectorAll('.faq-question');
+    var expanded = btn.getAttribute('aria-expanded') === 'true';
+    var panelId = btn.getAttribute('aria-controls');
+    var panel = panelById(section, panelId);
+    var toggle = btn.querySelector('.faq-toggle');
+
+    buttons.forEach(function (other) {
+      if (other !== btn) {
+        other.setAttribute('aria-expanded', 'false');
+        var otherId = other.getAttribute('aria-controls');
+        var otherPanel = panelById(section, otherId);
+        var otherToggle = other.querySelector('.faq-toggle');
+        if (otherPanel) otherPanel.classList.remove('is-open');
+        if (otherToggle) otherToggle.textContent = '↓';
       }
     });
+
+    if (!expanded) {
+      btn.setAttribute('aria-expanded', 'true');
+      if (panel) panel.classList.add('is-open');
+      if (toggle) toggle.textContent = '↑';
+    } else {
+      btn.setAttribute('aria-expanded', 'false');
+      if (panel) panel.classList.remove('is-open');
+      if (toggle) toggle.textContent = '↓';
+    }
   });
 })();
 {% endjavascript %}
