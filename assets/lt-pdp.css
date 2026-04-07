@@ -102,13 +102,13 @@
 .lt-pdp-hero__container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 80px 24px 64px;
+  padding: var(--space-9) var(--space-5) var(--space-8);
 }
 
 .lt-pdp-hero {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 32px;
+  gap: var(--space-6);
   align-items: start;
 }
 
@@ -776,18 +776,31 @@
 
 @media (max-width: 1023px) {
   .lt-pdp-hero {
-    gap: 30px;
+    gap: calc(var(--space-6) - var(--space-1) / 2);
   }
 }
 
 @media (max-width: 767px) {
   .lt-pdp-hero__container {
-    padding: 64px 16px 100px;
+    /* unten: Reserve Sticky-ATC (~100px) aus Tokens */
+    padding: var(--space-8) var(--space-4) calc(var(--space-9) + var(--space-5));
   }
 
   .lt-pdp-hero {
     grid-template-columns: 1fr;
-    gap: 24px;
+    gap: var(--space-5);
+  }
+
+  /*
+    section-main-product.css: .lap--grid--slider-container css-slider nutzt negative margin + extra width
+    (--gutter-container), damit die Galerie aus dem Standard-Product-Container „ausbricht“.
+    LT PDP Hero bringt eigenes Padding in .lt-pdp-hero__container — ohne Override wirkt die Galerie
+    nach links verschoben / asymmetrisch zum Text.
+  */
+  .lt-pdp-hero .lap--grid--slider-container css-slider {
+    width: 100%;
+    margin-inline-start: 0;
+    margin-inline-end: 0;
   }
 
   .lt-qty-pill__title,
@@ -796,10 +809,11 @@
     font-size: 12px;
   }
 
+  /* Kein zusätzliches horizontales Padding: stammt bereits aus .lt-pdp-hero__container (sonst doppelter Einzug vs. Galerie). */
   .lt-hero-text,
   .lt-pdp-hero__content {
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .lt-pdp-hero .product-gallery__thumbnails {
@@ -922,19 +936,36 @@ body:has(.lt-pdp-hero-section) [data-banners] [data-banner][data-type="product-p
 }
 
 .lt-bb-card__body {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Radio + Titel/Preiszeile: flex, Radio vertikal zentriert, wenig horizontaler Platz */
+.lt-bb-card__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4) 0;
+  min-width: 0;
+}
+
+.lt-bb-card__head--once {
+  padding-bottom: var(--space-3);
 }
 
 .lt-bb-card__row {
   display: grid;
-  grid-template-columns: 22px 1fr minmax(5.75rem, auto);
-  gap: 10px 12px;
-  align-items: start;
-  padding: 14px 14px 0;
+  grid-template-columns: minmax(0, 1fr) minmax(4.5rem, auto);
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+  padding: 0;
 }
 
 .lt-bb-card__row--once {
-  padding-bottom: 14px;
+  padding-bottom: 0;
 }
 
 .lt-bb-card--sub .lt-bb-card__row {
@@ -942,14 +973,12 @@ body:has(.lt-pdp-hero-section) [data-banners] [data-banner][data-type="product-p
 }
 
 .lt-bb-card__radio {
-  grid-column: 1;
-  grid-row: 1;
+  flex-shrink: 0;
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  border: 2px solid #c4c4c4;
-  margin-top: 3px;
-  flex-shrink: 0;
+  border: 2px solid var(--color-gray-400, #c4c4c4);
+  margin: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -957,13 +986,13 @@ body:has(.lt-pdp-hero-section) [data-banners] [data-banner][data-type="product-p
 }
 
 .lt-bb-card__meta {
-  grid-column: 2;
+  grid-column: 1;
   grid-row: 1;
   min-width: 0;
 }
 
 .lt-bb-card__prices {
-  grid-column: 3;
+  grid-column: 2;
   grid-row: 1;
   text-align: right;
   justify-self: end;
@@ -1056,8 +1085,8 @@ body:has(.lt-pdp-hero-section) [data-banners] [data-banner][data-type="product-p
 .lt-bb-card__perks {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px 14px 14px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-3);
   margin-top: 0;
   border-top: 1px solid var(--lt-border);
   background: var(--lt-bg);
@@ -1112,23 +1141,49 @@ body:has(.lt-pdp-hero-section) [data-banners] [data-banner][data-type="product-p
 
 @media (max-width: 380px) {
   .lt-bb-card__row {
-    grid-template-columns: 22px 1fr;
-  }
-
-  .lt-bb-card__radio {
-    grid-row: 1 / span 2;
+    grid-template-columns: 1fr;
+    justify-items: start;
   }
 
   .lt-bb-card__meta {
-    grid-column: 2;
+    grid-column: 1;
     grid-row: 1;
   }
 
   .lt-bb-card__prices {
-    grid-column: 2;
+    grid-column: 1;
     grid-row: 2;
     text-align: left;
     justify-self: start;
+  }
+}
+
+@media (max-width: 767px) {
+  .lt-bb-card__head {
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-3) 0;
+  }
+
+  .lt-bb-card__head--once {
+    padding-bottom: var(--space-3);
+  }
+
+  .lt-bb-card__radio {
+    width: 18px;
+    height: 18px;
+  }
+
+  .lt-bb-card.is-selected .lt-bb-card__radio::after {
+    width: 8px;
+    height: 8px;
+  }
+
+  .lt-bb-card__row {
+    column-gap: var(--space-3);
+  }
+
+  .lt-bb-card__perks {
+    padding: var(--space-3);
   }
 }
 

@@ -387,20 +387,22 @@
                 data-once-price="{{ lt_pill_1_once }}"
                 data-sub-price="{{ lt_pill_1_sub }}"
               >
-              <span class="lt-bb-card__radio" aria-hidden="true"></span>
               <span class="lt-bb-card__body">
-                <span class="lt-bb-card__row">
-                  <span class="lt-bb-card__meta">
-                    <span class="lt-bb-card__title-row">
-                      <span class="lt-bb-card__title">{{ bb_sub1_title | escape }}</span>
-                      <span class="lt-bb-card__badge lt-bb-card__badge--strong" data-lt-bb-badge>SPARE 0%</span>
+                <span class="lt-bb-card__head">
+                  <span class="lt-bb-card__radio" aria-hidden="true"></span>
+                  <span class="lt-bb-card__row">
+                    <span class="lt-bb-card__meta">
+                      <span class="lt-bb-card__title-row">
+                        <span class="lt-bb-card__title">{{ bb_sub1_title | escape }}</span>
+                        <span class="lt-bb-card__badge lt-bb-card__badge--strong" data-lt-bb-badge>SPARE 0%</span>
+                      </span>
+                      <span class="lt-bb-card__sub">{{ bb_sub1_sub | escape }}</span>
                     </span>
-                    <span class="lt-bb-card__sub">{{ bb_sub1_sub | escape }}</span>
-                  </span>
-                  <span class="lt-bb-card__prices">
-                    <del class="lt-bb-card__compare" data-lt-bb-compare></del>
-                    <span class="lt-bb-card__current" data-lt-bb-current></span>
-                    <span class="lt-bb-card__unit" data-lt-bb-unit></span>
+                    <span class="lt-bb-card__prices">
+                      <del class="lt-bb-card__compare" data-lt-bb-compare></del>
+                      <span class="lt-bb-card__current" data-lt-bb-current></span>
+                      <span class="lt-bb-card__unit" data-lt-bb-unit></span>
+                    </span>
                   </span>
                 </span>
                 <span class="lt-bb-card__perks">
@@ -469,19 +471,21 @@
                 data-once-price="{{ lt_pill_1_once }}"
                 data-sub-price="{{ lt_pill_1_sub }}"
               >
-              <span class="lt-bb-card__radio" aria-hidden="true"></span>
               <span class="lt-bb-card__body">
-                <span class="lt-bb-card__row lt-bb-card__row--once">
-                  <span class="lt-bb-card__meta">
-                    <span class="lt-bb-card__title-row">
-                      <span class="lt-bb-card__title">{{ bb_once_title | escape }}</span>
+                <span class="lt-bb-card__head lt-bb-card__head--once">
+                  <span class="lt-bb-card__radio" aria-hidden="true"></span>
+                  <span class="lt-bb-card__row lt-bb-card__row--once">
+                    <span class="lt-bb-card__meta">
+                      <span class="lt-bb-card__title-row">
+                        <span class="lt-bb-card__title">{{ bb_once_title | escape }}</span>
+                      </span>
+                      <span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>
                     </span>
-                    <span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>
-                  </span>
-                  <span class="lt-bb-card__prices">
-                    <del class="lt-bb-card__compare" data-lt-bb-compare></del>
-                    <span class="lt-bb-card__current" data-lt-bb-current></span>
-                    <span class="lt-bb-card__unit" data-lt-bb-unit></span>
+                    <span class="lt-bb-card__prices">
+                      <del class="lt-bb-card__compare" data-lt-bb-compare></del>
+                      <span class="lt-bb-card__current" data-lt-bb-current></span>
+                      <span class="lt-bb-card__unit" data-lt-bb-unit></span>
+                    </span>
                   </span>
                 </span>
               </span>
@@ -857,10 +861,14 @@
 </section>
 
 {%- if section.settings.show_sticky_atc and product.available -%}
+  {%- comment -%}
+    Kein data-single-with-options: Theme-Komponente würde Preis aus price-sticky-main spiegeln (AJAX-Varianten).
+    LT Hero hat kein product-variants — Kaufoptionen laufen über die Buy-Box; Preis kommt ausschließlich aus JS (syncFromCard).
+  {%- endcomment -%}
   <sticky-add-to-cart
     id="lt-sticky-atc"
     data-single
-    {% unless product.has_only_default_variant %}data-single-with-options{% endunless %}
+    data-lt-pdp-hero-sticky
     data-id="product-{{ section.id }}"
     class="sticky-add-to-cart lt-sticky-atc sticky-add-to-cart--default-to-first-variant-{{ default_to_first_variant }}"
   >
@@ -879,7 +887,7 @@
         <div class="lt-sticky-atc__meta">
           <span class="lt-sticky-atc__title">{{ product.title | escape }}</span>
           {%- if section.settings.sticky_atc_subline != blank -%}
-            <span class="lt-sticky-atc__subline">{{ section.settings.sticky_atc_subline | escape }}</span>
+            <span class="lt-sticky-atc__subline" data-lt-sticky-atc-subline>{{ section.settings.sticky_atc_subline | escape }}</span>
           {%- endif -%}
           <div class="lt-sticky-atc__price" data-js-atc-price>
             <span class="sticky-add-to-cart__price-original text-weight--bold">
@@ -942,9 +950,55 @@
     if (!buyBox) return;
 
     const unitSuffix = buyBox.dataset.unitSuffix || 'Monat';
+    const productPageId = 'product-{{ section.id }}';
 
     function formatPrice(cents) {
       return (cents / 100).toFixed(2).replace('.', ',') + ' €';
+    }
+
+    function escapeLtHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    /** Vergleichspreis für Sticky (wie Buy-Box / updatePriceMeta) */
+    function stickyCompareCents(isSub, qty, onceCents, subCents, currentCents) {
+      if (isSub) {
+        return onceCents > subCents ? onceCents : 0;
+      }
+      var shopCompare = baseComparePrice > 0 ? baseComparePrice * qty : 0;
+      return shopCompare > onceCents ? shopCompare : 0;
+    }
+
+    function buildStickyPriceInner(currentCents, compareCents) {
+      var main = formatPrice(currentCents);
+      var h =
+        '<span class="sticky-add-to-cart__price-original text-weight--bold">' +
+        escapeLtHtml(main) +
+        '</span>';
+      if (compareCents > currentCents) {
+        h +=
+          '<del class="sticky-add-to-cart__price-compare">' +
+          escapeLtHtml(formatPrice(compareCents)) +
+          '</del>';
+      }
+      return h;
+    }
+
+    function syncStickyAtcPrice(isSub, qty, onceCents, subCents, currentCents) {
+      var cmp = stickyCompareCents(isSub, qty, onceCents, subCents, currentCents);
+      var inner = buildStickyPriceInner(currentCents, cmp);
+      var wrapped =
+        '<span class="show-block-if-variant-selected">' + inner + '</span>';
+
+      var stickyRoot = document.querySelector('#lt-sticky-atc [data-js-atc-price]');
+      if (stickyRoot) stickyRoot.innerHTML = inner;
+
+      var hidden = document.querySelector('#' + productPageId + ' [data-update-block="price-sticky-main"]');
+      if (hidden) hidden.innerHTML = wrapped;
     }
 
     function savingsPct(onceC, subC) {
@@ -1062,11 +1116,10 @@
       }
       if (mainPrice) mainPrice.textContent = formatPrice(currentCents);
 
-      const stickyPrice = document.querySelector('#lt-sticky-atc .sticky-add-to-cart__price-original');
-      if (stickyPrice) stickyPrice.textContent = formatPrice(currentCents);
-
       updateCardFacades();
       updatePriceMeta(isSub, qty, onceCents, currentCents);
+
+      syncStickyAtcPrice(isSub, qty, onceCents, subCents, currentCents);
     }
 
     function selectCard(card) {
@@ -1092,6 +1145,14 @@
       selectCard(initialCard);
     } else {
       updateCardFacades();
+    }
+
+    /* Nach deferred section-main-product.js: StickyAddToCart kann Initial-HTML setzen — Buy-Box erneut anwenden */
+    if (typeof customElements !== 'undefined' && customElements.whenDefined) {
+      customElements.whenDefined('sticky-add-to-cart').then(function () {
+        var inp = section.querySelector('.lt-bb-card__input:checked');
+        if (inp) inp.dispatchEvent(new Event('change', { bubbles: true }));
+      });
     }
   })();
 </script>
@@ -1375,22 +1436,6 @@
   opacity: 0.65;
 }
 
-/* Radio button — pin to top-left of card, aligned with row content */
-.lt-bb-card {
-  position: relative !important;
-}
-
-.lt-bb-card__radio {
-  position: absolute !important;
-  top: 17px !important;
-  left: 16px !important;
-  margin-top: 0 !important;
-}
-
-/* Indent row content to clear the radio (16px left pad + 20px radio + 10px gap) */
-.lt-bb-card__row {
-  padding-left: 46px !important;
-}
 {% endstylesheet %}
 
 {% schema %}
@@ -1858,7 +1903,7 @@
       "type": "text",
       "id": "sticky_atc_subline",
       "label": "Sticky ATC Unterzeile",
-      "info": "Optionale zweite Zeile unter dem Titel (grau). Feld leeren zum Ausblenden.",
+      "info": "Text unter dem Produkttitel im Sticky-Bar (z. B. Versand/Garantie). Leer lassen zum Ausblenden. Bearbeiten: Section „LT — PDP Hero“ → Sticky ATC.",
       "default": "Gratisversand · 90-Tage Garantie"
     }
   ],
