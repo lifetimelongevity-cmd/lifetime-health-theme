@@ -502,10 +502,10 @@
           <div class="appstle_subscription_widget" data-product-id="{{ product.id }}"></div>
         </div>
 
-        <div class="lt-price-notes">
+        <div class="lt-atc-foot">
           <p
-            class="lt-price-notes__text"
-            data-lt-price-note-live
+            class="lt-atc-foot__price"
+            data-lt-atc-price-live
             aria-live="polite"
           ></p>
         </div>
@@ -953,7 +953,7 @@
     const mainPrice = section.querySelector('.lt-price-main');
     const priceCompare = section.querySelector('[data-js-product-price-compare]');
     const priceSaving = section.querySelector('[data-js-product-price-saving]');
-    const priceNoteLive = section.querySelector('[data-lt-price-note-live]');
+    const atcPriceLive = section.querySelector('[data-lt-atc-price-live]');
     const baseComparePrice = {{ lt_compare_price | default: 0 }};
 
     if (!buyBox) return;
@@ -963,18 +963,6 @@
 
     function formatPrice(cents) {
       return (cents / 100).toFixed(2).replace('.', ',') + ' €';
-    }
-
-    /** Gleiche Cent-Basis wie Buy-Box-Karten (data-once-price / data-sub-price) */
-    function buildAppstlePriceNote(isSub, onceCents, subCents) {
-      if (isSub) {
-        return (
-          'Abo: nur ' +
-          formatPrice(subCents) +
-          ' / Monat · Jederzeit kündbar · Gratisversand inklusive'
-        );
-      }
-      return 'Einmalig: ' + formatPrice(onceCents);
     }
 
     function escapeLtHtml(str) {
@@ -1142,9 +1130,17 @@
 
       syncStickyAtcPrice(isSub, qty, onceCents, subCents, currentCents);
 
-      if (priceNoteLive) {
-        priceNoteLive.textContent = buildAppstlePriceNote(isSub, onceCents, subCents);
-        priceNoteLive.hidden = false;
+      if (atcPriceLive) {
+        atcPriceLive.textContent = isSub
+          ? 'Abo: ' + formatPrice(subCents)
+          : 'Einmalig: ' + formatPrice(onceCents);
+      }
+      var atcBtn = section.querySelector('#lt-hero-atc');
+      if (atcBtn) {
+        atcBtn.setAttribute(
+          'aria-label',
+          (isSub ? 'Abo' : 'Einmalig') + ', ' + formatPrice(currentCents) + ': Jetzt kaufen'
+        );
       }
     }
 
@@ -1228,17 +1224,19 @@
   border-radius: 4px !important;
 }
 
-/* Price notes — under Appstle, above ATC */
-.lt-price-notes {
+/* Preiszeile über dem CTA (unter Appstle) */
+.lt-atc-foot {
   margin: var(--space-3) 0 var(--space-4);
+  text-align: center;
 }
 
-.lt-price-notes__text {
+.lt-atc-foot__price {
   margin: 0;
   font-family: var(--font-body);
-  font-size: var(--text-body-sm);
-  line-height: var(--leading-body);
-  color: var(--color-text-secondary);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
 }
 
 /* Buy-box cards — flat cursor style */
