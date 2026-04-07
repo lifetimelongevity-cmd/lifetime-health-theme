@@ -329,6 +329,16 @@
           <div class="lt-bb__intro rte">{{ section.settings.bb_intro }}</div>
         {%- endif -%}
 
+        {%- if section.settings.subscription_savings_text != blank -%}
+          <div class="lt-bb__banner" role="status">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13z" stroke="currentColor" stroke-width="1.2"/>
+              <path d="M5 8l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>{{ section.settings.subscription_savings_text | escape }}</span>
+          </div>
+        {%- endif -%}
+
         <script id="lt-selling-plans-data" type="application/json">
           {
             "plans": [
@@ -493,6 +503,25 @@
           </div>
         </div>
 
+        <div
+          id="lt-appstle-widget"
+          data-product-id="{{ product.id }}"
+          data-variant-id="{{ lt_variant_1.id }}"
+          style="display:none"
+        >
+          <div class="appstle_subscription_widget" data-product-id="{{ product.id }}"></div>
+        </div>
+
+        {%- if section.settings.subscription_price_note != blank or section.settings.one_time_price_note != blank -%}
+          <div class="lt-price-notes">
+            <p
+              class="lt-price-notes__text"
+              data-lt-price-note-live
+              aria-live="polite"
+            ></p>
+          </div>
+        {%- endif -%}
+
         {%- assign product_form_id = 'product-form-' | append: section.id -%}
         <product-form
           id="add-to-cart-{{ section.id }}"
@@ -543,15 +572,6 @@
             {%- endfor -%}
           </div>
         {%- endif -%}
-
-        <div
-          id="lt-appstle-widget"
-          data-product-id="{{ product.id }}"
-          data-variant-id="{{ lt_variant_1.id }}"
-          style="display:none"
-        >
-          <div class="appstle_subscription_widget" data-product-id="{{ product.id }}"></div>
-        </div>
 
         <script>
           window.ltPricing = {
@@ -945,6 +965,9 @@
     const mainPrice = section.querySelector('.lt-price-main');
     const priceCompare = section.querySelector('[data-js-product-price-compare]');
     const priceSaving = section.querySelector('[data-js-product-price-saving]');
+    const priceNoteLive = section.querySelector('[data-lt-price-note-live]');
+    const ltPriceNoteSub = {{ section.settings.subscription_price_note | json }};
+    const ltPriceNoteOnce = {{ section.settings.one_time_price_note | json }};
     const baseComparePrice = {{ lt_compare_price | default: 0 }};
 
     if (!buyBox) return;
@@ -1120,6 +1143,18 @@
       updatePriceMeta(isSub, qty, onceCents, currentCents);
 
       syncStickyAtcPrice(isSub, qty, onceCents, subCents, currentCents);
+
+      if (priceNoteLive) {
+        var noteRaw = isSub ? ltPriceNoteSub : ltPriceNoteOnce;
+        var noteStr = noteRaw != null ? String(noteRaw).trim() : '';
+        if (noteStr) {
+          priceNoteLive.textContent = noteStr;
+          priceNoteLive.hidden = false;
+        } else {
+          priceNoteLive.textContent = '';
+          priceNoteLive.hidden = true;
+        }
+      }
     }
 
     function selectCard(card) {
@@ -1200,6 +1235,19 @@
   border: none !important;
   background: var(--lt-surface, #f2f1ed) !important;
   border-radius: 4px !important;
+}
+
+/* Price notes — under Appstle, above ATC */
+.lt-price-notes {
+  margin: var(--space-3) 0 var(--space-4);
+}
+
+.lt-price-notes__text {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
 }
 
 /* Buy-box cards — flat cursor style */
@@ -1312,6 +1360,11 @@
 
 /* Subscription banner */
 .lt-bb__banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  margin-bottom: var(--space-4);
   border-radius: 4px !important;
   background: var(--lt-success-bg, rgba(38,37,30,0.06)) !important;
   color: var(--lt-text, #26251e) !important;
@@ -1584,6 +1637,24 @@
       "type": "richtext",
       "id": "bb_intro",
       "label": "Intro über der Buy-Box"
+    },
+    {
+      "type": "text",
+      "id": "subscription_savings_text",
+      "label": "Abo-Ersparnis (Banner über Buy-Box)",
+      "default": "Spare 15% im Abo – jederzeit kündbar"
+    },
+    {
+      "type": "text",
+      "id": "subscription_price_note",
+      "label": "Preis-Hinweis unter Appstle (Abo)",
+      "default": "Abo: nur €X,XX / Monat · Jederzeit kündbar · Gratisversand inklusive"
+    },
+    {
+      "type": "text",
+      "id": "one_time_price_note",
+      "label": "Preis-Hinweis unter Appstle (Einmalig)",
+      "default": "Einmalig: €XX,XX"
     },
     {
       "type": "text",

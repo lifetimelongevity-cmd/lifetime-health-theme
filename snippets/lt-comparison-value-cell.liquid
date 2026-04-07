@@ -1,0 +1,67 @@
+{%- doc -%}
+  Renders one comparison table cell (icon + value) for row index 1–5.
+  @param {object} block - Section block (type column)
+  @param {number} row - Row index 1–5
+{%- enddoc -%}
+{%- liquid
+  case row
+    when 1
+      assign cell_value = block.settings.first_row
+      assign icon_type = block.settings.first_row_icon_type
+      assign icon_variant = block.settings.first_row_icon
+      assign custom_img = block.settings.first_row_custom_image
+    when 2
+      assign cell_value = block.settings.second_row
+      assign icon_type = block.settings.second_row_icon_type
+      assign icon_variant = block.settings.second_row_icon
+      assign custom_img = block.settings.second_row_custom_image
+    when 3
+      assign cell_value = block.settings.third_row
+      assign icon_type = block.settings.third_row_icon_type
+      assign icon_variant = block.settings.third_row_icon
+      assign custom_img = block.settings.third_row_custom_image
+    when 4
+      assign cell_value = block.settings.fourth_row
+      assign icon_type = block.settings.fourth_row_icon_type
+      assign icon_variant = block.settings.fourth_row_icon
+      assign custom_img = block.settings.fourth_row_custom_image
+    when 5
+      assign cell_value = block.settings.fifth_row
+      assign icon_type = block.settings.fifth_row_icon_type
+      assign icon_variant = block.settings.fifth_row_icon
+      assign custom_img = block.settings.fifth_row_custom_image
+    else
+      assign cell_value = ''
+      assign icon_type = 'none'
+      assign icon_variant = 'check'
+      assign custom_img = nil
+  endcase
+-%}
+<div class="lct-row lct-row--body">
+  {%- if icon_type == 'default' -%}
+    <span class="lct-value-icon" aria-hidden="true">
+      {%- if icon_variant == 'check' -%}
+        <svg class="lct-icon lct-icon--check" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="8.25" stroke="currentColor" stroke-width="1.25"/>
+          <path d="M6 10l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        </svg>
+      {%- elsif icon_variant == 'cross' -%}
+        <svg class="lct-icon lct-icon--cross" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="8.25" stroke="currentColor" stroke-width="1.25"/>
+          <path d="M7 7l6 6M13 7l-6 6" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+        </svg>
+      {%- endif -%}
+    </span>
+  {%- elsif icon_type == 'custom' and custom_img != blank -%}
+    <span class="lct-value-icon lct-value-icon--img">
+      {{
+        custom_img
+        | image_url: width: 80
+        | image_tag: loading: 'lazy', class: 'lct-value-icon__img', alt: ''
+      }}
+    </span>
+  {%- endif -%}
+  {%- if cell_value != blank -%}
+    <p class="lct-value-text">{{ cell_value | escape }}</p>
+  {%- endif -%}
+</div>
