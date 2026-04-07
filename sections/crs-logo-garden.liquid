@@ -12,6 +12,10 @@
   if crs_lg_sub == '__none__'
     assign crs_lg_sub = ''
   endif
+  assign crs_h_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign crs_h_headline_lg = true
+  endif
 -%}
 {% style %}
   #section-{{ section.id }} {
@@ -30,17 +34,17 @@
   <div class="lg-container">
 
     {%- if crs_lg_kicker != blank or crs_lg_head != blank or crs_lg_sub != blank -%}
-      <div class="lg-section-head crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}">
+      <div class="lg-section-head crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
         {%- if crs_lg_kicker != blank -%}
           <p class="crs-heading-stack__kicker">{{ crs_lg_kicker | escape }}</p>
         {%- endif -%}
         {%- if crs_lg_head != blank or crs_lg_sub != blank -%}
           <div class="crs-heading-stack__pair">
             {%- if crs_lg_head != blank -%}
-              <h2 class="crs-heading-stack__title">{{ crs_lg_head | escape }}</h2>
+              <h2 class="crs-heading-stack__title">{{ crs_lg_head | escape | newline_to_br }}</h2>
             {%- endif -%}
             {%- if crs_lg_sub != blank -%}
-              <p class="crs-heading-stack__subtitle">{{ crs_lg_sub | escape }}</p>
+              <p class="crs-heading-stack__subtitle">{{ crs_lg_sub | escape | newline_to_br }}</p>
             {%- endif -%}
           </div>
         {%- endif -%}
@@ -256,6 +260,17 @@
       "default": "left"
     },
     {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section",
+      "info": "Zeilenumbruch: Enter in Überschrift/Unterüberschrift."
+    },
+    {
       "type": "text",
       "id": "kicker",
       "label": "Kicker (optional)",
@@ -263,7 +278,7 @@
       "info": "__none__ = ausblenden (Theme-Editor)"
     },
     {
-      "type": "text",
+      "type": "textarea",
       "id": "heading",
       "label": "Überschrift",
       "default": "Unverzichtbar für tausende Teams"

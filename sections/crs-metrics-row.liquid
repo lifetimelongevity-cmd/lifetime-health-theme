@@ -15,6 +15,10 @@
   if crs_mg_sub == '__none__'
     assign crs_mg_sub = ''
   endif
+  assign crs_h_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign crs_h_headline_lg = true
+  endif
 -%}
 {% style %}
   #section-{{ section.id }} {
@@ -33,17 +37,17 @@
   <div class="mg-container">
 
     {%- if crs_mg_kicker != blank or crs_mg_head != blank or crs_mg_sub != blank -%}
-      <div class="mg-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}">
+      <div class="mg-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
         {%- if crs_mg_kicker != blank -%}
           <p class="crs-heading-stack__kicker">{{ crs_mg_kicker | escape }}</p>
         {%- endif -%}
         {%- if crs_mg_head != blank or crs_mg_sub != blank -%}
           <div class="crs-heading-stack__pair">
             {%- if crs_mg_head != blank -%}
-              <h2 class="crs-heading-stack__title">{{ crs_mg_head | escape }}</h2>
+              <h2 class="crs-heading-stack__title">{{ crs_mg_head | escape | newline_to_br }}</h2>
             {%- endif -%}
             {%- if crs_mg_sub != blank -%}
-              <p class="crs-heading-stack__subtitle">{{ crs_mg_sub | escape }}</p>
+              <p class="crs-heading-stack__subtitle">{{ crs_mg_sub | escape | newline_to_br }}</p>
             {%- endif -%}
           </div>
         {%- endif -%}
@@ -223,6 +227,17 @@
       "default": "left"
     },
     {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section",
+      "info": "Zeilenumbruch: Enter in Überschrift/Unterüberschrift."
+    },
+    {
       "type": "text",
       "id": "kicker",
       "label": "Kicker (optional)",
@@ -230,7 +245,7 @@
       "info": "__none__ = ausblenden (Theme-Editor)"
     },
     {
-      "type": "text",
+      "type": "textarea",
       "id": "heading",
       "label": "Überschrift (optional)",
       "default": "__none__",

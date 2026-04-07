@@ -9,6 +9,10 @@
   if crs_gb_kicker == '__none__'
     assign crs_gb_kicker = ''
   endif
+  assign crs_h_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign crs_h_headline_lg = true
+  endif
 -%}
 {% style %}
   #section-{{ section.id }} {
@@ -48,17 +52,17 @@
       {%- endif -%}
 
       {%- if crs_gb_kicker != blank or crs_gb_head != blank or crs_gb_body != blank -%}
-        <div class="gb-copy crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}">
+        <div class="gb-copy crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
           {%- if crs_gb_kicker != blank -%}
             <p class="crs-heading-stack__kicker">{{ crs_gb_kicker | escape }}</p>
           {%- endif -%}
           {%- if crs_gb_head != blank or crs_gb_body != blank -%}
             <div class="crs-heading-stack__pair">
               {%- if crs_gb_head != blank -%}
-                <h2 class="crs-heading-stack__title">{{ crs_gb_head | escape }}</h2>
+                <h2 class="crs-heading-stack__title">{{ crs_gb_head | escape | newline_to_br }}</h2>
               {%- endif -%}
               {%- if crs_gb_body != blank -%}
-                <p class="crs-heading-stack__subtitle">{{ crs_gb_body | escape }}</p>
+                <p class="crs-heading-stack__subtitle">{{ crs_gb_body | escape | newline_to_br }}</p>
               {%- endif -%}
             </div>
           {%- endif -%}
@@ -282,6 +286,17 @@
       "default": "left"
     },
     {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section",
+      "info": "Zeilenumbruch: Enter in Überschrift/Beschreibung."
+    },
+    {
       "type": "text",
       "id": "kicker",
       "label": "Kicker (optional)",
@@ -307,7 +322,7 @@
       "default": "Tage"
     },
     {
-      "type": "text",
+      "type": "textarea",
       "id": "headline",
       "label": "Überschrift",
       "default": "Volle Geld-zurück-Garantie"
