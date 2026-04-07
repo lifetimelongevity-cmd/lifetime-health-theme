@@ -43,15 +43,52 @@
         <p class="gb-body">{{ section.settings.body_text | escape }}</p>
       {%- endif -%}
 
-      {%- if section.settings.contact_url != blank and section.settings.contact_label != blank -%}
+      {%- assign gb_popup_plain = section.settings.contact_popup | default: '' | strip_html | strip -%}
+      {%- if section.settings.contact_label != blank and gb_popup_plain != '' -%}
+        <button
+          type="button"
+          class="crs-popup-link"
+          data-crs-dialog-open
+          aria-haspopup="dialog"
+          aria-controls="crs-gb-dialog-{{ section.id }}"
+        >
+          {{ section.settings.contact_label | escape }}&nbsp;↗
+        </button>
+        <dialog
+          id="crs-gb-dialog-{{ section.id }}"
+          class="crs-micro-dialog"
+          aria-modal="true"
+          aria-labelledby="crs-gb-dlg-title-{{ section.id }}"
+        >
+          <div class="crs-micro-dialog__inner">
+            <button
+              type="button"
+              class="crs-micro-dialog__close"
+              data-crs-dialog-close
+              aria-label="{{ 'general.accessibility_labels.close' | t }}"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+            {%- assign gb_dlg_title = section.settings.contact_popup_title | default: section.settings.contact_label -%}
+            <h2 id="crs-gb-dlg-title-{{ section.id }}" class="crs-micro-dialog__title">
+              {{ gb_dlg_title | escape }}
+            </h2>
+            <div class="crs-micro-dialog__body rte">
+              {{ section.settings.contact_popup }}
+            </div>
+          </div>
+        </dialog>
+      {%- elsif section.settings.contact_url != blank and section.settings.contact_label != blank -%}
         <a href="{{ section.settings.contact_url }}" class="gb-link">
-          {{ section.settings.contact_label | escape }} ↗
+          {{ section.settings.contact_label | escape }}&nbsp;↗
         </a>
       {%- endif -%}
 
     </div>
   </div>
 </div>
+
+{% render 'crs-micro-dialog-init' %}
 
 {% stylesheet %}
 /* ===================================================
@@ -136,13 +173,17 @@
 .gb-link {
   font-size: 14px;
   font-weight: 400;
-  color: var(--color-dark);
-  text-decoration: none;
-  transition: opacity 0.15s ease;
+  color: var(--color-teal);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--color-gray-400);
+  transition: color 0.15s ease, text-decoration-color 0.15s ease, opacity 0.15s ease;
 }
 
 .gb-link:hover {
-  opacity: 0.75;
+  color: var(--color-teal-dark);
+  text-decoration-color: var(--color-teal-dark);
+  opacity: 0.92;
 }
 
 /* Mobile */
@@ -247,9 +288,26 @@
       "default": "Schreib uns"
     },
     {
+      "type": "header",
+      "content": "Popup statt Link"
+    },
+    {
+      "type": "richtext",
+      "id": "contact_popup",
+      "label": "Popup-Inhalt",
+      "info": "Wenn ausgefüllt: öffnet Popup statt Link-URL (z. B. E-Mail-Hinweis)."
+    },
+    {
+      "type": "text",
+      "id": "contact_popup_title",
+      "label": "Popup-Titel",
+      "info": "Leer = gleich wie Link-Text"
+    },
+    {
       "type": "url",
       "id": "contact_url",
-      "label": "Link-URL"
+      "label": "Link-URL",
+      "info": "Nur wenn Popup-Inhalt leer (z. B. mailto:…)"
     }
   ],
   "blocks": [],

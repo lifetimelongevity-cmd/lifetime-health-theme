@@ -28,12 +28,50 @@
     {%- if section.blocks.size > 0 -%}
       <div class="fg-grid fg-grid--cols-{{ section.settings.columns }}">
         {%- for block in section.blocks -%}
+          {%- assign fg_popup_plain = block.settings.popup_body | default: '' | strip_html | strip -%}
           <div class="fg-card" {{ block.shopify_attributes }}>
             {%- if block.settings.title != blank -%}
               <h3 class="fg-card-title">{{ block.settings.title | escape }}</h3>
             {%- endif -%}
             {%- if block.settings.description != blank -%}
               <div class="fg-card-desc">{{ block.settings.description | escape }}</div>
+            {%- endif -%}
+            {%- if block.settings.link_label != blank and fg_popup_plain != '' -%}
+              <div class="fg-card-footer">
+                <button
+                  type="button"
+                  class="crs-popup-link"
+                  data-crs-dialog-open
+                  aria-haspopup="dialog"
+                  aria-controls="crs-fg-dialog-{{ section.id }}-{{ block.id }}"
+                >
+                  {{ block.settings.link_label | escape }}&nbsp;↗
+                </button>
+              </div>
+              <dialog
+                id="crs-fg-dialog-{{ section.id }}-{{ block.id }}"
+                class="crs-micro-dialog"
+                aria-modal="true"
+                aria-labelledby="crs-fg-dlg-title-{{ section.id }}-{{ block.id }}"
+              >
+                <div class="crs-micro-dialog__inner">
+                  <button
+                    type="button"
+                    class="crs-micro-dialog__close"
+                    data-crs-dialog-close
+                    aria-label="{{ 'general.accessibility_labels.close' | t }}"
+                  >
+                    <span aria-hidden="true">×</span>
+                  </button>
+                  {%- assign fg_dlg_title = block.settings.popup_title | default: block.settings.link_label -%}
+                  <h2 id="crs-fg-dlg-title-{{ section.id }}-{{ block.id }}" class="crs-micro-dialog__title">
+                    {{ fg_dlg_title | escape }}
+                  </h2>
+                  <div class="crs-micro-dialog__body rte">
+                    {{ block.settings.popup_body }}
+                  </div>
+                </div>
+              </dialog>
             {%- endif -%}
           </div>
         {%- endfor -%}
@@ -42,6 +80,8 @@
 
   </div>
 </div>
+
+{% render 'crs-micro-dialog-init' %}
 
 {% stylesheet %}
 /* ===================================================
@@ -121,6 +161,10 @@
   font-weight: 400;
   line-height: 1.5;
   color: var(--crs-text-sec, rgba(38,37,30,0.6));
+}
+
+.fg-card-footer {
+  margin-top: var(--space-5);
 }
 
 /* Tablet — 2 columns for 3-col grid */
@@ -232,6 +276,27 @@
           "id": "description",
           "label": "Beschreibung",
           "default": "Deploy AI at scale with professional expertise."
+        },
+        {
+          "type": "header",
+          "content": "Popup-Link (optional)"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link-Text mit Pfeil ↗",
+          "info": "Nur sichtbar, wenn Popup-Inhalt gesetzt ist. Öffnet ein kleines Fenster statt neuer Seite."
+        },
+        {
+          "type": "text",
+          "id": "popup_title",
+          "label": "Popup-Titel",
+          "info": "Leer = gleich wie Link-Text"
+        },
+        {
+          "type": "richtext",
+          "id": "popup_body",
+          "label": "Popup-Inhalt"
         }
       ]
     }

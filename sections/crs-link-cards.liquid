@@ -25,7 +25,44 @@
                 <p class="lc-card-desc">{{ block.settings.description | escape }}</p>
               {%- endif -%}
             </div>
-            {%- if block.settings.link_url != blank and block.settings.link_label != blank -%}
+            {%- assign lc_popup_plain = block.settings.popup_body | default: '' | strip_html | strip -%}
+            {%- if block.settings.link_label != blank and lc_popup_plain != '' -%}
+              <div class="lc-card-footer">
+                <button
+                  type="button"
+                  class="crs-popup-link"
+                  data-crs-dialog-open
+                  aria-haspopup="dialog"
+                  aria-controls="crs-lc-dialog-{{ section.id }}-{{ block.id }}"
+                >
+                  {{ block.settings.link_label | escape }}&nbsp;↗
+                </button>
+              </div>
+              <dialog
+                id="crs-lc-dialog-{{ section.id }}-{{ block.id }}"
+                class="crs-micro-dialog"
+                aria-modal="true"
+                aria-labelledby="crs-lc-dlg-title-{{ section.id }}-{{ block.id }}"
+              >
+                <div class="crs-micro-dialog__inner">
+                  <button
+                    type="button"
+                    class="crs-micro-dialog__close"
+                    data-crs-dialog-close
+                    aria-label="{{ 'general.accessibility_labels.close' | t }}"
+                  >
+                    <span aria-hidden="true">×</span>
+                  </button>
+                  {%- assign lc_dlg_title = block.settings.popup_title | default: block.settings.link_label -%}
+                  <h2 id="crs-lc-dlg-title-{{ section.id }}-{{ block.id }}" class="crs-micro-dialog__title">
+                    {{ lc_dlg_title | escape }}
+                  </h2>
+                  <div class="crs-micro-dialog__body rte">
+                    {{ block.settings.popup_body }}
+                  </div>
+                </div>
+              </dialog>
+            {%- elsif block.settings.link_url != blank and block.settings.link_label != blank -%}
               <div class="lc-card-footer">
                 <a
                   href="{{ block.settings.link_url }}"
@@ -33,7 +70,7 @@
                   {% unless block.settings.link_url contains 'javascript' %}
                     target="_blank" rel="noopener noreferrer"
                   {% endunless %}
-                >{{ block.settings.link_label | escape }} ↗</a>
+                >{{ block.settings.link_label | escape }}&nbsp;↗</a>
               </div>
             {%- endif -%}
           </div>
@@ -42,6 +79,8 @@
     {%- endif -%}
   </div>
 </div>
+
+{% render 'crs-micro-dialog-init' %}
 
 {% stylesheet %}
 /* ===================================================
@@ -108,16 +147,17 @@
 .lc-link {
   font-size: 14px;
   font-weight: 400;
-  color: var(--color-dark);
+  color: var(--color-teal);
   text-decoration: underline;
   text-underline-offset: 3px;
   text-decoration-color: var(--color-gray-400);
-  transition: text-decoration-color 0.15s ease, opacity 0.15s ease;
+  transition: color 0.15s ease, text-decoration-color 0.15s ease, opacity 0.15s ease;
 }
 
 .lc-link:hover {
-  text-decoration-color: var(--color-dark);
-  opacity: 0.75;
+  color: var(--color-teal-dark);
+  text-decoration-color: var(--color-teal-dark);
+  opacity: 0.92;
 }
 
 /* Tablet — 2 columns */
@@ -206,9 +246,26 @@
           "default": "Erhalte Antworten von unserem Team und der Community."
         },
         {
+          "type": "header",
+          "content": "Popup statt externem Link"
+        },
+        {
+          "type": "richtext",
+          "id": "popup_body",
+          "label": "Popup-Inhalt",
+          "info": "Wenn ausgefüllt: Button öffnet dieses Fenster. Link-URL wird dann ignoriert."
+        },
+        {
+          "type": "text",
+          "id": "popup_title",
+          "label": "Popup-Titel",
+          "info": "Leer = gleich wie Link-Text"
+        },
+        {
           "type": "url",
           "id": "link_url",
-          "label": "Link-URL"
+          "label": "Link-URL",
+          "info": "Nur wenn Popup-Inhalt leer ist"
         },
         {
           "type": "text",
