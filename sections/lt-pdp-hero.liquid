@@ -502,14 +502,6 @@
           <div class="appstle_subscription_widget" data-product-id="{{ product.id }}"></div>
         </div>
 
-        <div class="lt-atc-foot">
-          <p
-            class="lt-atc-foot__price"
-            data-lt-atc-price-live
-            aria-live="polite"
-          ></p>
-        </div>
-
         {%- assign product_form_id = 'product-form-' | append: section.id -%}
         <product-form
           id="add-to-cart-{{ section.id }}"
@@ -953,7 +945,6 @@
     const mainPrice = section.querySelector('.lt-price-main');
     const priceCompare = section.querySelector('[data-js-product-price-compare]');
     const priceSaving = section.querySelector('[data-js-product-price-saving]');
-    const atcPriceLive = section.querySelector('[data-lt-atc-price-live]');
     const baseComparePrice = {{ lt_compare_price | default: 0 }};
 
     if (!buyBox) return;
@@ -1130,17 +1121,15 @@
 
       syncStickyAtcPrice(isSub, qty, onceCents, subCents, currentCents);
 
-      if (atcPriceLive) {
-        atcPriceLive.textContent = isSub
-          ? 'Abo: ' + formatPrice(subCents)
-          : 'Einmalig: ' + formatPrice(onceCents);
+      var atcTextEl = section.querySelector('[data-js-product-add-to-cart-text]');
+      var atcLabel =
+        (isSub ? 'Abo' : 'Einmalig') + ': ' + formatPrice(currentCents) + ' — Jetzt kaufen →';
+      if (atcTextEl) {
+        atcTextEl.textContent = atcLabel;
       }
       var atcBtn = section.querySelector('#lt-hero-atc');
       if (atcBtn) {
-        atcBtn.setAttribute(
-          'aria-label',
-          (isSub ? 'Abo' : 'Einmalig') + ', ' + formatPrice(currentCents) + ': Jetzt kaufen'
-        );
+        atcBtn.setAttribute('aria-label', atcLabel.replace(' →', ''));
       }
     }
 
@@ -1224,21 +1213,6 @@
   border-radius: 4px !important;
 }
 
-/* Preiszeile über dem CTA (unter Appstle) */
-.lt-atc-foot {
-  margin: var(--space-3) 0 var(--space-4);
-  text-align: center;
-}
-
-.lt-atc-foot__price {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: var(--text-body-lg);
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-tight);
-  color: var(--color-text-primary);
-}
-
 /* Buy-box cards — flat cursor style */
 .lt-bb-card {
   background: var(--lt-bg, #f7f7f4) !important;
@@ -1285,11 +1259,15 @@
   background: var(--color-dark) !important;
   border-color: var(--color-dark) !important;
   color: var(--color-text-on-dark) !important;
+  white-space: normal;
 }
 
 .lt-pdp-hero__atc.button .button__text,
 #lt-hero-atc .button__text {
   color: var(--color-text-on-dark) !important;
+  white-space: normal;
+  line-height: var(--leading-tight);
+  text-align: center;
 }
 
 .lt-pdp-hero__atc.button .button__preloader circle,
