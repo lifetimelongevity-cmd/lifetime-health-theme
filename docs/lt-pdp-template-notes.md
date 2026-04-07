@@ -2,6 +2,8 @@
 
 Duplicate `product.nmn.json` for each new product and rename to `product.[productname].json`.
 
+`product.13_3_nmn.json` ist eine **Kopie** desselben LT-PDP-Inhalts (Suffix `13_3_nmn`) — z. B. wenn Produkte im Admin noch dieses Template nutzen. Bei inhaltlichen Änderungen beide Dateien parallel pflegen oder eine aus der anderen erzeugen.
+
 ## Per-product fields to update:
 
 - main.settings.tagline
