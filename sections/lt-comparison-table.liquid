@@ -1,3 +1,12 @@
+{%- liquid
+  assign crs_h_align = section.settings.content_align | default: 'left'
+  if crs_h_align != 'left' and crs_h_align != 'center' and crs_h_align != 'right'
+    assign crs_h_align = 'left'
+  endif
+  assign crs_lct_kicker = section.settings.kicker | strip
+  assign crs_lct_head = section.settings.headline | strip
+  assign crs_lct_sub = section.settings.subheading | strip
+-%}
 {% style %}
   #section-{{ section.id }} {
     --crs-bg:       {{ section.settings.color_bg }};
@@ -13,13 +22,20 @@
 
 <div class="tl-section lct-section" id="section-{{ section.id }}">
   <div class="tl-container lct-container">
-    {%- if section.settings.headline != blank or section.settings.subheading != blank -%}
-      <div class="tl-header lct-header">
-        {%- if section.settings.headline != blank -%}
-          <h2 class="tl-headline">{{ section.settings.headline | escape }}</h2>
+    {%- if crs_lct_kicker != blank or crs_lct_head != blank or crs_lct_sub != blank -%}
+      <div class="tl-header lct-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}">
+        {%- if crs_lct_kicker != blank -%}
+          <p class="crs-heading-stack__kicker">{{ crs_lct_kicker | escape }}</p>
         {%- endif -%}
-        {%- if section.settings.subheading != blank -%}
-          <p class="tl-subheading">{{ section.settings.subheading | escape }}</p>
+        {%- if crs_lct_head != blank or crs_lct_sub != blank -%}
+          <div class="crs-heading-stack__pair">
+            {%- if crs_lct_head != blank -%}
+              <h2 class="crs-heading-stack__title">{{ crs_lct_head | escape }}</h2>
+            {%- endif -%}
+            {%- if crs_lct_sub != blank -%}
+              <p class="crs-heading-stack__subtitle">{{ crs_lct_sub | escape }}</p>
+            {%- endif -%}
+          </div>
         {%- endif -%}
       </div>
     {%- endif -%}
@@ -109,18 +125,6 @@
 .lct-header.tl-header {
   margin-bottom: var(--space-7);
   max-width: 48rem;
-}
-
-.lct-header .tl-headline {
-  margin: 0 0 var(--space-3);
-}
-
-.tl-subheading {
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-relaxed);
-  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
-  margin: 0;
 }
 
 .lct-scroll {
@@ -339,6 +343,23 @@
     {
       "type": "header",
       "content": "Inhalt"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung (Überschrift)",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": " "
     },
     {
       "type": "text",

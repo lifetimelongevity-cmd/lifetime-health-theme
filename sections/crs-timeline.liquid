@@ -1,3 +1,12 @@
+{%- liquid
+  assign crs_h_align = section.settings.content_align | default: 'left'
+  if crs_h_align != 'left' and crs_h_align != 'center' and crs_h_align != 'right'
+    assign crs_h_align = 'left'
+  endif
+  assign crs_tl_kicker = section.settings.kicker | strip
+  assign crs_tl_head = section.settings.headline | strip
+  assign crs_tl_sub = section.settings.subheading | strip
+-%}
 {% style %}
   #section-{{ section.id }} {
     --crs-bg:       {{ section.settings.color_bg }};
@@ -21,13 +30,20 @@
       {%- comment -%} Left: Timeline {%- endcomment -%}
       <div class="tl-left">
 
-        {%- if section.settings.kicker != blank or section.settings.headline != blank -%}
-          <div class="tl-header">
-            {%- if section.settings.kicker != blank -%}
-              <p class="tl-kicker">{{ section.settings.kicker | escape }}</p>
+        {%- if crs_tl_kicker != blank or crs_tl_head != blank or crs_tl_sub != blank -%}
+          <div class="tl-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}">
+            {%- if crs_tl_kicker != blank -%}
+              <p class="crs-heading-stack__kicker">{{ crs_tl_kicker | escape }}</p>
             {%- endif -%}
-            {%- if section.settings.headline != blank -%}
-              <h2 class="tl-headline">{{ section.settings.headline | escape }}</h2>
+            {%- if crs_tl_head != blank or crs_tl_sub != blank -%}
+              <div class="crs-heading-stack__pair">
+                {%- if crs_tl_head != blank -%}
+                  <h2 class="crs-heading-stack__title">{{ crs_tl_head | escape }}</h2>
+                {%- endif -%}
+                {%- if crs_tl_sub != blank -%}
+                  <p class="crs-heading-stack__subtitle">{{ crs_tl_sub | escape }}</p>
+                {%- endif -%}
+              </div>
             {%- endif -%}
           </div>
         {%- endif -%}
@@ -110,26 +126,7 @@
 
 /* Header block */
 .tl-header {
-  margin-bottom: 32px;
-}
-
-.tl-kicker {
-  font-size: 12px;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--crs-text-ter, rgba(38,37,30,0.4));
-  margin: 0 0 12px;
-}
-
-.tl-headline {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
-  font-size: 36px !important;
-  font-weight: 400 !important;
-  line-height: 1.15 !important;
-  letter-spacing: -0.72px !important;
-  color: var(--crs-text, #26251e) !important;
-  margin: 0 !important;
+  margin-bottom: var(--space-7);
 }
 
 /* Timeline items */
@@ -288,6 +285,17 @@
       "content": "Inhalt"
     },
     {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung (Überschrift)",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
       "type": "text",
       "id": "kicker",
       "label": "Kicker (optional)",
@@ -298,6 +306,12 @@
       "id": "headline",
       "label": "Überschrift",
       "default": "Aus Forschung wird Alltag"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Unterüberschrift (optional)",
+      "default": " "
     },
     {
       "type": "checkbox",

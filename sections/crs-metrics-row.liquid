@@ -1,3 +1,12 @@
+{%- liquid
+  assign crs_h_align = section.settings.content_align | default: 'left'
+  if crs_h_align != 'left' and crs_h_align != 'center' and crs_h_align != 'right'
+    assign crs_h_align = 'left'
+  endif
+  assign crs_mg_kicker = section.settings.kicker | strip
+  assign crs_mg_head = section.settings.heading | strip
+  assign crs_mg_sub = section.settings.subheading | strip
+-%}
 {% style %}
   #section-{{ section.id }} {
     --crs-bg:       {{ section.settings.color_bg }};
@@ -14,13 +23,20 @@
 <div class="mg-section" id="section-{{ section.id }}">
   <div class="mg-container">
 
-    {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
-      <div class="mg-header">
-        {%- if section.settings.heading != blank -%}
-          <h2 class="mg-heading">{{ section.settings.heading | escape }}</h2>
+    {%- if crs_mg_kicker != blank or crs_mg_head != blank or crs_mg_sub != blank -%}
+      <div class="mg-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}">
+        {%- if crs_mg_kicker != blank -%}
+          <p class="crs-heading-stack__kicker">{{ crs_mg_kicker | escape }}</p>
         {%- endif -%}
-        {%- if section.settings.subheading != blank -%}
-          <p class="mg-subheading">{{ section.settings.subheading | escape }}</p>
+        {%- if crs_mg_head != blank or crs_mg_sub != blank -%}
+          <div class="crs-heading-stack__pair">
+            {%- if crs_mg_head != blank -%}
+              <h2 class="crs-heading-stack__title">{{ crs_mg_head | escape }}</h2>
+            {%- endif -%}
+            {%- if crs_mg_sub != blank -%}
+              <p class="crs-heading-stack__subtitle">{{ crs_mg_sub | escape }}</p>
+            {%- endif -%}
+          </div>
         {%- endif -%}
       </div>
     {%- endif -%}
@@ -58,25 +74,7 @@
 
 /* Header */
 .mg-header {
-  margin-bottom: 32px;
-}
-
-.mg-heading {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
-  font-size: 36px !important;
-  font-weight: 400 !important;
-  line-height: 1.15 !important;
-  letter-spacing: -0.72px !important;
-  color: var(--crs-text, #26251e) !important;
-  margin: 0 0 8px !important;
-}
-
-.mg-subheading {
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.6;
-  color: var(--crs-text-sec, rgba(38,37,30,0.6));
-  margin: 0;
+  margin-bottom: var(--space-7);
 }
 
 /* Grid */
@@ -205,14 +203,33 @@
       "content": "Inhalt"
     },
     {
-      "type": "text",
-      "id": "heading",
-      "label": "Überschrift (optional)"
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung (Überschrift)",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
     },
     {
       "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": " "
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift (optional)",
+      "default": " "
+    },
+    {
+      "type": "textarea",
       "id": "subheading",
-      "label": "Unterüberschrift (optional)"
+      "label": "Unterüberschrift (optional)",
+      "default": " "
     }
   ],
   "blocks": [

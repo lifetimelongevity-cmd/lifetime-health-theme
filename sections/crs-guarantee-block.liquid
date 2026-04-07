@@ -1,3 +1,12 @@
+{%- liquid
+  assign crs_h_align = section.settings.content_align | default: 'left'
+  if crs_h_align != 'left' and crs_h_align != 'center' and crs_h_align != 'right'
+    assign crs_h_align = 'left'
+  endif
+  assign crs_gb_kicker = section.settings.kicker | strip
+  assign crs_gb_head = section.settings.headline | strip
+  assign crs_gb_body = section.settings.body_text | strip
+-%}
 {% style %}
   #section-{{ section.id }} {
     --crs-bg:       {{ section.settings.color_bg }};
@@ -14,7 +23,7 @@
 
 <div class="gb-section" id="section-{{ section.id }}">
   <div class="gb-container">
-    <div class="gb-inner">
+    <div class="gb-inner gb-inner--align-{{ crs_h_align }}">
 
       {%- if section.settings.show_shield_icon -%}
         <div class="gb-icon" aria-hidden="true">
@@ -35,12 +44,22 @@
         </div>
       {%- endif -%}
 
-      {%- if section.settings.headline != blank -%}
-        <h2 class="gb-headline">{{ section.settings.headline | escape }}</h2>
-      {%- endif -%}
-
-      {%- if section.settings.body_text != blank -%}
-        <p class="gb-body">{{ section.settings.body_text | escape }}</p>
+      {%- if crs_gb_kicker != blank or crs_gb_head != blank or crs_gb_body != blank -%}
+        <div class="gb-copy crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}">
+          {%- if crs_gb_kicker != blank -%}
+            <p class="crs-heading-stack__kicker">{{ crs_gb_kicker | escape }}</p>
+          {%- endif -%}
+          {%- if crs_gb_head != blank or crs_gb_body != blank -%}
+            <div class="crs-heading-stack__pair">
+              {%- if crs_gb_head != blank -%}
+                <h2 class="crs-heading-stack__title">{{ crs_gb_head | escape }}</h2>
+              {%- endif -%}
+              {%- if crs_gb_body != blank -%}
+                <p class="crs-heading-stack__subtitle">{{ crs_gb_body | escape }}</p>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
       {%- endif -%}
 
       {%- assign gb_popup_plain = section.settings.contact_popup | default: '' | strip_html | strip -%}
@@ -108,11 +127,24 @@
 .gb-inner {
   max-width: 480px;
   margin: 0 auto;
-  text-align: center;
   display: flex;
   flex-direction: column;
+  gap: var(--space-4);
+}
+
+.gb-inner--align-left {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.gb-inner--align-center {
   align-items: center;
-  gap: 16px;
+  text-align: center;
+}
+
+.gb-inner--align-right {
+  align-items: flex-end;
+  text-align: right;
 }
 
 /* Shield icon */
@@ -148,25 +180,9 @@
   line-height: 1;
 }
 
-/* Headline */
-.gb-headline {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
-  font-size: 22px !important;
-  font-weight: 400 !important;
-  line-height: 1.3 !important;
-  letter-spacing: -0.3px !important;
-  color: var(--crs-text, #26251e) !important;
-  margin: 0 !important;
-}
-
-/* Body */
-.gb-body {
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.65;
-  color: var(--crs-text-sec, rgba(38,37,30,0.6));
+.gb-copy {
+  width: 100%;
   max-width: 400px;
-  margin: 0;
 }
 
 /* Contact link */
@@ -250,6 +266,23 @@
     {
       "type": "header",
       "content": "Inhalt"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung (Überschrift)",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": " "
     },
     {
       "type": "checkbox",

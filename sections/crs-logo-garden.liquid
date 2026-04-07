@@ -1,3 +1,12 @@
+{%- liquid
+  assign crs_h_align = section.settings.content_align | default: 'left'
+  if crs_h_align != 'left' and crs_h_align != 'center' and crs_h_align != 'right'
+    assign crs_h_align = 'left'
+  endif
+  assign crs_lg_kicker = section.settings.kicker | strip
+  assign crs_lg_head = section.settings.heading | strip
+  assign crs_lg_sub = section.settings.subheading | strip
+-%}
 {% style %}
   #section-{{ section.id }} {
     --crs-bg:       {{ section.settings.color_bg }};
@@ -14,8 +23,22 @@
 <div class="lg-section" id="section-{{ section.id }}">
   <div class="lg-container">
 
-    {%- if section.settings.heading != blank -%}
-      <p class="lg-heading">{{ section.settings.heading | escape }}</p>
+    {%- if crs_lg_kicker != blank or crs_lg_head != blank or crs_lg_sub != blank -%}
+      <div class="lg-section-head crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}">
+        {%- if crs_lg_kicker != blank -%}
+          <p class="crs-heading-stack__kicker">{{ crs_lg_kicker | escape }}</p>
+        {%- endif -%}
+        {%- if crs_lg_head != blank or crs_lg_sub != blank -%}
+          <div class="crs-heading-stack__pair">
+            {%- if crs_lg_head != blank -%}
+              <h2 class="crs-heading-stack__title">{{ crs_lg_head | escape }}</h2>
+            {%- endif -%}
+            {%- if crs_lg_sub != blank -%}
+              <p class="crs-heading-stack__subtitle">{{ crs_lg_sub | escape }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
@@ -65,16 +88,8 @@
   padding: 0 20px;
 }
 
-/* Heading */
-.lg-heading {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
-  font-size: .875rem !important;
-  font-weight: 500 !important;
-  line-height: 1.5 !important;
-  letter-spacing: 0 !important;
-  text-align: center !important;
-  color: var(--crs-text-sec, rgba(38,37,30,0.6)) !important;
-  margin: 0 0 32px !important;
+.lg-section-head {
+  margin-bottom: var(--space-7);
 }
 
 /* Logos — zentriert (flex), unabhängig von der Anzahl */
@@ -224,10 +239,33 @@
       "content": "Inhalt"
     },
     {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung (Überschrift)",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": " "
+    },
+    {
       "type": "text",
       "id": "heading",
       "label": "Überschrift",
       "default": "Unverzichtbar für tausende Teams"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Unterüberschrift (optional)",
+      "default": " "
     }
   ],
   "blocks": [
