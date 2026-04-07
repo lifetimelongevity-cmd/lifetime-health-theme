@@ -5,7 +5,7 @@
     --crs-text:     {{ section.settings.color_text }};
     --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
     --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
-    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.1 }};
+    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.05 }};
     padding-top:    {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
   }
@@ -13,7 +13,7 @@
 
 <div class="ckb-section" id="section-{{ section.id }}">
   <div class="ckb-container">
-    <div class="ckb-card">
+    <div class="ckb-card{% if section.settings.image_position == 'left' %} ckb-card--image-left{% endif %}">
 
       {%- comment -%} LEFT — text + testimonial {%- endcomment -%}
       <div class="ckb-content">
@@ -87,14 +87,29 @@
   padding: 0 20px;
 }
 
-/* Card */
+/* Card — Text 1fr, Bild 2fr (Bild rechts: Text | Bild) */
 .ckb-card {
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr 2fr;
   min-height: 560px;
   border-radius: 4px;
   overflow: hidden;
   background: var(--crs-card-bg, #f2f1ed);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.05));
+}
+
+/* Bild links: gleiche Proportionen, Spalten getauscht */
+.ckb-card--image-left {
+  grid-template-columns: 2fr 1fr;
+}
+
+.ckb-card--image-left .ckb-visual {
+  grid-column: 1;
+}
+
+.ckb-card--image-left .ckb-content {
+  grid-column: 2;
 }
 
 /* Left column */
@@ -135,7 +150,7 @@
 /* Testimonial quote */
 .ckb-quote {
   margin: 0;
-  border-left: 2px solid var(--crs-border, rgba(38,37,30,0.1));
+  border-left: 2px solid var(--crs-border, rgba(38, 37, 30, 0.05));
   padding-left: 20px;
 }
 
@@ -159,7 +174,7 @@
   border-radius: 50%;
   overflow: hidden;
   flex-shrink: 0;
-  border: 1.5px solid var(--crs-border, rgba(38,37,30,0.1));
+  border: 1.5px solid var(--crs-border, rgba(38, 37, 30, 0.05));
 }
 
 .ckb-avatar img {
@@ -220,6 +235,11 @@
   .ckb-card {
     grid-template-columns: 1fr;
     grid-template-rows: auto 360px;
+  }
+
+  .ckb-card--image-left .ckb-visual,
+  .ckb-card--image-left .ckb-content {
+    grid-column: auto;
   }
 
   .ckb-visual {
@@ -341,7 +361,17 @@
     },
     {
       "type": "header",
-      "content": "Rechte Spalte — Bild"
+      "content": "Bild"
+    },
+    {
+      "type": "select",
+      "id": "image_position",
+      "label": "Bildposition (Desktop)",
+      "options": [
+        { "value": "right", "label": "Rechts" },
+        { "value": "left", "label": "Links" }
+      ],
+      "default": "right"
     },
     {
       "type": "image_picker",
