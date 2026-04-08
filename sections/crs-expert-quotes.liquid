@@ -1,3 +1,25 @@
+{%- liquid
+  assign crs_h_align = section.settings.content_align | default: 'left'
+  if crs_h_align != 'left' and crs_h_align != 'center' and crs_h_align != 'right'
+    assign crs_h_align = 'left'
+  endif
+  assign crs_eq_kicker = section.settings.kicker | strip
+  assign crs_eq_head = section.settings.heading | strip
+  assign crs_eq_sub = section.settings.subheading | strip
+  if crs_eq_kicker == '__none__'
+    assign crs_eq_kicker = ''
+  endif
+  if crs_eq_head == '__none__'
+    assign crs_eq_head = ''
+  endif
+  if crs_eq_sub == '__none__'
+    assign crs_eq_sub = ''
+  endif
+  assign crs_h_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign crs_h_headline_lg = true
+  endif
+-%}
 {% style %}
   #section-{{ section.id }} {
     --crs-text:     {{ section.settings.color_text }};
@@ -14,8 +36,22 @@
 <div class="eq-section" id="section-{{ section.id }}">
   <div class="eq-container">
 
-    {%- if section.settings.heading != blank -%}
-      <h2 class="eq-heading">{{ section.settings.heading | escape }}</h2>
+    {%- if crs_eq_kicker != blank or crs_eq_head != blank or crs_eq_sub != blank -%}
+      <div class="eq-section-head crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+        {%- if crs_eq_kicker != blank -%}
+          <p class="crs-heading-stack__kicker">{{ crs_eq_kicker | escape }}</p>
+        {%- endif -%}
+        {%- if crs_eq_head != blank or crs_eq_sub != blank -%}
+          <div class="crs-heading-stack__pair">
+            {%- if crs_eq_head != blank -%}
+              <h2 class="crs-heading-stack__title">{{ crs_eq_head | escape | newline_to_br }}</h2>
+            {%- endif -%}
+            {%- if crs_eq_sub != blank -%}
+              <p class="crs-heading-stack__subtitle">{{ crs_eq_sub | escape | newline_to_br }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
@@ -28,9 +64,22 @@
             </blockquote>
 
             <div class="eq-author">
-              <div class="eq-initials" aria-hidden="true">
-                {{ block.settings.name | slice: 0, 2 | upcase }}
-              </div>
+              {%- if block.settings.photo != blank -%}
+                <div class="eq-photo">
+                  {{
+                    block.settings.photo
+                    | image_url: width: 160
+                    | image_tag:
+                      loading: 'lazy',
+                      class: 'eq-photo-img',
+                      alt: block.settings.name | escape
+                  }}
+                </div>
+              {%- else -%}
+                <div class="eq-initials" aria-hidden="true">
+                  {{ block.settings.name | slice: 0, 2 | upcase }}
+                </div>
+              {%- endif -%}
               <div class="eq-author-info">
                 <span class="eq-name">{{ block.settings.name | escape }}</span>
                 <span class="eq-title">{{ block.settings.title | escape }}</span>
@@ -54,30 +103,26 @@
 .eq-container {
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 var(--space-5);
 }
 
-.eq-heading {
-  font-size: 1.375rem;
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  color: var(--crs-text, #26251e);
-  margin: 0 0 40px;
+.eq-section-head {
+  margin-bottom: var(--space-7);
 }
 
 .eq-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .eq-card {
   background: var(--crs-card-bg, #f2f1ed);
-  border-radius: 4px;
-  padding: 24px;
+  border-radius: var(--radius-sm);
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-5);
 }
 
 .eq-blockquote {
@@ -110,6 +155,24 @@
   font-weight: 500;
   color: var(--crs-text, #26251e);
   flex-shrink: 0;
+}
+
+.eq-photo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 1.5px solid var(--crs-border, rgba(38, 37, 30, 0.1));
+  box-sizing: border-box;
+}
+
+.eq-photo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
 }
 
 .eq-author-info {
@@ -147,11 +210,11 @@
 
 @media (max-width: 640px) {
   .eq-container {
-    padding: 0 16px;
+    padding: 0 var(--space-4);
   }
 
   .eq-card {
-    padding: 20px;
+    padding: var(--space-5);
   }
 }
 {% endstylesheet %}
@@ -186,16 +249,6 @@
     },
     {
       "type": "header",
-      "content": "Inhalt"
-    },
-    {
-      "type": "text",
-      "id": "heading",
-      "label": "Überschrift",
-      "default": "Was führende Forscher sagen"
-    },
-    {
-      "type": "header",
       "content": "Abstände"
     },
     {
@@ -217,6 +270,53 @@
       "step": 8,
       "default": 80,
       "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung (Überschrift)",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section",
+      "info": "Zeilenumbruch: Enter in Überschrift/Unterüberschrift."
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": "__none__",
+      "info": "__none__ = ausblenden (Theme-Editor)"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Überschrift (optional)",
+      "default": "Was führende Forscher sagen",
+      "info": "__none__ = ausblenden (Theme-Editor)"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Unterüberschrift (optional)",
+      "default": "__none__",
+      "info": "__none__ = ausblenden (Theme-Editor)"
     }
   ],
   "blocks": [
@@ -227,7 +327,13 @@
         {
           "type": "textarea",
           "id": "quote",
-          "label": "Zitat (Original-Sprache)"
+          "label": "Zitat (Original-Sprache)",
+          "default": "Zitat hier einfügen."
+        },
+        {
+          "type": "image_picker",
+          "id": "photo",
+          "label": "Autorenfoto (optional)"
         },
         {
           "type": "text",
