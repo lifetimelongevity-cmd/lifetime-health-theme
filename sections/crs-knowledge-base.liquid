@@ -108,18 +108,18 @@
                   preserveAspectRatio="none"
                   aria-hidden="true"
                 >
-                  <defs>
-                    <filter id="ckb-nad-shadow-{{ section.id }}" x="-20%" y="-20%" width="140%" height="140%">
-                      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#111111" flood-opacity="0.08"></feDropShadow>
-                    </filter>
-                  </defs>
-
                   <g class="ckb-nad__grid">
                     <line x1="82" y1="76" x2="660" y2="76"></line>
                     <line x1="82" y1="164" x2="660" y2="164"></line>
                     <line x1="82" y1="252" x2="660" y2="252"></line>
                     <line x1="82" y1="340" x2="660" y2="340"></line>
                     <line x1="82" y1="428" x2="660" y2="428"></line>
+                    <line x1="176" y1="76" x2="176" y2="428"></line>
+                    <line x1="350" y1="76" x2="350" y2="428"></line>
+                    <line x1="610" y1="76" x2="610" y2="428"></line>
+                  </g>
+
+                  <g class="ckb-nad__axes">
                     <line x1="82" y1="428" x2="82" y2="58"></line>
                     <line x1="82" y1="428" x2="676" y2="428"></line>
                   </g>
@@ -129,7 +129,7 @@
                     d="M 82 124 C 136 128, 180 138, 222 154 C 266 171, 308 194, 346 225 C 388 259, 432 291, 480 324 C 532 359, 586 385, 660 401"
                   ></path>
 
-                  <g class="ckb-nad__markers" filter="url(#ckb-nad-shadow-{{ section.id }})">
+                  <g class="ckb-nad__markers">
                     <g class="ckb-nad__marker" style="--delay: 0.62s;">
                       <circle class="ckb-nad__marker-ripple" cx="176" cy="140" r="6"></circle>
                       <circle class="ckb-nad__marker-ring" cx="176" cy="140" r="6"></circle>
@@ -149,13 +149,57 @@
                 </svg>
 
                 <div class="ckb-nad__y-guide" aria-hidden="true">
-                  <span class="ckb-nad__y-guide-label ckb-nad__y-guide-label--high">MEHR {{ section.settings.graph_axis_y | escape }}</span>
-                  <span class="ckb-nad__y-guide-label ckb-nad__y-guide-label--low">WENIGER</span>
+                  <span class="ckb-nad__y-caption">{{ section.settings.graph_axis_y | upcase | escape }}</span>
+                  <span class="ckb-nad__y-value ckb-nad__y-value--top">100</span>
+                  <span class="ckb-nad__y-value ckb-nad__y-value--mid">50</span>
+                  <span class="ckb-nad__y-value ckb-nad__y-value--bottom">0</span>
                 </div>
                 <div class="ckb-nad__x-guide" aria-hidden="true">
-                  <span class="ckb-nad__x-label" style="--delay: 0.62s;">JUENGER</span>
-                  <span class="ckb-nad__x-label" style="--delay: 1.38s;">{{ section.settings.graph_axis_x | upcase | escape }}</span>
-                  <span class="ckb-nad__x-label" style="--delay: 2.08s;">AELTER</span>
+                  <span class="ckb-nad__x-label">
+                    <span class="ckb-nad__x-label-text">JUENGER</span>
+                    <span class="ckb-nad__x-label-value">20</span>
+                  </span>
+                  <span class="ckb-nad__x-label">
+                    <span class="ckb-nad__x-label-text">{{ section.settings.graph_axis_x | upcase | escape }}</span>
+                    <span class="ckb-nad__x-label-value">50</span>
+                  </span>
+                  <span class="ckb-nad__x-label">
+                    <span class="ckb-nad__x-label-text">AELTER</span>
+                    <span class="ckb-nad__x-label-value">80</span>
+                  </span>
+                </div>
+
+                <div class="ckb-nad__hotspots">
+                  <button
+                    type="button"
+                    class="ckb-nad__hotspot"
+                    data-nad-hotspot
+                    aria-expanded="false"
+                    aria-label="Hinweis zu jungem NAD+ Niveau"
+                    style="--x: 24.44%; --y: 26.92%;"
+                  >
+                    <span class="ckb-nad__tooltip">Maximale Zellenergie. Optimale Reparatur.</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="ckb-nad__hotspot"
+                    data-nad-hotspot
+                    aria-expanded="false"
+                    aria-label="Hinweis zu mittlerem NAD+ Niveau"
+                    style="--x: 48.61%; --y: 43.85%;"
+                  >
+                    <span class="ckb-nad__tooltip">Spuerbarer Rueckgang. Erhoehter Bedarf.</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="ckb-nad__hotspot"
+                    data-nad-hotspot
+                    aria-expanded="false"
+                    aria-label="Hinweis zu niedrigem NAD+ Niveau"
+                    style="--x: 84.72%; --y: 75.00%;"
+                  >
+                    <span class="ckb-nad__tooltip">Kritische Werte. Beschleunigte Alterung.</span>
+                  </button>
                 </div>
               </div>
 
@@ -359,6 +403,15 @@
   min-height: 392px;
 }
 
+.ckb-nad__chart::before {
+  content: '';
+  position: absolute;
+  inset: 76px 60px 92px 82px;
+  background-image: radial-gradient(circle, rgba(153, 153, 153, 0.12) 0.7px, transparent 0.8px);
+  background-size: 20px 20px;
+  pointer-events: none;
+}
+
 .ckb-nad__svg {
   position: relative;
   z-index: 1;
@@ -370,6 +423,12 @@
 .ckb-nad__grid line {
   stroke: #f5f5f5;
   stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.ckb-nad__axes line {
+  stroke: rgba(20, 20, 20, 0.72);
+  stroke-width: 0.5;
   vector-effect: non-scaling-stroke;
 }
 
@@ -391,6 +450,7 @@
   opacity: 0;
   transform-box: fill-box;
   transform-origin: center;
+  cursor: pointer;
 }
 
 .ckb-nad.is-visible .ckb-nad__marker {
@@ -422,6 +482,17 @@
   animation-delay: calc(var(--delay, 0s) + 0.08s);
 }
 
+.ckb-nad.is-complete .ckb-nad__marker {
+  opacity: 1;
+  animation: ckb-nad-point-idle 2.8s ease-in-out infinite;
+  animation-delay: calc(var(--delay, 0s) + 0.2s);
+}
+
+.ckb-nad.is-complete .ckb-nad__marker-ripple {
+  animation: none;
+  opacity: 0;
+}
+
 .ckb-nad__y-guide,
 .ckb-nad__x-guide {
   position: absolute;
@@ -430,30 +501,57 @@
 }
 
 .ckb-nad__y-guide {
-  inset-block: 30px 56px;
+  inset-block: 76px 92px;
   inset-inline-start: 0;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  opacity: 0;
 }
 
-.ckb-nad__y-guide-label,
-.ckb-nad__x-label {
-  font-size: 0.7rem;
+.ckb-nad__y-caption,
+.ckb-nad__y-value,
+.ckb-nad__x-label-text,
+.ckb-nad__x-label-value {
+  font-size: 0.56rem;
   font-family: var(--font-body);
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(20, 20, 20, 0.6);
-  opacity: 0.22;
+  color: #999999;
+  font-weight: 300;
+}
+
+.ckb-nad__y-caption {
+  position: absolute;
+  inset-inline-start: -6px;
+  inset-block-start: -30px;
+}
+
+.ckb-nad__y-value {
+  position: absolute;
+  inset-inline-start: 0;
+}
+
+.ckb-nad__y-value--top {
+  inset-block-start: -4px;
+}
+
+.ckb-nad__y-value--mid {
+  inset-block-start: calc(50% - 4px);
+}
+
+.ckb-nad__y-value--bottom {
+  inset-block-end: -4px;
 }
 
 .ckb-nad__x-guide {
   inset-inline: 82px 44px;
-  inset-block-end: 0;
+  inset-block-end: 14px;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: center;
   gap: 12px;
+  opacity: 0;
 }
 
 .ckb-nad__x-guide::before {
@@ -466,7 +564,8 @@
 }
 
 .ckb-nad__x-label {
-  opacity: 0;
+  display: grid;
+  gap: 3px;
 }
 
 .ckb-nad__x-label:first-child {
@@ -481,9 +580,68 @@
   justify-self: end;
 }
 
-.ckb-nad.is-visible .ckb-nad__x-label {
-  animation: ckb-nad-label-in 0.5s ease-out forwards;
-  animation-delay: calc(var(--delay, 0s) + 0.04s);
+.ckb-nad__x-label-text,
+.ckb-nad__x-label-value {
+  display: block;
+}
+
+.ckb-nad__x-label-value {
+  letter-spacing: 0.08em;
+}
+
+.ckb-nad__hotspots {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+}
+
+.ckb-nad__hotspot {
+  position: absolute;
+  inset-inline-start: var(--x);
+  inset-block-start: var(--y);
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+}
+
+.ckb-nad__hotspot:focus-visible {
+  outline: 1px solid rgba(20, 20, 20, 0.6);
+  outline-offset: 2px;
+}
+
+.ckb-nad__tooltip {
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-end: calc(100% + 10px);
+  width: 148px;
+  padding: 10px 12px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 0.7rem;
+  line-height: 1.45;
+  text-align: start;
+  opacity: 0;
+  transform: translate(-50%, 8px) scale(0.96);
+  transform-origin: center bottom;
+  transition:
+    opacity 0.22s ease,
+    transform 0.22s ease;
+  pointer-events: none;
+}
+
+.ckb-nad__hotspot[aria-expanded='true'] .ckb-nad__tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0) scale(1);
+}
+
+.ckb-nad.is-complete .ckb-nad__y-guide,
+.ckb-nad.is-complete .ckb-nad__x-guide {
+  animation: ckb-nad-axis-fade 0.7s ease forwards;
+  animation-delay: 0.08s;
 }
 
 .ckb-nad.is-complete .ckb-nad__chart {
@@ -566,20 +724,65 @@
     min-height: 272px;
   }
 
+  .ckb-nad__chart::before {
+    inset: 76px 26px 88px 74px;
+    background-size: 16px 16px;
+  }
+
   .ckb-nad__x-guide {
     inset-inline: 74px 18px;
     gap: 8px;
   }
 
-  .ckb-nad__y-guide-label,
-  .ckb-nad__x-label {
-    font-size: 0.62rem;
+  .ckb-nad__y-caption,
+  .ckb-nad__y-value,
+  .ckb-nad__x-label-text,
+  .ckb-nad__x-label-value {
+    font-size: 0.5rem;
+  }
+
+  .ckb-nad__tooltip {
+    width: 126px;
+    padding: 8px 10px;
+    font-size: 0.64rem;
   }
 }
 {% endstylesheet %}
 
 {% javascript %}
   (function () {
+    function bindHotspots(graph) {
+      if (!graph || graph.dataset.hotspotsBound === 'true') return;
+
+      var hotspots = graph.querySelectorAll('[data-nad-hotspot]');
+
+      function closeAll(except) {
+        hotspots.forEach(function (hotspot) {
+          var expanded = except && hotspot === except;
+          hotspot.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+        });
+      }
+
+      hotspots.forEach(function (hotspot) {
+        hotspot.addEventListener('click', function (event) {
+          event.stopPropagation();
+          var isOpen = hotspot.getAttribute('aria-expanded') === 'true';
+          closeAll(isOpen ? null : hotspot);
+        });
+      });
+
+      graph.addEventListener('click', function () {
+        closeAll(null);
+      });
+
+      graph.addEventListener('keydown', function (event) {
+        if (event.key !== 'Escape') return;
+        closeAll(null);
+      });
+
+      graph.dataset.hotspotsBound = 'true';
+    }
+
     function setupGraph(graph) {
       if (!graph || graph.dataset.graphReady === 'true') return;
 
@@ -639,6 +842,7 @@
 
       graphs.forEach(function (graph) {
         setupGraph(graph);
+        bindHotspots(graph);
         observeGraph(graph);
       });
     }
@@ -693,12 +897,12 @@
     }
   }
 
-  @keyframes ckb-nad-label-in {
+  @keyframes ckb-nad-axis-fade {
     from {
       opacity: 0;
     }
     to {
-      opacity: 0.6;
+      opacity: 1;
     }
   }
 
@@ -709,6 +913,16 @@
     }
     50% {
       opacity: 0.94;
+    }
+  }
+
+  @keyframes ckb-nad-point-idle {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.06);
     }
   }
 {% endstyle %}
