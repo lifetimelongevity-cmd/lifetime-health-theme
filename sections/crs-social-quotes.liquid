@@ -58,29 +58,26 @@
       <div class="sq-grid">
         {%- for block in section.blocks -%}
           <div class="sq-card" {{ block.shopify_attributes }}>
+            {%- if block.settings.avatar != blank -%}
+              <div class="sq-image">
+                {{
+                  block.settings.avatar
+                  | image_url: width: 600
+                  | image_tag:
+                    loading: 'lazy',
+                    class: 'sq-image-img',
+                    alt: block.settings.name | escape
+                }}
+              </div>
+            {%- endif -%}
             <figure class="sq-figure">
               <blockquote class="sq-blockquote">
                 <p class="sq-quote-text">{{ block.settings.quote | escape }}</p>
               </blockquote>
-              <div class="sq-author">
-                {%- if block.settings.avatar != blank -%}
-                  <div class="sq-avatar">
-                    {{
-                      block.settings.avatar
-                      | image_url: width: 84
-                      | image_tag:
-                        width: 42,
-                        height: 42,
-                        loading: 'lazy',
-                        alt: block.settings.name | escape
-                    }}
-                  </div>
-                {%- endif -%}
-                <figcaption class="sq-figcaption">
-                  <span class="sq-name">{{ block.settings.name | escape }}</span>
-                  <span class="sq-role">{{ block.settings.role | escape }}</span>
-                </figcaption>
-              </div>
+              <figcaption class="sq-figcaption">
+                <span class="sq-name">{{ block.settings.name | escape }}</span>
+                <span class="sq-role">{{ block.settings.role | escape }}</span>
+              </figcaption>
             </figure>
           </div>
         {%- endfor -%}
@@ -125,6 +122,25 @@
   padding: 20px;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+/* Testimonial image (oben in der Card) */
+.sq-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: 8px 8px 0 0;
+  margin: -28px -28px 20px -28px;
+  width: calc(100% + 56px);
+}
+
+.sq-image-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
 }
 
 /* Figure */
@@ -148,30 +164,6 @@
   color: var(--crs-text, #26251e);
   margin: 0;
   white-space: pre-wrap;
-}
-
-/* Author row */
-.sq-author {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: auto;
-}
-
-.sq-avatar {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  overflow: hidden;
-  flex-shrink: 0;
-  border: 1.5px solid var(--crs-border, rgba(38, 37, 30, 0.05));
-}
-
-.sq-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
 }
 
 .sq-figcaption {
@@ -346,49 +338,49 @@
         {
           "type": "quote",
           "settings": {
-            "quote": "The hit rate from Bugbot is insane. Catching bugs early saves huge downstream cost.",
-            "name": "David Cramer",
-            "role": "Co-Founder & CPO, Sentry"
+            "quote": "Ich habe Sinclairs Buch gelesen und wollte es ausprobieren. Ich fühle mich insgesamt energiegeladener und weniger erschöpft – der Unterschied ist real.",
+            "name": "Sven M.",
+            "role": "Verifizierter Käufer ★★★★★"
           }
         },
         {
           "type": "quote",
           "settings": {
-            "quote": "Bugbot is particularly helpful for large MRs. The summary it generates accurately describes the actual code changes.",
-            "name": "Tim Froehlich",
-            "role": "Staff Engineer, Maven"
+            "quote": "Ich bin 58 Jahre alt und arbeite als Best-Age Model. NMN ist mein Geheimnis für mehr Energie und kürzere Regenerationszeit nach dem Sport.",
+            "name": "@christinehei",
+            "role": "Verifizierte Kundin ★★★★★"
           }
         },
         {
           "type": "quote",
           "settings": {
-            "quote": "Bugbot helps give back 40% of time spent on code reviews.",
-            "name": "Ankur Bhatt",
-            "role": "Head of AI Engineering, Rippling"
+            "quote": "Mehr Fokus, mehr Ausdauer ab Woche 3. Kein Placebo-Effekt – ich habe es absichtlich ohne Erwartung getestet. Der Unterschied ist messbar.",
+            "name": "@misscasiraghi",
+            "role": "Verifizierte Kundin ★★★★★"
           }
         },
         {
           "type": "quote",
           "settings": {
-            "quote": "Bugbot finds real bugs after human approval. Avoiding one sev pays for itself.",
-            "name": "Kodie Goodwin",
-            "role": "AI Engineering Leader, Discord"
+            "quote": "Kein sofortiger Wow-Effekt, aber nach 6 Wochen merke ich deutlich mehr Ausdauer beim Sport und einen klareren Kopf am Morgen.",
+            "name": "Mattes J.",
+            "role": "Verifizierter Käufer ★★★★☆"
           }
         },
         {
           "type": "quote",
           "settings": {
-            "quote": "Incredibly strong at reviewing AI-generated code.",
-            "name": "Vijay Iyengar",
-            "role": "AI Engineering Leader, Sierra"
+            "quote": "LIFETIME ist ein von Ärzten geführtes Unternehmen aus Berlin. Das Vertrauen war von Anfang an da – und die Wirkung kam mit der Zeit.",
+            "name": "Thomas K.",
+            "role": "Verifizierter Käufer ★★★★★"
           }
         },
         {
           "type": "quote",
           "settings": {
-            "quote": "Bugbot finds really solid issues, not just in the files or lines of code directly touched by a PR, but also in how the changes interact with existing components.",
-            "name": "Prabhav Chawla",
-            "role": "Engineer, Decagon"
+            "quote": "Nach 3 Monaten fühle ich mich biologisch jünger – mehr Energie, besserer Schlaf, und mein Arzt ist von den Blutwerten beeindruckt.",
+            "name": "Andrea L.",
+            "role": "Verifizierte Käuferin ★★★★★"
           }
         }
       ]
