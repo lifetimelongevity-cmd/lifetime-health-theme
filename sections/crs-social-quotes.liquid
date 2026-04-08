@@ -57,47 +57,54 @@
     {%- if section.blocks.size > 0 -%}
       <div class="sq-grid">
         {%- for block in section.blocks -%}
-          <div class="sq-card" {{ block.shopify_attributes }}>
+          <div
+            class="sq-card{% if block.settings.avatar == blank %} sq-card--no-image{% endif %}"
+            {{ block.shopify_attributes }}
+          >
             {%- if block.settings.avatar != blank -%}
-              <div class="sq-image">
-                {{
-                  block.settings.avatar
-                  | image_url: width: 800
-                  | image_tag:
-                    loading: 'lazy',
-                    class: 'sq-image-img',
-                    alt: block.settings.name | escape
-                }}
+              <div class="sq-image-wrap">
+                <div class="sq-image">
+                  {{
+                    block.settings.avatar
+                    | image_url: width: 900
+                    | image_tag:
+                      loading: 'lazy',
+                      class: 'sq-image-img',
+                      alt: block.settings.name | escape
+                  }}
+                </div>
               </div>
             {%- endif -%}
-            {%- assign sq_role = block.settings.role | default: '' -%}
-            {%- assign sq_star_row = '' -%}
-            {%- if sq_role contains '★★★★★' -%}
-              {%- assign sq_star_row = '★★★★★' -%}
-            {%- elsif sq_role contains '★★★★☆' -%}
-              {%- assign sq_star_row = '★★★★☆' -%}
-            {%- elsif sq_role contains '★★★☆☆' -%}
-              {%- assign sq_star_row = '★★★☆☆' -%}
-            {%- elsif sq_role contains '★' or sq_role contains '⭐' -%}
-              {%- assign sq_star_row = '★★★★★' -%}
-            {%- endif -%}
-            {%- if sq_star_row != blank -%}
-              <div class="sq-stars" aria-hidden="true">
-                <span class="sq-stars__row">{{ sq_star_row }}</span>
-              </div>
-            {%- endif -%}
-            <figure class="sq-figure">
-              <blockquote class="sq-blockquote">
-                <p class="sq-quote-text">{{ block.settings.quote | escape }}</p>
-              </blockquote>
-              <figcaption class="sq-figcaption">
-                <span class="sq-name">{{ block.settings.name | escape }}</span>
-                {%- assign sq_role_clean = sq_role | replace: '★', '' | replace: '☆', '' | replace: '⭐', '' | strip -%}
-                {%- if sq_role_clean != blank -%}
-                  <span class="sq-role">{{ sq_role_clean | escape }}</span>
-                {%- endif -%}
-              </figcaption>
-            </figure>
+            <div class="sq-card-content">
+              {%- assign sq_role = block.settings.role | default: '' -%}
+              {%- assign sq_star_row = '' -%}
+              {%- if sq_role contains '★★★★★' -%}
+                {%- assign sq_star_row = '★★★★★' -%}
+              {%- elsif sq_role contains '★★★★☆' -%}
+                {%- assign sq_star_row = '★★★★☆' -%}
+              {%- elsif sq_role contains '★★★☆☆' -%}
+                {%- assign sq_star_row = '★★★☆☆' -%}
+              {%- elsif sq_role contains '★' or sq_role contains '⭐' -%}
+                {%- assign sq_star_row = '★★★★★' -%}
+              {%- endif -%}
+              {%- if sq_star_row != blank -%}
+                <div class="sq-stars" aria-hidden="true">
+                  <span class="sq-stars__row">{{ sq_star_row }}</span>
+                </div>
+              {%- endif -%}
+              <figure class="sq-figure">
+                <blockquote class="sq-blockquote">
+                  <p class="sq-quote-text">{{ block.settings.quote | escape }}</p>
+                </blockquote>
+                <figcaption class="sq-figcaption">
+                  <span class="sq-name">{{ block.settings.name | escape }}</span>
+                  {%- assign sq_role_clean = sq_role | replace: '★', '' | replace: '☆', '' | replace: '⭐', '' | strip -%}
+                  {%- if sq_role_clean != blank -%}
+                    <span class="sq-role">{{ sq_role_clean | escape }}</span>
+                  {%- endif -%}
+                </figcaption>
+              </figure>
+            </div>
           </div>
         {%- endfor -%}
       </div>
@@ -125,51 +132,61 @@
   margin-bottom: var(--space-7);
 }
 
-/* Grid — Karten in einer Zeile gleich hoch */
+/* Grid — quadratische Karten: Breite = Spalte, Höhe folgt aus aspect-ratio */
 .sq-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-5);
-  align-items: stretch;
+  align-items: start;
 }
 
 /*
-  Karte: Hochformat durch relativ niedrigen Bildstreifen + Inhalt darunter (kein overflow:hidden).
-  Zeilen im Grid gleichen sich über align-items: stretch an der höchsten Karte aus.
+  Quadratische Karte; obere Hälfte = quadratisches Bild (zentriert),
+  untere Hälfte = Sterne, Zitat, Name.
 */
 .sq-card {
   box-sizing: border-box;
   background: var(--crs-card-bg, #f2f1ed);
   border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.05));
   border-radius: var(--radius-md);
-  padding: var(--space-4);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
-  overflow: visible;
+  align-items: stretch;
+  overflow: hidden;
   width: 100%;
   max-width: 100%;
+  aspect-ratio: 1 / 1;
   min-height: 0;
-  height: 100%;
 }
 
-/* Foto: kompakter Kopfbereich (~40 % der Kartenhöhe), leicht eingerückt wie Referenz */
+.sq-card--no-image .sq-card-content {
+  flex: 1 1 100%;
+  min-height: 0;
+}
+
+/* Obere 50 %: Bildfläche — darin quadratischer Ausschnitt (Seitenlänge = Hälfte der Kartenhöhe) */
+.sq-image-wrap {
+  flex: 0 0 50%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 .sq-image {
   flex-shrink: 0;
-  width: 100%;
+  height: 100%;
+  width: auto;
   max-width: 100%;
-  height: 0;
-  padding-bottom: 42%;
-  position: relative;
-  overflow: hidden;
+  aspect-ratio: 1 / 1;
   border-radius: var(--radius-sm);
-  margin: 0 0 var(--space-3);
+  overflow: hidden;
+  position: relative;
 }
 
 .sq-image-img {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -177,9 +194,25 @@
   display: block;
 }
 
+/* Untere 50 %: Sterne + Text */
+.sq-card-content {
+  flex: 0 0 50%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-3) var(--space-4);
+  box-sizing: border-box;
+  gap: var(--space-2);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .sq-stars {
   flex-shrink: 0;
-  margin: 0 0 var(--space-2);
+  margin: 0;
 }
 
 .sq-stars__row {
@@ -195,7 +228,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
   margin: 0;
   width: 100%;
@@ -206,7 +239,7 @@
 .sq-blockquote {
   flex: 0 1 auto;
   min-height: 0;
-  margin: 0 0 var(--space-3);
+  margin: 0;
   overflow: visible;
   width: 100%;
 }
@@ -228,7 +261,7 @@
   align-items: center;
   gap: var(--space-1);
   flex-shrink: 0;
-  margin-top: auto;
+  margin-top: 0;
   width: 100%;
   padding-top: var(--space-2);
 }

@@ -13,6 +13,14 @@
   if section.settings.heading_size == 'product_title'
     assign crs_h_headline_lg = true
   endif
+  assign tl_has_intro_header = false
+  if crs_tl_kicker != blank or crs_tl_head != blank or crs_tl_sub != blank
+    assign tl_has_intro_header = true
+  endif
+  assign tl_show_intro_col = false
+  if tl_has_intro_header or section.settings.image != blank
+    assign tl_show_intro_col = true
+  endif
 -%}
 {% style %}
   #section-{{ section.id }} {
@@ -28,34 +36,51 @@
 {% endstyle %}
 
 <div
-  class="tl-section{% if section.settings.image == blank %} tl-section--no-image{% endif %}"
+  class="tl-section{% if section.settings.image != blank %} tl-section--has-image{% else %} tl-section--no-image{% endif %}"
   id="section-{{ section.id }}"
 >
   <div class="tl-container">
-    <div class="tl-layout">
+    <div class="tl-layout{% if tl_show_intro_col == false %} tl-layout--timeline-only{% endif %}">
 
-      {%- comment -%} Left: Timeline {%- endcomment -%}
-      <div class="tl-left">
+      {%- if tl_show_intro_col -%}
+        {%- comment -%} Spalte 1 (Desktop): Kicker, Überschrift, Unterzeile, optional Bild darunter {%- endcomment -%}
+        <div class="tl-intro">
+          {%- if tl_has_intro_header -%}
+            <div class="tl-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+              {%- if crs_tl_kicker != blank -%}
+                <p class="crs-heading-stack__kicker">{{ crs_tl_kicker | escape }}</p>
+              {%- endif -%}
+              {%- if crs_tl_head != blank or crs_tl_sub != blank -%}
+                <div class="crs-heading-stack__pair">
+                  {%- if crs_tl_head != blank -%}
+                    <h2 class="crs-heading-stack__title">{{ crs_tl_head | escape | newline_to_br }}</h2>
+                  {%- endif -%}
+                  {%- if crs_tl_sub != blank -%}
+                    <p class="crs-heading-stack__subtitle">{{ crs_tl_sub | escape | newline_to_br }}</p>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
 
-        {%- if crs_tl_kicker != blank or crs_tl_head != blank or crs_tl_sub != blank -%}
-          <div class="tl-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
-            {%- if crs_tl_kicker != blank -%}
-              <p class="crs-heading-stack__kicker">{{ crs_tl_kicker | escape }}</p>
-            {%- endif -%}
-            {%- if crs_tl_head != blank or crs_tl_sub != blank -%}
-              <div class="crs-heading-stack__pair">
-                {%- if crs_tl_head != blank -%}
-                  <h2 class="crs-heading-stack__title">{{ crs_tl_head | escape | newline_to_br }}</h2>
-                {%- endif -%}
-                {%- if crs_tl_sub != blank -%}
-                  <p class="crs-heading-stack__subtitle">{{ crs_tl_sub | escape | newline_to_br }}</p>
-                {%- endif -%}
-              </div>
-            {%- endif -%}
-          </div>
-        {%- endif -%}
+          {%- if section.settings.image != blank -%}
+            <div class="tl-media">
+              {{
+                section.settings.image
+                | image_url: width: 1000
+                | image_tag:
+                  loading: 'lazy',
+                  class: 'tl-image',
+                  alt: section.settings.image_alt | escape
+              }}
+            </div>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
 
-        {%- if section.blocks.size > 0 -%}
+      {%- comment -%} Spalte 2 (Desktop): Timeline {%- endcomment -%}
+      {%- if section.blocks.size > 0 -%}
+        <div class="tl-timeline">
           <div class="tl-items">
             {%- for block in section.blocks -%}
               <div class="tl-item{% if block.settings.is_active %} tl-item--active{% endif %}" {{ block.shopify_attributes }}>
@@ -82,21 +107,6 @@
               </div>
             {%- endfor -%}
           </div>
-        {%- endif -%}
-
-      </div>
-
-      {%- comment -%} Right: Image (only if set) {%- endcomment -%}
-      {%- if section.settings.image != blank -%}
-        <div class="tl-right">
-          {{
-            section.settings.image
-            | image_url: width: 1000
-            | image_tag:
-              loading: 'lazy',
-              class: 'tl-image',
-              alt: section.settings.image_alt | escape
-          }}
         </div>
       {%- endif -%}
 
@@ -114,28 +124,45 @@
 }
 
 .tl-container {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--space-5);
 }
 
-/* Layout */
+/* Desktop: Intro links, Timeline rechts — volle Containerbreite (kein 720px-Cap) */
 .tl-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 32px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-5);
   align-items: start;
-  max-width: 720px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
-.tl-left {
-  max-width: 480px;
+.tl-layout--timeline-only {
+  grid-template-columns: minmax(0, 1fr);
 }
 
-.tl-section--no-image .tl-layout {
-  grid-template-columns: 1fr;
+/* Mit Bild: Bild unter der Headline in Spalte 1, Timeline in Spalte 2 über volle Höhe */
+.tl-section--has-image .tl-timeline {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+}
+
+.tl-section--has-image .tl-intro {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.tl-section--has-image .tl-media {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.tl-intro {
+  min-width: 0;
+}
+
+.tl-timeline {
+  min-width: 0;
 }
 
 /* Header block */
@@ -224,20 +251,42 @@
   color: var(--crs-text-sec, rgba(38,37,30,0.6));
 }
 
-/* Right image */
+.tl-media {
+  margin-top: var(--space-5);
+}
+
 .tl-image {
   width: 100%;
   height: auto;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   object-fit: cover;
   display: block;
 }
 
-/* Mobile */
+/* Tablet/Mobile: Intro → Timeline → Bild */
 @media (max-width: 1024px) {
   .tl-layout {
     grid-template-columns: 1fr;
-    gap: 32px;
+    gap: var(--space-6);
+  }
+
+  .tl-section--has-image .tl-timeline {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .tl-section--has-image .tl-intro {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .tl-section--has-image .tl-media {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .tl-media {
+    margin-top: 0;
   }
 }
 {% endstylesheet %}
@@ -349,7 +398,8 @@
     {
       "type": "image_picker",
       "id": "image",
-      "label": "Bild (rechte Spalte)"
+      "label": "Bild (optional)",
+      "info": "Desktop: unter der Headline (linke Spalte). Mobile: direkt unter Headline, vor den Timeline-Schritten."
     },
     {
       "type": "text",
