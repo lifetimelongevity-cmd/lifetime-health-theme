@@ -1,0 +1,943 @@
+{%- liquid
+  assign nad_graph_heading = section.settings.heading | strip
+  assign nad_graph_kicker = section.settings.kicker | strip
+  assign nad_graph_body = section.settings.body
+  assign nad_graph_note = section.settings.note | strip
+  assign nad_graph_source_url = section.settings.source_url | default: 'https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0042357'
+  assign nad_graph_x_quarter = section.settings.x_axis_max | times: 0.25
+  assign nad_graph_x_half = section.settings.x_axis_max | times: 0.5
+  assign nad_graph_x_three_quarters = section.settings.x_axis_max | times: 0.75
+  assign nad_graph_y_quarter = section.settings.y_axis_max | times: 0.25
+  assign nad_graph_y_half = section.settings.y_axis_max | times: 0.5
+  assign nad_graph_y_three_quarters = section.settings.y_axis_max | times: 0.75
+-%}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --nad-graph-bg: {{ section.settings.color_bg }};
+    --nad-graph-card-bg: {{ section.settings.color_card_bg }};
+    --nad-graph-text: {{ section.settings.color_text }};
+    --nad-graph-text-muted: {{ section.settings.color_text | color_modify: 'alpha', 0.66 }};
+    --nad-graph-border: {{ section.settings.color_text | color_modify: 'alpha', 0.12 }};
+    --nad-graph-grid: {{ section.settings.color_accent | color_modify: 'alpha', 0.14 }};
+    --nad-graph-accent: {{ section.settings.color_accent }};
+    --nad-graph-accent-soft: {{ section.settings.color_accent | color_modify: 'alpha', 0.14 }};
+    --nad-graph-dot: {{ section.settings.color_dot }};
+    --nad-graph-glow: {{ section.settings.color_dot | color_modify: 'alpha', 0.26 }};
+    --nad-graph-top-space: {{ section.settings.padding_top }}px;
+    --nad-graph-bottom-space: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<section
+  class="nad-graph"
+  data-nad-graph
+  data-x-max="{{ section.settings.x_axis_max }}"
+  data-y-max="{{ section.settings.y_axis_max }}"
+  data-x-label="{{ section.settings.x_axis_label | escape }}"
+  data-y-label="{{ section.settings.y_axis_label | escape }}"
+>
+  <div class="nad-graph__container">
+    <div class="nad-graph__intro">
+      {%- if nad_graph_kicker != blank -%}
+        <p class="nad-graph__kicker">{{ nad_graph_kicker | escape }}</p>
+      {%- endif -%}
+
+      {%- if nad_graph_heading != blank -%}
+        <h2 class="nad-graph__heading">{{ nad_graph_heading | escape | newline_to_br }}</h2>
+      {%- endif -%}
+
+      {%- if nad_graph_body != blank -%}
+        <div class="nad-graph__body rte">{{ nad_graph_body }}</div>
+      {%- endif -%}
+
+      <div class="nad-graph__meta">
+        {%- if section.settings.source_label != blank -%}
+          <a
+            class="nad-graph__source"
+            href="{{ nad_graph_source_url }}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{ section.settings.source_label | escape }}
+          </a>
+        {%- endif -%}
+
+        {%- if section.settings.show_note and nad_graph_note != blank -%}
+          <p class="nad-graph__note">{{ nad_graph_note | escape }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="nad-graph__visual">
+      <div class="nad-graph__chart-shell">
+        <div class="nad-graph__eyebrow">Observed mean values</div>
+
+        <div
+          class="nad-graph__chart"
+          role="img"
+          aria-labelledby="nad-graph-title-{{ section.id }}"
+          aria-describedby="nad-graph-desc-{{ section.id }}"
+        >
+          <span class="visually-hidden" id="nad-graph-title-{{ section.id }}">
+            {{ nad_graph_heading | default: 'NAD+ declines with age' | escape }}
+          </span>
+          <span class="visually-hidden" id="nad-graph-desc-{{ section.id }}">
+            {{ section.settings.x_axis_label | escape }} on the horizontal axis and {{ section.settings.y_axis_label | escape }} on the vertical axis.
+          </span>
+
+          <svg
+            class="nad-graph__svg"
+            viewBox="0 0 1000 540"
+            preserveAspectRatio="none"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="nad-graph-gradient-{{ section.id }}" x1="0%" x2="100%" y1="0%" y2="0%">
+                <stop offset="0%" stop-color="{{ section.settings.color_dot }}" />
+                <stop offset="100%" stop-color="{{ section.settings.color_accent }}" />
+              </linearGradient>
+              <linearGradient id="nad-graph-fill-{{ section.id }}" x1="0%" x2="0%" y1="0%" y2="100%">
+                <stop offset="0%" stop-color="{{ section.settings.color_accent | color_modify: 'alpha', 0.3 }}" />
+                <stop offset="100%" stop-color="{{ section.settings.color_accent | color_modify: 'alpha', 0.01 }}" />
+              </linearGradient>
+              <filter id="nad-graph-shadow-{{ section.id }}" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="{{ section.settings.color_dot | color_modify: 'alpha', 0.18 }}" />
+              </filter>
+            </defs>
+
+            <g class="nad-graph__grid">
+              <line x1="96" y1="68" x2="960" y2="68"></line>
+              <line x1="96" y1="161" x2="960" y2="161"></line>
+              <line x1="96" y1="254" x2="960" y2="254"></line>
+              <line x1="96" y1="347" x2="960" y2="347"></line>
+              <line x1="96" y1="440" x2="960" y2="440"></line>
+              <line x1="96" y1="440" x2="96" y2="68"></line>
+            </g>
+
+            <g class="nad-graph__ticks">
+              <text x="66" y="445">0</text>
+              <text x="58" y="352">{{ nad_graph_y_quarter }}</text>
+              <text x="58" y="259">{{ nad_graph_y_half }}</text>
+              <text x="58" y="166">{{ nad_graph_y_three_quarters }}</text>
+              <text x="52" y="73">{{ section.settings.y_axis_max }}</text>
+              <text x="96" y="485">0</text>
+              <text x="308" y="485">{{ nad_graph_x_quarter }}</text>
+              <text x="524" y="485">{{ nad_graph_x_half }}</text>
+              <text x="740" y="485">{{ nad_graph_x_three_quarters }}</text>
+              <text x="932" y="485">{{ section.settings.x_axis_max }}</text>
+            </g>
+
+            <path class="nad-graph__area" data-nad-graph-area d=""></path>
+            <path class="nad-graph__line" data-nad-graph-line d=""></path>
+            <g class="nad-graph__markers" data-nad-graph-markers filter="url(#nad-graph-shadow-{{ section.id }})"></g>
+          </svg>
+
+          <div class="nad-graph__axis-label nad-graph__axis-label--x">
+            {{ section.settings.x_axis_label | escape }}
+          </div>
+          <div class="nad-graph__axis-label nad-graph__axis-label--y">
+            {{ section.settings.y_axis_label | escape }}
+          </div>
+        </div>
+      </div>
+
+      <div class="nad-graph__cards" aria-label="Data points">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'point' -%}
+            <article
+              class="nad-graph__card"
+              data-point
+              data-age="{{ block.settings.age }}"
+              data-value="{{ block.settings.value }}"
+              {{ block.shopify_attributes }}
+            >
+              <p class="nad-graph__card-kicker">{{ block.settings.stage | escape }}</p>
+              <div class="nad-graph__value-row">
+                <p class="nad-graph__value">{{ block.settings.value | escape }}</p>
+                <p class="nad-graph__unit">{{ section.settings.value_unit | escape }}</p>
+              </div>
+              <p class="nad-graph__age">{{ block.settings.age_label | escape }}</p>
+              {%- if block.settings.detail != blank -%}
+                <p class="nad-graph__detail">{{ block.settings.detail | escape }}</p>
+              {%- endif -%}
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    <div class="visually-hidden">
+      <ul>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'point' -%}
+            <li>
+              {{ block.settings.stage | escape }}: age {{ block.settings.age | escape }}, value {{ block.settings.value | escape }} {{ section.settings.value_unit | escape }}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+  .nad-graph {
+    position: relative;
+    overflow: clip;
+    padding-top: var(--nad-graph-top-space, 80px);
+    padding-bottom: var(--nad-graph-bottom-space, 80px);
+    color: var(--nad-graph-text, #2d3027);
+    background:
+      radial-gradient(circle at top left, var(--nad-graph-accent-soft, rgba(156, 176, 112, 0.14)), transparent 34%),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.76), transparent 34%),
+      var(--nad-graph-bg, #f7f5ee);
+  }
+
+  .nad-graph::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--nad-graph-grid, rgba(86, 95, 54, 0.08)) 1px, transparent 1px),
+      linear-gradient(90deg, var(--nad-graph-grid, rgba(86, 95, 54, 0.08)) 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.22), transparent 72%);
+    pointer-events: none;
+  }
+
+  .nad-graph__container {
+    position: relative;
+    z-index: 1;
+    max-width: 1320px;
+    margin: 0 auto;
+    padding-inline: clamp(20px, 3vw, 40px);
+    display: grid;
+    gap: clamp(28px, 3vw, 48px);
+  }
+
+  .nad-graph__intro {
+    max-width: 48rem;
+    display: grid;
+    gap: 14px;
+  }
+
+  .nad-graph__kicker,
+  .nad-graph__eyebrow,
+  .nad-graph__card-kicker {
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--nad-graph-accent, #7c8d4f);
+  }
+
+  .nad-graph__heading {
+    margin: 0;
+    max-width: 12ch;
+    font-family: var(--font-heading);
+    font-size: clamp(2.2rem, 4vw, 4.75rem);
+    line-height: 0.94;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+
+  .nad-graph__body,
+  .nad-graph__note,
+  .nad-graph__detail,
+  .nad-graph__age {
+    margin: 0;
+    max-width: 54ch;
+    font-size: clamp(0.98rem, 1.3vw, 1.08rem);
+    line-height: 1.65;
+    color: var(--nad-graph-text-muted, rgba(45, 48, 39, 0.66));
+  }
+
+  .nad-graph__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    align-items: center;
+  }
+
+  .nad-graph__source {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 2.8rem;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--nad-graph-border, rgba(45, 48, 39, 0.12));
+    border-radius: 999px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--nad-graph-text, #2d3027);
+    text-decoration: none;
+    transition:
+      transform 0.24s ease,
+      border-color 0.24s ease,
+      background-color 0.24s ease;
+  }
+
+  .nad-graph__source:hover,
+  .nad-graph__source:focus-visible {
+    transform: translateY(-1px);
+    border-color: var(--nad-graph-accent, #7c8d4f);
+    background: rgba(255, 255, 255, 0.55);
+  }
+
+  .nad-graph__visual {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(280px, 0.95fr);
+    gap: clamp(20px, 2vw, 32px);
+    align-items: stretch;
+  }
+
+  .nad-graph__chart-shell,
+  .nad-graph__card {
+    position: relative;
+    border: 1px solid var(--nad-graph-border, rgba(45, 48, 39, 0.12));
+    border-radius: 28px;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.52)),
+      var(--nad-graph-card-bg, #fbfaf6);
+    backdrop-filter: blur(10px);
+  }
+
+  .nad-graph__chart-shell {
+    padding: clamp(20px, 2vw, 28px);
+    box-shadow: 0 22px 48px rgba(43, 46, 35, 0.08);
+  }
+
+  .nad-graph__chart {
+    position: relative;
+    min-height: clamp(380px, 52vw, 580px);
+    margin-top: 14px;
+    overflow: visible;
+  }
+
+  .nad-graph__svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .nad-graph__grid line {
+    stroke: var(--nad-graph-grid, rgba(86, 95, 54, 0.14));
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .nad-graph__ticks text {
+    fill: var(--nad-graph-text-muted, rgba(45, 48, 39, 0.66));
+    font-size: 24px;
+    letter-spacing: 0.04em;
+  }
+
+  .nad-graph__line,
+  .nad-graph__area {
+    transition: opacity 0.24s ease;
+  }
+
+  .nad-graph__line {
+    fill: none;
+    stroke: url(#nad-graph-gradient-{{ section.id }});
+    stroke-width: 6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+  }
+
+  .nad-graph__area {
+    fill: url(#nad-graph-fill-{{ section.id }});
+    opacity: 0;
+  }
+
+  .nad-graph.is-visible .nad-graph__line {
+    opacity: 1;
+    animation: nad-graph-line-draw 1.8s cubic-bezier(0.2, 0.72, 0.26, 1) forwards;
+  }
+
+  .nad-graph.is-visible .nad-graph__area {
+    opacity: 1;
+    animation: nad-graph-area-rise 1s ease 0.35s both;
+  }
+
+  .nad-graph__marker {
+    opacity: 0;
+    transform-origin: center;
+  }
+
+  .nad-graph.is-visible .nad-graph__marker {
+    animation: nad-graph-marker-in 0.66s cubic-bezier(0.2, 0.72, 0.26, 1) forwards;
+  }
+
+  .nad-graph__marker-ring {
+    fill: rgba(255, 255, 255, 0.88);
+    stroke: var(--nad-graph-dot, #c96c4a);
+    stroke-width: 5;
+  }
+
+  .nad-graph__marker-core {
+    fill: var(--nad-graph-dot, #c96c4a);
+  }
+
+  .nad-graph__marker-glow {
+    fill: var(--nad-graph-glow, rgba(201, 108, 74, 0.26));
+  }
+
+  .nad-graph__marker-label {
+    fill: var(--nad-graph-text, #2d3027);
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .nad-graph__marker-copy {
+    fill: var(--nad-graph-text-muted, rgba(45, 48, 39, 0.66));
+    font-size: 20px;
+  }
+
+  .nad-graph__axis-label {
+    position: absolute;
+    font-size: 0.84rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--nad-graph-text-muted, rgba(45, 48, 39, 0.66));
+    pointer-events: none;
+  }
+
+  .nad-graph__axis-label--x {
+    inset-inline-end: 2%;
+    inset-block-end: 2px;
+  }
+
+  .nad-graph__axis-label--y {
+    inset-inline-start: -54px;
+    inset-block-start: 50%;
+    transform: translateY(-50%) rotate(-90deg);
+    transform-origin: left top;
+  }
+
+  .nad-graph__cards {
+    display: grid;
+    gap: 14px;
+  }
+
+  .nad-graph__card {
+    padding: 20px 20px 22px;
+    overflow: hidden;
+  }
+
+  .nad-graph__card::after {
+    content: '';
+    position: absolute;
+    inset: auto -12% -38% auto;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--nad-graph-accent-soft, rgba(156, 176, 112, 0.14)), transparent 70%);
+    pointer-events: none;
+  }
+
+  .nad-graph__value-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 6px 10px;
+    margin-block: 10px 6px;
+  }
+
+  .nad-graph__value,
+  .nad-graph__unit {
+    margin: 0;
+  }
+
+  .nad-graph__value {
+    font-family: var(--font-heading);
+    font-size: clamp(2rem, 2vw, 2.6rem);
+    line-height: 0.94;
+    letter-spacing: -0.05em;
+  }
+
+  .nad-graph__unit {
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--nad-graph-text-muted, rgba(45, 48, 39, 0.66));
+  }
+
+  @media (max-width: 989px) {
+    .nad-graph__visual {
+      grid-template-columns: 1fr;
+    }
+
+    .nad-graph__chart {
+      min-height: 420px;
+    }
+
+    .nad-graph__axis-label--y {
+      inset-inline-start: -42px;
+    }
+
+    .nad-graph__cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 749px) {
+    .nad-graph__container {
+      gap: 24px;
+      padding-inline: 18px;
+    }
+
+    .nad-graph__heading {
+      max-width: none;
+    }
+
+    .nad-graph__chart-shell {
+      padding: 16px 14px 18px;
+      border-radius: 24px;
+    }
+
+    .nad-graph__chart {
+      min-height: 340px;
+    }
+
+    .nad-graph__axis-label--y {
+      display: none;
+    }
+
+    .nad-graph__cards {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nad-graph__line,
+    .nad-graph__area,
+    .nad-graph__marker {
+      animation: none !important;
+      opacity: 1 !important;
+    }
+
+    .nad-graph__source {
+      transition: none;
+    }
+  }
+
+  @keyframes nad-graph-line-draw {
+    from {
+      stroke-dashoffset: var(--nad-graph-path-length, 1);
+    }
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes nad-graph-area-rise {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes nad-graph-marker-in {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.92);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+{% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    function escapeSvgText(text) {
+      return String(text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function normalizeNumber(value) {
+      return Number(String(value || '').replace(',', '.'));
+    }
+
+    function formatNumber(value) {
+      var rounded = Math.round(value * 100) / 100;
+      return rounded % 1 === 0 ? String(rounded.toFixed(0)) : String(rounded.toFixed(2)).replace(/0+$/, '').replace(/\.$/, '');
+    }
+
+    function buildGraph(section) {
+      var svg = section.querySelector('.nad-graph__svg');
+      var line = section.querySelector('[data-nad-graph-line]');
+      var area = section.querySelector('[data-nad-graph-area]');
+      var markers = section.querySelector('[data-nad-graph-markers]');
+      var cards = Array.prototype.slice.call(section.querySelectorAll('[data-point]'));
+      var xMax = Number(section.dataset.xMax || 80);
+      var yMax = Number(section.dataset.yMax || 10);
+
+      if (!svg || !line || !area || !markers || cards.length < 2 || !xMax || !yMax) return;
+
+      var plot = {
+        left: 96,
+        right: 960,
+        top: 68,
+        bottom: 440
+      };
+
+      var width = plot.right - plot.left;
+      var height = plot.bottom - plot.top;
+      var points = cards.map(function (card) {
+        return {
+          element: card,
+          stage: card.querySelector('.nad-graph__card-kicker') ? card.querySelector('.nad-graph__card-kicker').textContent.trim() : '',
+          ageLabel: card.querySelector('.nad-graph__age') ? card.querySelector('.nad-graph__age').textContent.trim() : '',
+          value: normalizeNumber(card.dataset.value || 0),
+          age: normalizeNumber(card.dataset.age || 0)
+        };
+      }).filter(function (point) {
+        return !Number.isNaN(point.value) && !Number.isNaN(point.age);
+      });
+
+      var commands = [];
+      var areaCommands = [];
+
+      markers.innerHTML = '';
+
+      points.forEach(function (point, index) {
+        var x = plot.left + (point.age / xMax) * width;
+        var y = plot.bottom - (point.value / yMax) * height;
+        point.x = Math.max(plot.left, Math.min(plot.right, x));
+        point.y = Math.max(plot.top, Math.min(plot.bottom, y));
+
+        commands.push((index === 0 ? 'M ' : 'L ') + point.x.toFixed(2) + ' ' + point.y.toFixed(2));
+
+        if (index === 0) {
+          areaCommands.push('M ' + point.x.toFixed(2) + ' ' + plot.bottom);
+          areaCommands.push('L ' + point.x.toFixed(2) + ' ' + point.y.toFixed(2));
+        } else {
+          areaCommands.push('L ' + point.x.toFixed(2) + ' ' + point.y.toFixed(2));
+        }
+
+        var group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        var delay = (index * 0.16 + 0.42).toFixed(2) + 's';
+        var anchor = 'middle';
+        var labelX = point.x;
+
+        if (index === 0) {
+          anchor = 'start';
+          labelX = point.x + 18;
+        } else if (index === points.length - 1) {
+          anchor = 'end';
+          labelX = point.x - 18;
+        }
+
+        var labelY = point.y - 26;
+        if (point.y < plot.top + 54) labelY = point.y + 54;
+
+        group.setAttribute('class', 'nad-graph__marker');
+        group.style.animationDelay = delay;
+
+        group.innerHTML =
+          '<circle class="nad-graph__marker-glow" cx="' + point.x.toFixed(2) + '" cy="' + point.y.toFixed(2) + '" r="26"></circle>' +
+          '<circle class="nad-graph__marker-ring" cx="' + point.x.toFixed(2) + '" cy="' + point.y.toFixed(2) + '" r="12"></circle>' +
+          '<circle class="nad-graph__marker-core" cx="' + point.x.toFixed(2) + '" cy="' + point.y.toFixed(2) + '" r="5"></circle>' +
+          '<text class="nad-graph__marker-label" text-anchor="' + anchor + '" x="' + labelX.toFixed(2) + '" y="' + labelY.toFixed(2) + '">' + escapeSvgText(formatNumber(point.value)) + '</text>' +
+          '<text class="nad-graph__marker-copy" text-anchor="' + anchor + '" x="' + labelX.toFixed(2) + '" y="' + (labelY + 26).toFixed(2) + '">' + escapeSvgText(point.stage) + '</text>';
+
+        markers.appendChild(group);
+      });
+
+      areaCommands.push('L ' + points[points.length - 1].x.toFixed(2) + ' ' + plot.bottom);
+      areaCommands.push('Z');
+
+      line.setAttribute('d', commands.join(' '));
+      area.setAttribute('d', areaCommands.join(' '));
+
+      var length = line.getTotalLength();
+      line.style.strokeDasharray = length;
+      line.style.strokeDashoffset = length;
+      section.style.setProperty('--nad-graph-path-length', length);
+    }
+
+    function observe(section) {
+      if (section.__nadGraphObserved) return;
+      section.__nadGraphObserved = true;
+
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        section.classList.add('is-visible');
+        return;
+      }
+
+      var observer = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        });
+      }, {
+        threshold: 0.3
+      });
+
+      observer.observe(section);
+    }
+
+    function init(root) {
+      var scope = root || document;
+      var sections = scope.querySelectorAll('[data-nad-graph]');
+
+      sections.forEach(function (section) {
+        buildGraph(section);
+        observe(section);
+      });
+    }
+
+    document.addEventListener('shopify:section:load', function (event) {
+      init(event.target);
+    });
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        init(document);
+      });
+    } else {
+      init(document);
+    }
+  })();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "LT NAD age graph",
+  "tag": "section",
+  "class": "section section-lt-nad-age-graph",
+  "settings": [
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Human tissue data"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Heading",
+      "default": "NAD+ declines with age"
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Body",
+      "default": "<p>Animated chart showing the often-cited human skin tissue dataset from Massudi et al. (2012). The x-axis is average age in years, and the y-axis is mean NAD+ concentration in ng NAD+/mg protein.</p>"
+    },
+    {
+      "type": "text",
+      "id": "source_label",
+      "label": "Source label",
+      "default": "View source study"
+    },
+    {
+      "type": "url",
+      "id": "source_url",
+      "label": "Source URL"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_note",
+      "label": "Show note",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "note",
+      "label": "Note",
+      "default": "Mean values by age group. Human pelvic skin tissue, not whole-body NAD+."
+    },
+    {
+      "type": "text",
+      "id": "x_axis_label",
+      "label": "X-axis label",
+      "default": "Average age (years)"
+    },
+    {
+      "type": "text",
+      "id": "y_axis_label",
+      "label": "Y-axis label",
+      "default": "NAD+ (ng/mg protein)"
+    },
+    {
+      "type": "text",
+      "id": "value_unit",
+      "label": "Value unit",
+      "default": "ng/mg"
+    },
+    {
+      "type": "range",
+      "id": "x_axis_max",
+      "label": "X-axis max",
+      "min": 20,
+      "max": 120,
+      "step": 5,
+      "unit": "yr",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "y_axis_max",
+      "label": "Y-axis max",
+      "min": 4,
+      "max": 20,
+      "step": 1,
+      "unit": "val",
+      "default": 10
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Background",
+      "default": "#f6f1e7"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Card background",
+      "default": "#fbf8f2"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Text",
+      "default": "#25251d"
+    },
+    {
+      "type": "color",
+      "id": "color_accent",
+      "label": "Accent",
+      "default": "#879b56"
+    },
+    {
+      "type": "color",
+      "id": "color_dot",
+      "label": "Dot color",
+      "default": "#c66f50"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 88
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 88
+    }
+  ],
+  "blocks": [
+    {
+      "type": "point",
+      "name": "Data point",
+      "settings": [
+        {
+          "type": "text",
+          "id": "stage",
+          "label": "Stage label",
+          "default": "Young adults"
+        },
+        {
+          "type": "text",
+          "id": "age_label",
+          "label": "Age label",
+          "default": "30-50 years"
+        },
+        {
+          "type": "text",
+          "id": "detail",
+          "label": "Detail",
+          "default": "Reported mean group value"
+        },
+        {
+          "type": "text",
+          "id": "age",
+          "label": "Age value",
+          "default": "41.17"
+        },
+        {
+          "type": "text",
+          "id": "value",
+          "label": "Y value",
+          "default": "2.74"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT NAD age graph",
+      "blocks": [
+        {
+          "type": "point",
+          "settings": {
+            "stage": "Newborns",
+            "age_label": "0-1 years",
+            "detail": "Mean age 0.072 years",
+            "age": "0.072",
+            "value": "8.54"
+          }
+        },
+        {
+          "type": "point",
+          "settings": {
+            "stage": "Young adults",
+            "age_label": "30-50 years",
+            "detail": "Mean age 41.17 years",
+            "age": "41.17",
+            "value": "2.74"
+          }
+        },
+        {
+          "type": "point",
+          "settings": {
+            "stage": "Middle age",
+            "age_label": "51-70 years",
+            "detail": "Mean age 63.17 years",
+            "age": "63.17",
+            "value": "1.08"
+          }
+        },
+        {
+          "type": "point",
+          "settings": {
+            "stage": "Elderly",
+            "age_label": ">71 years",
+            "detail": "Mean age 74.4 years",
+            "age": "74.4",
+            "value": "1.06"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
