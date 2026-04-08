@@ -132,7 +132,7 @@
   margin-bottom: var(--space-7);
 }
 
-/* Grid — quadratische Karten: Breite = Spalte, Höhe folgt aus aspect-ratio */
+/* Grid — Kartenhöhe folgt Inhalt (kein erzwungenes Quadrat → kein Text-Überlapp) */
 .sq-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -141,8 +141,8 @@
 }
 
 /*
-  Quadratische Karte; obere Hälfte = quadratisches Bild (zentriert),
-  untere Hälfte = Sterne, Zitat, Name.
+  Quadratisches Bild = volle Kartenbreite (1:1).
+  Darunter Sterne, Zitat, Name mit festen Abständen und kompakterer Typo.
 */
 .sq-card {
   box-sizing: border-box;
@@ -155,35 +155,34 @@
   overflow: hidden;
   width: 100%;
   max-width: 100%;
-  aspect-ratio: 1 / 1;
   min-height: 0;
+  padding: 0;
+}
+
+.sq-card--no-image {
+  padding: var(--space-4);
 }
 
 .sq-card--no-image .sq-card-content {
-  flex: 1 1 100%;
-  min-height: 0;
+  padding: 0;
 }
 
-/* Obere 50 %: Bildfläche — darin quadratischer Ausschnitt (Seitenlänge = Hälfte der Kartenhöhe) */
+/* Bild: volle Breite, quadratisch, oben bündig mit Karte */
 .sq-image-wrap {
-  flex: 0 0 50%;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  flex: none;
+  width: 100%;
+  display: block;
+  margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
 .sq-image {
-  flex-shrink: 0;
-  height: 100%;
-  width: auto;
-  max-width: 100%;
+  width: 100%;
   aspect-ratio: 1 / 1;
-  border-radius: var(--radius-sm);
   overflow: hidden;
   position: relative;
+  border-radius: 0;
 }
 
 .sq-image-img {
@@ -194,25 +193,30 @@
   display: block;
 }
 
-/* Untere 50 %: Sterne + Text */
-.sq-card-content {
-  flex: 0 0 50%;
-  min-height: 0;
+.sq-card:not(.sq-card--no-image) .sq-card-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   text-align: center;
-  padding: var(--space-3) var(--space-4);
+  padding: var(--space-4) var(--space-4) var(--space-5);
   box-sizing: border-box;
-  gap: var(--space-2);
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  gap: 0;
+  flex: none;
+  min-height: 0;
+}
+
+.sq-card--no-image .sq-card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0;
+  width: 100%;
 }
 
 .sq-stars {
   flex-shrink: 0;
-  margin: 0;
+  margin: 0 0 var(--space-4);
 }
 
 .sq-stars__row {
@@ -228,8 +232,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 0 1 auto;
-  min-height: 0;
+  flex: none;
   margin: 0;
   width: 100%;
   justify-content: flex-start;
@@ -237,17 +240,16 @@
 
 /* Quote */
 .sq-blockquote {
-  flex: 0 1 auto;
-  min-height: 0;
-  margin: 0;
+  flex: none;
+  margin: 0 0 var(--space-4);
   overflow: visible;
   width: 100%;
 }
 
 .sq-quote-text {
   font-family: var(--font-body, -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif);
-  font-size: var(--text-body);
-  line-height: var(--leading-relaxed);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body, 1.4);
   color: var(--crs-text, #26251e);
   margin: 0;
   white-space: pre-wrap;
@@ -261,9 +263,9 @@
   align-items: center;
   gap: var(--space-1);
   flex-shrink: 0;
-  margin-top: 0;
+  margin: 0;
   width: 100%;
-  padding-top: var(--space-2);
+  padding-top: 0;
 }
 
 .sq-name {
