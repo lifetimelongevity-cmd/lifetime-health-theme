@@ -331,17 +331,19 @@
           {%- if section.settings.show_value_stack -%}
             <div class="lt-value-stack">
               <h3 class="lt-value-stack__header">{{ section.settings.stack_header | escape }}</h3>
-              <div class="lt-value-stack__item">
-                <div class="lt-value-stack__item-info">
-                  <span class="lt-value-stack__item-title">{{ product.title | escape }}</span>
-                  {%- if section.settings.stack_product_sub != blank -%}
-                    <span class="lt-value-stack__item-sub">{{ section.settings.stack_product_sub | escape }}</span>
-                  {%- endif -%}
+              {%- if section.settings.show_stack_product_line -%}
+                <div class="lt-value-stack__item">
+                  <div class="lt-value-stack__item-info">
+                    <span class="lt-value-stack__item-title">{{ product.title | escape }}</span>
+                    {%- if section.settings.stack_product_sub != blank -%}
+                      <span class="lt-value-stack__item-sub">{{ section.settings.stack_product_sub | escape }}</span>
+                    {%- endif -%}
+                  </div>
+                  <div class="lt-value-stack__item-price">
+                    <span class="lt-value-stack__item-label" data-lt-stack-product-price>{{ lt_base_price | money }}</span>
+                  </div>
                 </div>
-                <div class="lt-value-stack__item-price">
-                  <span class="lt-value-stack__item-label" data-lt-stack-product-price>{{ lt_base_price | money }}</span>
-                </div>
-              </div>
+              {%- endif -%}
               {%- if section.settings.stack_guide_title != blank -%}
                 {%- assign guide_cents = section.settings.stack_guide_value_cents | default: 0 -%}
                 <div class="lt-value-stack__item">
@@ -373,6 +375,19 @@
                       <del class="lt-value-stack__item-was">{{ bonus_cents | money }}</del>
                     {%- endif -%}
                     <span class="lt-value-stack__item-label lt-value-stack__item-label--free">{{ section.settings.stack_bonus_price | default: 'Gratis' | escape }}</span>
+                  </div>
+                </div>
+              {%- endif -%}
+              {%- if section.settings.stack_extra_title != blank -%}
+                <div class="lt-value-stack__item">
+                  <div class="lt-value-stack__item-info">
+                    <span class="lt-value-stack__item-title">{{ section.settings.stack_extra_title | escape }}</span>
+                    {%- if section.settings.stack_extra_sub != blank -%}
+                      <span class="lt-value-stack__item-sub">{{ section.settings.stack_extra_sub | escape }}</span>
+                    {%- endif -%}
+                  </div>
+                  <div class="lt-value-stack__item-price">
+                    <span class="lt-value-stack__item-label lt-value-stack__item-label--free">{{ section.settings.stack_extra_price | default: 'Enthalten' | escape }}</span>
                   </div>
                 </div>
               {%- endif -%}
@@ -1532,39 +1547,41 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 12px;
+  opacity: 0.5;
 }
 
 .lt-value-stack__total-label {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--font-size-sm, 12px);
+  font-weight: 400;
   color: var(--lt-text, #26251e);
 }
 
 .lt-value-stack__total-value {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--font-size-sm, 12px);
+  font-weight: 500;
   color: var(--lt-text, #26251e);
+  text-decoration: line-through;
 }
 
 .lt-value-stack__pay-today {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 10px;
+  padding-top: 12px;
   margin-top: 4px;
   border-top: 1px solid color-mix(in srgb, var(--lt-text, #26251e) 10%, transparent);
 }
 
 .lt-value-stack__pay-label {
-  font-size: 15px;
-  font-weight: 600;
+  font-size: var(--font-size-lg, 17px);
+  font-weight: 700;
   color: var(--lt-text, #26251e);
 }
 
 .lt-value-stack__pay-price {
-  font-size: 20px;
+  font-size: var(--font-size-lg, 17px);
   font-weight: 700;
-  letter-spacing: -0.4px;
+  letter-spacing: -0.3px;
   color: var(--lt-text, #26251e);
 }
 
@@ -1997,6 +2014,13 @@
       "default": "Was du heute bekommst"
     },
     {
+      "type": "checkbox",
+      "id": "show_stack_product_line",
+      "label": "Erste Zeile (Produktname + Preis) anzeigen",
+      "info": "Deaktivieren wenn der Produktname bereits als Headline sichtbar ist (z. B. Diagnostik-Produkte).",
+      "default": true
+    },
+    {
       "type": "text",
       "id": "stack_product_sub",
       "label": "Produkt Unterzeile",
@@ -2061,6 +2085,23 @@
       "label": "AGE & DNA-Test Benefit Wert",
       "info": "Preis in Cent. Beispiel: 29,90 € → 2990. 0 = kein Wert anzeigen",
       "default": 0
+    },
+    {
+      "type": "text",
+      "id": "stack_extra_title",
+      "label": "Extra-Zeile Titel",
+      "info": "Optionale vierte Stack-Zeile (z. B. App · AI Health Coach). Leer lassen = nicht anzeigen."
+    },
+    {
+      "type": "text",
+      "id": "stack_extra_sub",
+      "label": "Extra-Zeile Unterzeile"
+    },
+    {
+      "type": "text",
+      "id": "stack_extra_price",
+      "label": "Extra-Zeile Preislabel",
+      "default": "Enthalten"
     },
     {
       "type": "text",
