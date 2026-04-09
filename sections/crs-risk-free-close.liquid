@@ -7,6 +7,7 @@
   assign crs_rfc_head = section.settings.headline | strip
   assign crs_rfc_sub = section.settings.subheading | strip
   assign crs_rfc_badge = section.settings.badge_text | strip
+  assign crs_rfc_price = section.settings.price_fallback | strip
   assign crs_rfc_cta = section.settings.cta_label | strip
   if crs_rfc_kicker == '__none__'
     assign crs_rfc_kicker = ''
@@ -84,15 +85,21 @@
           </div>
         {%- endif -%}
 
+        {%- if crs_rfc_price != blank -%}
+          <p class="rfc-price" data-rfc-price>{{ crs_rfc_price | escape }}</p>
+        {%- else -%}
+          <p class="rfc-price" data-rfc-price hidden></p>
+        {%- endif -%}
+
         {%- if section.blocks.size > 0 -%}
           <ul class="rfc-trust-list" role="list">
             {%- for block in section.blocks -%}
               {%- if block.type == 'trust_line' and block.settings.text != blank -%}
                 <li class="rfc-trust-item" {{ block.shopify_attributes }}>
                   <span class="rfc-trust-icon" aria-hidden="true">
-                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                      <circle cx="9" cy="9" r="9" fill="currentColor"></circle>
-                      <path d="M5.8 9.1 7.7 11l4.6-4.6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
+                      <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
                     </svg>
                   </span>
                   <span>{{ block.settings.text | escape }}</span>
@@ -118,6 +125,36 @@
     if (!root) return;
 
     var cta = root.querySelector('[data-rfc-scroll]');
+    var priceEl = root.querySelector('[data-rfc-price]');
+
+    function syncSubscriptionPrice() {
+      if (!priceEl) return;
+
+      var subCard = document.querySelector('[data-bb-kind="sub"]');
+      if (!subCard) return;
+
+      var currentEl = subCard.querySelector('[data-lt-bb-current]');
+      var unitEl = subCard.querySelector('[data-lt-bb-unit]');
+      var current = currentEl ? currentEl.textContent.trim() : '';
+      var unit = unitEl ? unitEl.textContent.trim() : '';
+
+      if (!current && !unit) return;
+
+      priceEl.hidden = false;
+      priceEl.textContent = current && unit ? current + ' · ' + unit : current || unit;
+    }
+
+    syncSubscriptionPrice();
+
+    var subCard = document.querySelector('[data-bb-kind="sub"]');
+    if (subCard) {
+      var priceObserver = new MutationObserver(syncSubscriptionPrice);
+      priceObserver.observe(subCard, { childList: true, subtree: true, characterData: true });
+      window.setTimeout(function () {
+        priceObserver.disconnect();
+      }, 12000);
+    }
+
     if (!cta) return;
 
     cta.addEventListener('click', function () {
@@ -137,7 +174,7 @@
 }
 
 .rfc-container {
-  max-width: 1280px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -145,7 +182,7 @@
 .rfc-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-7);
+  gap: var(--space-6);
   align-items: center;
 }
 
@@ -155,7 +192,7 @@
   border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
   border-radius: 4px;
   overflow: hidden;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 6 / 5;
 }
 
 .rfc-image {
@@ -175,10 +212,10 @@
 
 .rfc-badge {
   position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 88px;
-  height: 88px;
+  top: 16px;
+  right: 16px;
+  width: 80px;
+  height: 80px;
   border-radius: 999px;
   background: var(--crs-text, #26251e);
   color: #fff;
@@ -191,7 +228,7 @@
 }
 
 .rfc-badge span {
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1.2;
   letter-spacing: 0.02em;
 }
@@ -199,7 +236,7 @@
 .rfc-copy {
   display: flex;
   flex-direction: column;
-  gap: var(--space-5);
+  gap: var(--space-4);
 }
 
 .rfc-copy--align-left {
@@ -217,10 +254,18 @@
   text-align: right;
 }
 
+.rfc-price {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--crs-text, #26251e);
+}
+
 .rfc-trust-list {
   list-style: none;
   display: grid;
-  gap: var(--space-3);
+  gap: 10px;
   margin: 0;
   padding: 0;
   width: 100%;
@@ -229,8 +274,8 @@
 .rfc-trust-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  font-size: 16px;
+  gap: 8px;
+  font-size: 15px;
   line-height: 1.4;
   color: var(--crs-text, #26251e);
 }
@@ -246,14 +291,15 @@
 .rfc-trust-icon {
   flex: 0 0 auto;
   color: var(--crs-text, #26251e);
+  opacity: 0.85;
   display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
 .rfc-cta {
-  min-height: 48px;
-  padding: 0 24px;
+  min-height: 46px;
+  padding: 0 22px;
   border: 1px solid var(--crs-text, #26251e);
   border-radius: 999px;
   background: var(--crs-text, #26251e);
@@ -282,7 +328,7 @@
 @media (max-width: 767px) {
   .rfc-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-5);
+    gap: var(--space-4);
   }
 
   .rfc-media {
@@ -294,10 +340,14 @@
   }
 
   .rfc-badge {
-    top: 14px;
-    right: 14px;
-    width: 76px;
-    height: 76px;
+    top: 12px;
+    right: 12px;
+    width: 68px;
+    height: 68px;
+  }
+
+  .rfc-media-card {
+    aspect-ratio: 1 / 1;
   }
 }
 {% endstylesheet %}
@@ -342,7 +392,7 @@
       "max": 120,
       "step": 8,
       "unit": "px",
-      "default": 80
+      "default": 64
     },
     {
       "type": "range",
@@ -352,7 +402,7 @@
       "max": 120,
       "step": 8,
       "unit": "px",
-      "default": 80
+      "default": 64
     },
     {
       "type": "header",
@@ -395,33 +445,40 @@
       "type": "text",
       "id": "badge_text",
       "label": "Badge",
-      "default": "30 Tage Garantie"
+      "default": "Abo-Vorteil"
     },
     {
       "type": "text",
       "id": "kicker",
       "label": "Kicker (optional)",
-      "default": "Risikofrei starten",
+      "default": "Täglich besser. Monat für Monat.",
       "info": "__none__ = ausblenden (Theme-Editor)"
     },
     {
       "type": "textarea",
       "id": "headline",
       "label": "Überschrift",
-      "default": "Du riskierst nichts."
+      "default": "NMN wirkt — wenn man es durchhält."
     },
     {
       "type": "textarea",
       "id": "subheading",
       "label": "Unterüberschrift (optional)",
-      "default": "30 Tage testen — nicht überzeugt? Volle Rückerstattung. Kein Anruf, kein Formular.",
+      "default": "Im Abo sparst du 15 %, bekommst gratis Versand und kannst jederzeit pausieren oder kündigen. Kein Risiko, voller Effekt.",
       "info": "__none__ = ausblenden (Theme-Editor)"
+    },
+    {
+      "type": "text",
+      "id": "price_fallback",
+      "label": "Preis Fallback",
+      "default": "35,90 € · 0,60 €/Tag",
+      "info": "Wird automatisch vom Abo-Preis der Buy-Box überschrieben, falls vorhanden."
     },
     {
       "type": "text",
       "id": "cta_label",
       "label": "CTA-Label",
-      "default": "Jetzt risikofrei bestellen →"
+      "default": "Jetzt im Abo bestellen →"
     }
   ],
   "blocks": [
@@ -446,25 +503,25 @@
         {
           "type": "trust_line",
           "settings": {
+            "text": "15 % günstiger als Einzelkauf"
+          }
+        },
+        {
+          "type": "trust_line",
+          "settings": {
+            "text": "Gratisversand bei jeder Lieferung"
+          }
+        },
+        {
+          "type": "trust_line",
+          "settings": {
+            "text": "Jederzeit pausieren oder kündigen"
+          }
+        },
+        {
+          "type": "trust_line",
+          "settings": {
             "text": "30 Tage Geld-zurück-Garantie"
-          }
-        },
-        {
-          "type": "trust_line",
-          "settings": {
-            "text": "Jederzeit kündbar, ohne Fristen"
-          }
-        },
-        {
-          "type": "trust_line",
-          "settings": {
-            "text": "Gratisversand im Abo"
-          }
-        },
-        {
-          "type": "trust_line",
-          "settings": {
-            "text": "Entwickelt von Ärzten in Berlin"
           }
         }
       ]
