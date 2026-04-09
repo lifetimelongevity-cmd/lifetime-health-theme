@@ -309,7 +309,10 @@
           assign bb_sub1_title = section.settings.bb_sub1_title | default: 'Einzel-Abo'
           assign bb_once_title = section.settings.bb_once_title | default: 'Einmaliger Kauf'
           assign bb_or_label = section.settings.bb_or_label | default: 'ODER'
-          assign bb_unit_suffix = section.settings.bb_unit_suffix | default: 'Monat'
+          assign bb_supply_days = lt_variant_1.metafields.custom.supply_days.value | default: section.settings.bb_supply_days_fallback | default: 30
+          if bb_supply_days == blank
+            assign bb_supply_days = 30
+          endif
           assign bb_b1 = section.settings.bb_benefit_1 | default: 'Gratis Versand bei Abo-Lieferungen'
           assign bb_b2 = section.settings.bb_benefit_2 | default: 'Jederzeit kündbar'
           assign bb_b3 = section.settings.bb_benefit_3 | default: 'Willkommens-Angebote zur ersten Lieferung'
@@ -368,7 +371,8 @@
           <div
             class="lt-bb"
             data-lt-buy-box
-            data-unit-suffix="{{ bb_unit_suffix | escape }}"
+            data-supply-days="{{ bb_supply_days | plus: 0 }}"
+            data-discount-pct="{{ section.settings.sub_discount_percent | default: 10 }}"
             role="radiogroup"
             aria-label="Kaufoption wählen"
           >
@@ -949,11 +953,18 @@
 
     if (!buyBox) return;
 
-    const unitSuffix = buyBox.dataset.unitSuffix || 'Monat';
+    const supplyDays = Math.max(1, parseFloat(buyBox.dataset.supplyDays) || 30);
+    const badgeDiscountPct = Math.max(0, parseInt(buyBox.dataset.discountPct, 10) || 0);
     const productPageId = 'product-{{ section.id }}';
 
     function formatPrice(cents) {
       return (cents / 100).toFixed(2).replace('.', ',') + ' €';
+    }
+
+    function formatPerDay(cents, qty) {
+      const totalDays = Math.max(1, supplyDays * Math.max(1, qty || 1));
+      const perDay = (cents / 100) / totalDays;
+      return perDay.toFixed(2).replace('.', ',') + ' €/Tag';
     }
 
     function escapeLtHtml(str) {
@@ -1040,7 +1051,7 @@
         const badgeEl = card.querySelector('[data-lt-bb-badge]');
 
         if (kind === 'sub') {
-          const pct = savingsPct(onceC, subC);
+          const pct = badgeDiscountPct > 0 ? badgeDiscountPct : savingsPct(onceC, subC);
           subCards.push({ card, badgeEl, pct });
 
           if (badgeEl) {
@@ -1063,8 +1074,7 @@
           }
           if (currentEl) currentEl.textContent = formatPrice(subC);
           if (unitEl) {
-            const per = (subC / 100) / qty;
-            unitEl.textContent = per.toFixed(2).replace('.', ',') + ' €/' + unitSuffix;
+            unitEl.textContent = formatPerDay(subC, qty);
           }
         } else {
           const shopCompare = baseComparePrice > 0 ? baseComparePrice * qty : 0;
@@ -1079,8 +1089,7 @@
           }
           if (currentEl) currentEl.textContent = formatPrice(onceC);
           if (unitEl) {
-            const per = (onceC / 100) / qty;
-            unitEl.textContent = per.toFixed(2).replace('.', ',') + ' €/' + unitSuffix;
+            unitEl.textContent = formatPerDay(onceC, qty);
           }
         }
       });
@@ -1636,10 +1645,11 @@
       "default": "ODER"
     },
     {
-      "type": "text",
-      "id": "bb_unit_suffix",
-      "label": "Stückpreis-Einheit",
-      "default": "Monat"
+      "type": "number",
+      "id": "bb_supply_days_fallback",
+      "label": "Versorgungstage Fallback",
+      "info": "Wird nur genutzt, wenn das Variant-Metafield custom.supply_days leer ist.",
+      "default": 30
     },
     {
       "type": "text",
@@ -1707,8 +1717,8 @@
     {
       "type": "range",
       "id": "sub_discount_percent",
-      "label": "Abo-Rabatt (ltPricing)",
-      "info": "Wird als window.ltPricing.subDiscount (Dezimal) ausgegeben, z. B. 15 % → 0,15. Für externe Skripte / Appstle.",
+      "label": "Abo-Rabatt",
+      "info": "Steuert den sichtbaren SPARE-Badge und wird zusätzlich als window.ltPricing.subDiscount für externe Skripte / Appstle ausgegeben.",
       "min": 0,
       "max": 50,
       "step": 1,
