@@ -933,9 +933,37 @@
     if (!section) return;
 
     const reviewButton = section.querySelector('[data-lt-reviews-scroll]');
+
+    function markLooxSection() {
+      const looxRoot = document.querySelector(
+        '#looxReviews, .loox-dynamic-section, [class*="loox-dynamic-section"], .loox-v2-widget-container'
+      );
+      if (!looxRoot) return false;
+
+      const looxSection = looxRoot.closest('[id^="shopify-section-"]') || looxRoot.closest('.shopify-section') || looxRoot;
+      looxSection.classList.add('lt-loox-section');
+
+      if (!document.getElementById('lt-reviews') && !looxRoot.id) {
+        looxRoot.id = 'lt-reviews';
+      }
+
+      return true;
+    }
+
+    if (!markLooxSection()) {
+      const looxObserver = new MutationObserver(function() {
+        if (markLooxSection()) looxObserver.disconnect();
+      });
+      looxObserver.observe(document.body, { childList: true, subtree: true });
+      window.setTimeout(function() {
+        looxObserver.disconnect();
+      }, 12000);
+    }
+
     if (reviewButton) {
       reviewButton.addEventListener('click', function() {
-        const target = document.getElementById('lt-reviews');
+        const target = document.getElementById('lt-reviews')
+          || document.querySelector('.lt-loox-section');
         if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
     }
