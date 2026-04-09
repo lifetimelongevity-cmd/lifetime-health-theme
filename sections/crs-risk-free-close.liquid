@@ -1,0 +1,474 @@
+{%- liquid
+  assign crs_h_align = section.settings.content_align | default: 'left'
+  if crs_h_align != 'left' and crs_h_align != 'center' and crs_h_align != 'right'
+    assign crs_h_align = 'left'
+  endif
+  assign crs_rfc_kicker = section.settings.kicker | strip
+  assign crs_rfc_head = section.settings.headline | strip
+  assign crs_rfc_sub = section.settings.subheading | strip
+  assign crs_rfc_badge = section.settings.badge_text | strip
+  assign crs_rfc_cta = section.settings.cta_label | strip
+  if crs_rfc_kicker == '__none__'
+    assign crs_rfc_kicker = ''
+  endif
+  if crs_rfc_sub == '__none__'
+    assign crs_rfc_sub = ''
+  endif
+  assign crs_h_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign crs_h_headline_lg = true
+  endif
+
+  assign crs_rfc_image = section.settings.image
+  if crs_rfc_image == blank and product.featured_media != blank
+    assign crs_rfc_image = product.featured_media.preview_image
+  endif
+-%}
+{% style %}
+  #section-{{ section.id }} {
+    --crs-bg:       {{ section.settings.color_bg }};
+    --crs-card-bg:  {{ section.settings.color_card_bg }};
+    --crs-text:     {{ section.settings.color_text }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    background:     var(--crs-bg);
+  }
+{% endstyle %}
+
+<div class="rfc-section" id="section-{{ section.id }}">
+  <div class="rfc-container">
+    <div class="rfc-grid">
+      <div class="rfc-media">
+        <div class="rfc-media-card">
+          {%- if crs_rfc_image != blank -%}
+            {{
+              crs_rfc_image
+              | image_url: width: 1400
+              | image_tag:
+                loading: 'lazy',
+                class: 'rfc-image',
+                sizes: '(max-width: 767px) calc(100vw - 40px), 50vw',
+                alt: section.settings.image_alt | default: product.title | escape
+            }}
+          {%- else -%}
+            <div class="rfc-image rfc-image--placeholder" aria-hidden="true"></div>
+          {%- endif -%}
+
+          {%- if crs_rfc_badge != blank -%}
+            <div class="rfc-badge">
+              <span>{{ crs_rfc_badge | escape }}</span>
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="rfc-copy rfc-copy--align-{{ crs_h_align }}">
+        {%- if crs_rfc_kicker != blank or crs_rfc_head != blank or crs_rfc_sub != blank -%}
+          <div class="crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+            {%- if crs_rfc_kicker != blank -%}
+              <p class="crs-heading-stack__kicker">{{ crs_rfc_kicker | escape }}</p>
+            {%- endif -%}
+            {%- if crs_rfc_head != blank or crs_rfc_sub != blank -%}
+              <div class="crs-heading-stack__pair">
+                {%- if crs_rfc_head != blank -%}
+                  <h2 class="crs-heading-stack__title">{{ crs_rfc_head | escape | newline_to_br }}</h2>
+                {%- endif -%}
+                {%- if crs_rfc_sub != blank -%}
+                  <p class="crs-heading-stack__subtitle">{{ crs_rfc_sub | escape | newline_to_br }}</p>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- if section.blocks.size > 0 -%}
+          <ul class="rfc-trust-list" role="list">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'trust_line' and block.settings.text != blank -%}
+                <li class="rfc-trust-item" {{ block.shopify_attributes }}>
+                  <span class="rfc-trust-icon" aria-hidden="true">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                      <circle cx="9" cy="9" r="9" fill="currentColor"></circle>
+                      <path d="M5.8 9.1 7.7 11l4.6-4.6" stroke="#fff" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                  </span>
+                  <span>{{ block.settings.text | escape }}</span>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+
+        {%- if crs_rfc_cta != blank -%}
+          <button type="button" class="rfc-cta" data-rfc-scroll>
+            {{ crs_rfc_cta | escape }}
+          </button>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var root = document.getElementById('section-{{ section.id }}');
+    if (!root) return;
+
+    var cta = root.querySelector('[data-rfc-scroll]');
+    if (!cta) return;
+
+    cta.addEventListener('click', function () {
+      var target = document.querySelector('[data-lt-buy-box]') || document.getElementById('lt-hero-atc');
+      if (!target) return;
+
+      var offset = 96;
+      var y = target.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  })();
+</script>
+
+{% stylesheet %}
+.rfc-section {
+  background: var(--crs-bg, #f7f7f4);
+}
+
+.rfc-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.rfc-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-7);
+  align-items: center;
+}
+
+.rfc-media-card {
+  position: relative;
+  background: var(--crs-card-bg, #f2f1ed);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  border-radius: 4px;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+}
+
+.rfc-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
+  object-position: center;
+  background: var(--crs-card-bg, #f2f1ed);
+}
+
+.rfc-image--placeholder {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.26), rgba(255,255,255,0)),
+    var(--crs-card-bg, #f2f1ed);
+}
+
+.rfc-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 88px;
+  height: 88px;
+  border-radius: 999px;
+  background: var(--crs-text, #26251e);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.rfc-badge span {
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.rfc-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.rfc-copy--align-left {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.rfc-copy--align-center {
+  align-items: center;
+  text-align: center;
+}
+
+.rfc-copy--align-right {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.rfc-trust-list {
+  list-style: none;
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.rfc-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 16px;
+  line-height: 1.4;
+  color: var(--crs-text, #26251e);
+}
+
+.rfc-copy--align-center .rfc-trust-item {
+  justify-content: center;
+}
+
+.rfc-copy--align-right .rfc-trust-item {
+  justify-content: flex-end;
+}
+
+.rfc-trust-icon {
+  flex: 0 0 auto;
+  color: var(--crs-text, #26251e);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rfc-cta {
+  min-height: 48px;
+  padding: 0 24px;
+  border: 1px solid var(--crs-text, #26251e);
+  border-radius: 999px;
+  background: var(--crs-text, #26251e);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.18s ease, opacity 0.18s ease, background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.rfc-cta:hover {
+  transform: translateY(-1px);
+  opacity: 0.92;
+}
+
+.rfc-cta:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--crs-bg, #f7f7f4), 0 0 0 4px color-mix(in srgb, var(--crs-text) 16%, transparent);
+}
+
+@media (max-width: 767px) {
+  .rfc-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  .rfc-media {
+    order: 1;
+  }
+
+  .rfc-copy {
+    order: 2;
+  }
+
+  .rfc-badge {
+    top: 14px;
+    right: 14px;
+    width: 76px;
+    height: 76px;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Risk-Free Close",
+  "tag": "section",
+  "class": "crs-risk-free-close",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section",
+      "info": "Zeilenumbruch: Enter in Überschrift/Unterüberschrift."
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Bild"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Bild Alt-Text",
+      "default": "Produktbild"
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge",
+      "default": "30 Tage Garantie"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": "Risikofrei starten",
+      "info": "__none__ = ausblenden (Theme-Editor)"
+    },
+    {
+      "type": "textarea",
+      "id": "headline",
+      "label": "Überschrift",
+      "default": "Du riskierst nichts."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Unterüberschrift (optional)",
+      "default": "30 Tage testen — nicht überzeugt? Volle Rückerstattung. Kein Anruf, kein Formular.",
+      "info": "__none__ = ausblenden (Theme-Editor)"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA-Label",
+      "default": "Jetzt risikofrei bestellen →"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "trust_line",
+      "name": "Trust Line",
+      "limit": 6,
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Trust Line"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Risk-Free Close",
+      "blocks": [
+        {
+          "type": "trust_line",
+          "settings": {
+            "text": "30 Tage Geld-zurück-Garantie"
+          }
+        },
+        {
+          "type": "trust_line",
+          "settings": {
+            "text": "Jederzeit kündbar, ohne Fristen"
+          }
+        },
+        {
+          "type": "trust_line",
+          "settings": {
+            "text": "Gratisversand im Abo"
+          }
+        },
+        {
+          "type": "trust_line",
+          "settings": {
+            "text": "Entwickelt von Ärzten in Berlin"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
