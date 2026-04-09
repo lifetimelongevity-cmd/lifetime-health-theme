@@ -118,11 +118,17 @@ After generating any section implementation, run this:
 
 ---
 
-## Cursor Rules Index
+## Rules Index
 
 | File | Active for | Purpose |
 |---|---|---|
+| `/AGENTS.md` | all agents | Project orientation + source of truth hierarchy |
+| `/shopify/AGENTS.md` | Shopify implementation | Theme rules, naming, CSS scoping, QA |
+| `/docs/pdp-system.md` | PDP work | Live section order, proof structure, messaging |
 | `.cursor/rules/design-tokens.mdc` | all files | CSS token definitions |
 | `.cursor/rules/design-components.mdc` | sections, snippets, CSS | Component specs + visual QA |
 | `.cursor/rules/shopify-rules.mdc` | liquid, json, templates | Platform limits + operating rules |
-| `.cursor/rules/pdp-architecture.mdc` | product templates, PDP sections | Section order + psychology |
+| `.cursor/rules/pdp-architecture.mdc` | PDP sections | Psychological journey model (section map → see pdp-system.md) |
+| `docs/design-governance.md` | visual decisions | Full visual system reference |
+| `docs/conversion-messaging.md` | copy | Messaging governance, subscription framing |
+| `docs/lt-pdp-template-notes.md` | new products | Per-product field checklist for PDP duplication |

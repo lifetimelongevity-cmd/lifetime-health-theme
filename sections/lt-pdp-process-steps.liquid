@@ -1,0 +1,426 @@
+{%- liquid
+  assign crs_h_align = section.settings.content_align | default: 'left'
+  if crs_h_align != 'left' and crs_h_align != 'center' and crs_h_align != 'right'
+    assign crs_h_align = 'left'
+  endif
+  assign ps_kicker = section.settings.kicker | strip
+  assign ps_head   = section.settings.heading | strip
+  assign ps_sub    = section.settings.subheading | strip
+  if ps_kicker == '__none__'
+    assign ps_kicker = ''
+  endif
+  if ps_sub == '__none__'
+    assign ps_sub = ''
+  endif
+  assign crs_h_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign crs_h_headline_lg = true
+  endif
+  assign ps_has_header = false
+  if ps_kicker != blank or ps_head != blank or ps_sub != blank
+    assign ps_has_header = true
+  endif
+-%}
+{% style %}
+  #section-{{ section.id }} {
+    --crs-bg:       {{ section.settings.color_bg }};
+    --crs-card-bg:  {{ section.settings.color_card_bg }};
+    --crs-text:     {{ section.settings.color_text }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    background:     var(--crs-bg);
+  }
+{% endstyle %}
+
+<div class="ps-section" id="section-{{ section.id }}">
+  <div class="ps-container">
+    <div class="ps-layout{% unless ps_has_header %} ps-layout--full{% endunless %}">
+
+      {%- if ps_has_header -%}
+        <div class="ps-intro">
+          <div class="ps-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+            {%- if ps_kicker != blank -%}
+              <p class="crs-heading-stack__kicker">{{ ps_kicker | escape }}</p>
+            {%- endif -%}
+            {%- if ps_head != blank or ps_sub != blank -%}
+              <div class="crs-heading-stack__pair">
+                {%- if ps_head != blank -%}
+                  <h2 class="crs-heading-stack__title">{{ ps_head | escape | newline_to_br }}</h2>
+                {%- endif -%}
+                {%- if ps_sub != blank -%}
+                  <p class="crs-heading-stack__subtitle">{{ ps_sub | escape | newline_to_br }}</p>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <div class="ps-steps" role="list">
+          {%- for block in section.blocks -%}
+            <div class="ps-step" role="listitem" {{ block.shopify_attributes }}>
+
+              <div class="ps-step-marker" aria-hidden="true">
+                <span class="ps-step-num">
+                  {%- if block.settings.step_number != blank -%}
+                    {{ block.settings.step_number | escape }}
+                  {%- else -%}
+                    {{ forloop.index }}
+                  {%- endif -%}
+                </span>
+                {%- unless forloop.last -%}
+                  <span class="ps-step-connector"></span>
+                {%- endunless -%}
+              </div>
+
+              <div class="ps-step-content">
+                {%- if block.settings.step_title != blank -%}
+                  <h3 class="ps-step-title">{{ block.settings.step_title | escape }}</h3>
+                {%- endif -%}
+                {%- if block.settings.step_body != blank -%}
+                  <p class="ps-step-body">{{ block.settings.step_body | escape }}</p>
+                {%- endif -%}
+                {%- if block.settings.show_callout and block.settings.callout_text != blank -%}
+                  <div class="ps-callout" role="note">{{ block.settings.callout_text | escape }}</div>
+                {%- endif -%}
+              </div>
+
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+/* ===================================================
+   Process Steps — lt-pdp-process-steps.liquid
+   =================================================== */
+
+.ps-section {
+  background: var(--crs-bg, #f2f1ed);
+}
+
+.ps-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5, 20px);
+}
+
+.ps-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-5, 24px);
+  align-items: start;
+}
+
+.ps-layout--full {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.ps-intro {
+  min-width: 0;
+  align-self: start;
+  padding-right: var(--space-7, 48px);
+  padding-top: var(--space-1, 4px);
+  position: sticky;
+  top: 80px;
+}
+
+/* Steps list */
+.ps-steps {
+  min-width: 0;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ps-step {
+  display: grid;
+  grid-template-columns: 36px 1fr;
+  gap: 0 16px;
+  align-items: start;
+}
+
+/* Marker column: number + connector */
+.ps-step-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 2px;
+}
+
+.ps-step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--crs-bg, #f2f1ed);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+  font-variant-numeric: tabular-nums;
+}
+
+.ps-step-connector {
+  flex: 1;
+  width: 1px;
+  min-height: 20px;
+  background: var(--crs-border, rgba(38, 37, 30, 0.08));
+  display: block;
+  margin-top: 5px;
+}
+
+/* Content column */
+.ps-step-content {
+  padding-bottom: 28px;
+}
+
+.ps-step:last-child .ps-step-content {
+  padding-bottom: 0;
+}
+
+.ps-step-title {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0 !important;
+  color: var(--crs-text, #26251e) !important;
+  margin: 0 0 5px !important;
+}
+
+.ps-step-body {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.65;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+  margin: 0;
+}
+
+.ps-callout {
+  box-sizing: border-box;
+  background: rgba(38, 37, 30, 0.04);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  border-radius: 4px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+}
+
+@media (max-width: 1024px) {
+  .ps-layout {
+    grid-template-columns: 1fr;
+    gap: var(--space-6, 32px);
+  }
+
+  .ps-intro {
+    position: static;
+    top: auto;
+    padding-right: 0;
+    padding-top: 0;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Process Steps",
+  "tag": "section",
+  "class": "lt-pdp-process-steps",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section",
+      "info": "Zeilenumbruch: Enter in Überschrift/Unterüberschrift."
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": "So einfach geht's",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Dein Test in 3 Schritten"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Unterüberschrift (optional)",
+      "default": "Eine Speichelprobe. Sechs bis acht Wochen Wartezeit.",
+      "info": "__none__ = ausblenden"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Schritt",
+      "settings": [
+        {
+          "type": "text",
+          "id": "step_number",
+          "label": "Schritt-Nummer",
+          "default": "01"
+        },
+        {
+          "type": "text",
+          "id": "step_title",
+          "label": "Titel",
+          "default": "Testkit bestellen"
+        },
+        {
+          "type": "textarea",
+          "id": "step_body",
+          "label": "Beschreibung",
+          "default": "Dein Testkit wird direkt nach Hause geliefert."
+        },
+        {
+          "type": "checkbox",
+          "id": "show_callout",
+          "label": "Callout anzeigen",
+          "default": false
+        },
+        {
+          "type": "textarea",
+          "id": "callout_text",
+          "label": "Callout-Text",
+          "default": "Zertifizierungshinweis"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    {
+      "name": "Process Steps",
+      "blocks": [
+        {
+          "type": "step",
+          "settings": {
+            "step_number": "01",
+            "step_title": "Testkit bestellen & erhalten",
+            "step_body": "Dein Testkit wird direkt nach Hause geliefert. Im Inneren: Speichelröhrchen, eine klare Schritt-für-Schritt-Anleitung und ein vorfrankiertes Rückkuvert. Du brauchst nichts dazuzukaufen.",
+            "show_callout": false,
+            "callout_text": "Zertifizierungshinweis"
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "step_number": "02",
+            "step_title": "App scannen & Speichelprobe entnehmen",
+            "step_body": "Scanne den QR-Code im Kit, um deine Probe in der App zu registrieren. Dann: Speichelprobe entnehmen – nicht-invasiv, weniger als 5 Minuten.",
+            "show_callout": false,
+            "callout_text": "Zertifizierungshinweis"
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "step_number": "03",
+            "step_title": "Probe geht ins Labor",
+            "step_body": "Deine Probe wird direkt an Eurofins Genomics gesendet. DNA-Sequenzierung und epigenetische Methylierungsanalyse nach ISO 9001, ISO 17025 und ISO 13485.",
+            "show_callout": true,
+            "callout_text": "Eurofins Genomics ist ISO 9001, ISO 17025 und ISO 13485 zertifiziert. Deine Probe wird unter strengen klinischen Bedingungen analysiert."
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "step_number": "04",
+            "step_title": "Ergebnisse erscheinen in der App",
+            "step_body": "Nach 6–8 Wochen: dein biologisches Alter, 187 DNA-Reports, MethylPace-Score, Immunoscore, Entzündungsprofil und dein AI Health Coach.",
+            "show_callout": false,
+            "callout_text": "Zertifizierungshinweis"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

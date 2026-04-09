@@ -1,0 +1,499 @@
+{%- liquid
+  assign crs_h_align = section.settings.content_align | default: 'left'
+  if crs_h_align != 'left' and crs_h_align != 'center' and crs_h_align != 'right'
+    assign crs_h_align = 'left'
+  endif
+  assign rp_kicker  = section.settings.kicker | strip
+  assign rp_head    = section.settings.heading | strip
+  assign rp_sub     = section.settings.subheading | strip
+  if rp_kicker == '__none__'
+    assign rp_kicker = ''
+  endif
+  if rp_sub == '__none__'
+    assign rp_sub = ''
+  endif
+  assign crs_h_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign crs_h_headline_lg = true
+  endif
+  assign rp_has_visual = false
+  if section.settings.app_visual != blank
+    assign rp_has_visual = true
+  endif
+  assign rp_format = section.settings.format_note | strip
+  assign rp_retest = section.settings.retest_note | strip
+-%}
+{% style %}
+  #section-{{ section.id }} {
+    --crs-bg:       {{ section.settings.color_bg }};
+    --crs-card-bg:  {{ section.settings.color_card_bg }};
+    --crs-text:     {{ section.settings.color_text }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    background:     var(--crs-bg);
+  }
+{% endstyle %}
+
+<div class="rp-section" id="section-{{ section.id }}">
+  <div class="rp-container">
+
+    {%- if rp_kicker != blank or rp_head != blank or rp_sub != blank -%}
+      <div class="rp-heading-wrap crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+        {%- if rp_kicker != blank -%}
+          <p class="crs-heading-stack__kicker">{{ rp_kicker | escape }}</p>
+        {%- endif -%}
+        {%- if rp_head != blank or rp_sub != blank -%}
+          <div class="crs-heading-stack__pair">
+            {%- if rp_head != blank -%}
+              <h2 class="crs-heading-stack__title">{{ rp_head | escape | newline_to_br }}</h2>
+            {%- endif -%}
+            {%- if rp_sub != blank -%}
+              <p class="crs-heading-stack__subtitle">{{ rp_sub | escape | newline_to_br }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="rp-body rp-body--{{ section.settings.layout_variant | default: 'two-col' }}">
+
+      {%- comment -%} Media column {%- endcomment -%}
+      <div class="rp-media">
+        {%- if rp_has_visual -%}
+          {{
+            section.settings.app_visual
+            | image_url: width: 1200
+            | image_tag:
+              loading: 'lazy',
+              class: 'rp-app-image',
+              sizes: '(max-width: 767px) calc(100vw - 40px), 50vw',
+              alt: 'App-Screenshot'
+          }}
+        {%- else -%}
+          <div class="rp-media-placeholder" aria-hidden="true"></div>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} Callouts column {%- endcomment -%}
+      <div class="rp-callouts">
+
+        {%- if section.blocks.size > 0 -%}
+          <div class="rp-callout-list">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'callout' -%}
+                <div class="rp-callout-card" {{ block.shopify_attributes }}>
+                  {%- if block.settings.callout_label != blank -%}
+                    <span class="rp-callout-label">{{ block.settings.callout_label | escape }}</span>
+                  {%- endif -%}
+                  {%- if block.settings.callout_body != blank -%}
+                    <p class="rp-callout-body">{{ block.settings.callout_body | escape }}</p>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.retest_show and rp_retest != blank -%}
+          <div class="rp-retest" role="note">
+            <span class="rp-retest-icon" aria-hidden="true">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"/>
+                <path d="M7 4v3.5l2 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span>{{ rp_retest | escape }}</span>
+          </div>
+        {%- endif -%}
+
+      </div>
+    </div>
+
+    {%- if rp_format != blank -%}
+      <p class="rp-format-note">{{ rp_format | escape }}</p>
+    {%- endif -%}
+
+  </div>
+</div>
+
+{% stylesheet %}
+/* ===================================================
+   Report Preview — lt-pdp-report-preview.liquid
+   =================================================== */
+
+.rp-section {
+  background: var(--crs-bg, #f2f1ed);
+}
+
+.rp-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5, 20px);
+}
+
+.rp-heading-wrap {
+  margin-bottom: var(--space-7, 48px);
+}
+
+/* Two-column body */
+.rp-body--two-col {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-6, 40px);
+  align-items: start;
+}
+
+/* Media */
+.rp-media {
+  position: sticky;
+  top: 80px;
+}
+
+.rp-app-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: var(--radius-sm, 4px);
+  object-fit: contain;
+}
+
+.rp-media-placeholder {
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  max-height: 560px;
+  border-radius: var(--radius-sm, 4px);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0)),
+    var(--crs-card-bg, #f7f7f4);
+  border: 1px dashed var(--crs-border, rgba(38, 37, 30, 0.08));
+}
+
+/* Callouts column */
+.rp-callouts {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4, 16px);
+}
+
+.rp-callout-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rp-callout-card {
+  box-sizing: border-box;
+  background: var(--crs-card-bg, #f7f7f4);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  border-radius: 4px;
+  padding: 13px 15px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.rp-callout-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.4));
+  line-height: 1.4;
+}
+
+.rp-callout-body {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+  margin: 0;
+}
+
+/* Retest note */
+.rp-retest {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: rgba(38, 37, 30, 0.04);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  border-radius: 4px;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+}
+
+.rp-retest-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 1px;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+}
+
+/* Format note */
+.rp-format-note {
+  margin: var(--space-6, 40px) 0 0;
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.4));
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .rp-body--two-col {
+    grid-template-columns: 1fr;
+  }
+
+  .rp-media {
+    position: static;
+    top: auto;
+  }
+
+  .rp-media-placeholder {
+    aspect-ratio: 4 / 3;
+    max-height: 320px;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Report Preview",
+  "tag": "section",
+  "class": "lt-pdp-report-preview",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section",
+      "info": "Zeilenumbruch: Enter in Überschrift/Unterüberschrift."
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": "__none__",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "So sehen deine Ergebnisse aus"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Unterüberschrift (optional)",
+      "default": "Alle Ergebnisse erscheinen in der App – verständlich aufbereitet.",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout_variant",
+      "label": "Layout-Variante",
+      "options": [
+        { "value": "two-col", "label": "Zwei Spalten (Bild + Callouts)" },
+        { "value": "full-width-annotated", "label": "Vollbreite mit Annotation" }
+      ],
+      "default": "two-col"
+    },
+    {
+      "type": "header",
+      "content": "App-Visual"
+    },
+    {
+      "type": "image_picker",
+      "id": "app_visual",
+      "label": "App-Screenshot",
+      "info": "PNG oder WebP · mind. 1200 px Breite · Hauptscreen mit biologischem Alter"
+    },
+    {
+      "type": "header",
+      "content": "Zusatzelemente"
+    },
+    {
+      "type": "checkbox",
+      "id": "retest_show",
+      "label": "Re-Test-Hinweis anzeigen",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "retest_note",
+      "label": "Re-Test-Hinweis",
+      "default": "Empfehlung: Test nach 6 Monaten wiederholen."
+    },
+    {
+      "type": "text",
+      "id": "format_note",
+      "label": "Format-Hinweis (unten)",
+      "default": "Digital · App · PDF-Export möglich · mit Arzt teilbar"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "callout",
+      "name": "Callout",
+      "settings": [
+        {
+          "type": "text",
+          "id": "callout_label",
+          "label": "Label",
+          "default": "Biologisches Alter"
+        },
+        {
+          "type": "textarea",
+          "id": "callout_body",
+          "label": "Beschreibung",
+          "default": "Dein epigenetisches Alter im Vergleich zum chronologischen."
+        },
+        {
+          "type": "header",
+          "content": "Overlay-Position (optional)"
+        },
+        {
+          "type": "range",
+          "id": "position_x",
+          "label": "Position X (%)",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 20
+        },
+        {
+          "type": "range",
+          "id": "position_y",
+          "label": "Position Y (%)",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 20
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "Report Preview",
+      "blocks": [
+        {
+          "type": "callout",
+          "settings": {
+            "callout_label": "Biologisches Alter",
+            "callout_body": "Dein epigenetisches Alter im Vergleich zu deinem chronologischen – inklusive MethylPace-Score.",
+            "position_x": 20,
+            "position_y": 20
+          }
+        },
+        {
+          "type": "callout",
+          "settings": {
+            "callout_label": "DNA-Report: Supplements",
+            "callout_body": "Welche Supplemente genetisch für dich sinnvoll sind – von NMN über Kreatin bis Omega-3.",
+            "position_x": 70,
+            "position_y": 30
+          }
+        },
+        {
+          "type": "callout",
+          "settings": {
+            "callout_label": "Epigenetik: Immunoscore",
+            "callout_body": "Wie dein Immunsystem epigenetisch aufgestellt ist – aktuell, nicht nur genetisch vorbestimmt.",
+            "position_x": 20,
+            "position_y": 60
+          }
+        },
+        {
+          "type": "callout",
+          "settings": {
+            "callout_label": "AI Health Coach",
+            "callout_body": "Stellt dir Fragen, erklärt deine Werte und gibt dir konkrete Empfehlungen auf Basis deiner Daten.",
+            "position_x": 70,
+            "position_y": 70
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

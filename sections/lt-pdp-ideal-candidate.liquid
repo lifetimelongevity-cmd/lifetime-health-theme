@@ -1,0 +1,418 @@
+{%- liquid
+  assign crs_h_align = section.settings.content_align | default: 'left'
+  if crs_h_align != 'left' and crs_h_align != 'center' and crs_h_align != 'right'
+    assign crs_h_align = 'left'
+  endif
+  assign ic_kicker = section.settings.kicker | strip
+  assign ic_head   = section.settings.heading | strip
+  assign ic_sub    = section.settings.subheading | strip
+  if ic_kicker == '__none__'
+    assign ic_kicker = ''
+  endif
+  if ic_sub == '__none__'
+    assign ic_sub = ''
+  endif
+  assign crs_h_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign crs_h_headline_lg = true
+  endif
+  assign ic_excl_heading = section.settings.exclusion_heading | strip
+  assign ic_has_exclusions = false
+  for block in section.blocks
+    if block.type == 'exclusion'
+      assign ic_has_exclusions = true
+    endif
+  endfor
+-%}
+{% style %}
+  #section-{{ section.id }} {
+    --crs-bg:       {{ section.settings.color_bg }};
+    --crs-card-bg:  {{ section.settings.color_card_bg }};
+    --crs-text:     {{ section.settings.color_text }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    background:     var(--crs-bg);
+  }
+{% endstyle %}
+
+<div class="ic-section" id="section-{{ section.id }}">
+  <div class="ic-container">
+
+    {%- if ic_kicker != blank or ic_head != blank or ic_sub != blank -%}
+      <div class="ic-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+        {%- if ic_kicker != blank -%}
+          <p class="crs-heading-stack__kicker">{{ ic_kicker | escape }}</p>
+        {%- endif -%}
+        {%- if ic_head != blank or ic_sub != blank -%}
+          <div class="crs-heading-stack__pair">
+            {%- if ic_head != blank -%}
+              <h2 class="crs-heading-stack__title">{{ ic_head | escape | newline_to_br }}</h2>
+            {%- endif -%}
+            {%- if ic_sub != blank -%}
+              <p class="crs-heading-stack__subtitle">{{ ic_sub | escape | newline_to_br }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} Candidate cards {%- endcomment -%}
+    {%- assign ic_has_candidates = false -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'candidate' -%}
+        {%- assign ic_has_candidates = true -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if ic_has_candidates -%}
+      <div class="ic-grid">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'candidate' -%}
+            <div class="ic-card" {{ block.shopify_attributes }}>
+              <span class="ic-card-icon" aria-hidden="true">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"/>
+                  <path d="M5.5 8.2l1.6 1.6 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+              {%- if block.settings.candidate_description != blank -%}
+                <p class="ic-card-desc">{{ block.settings.candidate_description | escape }}</p>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} Exclusion block {%- endcomment -%}
+    {%- if section.settings.show_exclusion_block and ic_has_exclusions -%}
+      <div class="ic-exclusion">
+        {%- if ic_excl_heading != blank -%}
+          <p class="ic-exclusion-heading">{{ ic_excl_heading | escape }}</p>
+        {%- endif -%}
+        <ul class="ic-exclusion-list" role="list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'exclusion' and block.settings.exclusion_text != blank -%}
+              <li class="ic-exclusion-item" {{ block.shopify_attributes }}>
+                <span class="ic-exclusion-icon" aria-hidden="true">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                    <path d="M5 7h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+                  </svg>
+                </span>
+                <span>{{ block.settings.exclusion_text | escape }}</span>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+  </div>
+</div>
+
+{% stylesheet %}
+/* ===================================================
+   Ideal Candidate — lt-pdp-ideal-candidate.liquid
+   =================================================== */
+
+.ic-section {
+  background: var(--crs-bg, #f2f1ed);
+}
+
+.ic-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.ic-header {
+  margin-bottom: var(--space-7, 48px);
+}
+
+/* Candidate grid */
+.ic-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.ic-card {
+  box-sizing: border-box;
+  background: var(--crs-card-bg, #f7f7f4);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  border-radius: 4px;
+  padding: 14px 15px 15px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.ic-card-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 2px;
+  color: var(--crs-text, #26251e);
+}
+
+.ic-card-desc {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+  margin: 0;
+}
+
+/* Exclusion block */
+.ic-exclusion {
+  box-sizing: border-box;
+  margin-top: var(--space-6, 40px);
+  background: rgba(38, 37, 30, 0.03);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  border-radius: 4px;
+  padding: 20px 24px;
+}
+
+.ic-exclusion-heading {
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+  margin: 0 0 12px;
+}
+
+.ic-exclusion-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ic-exclusion-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.4));
+}
+
+.ic-exclusion-icon {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  margin-top: 2px;
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.4));
+}
+
+@media (max-width: 767px) {
+  .ic-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .ic-exclusion {
+    padding: 16px 18px;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Ideal Candidate",
+  "tag": "section",
+  "class": "lt-pdp-ideal-candidate",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section",
+      "info": "Zeilenumbruch: Enter in Überschrift/Unterüberschrift."
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": "__none__",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Für wen dieser Test gemacht ist"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Unterüberschrift (optional)",
+      "default": "Nicht für jeden. Aber vielleicht für dich.",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "header",
+      "content": "Nicht-für-dich-Block"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_exclusion_block",
+      "label": "Ausschluss-Block anzeigen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "exclusion_heading",
+      "label": "Ausschluss-Überschrift",
+      "default": "Dieser Test ist nicht das Richtige für dich, wenn…"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "candidate",
+      "name": "Kandidat",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "candidate_description",
+          "label": "Beschreibung (Mindset / Situation)",
+          "default": "Du willst eine biologische Baseline vor Start eines Longevity-Protokolls."
+        }
+      ]
+    },
+    {
+      "type": "exclusion",
+      "name": "Ausschluss",
+      "settings": [
+        {
+          "type": "textarea",
+          "id": "exclusion_text",
+          "label": "Ausschluss-Text",
+          "default": "…du eine medizinische Diagnose suchst."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Ideal Candidate",
+      "blocks": [
+        {
+          "type": "candidate",
+          "settings": {
+            "candidate_description": "Du willst eine biologische Baseline – bevor du mit einem Longevity-Protokoll anfängst. Nicht nach Gefühl optimieren, sondern nach Daten."
+          }
+        },
+        {
+          "type": "candidate",
+          "settings": {
+            "candidate_description": "Du nimmst bereits Supplemente und willst wissen, welche genetisch für dich Sinn ergeben – und welche nicht."
+          }
+        },
+        {
+          "type": "candidate",
+          "settings": {
+            "candidate_description": "Du hast das Gefühl, dass dein Körper anders altert als dein Pass vermuten lässt. Du willst es wissen, nicht vermuten."
+          }
+        },
+        {
+          "type": "candidate",
+          "settings": {
+            "candidate_description": "Du machst regelmäßig Blutbilder – und willst eine zweite Analyseebene: wie Lebensstil und Umwelt heute auf zellulärer Ebene wirken."
+          }
+        },
+        {
+          "type": "candidate",
+          "settings": {
+            "candidate_description": "Du willst einen Gesundheitscheck, der in 6 Monaten wiederholbar ist. Kein Schnappschuss – ein Werkzeug, das Veränderung messbar macht."
+          }
+        },
+        {
+          "type": "exclusion",
+          "settings": {
+            "exclusion_text": "…du eine medizinische Diagnose für eine spezifische Erkrankung suchst. Der Test ist ein Präventions- und Optimierungswerkzeug, kein Krankheitsdiagnostikum."
+          }
+        },
+        {
+          "type": "exclusion",
+          "settings": {
+            "exclusion_text": "…du kurzfristige Ergebnisse erwartest. Die Laboranalyse dauert 6–8 Wochen. Nachhaltige Erkenntnisse brauchen Geduld."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

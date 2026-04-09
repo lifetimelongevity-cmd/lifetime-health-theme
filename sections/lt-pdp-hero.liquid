@@ -1188,6 +1188,24 @@
       });
     });
 
+    // No selling plans → hide subscription card and or-divider, pre-select once card
+    if (ltPlans.length === 0) {
+      const noSubCard = section.querySelector('.lt-bb-card--sub');
+      const noOrDiv  = section.querySelector('.lt-bb__or');
+      if (noSubCard) {
+        noSubCard.hidden = true;
+        const noSubRadio = noSubCard.querySelector('.lt-bb-card__input');
+        if (noSubRadio) noSubRadio.checked = false;
+      }
+      if (noOrDiv) noOrDiv.hidden = true;
+      const noOnceCard = section.querySelector('.lt-bb-card--once');
+      if (noOnceCard) {
+        noOnceCard.classList.add('is-selected');
+        const noOnceRadio = noOnceCard.querySelector('.lt-bb-card__input');
+        if (noOnceRadio) noOnceRadio.checked = true;
+      }
+    }
+
     const initialCard = section.querySelector('.lt-bb-card__input:checked')?.closest('[data-lt-bb-card]');
     if (initialCard) {
       selectCard(initialCard);

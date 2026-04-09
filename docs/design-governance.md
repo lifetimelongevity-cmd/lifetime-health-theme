@@ -166,6 +166,7 @@ No instruction to "find an image" is needed in the build prompt.
   --color-star: #F4B740;
   --color-success: #22C55E;
   --color-promo: #E85D5D;
+  --color-benefit-bg: #E6F4F1;
 
   /* Surfaces */
   --color-surface-primary: var(--color-white);
@@ -173,6 +174,7 @@ No instruction to "find an image" is needed in the build prompt.
   --color-surface-tertiary: var(--color-light-cool);
   --color-surface-dark: var(--color-dark);
   --color-surface-accent: var(--color-teal-dark);
+  --color-surface-benefit: var(--color-benefit-bg);
 
   /* Text */
   --color-text-primary: var(--color-black);
@@ -181,6 +183,10 @@ No instruction to "find an image" is needed in the build prompt.
   --color-text-on-dark: var(--color-white);
   --color-text-on-dark-muted: rgba(255, 255, 255, 0.65);
   --color-text-accent: var(--color-teal);
+
+  /* Borders */
+  --color-border-default: var(--color-gray-200);
+  --color-border-strong: rgba(54, 79, 86, 0.14);
 
   /* Buttons */
   --color-button-primary-bg: var(--color-dark);
@@ -237,6 +243,7 @@ No instruction to "find an image" is needed in the build prompt.
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
+  --radius-xl: 20px;
   --radius-full: 999px;
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05);
@@ -341,14 +348,14 @@ These are conceptual components. Apply their visual rules to whatever Shopify st
 - Font: `--font-body`, `--text-body-sm`, `--weight-semibold`
 - Height: 48px, padding: 14px 32px, radius: `--radius-full`
 - Variants:
-  - `cta` → sand bg, white text (revenue-driving actions)
+  - `cta` → `var(--color-dark)` bg (#364F56), white text (revenue-driving actions)
   - `primary` → dark bg, white text (secondary conversions)
   - `secondary` → white bg, dark text, gray border
   - `outline` → transparent bg, dark text, currentColor border
   - `ghost` → transparent, no border, no padding, auto height
   - `icon` → 40×40 circle, dark bg, white icon
 - Full-width modifier: default only inside PDP add-to-cart zone
-- Dark surface behavior: `cta` stays sand; `primary` inverts to white bg / dark text; `outline` inverts to white text / white border
+- Dark surface behavior: `cta` inverts to white bg / dark text; `outline` inverts to white text / white border
 - If the theme has existing button classes, restyle them to match these specs rather than creating new classes
 
 ### Section Header
@@ -559,7 +566,7 @@ If a UI need arises that doesn't fit existing components:
 
 ### Color
 - ✗ Teal on buttons (teal is for accents, progress bars, icons)
-- ✗ Sand on large surfaces (sand is for CTA buttons and small accents)
+- ✗ Sand on large surfaces (sand is an accent color — not for CTA buttons)
 - ✗ `#000000` as a background surface
 - ✗ Multiple accent colors competing in the same section
 - ✗ Gray values outside the three defined grays (200, 400, 600)
@@ -605,7 +612,7 @@ Run after every UI change. Fix all failures before proceeding.
 
 ### Components
 - [ ] Maximum 3 card types per page
-- [ ] CTA (sand) button count reasonable per viewport (default: 1)
+- [ ] CTA (dark bg) button count reasonable per viewport (default: 1)
 - [ ] Dark surface text uses `--color-text-on-dark` or `--color-text-on-dark-muted` only
 - [ ] Pillar/feature items use `card-info` pattern (padding `--space-5`, `--radius-md`, correct shadow rule)
 
