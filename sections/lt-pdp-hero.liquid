@@ -380,6 +380,14 @@
                 <span class="lt-value-stack__total-label">{{ section.settings.stack_total_label | default: 'Gesamtwert' | escape }}</span>
                 <span class="lt-value-stack__total-value" data-lt-stack-total>{{ section.settings.stack_old_total | escape }}</span>
               </div>
+              {%- unless lt_show_sub -%}
+                {%- if section.settings.stack_pay_today_label != blank -%}
+                  <div class="lt-value-stack__pay-today">
+                    <span class="lt-value-stack__pay-label">{{ section.settings.stack_pay_today_label | escape }}</span>
+                    <span class="lt-value-stack__pay-price">{{ lt_pill_1_once | money }}</span>
+                  </div>
+                {%- endif -%}
+              {%- endunless -%}
             </div>
           {%- endif -%}
         {%- endcapture -%}
@@ -521,154 +529,155 @@
           </script>
         {%- endif -%}
 
-        <div class="lt-purchase-block">
-          <div class="visually-hidden" data-update-block="price-compact-main">
-            <div class="lt-price-row__line">
-              <span class="lt-price-row__current lt-price-main" data-js-product-price-original>{{ lt_base_price | money }}</span>
-              <del class="lt-price-row__compare" data-js-product-price-compare>{% if lt_compare_price > lt_base_price %}{{ lt_compare_price | money }}{% endif %}</del>
-              <span class="lt-price-row__saving lt-save-badge" data-js-product-price-saving>{% if lt_compare_price > lt_base_price %}Du sparst {{ lt_compare_price | minus: lt_base_price | money }}{% endif %}</span>
-            </div>
+        <div class="visually-hidden" data-update-block="price-compact-main">
+          <div class="lt-price-row__line">
+            <span class="lt-price-row__current lt-price-main" data-js-product-price-original>{{ lt_base_price | money }}</span>
+            <del class="lt-price-row__compare" data-js-product-price-compare>{% if lt_compare_price > lt_base_price %}{{ lt_compare_price | money }}{% endif %}</del>
+            <span class="lt-price-row__saving lt-save-badge" data-js-product-price-saving>{% if lt_compare_price > lt_base_price %}Du sparst {{ lt_compare_price | minus: lt_base_price | money }}{% endif %}</span>
           </div>
-
-
-          {%- if lt_show_sub -%}
-          <div
-            class="lt-bb"
-            data-lt-buy-box
-            data-supply-days="{{ bb_supply_days | plus: 0 }}"
-            data-discount-pct="{{ section.settings.sub_discount_percent | default: 10 }}"
-            role="radiogroup"
-            aria-label="Kaufoption wählen"
-          >
-            <label
-              class="lt-bb-card lt-bb-card--sub is-selected"
-              data-lt-bb-card
-              data-bb-kind="sub"
-            >
-              <input
-                type="radio"
-                class="lt-bb-card__input"
-                name="lt-bb-{{ section.id }}"
-                value="sub-1"
-                checked
-                data-quantity="{{ lt_pill_1_qty }}"
-                data-once-price="{{ lt_pill_1_once }}"
-                data-sub-price="{{ lt_pill_1_sub }}"
-              >
-              <span class="lt-bb-card__body">
-                <span class="lt-bb-card__head">
-                  <span class="lt-bb-card__radio" aria-hidden="true"></span>
-                  <span class="lt-bb-card__row">
-                    <span class="lt-bb-card__meta">
-                      <span class="lt-bb-card__title-row">
-                        <span class="lt-bb-card__title">{{ bb_sub1_title | escape }}</span>
-                        <span class="lt-bb-card__badge lt-bb-card__badge--strong" data-lt-bb-badge>SPARE 0%</span>
-                      </span>
-                      <span class="lt-bb-card__sub">{{ bb_sub1_sub | escape }}</span>
-                    </span>
-                    <span class="lt-bb-card__prices">
-                      <del class="lt-bb-card__compare" data-lt-bb-compare></del>
-                      <span class="lt-bb-card__current" data-lt-bb-current></span>
-                      <span class="lt-bb-card__unit" data-lt-bb-unit></span>
-                    </span>
-                  </span>
-                </span>
-                <span class="lt-bb-card__perks">
-                  <span class="lt-bb-card__perk">
-                    {%- if section.settings.bb_perk_1_icon != blank -%}
-                      {{
-                        section.settings.bb_perk_1_icon
-                        | image_url: width: 56
-                        | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
-                      }}
-                    {%- else -%}
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                        <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
-                        <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    {%- endif -%}
-                    <span>{{ bb_b1 | escape }}</span>
-                  </span>
-                  <span class="lt-bb-card__perk">
-                    {%- if section.settings.bb_perk_2_icon != blank -%}
-                      {{
-                        section.settings.bb_perk_2_icon
-                        | image_url: width: 56
-                        | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
-                      }}
-                    {%- else -%}
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                        <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
-                        <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    {%- endif -%}
-                    <span>{{ bb_b2 | escape }}</span>
-                  </span>
-                  <span class="lt-bb-card__perk">
-                    {%- if section.settings.bb_perk_3_icon != blank -%}
-                      {{
-                        section.settings.bb_perk_3_icon
-                        | image_url: width: 56
-                        | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
-                      }}
-                    {%- else -%}
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                        <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
-                        <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
-                      </svg>
-                    {%- endif -%}
-                    <span>{{ bb_b3 | escape }}</span>
-                  </span>
-                </span>
-              </span>
-            </label>
-
-            <div class="lt-bb__or" role="presentation">
-              <span class="lt-bb__or-line" aria-hidden="true"></span>
-              <span class="lt-bb__or-text">{{ bb_or_label | escape }}</span>
-              <span class="lt-bb__or-line" aria-hidden="true"></span>
-            </div>
-
-            <label class="lt-bb-card lt-bb-card--once" data-lt-bb-card data-bb-kind="once">
-              <input
-                type="radio"
-                class="lt-bb-card__input"
-                name="lt-bb-{{ section.id }}"
-                value="once"
-                data-quantity="{{ lt_pill_1_qty }}"
-                data-once-price="{{ lt_pill_1_once }}"
-                data-sub-price="{{ lt_pill_1_sub }}"
-              >
-              <span class="lt-bb-card__body">
-                <span class="lt-bb-card__head lt-bb-card__head--once">
-                  <span class="lt-bb-card__radio" aria-hidden="true"></span>
-                  <span class="lt-bb-card__row lt-bb-card__row--once">
-                    <span class="lt-bb-card__meta">
-                      <span class="lt-bb-card__title-row">
-                        <span class="lt-bb-card__title">{{ bb_once_title | escape }}</span>
-                      </span>
-                      <span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>
-                    </span>
-                    <span class="lt-bb-card__prices">
-                      <del class="lt-bb-card__compare" data-lt-bb-compare></del>
-                      <span class="lt-bb-card__current" data-lt-bb-current></span>
-                      <span class="lt-bb-card__unit" data-lt-bb-unit></span>
-                    </span>
-                  </span>
-                </span>
-              </span>
-            </label>
-          </div>
-          {%- else -%}
-          <div class="lt-price-direct">
-            <span class="lt-price-direct__amount">{{ lt_pill_1_once | money }}</span>
-            {%- if lt_compare_price > lt_pill_1_once -%}
-              <del class="lt-price-direct__compare">{{ lt_compare_price | money }}</del>
-            {%- endif -%}
-            <span class="lt-price-direct__note">{{ section.settings.bb_once_subline | default: '' | escape }}</span>
-          </div>
-          {%- endif -%}
         </div>
+
+        {%- if lt_show_sub or section.settings.show_price_standalone -%}
+          <div class="lt-purchase-block">
+            {%- if lt_show_sub -%}
+            <div
+              class="lt-bb"
+              data-lt-buy-box
+              data-supply-days="{{ bb_supply_days | plus: 0 }}"
+              data-discount-pct="{{ section.settings.sub_discount_percent | default: 10 }}"
+              role="radiogroup"
+              aria-label="Kaufoption wählen"
+            >
+              <label
+                class="lt-bb-card lt-bb-card--sub is-selected"
+                data-lt-bb-card
+                data-bb-kind="sub"
+              >
+                <input
+                  type="radio"
+                  class="lt-bb-card__input"
+                  name="lt-bb-{{ section.id }}"
+                  value="sub-1"
+                  checked
+                  data-quantity="{{ lt_pill_1_qty }}"
+                  data-once-price="{{ lt_pill_1_once }}"
+                  data-sub-price="{{ lt_pill_1_sub }}"
+                >
+                <span class="lt-bb-card__body">
+                  <span class="lt-bb-card__head">
+                    <span class="lt-bb-card__radio" aria-hidden="true"></span>
+                    <span class="lt-bb-card__row">
+                      <span class="lt-bb-card__meta">
+                        <span class="lt-bb-card__title-row">
+                          <span class="lt-bb-card__title">{{ bb_sub1_title | escape }}</span>
+                          <span class="lt-bb-card__badge lt-bb-card__badge--strong" data-lt-bb-badge>SPARE 0%</span>
+                        </span>
+                        <span class="lt-bb-card__sub">{{ bb_sub1_sub | escape }}</span>
+                      </span>
+                      <span class="lt-bb-card__prices">
+                        <del class="lt-bb-card__compare" data-lt-bb-compare></del>
+                        <span class="lt-bb-card__current" data-lt-bb-current></span>
+                        <span class="lt-bb-card__unit" data-lt-bb-unit></span>
+                      </span>
+                    </span>
+                  </span>
+                  <span class="lt-bb-card__perks">
+                    <span class="lt-bb-card__perk">
+                      {%- if section.settings.bb_perk_1_icon != blank -%}
+                        {{
+                          section.settings.bb_perk_1_icon
+                          | image_url: width: 56
+                          | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
+                        }}
+                      {%- else -%}
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                          <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
+                          <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      {%- endif -%}
+                      <span>{{ bb_b1 | escape }}</span>
+                    </span>
+                    <span class="lt-bb-card__perk">
+                      {%- if section.settings.bb_perk_2_icon != blank -%}
+                        {{
+                          section.settings.bb_perk_2_icon
+                          | image_url: width: 56
+                          | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
+                        }}
+                      {%- else -%}
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                          <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
+                          <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      {%- endif -%}
+                      <span>{{ bb_b2 | escape }}</span>
+                    </span>
+                    <span class="lt-bb-card__perk">
+                      {%- if section.settings.bb_perk_3_icon != blank -%}
+                        {{
+                          section.settings.bb_perk_3_icon
+                          | image_url: width: 56
+                          | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
+                        }}
+                      {%- else -%}
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                          <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
+                          <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      {%- endif -%}
+                      <span>{{ bb_b3 | escape }}</span>
+                    </span>
+                  </span>
+                </span>
+              </label>
+
+              <div class="lt-bb__or" role="presentation">
+                <span class="lt-bb__or-line" aria-hidden="true"></span>
+                <span class="lt-bb__or-text">{{ bb_or_label | escape }}</span>
+                <span class="lt-bb__or-line" aria-hidden="true"></span>
+              </div>
+
+              <label class="lt-bb-card lt-bb-card--once" data-lt-bb-card data-bb-kind="once">
+                <input
+                  type="radio"
+                  class="lt-bb-card__input"
+                  name="lt-bb-{{ section.id }}"
+                  value="once"
+                  data-quantity="{{ lt_pill_1_qty }}"
+                  data-once-price="{{ lt_pill_1_once }}"
+                  data-sub-price="{{ lt_pill_1_sub }}"
+                >
+                <span class="lt-bb-card__body">
+                  <span class="lt-bb-card__head lt-bb-card__head--once">
+                    <span class="lt-bb-card__radio" aria-hidden="true"></span>
+                    <span class="lt-bb-card__row lt-bb-card__row--once">
+                      <span class="lt-bb-card__meta">
+                        <span class="lt-bb-card__title-row">
+                          <span class="lt-bb-card__title">{{ bb_once_title | escape }}</span>
+                        </span>
+                        <span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>
+                      </span>
+                      <span class="lt-bb-card__prices">
+                        <del class="lt-bb-card__compare" data-lt-bb-compare></del>
+                        <span class="lt-bb-card__current" data-lt-bb-current></span>
+                        <span class="lt-bb-card__unit" data-lt-bb-unit></span>
+                      </span>
+                    </span>
+                  </span>
+                </span>
+              </label>
+            </div>
+            {%- else -%}
+            <div class="lt-price-direct">
+              <span class="lt-price-direct__amount">{{ lt_pill_1_once | money }}</span>
+              {%- if lt_compare_price > lt_pill_1_once -%}
+                <del class="lt-price-direct__compare">{{ lt_compare_price | money }}</del>
+              {%- endif -%}
+              <span class="lt-price-direct__note">{{ section.settings.bb_once_subline | default: '' | escape }}</span>
+            </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
 
         {%- if lt_show_sub -%}
           <div
@@ -682,7 +691,6 @@
         {%- endif -%}
 
         {%- unless lt_show_sub -%}
-          {{ lt_doctor_block }}
           {{ lt_value_stack_block }}
         {%- endunless -%}
 
@@ -731,6 +739,7 @@
 
         {%- unless lt_show_sub -%}
           {{ lt_trust_block }}
+          {{ lt_doctor_block }}
         {%- endunless -%}
 
         {%- if shop.enabled_payment_types.size > 0 -%}
@@ -1537,6 +1546,28 @@
   color: var(--lt-text, #26251e);
 }
 
+.lt-value-stack__pay-today {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
+  margin-top: 4px;
+  border-top: 1px solid color-mix(in srgb, var(--lt-text, #26251e) 10%, transparent);
+}
+
+.lt-value-stack__pay-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--lt-text, #26251e);
+}
+
+.lt-value-stack__pay-price {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: var(--lt-text, #26251e);
+}
+
 /* Unselected cards — muted */
 .lt-bb-card:not(.is-selected) {
   opacity: 0.6;
@@ -1826,7 +1857,14 @@
       "type": "checkbox",
       "id": "show_subscription_toggle",
       "label": "Abo-Auswahl anzeigen (Sub vs. Einmalkauf)",
-      "info": "Deaktivieren für Einmal-Kaufprodukte (z. B. Diagnostik-Tests). Blendet Radio-Karten, ODER-Trenner und Appstle-Widget vollständig aus. Verschiebt Dr.-Badge und Value Stack vor den CTA.",
+      "info": "Deaktivieren für Einmal-Kaufprodukte (z. B. Diagnostik-Tests). Blendet Radio-Karten, ODER-Trenner und Appstle-Widget vollständig aus.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_price_standalone",
+      "label": "Preis-Block separat anzeigen",
+      "info": "Deaktivieren wenn der Preis ausschließlich im Value Stack (letzte zwei Zeilen) erscheinen soll. Bei Einmal-Kauf-Produkten ohne Abo auf false setzen.",
       "default": true
     },
     {
@@ -2035,6 +2073,13 @@
       "id": "stack_old_total",
       "label": "Fallback Gesamtwert (falls JS aus)",
       "default": "69,80 €"
+    },
+    {
+      "type": "text",
+      "id": "stack_pay_today_label",
+      "label": "Du zahlst heute — Label",
+      "info": "Wird nur bei show_price_standalone: false angezeigt (no-sub Modus). Leer lassen = Zeile wird nicht gerendert. Standard: Du zahlst heute",
+      "default": "Du zahlst heute"
     },
     {
       "type": "header",
