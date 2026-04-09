@@ -9,8 +9,20 @@
   assign crs_ckb_visual_type = section.settings.visual_type | default: 'image'
   assign crs_ckb_graph_kicker = section.settings.graph_kicker | strip
   assign crs_ckb_graph_note = section.settings.graph_note | strip
+  assign crs_ckb_graph_axis_x = section.settings.graph_axis_x | strip
+  assign crs_ckb_graph_axis_y = section.settings.graph_axis_y | strip
+  assign crs_ckb_graph_alt = section.settings.graph_alt | strip
   if crs_ckb_kicker == '__none__'
     assign crs_ckb_kicker = ''
+  endif
+  if crs_ckb_graph_axis_x == blank
+    assign crs_ckb_graph_axis_x = 'Alter'
+  endif
+  if crs_ckb_graph_axis_y == blank
+    assign crs_ckb_graph_axis_y = 'NAD+'
+  endif
+  if crs_ckb_graph_alt == blank
+    assign crs_ckb_graph_alt = 'Schematische Visualisierung eines altersbedingten NAD+-Rueckgangs.'
   endif
   assign crs_h_headline_lg = false
   if section.settings.heading_size == 'product_title'
@@ -95,16 +107,8 @@
               <div
                 class="ckb-nad__chart"
                 role="img"
-                aria-labelledby="ckb-nad-title-{{ section.id }}"
-                aria-describedby="ckb-nad-desc-{{ section.id }}"
+                aria-label="{{ crs_ckb_graph_alt | escape }}"
               >
-                <span class="visually-hidden" id="ckb-nad-title-{{ section.id }}">
-                  Animierte Visualisierung eines altersbedingten NAD+ Rueckgangs
-                </span>
-                <span class="visually-hidden" id="ckb-nad-desc-{{ section.id }}">
-                  Schematische Kurve mit hoehren NAD+ Werten in juengeren Jahren und niedrigeren Werten im hoeheren Alter.
-                </span>
-
                 <svg
                   class="ckb-nad__svg"
                   viewBox="0 0 720 520"
@@ -152,7 +156,7 @@
                 </svg>
 
                 <div class="ckb-nad__y-guide" aria-hidden="true">
-                  <span class="ckb-nad__y-caption">NAD+</span>
+                  <span class="ckb-nad__y-caption">{{ crs_ckb_graph_axis_y | escape }}</span>
                   <span class="ckb-nad__y-value ckb-nad__y-value--top">100</span>
                   <span class="ckb-nad__y-value ckb-nad__y-value--mid">50</span>
                   <span class="ckb-nad__y-value ckb-nad__y-value--bottom">0</span>
@@ -165,7 +169,7 @@
                     <span class="ckb-nad__x-label-value">50</span>
                   </span>
                   <span class="ckb-nad__x-label">
-                    <span class="ckb-nad__x-label-text">ALTER</span>
+                    <span class="ckb-nad__x-label-text">{{ crs_ckb_graph_axis_x | escape }}</span>
                   </span>
                 </div>
 
@@ -1123,6 +1127,13 @@
       "id": "graph_axis_y",
       "label": "Achse links",
       "default": "NAD+"
+    },
+    {
+      "visible_if": "{{ section.settings.visual_type == 'nad_graph' }}",
+      "type": "text",
+      "id": "graph_alt",
+      "label": "Graph Alt-Text",
+      "default": "Schematische Visualisierung eines altersbedingten NAD+-Rueckgangs."
     },
     {
       "visible_if": "{{ section.settings.visual_type == 'nad_graph' }}",

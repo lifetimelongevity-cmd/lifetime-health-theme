@@ -62,6 +62,7 @@
           <div class="faq-item" {{ block.shopify_attributes }}>
             <button
               class="faq-question"
+              id="faq-trigger-{{ section.id }}-{{ forloop.index }}"
               aria-expanded="false"
               aria-controls="faq-panel-{{ section.id }}-{{ forloop.index }}"
             >
@@ -72,6 +73,7 @@
               class="faq-panel"
               id="faq-panel-{{ section.id }}-{{ forloop.index }}"
               role="region"
+              aria-labelledby="faq-trigger-{{ section.id }}-{{ forloop.index }}"
             >
               <div class="faq-answer">
                 <p>{{ block.settings.answer | escape }}</p>
@@ -84,6 +86,35 @@
     </div>
   </div>
 </div>
+
+{%- capture faq_schema_items -%}
+  {%- assign faq_schema_started = false -%}
+  {%- for block in section.blocks -%}
+    {%- assign faq_question = block.settings.question | strip -%}
+    {%- assign faq_answer = block.settings.answer | strip -%}
+    {%- if faq_question != blank and faq_answer != blank -%}
+      {%- if faq_schema_started -%},{%- endif -%}
+      {%- assign faq_schema_started = true -%}
+      {
+        "@type": "Question",
+        "name": {{ faq_question | json }},
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": {{ faq_answer | strip_html | strip_newlines | json }}
+        }
+      }
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+{%- unless faq_schema_items | strip == blank -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [{{ faq_schema_items | strip }}]
+    }
+  </script>
+{%- endunless -%}
 
 {% stylesheet %}
 /* ===================================================
