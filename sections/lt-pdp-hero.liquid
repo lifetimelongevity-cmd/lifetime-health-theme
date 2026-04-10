@@ -58,10 +58,20 @@
   }
 {% endstyle %}
 
+{%- liquid
+  # Sticky: kein Streichpreis auf product.14_1_test (Template-Suffix), Editor-sicher
+  assign lt_sticky_show_compare_price = true
+  if template.suffix == '14_1_test'
+    assign lt_sticky_show_compare_price = false
+  elsif section.settings.sticky_show_compare_price == false
+    assign lt_sticky_show_compare_price = false
+  endif
+-%}
+
 <section
   id="lt-pdp-hero-{{ section.id }}"
   class="lt-pdp-hero-section"
-  data-lt-sticky-show-compare="{% if section.settings.sticky_show_compare_price != false %}1{% else %}0{% endif %}"
+  data-lt-sticky-show-compare="{% if lt_sticky_show_compare_price %}1{% else %}0{% endif %}"
 >
   <div class="lt-pdp-hero__container">
     <product-page
@@ -848,7 +858,7 @@
             <span class="sticky-add-to-cart__price-original text-weight--bold">
               {{ current_variant.price | money | append: iso_code }}
             </span>
-            {%- if section.settings.sticky_show_compare_price != false and current_variant.compare_at_price > current_variant.price -%}
+            {%- if lt_sticky_show_compare_price and current_variant.compare_at_price > current_variant.price -%}
               <del class="sticky-add-to-cart__price-compare">
                 {{ current_variant.compare_at_price | money | append: iso_code }}
               </del>
@@ -948,7 +958,7 @@
             <span class="sticky-add-to-cart__price-original text-weight--bold">
               {{ current_variant.price | money | append: iso_code }}
             </span>
-            {%- if section.settings.sticky_show_compare_price != false and current_variant.compare_at_price > current_variant.price -%}
+            {%- if lt_sticky_show_compare_price and current_variant.compare_at_price > current_variant.price -%}
               <del class="sticky-add-to-cart__price-compare">
                 {{ current_variant.compare_at_price | money | append: iso_code }}
               </del>
