@@ -58,7 +58,11 @@
   }
 {% endstyle %}
 
-<section id="lt-pdp-hero-{{ section.id }}" class="lt-pdp-hero-section">
+<section
+  id="lt-pdp-hero-{{ section.id }}"
+  class="lt-pdp-hero-section"
+  data-lt-sticky-show-compare="{% if section.settings.sticky_show_compare_price != false %}1{% else %}0{% endif %}"
+>
   <div class="lt-pdp-hero__container">
     <product-page
       id="product-{{ section.id }}"
@@ -844,7 +848,7 @@
             <span class="sticky-add-to-cart__price-original text-weight--bold">
               {{ current_variant.price | money | append: iso_code }}
             </span>
-            {%- if current_variant.compare_at_price > current_variant.price -%}
+            {%- if section.settings.sticky_show_compare_price != false and current_variant.compare_at_price > current_variant.price -%}
               <del class="sticky-add-to-cart__price-compare">
                 {{ current_variant.compare_at_price | money | append: iso_code }}
               </del>
@@ -944,7 +948,7 @@
             <span class="sticky-add-to-cart__price-original text-weight--bold">
               {{ current_variant.price | money | append: iso_code }}
             </span>
-            {%- if current_variant.compare_at_price > current_variant.price -%}
+            {%- if section.settings.sticky_show_compare_price != false and current_variant.compare_at_price > current_variant.price -%}
               <del class="sticky-add-to-cart__price-compare">
                 {{ current_variant.compare_at_price | money | append: iso_code }}
               </del>
@@ -978,6 +982,8 @@
   (function() {
     const section = document.getElementById('lt-pdp-hero-{{ section.id }}');
     if (!section) return;
+
+    const ltStickyShowCompare = section.dataset.ltStickyShowCompare !== '0';
 
     const reviewButton = section.querySelector('[data-lt-reviews-scroll]');
 
@@ -1065,7 +1071,7 @@
         '<span class="sticky-add-to-cart__price-original text-weight--bold">' +
         escapeLtHtml(main) +
         '</span>';
-      if (compareCents > currentCents) {
+      if (ltStickyShowCompare && compareCents > currentCents) {
         h +=
           '<del class="sticky-add-to-cart__price-compare">' +
           escapeLtHtml(formatPrice(compareCents)) +
@@ -2140,6 +2146,13 @@
       "label": "Sticky ATC Unterzeile",
       "info": "Text unter dem Produkttitel im Sticky-Bar (z. B. Versand/Garantie). Leer lassen zum Ausblenden. Bearbeiten: Section „LT — PDP Hero“ → Sticky ATC.",
       "default": "Gratisversand · 90-Tage Garantie"
+    },
+    {
+      "type": "checkbox",
+      "id": "sticky_show_compare_price",
+      "label": "Streichpreis im Sticky-Warenkorb",
+      "info": "Deaktivieren, wenn nur der aktuelle Preis angezeigt werden soll (z. B. schmale Mobile-Ansicht).",
+      "default": true
     }
   ],
   "presets": [
