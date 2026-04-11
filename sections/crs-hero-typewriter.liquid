@@ -1,8 +1,10 @@
 {% style %}
   #section-{{ section.id }} {
-    --hero-text:     {{ settings.color_text_main | default: '#161514' }};
-    --hero-text-sec: {{ settings.color_text_main | color_modify: 'alpha', 0.45 | default: 'rgba(22,21,20,0.45)' }};
-    --hero-bg:       {{ settings.color_background_main | default: '#efede6' }};
+    --hero-text:     {{ section.settings.color_text | default: '#26251e' }};
+    --hero-text-sec: {{ section.settings.color_text | default: '#26251e' | color_modify: 'alpha', 0.55 }};
+    --hero-bg:       {{ section.settings.color_bg | default: '#f7f7f4' }};
+    --hero-card-bg:  {{ section.settings.color_card_bg | default: '#f2f1ed' }};
+    --hero-card-brd: {{ section.settings.color_text | default: '#26251e' | color_modify: 'alpha', 0.08 }};
     --hero-btn-r:    {{ settings.border_radius_buttons | default: 30 }}px;
     padding-top:    {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
@@ -192,22 +194,25 @@
 
 /* Eyebrow */
 .ltw-eyebrow {
-  font-size: .875rem;
-  font-weight: 500;
-  letter-spacing: .01em;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  letter-spacing: .12em;
+  text-transform: uppercase;
   color: var(--hero-text-sec, rgba(22,21,20,.45));
-  margin: 0 0 12px;
+  margin: 0 0 8px;
 }
 
 /* Headline */
 .ltw-heading {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
-  font-size: clamp(2rem, 4vw, 3.25rem) !important;
-  font-weight: 700 !important;
-  line-height: 1.1 !important;
-  letter-spacing: -.03em !important;
+  font-family: var(--font-heading) !important;
+  font-size: clamp(2.25rem, 4vw, 3.25rem) !important;
+  font-weight: var(--weight-regular) !important;
+  line-height: var(--leading-heading) !important;
+  letter-spacing: -.02em !important;
   color: var(--hero-text, #161514) !important;
-  margin: 0 0 16px !important;
+  margin: 0 0 10px !important;
 }
 
 .ltw-heading__static {
@@ -234,13 +239,13 @@
 
 /* Subheading */
 .ltw-subheading {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
-  font-size: 1.0625rem !important;  /* 17px — body text, clearly subordinate to headline */
-  font-weight: 400 !important;
-  line-height: 1.6 !important;
+  font-family: var(--font-body) !important;
+  font-size: var(--text-body-lg) !important;
+  font-weight: var(--weight-regular) !important;
+  line-height: var(--leading-body) !important;
   letter-spacing: 0 !important;
-  color: var(--hero-text-sec, rgba(22,21,20,.45)) !important;
-  margin: 0 0 40px !important;
+  color: var(--hero-text-sec, rgba(22,21,20,.55)) !important;
+  margin: 0 0 32px !important;
 }
 
 /* CTA */
@@ -252,10 +257,11 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: var(--hero-text, #161514);
-  color: var(--hero-bg, #efede6);
-  font-size: .9375rem;
-  font-weight: 500;
+  background: var(--color-dark);
+  color: var(--color-text-on-dark);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
   line-height: 1;
   padding: 14px 22px;
   border-radius: var(--hero-btn-r, 30px);
@@ -269,7 +275,7 @@
   background: transparent;
   color: var(--hero-text, #161514);
   border: 1.5px solid currentColor;
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
 .ltw-btn--ghost:hover {
@@ -293,18 +299,19 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 16px;
+  border-radius: 4px;
   display: block;
 }
 
 .ltw-visual__placeholder {
   width: 100%;
   aspect-ratio: 4 / 3;
-  background: rgba(0,0,0,.06);
-  border-radius: 16px;
+  background: var(--hero-card-bg, #f2f1ed);
+  border-radius: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid var(--hero-card-brd, rgba(38,37,30,.08));
 }
 
 .ltw-placeholder-svg {
@@ -322,9 +329,10 @@
 }
 
 .ltw-card {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0,0,0,.07), 0 0 0 1px rgba(0,0,0,.04);
+  background: var(--hero-card-bg, #f2f1ed);
+  border-radius: 4px;
+  box-shadow: none;
+  border: 1px solid var(--hero-card-brd, rgba(38,37,30,.08));
   padding: 20px 24px;
 }
 
@@ -335,29 +343,32 @@
 }
 
 .ltw-card__label {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: .08em;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: .12em;
   text-transform: uppercase;
-  opacity: .5;
+  opacity: .4;
   margin-bottom: 8px;
-  color: #161514;
+  color: var(--hero-text, #26251e);
 }
 
 .ltw-card__age-num {
-  font-size: 4rem;
-  font-weight: 800;
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 6vw, 4rem);
+  font-weight: var(--weight-regular);
   line-height: 1;
   letter-spacing: -.04em;
-  color: #161514;
+  color: var(--hero-text, #26251e);
   margin-bottom: 6px;
 }
 
 .ltw-card__age-sub {
-  font-size: 14px;
-  font-weight: 600;
-  opacity: .4;
-  color: #161514;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  opacity: .55;
+  color: var(--hero-text, #26251e);
 }
 
 /* Metric cards */
@@ -373,16 +384,17 @@
 
 .ltw-metric__name {
   display: block;
+  font-family: var(--font-body);
   font-size: .8125rem;
-  font-weight: 600;
-  color: #161514;
+  font-weight: var(--weight-medium);
+  color: var(--hero-text, #26251e);
   margin-bottom: 10px;
-  opacity: .8;
+  opacity: .7;
 }
 
 .ltw-bar {
   height: 7px;
-  background: rgba(0,0,0,.07);
+  background: rgba(38,37,30,.08);
   border-radius: 99px;
   overflow: hidden;
 }
@@ -439,6 +451,25 @@
       "step": 8,
       "default": 120,
       "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrundfarbe"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Kartenhintergrund"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe"
     },
     {
       "type": "header",
