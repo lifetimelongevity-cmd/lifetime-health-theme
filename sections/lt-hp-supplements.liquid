@@ -1,36 +1,757 @@
-{% comment %} lt-hp-supplements — Stub. Liquid pending. {% endcomment %}
+{% comment %}
+  lt-hp-supplements — Protokoll-Stack (Section 7)
+  ─────────────────────────────────────────────────
+  §12 Build Spec:
+  - Surface:          --color-surface-secondary (warm — nach dunkler Science Section, sanfte Rückkehr)
+  - Dominant element: NMN Hero-Card (is_hero: true) — deutlich prominenter als die drei Standard-Cards
+  - Heading size:     --text-h1 Section · Hero-Card: --text-h2 Produkt-Name · Standard: --text-h3
+  - Content pattern:  Hero-Card (volle Breite oder groß) + 3-col Standard-Cards + Grid-CTA
+  - CTA:              "Entdecken" pro Card (soft, keine Add-to-Cart) + Grid-CTA am Ende
+  - Removed:          Add-to-Cart in Cards (Kauf auf PDP, nicht Homepage), Mengenauswahl
+  - Quality move:     "Test-verknüpft"-Badge auf jeder relevanten Card — macht den Biomarker-Bezug
+                      explicit: nicht "wir haben auch Supplemente", sondern
+                      "dein Test zeigt ob du das brauchst".
+                      Hero-Card (NMN) bekommt visuell deutlich mehr Gewicht:
+                      größeres Produktbild, größere Typografie, prominenterer CTA.
+{% endcomment %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.color_bg != blank -%}
+    background: {{ section.settings.color_bg }};
+    {%- endif -%}
+    {%- if section.settings.color_text != blank -%}
+    color: {{ section.settings.color_text }};
+    {%- endif -%}
+    padding-top:    {{ section.settings.padding_top | default: 80 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | default: 80 }}px;
+  }
+{% endstyle %}
+
+<section id="shopify-section-{{ section.id }}" class="supps">
+  <div class="supps__container">
+
+    {%- comment -%}=== Section Header ==={%- endcomment -%}
+    <div class="supps__header">
+      {%- if section.settings.kicker != blank -%}
+        <p class="supps__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      <h2 class="supps__headline">{{ section.settings.headline | escape }}</h2>
+      {%- if section.settings.subheadline != blank -%}
+        <p class="supps__subheadline">{{ section.settings.subheadline | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%}=== Hero Card (is_hero: true) — rendered separately for layout control ==={%- endcomment -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'supplement_card' and block.settings.is_hero -%}
+        <div class="supps__hero-card" {{ block.shopify_attributes }}>
+
+          {%- comment -%} Product visual {%- endcomment -%}
+          <div class="supps__hero-visual" aria-hidden="true">
+            {%- if block.settings.product_image_url != blank -%}
+              <img
+                src="{{ block.settings.product_image_url | escape }}"
+                alt="{{ block.settings.product_name | escape }}"
+                class="supps__hero-img"
+                loading="lazy"
+                width="400"
+                height="400"
+              >
+            {%- else -%}
+              <div class="supps__hero-placeholder">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M6 2v6l-2.5 5.5A4 4 0 0 0 7 20h10a4 4 0 0 0 3.5-6.5L18 8V2"/>
+                  <line x1="6" y1="2" x2="18" y2="2"/>
+                  <path d="M6 13h12"/>
+                </svg>
+                <p>{{ block.settings.product_name | escape }}</p>
+              </div>
+            {%- endif -%}
+          </div>
+
+          {%- comment -%} Product info {%- endcomment -%}
+          <div class="supps__hero-info">
+            {%- if block.settings.show_test_link_badge and block.settings.test_link_label != blank -%}
+              <div class="supps__test-badge">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                {{ block.settings.test_link_label | escape }}
+              </div>
+            {%- endif -%}
+
+            <h3 class="supps__hero-name">{{ block.settings.product_name | escape }}</h3>
+
+            {%- if block.settings.product_tagline != blank -%}
+              <p class="supps__hero-tagline">{{ block.settings.product_tagline | escape }}</p>
+            {%- endif -%}
+
+            {%- if block.settings.product_price != blank -%}
+              <p class="supps__hero-price">{{ block.settings.product_price | escape }}</p>
+            {%- endif -%}
+
+            {%- if block.settings.cta_label != blank -%}
+              <a href="{{ block.settings.product_url | default: '#' }}" class="supps__hero-cta">
+                {{ block.settings.cta_label | escape }}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </a>
+            {%- endif -%}
+          </div>
+
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- comment -%}=== Standard Cards (is_hero: false) ==={%- endcomment -%}
+    {%- assign has_standard = false -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'supplement_card' and block.settings.is_hero == false -%}
+        {%- assign has_standard = true -%}{%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if has_standard -%}
+      <ul class="supps__grid" role="list">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'supplement_card' and block.settings.is_hero == false -%}
+            <li class="supps__card" {{ block.shopify_attributes }}>
+
+              {%- comment -%} Product image {%- endcomment -%}
+              <div class="supps__card-visual" aria-hidden="true">
+                {%- if block.settings.product_image_url != blank -%}
+                  <img
+                    src="{{ block.settings.product_image_url | escape }}"
+                    alt="{{ block.settings.product_name | escape }}"
+                    class="supps__card-img"
+                    loading="lazy"
+                    width="280"
+                    height="280"
+                  >
+                {%- else -%}
+                  <div class="supps__card-placeholder">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6 2v6l-2.5 5.5A4 4 0 0 0 7 20h10a4 4 0 0 0 3.5-6.5L18 8V2"/>
+                      <line x1="6" y1="2" x2="18" y2="2"/>
+                      <path d="M6 13h12"/>
+                    </svg>
+                  </div>
+                {%- endif -%}
+              </div>
+
+              <div class="supps__card-info">
+                {%- if block.settings.show_test_link_badge and block.settings.test_link_label != blank -%}
+                  <div class="supps__test-badge supps__test-badge--sm">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                    {{ block.settings.test_link_label | escape }}
+                  </div>
+                {%- endif -%}
+
+                <h3 class="supps__card-name">{{ block.settings.product_name | escape }}</h3>
+
+                {%- if block.settings.product_tagline != blank -%}
+                  <p class="supps__card-tagline">{{ block.settings.product_tagline | escape }}</p>
+                {%- endif -%}
+
+                <div class="supps__card-footer">
+                  {%- if block.settings.product_price != blank -%}
+                    <span class="supps__card-price">{{ block.settings.product_price | escape }}</span>
+                  {%- endif -%}
+                  {%- if block.settings.cta_label != blank -%}
+                    <a href="{{ block.settings.product_url | default: '#' }}" class="supps__card-cta">
+                      {{ block.settings.cta_label | escape }}
+                    </a>
+                  {%- endif -%}
+                </div>
+              </div>
+
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- comment -%}=== Grid CTA ==={%- endcomment -%}
+    {%- if section.settings.cta_label != blank -%}
+      <div class="supps__grid-cta">
+        <a href="{{ section.settings.cta_url | default: '#' }}" class="supps__cta">
+          {{ section.settings.cta_label | escape }}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% stylesheet %}
+/* ================================================================
+   lt-hp-supplements — Produkt-Stack (AOV Upsell)
+   Token refs: §3 (colors, type, spacing), §5 (Card Info pattern)
+   ================================================================ */
+
+/* — Section shell — */
+.supps {
+  background: var(--color-surface-secondary);
+}
+
+.supps__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+/* — Section header — */
+.supps__header {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto var(--space-9);
+}
+
+.supps__kicker {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.supps__headline {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-4);
+}
+
+.supps__subheadline {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* — Test-verknüpft Badge — */
+/*
+  DECISION: teal pill — same surface token as result-metric in social proof.
+  Makes the Test→Supplement connection visually consistent across sections.
+*/
+.supps__test-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-surface-benefit);
+  border: 1px solid rgba(94, 171, 161, 0.25);
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-teal-dark);
+  line-height: 1;
+}
+
+.supps__test-badge--sm {
+  font-size: var(--text-micro);
+  padding: 5px var(--space-2);    /* intentional: between --space-1/2 for compact badge */
+}
+
+/* — Hero Card (NMN Flaggschiff) — */
+/*
+  DECISION: 2-col split within card — product image left, info right.
+  White bg on warm surface = visual lift.
+  More padding than standard cards (--space-8 vs --space-5) signals importance.
+  is_hero: true means this card should feel like a mini product hero, not a list item.
+*/
+.supps__hero-card {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-7);            /* 48px */
+  background: var(--color-surface-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);        /* 64px */
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-7);  /* 48px → standard cards grid */
+  align-items: center;
+}
+
+/* Hero visual */
+.supps__hero-visual {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+}
+
+.supps__hero-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.supps__hero-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--color-surface-benefit);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  color: var(--color-teal-dark);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+}
+
+/* Hero info */
+.supps__hero-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.supps__hero-name {
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);     /* 28px */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.supps__hero-tagline {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.supps__hero-price {
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);     /* 24px */
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.supps__hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: 12px var(--space-6);
+  border-radius: var(--radius-full);
+  background: var(--color-cta-bg);
+  color: var(--color-cta-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: opacity var(--ease-default);
+  margin-top: var(--space-3);
+}
+
+.supps__hero-cta:hover {
+  opacity: 0.88;
+}
+
+/* — Standard Card Grid (3 products) — */
+.supps__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-7);    /* 48px before grid CTA */
+}
+
+/* — Standard Card — */
+.supps__card {
+  background: var(--color-surface-primary);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Card visual */
+.supps__card-visual {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.supps__card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--ease-smooth);
+}
+
+.supps__card:hover .supps__card-img {
+  transform: scale(1.03);
+}
+
+.supps__card-placeholder {
+  width: 100%;
+  height: 100%;
+  background: var(--color-surface-benefit);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-teal-dark);
+}
+
+/* Card info */
+.supps__card-info {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  flex: 1;
+}
+
+.supps__card-name {
+  font-family: var(--font-heading);
+  font-size: var(--text-section); /* 20px */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.supps__card-tagline {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+  margin: 0;
+  flex: 1;
+}
+
+/* Card footer: price + CTA */
+.supps__card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.supps__card-price {
+  font-family: var(--font-heading);
+  font-size: var(--text-body);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+}
+
+.supps__card-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 1px solid var(--color-border-default);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: background var(--ease-default), border-color var(--ease-default);
+}
+
+.supps__card-cta:hover {
+  background: var(--color-surface-secondary);
+  border-color: var(--color-text-secondary);
+}
+
+/* — Grid CTA — */
+.supps__grid-cta {
+  display: flex;
+  justify-content: center;
+}
+
+.supps__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px var(--space-7);
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: 1.5px solid var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: background var(--ease-default);
+}
+
+.supps__cta:hover {
+  background: var(--color-border-default);
+}
+
+/* — Responsive — */
+@media screen and (max-width: 1024px) {
+  .supps__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .supps__container {
+    padding: 0 var(--space-4);
+  }
+
+  .supps__header {
+    margin-bottom: var(--space-7);
+  }
+
+  .supps__headline {
+    font-size: var(--text-h2);
+  }
+
+  .supps__hero-card {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+    padding: var(--space-5);
+  }
+
+  .supps__hero-visual {
+    max-width: 240px;
+    margin: 0 auto;
+  }
+
+  .supps__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .supps__grid {
+    grid-template-columns: 1fr;
+  }
+}
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "HP Supplements",
+  "tag": "section",
+  "class": "section",
   "settings": [
-    { "type": "color", "id": "color_bg", "label": "Hintergrundfarbe" },
-    { "type": "color", "id": "color_text", "label": "Textfarbe" },
-    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
-    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
-    { "type": "text", "id": "kicker", "label": "Kicker" },
-    { "type": "text", "id": "headline", "label": "Headline" },
-    { "type": "textarea", "id": "subheadline", "label": "Subheadline" },
-    { "type": "text", "id": "cta_label", "label": "CTA Text" },
-    { "type": "url", "id": "cta_url", "label": "CTA Link" }
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrundfarbe"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe"
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline"
+    },
+    {
+      "type": "textarea",
+      "id": "subheadline",
+      "label": "Subheadline"
+    },
+    {
+      "type": "header",
+      "content": "Grid-CTA"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA Text"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA Link"
+    }
   ],
   "blocks": [
     {
       "type": "supplement_card",
-      "name": "Supplement-Karte",
+      "name": "Supplement-Card",
       "settings": [
-        { "type": "checkbox", "id": "is_hero", "label": "Hero-Karte", "default": false },
-        { "type": "text", "id": "product_name", "label": "Produktname" },
-        { "type": "text", "id": "product_tagline", "label": "Tagline" },
-        { "type": "text", "id": "product_image_url", "label": "Produktbild URL" },
-        { "type": "text", "id": "product_price", "label": "Preis" },
-        { "type": "url", "id": "product_url", "label": "Produkt-Link" },
-        { "type": "checkbox", "id": "show_test_link_badge", "label": "Test-Badge anzeigen", "default": false },
-        { "type": "text", "id": "test_link_label", "label": "Test-Badge Text" },
-        { "type": "text", "id": "cta_label", "label": "CTA Text" }
+        {
+          "type": "checkbox",
+          "id": "is_hero",
+          "label": "Hero-Card (groß, 2-spaltig)",
+          "default": false,
+          "info": "Nur für das Hauptprodukt aktivieren (z.B. NMN)"
+        },
+        {
+          "type": "text",
+          "id": "product_name",
+          "label": "Produktname"
+        },
+        {
+          "type": "text",
+          "id": "product_tagline",
+          "label": "Tagline"
+        },
+        {
+          "type": "text",
+          "id": "product_image_url",
+          "label": "Produktbild URL"
+        },
+        {
+          "type": "text",
+          "id": "product_price",
+          "label": "Preis",
+          "info": "Als Text, z.B. 39,90 €"
+        },
+        {
+          "type": "url",
+          "id": "product_url",
+          "label": "Produkt-Link"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_test_link_badge",
+          "label": "Test-verknüpft-Badge anzeigen",
+          "default": false
+        },
+        {
+          "type": "text",
+          "id": "test_link_label",
+          "label": "Badge-Text",
+          "info": "z.B. Empfohlen bei erhöhtem MethylPace-Score"
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA Text"
+        }
       ]
     }
   ],
-  "presets": [{ "name": "HP Supplements" }]
+  "presets": [
+    {
+      "name": "HP Supplements",
+      "blocks": [
+        {
+          "type": "supplement_card",
+          "settings": {
+            "is_hero": true,
+            "product_name": "NMN Pulver",
+            "product_tagline": "NAD+-Vorläufer · >99 % Reinheit · direkt dosierbar",
+            "product_price": "39,90 €",
+            "product_url": "/products/nmn-pulver",
+            "show_test_link_badge": true,
+            "test_link_label": "Empfohlen bei erhöhtem MethylPace-Score",
+            "cta_label": "NMN entdecken"
+          }
+        },
+        {
+          "type": "supplement_card",
+          "settings": {
+            "is_hero": false,
+            "product_name": "NAD+-Booster (liposomal)",
+            "product_tagline": "Maximale Bioverfügbarkeit · liposomale Formulierung",
+            "product_price": "49,90 €",
+            "product_url": "/products/nad-booster",
+            "show_test_link_badge": true,
+            "test_link_label": "Empfohlen bei biologischem Alter > chronologischem Alter",
+            "cta_label": "Entdecken"
+          }
+        },
+        {
+          "type": "supplement_card",
+          "settings": {
+            "is_hero": false,
+            "product_name": "Fisetin",
+            "product_tagline": "Senolytikum · zelluläre Erneuerung",
+            "product_price": "29,90 €",
+            "product_url": "/products/fisetin",
+            "show_test_link_badge": true,
+            "test_link_label": "Empfohlen bei erhöhtem Entzündungsprofil",
+            "cta_label": "Entdecken"
+          }
+        },
+        {
+          "type": "supplement_card",
+          "settings": {
+            "is_hero": false,
+            "product_name": "CaAKG",
+            "product_tagline": "Alpha-Ketoglutarat · zelluläre Energieversorgung",
+            "product_price": "34,90 €",
+            "product_url": "/products/caakg",
+            "cta_label": "Entdecken"
+          }
+        }
+      ]
+    }
+  ]
 }
 {% endschema %}

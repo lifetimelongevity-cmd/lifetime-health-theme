@@ -43,6 +43,14 @@
               <span class="ltw-btn__icon" aria-hidden="true">{{ section.settings.cta_icon }}</span>
             {%- endif -%}
           </a>
+          {%- if section.settings.cta_secondary_label != blank -%}
+            <a
+              href="{{ section.settings.cta_secondary_anchor | default: '#' }}"
+              class="ltw-btn ltw-btn--ghost"
+            >
+              {{ section.settings.cta_secondary_label | escape }}
+            </a>
+          {%- endif -%}
         </div>
       {%- endif -%}
 
@@ -227,10 +235,10 @@
 /* Subheading */
 .ltw-subheading {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
-  font-size: clamp(2rem, 4vw, 3.25rem) !important;
-  font-weight: 700 !important;
-  line-height: 1.1 !important;
-  letter-spacing: -.03em !important;
+  font-size: 1.0625rem !important;  /* 17px — body text, clearly subordinate to headline */
+  font-weight: 400 !important;
+  line-height: 1.6 !important;
+  letter-spacing: 0 !important;
   color: var(--hero-text-sec, rgba(22,21,20,.45)) !important;
   margin: 0 0 40px !important;
 }
@@ -256,6 +264,17 @@
 }
 
 .ltw-btn:hover { opacity: .82; }
+
+.ltw-btn--ghost {
+  background: transparent;
+  color: var(--hero-text, #161514);
+  border: 1.5px solid currentColor;
+  opacity: 0.6;
+}
+
+.ltw-btn--ghost:hover {
+  opacity: 0.9;
+}
 
 .ltw-btn__icon {
   font-size: 1rem;
@@ -466,6 +485,25 @@
       "label": "Button Icon",
       "default": "↓",
       "info": "z.B. → ↓ ⤓"
+    },
+    {
+      "type": "text",
+      "id": "cta_secondary_label",
+      "label": "Sekundärer CTA Text",
+      "info": "z.B. Wie es funktioniert ↓ — Ghost-Button neben primärem CTA. Leer lassen = ausblenden."
+    },
+    {
+      "type": "text",
+      "id": "cta_secondary_anchor",
+      "label": "Sekundärer CTA Anker",
+      "info": "Anchor-Link, z.B. #shopify-section-loop"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_trust_ticker",
+      "label": "Trust-Ticker-Hinweis",
+      "default": false,
+      "info": "Nur als Referenz — der Ticker ist eine eigenständige Section (lt-hp-trust-ticker) in der Sektionsreihenfolge."
     },
     {
       "type": "header",

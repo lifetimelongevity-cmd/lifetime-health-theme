@@ -1,23 +1,274 @@
-{% comment %} lt-hp-trust-ticker — Stub. Liquid pending. {% endcomment %}
+{% comment %}
+  lt-hp-trust-ticker — Homepage Trust-Ticker (Section 1b)
+  ────────────────────────────────────────────────────────
+  §12 Build Spec:
+  - Surface:          --color-surface-dark (kompakte dunkle Leiste als Signal-Trenner nach dem Hero)
+  - Dominant element: die Items selbst — keine Section-Überschrift, kein Padding
+  - Heading size:     keiner — Compact-Strip-Pattern (--space-5/--space-6 padding)
+  - Content pattern:  CSS-only Marquee (keine JS-Abhängigkeit), Blöcke 2× dupliziert
+  - CTA:              keiner
+  - Removed:          Section-Header, Description, Standard-Padding — Compact-Strip
+  - Quality move:     Teal-Dot-Separator zwischen Items gibt dem Strip visuellen Rhythmus
+                      ohne ihn decorativ zu überladen. ticker_speed steuert direkt die
+                      animation-duration — volle Admin-Kontrolle ohne JS.
+{% endcomment %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.color_bg != blank -%}
+    background: {{ section.settings.color_bg }};
+    {%- endif -%}
+    {%- if section.settings.color_text != blank -%}
+    color: {{ section.settings.color_text }};
+    {%- endif -%}
+  }
+  #shopify-section-{{ section.id }} .ticker__track {
+    animation-duration: {{ section.settings.ticker_speed | default: 30 }}s;
+  }
+{% endstyle %}
+
+<section id="shopify-section-{{ section.id }}" class="ticker" aria-label="Trust-Signale">
+  <div class="ticker__viewport">
+    <div class="ticker__track" aria-hidden="true">
+      {%- comment -%}
+        Items werden 2× gerendert (ohne JS), damit der Track nahtlos scrollt.
+        translateX(-50%) in der Animation = genau ein vollständiger Satz Items.
+      {%- endcomment -%}
+      {%- for n in (1..2) -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'ticker_item' -%}
+            <span class="ticker__item{% if n == 2 %} ticker__dup{% endif %}" {{ block.shopify_attributes }}>
+              {%- if block.settings.item_icon != blank -%}
+                <span class="ticker__item-icon" aria-hidden="true">{{ block.settings.item_icon }}</span>
+              {%- else -%}
+                <svg class="ticker__check" width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true">
+                  <circle cx="6.5" cy="6.5" r="6" stroke="currentColor" stroke-width="1"/>
+                  <path d="M4 6.5l1.75 1.75L9 4.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              {%- endif -%}
+              {{ block.settings.item_text | escape }}
+            </span>
+            <span class="ticker__sep" aria-hidden="true">
+              <svg width="4" height="4" viewBox="0 0 4 4" fill="currentColor"><circle cx="2" cy="2" r="2"/></svg>
+            </span>
+          {%- endif -%}
+        {%- endfor -%}
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%}
+      Zugängliche Version: screen-reader-only, nicht sichtbar.
+      aria-hidden="true" auf dem visuellen Track, da der Text sich wiederholt.
+    {%- endcomment -%}
+    <ul class="ticker__sr-list">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'ticker_item' -%}
+          <li>{{ block.settings.item_text | escape }}</li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% stylesheet %}
+/* ================================================================
+   lt-hp-trust-ticker — Compact Trust Strip
+   Token refs: §3 (colors, type), §4 (Compact padding: --space-5/6)
+   ================================================================ */
+
+/* — Section shell — */
+.ticker {
+  background: var(--color-surface-dark);    /* #364F56 */
+  color: var(--color-text-on-dark);
+  padding: var(--space-3) 0;               /* intentional: tighter than --space-4, compact strip */
+  overflow: hidden;
+}
+
+/* — Viewport (clips the scrolling track) — */
+.ticker__viewport {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+
+  /* Edge fade — subtle gradient masks reinforce infinite feel */
+  mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0%,
+    black 6%,
+    black 94%,
+    transparent 100%
+  );
+}
+
+/* — Scrolling track — */
+/*
+  DECISION: translateX(-50%) moves by exactly one set of items,
+  creating a seamless loop when combined with the duplicated Liquid output.
+  animation-duration is set per-section via {% style %} using ticker_speed.
+*/
+.ticker__track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  animation: ticker-scroll linear infinite;
+  animation-duration: 30s;                 /* default — overridden by {% style %} */
+}
+
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Pause on hover (accessibility + usability) */
+.ticker__viewport:hover .ticker__track {
+  animation-play-state: paused;
+}
+
+/* — Item — */
+.ticker__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+  padding: 0 var(--space-5);              /* 24px horizontal rhythm between items */
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);         /* 14px */
+  font-weight: var(--weight-medium);
+  color: var(--color-text-on-dark);
+  line-height: 1;
+}
+
+/* Check icon inside item */
+.ticker__check {
+  color: var(--color-teal);               /* teal accent — matches brand tokens */
+  flex-shrink: 0;
+}
+
+/* Optional emoji/text icon */
+.ticker__item-icon {
+  font-size: var(--text-body-sm);
+  line-height: 1;
+}
+
+/* — Separator dot — */
+.ticker__sep {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-teal-dark);
+  flex-shrink: 0;
+}
+
+/* — Screen reader list — */
+.ticker__sr-list {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* — Reduced motion — */
+@media (prefers-reduced-motion: reduce) {
+  .ticker__track {
+    animation: none;
+  }
+
+  .ticker__viewport {
+    mask-image: none;
+    -webkit-mask-image: none;
+  }
+
+  /* Show items stacked as a static row when motion is reduced */
+  .ticker__track {
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-5);
+  }
+
+  /* Hide duplicate set — .ticker__dup is set in Liquid for the n==2 pass */
+  .ticker__dup,
+  .ticker__dup + .ticker__sep {
+    display: none;
+  }
+}
+{% endstylesheet %}
 
 {% schema %}
 {
-  "name": "HP Trust-Ticker",
+  "name": "HP Trust Ticker",
+  "tag": "section",
+  "class": "section",
   "settings": [
-    { "type": "range", "id": "ticker_speed", "label": "Scrollgeschwindigkeit", "min": 10, "max": 100, "step": 5, "default": 30 },
-    { "type": "color", "id": "color_bg", "label": "Hintergrundfarbe" },
-    { "type": "color", "id": "color_text", "label": "Textfarbe" }
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "range",
+      "id": "ticker_speed",
+      "label": "Scrollgeschwindigkeit (Sekunden pro Durchlauf)",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "default": 30,
+      "info": "Weniger Sekunden = schneller. 30s ist ein gutes Standard-Tempo."
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrundfarbe",
+      "info": "Standard: dunkelgrün (#364F56)"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "info": "Standard: weiß"
+    }
   ],
   "blocks": [
     {
       "type": "ticker_item",
       "name": "Ticker-Element",
       "settings": [
-        { "type": "text", "id": "item_text", "label": "Text" },
-        { "type": "text", "id": "item_icon", "label": "Icon", "info": "Optional, z.B. 🔒" }
+        {
+          "type": "text",
+          "id": "item_text",
+          "label": "Text"
+        },
+        {
+          "type": "text",
+          "id": "item_icon",
+          "label": "Icon (optional)",
+          "info": "Leer lassen → Checkmark-Icon wird verwendet. Alternativ: Emoji oder Text-Symbol."
+        }
       ]
     }
   ],
-  "presets": [{ "name": "HP Trust-Ticker" }]
+  "presets": [
+    {
+      "name": "HP Trust Ticker",
+      "blocks": [
+        { "type": "ticker_item", "settings": { "item_text": "90-Tage Geld-zurück-Garantie" } },
+        { "type": "ticker_item", "settings": { "item_text": "Gratis Versand ab 35 €" } },
+        { "type": "ticker_item", "settings": { "item_text": "+1.000 zufriedene Kund*innen" } },
+        { "type": "ticker_item", "settings": { "item_text": "Eurofins Laboranalyse · ISO-zertifiziert" } }
+      ]
+    }
+  ]
 }
 {% endschema %}

@@ -1,36 +1,628 @@
-{% comment %} lt-hp-product-hero — Stub. Liquid pending. {% endcomment %}
+{% comment %}
+  lt-hp-product-hero — Homepage Hauptprodukt (Section 4)
+  ───────────────────────────────────────────────────────
+  §12 Build Spec:
+  - Surface:          --color-surface-secondary (warm — erster Kauf-Moment nach dunklem Hero)
+  - Dominant element: Preis + CTA-Button — Auge landet hier, Aktion folgt sofort
+  - Heading size:     --text-h1 (36px) Headline · --text-micro Kicker · --text-body-lg Subheadline
+  - Content pattern:  2-col Split (Produkt-Visual links | Purchase-Block rechts) + 2×2 Feature-Grid
+  - CTA:              cta-Variante, full-width in rechter Spalte — einzige Revenue-Aktion
+  - Removed:          Abo-Toggle, Mengenwahl, Varianten-Picker (nicht relevant für Homepage)
+  - Quality move:     Eurofins-Badge inline mit Preis — Trust-Signal im Moment der Preis-Exposition
+                      Placeholder-Karte mit Teal-Tint — wirkt premium auch ohne Produktfoto
+{% endcomment %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.color_bg != blank -%}
+    background: {{ section.settings.color_bg }};
+    {%- endif -%}
+    {%- if section.settings.color_text != blank -%}
+    color: {{ section.settings.color_text }};
+    {%- endif -%}
+    padding-top:    {{ section.settings.padding_top | default: 80 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | default: 80 }}px;
+  }
+{% endstyle %}
+
+<section id="shopify-section-{{ section.id }}" class="php">
+  <div class="php__container">
+
+    {%- comment -%}=== LEFT — Product Visual ==={%- endcomment -%}
+    <div class="php__visual">
+      {%- if section.settings.product_image_url != blank -%}
+        <img
+          src="{{ section.settings.product_image_url | escape }}"
+          alt="{{ section.settings.headline | escape }}"
+          class="php__img"
+          loading="lazy"
+          width="600"
+          height="600"
+        >
+      {%- else -%}
+        <div class="php__placeholder" aria-hidden="true">
+          <svg class="php__placeholder-icon" viewBox="0 0 64 64" fill="none" aria-hidden="true" width="64" height="64">
+            <circle cx="32" cy="24" r="14" stroke="currentColor" stroke-width="1.25"/>
+            <path d="M32 10v14l7 4.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M12 52c0-11 40-11 40 0" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"/>
+          </svg>
+          <p class="php__placeholder-label">AGE & DNA-Test</p>
+          <p class="php__placeholder-sub">Speichelprobe · Eurofins · App</p>
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.show_lab_badge and section.settings.lab_badge_text != blank -%}
+        <div class="php__lab-seal">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <polyline points="9 12 11 14 15 10"/>
+          </svg>
+          {{ section.settings.lab_badge_text | escape }}
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%}=== RIGHT — Purchase Block ==={%- endcomment -%}
+    <div class="php__purchase">
+
+      {%- if section.settings.kicker != blank -%}
+        <p class="php__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+
+      <h2 class="php__headline">{{ section.settings.headline | escape }}</h2>
+
+      {%- if section.settings.subheadline != blank -%}
+        <p class="php__subheadline">{{ section.settings.subheadline | escape }}</p>
+      {%- endif -%}
+
+      {%- comment -%} Price row {%- endcomment -%}
+      {%- if section.settings.product_price != blank -%}
+        <div class="php__price-row">
+          <span class="php__price">{{ section.settings.product_price | escape }}</span>
+          <span class="php__price-note">einmalig</span>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Feature grid (2×2) {%- endcomment -%}
+      {%- if section.blocks.size > 0 -%}
+        <ul class="php__features" role="list">
+          {%- for block in section.blocks -%}
+            <li class="php__feature" {{ block.shopify_attributes }}>
+              <div class="php__feature-icon" aria-hidden="true">
+                {%- case block.settings.feature_icon -%}
+                  {%- when 'biological_age' -%}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                  {%- when 'dna' -%}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                      <path d="M2 15c6.667-6 13.333 0 20-6"/>
+                      <path d="M2 9c6.667 6 13.333 0 20 6"/>
+                      <circle cx="7" cy="12" r=".5" fill="currentColor"/>
+                      <circle cx="17" cy="12" r=".5" fill="currentColor"/>
+                    </svg>
+                  {%- when 'ai_coach' -%}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                      <line x1="9" y1="10" x2="9.01" y2="10"/>
+                      <line x1="12" y1="10" x2="12.01" y2="10"/>
+                      <line x1="15" y1="10" x2="15.01" y2="10"/>
+                    </svg>
+                  {%- when 'lab' -%}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M6 2v6l-2.5 5.5A4 4 0 0 0 7 20h10a4 4 0 0 0 3.5-6.5L18 8V2"/>
+                      <line x1="6" y1="2" x2="18" y2="2"/>
+                      <path d="M6 13h12"/>
+                    </svg>
+                  {%- else -%}
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                      <circle cx="12" cy="12" r="4"/>
+                    </svg>
+                {%- endcase -%}
+              </div>
+              <div class="php__feature-text">
+                <p class="php__feature-title">{{ block.settings.feature_title | escape }}</p>
+                {%- if block.settings.feature_body != blank -%}
+                  <p class="php__feature-body">{{ block.settings.feature_body | escape }}</p>
+                {%- endif -%}
+              </div>
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      {%- comment -%} Primary CTA {%- endcomment -%}
+      {%- if section.settings.cta_label != blank -%}
+        <a
+          href="{{ section.settings.product_url | default: '#' }}"
+          class="php__cta"
+        >
+          {{ section.settings.cta_label | escape }}
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </a>
+      {%- endif -%}
+
+      {%- comment -%} Sample report ghost link {%- endcomment -%}
+      {%- if section.settings.sample_report_label != blank and section.settings.sample_report_url != blank -%}
+        <a
+          href="{{ section.settings.sample_report_url }}"
+          class="php__report-link"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {{ section.settings.sample_report_label | escape }}
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </a>
+      {%- endif -%}
+
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+/* ================================================================
+   lt-hp-product-hero — Homepage Hauptprodukt Section
+   Token refs: §3 (colors, spacing, type), §5 (Card Info, Buttons)
+   ================================================================ */
+
+/* — Section shell — */
+.php {
+  background: var(--color-surface-secondary);
+}
+
+.php__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  display: grid;
+  grid-template-columns: 5fr 7fr;   /* asymmetric: visual smaller, purchase block wider */
+  gap: var(--space-8);              /* 64px */
+  align-items: start;
+}
+
+/* — Product Visual — */
+.php__visual {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.php__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-lg);
+}
+
+/* Placeholder: teal-tinted card when no product image is set */
+.php__placeholder {
+  aspect-ratio: 4 / 5;
+  background: var(--color-surface-benefit);    /* #E6F4F1 */
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  color: var(--color-teal-dark);
+  border: 1px solid rgba(94, 171, 161, 0.18);
+}
+
+.php__placeholder-icon {
+  opacity: 0.6;
+}
+
+.php__placeholder-label {
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  color: var(--color-teal-dark);
+  letter-spacing: -0.01em;
+}
+
+.php__placeholder-sub {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+}
+
+/* Lab seal badge — overlaid bottom-left of visual */
+.php__lab-seal {
+  position: absolute;
+  bottom: var(--space-4);
+  left: var(--space-4);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-surface-primary);     /* white */
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  color: var(--color-teal-dark);
+  line-height: 1;
+  box-shadow: var(--shadow-sm);
+}
+
+/* — Purchase block — */
+.php__purchase {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  padding-top: var(--space-5);     /* optical alignment with visual */
+}
+
+/* Kicker */
+.php__kicker {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+/* Headline */
+.php__headline {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);       /* 36px */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-4);
+  letter-spacing: -0.02em;
+}
+
+/* Subheadline */
+.php__subheadline {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);  /* 18px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-6);
+}
+
+/* Price row */
+.php__price-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.php__price {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);       /* 36px — matches headline weight */
+  font-weight: var(--weight-bold);
+  line-height: 1;
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.php__price-note {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  font-weight: var(--weight-regular);
+}
+
+/* Feature grid (2×2) */
+/*
+  DECISION: 2-col grid, not list.
+  gap: --space-4 (16px) — tighter than section gap because features are related.
+  Card-info style: white bg + shadow-sm on warm surface.
+*/
+.php__features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0 0 var(--space-7);      /* 48px before CTA — breathing room per §6b */
+  padding: 0;
+  width: 100%;
+}
+
+.php__feature {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  background: var(--color-surface-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Icon container: benefit-bg pocket — matches approved card-info pattern */
+.php__feature-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-benefit);  /* #E6F4F1 */
+  color: var(--color-teal-dark);
+  flex-shrink: 0;
+}
+
+.php__feature-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.php__feature-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-body);     /* 16px — compact in grid context */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-1);
+}
+
+.php__feature-body {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);  /* 14px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Primary CTA — full width, cta variant */
+.php__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 52px;
+  padding: 14px var(--space-6);
+  border-radius: var(--radius-full);
+  background: var(--color-cta-bg);          /* #364F56 */
+  color: var(--color-cta-text);             /* white */
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  text-decoration: none;
+  transition: opacity var(--ease-default);
+  letter-spacing: 0.01em;
+}
+
+.php__cta:hover {
+  opacity: 0.88;
+}
+
+/* Sample report link — ghost text under CTA */
+.php__report-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-border-default);
+  padding-bottom: 1px;
+  transition: color var(--ease-default), border-color var(--ease-default);
+}
+
+.php__report-link:hover {
+  color: var(--color-text-primary);
+  border-color: var(--color-text-primary);
+}
+
+/* — Responsive — */
+@media screen and (max-width: 1024px) {
+  .php__container {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-7);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .php__container {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    padding: 0 var(--space-4);
+  }
+
+  .php__visual {
+    max-width: 480px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .php__purchase {
+    padding-top: 0;
+  }
+
+  .php__headline {
+    font-size: var(--text-h2);    /* 28px on mobile */
+  }
+
+  .php__features {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+}
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "HP Product Hero",
+  "tag": "section",
+  "class": "section",
   "settings": [
-    { "type": "color", "id": "color_bg", "label": "Hintergrundfarbe" },
-    { "type": "color", "id": "color_text", "label": "Textfarbe" },
-    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
-    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
-    { "type": "text", "id": "kicker", "label": "Kicker" },
-    { "type": "text", "id": "headline", "label": "Headline" },
-    { "type": "textarea", "id": "subheadline", "label": "Subheadline" },
-    { "type": "text", "id": "product_image_url", "label": "Produktbild URL" },
-    { "type": "text", "id": "product_price", "label": "Preis" },
-    { "type": "url", "id": "product_url", "label": "Produkt-Link" },
-    { "type": "text", "id": "cta_label", "label": "CTA Text" },
-    { "type": "checkbox", "id": "show_lab_badge", "label": "Labor-Badge anzeigen", "default": true },
-    { "type": "text", "id": "lab_badge_text", "label": "Labor-Badge Text" },
-    { "type": "url", "id": "sample_report_url", "label": "Beispielbericht URL" },
-    { "type": "text", "id": "sample_report_label", "label": "Beispielbericht Link-Text" }
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrundfarbe"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe"
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline"
+    },
+    {
+      "type": "textarea",
+      "id": "subheadline",
+      "label": "Subheadline"
+    },
+    {
+      "type": "header",
+      "content": "Produkt"
+    },
+    {
+      "type": "text",
+      "id": "product_image_url",
+      "label": "Produktbild URL",
+      "info": "Shopify CDN-Pfad, z.B. shopify://shop_images/..."
+    },
+    {
+      "type": "text",
+      "id": "product_price",
+      "label": "Preis",
+      "info": "Wird als Text angezeigt, z.B. 349,00 €"
+    },
+    {
+      "type": "url",
+      "id": "product_url",
+      "label": "Produkt-Link"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA Text"
+    },
+    {
+      "type": "header",
+      "content": "Labor-Badge"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_lab_badge",
+      "label": "Labor-Badge anzeigen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "lab_badge_text",
+      "label": "Labor-Badge Text"
+    },
+    {
+      "type": "header",
+      "content": "Beispielbericht"
+    },
+    {
+      "type": "url",
+      "id": "sample_report_url",
+      "label": "Beispielbericht URL"
+    },
+    {
+      "type": "text",
+      "id": "sample_report_label",
+      "label": "Beispielbericht Link-Text"
+    }
   ],
   "blocks": [
     {
       "type": "feature",
       "name": "Feature",
       "settings": [
-        { "type": "text", "id": "feature_icon", "label": "Icon-Kennung" },
-        { "type": "text", "id": "feature_title", "label": "Titel" },
-        { "type": "textarea", "id": "feature_body", "label": "Beschreibung" }
+        {
+          "type": "select",
+          "id": "feature_icon",
+          "label": "Icon",
+          "options": [
+            { "value": "biological_age", "label": "Biologisches Alter (Uhr)" },
+            { "value": "dna",            "label": "DNA (Helix)" },
+            { "value": "ai_coach",       "label": "KI Coach (Chat)" },
+            { "value": "lab",            "label": "Labor (Reagenzglas)" }
+          ],
+          "default": "biological_age"
+        },
+        {
+          "type": "text",
+          "id": "feature_title",
+          "label": "Titel"
+        },
+        {
+          "type": "textarea",
+          "id": "feature_body",
+          "label": "Beschreibung"
+        }
       ]
     }
   ],
-  "presets": [{ "name": "HP Product Hero" }]
+  "presets": [
+    {
+      "name": "HP Product Hero",
+      "blocks": [
+        { "type": "feature", "settings": { "feature_icon": "biological_age", "feature_title": "Biologisches Alter", "feature_body": "Epigenetische Methylierungsanalyse – du siehst, ob dein Körper schneller oder langsamer altert als dein Pass." } },
+        { "type": "feature", "settings": { "feature_icon": "dna",            "feature_title": "187 DNA-Reports",   "feature_body": "Genetische Analyse aus 16 Bereichen: Supplements, Vitamine, Schlaf, Herzgesundheit, Haut und mehr." } },
+        { "type": "feature", "settings": { "feature_icon": "ai_coach",       "feature_title": "KI Health Coach",   "feature_body": "Individuelle Empfehlungen für Ernährung, Alltag und Routinen – direkt aus deinen Ergebnissen abgeleitet." } },
+        { "type": "feature", "settings": { "feature_icon": "lab",            "feature_title": "Eurofins Laboranalyse", "feature_body": "Zertifiziert nach ISO 9001, ISO 17025 und ISO 13485 – derselbe Standard wie in der medizinischen Diagnostik." } }
+      ]
+    }
+  ]
 }
 {% endschema %}

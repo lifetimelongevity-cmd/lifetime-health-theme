@@ -1,28 +1,337 @@
-{% comment %} lt-hp-problem — Stub. Liquid pending. {% endcomment %}
+{% comment %}
+  lt-hp-problem — Die Lücke (Section 2)
+  ──────────────────────────────────────
+  §12 Build Spec:
+  - Surface:          --color-surface-primary (weiß — harter visueller Schnitt nach dunklem Ticker,
+                      signalisiert Übergang von Emotion zu Fakten)
+  - Dominant element: Headline "Wer im Dunkeln optimiert, rät." — Provokation in einem Satz
+  - Heading size:     --text-h1 Section · --text-stat (56px) Stat-Werte — Zahlen dominieren
+  - Content pattern:  stat-callout × 3 auf hellem Hintergrund (Inversion des Dark-Musters)
+  - CTA:              keiner — Spannung darf hier nicht aufgelöst werden, sie trägt in Section 3
+  - Removed:          CTA (bewusst — kein Kaufimpuls hier), dekorative Trennlinien
+  - Quality move:     Stat-Werte als dominantes Textelement in Heading-Font + --text-stat auf
+                      weißem Hintergrund — ungewöhnliche Größe auf hellem Surface erzeugt
+                      Stopp-Effekt ohne dekorative Überlastung.
+                      stat_source als Micro-Text — Quellenangabe signalisiert Seriosität,
+                      ohne den Blick auf die Hauptaussage zu stören.
+{% endcomment %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.color_bg != blank -%}
+    background: {{ section.settings.color_bg }};
+    {%- endif -%}
+    {%- if section.settings.color_text != blank -%}
+    color: {{ section.settings.color_text }};
+    {%- endif -%}
+    padding-top:    {{ section.settings.padding_top | default: 80 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | default: 80 }}px;
+  }
+{% endstyle %}
+
+<section id="shopify-section-{{ section.id }}" class="prob">
+  <div class="prob__container">
+
+    {%- comment -%}=== Section Header ==={%- endcomment -%}
+    <div class="prob__header">
+      {%- if section.settings.kicker != blank -%}
+        <p class="prob__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      <h2 class="prob__headline">{{ section.settings.headline | escape }}</h2>
+      {%- if section.settings.subheadline != blank -%}
+        <p class="prob__subheadline">{{ section.settings.subheadline | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%}=== Stat Grid ==={%- endcomment -%}
+    {%- if section.blocks.size > 0 -%}
+      <ul class="prob__grid" role="list">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'stat' -%}
+            <li class="prob__stat" {{ block.shopify_attributes }}>
+              {%- if block.settings.stat_value != blank -%}
+                <p class="prob__stat-value">{{ block.settings.stat_value | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.stat_label != blank -%}
+                <p class="prob__stat-label">{{ block.settings.stat_label | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.stat_source != blank -%}
+                <p class="prob__stat-source">{{ block.settings.stat_source | escape }}</p>
+              {%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% stylesheet %}
+/* ================================================================
+   lt-hp-problem — Die Lücke (Destabilisierungs-Block)
+   Token refs: §3 (colors, type), §5 (Stat Callout — helle Variante)
+   ================================================================ */
+
+/* — Section shell — */
+.prob {
+  background: var(--color-surface-primary);
+}
+
+.prob__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+/* — Section header — */
+.prob__header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto var(--space-9);   /* 80px → stats */
+}
+
+.prob__kicker {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.prob__headline {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-5);
+}
+
+.prob__subheadline {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* — Stat grid — */
+/*
+  DECISION: 3-col grid on white background — inverts the dark stat-callout pattern.
+  Large stat values (--text-stat or mixed text) create visual tension
+  against the clinical-light background — unexpected, not decorative.
+  No box/card framing: stats bleed into the white surface.
+  Thin left-border as the only separator element (§11 Subtraction Rules applied).
+*/
+.prob__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-7);             /* 48px — generous, each stat breathes */
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* — Stat item — */
+.prob__stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-left: var(--space-5);   /* 24px indent from left border */
+  border-left: 2px solid var(--color-teal-dark);
+}
+
+/* Stat value — the dominant element */
+/*
+  DECISION: --text-h1 (36px) not --text-stat (56px) because these
+  stats contain multi-word text values ("15 Jahre", "Nicht sichtbar").
+  Full stat-size would create too many broken lines at 36px container width.
+  --text-h1 still commands authority at this size without linebreak chaos.
+*/
+.prob__stat-value {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);      /* 36px — authoritative but line-safe */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--color-teal-dark);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+/* Stat label */
+.prob__stat-label {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Source citation */
+.prob__stat-source {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);   /* 12px */
+  font-weight: var(--weight-regular);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* — Responsive — */
+@media screen and (max-width: 1024px) {
+  .prob__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-6) var(--space-7);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .prob__container {
+    padding: 0 var(--space-4);
+  }
+
+  .prob__header {
+    margin-bottom: var(--space-7);
+  }
+
+  .prob__headline {
+    font-size: var(--text-h2);
+  }
+
+  .prob__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  .prob__stat-value {
+    font-size: var(--text-h2);   /* 28px on mobile */
+  }
+}
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "HP Problem",
+  "tag": "section",
+  "class": "section",
   "settings": [
-    { "type": "color", "id": "color_bg", "label": "Hintergrundfarbe" },
-    { "type": "color", "id": "color_text", "label": "Textfarbe" },
-    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
-    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
-    { "type": "text", "id": "kicker", "label": "Kicker" },
-    { "type": "text", "id": "headline", "label": "Headline" },
-    { "type": "textarea", "id": "subheadline", "label": "Subheadline" }
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrundfarbe"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe"
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline"
+    },
+    {
+      "type": "textarea",
+      "id": "subheadline",
+      "label": "Subheadline"
+    }
   ],
   "blocks": [
     {
       "type": "stat",
       "name": "Statistik",
       "settings": [
-        { "type": "text", "id": "stat_value", "label": "Wert" },
-        { "type": "textarea", "id": "stat_label", "label": "Label" },
-        { "type": "text", "id": "stat_source", "label": "Quelle" }
+        {
+          "type": "text",
+          "id": "stat_value",
+          "label": "Wert",
+          "info": "z.B. 15 Jahre — wird als dominantes Heading-Element angezeigt"
+        },
+        {
+          "type": "textarea",
+          "id": "stat_label",
+          "label": "Beschreibung"
+        },
+        {
+          "type": "text",
+          "id": "stat_source",
+          "label": "Quelle (optional)",
+          "info": "z.B. Nature Aging, 2023"
+        }
       ]
     }
   ],
-  "presets": [{ "name": "HP Problem" }]
+  "presets": [
+    {
+      "name": "HP Problem",
+      "blocks": [
+        {
+          "type": "stat",
+          "settings": {
+            "stat_value": "15 Jahre",
+            "stat_label": "So weit kann das biologische Alter bei Menschen gleichen Jahrgangs auseinanderliegen.",
+            "stat_source": "Nature Aging, 2023"
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "stat_value": "Nicht sichtbar",
+            "stat_label": "Das biologische Alter ist am Körper nicht ablesbar — nur durch epigenetische Messung bestimmbar."
+          }
+        },
+        {
+          "type": "stat",
+          "settings": {
+            "stat_value": "Messbar umkehrbar",
+            "stat_label": "Gezielte Maßnahmen können das biologische Alter auf zellulärer Ebene nachweislich beeinflussen.",
+            "stat_source": "Horvath et al., Cell 2018"
+          }
+        }
+      ]
+    }
+  ]
 }
 {% endschema %}

@@ -1,43 +1,608 @@
-{% comment %} lt-hp-science — Stub. Liquid pending. {% endcomment %}
+{% comment %}
+  lt-hp-science — Wissenschaft & Methodik (Section 6)
+  ─────────────────────────────────────────────────────
+  §12 Build Spec:
+  - Surface:          --color-surface-dark (Dunkel = Autorität — intentionaler Rhythmusbruch nach weißer Social Proof Section)
+  - Dominant element: Headline "Kein Wellness-Theater." — provokative Kürze stoppt den Skimmer
+  - Heading size:     --text-h1 Section · --text-h2 Pillar-Headlines · --text-h3 Expert-Name
+  - Content pattern:  3-Block-Mischgrid: Pillar (Labor) | Expert (Limmroth) | Pillar (Forschung)
+                      — Expert in der Mitte als "Validierungssandwich"
+  - CTA:              outline-inverted auf dunkler Fläche — dritter Kaufimpuls
+  - Removed:          Sterne, Ratings, dekorative Icons — klinisch-editoriale Tonalität
+  - Quality move:     Expert-Card wird durch Reihenfolge (pillar_1 | expert_1 | pillar_3) zur
+                      Brücke zwischen Labor und Forschung: menschliche Autorität als Verbindungsglied.
+                      Glass-Morphism-Cards (rgba-Hintergrund + heller Border) auf dunklem Surface —
+                      subtile Tiefe ohne Farbkonkurrenz.
+{% endcomment %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.color_bg != blank -%}
+    background: {{ section.settings.color_bg }};
+    {%- endif -%}
+    {%- if section.settings.color_text != blank -%}
+    color: {{ section.settings.color_text }};
+    {%- endif -%}
+    padding-top:    {{ section.settings.padding_top | default: 80 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | default: 80 }}px;
+  }
+{% endstyle %}
+
+<section id="shopify-section-{{ section.id }}" class="sci sci--dark">
+  <div class="sci__container">
+
+    {%- comment -%}=== Section Header ==={%- endcomment -%}
+    <div class="sci__header">
+      {%- if section.settings.kicker != blank -%}
+        <p class="sci__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      <h2 class="sci__headline">{{ section.settings.headline | escape }}</h2>
+      {%- if section.settings.subheadline != blank -%}
+        <p class="sci__subheadline">{{ section.settings.subheadline | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%}=== Blocks — Pillar + Expert (mixed) ==={%- endcomment -%}
+    {%- if section.blocks.size > 0 -%}
+      <div class="sci__grid">
+        {%- for block in section.blocks -%}
+
+          {%- if block.type == 'science_pillar' -%}
+            <div class="sci__card sci__card--pillar" {{ block.shopify_attributes }}>
+              {%- if block.settings.pillar_label != blank -%}
+                <p class="sci__card-label">{{ block.settings.pillar_label | escape }}</p>
+              {%- endif -%}
+
+              {%- if block.settings.pillar_logo_url != blank -%}
+                <div class="sci__pillar-logo-wrap">
+                  <img
+                    src="{{ block.settings.pillar_logo_url | escape }}"
+                    alt="{{ block.settings.pillar_headline | escape }}"
+                    class="sci__pillar-logo"
+                    loading="lazy"
+                    width="120"
+                    height="40"
+                  >
+                </div>
+              {%- endif -%}
+
+              <h3 class="sci__card-headline">{{ block.settings.pillar_headline | escape }}</h3>
+
+              {%- if block.settings.pillar_body != blank -%}
+                <p class="sci__card-body">{{ block.settings.pillar_body | escape }}</p>
+              {%- endif -%}
+
+              {%- if block.settings.pillar_link_url != blank and block.settings.pillar_link_label != blank -%}
+                <a
+                  href="{{ block.settings.pillar_link_url }}"
+                  class="sci__card-link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ block.settings.pillar_link_label | escape }}
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                  </svg>
+                </a>
+              {%- endif -%}
+            </div>
+
+          {%- elsif block.type == 'expert' -%}
+            <div class="sci__card sci__card--expert" {{ block.shopify_attributes }}>
+              <div class="sci__expert-header">
+                {%- if block.settings.expert_image_url != blank -%}
+                  <img
+                    src="{{ block.settings.expert_image_url | escape }}"
+                    alt="{{ block.settings.expert_name | escape }}"
+                    class="sci__expert-avatar"
+                    loading="lazy"
+                    width="64"
+                    height="64"
+                  >
+                {%- else -%}
+                  <div class="sci__expert-avatar-placeholder" aria-hidden="true">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  </div>
+                {%- endif -%}
+                <div class="sci__expert-id">
+                  <p class="sci__expert-name">{{ block.settings.expert_name | escape }}</p>
+                  {%- if block.settings.expert_title != blank -%}
+                    <p class="sci__expert-title">{{ block.settings.expert_title | escape }}</p>
+                  {%- endif -%}
+                </div>
+              </div>
+              {%- if block.settings.expert_credentials != blank -%}
+                <p class="sci__expert-credentials">{{ block.settings.expert_credentials | escape }}</p>
+              {%- endif -%}
+            </div>
+
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%}=== CTA — dritter Kaufimpuls ==={%- endcomment -%}
+    {%- if section.settings.cta_label != blank -%}
+      <div class="sci__cta-wrap">
+        <a href="{{ section.settings.cta_url | default: '#' }}" class="sci__cta">
+          {{ section.settings.cta_label | escape }}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% stylesheet %}
+/* ================================================================
+   lt-hp-science — Wissenschaft & Methodik (Dark Surface)
+   Token refs: §3 (colors, type, spacing), §5 (Stat Callout dark pattern)
+   ================================================================ */
+
+/* — Section shell — */
+.sci--dark {
+  background: var(--color-surface-dark);   /* #364F56 */
+  color: var(--color-text-on-dark);
+}
+
+.sci__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+/* — Section header — */
+.sci__header {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto var(--space-9);   /* 80px → grid */
+}
+
+.sci__kicker {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-on-dark-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.sci__headline {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-on-dark);
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-5);
+}
+
+.sci__subheadline {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-on-dark-muted);
+  margin: 0;
+}
+
+/* — Block grid — */
+/*
+  DECISION: 3-col grid for desktop — order from block_order in JSON:
+  pillar_1 | expert_1 | pillar_3
+  Expert card is taller (auto height on stretch); pillars match its height.
+  Glass-effect cards: semi-transparent bg + light border on dark surface.
+  This is a known approved pattern for dark sections (§5 Stat Callout variant).
+*/
+.sci__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+  margin-bottom: var(--space-9);   /* 80px before CTA */
+}
+
+/* — Card base (glass morphism on dark) — */
+.sci__card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);         /* 32px */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* — Pillar card — */
+.sci__card-label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-teal);        /* teal on dark — brand accent */
+  margin: 0;
+}
+
+/* Pillar logo */
+.sci__pillar-logo-wrap {
+  margin: 0;
+}
+
+.sci__pillar-logo {
+  height: 32px;
+  width: auto;
+  max-width: 140px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);  /* white logo on dark bg */
+  opacity: 0.8;
+}
+
+/* Pillar headline */
+.sci__card-headline {
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);       /* 24px */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-on-dark);
+  margin: 0;
+}
+
+/* Pillar body */
+.sci__card-body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);     /* 16px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-on-dark-muted);
+  margin: 0;
+  flex: 1;
+}
+
+/* External research link */
+.sci__card-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: auto;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-teal);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(101, 192, 182, 0.35);
+  padding-bottom: 1px;
+  transition: color var(--ease-default), border-color var(--ease-default);
+}
+
+.sci__card-link:hover {
+  color: var(--color-white);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* — Expert card — */
+.sci__card--expert {
+  background: rgba(101, 192, 182, 0.08);   /* teal-tinted on dark — subtle expert distinction */
+  border-color: rgba(101, 192, 182, 0.2);
+}
+
+.sci__expert-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* Expert avatar */
+.sci__expert-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(101, 192, 182, 0.3);
+}
+
+.sci__expert-avatar-placeholder {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  background: rgba(101, 192, 182, 0.12);
+  color: var(--color-teal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1.5px solid rgba(101, 192, 182, 0.25);
+}
+
+/* Expert identity */
+.sci__expert-id {
+  flex: 1;
+  min-width: 0;
+}
+
+.sci__expert-name {
+  font-family: var(--font-heading);
+  font-size: var(--text-body);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-on-dark);
+  line-height: var(--leading-tight);
+  margin: 0 0 var(--space-1);
+}
+
+.sci__expert-title {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-regular);
+  color: var(--color-teal);
+  line-height: var(--leading-body);
+  margin: 0;
+}
+
+/* Expert credentials */
+.sci__expert-credentials {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-on-dark-muted);
+  margin: 0;
+  flex: 1;
+}
+
+/* — CTA (outline-inverted on dark surface) — */
+.sci__cta-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.sci__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 14px var(--space-8);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-text-on-dark);
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: background var(--ease-default), border-color var(--ease-default);
+}
+
+.sci__cta:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.75);
+}
+
+/* — Responsive — */
+@media screen and (max-width: 1024px) {
+  .sci__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .sci__container {
+    padding: 0 var(--space-4);
+  }
+
+  .sci__header {
+    margin-bottom: var(--space-7);
+  }
+
+  .sci__headline {
+    font-size: var(--text-h2);
+  }
+
+  .sci__subheadline {
+    font-size: var(--text-body);
+  }
+
+  .sci__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    margin-bottom: var(--space-7);
+  }
+
+  .sci__expert-header {
+    gap: var(--space-3);
+  }
+
+  .sci__expert-avatar,
+  .sci__expert-avatar-placeholder {
+    width: 52px;
+    height: 52px;
+  }
+}
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "HP Science",
+  "tag": "section",
+  "class": "section",
   "settings": [
-    { "type": "color", "id": "color_bg", "label": "Hintergrundfarbe" },
-    { "type": "color", "id": "color_text", "label": "Textfarbe" },
-    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
-    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
-    { "type": "text", "id": "kicker", "label": "Kicker" },
-    { "type": "text", "id": "headline", "label": "Headline" },
-    { "type": "textarea", "id": "subheadline", "label": "Subheadline" },
-    { "type": "text", "id": "cta_label", "label": "CTA Text" },
-    { "type": "url", "id": "cta_url", "label": "CTA Link" }
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrundfarbe",
+      "info": "Standard: dunkelgrün (#364F56)"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe"
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline"
+    },
+    {
+      "type": "textarea",
+      "id": "subheadline",
+      "label": "Subheadline"
+    },
+    {
+      "type": "header",
+      "content": "CTA"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA Text"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA Link"
+    }
   ],
   "blocks": [
     {
       "type": "science_pillar",
       "name": "Wissenschafts-Säule",
       "settings": [
-        { "type": "text", "id": "pillar_label", "label": "Label" },
-        { "type": "text", "id": "pillar_headline", "label": "Headline" },
-        { "type": "textarea", "id": "pillar_body", "label": "Text" },
-        { "type": "text", "id": "pillar_logo_url", "label": "Logo URL" },
-        { "type": "url", "id": "pillar_link_url", "label": "Link URL" },
-        { "type": "text", "id": "pillar_link_label", "label": "Link Text" }
+        {
+          "type": "text",
+          "id": "pillar_label",
+          "label": "Label",
+          "info": "z.B. Labor, Forschung, Experte"
+        },
+        {
+          "type": "text",
+          "id": "pillar_headline",
+          "label": "Headline"
+        },
+        {
+          "type": "textarea",
+          "id": "pillar_body",
+          "label": "Beschreibung"
+        },
+        {
+          "type": "text",
+          "id": "pillar_logo_url",
+          "label": "Logo URL",
+          "info": "Logo wird weiß gefärbt (auf dunklem Hintergrund)"
+        },
+        {
+          "type": "url",
+          "id": "pillar_link_url",
+          "label": "Externer Link URL (optional)"
+        },
+        {
+          "type": "text",
+          "id": "pillar_link_label",
+          "label": "Externer Link Text (optional)"
+        }
       ]
     },
     {
       "type": "expert",
       "name": "Experte",
       "settings": [
-        { "type": "text", "id": "expert_name", "label": "Name" },
-        { "type": "text", "id": "expert_title", "label": "Titel" },
-        { "type": "textarea", "id": "expert_credentials", "label": "Credentials" },
-        { "type": "text", "id": "expert_image_url", "label": "Foto URL" }
+        {
+          "type": "text",
+          "id": "expert_name",
+          "label": "Name"
+        },
+        {
+          "type": "text",
+          "id": "expert_title",
+          "label": "Titel / Position"
+        },
+        {
+          "type": "textarea",
+          "id": "expert_credentials",
+          "label": "Credentials / Bio"
+        },
+        {
+          "type": "text",
+          "id": "expert_image_url",
+          "label": "Portrait URL"
+        }
       ]
     }
   ],
-  "presets": [{ "name": "HP Science" }]
+  "presets": [
+    {
+      "name": "HP Science",
+      "blocks": [
+        {
+          "type": "science_pillar",
+          "settings": {
+            "pillar_label": "Labor",
+            "pillar_headline": "Eurofins Genomics",
+            "pillar_body": "Eines der führenden Genomik-Labore Europas. Deine Probe wird unter strengen klinischen Bedingungen analysiert – ISO 9001, ISO 17025, ISO 13485 und GLP-zertifiziert."
+          }
+        },
+        {
+          "type": "expert",
+          "settings": {
+            "expert_name": "Prof. Dr. med. Volker Limmroth",
+            "expert_title": "Chefarzt Neurologie · Chief Scientific Officer LIFETIME",
+            "expert_credentials": "Neurologe, Longevity-Forscher und Spiegel-Bestseller-Autor. Er hat das wissenschaftliche Fundament von LIFETIME entwickelt und verantwortet die medizinische Qualität aller Analysen."
+          }
+        },
+        {
+          "type": "science_pillar",
+          "settings": {
+            "pillar_label": "Forschung",
+            "pillar_headline": "Peer-reviewed Grundlage",
+            "pillar_body": "Die epigenetische Altersbestimmung basiert auf der 10-CpG-Methylierungsuhr – einem der am häufigsten replizierten Verfahren in der Longevity-Forschung.",
+            "pillar_link_url": "https://pubmed.ncbi.nlm.nih.gov/",
+            "pillar_link_label": "Forschungsbasis ansehen →"
+          }
+        }
+      ]
+    }
+  ]
 }
 {% endschema %}

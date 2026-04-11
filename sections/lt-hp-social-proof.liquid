@@ -1,41 +1,623 @@
-{% comment %} lt-hp-social-proof — Stub. Liquid pending. {% endcomment %}
+{% comment %}
+  lt-hp-social-proof — Homepage Social Proof + Presse (Section 5)
+  ───────────────────────────────────────────────────────────────
+  §12 Build Spec:
+  - Surface:          --color-surface-primary (white — direkter Kontrast nach warmem Product Hero)
+  - Dominant element: Aggregate-Stat ("87 %") — zentrales Skalierungs-Signal nach den Testimonials
+  - Heading size:     --text-h1 (36px) · kein Karussell — statische 3-col Cards
+  - Content pattern:  testimonial-card × 3 + Stat-Banner + Press-Logo-Zeile
+  - CTA:              keiner — Energie geht direkt in Section 6 über (Wissenschaft)
+  - Removed:          Sterne (das sind Ergebnis-Testimonials, keine Produkt-Bewertungen),
+                      Card-CTAs, Datums-Feld (kein Relevanz-Signal hier)
+  - Quality move:     result_metric als Teal-Pill in der Card — das konkrete Messergebnis
+                      ("Biologisches Alter: 37 · Chronologisch: 44") ist der stärkste
+                      Conversion-Treiber: es nimmt das eigene Ergebnis vorweg.
+{% endcomment %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.color_bg != blank -%}
+    background: {{ section.settings.color_bg }};
+    {%- endif -%}
+    {%- if section.settings.color_text != blank -%}
+    color: {{ section.settings.color_text }};
+    {%- endif -%}
+    padding-top:    {{ section.settings.padding_top | default: 80 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | default: 80 }}px;
+  }
+{% endstyle %}
+
+<section id="shopify-section-{{ section.id }}" class="sp">
+  <div class="sp__container">
+
+    {%- comment -%}=== Section Header ==={%- endcomment -%}
+    <div class="sp__header">
+      {%- if section.settings.kicker != blank -%}
+        <p class="sp__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      <h2 class="sp__headline">{{ section.settings.headline | escape }}</h2>
+    </div>
+
+    {%- comment -%}=== Testimonial Cards ==={%- endcomment -%}
+    {%- assign has_testimonials = false -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'testimonial' -%}{%- assign has_testimonials = true -%}{%- break -%}{%- endif -%}
+    {%- endfor -%}
+
+    {%- if has_testimonials -%}
+      <ul class="sp__grid" role="list">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'testimonial' -%}
+            <li class="sp__card" {{ block.shopify_attributes }}>
+
+              {%- comment -%} Verified badge (top) {%- endcomment -%}
+              {%- if block.settings.verified -%}
+                <div class="sp__verified" aria-label="Verifizierter Kauf">
+                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                    <circle cx="6" cy="6" r="5.5" fill="var(--color-success)"/>
+                    <path d="M3.5 6l1.75 1.75L8.5 4.5" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                  Verifizierter Kauf
+                </div>
+              {%- endif -%}
+
+              {%- comment -%} Quote text {%- endcomment -%}
+              {%- if block.settings.quote != blank -%}
+                <blockquote class="sp__quote">
+                  <p>{{ block.settings.quote | escape }}</p>
+                </blockquote>
+              {%- endif -%}
+
+              {%- comment -%} Result metric — the key conversion element {%- endcomment -%}
+              {%- if block.settings.result_metric != blank -%}
+                <div class="sp__result-metric" aria-label="Messergebnis">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                  </svg>
+                  {{ block.settings.result_metric | escape }}
+                </div>
+              {%- endif -%}
+
+              {%- comment -%} Author {%- endcomment -%}
+              <footer class="sp__author">
+                <span class="sp__author-name">{{ block.settings.name | escape }}</span>
+                {%- if block.settings.age != blank -%}
+                  <span class="sp__author-age">, {{ block.settings.age }} Jahre</span>
+                {%- endif -%}
+              </footer>
+
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- comment -%}=== Aggregate Stat Banner ==={%- endcomment -%}
+    {%- if section.settings.aggregate_stat_number != blank -%}
+      <div class="sp__stat-banner" aria-label="{{ section.settings.aggregate_stat_number }} {{ section.settings.aggregate_stat_label }}">
+        <span class="sp__stat-number">{{ section.settings.aggregate_stat_number | escape }}</span>
+        {%- if section.settings.aggregate_stat_label != blank -%}
+          <p class="sp__stat-label">{{ section.settings.aggregate_stat_label | escape }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%}=== Press Logos ==={%- endcomment -%}
+    {%- if section.settings.show_press_logos -%}
+      {%- assign has_logos = false -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'press_logo' -%}{%- assign has_logos = true -%}{%- break -%}{%- endif -%}
+      {%- endfor -%}
+
+      {%- if has_logos -%}
+        <div class="sp__press">
+          <p class="sp__press-label">Bekannt aus</p>
+          <ul class="sp__press-row" role="list">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'press_logo' -%}
+                <li class="sp__press-item" {{ block.shopify_attributes }}>
+                  {%- if block.settings.logo_link_url != blank -%}
+                    <a href="{{ block.settings.logo_link_url }}" class="sp__press-link" target="_blank" rel="noopener noreferrer" aria-label="{{ block.settings.logo_alt | escape }}">
+                  {%- endif -%}
+                  {%- if block.settings.logo_image_url != blank -%}
+                    <img
+                      src="{{ block.settings.logo_image_url | escape }}"
+                      alt="{{ block.settings.logo_alt | escape }}"
+                      class="sp__press-logo"
+                      loading="lazy"
+                      width="120"
+                      height="40"
+                    >
+                  {%- else -%}
+                    <span class="sp__press-logo-text">{{ block.settings.logo_alt | escape }}</span>
+                  {%- endif -%}
+                  {%- if block.settings.logo_link_url != blank -%}
+                    </a>
+                  {%- endif -%}
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% stylesheet %}
+/* ================================================================
+   lt-hp-social-proof — Homepage Social Proof + Presse
+   Token refs: §3 (colors, spacing, type), §5 (Card Review)
+   ================================================================ */
+
+/* — Section shell — */
+.sp {
+  background: var(--color-surface-primary);
+}
+
+.sp__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+/* — Section header — */
+.sp__header {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto var(--space-8);   /* 64px → cards */
+}
+
+.sp__kicker {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.sp__headline {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);      /* 36px */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+/* — Testimonial grid — */
+/*
+  DECISION: 3-col grid, no carousel (blueprint §5).
+  Static cards stay visible — interaction with cards themselves
+  introduces cognitive load between the user and the content.
+*/
+.sp__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);             /* 24px */
+  list-style: none;
+  margin: 0 0 var(--space-8);     /* 64px → stat banner */
+  padding: 0;
+}
+
+/* — Testimonial card (card-review pattern) — */
+.sp__card {
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);        /* 24px */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Verified badge — top of card */
+.sp__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  color: var(--color-success);
+  line-height: 1;
+}
+
+/* Quote text */
+.sp__quote {
+  flex: 1;
+}
+
+.sp__quote p {
+  font-family: var(--font-body);
+  font-size: var(--text-body);    /* 16px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* Result metric — the quality move
+   This pill is the single most important conversion element on the card.
+   It visualises the concrete outcome, making the abstract product real.
+*/
+.sp__result-metric {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: var(--color-surface-benefit);  /* #E6F4F1 */
+  border: 1px solid rgba(94, 171, 161, 0.25);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-teal-dark);
+  line-height: 1;
+}
+
+.sp__result-metric svg {
+  flex-shrink: 0;
+  color: var(--color-teal-dark);
+}
+
+/* Author */
+.sp__author {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  border-top: 1px solid var(--color-border-default);
+  padding-top: var(--space-3);
+  margin-top: auto;               /* pushes author to bottom of card */
+}
+
+.sp__author-name {
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.sp__author-age {
+  font-weight: var(--weight-regular);
+}
+
+/* — Aggregate Stat Banner —
+   DECISION: Full-width benefit-surface banner.
+   Stat number in --text-stat (56px) commands the section.
+   This is the section's dominant element — not the cards.
+*/
+.sp__stat-banner {
+  background: var(--color-surface-benefit);    /* #E6F4F1 */
+  border: 1px solid rgba(94, 171, 161, 0.18);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-6);      /* 64px 32px */
+  text-align: center;
+  margin-bottom: var(--space-8);               /* 64px → press row */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.sp__stat-number {
+  font-family: var(--font-heading);
+  font-size: var(--text-stat);    /* 56px */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-stat);
+  color: var(--color-teal-dark);
+  letter-spacing: -0.03em;
+}
+
+.sp__stat-label {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg); /* 18px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  max-width: 540px;
+  margin: 0;
+}
+
+/* — Press logos —
+   DECISION: Centered flex row, muted.
+   Logo images are desaturated in CSS — keeps visual calm even with branded assets.
+   Text fallback when image unavailable: styled as uppercase micro.
+*/
+.sp__press {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-5);
+}
+
+.sp__press-label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.sp__press-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-6) var(--space-8);  /* 32px vert, 64px horiz */
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sp__press-item {
+  display: flex;
+  align-items: center;
+}
+
+.sp__press-link {
+  display: block;
+  text-decoration: none;
+  transition: opacity var(--ease-default);
+}
+
+.sp__press-link:hover {
+  opacity: 0.65;
+}
+
+.sp__press-logo {
+  display: block;
+  height: 32px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+  filter: grayscale(1);
+  opacity: 0.55;
+  transition: opacity var(--ease-default), filter var(--ease-default);
+}
+
+.sp__press-link:hover .sp__press-logo,
+.sp__press-logo:hover {
+  opacity: 0.8;
+  filter: grayscale(0);
+}
+
+/* Text fallback (no logo image) */
+.sp__press-logo-text {
+  font-family: var(--font-heading);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+/* — Responsive — */
+@media screen and (max-width: 1024px) {
+  .sp__grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .sp__container {
+    padding: 0 var(--space-4);
+  }
+
+  .sp__header {
+    margin-bottom: var(--space-7);
+  }
+
+  .sp__headline {
+    font-size: var(--text-h2);   /* 28px on mobile */
+  }
+
+  .sp__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+    margin-bottom: var(--space-7);
+  }
+
+  .sp__stat-banner {
+    padding: var(--space-7) var(--space-5);
+    margin-bottom: var(--space-7);
+  }
+
+  .sp__stat-number {
+    font-size: var(--text-display);  /* 48px on mobile */
+  }
+
+  .sp__press-row {
+    gap: var(--space-5) var(--space-6);
+  }
+}
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "HP Social Proof",
+  "tag": "section",
+  "class": "section",
   "settings": [
-    { "type": "color", "id": "color_bg", "label": "Hintergrundfarbe" },
-    { "type": "color", "id": "color_text", "label": "Textfarbe" },
-    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
-    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
-    { "type": "text", "id": "kicker", "label": "Kicker" },
-    { "type": "text", "id": "headline", "label": "Headline" },
-    { "type": "text", "id": "aggregate_stat_number", "label": "Aggregat-Stat Zahl" },
-    { "type": "textarea", "id": "aggregate_stat_label", "label": "Aggregat-Stat Label" },
-    { "type": "checkbox", "id": "show_press_logos", "label": "Presse-Logos anzeigen", "default": true }
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrundfarbe"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe"
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline"
+    },
+    {
+      "type": "header",
+      "content": "Aggregat-Statistik"
+    },
+    {
+      "type": "text",
+      "id": "aggregate_stat_number",
+      "label": "Stat-Zahl",
+      "info": "z.B. 87 % — wird als --text-stat (56px) angezeigt"
+    },
+    {
+      "type": "textarea",
+      "id": "aggregate_stat_label",
+      "label": "Stat-Beschreibung"
+    },
+    {
+      "type": "header",
+      "content": "Presse"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_press_logos",
+      "label": "Presse-Logos anzeigen",
+      "default": true
+    }
   ],
   "blocks": [
     {
       "type": "testimonial",
       "name": "Testimonial",
       "settings": [
-        { "type": "textarea", "id": "quote", "label": "Zitat" },
-        { "type": "text", "id": "name", "label": "Name" },
-        { "type": "text", "id": "age", "label": "Alter" },
-        { "type": "text", "id": "result_metric", "label": "Ergebnis-Metrik" },
-        { "type": "checkbox", "id": "verified", "label": "Verifiziert", "default": true }
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Zitat"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name"
+        },
+        {
+          "type": "text",
+          "id": "age",
+          "label": "Alter",
+          "info": "Nur Zahl, z.B. 44"
+        },
+        {
+          "type": "text",
+          "id": "result_metric",
+          "label": "Messergebnis",
+          "info": "z.B. Biologisches Alter: 37 · Chronologisch: 44"
+        },
+        {
+          "type": "checkbox",
+          "id": "verified",
+          "label": "Verifizierter Kauf",
+          "default": true
+        }
       ]
     },
     {
       "type": "press_logo",
       "name": "Presse-Logo",
       "settings": [
-        { "type": "text", "id": "logo_image_url", "label": "Logo URL" },
-        { "type": "text", "id": "logo_alt", "label": "Alt-Text" },
-        { "type": "url", "id": "logo_link_url", "label": "Link" }
+        {
+          "type": "text",
+          "id": "logo_image_url",
+          "label": "Logo Bild URL",
+          "info": "Leer lassen → Logo-Name als Text angezeigt"
+        },
+        {
+          "type": "text",
+          "id": "logo_alt",
+          "label": "Name / Alt-Text"
+        },
+        {
+          "type": "url",
+          "id": "logo_link_url",
+          "label": "Link URL (optional)"
+        }
       ]
     }
   ],
-  "presets": [{ "name": "HP Social Proof" }]
+  "presets": [
+    {
+      "name": "HP Social Proof",
+      "blocks": [
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "Mein biologisches Alter lag 7 Jahre unter meinem chronologischen. Ich dachte, ich mache bereits alles richtig – jetzt weiß ich, warum.",
+            "name": "Markus T.",
+            "age": "44",
+            "result_metric": "Biologisches Alter: 37 · Chronologisch: 44",
+            "verified": true
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "Die Speichelprobe war in drei Minuten erledigt. Wie verständlich die App alles erklärt – ich habe keine Biologie studiert, aber ich verstehe jetzt meine Werte.",
+            "name": "Sophie K.",
+            "age": "38",
+            "result_metric": "",
+            "verified": true
+          }
+        },
+        {
+          "type": "testimonial",
+          "settings": {
+            "quote": "Als Arzt war ich skeptisch. Aber Eurofins, ISO 17025 und die Methodik hinter dem MethylPace-Score haben mich überzeugt. Das ist kein Consumer-Gadget.",
+            "name": "Dr. med. Andreas F.",
+            "age": "",
+            "result_metric": "",
+            "verified": true
+          }
+        },
+        { "type": "press_logo", "settings": { "logo_alt": "SWR1" } },
+        { "type": "press_logo", "settings": { "logo_alt": "Spiegel Bestseller" } },
+        { "type": "press_logo", "settings": { "logo_alt": "RTL" } },
+        { "type": "press_logo", "settings": { "logo_alt": "SAT.1" } }
+      ]
+    }
+  ]
 }
 {% endschema %}

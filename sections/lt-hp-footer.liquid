@@ -1,31 +1,500 @@
-{% comment %} lt-hp-footer — Stub. Liquid pending. {% endcomment %}
+{% comment %}
+  lt-hp-footer — Homepage Footer (Section 11)
+  ─────────────────────────────────────────────
+  §12 Build Spec:
+  - Surface:          --color-surface-dark (dunkel = institutioneller Abschluss)
+  - Dominant element: Mission Statement + Eurofins-Logo-Reihe — Vertrauen als letztes Signal
+  - Content pattern:  4-col Nav + E-Mail-Capture + Logo-Zeile + Mission + Disclaimer
+  - CTA:              E-Mail CTA (tertiäres Ziel: Retargeting)
+  - Removed:          Social-Media-Icons (kein direkter Conversion-Beitrag),
+                      komplexe Nested-Nav (flache Links reichen für Footer-Zweck)
+  - Quality move:     Eurofins + Presse-Logos als Vertrauens-Footer — Logos auf dunklem Surface
+                      haben reine Silhouetten-Wirkung: institutionell, ohne Farb-Ablenkung.
+{% endcomment %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    padding-top:    {{ section.settings.padding_top | default: 64 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | default: 64 }}px;
+  }
+{% endstyle %}
+
+<footer id="shopify-section-{{ section.id }}" class="hpf hpf--dark" role="contentinfo">
+  <div class="hpf__container">
+
+    {%- comment -%}=== Email Capture + Nav Grid ==={%- endcomment -%}
+    <div class="hpf__top">
+
+      {%- comment -%} Email capture {%- endcomment -%}
+      {%- if section.settings.show_email_capture -%}
+        <div class="hpf__email-col">
+          {%- if section.settings.mission_statement != blank -%}
+            <p class="hpf__mission">{{ section.settings.mission_statement | escape }}</p>
+          {%- endif -%}
+          <form class="hpf__email-form" action="/contact#contact_form" method="post" accept-charset="UTF-8" novalidate>
+            <input type="hidden" name="form_type" value="customer">
+            <input type="hidden" name="utf8" value="✓">
+            <input type="hidden" name="contact[tags]" value="newsletter">
+            <div class="hpf__email-row">
+              <input
+                type="email"
+                name="contact[email]"
+                class="hpf__email-input"
+                placeholder="{{ section.settings.email_capture_placeholder | default: 'Deine E-Mail-Adresse' | escape }}"
+                required
+                aria-label="{{ section.settings.email_capture_placeholder | default: 'Deine E-Mail-Adresse' | escape }}"
+                autocomplete="email"
+              >
+              <button type="submit" class="hpf__email-btn">
+                {{ section.settings.email_capture_cta | default: 'Abonnieren' | escape }}
+              </button>
+            </div>
+          </form>
+        </div>
+      {%- endif -%}
+
+      {%- comment -%} Nav columns {%- endcomment -%}
+      <nav class="hpf__nav" aria-label="Footer-Navigation">
+        {%- assign nav_cols = "1,2,3,4" | split: "," -%}
+        {%- for col in nav_cols -%}
+          {%- assign col_label_key = "nav_col_" | append: col | append: "_label" -%}
+          {%- assign col_links_key = "nav_col_" | append: col | append: "_links" -%}
+          {%- assign col_label = section.settings[col_label_key] -%}
+          {%- assign col_links = section.settings[col_links_key] -%}
+          {%- if col_label != blank or col_links != blank -%}
+            <div class="hpf__nav-col">
+              {%- if col_label != blank -%}
+                <p class="hpf__nav-label">{{ col_label | escape }}</p>
+              {%- endif -%}
+              {%- if col_links != blank -%}
+                <ul class="hpf__nav-list" role="list">
+                  {%- assign link_items = col_links | split: "," -%}
+                  {%- for item in link_items -%}
+                    {%- assign item_trimmed = item | strip -%}
+                    {%- if item_trimmed != blank -%}
+                      <li><span class="hpf__nav-link">{{ item_trimmed | escape }}</span></li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </nav>
+
+    </div>
+
+    {%- comment -%}=== Trust Logo Row ==={%- endcomment -%}
+    {%- if section.settings.show_eurofins_logo or section.settings.show_press_logos -%}
+      <div class="hpf__logos" aria-label="Zertifizierungen und Pressestimmen">
+        {%- if section.settings.show_eurofins_logo -%}
+          {%- if section.settings.eurofins_logo_url != blank -%}
+            <img
+              src="{{ section.settings.eurofins_logo_url | escape }}"
+              alt="Eurofins Genomics"
+              class="hpf__logo hpf__logo--eurofins"
+              loading="lazy"
+              width="120"
+              height="40"
+            >
+          {%- else -%}
+            <span class="hpf__logo-text">Eurofins Genomics</span>
+          {%- endif -%}
+        {%- endif -%}
+        {%- if section.settings.show_press_logos -%}
+          <span class="hpf__logo-text">SWR1</span>
+          <span class="hpf__logo-text">Spiegel Bestseller</span>
+          <span class="hpf__logo-text">RTL</span>
+          <span class="hpf__logo-text">SAT.1</span>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%}=== Bottom bar: copyright + disclaimer ==={%- endcomment -%}
+    <div class="hpf__bottom">
+      <p class="hpf__copyright">© {{ 'now' | date: '%Y' }} LIFETIME Health GmbH. Alle Rechte vorbehalten.</p>
+      {%- if section.settings.disclaimer != blank -%}
+        <p class="hpf__disclaimer">{{ section.settings.disclaimer | escape }}</p>
+      {%- endif -%}
+    </div>
+
+  </div>
+</footer>
+
+{% stylesheet %}
+/* ================================================================
+   lt-hp-footer — Homepage Footer (Dark Surface)
+   Token refs: §3 (colors, type, spacing)
+   ================================================================ */
+
+/* — Section shell — */
+.hpf--dark {
+  background: var(--color-surface-dark);
+  color: var(--color-text-on-dark);
+}
+
+.hpf__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);            /* 64px between major blocks */
+}
+
+/* — Top: email + nav — */
+.hpf__top {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: var(--space-8);
+  align-items: start;
+}
+
+/* — Email column — */
+.hpf__mission {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-on-dark-muted);
+  margin: 0 0 var(--space-5);
+  max-width: 280px;
+}
+
+.hpf__email-form {
+  width: 100%;
+}
+
+.hpf__email-row {
+  display: flex;
+  gap: 0;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.hpf__email-input {
+  flex: 1;
+  min-width: 0;
+  height: 44px;
+  padding: 0 var(--space-4);
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-on-dark);
+  caret-color: var(--color-teal);
+}
+
+.hpf__email-input::placeholder {
+  color: var(--color-text-on-dark-muted);
+}
+
+.hpf__email-btn {
+  flex-shrink: 0;
+  height: 44px;
+  padding: 0 var(--space-4);
+  background: var(--color-teal-dark);
+  border: none;
+  border-radius: 0 var(--radius-full) var(--radius-full) 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  color: var(--color-white);
+  cursor: pointer;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+  transition: opacity var(--ease-default);
+}
+
+.hpf__email-btn:hover {
+  opacity: 0.85;
+}
+
+/* — Nav grid (4 columns) — */
+.hpf__nav {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-5);
+}
+
+.hpf__nav-label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-on-dark);
+  margin: 0 0 var(--space-4);
+}
+
+.hpf__nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.hpf__nav-link {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-text-on-dark-muted);
+  cursor: default;
+  transition: color var(--ease-default);
+}
+
+/* — Logo trust row — */
+.hpf__logos {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-6) var(--space-8);
+  padding: var(--space-6) 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.hpf__logo {
+  height: 28px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+  filter: brightness(0) invert(1);
+  opacity: 0.5;
+}
+
+.hpf__logo-text {
+  font-family: var(--font-heading);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-bold);
+  letter-spacing: 0.04em;
+  color: var(--color-text-on-dark-muted);
+  white-space: nowrap;
+  opacity: 0.6;
+}
+
+/* — Bottom bar — */
+.hpf__bottom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.hpf__copyright {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-regular);
+  color: var(--color-text-on-dark-muted);
+  margin: 0;
+}
+
+.hpf__disclaimer {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: rgba(255, 255, 255, 0.3);
+  margin: 0;
+  max-width: 720px;
+}
+
+/* — Responsive — */
+@media screen and (max-width: 1024px) {
+  .hpf__top {
+    grid-template-columns: 1fr;
+    gap: var(--space-7);
+  }
+
+  .hpf__mission {
+    max-width: 100%;
+  }
+
+  .hpf__nav {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-6) var(--space-5);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .hpf__container {
+    padding: 0 var(--space-4);
+    gap: var(--space-7);
+  }
+
+  .hpf__nav {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hpf__logos {
+    gap: var(--space-4) var(--space-5);
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .hpf__nav {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+}
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "HP Footer",
+  "tag": "section",
+  "class": "section",
   "settings": [
-    { "type": "checkbox", "id": "show_eurofins_logo", "label": "Eurofins-Logo anzeigen", "default": true },
-    { "type": "text", "id": "eurofins_logo_url", "label": "Eurofins-Logo URL" },
-    { "type": "checkbox", "id": "show_press_logos", "label": "Presse-Logos anzeigen", "default": true },
-    { "type": "checkbox", "id": "show_email_capture", "label": "E-Mail-Capture anzeigen", "default": false },
-    { "type": "text", "id": "email_capture_placeholder", "label": "Placeholder E-Mail-Feld" },
-    { "type": "text", "id": "email_capture_cta", "label": "E-Mail-CTA Text" },
-    { "type": "header", "content": "Navigation — Spalte 1" },
-    { "type": "text", "id": "nav_col_1_label", "label": "Spalte 1 Titel" },
-    { "type": "textarea", "id": "nav_col_1_links", "label": "Spalte 1 Links (kommagetrennt)" },
-    { "type": "header", "content": "Navigation — Spalte 2" },
-    { "type": "text", "id": "nav_col_2_label", "label": "Spalte 2 Titel" },
-    { "type": "textarea", "id": "nav_col_2_links", "label": "Spalte 2 Links (kommagetrennt)" },
-    { "type": "header", "content": "Navigation — Spalte 3" },
-    { "type": "text", "id": "nav_col_3_label", "label": "Spalte 3 Titel" },
-    { "type": "textarea", "id": "nav_col_3_links", "label": "Spalte 3 Links (kommagetrennt)" },
-    { "type": "header", "content": "Navigation — Spalte 4" },
-    { "type": "text", "id": "nav_col_4_label", "label": "Spalte 4 Titel" },
-    { "type": "textarea", "id": "nav_col_4_links", "label": "Spalte 4 Links (kommagetrennt)" },
-    { "type": "header", "content": "Texte" },
-    { "type": "textarea", "id": "mission_statement", "label": "Mission Statement" },
-    { "type": "textarea", "id": "disclaimer", "label": "Disclaimer" }
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "default": 64,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "default": 64,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Logos & Zertifizierungen"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_eurofins_logo",
+      "label": "Eurofins-Logo anzeigen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "eurofins_logo_url",
+      "label": "Eurofins Logo URL",
+      "info": "Leer lassen → Textdarstellung"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_press_logos",
+      "label": "Presse-Logos anzeigen",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "E-Mail Capture"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_email_capture",
+      "label": "E-Mail Anmeldung anzeigen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "email_capture_placeholder",
+      "label": "Eingabefeld Placeholder"
+    },
+    {
+      "type": "text",
+      "id": "email_capture_cta",
+      "label": "Button Text"
+    },
+    {
+      "type": "header",
+      "content": "Navigation — Spalte 1"
+    },
+    {
+      "type": "text",
+      "id": "nav_col_1_label",
+      "label": "Spalten-Titel"
+    },
+    {
+      "type": "textarea",
+      "id": "nav_col_1_links",
+      "label": "Links",
+      "info": "Kommagetrennt, z.B. AGE & DNA-Test, NMN Pulver, Alle Produkte"
+    },
+    {
+      "type": "header",
+      "content": "Navigation — Spalte 2"
+    },
+    {
+      "type": "text",
+      "id": "nav_col_2_label",
+      "label": "Spalten-Titel"
+    },
+    {
+      "type": "textarea",
+      "id": "nav_col_2_links",
+      "label": "Links",
+      "info": "Kommagetrennt"
+    },
+    {
+      "type": "header",
+      "content": "Navigation — Spalte 3"
+    },
+    {
+      "type": "text",
+      "id": "nav_col_3_label",
+      "label": "Spalten-Titel"
+    },
+    {
+      "type": "textarea",
+      "id": "nav_col_3_links",
+      "label": "Links",
+      "info": "Kommagetrennt"
+    },
+    {
+      "type": "header",
+      "content": "Navigation — Spalte 4"
+    },
+    {
+      "type": "text",
+      "id": "nav_col_4_label",
+      "label": "Spalten-Titel"
+    },
+    {
+      "type": "textarea",
+      "id": "nav_col_4_links",
+      "label": "Links",
+      "info": "Kommagetrennt"
+    },
+    {
+      "type": "header",
+      "content": "Texte"
+    },
+    {
+      "type": "textarea",
+      "id": "mission_statement",
+      "label": "Mission Statement"
+    },
+    {
+      "type": "textarea",
+      "id": "disclaimer",
+      "label": "Disclaimer / Rechtlicher Hinweis"
+    }
   ],
-  "presets": [{ "name": "HP Footer" }]
+  "blocks": [],
+  "presets": [
+    {
+      "name": "HP Footer"
+    }
+  ]
 }
 {% endschema %}

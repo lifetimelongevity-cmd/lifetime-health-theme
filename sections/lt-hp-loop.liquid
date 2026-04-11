@@ -1,39 +1,680 @@
-{% comment %} lt-hp-loop — Stub. Liquid pending. {% endcomment %}
+{% comment %}
+  lt-hp-loop — Lösung Der Loop (Section 3)
+  ─────────────────────────────────────────
+  §12 Build Spec:
+  - Surface:          --color-surface-secondary (warm — visueller Rhythmus: hell nach dunklem Hero/Ticker)
+  - Dominant element: Step 1 Card (is_primary) — größer, teal-getönt, mit Produkt-Link
+  - Heading size:     --text-h1 Section · --text-h2 primary Step · --text-h3 secondary Steps
+  - Content pattern:  3-Step horizontal flow (mit optionaler Connector-Linie) + Expert-Quote + CTA
+  - CTA:              volle cta-Variante — zweiter Kaufimpuls, direkt nach Limmroth-Zitat
+  - Removed:          Icons (Step-Numbers kommunizieren Reihenfolge deutlicher),
+                      sekundäre Step-CTAs (nur Step 1 hat Produkt-Link — keine CTA-Konkurrenz)
+  - Quality move:     Step 1 (is_primary) erhält --color-surface-benefit Background + teal Border —
+                      das visuelle Gewicht macht sofort klar: hier ist der Einstieg.
+                      Limmroth-Zitat als Trust-Brücke direkt vor dem zweiten Kaufimpuls.
+{% endcomment %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.color_bg != blank -%}
+    background: {{ section.settings.color_bg }};
+    {%- endif -%}
+    {%- if section.settings.color_text != blank -%}
+    color: {{ section.settings.color_text }};
+    {%- endif -%}
+    padding-top:    {{ section.settings.padding_top | default: 80 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | default: 80 }}px;
+  }
+{% endstyle %}
+
+<span id="loop" aria-hidden="true" style="display:block;height:0;visibility:hidden;"></span>
+<section id="shopify-section-{{ section.id }}" class="loop">
+  <div class="loop__container">
+
+    {%- comment -%}=== Section Header ==={%- endcomment -%}
+    <div class="loop__header">
+      {%- if section.settings.kicker != blank -%}
+        <p class="loop__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      <h2 class="loop__headline">{{ section.settings.headline | escape }}</h2>
+      {%- if section.settings.subheadline != blank -%}
+        <p class="loop__subheadline">{{ section.settings.subheadline | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%}=== Steps ==={%- endcomment -%}
+    <div class="loop__steps">
+      {%- assign step_index = 0 -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'loop_step' -%}
+          {%- assign step_index = step_index | plus: 1 -%}
+
+          {%- comment -%} Connector between steps {%- endcomment -%}
+          {%- if step_index > 1 and section.settings.show_connector_line -%}
+            <div class="loop__connector" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"/>
+                <polyline points="13 6 19 12 13 18"/>
+              </svg>
+            </div>
+          {%- endif -%}
+
+          <div
+            class="loop__step{% if block.settings.step_is_primary %} loop__step--primary{% endif %}"
+            {{ block.shopify_attributes }}
+          >
+            <div class="loop__step-number-row">
+              <span class="loop__step-number">{{ block.settings.step_number | escape }}</span>
+              {%- if block.settings.step_label != blank -%}
+                <span class="loop__step-label">{{ block.settings.step_label | escape }}</span>
+              {%- endif -%}
+            </div>
+
+            <h3 class="loop__step-headline">{{ block.settings.step_headline | escape }}</h3>
+
+            {%- if block.settings.step_body != blank -%}
+              <p class="loop__step-body">{{ block.settings.step_body | escape }}</p>
+            {%- endif -%}
+
+            {%- if block.settings.step_product_url != blank and block.settings.step_product_name != blank -%}
+              <a href="{{ block.settings.step_product_url }}" class="loop__step-link">
+                {{ block.settings.step_product_name | escape }}
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="12 5 19 12 12 19"/>
+                </svg>
+              </a>
+            {%- endif -%}
+          </div>
+
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%}=== Expert Quote (Trust-Brücke vor CTA) ==={%- endcomment -%}
+    {%- if section.settings.expert_quote != blank -%}
+      <div class="loop__expert">
+        {%- if section.settings.expert_image_url != blank -%}
+          <img
+            src="{{ section.settings.expert_image_url | escape }}"
+            alt="{{ section.settings.expert_name | escape }}"
+            class="loop__expert-avatar"
+            loading="lazy"
+            width="56"
+            height="56"
+          >
+        {%- else -%}
+          <div class="loop__expert-avatar-placeholder" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+        {%- endif -%}
+
+        <div class="loop__expert-content">
+          <blockquote class="loop__expert-quote">
+            <svg class="loop__expert-mark" width="24" height="18" viewBox="0 0 24 18" fill="currentColor" aria-hidden="true">
+              <path d="M0 18V10.8C0 7.2 1.4 4.2 4.2 1.8L6 0l1.2 1.2C5.6 2.8 4.4 4.8 3.6 7.2H7.2V18H0zm12 0V10.8c0-3.6 1.4-6.6 4.2-9L18 0l1.2 1.2c-1.6 1.6-2.8 3.6-3.6 6H19.2V18H12z"/>
+            </svg>
+            {{ section.settings.expert_quote | escape }}
+          </blockquote>
+          <footer class="loop__expert-meta">
+            <span class="loop__expert-name">{{ section.settings.expert_name | escape }}</span>
+            {%- if section.settings.expert_title != blank -%}
+              <span class="loop__expert-title">{{ section.settings.expert_title | escape }}</span>
+            {%- endif -%}
+          </footer>
+        </div>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%}=== Primary CTA — zweiter Kaufimpuls ==={%- endcomment -%}
+    {%- if section.settings.cta_label != blank -%}
+      <div class="loop__cta-wrap">
+        <a href="{{ section.settings.cta_url | default: '#' }}" class="loop__cta">
+          {{ section.settings.cta_label | escape }}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% stylesheet %}
+/* ================================================================
+   lt-hp-loop — Lösung: Test → Profil → Protokoll
+   Token refs: §3 (colors, spacing, type), §5 (Card Info, Buttons)
+   ================================================================ */
+
+/* — Section shell — */
+.loop {
+  background: var(--color-surface-secondary);
+}
+
+.loop__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+/* — Section header — */
+.loop__header {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto var(--space-9);  /* 80px → steps */
+}
+
+.loop__kicker {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.loop__headline {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-4);
+}
+
+.loop__subheadline {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* — Steps grid — */
+/*
+  DECISION: flex row with connectors between cards.
+  Connectors are flex-shrink: 0; cards take remaining space equally.
+  Primary card (Step 1) is visually differentiated by surface, not by size.
+*/
+.loop__steps {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-bottom: var(--space-9);   /* 80px → expert quote */
+}
+
+/* — Connector arrow between steps — */
+.loop__connector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--space-7);           /* 48px */
+  color: var(--color-text-muted);
+}
+
+/* — Step card — */
+.loop__step {
+  flex: 1;
+  background: var(--color-surface-primary);  /* white on warm surface — creates lift */
+  border-radius: var(--radius-md);
+  padding: var(--space-6);         /* 32px */
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Primary step — Step 1 gets teal-tinted treatment */
+.loop__step--primary {
+  background: var(--color-surface-benefit);     /* #E6F4F1 */
+  border: 1.5px solid rgba(94, 171, 161, 0.35);
+  box-shadow: var(--shadow-md);
+}
+
+/* — Step number row — */
+.loop__step-number-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+
+.loop__step-number {
+  font-family: var(--font-heading);
+  font-size: var(--text-display);  /* 48px — large, commands attention */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-stat);
+  color: var(--color-teal-dark);
+  letter-spacing: -0.03em;
+}
+
+.loop__step--primary .loop__step-number {
+  color: var(--color-teal-dark);   /* same — primary reinforces the teal theme */
+}
+
+/* Non-primary steps: muted number */
+.loop__step:not(.loop__step--primary) .loop__step-number {
+  color: var(--color-gray-400);
+}
+
+.loop__step-label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-teal-dark);
+}
+
+.loop__step:not(.loop__step--primary) .loop__step-label {
+  color: var(--color-text-muted);
+}
+
+/* — Step headline — */
+.loop__step-headline {
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);      /* 24px — compact in card context */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* — Step body — */
+.loop__step-body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: 0;
+  flex: 1;
+}
+
+/* — Step product link — */
+.loop__step-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: auto;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-teal-dark);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(74, 140, 133, 0.3);
+  padding-bottom: 1px;
+  transition: color var(--ease-default), border-color var(--ease-default);
+}
+
+.loop__step-link:hover {
+  color: var(--color-dark);
+  border-color: var(--color-dark);
+}
+
+/* — Expert quote (Trust-Brücke) — */
+/*
+  DECISION: horizontal layout on white surface card.
+  Avatar left, quote + meta right.
+  Opening quote mark is a large decorative element (teal, muted)
+  that visually anchors the quote without competing with the text.
+*/
+.loop__expert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-6);             /* 32px */
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  margin-bottom: var(--space-7);   /* 48px before CTA */
+}
+
+/* Expert avatar */
+.loop__expert-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border-default);
+}
+
+.loop__expert-avatar-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-benefit);
+  color: var(--color-teal-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(94, 171, 161, 0.25);
+}
+
+/* Expert content */
+.loop__expert-content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Opening quote mark */
+.loop__expert-mark {
+  color: var(--color-teal-dark);
+  opacity: 0.25;
+  display: block;
+  margin-bottom: var(--space-3);
+}
+
+/* Quote text */
+.loop__expert-quote {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);  /* 18px */
+  font-weight: var(--weight-regular);
+  font-style: italic;
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-4);
+}
+
+/* Expert meta */
+.loop__expert-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.loop__expert-name {
+  font-family: var(--font-heading);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-bold);
+  color: var(--color-text-primary);
+}
+
+.loop__expert-title {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-regular);
+  color: var(--color-text-muted);
+  line-height: var(--leading-body);
+}
+
+/* — Primary CTA — */
+.loop__cta-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.loop__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 14px var(--space-8);    /* 64px horizontal — wide, confident */
+  border-radius: var(--radius-full);
+  background: var(--color-cta-bg);
+  color: var(--color-cta-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: opacity var(--ease-default);
+}
+
+.loop__cta:hover {
+  opacity: 0.88;
+}
+
+/* — Responsive — */
+@media screen and (max-width: 1024px) {
+  .loop__steps {
+    gap: var(--space-4);
+  }
+
+  .loop__connector {
+    display: none;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .loop__container {
+    padding: 0 var(--space-4);
+  }
+
+  .loop__header {
+    margin-bottom: var(--space-7);
+  }
+
+  .loop__headline {
+    font-size: var(--text-h2);
+  }
+
+  .loop__steps {
+    flex-direction: column;
+    gap: var(--space-4);
+    margin-bottom: var(--space-7);
+  }
+
+  .loop__connector {
+    display: none;
+  }
+
+  .loop__step-number {
+    font-size: var(--text-h1);    /* 36px on mobile */
+  }
+
+  .loop__expert {
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .loop__expert-quote {
+    font-size: var(--text-body);
+  }
+}
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "HP Loop",
+  "tag": "section",
+  "class": "section",
   "settings": [
-    { "type": "color", "id": "color_bg", "label": "Hintergrundfarbe" },
-    { "type": "color", "id": "color_text", "label": "Textfarbe" },
-    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
-    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
-    { "type": "text", "id": "kicker", "label": "Kicker" },
-    { "type": "text", "id": "headline", "label": "Headline" },
-    { "type": "textarea", "id": "subheadline", "label": "Subheadline" },
-    { "type": "checkbox", "id": "show_connector_line", "label": "Verbindungslinie anzeigen", "default": true },
-    { "type": "text", "id": "cta_label", "label": "CTA Text" },
-    { "type": "url", "id": "cta_url", "label": "CTA Link" },
-    { "type": "textarea", "id": "expert_quote", "label": "Experten-Zitat" },
-    { "type": "text", "id": "expert_name", "label": "Experten-Name" },
-    { "type": "text", "id": "expert_title", "label": "Experten-Titel" },
-    { "type": "text", "id": "expert_image_url", "label": "Experten-Foto URL" }
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrundfarbe"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe"
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline"
+    },
+    {
+      "type": "textarea",
+      "id": "subheadline",
+      "label": "Subheadline"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_connector_line",
+      "label": "Verbindungspfeile zwischen Steps anzeigen",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "CTA"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA Text"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA Link"
+    },
+    {
+      "type": "header",
+      "content": "Expert-Zitat"
+    },
+    {
+      "type": "textarea",
+      "id": "expert_quote",
+      "label": "Zitat"
+    },
+    {
+      "type": "text",
+      "id": "expert_name",
+      "label": "Name"
+    },
+    {
+      "type": "text",
+      "id": "expert_title",
+      "label": "Titel / Credentials"
+    },
+    {
+      "type": "text",
+      "id": "expert_image_url",
+      "label": "Portrait URL"
+    }
   ],
   "blocks": [
     {
       "type": "loop_step",
       "name": "Loop-Schritt",
       "settings": [
-        { "type": "text", "id": "step_number", "label": "Nummer" },
-        { "type": "text", "id": "step_label", "label": "Label" },
-        { "type": "text", "id": "step_headline", "label": "Headline" },
-        { "type": "textarea", "id": "step_body", "label": "Beschreibung" },
-        { "type": "text", "id": "step_product_name", "label": "Produktname" },
-        { "type": "url", "id": "step_product_url", "label": "Produkt-Link" },
-        { "type": "checkbox", "id": "step_is_primary", "label": "Primärer Schritt", "default": false }
+        {
+          "type": "text",
+          "id": "step_number",
+          "label": "Schritt-Nummer",
+          "info": "z.B. 01"
+        },
+        {
+          "type": "text",
+          "id": "step_label",
+          "label": "Schritt-Label",
+          "info": "z.B. Messen"
+        },
+        {
+          "type": "text",
+          "id": "step_headline",
+          "label": "Headline"
+        },
+        {
+          "type": "textarea",
+          "id": "step_body",
+          "label": "Beschreibung"
+        },
+        {
+          "type": "text",
+          "id": "step_product_name",
+          "label": "Produkt-Link Text",
+          "info": "Leer lassen wenn kein Link"
+        },
+        {
+          "type": "url",
+          "id": "step_product_url",
+          "label": "Produkt-Link URL"
+        },
+        {
+          "type": "checkbox",
+          "id": "step_is_primary",
+          "label": "Primärer Schritt (visuell hervorgehoben)",
+          "default": false
+        }
       ]
     }
   ],
-  "presets": [{ "name": "HP Loop" }]
+  "presets": [
+    {
+      "name": "HP Loop",
+      "blocks": [
+        {
+          "type": "loop_step",
+          "settings": {
+            "step_number": "01",
+            "step_label": "Messen",
+            "step_headline": "AGE & DNA-Test",
+            "step_body": "Eine Speichelprobe. Zwei Analyseebenen. Dein biologisches Alter und 187 DNA-Reports – analysiert von Eurofins.",
+            "step_product_name": "AGE & DNA-Test",
+            "step_product_url": "/products/age-dna-test",
+            "step_is_primary": true
+          }
+        },
+        {
+          "type": "loop_step",
+          "settings": {
+            "step_number": "02",
+            "step_label": "Verstehen",
+            "step_headline": "Dein persönliches Longevity-Profil",
+            "step_body": "Biologisches Alter, genetische Prädispositionen und epigenetische Signale – verständlich aufbereitet in der App.",
+            "step_is_primary": false
+          }
+        },
+        {
+          "type": "loop_step",
+          "settings": {
+            "step_number": "03",
+            "step_label": "Handeln",
+            "step_headline": "Gezielte Protokolle",
+            "step_body": "Nährstoffe und Maßnahmen, die zu deinem Profil passen – nicht zu einem Durchschnittsmenschen.",
+            "step_product_name": "Supplemente entdecken",
+            "step_product_url": "/collections/supplements",
+            "step_is_primary": false
+          }
+        }
+      ]
+    }
+  ]
 }
 {% endschema %}

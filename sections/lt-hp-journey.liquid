@@ -1,42 +1,640 @@
-{% comment %} lt-hp-journey — Stub. Liquid pending. {% endcomment %}
+{% comment %}
+  lt-hp-journey — So läuft es ab (Section 8)
+  ────────────────────────────────────────────
+  §12 Build Spec:
+  - Surface:          --color-surface-primary (weiß — nach warmen Supplementen, vor Beratung)
+  - Dominant element: Step-Nummern (01–05) in Heading-Font + Teal — geordnete Klarheit
+  - Heading size:     --text-h1 Section · --text-h3 Step-Titel
+  - Content pattern:  Vertikale Step-Liste (adaptiert von lt-pdp-process-steps) + timeframe-Badges
+                      + Eurofins-Callout bei Step 4 + 2 FAQ-Akkordeons + CTA
+  - CTA:              cta-Variante am Sektionsende — vierter Kaufimpuls
+  - Removed:          Horizontaler Step-Flow (vertikal lesbarer auf Mobile), Progress-Bar
+  - Quality move:     Timeframe-Badge per Step als Teal-Pill — "6–8 Wochen Analysezeit" und
+                      "Unter 5 Minuten" sind die wichtigsten Trust-Signale dieser Sektion.
+                      Visuell abgesetzt von Body-Text → auf einen Blick findbar ohne Lesen.
+                      FAQ via <details>/<summary> — kein JS, vollständig zugänglich.
+{% endcomment %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.color_bg != blank -%}
+    background: {{ section.settings.color_bg }};
+    {%- endif -%}
+    {%- if section.settings.color_text != blank -%}
+    color: {{ section.settings.color_text }};
+    {%- endif -%}
+    padding-top:    {{ section.settings.padding_top | default: 80 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | default: 80 }}px;
+  }
+{% endstyle %}
+
+<section id="shopify-section-{{ section.id }}" class="jrn">
+  <div class="jrn__container">
+
+    {%- comment -%}=== Section Header ==={%- endcomment -%}
+    <div class="jrn__header">
+      {%- assign jrn_kicker = section.settings.kicker | strip -%}
+      {%- if jrn_kicker != blank and jrn_kicker != '__none__' -%}
+        <p class="jrn__kicker">{{ jrn_kicker | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <h2 class="jrn__headline">{{ section.settings.heading | escape }}</h2>
+      {%- endif -%}
+      {%- assign jrn_sub = section.settings.subheading | strip -%}
+      {%- if jrn_sub != blank and jrn_sub != '__none__' -%}
+        <p class="jrn__subheadline">{{ jrn_sub | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%}=== Step List ==={%- endcomment -%}
+    {%- assign has_steps = false -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'step' -%}{%- assign has_steps = true -%}{%- break -%}{%- endif -%}
+    {%- endfor -%}
+
+    {%- if has_steps -%}
+      <ol class="jrn__steps" role="list">
+        {%- assign step_count = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'step' -%}
+            {%- assign step_count = step_count | plus: 1 -%}
+            {%- comment -%} Count total steps for last-step detection {%- endcomment -%}
+          {%- endif -%}
+        {%- endfor -%}
+
+        {%- assign step_index = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'step' -%}
+            {%- assign step_index = step_index | plus: 1 -%}
+            {%- assign is_last_step = false -%}
+            {%- if step_index == step_count -%}{%- assign is_last_step = true -%}{%- endif -%}
+
+            <li class="jrn__step" {{ block.shopify_attributes }}>
+
+              {%- comment -%} Step marker: number + vertical connector {%- endcomment -%}
+              <div class="jrn__step-marker" aria-hidden="true">
+                <span class="jrn__step-num">
+                  {{ block.settings.step_number | default: step_index | escape }}
+                </span>
+                {%- unless is_last_step -%}
+                  <span class="jrn__step-connector"></span>
+                {%- endunless -%}
+              </div>
+
+              {%- comment -%} Step content {%- endcomment -%}
+              <div class="jrn__step-content">
+                <div class="jrn__step-header">
+                  <h3 class="jrn__step-title">{{ block.settings.step_title | escape }}</h3>
+                  {%- if block.settings.step_timeframe != blank -%}
+                    <span class="jrn__timeframe">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                      </svg>
+                      {{ block.settings.step_timeframe | escape }}
+                    </span>
+                  {%- endif -%}
+                </div>
+
+                {%- if block.settings.step_body != blank -%}
+                  <p class="jrn__step-body">{{ block.settings.step_body | escape }}</p>
+                {%- endif -%}
+
+                {%- comment -%} Eurofins Callout (Step 4) {%- endcomment -%}
+                {%- if block.settings.show_callout and block.settings.callout_text != blank -%}
+                  <div class="jrn__callout">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      <polyline points="9 12 11 14 15 10"/>
+                    </svg>
+                    <p>{{ block.settings.callout_text | escape }}</p>
+                  </div>
+                {%- endif -%}
+              </div>
+
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ol>
+    {%- endif -%}
+
+    {%- comment -%}=== FAQ Mini-Akkordeons ==={%- endcomment -%}
+    {%- assign has_faqs = false -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'faq' -%}{%- assign has_faqs = true -%}{%- break -%}{%- endif -%}
+    {%- endfor -%}
+
+    {%- if has_faqs -%}
+      <div class="jrn__faqs">
+        <p class="jrn__faqs-label">Häufige Fragen zum Ablauf</p>
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'faq' and block.settings.question != blank -%}
+            <details class="jrn__faq" {{ block.shopify_attributes }}>
+              <summary class="jrn__faq-question">
+                {{ block.settings.question | escape }}
+                <svg class="jrn__faq-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
+              </summary>
+              {%- if block.settings.answer != blank -%}
+                <div class="jrn__faq-answer">
+                  <p>{{ block.settings.answer | escape }}</p>
+                </div>
+              {%- endif -%}
+            </details>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%}=== CTA — vierter Kaufimpuls ==={%- endcomment -%}
+    {%- if section.settings.cta_label != blank -%}
+      <div class="jrn__cta-wrap">
+        <a href="{{ section.settings.cta_url | default: '#' }}" class="jrn__cta">
+          {{ section.settings.cta_label | escape }}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% stylesheet %}
+/* ================================================================
+   lt-hp-journey — Prozess-Steps (adaptiert von lt-pdp-process-steps)
+   Token refs: §3 (colors, type, spacing), §5 (Card Info pattern)
+   ================================================================ */
+
+/* — Section shell — */
+.jrn {
+  background: var(--color-surface-primary);
+}
+
+.jrn__container {
+  max-width: 800px;                /* narrower — vertical step list reads better focused */
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+/* — Section header — */
+.jrn__header {
+  text-align: center;
+  margin-bottom: var(--space-9);
+}
+
+.jrn__kicker {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.jrn__headline {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+  letter-spacing: -0.02em;
+  margin: 0 0 var(--space-4);
+}
+
+.jrn__subheadline {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* — Steps list — */
+.jrn__steps {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--space-8);    /* 64px → FAQs */
+}
+
+/* — Step — */
+.jrn__step {
+  display: grid;
+  grid-template-columns: 52px 1fr;  /* number column | content column */
+  gap: 0 var(--space-5);
+}
+
+/* — Step marker column — */
+.jrn__step-marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding-top: 2px;               /* optical alignment with step title */
+}
+
+/* Step number */
+.jrn__step-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-benefit);
+  border: 1.5px solid rgba(94, 171, 161, 0.35);
+  font-family: var(--font-heading);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-bold);
+  color: var(--color-teal-dark);
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* Vertical connector line between steps */
+.jrn__step-connector {
+  display: block;
+  width: 1.5px;
+  flex: 1;
+  min-height: var(--space-6);     /* 32px minimum */
+  background: var(--color-border-default);
+  margin: var(--space-2) 0;       /* gap from number circle */
+}
+
+/* — Step content — */
+.jrn__step-content {
+  padding-bottom: var(--space-7); /* 48px spacing between steps */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Step header: title + timeframe badge on same row */
+.jrn__step-header {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* Step title */
+.jrn__step-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);      /* 24px */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+/* Timeframe badge — the quality move */
+/*
+  DECISION: Teal pill, inline with title.
+  These are the most critical trust signals: "Unter 5 Minuten" answers
+  "how hard is it?" and "6–8 Wochen Analysezeit" answers "how long do I wait?"
+  Both must be found at a glance — not embedded in body text.
+*/
+.jrn__timeframe {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;                       /* intentional: between --space-1 and --space-2 */
+  background: var(--color-surface-benefit);
+  border: 1px solid rgba(94, 171, 161, 0.25);
+  border-radius: var(--radius-full);
+  padding: 4px var(--space-3);    /* intentional: sub-token vertical for compact pill */
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  color: var(--color-teal-dark);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* Step body */
+.jrn__step-body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* Eurofins callout (Step 4) */
+.jrn__callout {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  background: var(--color-surface-benefit);
+  border: 1px solid rgba(94, 171, 161, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.jrn__callout svg {
+  color: var(--color-teal-dark);
+  flex-shrink: 0;
+  margin-top: 2px;                /* optical vertical alignment with text */
+}
+
+.jrn__callout p {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-teal-dark);
+  margin: 0;
+}
+
+/* — FAQ section — */
+.jrn__faqs {
+  border-top: 1px solid var(--color-border-default);
+  padding-top: var(--space-7);
+  margin-bottom: var(--space-7);  /* 48px before CTA */
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.jrn__faqs-label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-4);
+}
+
+/* FAQ accordion (details/summary — no JS) */
+.jrn__faq {
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.jrn__faq[open] .jrn__faq-arrow {
+  transform: rotate(180deg);
+}
+
+.jrn__faq-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  list-style: none;              /* remove default marker */
+  user-select: none;
+}
+
+.jrn__faq-question::-webkit-details-marker {
+  display: none;
+}
+
+.jrn__faq-arrow {
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+  transition: transform var(--ease-default);
+}
+
+.jrn__faq-answer {
+  padding-bottom: var(--space-5);
+}
+
+.jrn__faq-answer p {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* — CTA — */
+.jrn__cta-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.jrn__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  padding: 14px var(--space-8);
+  border-radius: var(--radius-full);
+  background: var(--color-cta-bg);
+  color: var(--color-cta-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: opacity var(--ease-default);
+}
+
+.jrn__cta:hover {
+  opacity: 0.88;
+}
+
+/* — Responsive — */
+@media screen and (max-width: 768px) {
+  .jrn__container {
+    padding: 0 var(--space-4);
+  }
+
+  .jrn__header {
+    margin-bottom: var(--space-7);
+  }
+
+  .jrn__headline {
+    font-size: var(--text-h2);
+  }
+
+  .jrn__step {
+    grid-template-columns: 40px 1fr;
+    gap: 0 var(--space-4);
+  }
+
+  .jrn__step-num {
+    width: 34px;
+    height: 34px;
+    font-size: var(--text-micro);
+  }
+
+  .jrn__step-title {
+    font-size: var(--text-section); /* 20px on mobile */
+  }
+
+  .jrn__step-header {
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: flex-start;
+  }
+}
+{% endstylesheet %}
 
 {% schema %}
 {
   "name": "HP Journey",
+  "tag": "section",
+  "class": "section",
   "settings": [
-    { "type": "color", "id": "color_bg", "label": "Hintergrundfarbe" },
-    { "type": "color", "id": "color_card_bg", "label": "Karten-Hintergrund" },
-    { "type": "color", "id": "color_text", "label": "Textfarbe" },
-    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
-    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
-    { "type": "text", "id": "kicker", "label": "Kicker" },
-    { "type": "text", "id": "heading", "label": "Heading" },
-    { "type": "textarea", "id": "subheading", "label": "Subheading" },
-    { "type": "text", "id": "cta_label", "label": "CTA Text" },
-    { "type": "url", "id": "cta_url", "label": "CTA Link" }
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrundfarbe"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe"
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Headline"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheadline",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "header",
+      "content": "CTA"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA Text"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA Link"
+    }
   ],
   "blocks": [
     {
       "type": "step",
       "name": "Schritt",
       "settings": [
-        { "type": "text", "id": "step_number", "label": "Nummer" },
-        { "type": "text", "id": "step_title", "label": "Titel" },
-        { "type": "textarea", "id": "step_body", "label": "Beschreibung" },
-        { "type": "text", "id": "step_timeframe", "label": "Zeitangabe" },
-        { "type": "checkbox", "id": "show_callout", "label": "Callout anzeigen", "default": false },
-        { "type": "textarea", "id": "callout_text", "label": "Callout Text" }
+        {
+          "type": "text",
+          "id": "step_number",
+          "label": "Schritt-Nummer",
+          "info": "z.B. 01"
+        },
+        {
+          "type": "text",
+          "id": "step_title",
+          "label": "Titel"
+        },
+        {
+          "type": "textarea",
+          "id": "step_body",
+          "label": "Beschreibung"
+        },
+        {
+          "type": "text",
+          "id": "step_timeframe",
+          "label": "Zeitangabe",
+          "info": "z.B. Lieferung in 2–3 Werktagen — als Badge angezeigt"
+        },
+        {
+          "type": "checkbox",
+          "id": "show_callout",
+          "label": "Labor-Callout anzeigen",
+          "default": false
+        },
+        {
+          "type": "textarea",
+          "id": "callout_text",
+          "label": "Callout Text",
+          "info": "Nur sichtbar wenn Labor-Callout aktiviert"
+        }
       ]
     },
     {
       "type": "faq",
       "name": "FAQ",
+      "limit": 4,
       "settings": [
-        { "type": "text", "id": "question", "label": "Frage" },
-        { "type": "textarea", "id": "answer", "label": "Antwort" }
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Frage"
+        },
+        {
+          "type": "textarea",
+          "id": "answer",
+          "label": "Antwort"
+        }
       ]
     }
   ],
-  "presets": [{ "name": "HP Journey" }]
+  "presets": [
+    {
+      "name": "HP Journey",
+      "blocks": [
+        { "type": "step", "settings": { "step_number": "01", "step_title": "Online bestellen", "step_body": "Dein Testkit wird direkt nach Hause geliefert.", "step_timeframe": "Lieferung in 2–3 Werktagen" } },
+        { "type": "step", "settings": { "step_number": "02", "step_title": "Kit registrieren", "step_body": "QR-Code im Kit scannen, Probe in der App registrieren.", "step_timeframe": "2 Minuten" } },
+        { "type": "step", "settings": { "step_number": "03", "step_title": "Speichelprobe entnehmen & einsenden", "step_body": "Nicht-invasiv, zuhause, weniger als 5 Minuten.", "step_timeframe": "Unter 5 Minuten" } },
+        { "type": "step", "settings": { "step_number": "04", "step_title": "Probe geht ins Labor", "step_body": "Deine Probe wird direkt an Eurofins Genomics gesendet.", "step_timeframe": "6–8 Wochen Analysezeit", "show_callout": true, "callout_text": "Eurofins Genomics ist eines der führenden Genomik-Labore Europas." } },
+        { "type": "step", "settings": { "step_number": "05", "step_title": "Ergebnisse in der App", "step_body": "Dein biologisches Alter, 187 DNA-Reports und dein persönlicher KI Health Coach.", "step_timeframe": "Lebenslang verfügbar" } },
+        { "type": "faq", "settings": { "question": "Ist die Probenentnahme schmerzhaft?", "answer": "Nein. Du entnimmst ausschließlich eine Speichelprobe – kein Blut, keine Nadeln." } },
+        { "type": "faq", "settings": { "question": "Wie genau sind die Ergebnisse?", "answer": "Die Analyse erfolgt durch Eurofins Genomics – zertifiziert nach ISO 9001, ISO 17025 und ISO 13485." } }
+      ]
+    }
+  ]
 }
 {% endschema %}
