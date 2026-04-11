@@ -16,6 +16,13 @@
                       Moment wie der Klick gelöst. Timing ist der eigentliche Conversion-Hebel hier.
 {% endcomment %}
 
+{%- liquid
+  assign hp_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign hp_headline_lg = true
+  endif
+-%}
+
 {% style %}
   #shopify-section-{{ section.id }} {
     {%- if section.settings.color_bg != blank -%}
@@ -38,7 +45,7 @@
   <div class="ctac__container">
 
     {%- comment -%}=== Heading stack ==={%- endcomment -%}
-    <div class="ctac__header crs-heading-stack crs-heading-stack--align-center crs-heading-stack--on-dark crs-heading-stack--headline-lg crs-heading-stack--homepage-truth">
+    <div class="ctac__header crs-heading-stack crs-heading-stack--align-center{% if hp_headline_lg %} crs-heading-stack--headline-lg{% endif %} crs-heading-stack--on-dark crs-heading-stack--homepage-truth">
       {%- if section.settings.kicker != blank and section.settings.kicker != '__none__' -%}
         <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
       {%- endif -%}
@@ -360,6 +367,16 @@
     {
       "type": "header",
       "content": "Inhalt"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Ueberschrift Groesse",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "product_title"
     },
     {
       "type": "text",

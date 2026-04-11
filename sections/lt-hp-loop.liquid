@@ -14,6 +14,13 @@
                       Limmroth-Zitat als Trust-Brücke direkt vor dem zweiten Kaufimpuls.
 {% endcomment %}
 
+{%- liquid
+  assign hp_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign hp_headline_lg = true
+  endif
+-%}
+
 {% style %}
   #shopify-section-{{ section.id }} {
     {%- if section.settings.color_bg != blank -%}
@@ -35,7 +42,7 @@
   <div class="loop__container">
 
     {%- comment -%}=== Section Header ==={%- endcomment -%}
-    <div class="loop__header crs-heading-stack crs-heading-stack--align-center crs-heading-stack--homepage-truth">
+    <div class="loop__header crs-heading-stack crs-heading-stack--align-center{% if hp_headline_lg %} crs-heading-stack--headline-lg{% endif %} crs-heading-stack--homepage-truth">
       {%- if section.settings.kicker != blank -%}
         <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
       {%- endif -%}
@@ -499,6 +506,16 @@
     {
       "type": "header",
       "content": "Inhalt"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Ueberschrift Groesse",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section"
     },
     {
       "type": "text",

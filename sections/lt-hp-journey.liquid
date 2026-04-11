@@ -15,6 +15,13 @@
                       FAQ via <details>/<summary> — kein JS, vollständig zugänglich.
 {% endcomment %}
 
+{%- liquid
+  assign hp_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign hp_headline_lg = true
+  endif
+-%}
+
 {% style %}
   #shopify-section-{{ section.id }} {
     {%- if section.settings.color_bg != blank -%}
@@ -37,7 +44,7 @@
     {%- comment -%}=== Section Header ==={%- endcomment -%}
     {%- assign jrn_kicker = section.settings.kicker | strip -%}
     {%- assign jrn_sub = section.settings.subheading | strip -%}
-    <div class="jrn__header crs-heading-stack crs-heading-stack--align-center crs-heading-stack--homepage-truth">
+    <div class="jrn__header crs-heading-stack crs-heading-stack--align-center{% if hp_headline_lg %} crs-heading-stack--headline-lg{% endif %} crs-heading-stack--homepage-truth">
       {%- if jrn_kicker != blank and jrn_kicker != '__none__' -%}
         <p class="crs-heading-stack__kicker">{{ jrn_kicker | escape }}</p>
       {%- endif -%}
@@ -504,6 +511,16 @@
     {
       "type": "header",
       "content": "Inhalt"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Ueberschrift Groesse",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section"
     },
     {
       "type": "text",
