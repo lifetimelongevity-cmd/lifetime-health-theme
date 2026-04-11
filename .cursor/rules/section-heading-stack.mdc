@@ -1,0 +1,49 @@
+---
+description: Enforce shared crs-heading-stack component for all section headings in Liquid files
+globs: sections/**/*.liquid
+alwaysApply: false
+---
+
+## Section Headings: immer `crs-heading-stack` verwenden
+
+Alle Sections — PDP und Homepage — müssen das **geteilte `crs-heading-stack`-System** aus `assets/crs-section-headings.css` nutzen. Kein lokales Heading-CSS einführen.
+
+### ✅ RICHTIG — crs-heading-stack im HTML
+
+```liquid
+<div class="myblock__header crs-heading-stack crs-heading-stack--align-left">
+  {%- if section.settings.kicker != blank -%}
+    <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
+  {%- endif -%}
+  <div class="crs-heading-stack__pair">
+    <h2 class="crs-heading-stack__title">{{ section.settings.heading | escape }}</h2>
+    {%- if section.settings.subheading != blank -%}
+      <p class="crs-heading-stack__subtitle">{{ section.settings.subheading | escape }}</p>
+    {%- endif -%}
+  </div>
+</div>
+```
+
+### ❌ FALSCH — lokales Heading-CSS
+
+```css
+/* NICHT so — niemals eigene Kicker/Headline/Subheadline-Regeln definieren */
+.myblock__kicker { font-size: var(--text-micro); letter-spacing: 0.1em; … }
+.myblock__headline { font-size: var(--text-h1); font-weight: var(--weight-bold); … }
+.myblock__subheadline { font-size: var(--text-body-lg); … }
+```
+
+### Modifier-Klassen
+
+| Modifier | Wann | Ergebnis |
+|---|---|---|
+| `crs-heading-stack--align-left` | Standard-Content-Sections | linksbündig |
+| `crs-heading-stack--align-center` | Zentrierte Sections | zentriert |
+| `crs-heading-stack--on-dark` | Sections mit dunklem Hintergrund | helle Farben |
+| `crs-heading-stack--headline-lg` | Finale CTA-Sections (wie `crs-risk-free-close`) | `--text-h1` statt `--text-section` |
+
+### Warum
+
+- `crs-section-headings.css` ist bereits in `layout/theme.liquid` eingebunden (Zeile 48)
+- PDP-Sections (`crs-metrics-row`, `crs-feature-grid`, `crs-timeline` etc.) nutzen alle dieses System
+- Inkonsistente lokale CSS-Regeln führen zu visuell unterschiedlichen Headings auf PDP vs. Homepage
