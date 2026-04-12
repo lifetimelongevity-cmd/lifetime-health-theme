@@ -17,6 +17,15 @@
   if section.settings.heading_size == 'product_title'
     assign hp_headline_lg = true
   endif
+
+  assign cons_advisor_image_src = section.settings.advisor_image_url | strip
+  if cons_advisor_image_src contains 'shopify://shop_images/'
+    assign cons_advisor_image_src = cons_advisor_image_src | remove: 'shopify://shop_images/' | file_url
+  elsif cons_advisor_image_src != blank
+    unless cons_advisor_image_src contains '://'
+      assign cons_advisor_image_src = cons_advisor_image_src | file_url
+    endunless
+  endif
 -%}
 
 {% style %}
@@ -41,10 +50,10 @@
     <div class="cons__content">
 
       {%- comment -%} Optional advisor avatar {%- endcomment -%}
-      {%- if section.settings.advisor_image_url != blank -%}
+      {%- if cons_advisor_image_src != blank -%}
         <div class="cons__avatar-wrap">
           <img
-            src="{{ section.settings.advisor_image_url | escape }}"
+            src="{{ cons_advisor_image_src | escape }}"
             alt="LIFETIME Longevity-Experte"
             class="cons__avatar"
             loading="lazy"
@@ -69,12 +78,11 @@
         </div>
       </div>
 
-      {%- if section.settings.cta_label != blank -%}
+      {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
         <div class="cons__cta-wrap">
           <a
-            href="{{ section.settings.cta_url | default: '#' }}"
+            href="{{ section.settings.cta_url }}"
             class="cons__cta"
-            {%- if section.settings.cta_url == blank %} aria-disabled="true"{% endif %}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.72 9.16 19.79 19.79 0 0 1 1.68 .5 2 2 0 0 1 3.66 0h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 7.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16z"/>

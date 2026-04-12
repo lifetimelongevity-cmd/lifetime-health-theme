@@ -57,13 +57,23 @@
     {%- comment -%}=== Hero Card (is_hero: true) — rendered separately for layout control ==={%- endcomment -%}
     {%- for block in section.blocks -%}
       {%- if block.type == 'supplement_card' and block.settings.is_hero -%}
+        {%- liquid
+          assign supps_product_image_src = block.settings.product_image_url | strip
+          if supps_product_image_src contains 'shopify://shop_images/'
+            assign supps_product_image_src = supps_product_image_src | remove: 'shopify://shop_images/' | file_url
+          elsif supps_product_image_src != blank
+            unless supps_product_image_src contains '://'
+              assign supps_product_image_src = supps_product_image_src | file_url
+            endunless
+          endif
+        -%}
         <div class="supps__hero-card" {{ block.shopify_attributes }}>
 
           {%- comment -%} Product visual {%- endcomment -%}
           <div class="supps__hero-visual" aria-hidden="true">
-            {%- if block.settings.product_image_url != blank -%}
+            {%- if supps_product_image_src != blank -%}
               <img
-                src="{{ block.settings.product_image_url | escape }}"
+                src="{{ supps_product_image_src | escape }}"
                 alt="{{ block.settings.product_name | escape }}"
                 class="supps__hero-img"
                 loading="lazy"
@@ -130,13 +140,23 @@
       <ul class="supps__grid" role="list">
         {%- for block in section.blocks -%}
           {%- if block.type == 'supplement_card' and block.settings.is_hero == false -%}
+            {%- liquid
+              assign supps_product_image_src = block.settings.product_image_url | strip
+              if supps_product_image_src contains 'shopify://shop_images/'
+                assign supps_product_image_src = supps_product_image_src | remove: 'shopify://shop_images/' | file_url
+              elsif supps_product_image_src != blank
+                unless supps_product_image_src contains '://'
+                  assign supps_product_image_src = supps_product_image_src | file_url
+                endunless
+              endif
+            -%}
             <li class="supps__card" {{ block.shopify_attributes }}>
 
               {%- comment -%} Product image {%- endcomment -%}
               <div class="supps__card-visual" aria-hidden="true">
-                {%- if block.settings.product_image_url != blank -%}
+                {%- if supps_product_image_src != blank -%}
                   <img
-                    src="{{ block.settings.product_image_url | escape }}"
+                    src="{{ supps_product_image_src | escape }}"
                     alt="{{ block.settings.product_name | escape }}"
                     class="supps__card-img"
                     loading="lazy"

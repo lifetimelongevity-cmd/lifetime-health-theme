@@ -60,15 +60,25 @@
         {%- for block in section.blocks -%}
 
           {%- if block.type == 'science_pillar' -%}
+            {%- liquid
+              assign pillar_logo_src = block.settings.pillar_logo_url | strip
+              if pillar_logo_src contains 'shopify://shop_images/'
+                assign pillar_logo_src = pillar_logo_src | remove: 'shopify://shop_images/' | file_url
+              elsif pillar_logo_src != blank
+                unless pillar_logo_src contains '://'
+                  assign pillar_logo_src = pillar_logo_src | file_url
+                endunless
+              endif
+            -%}
             <div class="sci__card sci__card--pillar" {{ block.shopify_attributes }}>
               {%- if block.settings.pillar_label != blank -%}
                 <p class="sci__card-label">{{ block.settings.pillar_label | escape }}</p>
               {%- endif -%}
 
-              {%- if block.settings.pillar_logo_url != blank -%}
+              {%- if pillar_logo_src != blank -%}
                 <div class="sci__pillar-logo-wrap">
                   <img
-                    src="{{ block.settings.pillar_logo_url | escape }}"
+                    src="{{ pillar_logo_src | escape }}"
                     alt="{{ block.settings.pillar_headline | escape }}"
                     class="sci__pillar-logo"
                     loading="lazy"
@@ -102,11 +112,21 @@
             </div>
 
           {%- elsif block.type == 'expert' -%}
+            {%- liquid
+              assign science_expert_image_src = block.settings.expert_image_url | strip
+              if science_expert_image_src contains 'shopify://shop_images/'
+                assign science_expert_image_src = science_expert_image_src | remove: 'shopify://shop_images/' | file_url
+              elsif science_expert_image_src != blank
+                unless science_expert_image_src contains '://'
+                  assign science_expert_image_src = science_expert_image_src | file_url
+                endunless
+              endif
+            -%}
             <div class="sci__card sci__card--expert" {{ block.shopify_attributes }}>
               <div class="sci__expert-header">
-                {%- if block.settings.expert_image_url != blank -%}
+                {%- if science_expert_image_src != blank -%}
                   <img
-                    src="{{ block.settings.expert_image_url | escape }}"
+                    src="{{ science_expert_image_src | escape }}"
                     alt="{{ block.settings.expert_name | escape }}"
                     class="sci__expert-avatar"
                     loading="lazy"

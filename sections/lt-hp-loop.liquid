@@ -19,6 +19,15 @@
   if section.settings.heading_size == 'product_title'
     assign hp_headline_lg = true
   endif
+
+  assign loop_expert_image_src = section.settings.expert_image_url | strip
+  if loop_expert_image_src contains 'shopify://shop_images/'
+    assign loop_expert_image_src = loop_expert_image_src | remove: 'shopify://shop_images/' | file_url
+  elsif loop_expert_image_src != blank
+    unless loop_expert_image_src contains '://'
+      assign loop_expert_image_src = loop_expert_image_src | file_url
+    endunless
+  endif
 -%}
 
 {% style %}
@@ -106,9 +115,9 @@
     {%- comment -%}=== Expert Quote (Trust-Brücke vor CTA) ==={%- endcomment -%}
     {%- if section.settings.expert_quote != blank -%}
       <div class="loop__expert">
-        {%- if section.settings.expert_image_url != blank -%}
+        {%- if loop_expert_image_src != blank -%}
           <img
-            src="{{ section.settings.expert_image_url | escape }}"
+            src="{{ loop_expert_image_src | escape }}"
             alt="{{ section.settings.expert_name | escape }}"
             class="loop__expert-avatar"
             loading="lazy"

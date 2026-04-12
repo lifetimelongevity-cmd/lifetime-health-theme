@@ -17,6 +17,15 @@
   if section.settings.heading_size == 'product_title'
     assign hp_headline_lg = true
   endif
+
+  assign hp_product_image_src = section.settings.product_image_url | strip
+  if hp_product_image_src contains 'shopify://shop_images/'
+    assign hp_product_image_src = hp_product_image_src | remove: 'shopify://shop_images/' | file_url
+  elsif hp_product_image_src != blank
+    unless hp_product_image_src contains '://'
+      assign hp_product_image_src = hp_product_image_src | file_url
+    endunless
+  endif
 -%}
 
 {% style %}
@@ -40,9 +49,9 @@
 
     {%- comment -%}=== LEFT — Product Visual ==={%- endcomment -%}
     <div class="php__visual">
-      {%- if section.settings.product_image_url != blank -%}
+      {%- if hp_product_image_src != blank -%}
         <img
-          src="{{ section.settings.product_image_url | escape }}"
+          src="{{ hp_product_image_src | escape }}"
           alt="{{ section.settings.headline | escape }}"
           class="php__img"
           loading="lazy"

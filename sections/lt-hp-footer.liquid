@@ -19,6 +19,17 @@
   }
 {% endstyle %}
 
+{%- liquid
+  assign footer_eurofins_logo_src = section.settings.eurofins_logo_url | strip
+  if footer_eurofins_logo_src contains 'shopify://shop_images/'
+    assign footer_eurofins_logo_src = footer_eurofins_logo_src | remove: 'shopify://shop_images/' | file_url
+  elsif footer_eurofins_logo_src != blank
+    unless footer_eurofins_logo_src contains '://'
+      assign footer_eurofins_logo_src = footer_eurofins_logo_src | file_url
+    endunless
+  endif
+-%}
+
 <footer id="shopify-section-{{ section.id }}" class="hpf hpf--dark" role="contentinfo">
   <div class="hpf__container">
 
@@ -88,9 +99,9 @@
     {%- if section.settings.show_eurofins_logo or section.settings.show_press_logos -%}
       <div class="hpf__logos" aria-label="Zertifizierungen und Pressestimmen">
         {%- if section.settings.show_eurofins_logo -%}
-          {%- if section.settings.eurofins_logo_url != blank -%}
+          {%- if footer_eurofins_logo_src != blank -%}
             <img
-              src="{{ section.settings.eurofins_logo_url | escape }}"
+              src="{{ footer_eurofins_logo_src | escape }}"
               alt="Eurofins Genomics"
               class="hpf__logo hpf__logo--eurofins"
               loading="lazy"
