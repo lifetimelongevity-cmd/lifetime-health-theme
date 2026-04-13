@@ -39,6 +39,15 @@
     assign hpva_show_sound_toggle = true
   endif
 
+  assign hpva_expert_image_src = section.settings.expert_image_url | strip
+  if hpva_expert_image_src contains 'shopify://shop_images/'
+    assign hpva_expert_image_src = hpva_expert_image_src | remove: 'shopify://shop_images/' | file_url
+  elsif hpva_expert_image_src != blank
+    unless hpva_expert_image_src contains '://'
+      assign hpva_expert_image_src = hpva_expert_image_src | file_url
+    endunless
+  endif
+
   assign hpva_youtube_controls = '1'
   assign hpva_vimeo_background = '0'
   if section.settings.video_autoplay
@@ -70,17 +79,57 @@
   <div class="hpva__container">
     <div class="hpva__layout">
       <div class="hpva__copy">
-        <div class="hpva__header crs-heading-stack crs-heading-stack--align-center crs-heading-stack--homepage-truth">
+        <div class="hpva__header crs-heading-stack crs-heading-stack--align-left crs-heading-stack--homepage-truth">
           {%- if section.settings.kicker != blank -%}
             <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
           {%- endif -%}
 
-          {%- if section.settings.headline != blank -%}
+          {%- if section.settings.headline != blank or section.settings.subheadline != blank -%}
             <div class="crs-heading-stack__pair">
+              {%- if section.settings.headline != blank -%}
               <h2 class="crs-heading-stack__title">{{ section.settings.headline | escape }}</h2>
+              {%- endif -%}
+              {%- if section.settings.subheadline != blank -%}
+                <p class="crs-heading-stack__subtitle">{{ section.settings.subheadline | escape }}</p>
+              {%- endif -%}
             </div>
           {%- endif -%}
         </div>
+
+        {%- if section.settings.expert_quote != blank -%}
+          <div class="hpva__quote-card">
+            <blockquote class="hpva__quote">{{ section.settings.expert_quote | escape }}</blockquote>
+
+            <div class="hpva__expert">
+              {%- if hpva_expert_image_src != blank -%}
+                <img
+                  src="{{ hpva_expert_image_src | escape }}"
+                  alt="{{ section.settings.expert_name | escape }}"
+                  class="hpva__expert-avatar"
+                  loading="lazy"
+                  width="56"
+                  height="56"
+                >
+              {%- else -%}
+                <div class="hpva__expert-avatar-placeholder" aria-hidden="true">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                </div>
+              {%- endif -%}
+
+              <div class="hpva__expert-meta">
+                {%- if section.settings.expert_name != blank -%}
+                  <p class="hpva__expert-name">{{ section.settings.expert_name | escape }}</p>
+                {%- endif -%}
+                {%- if section.settings.expert_title != blank -%}
+                  <p class="hpva__expert-title">{{ section.settings.expert_title | escape }}</p>
+                {%- endif -%}
+              </div>
+            </div>
+          </div>
+        {%- endif -%}
       </div>
 
       <div class="hpva__media">
@@ -246,15 +295,86 @@
 
 .hpva__copy {
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-6);
 }
 
 .hpva__header {
-  max-width: 38rem;
-  margin: 0 auto;
+  max-width: 34rem;
+  margin: 0;
 }
 
 .hpva__media {
   width: 100%;
+}
+
+.hpva__quote-card {
+  background: #ffffff;
+  border-radius: var(--radius-md, 16px);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  padding: var(--space-6);
+}
+
+.hpva__quote {
+  margin: 0 0 var(--space-5);
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-style: italic;
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--hpva-text, #26251e);
+}
+
+.hpva__expert {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.hpva__expert-avatar,
+.hpva__expert-avatar-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.hpva__expert-avatar {
+  object-fit: cover;
+}
+
+.hpva__expert-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(38, 37, 30, 0.05);
+  color: var(--hpva-text-muted, rgba(38, 37, 30, 0.64));
+}
+
+.hpva__expert-meta {
+  min-width: 0;
+}
+
+.hpva__expert-name,
+.hpva__expert-title {
+  margin: 0;
+}
+
+.hpva__expert-name {
+  font-family: var(--font-heading);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  color: var(--hpva-text, #26251e);
+}
+
+.hpva__expert-title {
+  margin-top: 4px;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-body, 1.4);
+  color: var(--hpva-text-muted, rgba(38, 37, 30, 0.64));
 }
 
 .hpva__video-shell {
@@ -371,6 +491,10 @@
     gap: var(--space-6);
   }
 
+  .hpva__copy {
+    gap: var(--space-5);
+  }
+
   .hpva__video-shell {
     width: min(85%, calc(var(--hpva-video-max-width, 400px) * 0.85));
   }
@@ -385,15 +509,12 @@
 
 @media screen and (min-width: 990px) {
   .hpva__layout {
-    grid-template-columns: minmax(18rem, 28rem) minmax(15rem, 18rem);
-    gap: clamp(1.5rem, 3vw, 3rem);
-    justify-content: center;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(2rem, 4vw, 4rem);
   }
 
   .hpva__header {
-    margin: 0;
-    text-align: left;
-    max-width: 28rem;
+    max-width: 34rem;
   }
 
   .hpva__header.crs-heading-stack {
@@ -407,12 +528,11 @@
   }
 
   .hpva__copy {
-    display: flex;
-    justify-content: flex-end;
+    justify-content: center;
   }
 
   .hpva__video-shell {
-    width: min(100%, var(--hpva-video-max-width, 400px), 280px);
+    width: min(100%, var(--hpva-video-max-width, 400px), 320px);
   }
 }
 {% endstylesheet %}
@@ -480,6 +600,40 @@
       "default": "Warum biologisches Alter messbar ist."
     },
     {
+      "type": "textarea",
+      "id": "subheadline",
+      "label": "Subheadline",
+      "default": "Die Epigenetik macht Alterung messbar – nicht irgendwann, sondern heute."
+    },
+    {
+      "type": "header",
+      "content": "Expert:innen-Quote"
+    },
+    {
+      "type": "textarea",
+      "id": "expert_quote",
+      "label": "Zitat",
+      "default": "Longevity beginnt mit Daten, nicht mit Annahmen. Der AGE & DNA-Test gibt dir die biologische Basis, auf der echte Prävention aufbaut."
+    },
+    {
+      "type": "text",
+      "id": "expert_name",
+      "label": "Name",
+      "default": "Prof. Dr. med. Volker Limmroth"
+    },
+    {
+      "type": "text",
+      "id": "expert_title",
+      "label": "Titel",
+      "default": "Chefarzt Neurologie · Chief Scientific Officer LIFETIME · Spiegel-Bestseller-Autor"
+    },
+    {
+      "type": "text",
+      "id": "expert_image_url",
+      "label": "Portrait URL",
+      "default": "shopify://shop_images/volker-podcast.png"
+    },
+    {
       "type": "text",
       "id": "video_url",
       "label": "Video-URL oder Shopify-Datei"
@@ -525,6 +679,11 @@
       "settings": {
         "kicker": "Ärztlich erklärt",
         "headline": "Warum biologisches Alter messbar ist.",
+        "subheadline": "Die Epigenetik macht Alterung messbar – nicht irgendwann, sondern heute.",
+        "expert_quote": "Longevity beginnt mit Daten, nicht mit Annahmen. Der AGE & DNA-Test gibt dir die biologische Basis, auf der echte Prävention aufbaut.",
+        "expert_name": "Prof. Dr. med. Volker Limmroth",
+        "expert_title": "Chefarzt Neurologie · Chief Scientific Officer LIFETIME · Spiegel-Bestseller-Autor",
+        "expert_image_url": "shopify://shop_images/volker-podcast.png",
         "video_max_width": 400,
         "video_autoplay": true,
         "video_muted": true,

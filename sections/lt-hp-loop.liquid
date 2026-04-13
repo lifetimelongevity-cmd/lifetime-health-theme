@@ -19,15 +19,6 @@
   if section.settings.heading_size == 'product_title'
     assign hp_headline_lg = true
   endif
-
-  assign loop_expert_image_src = section.settings.expert_image_url | strip
-  if loop_expert_image_src contains 'shopify://shop_images/'
-    assign loop_expert_image_src = loop_expert_image_src | remove: 'shopify://shop_images/' | file_url
-  elsif loop_expert_image_src != blank
-    unless loop_expert_image_src contains '://'
-      assign loop_expert_image_src = loop_expert_image_src | file_url
-    endunless
-  endif
 -%}
 
 {% style %}
@@ -112,44 +103,6 @@
       {%- endfor -%}
     </div>
 
-    {%- comment -%}=== Expert Quote (Trust-Brücke vor CTA) ==={%- endcomment -%}
-    {%- if section.settings.expert_quote != blank -%}
-      <div class="loop__expert">
-        {%- if loop_expert_image_src != blank -%}
-          <img
-            src="{{ loop_expert_image_src | escape }}"
-            alt="{{ section.settings.expert_name | escape }}"
-            class="loop__expert-avatar"
-            loading="lazy"
-            width="56"
-            height="56"
-          >
-        {%- else -%}
-          <div class="loop__expert-avatar-placeholder" aria-hidden="true">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-              <circle cx="12" cy="7" r="4"/>
-            </svg>
-          </div>
-        {%- endif -%}
-
-        <div class="loop__expert-content">
-          <blockquote class="loop__expert-quote">
-            <svg class="loop__expert-mark" width="24" height="18" viewBox="0 0 24 18" fill="currentColor" aria-hidden="true">
-              <path d="M0 18V10.8C0 7.2 1.4 4.2 4.2 1.8L6 0l1.2 1.2C5.6 2.8 4.4 4.8 3.6 7.2H7.2V18H0zm12 0V10.8c0-3.6 1.4-6.6 4.2-9L18 0l1.2 1.2c-1.6 1.6-2.8 3.6-3.6 6H19.2V18H12z"/>
-            </svg>
-            {{ section.settings.expert_quote | escape }}
-          </blockquote>
-          <footer class="loop__expert-meta">
-            <span class="loop__expert-name">{{ section.settings.expert_name | escape }}</span>
-            {%- if section.settings.expert_title != blank -%}
-              <span class="loop__expert-title">{{ section.settings.expert_title | escape }}</span>
-            {%- endif -%}
-          </footer>
-        </div>
-      </div>
-    {%- endif -%}
-
     {%- comment -%}=== Primary CTA — zweiter Kaufimpuls ==={%- endcomment -%}
     {%- if section.settings.cta_label != blank -%}
       <div class="loop__cta-wrap">
@@ -196,7 +149,7 @@
   display: flex;
   align-items: stretch;
   gap: 0;
-  margin-bottom: var(--space-9);   /* 80px → expert quote */
+  margin-bottom: var(--space-7);   /* 48px → CTA */
 }
 
 /* — Connector arrow between steps — */
@@ -308,94 +261,6 @@
   border-color: var(--color-dark);
 }
 
-/* — Expert quote (Trust-Brücke) — */
-/*
-  DECISION: horizontal layout on white surface card.
-  Avatar left, quote + meta right.
-  Opening quote mark is a large decorative element (teal, muted)
-  that visually anchors the quote without competing with the text.
-*/
-.loop__expert {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-6);             /* 32px */
-  background: var(--color-surface-primary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  padding: var(--space-6);
-  margin-bottom: var(--space-7);   /* 48px before CTA */
-}
-
-/* Expert avatar */
-.loop__expert-avatar {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-full);
-  object-fit: cover;
-  flex-shrink: 0;
-  border: 1px solid var(--color-border-default);
-}
-
-.loop__expert-avatar-placeholder {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--radius-full);
-  background: var(--color-surface-secondary);
-  color: var(--color-text-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border: 1px solid var(--color-border-default);
-}
-
-/* Expert content */
-.loop__expert-content {
-  flex: 1;
-  min-width: 0;
-}
-
-/* Opening quote mark */
-.loop__expert-mark {
-  color: var(--color-text-muted);
-  opacity: 0.25;
-  display: block;
-  margin-bottom: var(--space-3);
-}
-
-/* Quote text */
-.loop__expert-quote {
-  font-family: var(--font-body);
-  font-size: var(--text-body-lg);  /* 18px */
-  font-weight: var(--weight-regular);
-  font-style: italic;
-  line-height: var(--leading-relaxed);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--space-4);
-}
-
-/* Expert meta */
-.loop__expert-meta {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.loop__expert-name {
-  font-family: var(--font-heading);
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-medium);
-  color: var(--color-text-primary);
-}
-
-.loop__expert-title {
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-regular);
-  color: var(--color-text-muted);
-  line-height: var(--leading-body);
-}
-
 /* — Primary CTA — */
 .loop__cta-wrap {
   display: flex;
@@ -457,14 +322,6 @@
     font-size: var(--text-h1);    /* 36px on mobile */
   }
 
-  .loop__expert {
-    flex-direction: column;
-    gap: var(--space-4);
-  }
-
-  .loop__expert-quote {
-    font-size: var(--text-body);
-  }
 }
 {% endstylesheet %}
 
@@ -562,28 +419,8 @@
       "label": "CTA Link"
     },
     {
-      "type": "header",
-      "content": "Expert-Zitat"
-    },
-    {
-      "type": "textarea",
-      "id": "expert_quote",
-      "label": "Zitat"
-    },
-    {
-      "type": "text",
-      "id": "expert_name",
-      "label": "Name"
-    },
-    {
-      "type": "text",
-      "id": "expert_title",
-      "label": "Titel / Credentials"
-    },
-    {
-      "type": "text",
-      "id": "expert_image_url",
-      "label": "Portrait URL"
+      "type": "paragraph",
+      "content": "Das Expert:innen-Zitat ist in die Section \"HP Video Authority\" verschoben."
     }
   ],
   "blocks": [
