@@ -22,14 +22,15 @@
           <p class="ltw-eyebrow">{{ section.settings.eyebrow | escape }}</p>
         {%- endif -%}
 
-        <h1 class="ltw-heading crs-heading-stack__title" aria-label="{{ section.settings.headline | escape }}">
-          {{ section.settings.headline | escape }}
-        </h1>
+        <div class="crs-heading-stack__pair">
+          <h1 class="ltw-heading crs-heading-stack__title" aria-label="{{ section.settings.headline | escape }}">
+            {{ section.settings.headline | escape }}
+          </h1>
+          {%- if section.settings.subheading != blank -%}
+            <p class="ltw-subheading crs-heading-stack__subtitle">{{ section.settings.subheading | escape }}</p>
+          {%- endif -%}
+        </div>
       </div>
-
-      {%- if section.settings.subheading != blank -%}
-        <p class="ltw-subheading">{{ section.settings.subheading | escape }}</p>
-      {%- endif -%}
 
       {%- if section.settings.cta_label != blank -%}
         <div class="ltw-cta">
@@ -230,30 +231,39 @@
 
 /* Headline */
 .ltw-heading {
-  font-family: var(--font-heading);
-  font-size: clamp(2.25rem, 4vw, 3.25rem);
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-heading);
-  letter-spacing: -.02em;
   color: var(--hero-text, #161514);
   margin: 0;
 }
 
-.ltw-heading-group.crs-heading-stack.crs-heading-stack--headline-lg .ltw-heading.crs-heading-stack__title {
-  font-size: var(--text-h1);
-  line-height: var(--leading-heading);
-  letter-spacing: -0.02em;
+.ltw-heading-group {
+  margin-bottom: 32px;
 }
 
 /* Subheading */
 .ltw-subheading {
-  font-family: var(--font-body) !important;
-  font-size: clamp(2.25rem, 4vw, 3.25rem) !important;
-  font-weight: var(--weight-regular) !important;
-  line-height: var(--leading-heading) !important;
-  letter-spacing: -.02em !important;
-  color: var(--hero-text-sec, rgba(22,21,20,.72)) !important;
-  margin: 0 0 32px !important;
+  color: var(--hero-text-sec, rgba(22,21,20,.72));
+  margin: 0;
+}
+
+.ltw-heading-group .crs-heading-stack__pair {
+  gap: 0;
+}
+
+.ltw-heading-group .ltw-heading.crs-heading-stack__title,
+.ltw-heading-group .ltw-subheading.crs-heading-stack__subtitle {
+  max-width: 13ch;
+}
+
+.ltw-heading-group .ltw-subheading.crs-heading-stack__subtitle {
+  margin-top: 0;
+}
+
+.ltw-heading-group.crs-heading-stack .ltw-heading.crs-heading-stack__title {
+  color: var(--hero-text, #161514);
+}
+
+.ltw-heading-group.crs-heading-stack .ltw-subheading.crs-heading-stack__subtitle {
+  color: var(--hero-text-sec, rgba(22,21,20,.72));
 }
 
 /* CTA */
@@ -490,6 +500,15 @@
   .ltw-container {
     padding: 0 20px;
     gap: 36px;
+  }
+
+  .ltw-heading-group {
+    margin-bottom: 24px;
+  }
+
+  .ltw-heading-group .ltw-heading.crs-heading-stack__title,
+  .ltw-heading-group .ltw-subheading.crs-heading-stack__subtitle {
+    max-width: 100%;
   }
 }
 {% endstylesheet %}
