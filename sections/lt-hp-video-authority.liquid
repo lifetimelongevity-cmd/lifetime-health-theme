@@ -1,0 +1,476 @@
+{% comment %}
+  lt-hp-video-authority — Editorial authority video for homepage
+{% endcomment %}
+
+{%- liquid
+  assign hpva_video_url = section.settings.video_url | strip
+  assign hpva_video_url_downcase = hpva_video_url | downcase
+  assign hpva_direct_video_src = hpva_video_url
+
+  assign hpva_is_youtube = false
+  assign hpva_is_vimeo = false
+  assign hpva_is_direct_video = false
+  assign hpva_youtube_id = ''
+  assign hpva_vimeo_id = ''
+
+  if hpva_video_url_downcase contains 'youtube.com/' or hpva_video_url_downcase contains 'youtu.be/'
+    assign hpva_is_youtube = true
+
+    if hpva_video_url_downcase contains 'youtu.be/'
+      assign hpva_youtube_id = hpva_video_url | split: 'youtu.be/' | last | split: '?' | first | split: '&' | first | split: '/' | first
+    elsif hpva_video_url_downcase contains 'youtube.com/embed/'
+      assign hpva_youtube_id = hpva_video_url | split: 'youtube.com/embed/' | last | split: '?' | first | split: '&' | first | split: '/' | first
+    elsif hpva_video_url_downcase contains 'v='
+      assign hpva_youtube_id = hpva_video_url | split: 'v=' | last | split: '&' | first
+    endif
+  elsif hpva_video_url_downcase contains 'vimeo.com/'
+    assign hpva_is_vimeo = true
+    assign hpva_vimeo_id = hpva_video_url | split: 'vimeo.com/' | last | split: '?' | first | split: '/' | first
+  elsif hpva_video_url_downcase contains '.mp4' or hpva_video_url_downcase contains '.mov' or hpva_video_url_downcase contains '.webm' or hpva_video_url_downcase contains '/videos/' or hpva_video_url_downcase contains 'cdn.shopify.com/videos'
+    assign hpva_is_direct_video = true
+
+    if hpva_video_url_downcase contains 'shopify://files/videos/'
+      assign hpva_direct_video_src = hpva_video_url | remove: 'shopify://files/videos/' | file_url
+    endif
+  endif
+
+  assign hpva_show_sound_toggle = false
+  if section.settings.show_sound_toggle and hpva_is_direct_video
+    assign hpva_show_sound_toggle = true
+  endif
+
+  assign hpva_youtube_controls = '1'
+  assign hpva_vimeo_background = '0'
+  if section.settings.video_autoplay
+    assign hpva_youtube_controls = '0'
+    assign hpva_vimeo_background = '1'
+  endif
+-%}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --hpva-bg: {{ section.settings.color_bg | default: '#f7f7f4' }};
+    --hpva-text: {{ section.settings.color_text | default: '#26251e' }};
+    --hpva-text-muted: {{ section.settings.color_text | default: '#26251e' | color_modify: 'alpha', 0.64 }};
+    --hpva-border: {{ section.settings.color_text | default: '#26251e' | color_modify: 'alpha', 0.08 }};
+    --hpva-video-max-width: {{ section.settings.video_max_width | default: 400 }}px;
+    background: var(--hpva-bg);
+    color: var(--hpva-text);
+    padding-top: {{ section.settings.padding_top | default: 80 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | default: 80 }}px;
+  }
+{% endstyle %}
+
+<section
+  id="lt-hp-video-authority-{{ section.id }}"
+  class="hpva"
+  data-section-id="{{ section.id }}"
+  data-show-sound-toggle="{{ hpva_show_sound_toggle }}"
+>
+  <div class="hpva__container">
+    <div class="hpva__header crs-heading-stack crs-heading-stack--align-center crs-heading-stack--homepage-truth">
+      {%- if section.settings.kicker != blank -%}
+        <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.headline != blank -%}
+        <div class="crs-heading-stack__pair">
+          <h2 class="crs-heading-stack__title">{{ section.settings.headline | escape }}</h2>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="hpva__media">
+      <div class="hpva__video-shell">
+        <div class="hpva__video-frame">
+          {%- if hpva_is_direct_video -%}
+            <video
+              class="hpva__video"
+              {% if section.settings.video_autoplay %}autoplay{% endif %}
+              {% if section.settings.video_muted %}muted{% endif %}
+              {% if section.settings.video_loop %}loop{% endif %}
+              {% unless section.settings.video_autoplay %}controls{% endunless %}
+              playsinline
+              preload="metadata"
+              src="{{ hpva_direct_video_src | escape }}"
+            ></video>
+          {%- elsif hpva_is_youtube and hpva_youtube_id != blank -%}
+            <iframe
+              class="hpva__iframe"
+              src="https://www.youtube.com/embed/{{ hpva_youtube_id }}?playsinline=1&rel=0&controls={{ hpva_youtube_controls }}{% if section.settings.video_autoplay %}&autoplay=1{% endif %}{% if section.settings.video_muted %}&mute=1{% endif %}{% if section.settings.video_loop %}&loop=1&playlist={{ hpva_youtube_id }}{% endif %}"
+              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+              allowfullscreen
+              title="{{ section.settings.headline | default: section.settings.kicker | default: 'Video' | escape }}"
+            ></iframe>
+          {%- elsif hpva_is_vimeo and hpva_vimeo_id != blank -%}
+            <iframe
+              class="hpva__iframe"
+              src="https://player.vimeo.com/video/{{ hpva_vimeo_id }}?title=0&byline=0&portrait=0&playsinline=1{% if section.settings.video_autoplay %}&autoplay=1{% endif %}{% if section.settings.video_muted %}&muted=1{% endif %}{% if section.settings.video_loop %}&loop=1{% endif %}&background={{ hpva_vimeo_background }}"
+              allow="autoplay; encrypted-media; picture-in-picture"
+              allowfullscreen
+              title="{{ section.settings.headline | default: section.settings.kicker | default: 'Video' | escape }}"
+            ></iframe>
+          {%- elsif request.design_mode -%}
+            <div class="hpva__placeholder">
+              <p class="hpva__placeholder-label">Video-URL hinzufügen</p>
+            </div>
+          {%- endif -%}
+
+          {%- if hpva_show_sound_toggle -%}
+            <button
+              type="button"
+              class="hpva__sound-toggle"
+              data-hpva-sound-toggle
+              aria-pressed="{% unless section.settings.video_muted %}true{% else %}false{% endunless %}"
+              aria-label="{% unless section.settings.video_muted %}Ton stummschalten{% else %}Ton aktivieren{% endunless %}"
+            >
+              <span class="hpva__sound-icon hpva__sound-icon--muted" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                  <path fill="none" d="M0 0h24v24H0z"></path>
+                  <path d="M5.889 16H2a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h3.889l5.294-4.332a.5.5 0 0 1 .817.387v15.89a.5.5 0 0 1-.817.387L5.89 16zm14.525-4l3.536 3.536-1.414 1.414L19 13.414l-3.536 3.536-1.414-1.414L17.586 12 14.05 8.464l1.414-1.414L19 10.586l3.536-3.536 1.414 1.414L20.414 12z"></path>
+                </svg>
+              </span>
+              <span class="hpva__sound-icon hpva__sound-icon--unmuted" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="24" height="24">
+                  <path fill="none" d="M0 0h24v24H0z"></path>
+                  <path d="M5.889 16H2a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h3.889l5.294-4.332a.5.5 0 0 1 .817.387v15.89a.5.5 0 0 1-.817.387L5.89 16zm13.517 4.134l-1.416-1.416A8.978 8.978 0 0 0 21 12a8.982 8.982 0 0 0-3.304-6.968l1.42-1.42A10.976 10.976 0 0 1 23 12c0 3.223-1.386 6.122-3.594 8.134zm-3.543-3.543l-1.422-1.422A3.993 3.993 0 0 0 16 12c0-1.43-.75-2.685-1.88-3.392l1.439-1.439A5.991 5.991 0 0 1 18 12c0 1.842-.83 3.49-2.137 4.591z"></path>
+                </svg>
+              </span>
+              <span class="visually-hidden">Ton umschalten</span>
+            </button>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function() {
+    var sectionId = '{{ section.id }}';
+
+    function initVideoAuthoritySection() {
+      var root = document.getElementById('lt-hp-video-authority-' + sectionId);
+      if (!root || root.dataset.initialized === 'true') return;
+
+      var video = root.querySelector('.hpva__video');
+      var soundToggle = root.querySelector('[data-hpva-sound-toggle]');
+
+      if (!video) {
+        root.dataset.initialized = 'true';
+        return;
+      }
+
+      function showAvailableCaptions() {
+        if (!video.textTracks) return;
+
+        Array.prototype.forEach.call(video.textTracks, function(track) {
+          if (track.kind === 'captions' || track.kind === 'subtitles') {
+            track.mode = 'showing';
+          }
+        });
+      }
+
+      function syncSoundToggleState() {
+        if (!soundToggle) return;
+
+        var isMuted = video.muted;
+        soundToggle.classList.toggle('is-unmuted', !isMuted);
+        soundToggle.setAttribute('aria-pressed', (!isMuted).toString());
+        soundToggle.setAttribute('aria-label', isMuted ? 'Ton aktivieren' : 'Ton stummschalten');
+      }
+
+      showAvailableCaptions();
+      video.addEventListener('loadedmetadata', showAvailableCaptions);
+      video.addEventListener('volumechange', syncSoundToggleState);
+
+      if (soundToggle) {
+        soundToggle.addEventListener('click', function() {
+          video.muted = !video.muted;
+
+          if (!video.paused) {
+            syncSoundToggleState();
+            return;
+          }
+
+          var playPromise = video.play();
+          if (playPromise && typeof playPromise.then === 'function') {
+            playPromise.then(syncSoundToggleState).catch(syncSoundToggleState);
+          } else {
+            syncSoundToggleState();
+          }
+        });
+      }
+
+      syncSoundToggleState();
+      root.dataset.initialized = 'true';
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initVideoAuthoritySection, { once: true });
+    } else {
+      initVideoAuthoritySection();
+    }
+
+    document.addEventListener('shopify:section:load', function(event) {
+      if (event.target && event.target.id === 'shopify-section-' + sectionId) {
+        initVideoAuthoritySection();
+      }
+    });
+  })();
+</script>
+
+{% stylesheet %}
+.hpva {
+  background: var(--hpva-bg, #f7f7f4);
+  color: var(--hpva-text, #26251e);
+}
+
+.hpva__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.hpva__header {
+  max-width: 720px;
+  margin: 0 auto var(--space-8);
+}
+
+.hpva__media {
+  width: 100%;
+}
+
+.hpva__video-shell {
+  width: min(100%, var(--hpva-video-max-width, 400px));
+  margin-inline: auto;
+}
+
+.hpva__video-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 9 / 16;
+  overflow: hidden;
+  border: 1px solid var(--hpva-border, rgba(38, 37, 30, 0.08));
+  border-radius: var(--radius-lg, 28px);
+  background: rgba(38, 37, 30, 0.06);
+  box-shadow: 0 20px 48px rgba(38, 37, 30, 0.08);
+  isolation: isolate;
+}
+
+.hpva__video,
+.hpva__iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  object-fit: cover;
+  background: #d9d5ca;
+}
+
+.hpva__sound-toggle {
+  position: absolute;
+  right: var(--space-4);
+  bottom: var(--space-4);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid rgba(247, 247, 244, 0.28);
+  border-radius: 999px;
+  background: rgba(38, 37, 30, 0.66);
+  color: #f7f7f4;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+  -webkit-appearance: none;
+}
+
+.hpva__sound-toggle:hover,
+.hpva__sound-toggle:focus-visible {
+  background: rgba(38, 37, 30, 0.82);
+  border-color: rgba(247, 247, 244, 0.4);
+  transform: translateY(-1px);
+}
+
+.hpva__sound-toggle:focus-visible {
+  outline: 2px solid rgba(247, 247, 244, 0.72);
+  outline-offset: 2px;
+}
+
+.hpva__sound-icon {
+  display: inline-flex;
+}
+
+.hpva__sound-icon--unmuted {
+  display: none;
+}
+
+.hpva__sound-toggle.is-unmuted .hpva__sound-icon--muted {
+  display: none;
+}
+
+.hpva__sound-toggle.is-unmuted .hpva__sound-icon--unmuted {
+  display: inline-flex;
+}
+
+.hpva__sound-icon svg {
+  width: 1.375rem;
+  height: 1.375rem;
+  fill: currentColor;
+}
+
+.hpva__placeholder {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  padding: var(--space-5);
+  background: rgba(38, 37, 30, 0.04);
+  color: var(--hpva-text-muted, rgba(38, 37, 30, 0.64));
+  text-align: center;
+}
+
+.hpva__placeholder-label {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-small, 0.95rem);
+  line-height: var(--leading-relaxed, 1.5);
+}
+
+@media screen and (max-width: 768px) {
+  .hpva__container {
+    padding: 0 var(--space-4);
+  }
+
+  .hpva__header {
+    margin-bottom: var(--space-6);
+  }
+
+  .hpva__sound-toggle {
+    right: 1rem;
+    bottom: 1rem;
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "HP Video Authority",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 80,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Text",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Ärztlich erklärt"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "Warum biologisches Alter messbar ist."
+    },
+    {
+      "type": "url",
+      "id": "video_url",
+      "label": "Video-URL"
+    },
+    {
+      "type": "checkbox",
+      "id": "video_autoplay",
+      "label": "Video automatisch abspielen",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "video_muted",
+      "label": "Video stumm starten",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "video_loop",
+      "label": "Video loopen",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "video_max_width",
+      "label": "Maximale Videobreite",
+      "min": 280,
+      "max": 600,
+      "step": 10,
+      "default": 400,
+      "unit": "px"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_sound_toggle",
+      "label": "Sound-Toggle anzeigen",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "HP Video Authority",
+      "settings": {
+        "kicker": "Ärztlich erklärt",
+        "headline": "Warum biologisches Alter messbar ist.",
+        "video_max_width": 400,
+        "video_autoplay": true,
+        "video_muted": true,
+        "show_sound_toggle": true
+      }
+    }
+  ]
+}
+{% endschema %}
