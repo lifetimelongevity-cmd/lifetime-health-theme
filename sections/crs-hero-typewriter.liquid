@@ -16,22 +16,16 @@
 
     {%- comment -%} LEFT — text + CTA {%- endcomment -%}
     <div class="ltw-content">
+      <div class="ltw-heading-group crs-heading-stack{% if section.settings.use_section_heading_size %} crs-heading-stack--headline-lg{% endif %} crs-heading-stack--homepage-truth">
 
-      {%- if section.settings.eyebrow != blank -%}
-        <p class="ltw-eyebrow">{{ section.settings.eyebrow | escape }}</p>
-      {%- endif -%}
+        {%- if section.settings.eyebrow != blank -%}
+          <p class="ltw-eyebrow">{{ section.settings.eyebrow | escape }}</p>
+        {%- endif -%}
 
-      <h1 class="ltw-heading" aria-label="{{ section.settings.heading_before | escape }} {{ section.blocks | map: 'settings' | map: 'word' | join: ', ' }} {{ section.settings.heading_after | escape }}">
-        {%- if section.settings.heading_before != blank -%}
-          <span class="ltw-heading__static">{{ section.settings.heading_before | escape }} </span>
-        {%- endif -%}
-        <span class="ltw-heading__animated" aria-hidden="true">
-          <span class="ltw-word" id="ltw-word-{{ section.id }}"></span><span class="ltw-cursor" aria-hidden="true">|</span>
-        </span>
-        {%- if section.settings.heading_after != blank -%}
-          <span class="ltw-heading__static"> {{ section.settings.heading_after | escape }}</span>
-        {%- endif -%}
-      </h1>
+        <h1 class="ltw-heading crs-heading-stack__title" aria-label="{{ section.settings.headline | escape }}">
+          {{ section.settings.headline | escape }}
+        </h1>
+      </div>
 
       {%- if section.settings.subheading != blank -%}
         <p class="ltw-subheading">{{ section.settings.subheading | escape }}</p>
@@ -128,54 +122,8 @@
   </div>
 </section>
 
-{%- assign words_json = section.blocks | map: 'settings' | map: 'word' | join: '","' | prepend: '["' | append: '"]' -%}
-
 <script>
 (function () {
-  var words  = {{ words_json }}.filter(Boolean);
-  var elWord = document.getElementById('ltw-word-{{ section.id }}');
-
-  if (!elWord || words.length === 0) return;
-
-  var current    = 0;
-  var charIndex  = 0;
-  var isDeleting = false;
-
-  var TYPING_SPEED = 80;
-  var DELETE_SPEED = 45;
-  var PAUSE_AFTER  = 2200;
-  var PAUSE_BEFORE = 320;
-
-  function tick() {
-    var word = words[current];
-
-    if (!isDeleting) {
-      elWord.textContent = word.slice(0, charIndex + 1);
-      charIndex++;
-      if (charIndex === word.length) {
-        isDeleting = true;
-        setTimeout(tick, PAUSE_AFTER);
-        return;
-      }
-      setTimeout(tick, TYPING_SPEED);
-    } else {
-      elWord.textContent = word.slice(0, charIndex - 1);
-      charIndex--;
-      if (charIndex === 0) {
-        isDeleting = false;
-        current = (current + 1) % words.length;
-        setTimeout(tick, PAUSE_BEFORE);
-        return;
-      }
-      setTimeout(tick, DELETE_SPEED);
-    }
-  }
-
-  elWord.textContent = words[0];
-  charIndex = words[0].length;
-  isDeleting = true;
-  setTimeout(tick, PAUSE_AFTER);
-
   /* Animate dashboard bars on load with a light stagger */
   document.querySelectorAll('#section-{{ section.id }} .ltw-bar__fill').forEach(function(el, index) {
     el.style.width = '0';
@@ -282,35 +230,19 @@
 
 /* Headline */
 .ltw-heading {
-  font-family: var(--font-heading) !important;
-  font-size: clamp(2.25rem, 4vw, 3.25rem) !important;
-  font-weight: var(--weight-regular) !important;
-  line-height: var(--leading-heading) !important;
-  letter-spacing: -.02em !important;
-  color: var(--hero-text, #161514) !important;
-  margin: 0 !important;
-}
-
-.ltw-heading__static {
+  font-family: var(--font-heading);
+  font-size: clamp(2.25rem, 4vw, 3.25rem);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-heading);
+  letter-spacing: -.02em;
   color: var(--hero-text, #161514);
+  margin: 0;
 }
 
-.ltw-heading__animated {
-  display: inline;
-  white-space: nowrap;
-}
-
-.ltw-cursor {
-  display: inline-block;
-  font-weight: 300;
-  color: var(--hero-text, #161514);
-  margin-left: 1px;
-  animation: ltw-blink .9s step-end infinite;
-}
-
-@keyframes ltw-blink {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0; }
+.ltw-heading-group.crs-heading-stack.crs-heading-stack--headline-lg .ltw-heading.crs-heading-stack__title {
+  font-size: var(--text-h1);
+  line-height: var(--leading-heading);
+  letter-spacing: -0.02em;
 }
 
 /* Subheading */
@@ -623,15 +555,15 @@
     },
     {
       "type": "text",
-      "id": "heading_before",
-      "label": "Text vor Animationswort",
-      "default": "Next-action"
+      "id": "headline",
+      "label": "Headline",
+      "default": "Dein Körper altert anders als du denkst."
     },
     {
-      "type": "text",
-      "id": "heading_after",
-      "label": "Text nach Animationswort",
-      "info": "Optional"
+      "type": "checkbox",
+      "id": "use_section_heading_size",
+      "label": "Section-Heading-Größe verwenden",
+      "default": true
     },
     {
       "type": "textarea",
@@ -728,18 +660,6 @@
   ],
   "blocks": [
     {
-      "type": "animated_word",
-      "name": "Animationswort",
-      "settings": [
-        {
-          "type": "text",
-          "id": "word",
-          "label": "Wort",
-          "default": "prediction"
-        }
-      ]
-    },
-    {
       "type": "metric",
       "name": "Metrik",
       "settings": [
@@ -771,10 +691,8 @@
     {
       "name": "Hero Typewriter",
       "blocks": [
-        { "type": "animated_word", "settings": { "word": "prediction" } },
-        { "type": "animated_word", "settings": { "word": "acceleration" } },
-        { "type": "animated_word", "settings": { "word": "suggestion" } },
         { "type": "metric", "settings": { "metric_name": "Langlebigkeit", "metric_value": 85, "metric_color": "#65c0b6" } },
+        { "type": "metric", "settings": { "metric_name": "Entzündungsprofil", "metric_value": 34, "metric_color": "#f4b740" } },
         { "type": "metric", "settings": { "metric_name": "Kognitive Degeneration", "metric_value": 72, "metric_color": "#f4b740" } }
       ]
     }
