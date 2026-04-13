@@ -85,17 +85,22 @@
           </div>
 
           {%- comment -%} Metric cards {%- endcomment -%}
-          <div class="ltw-metrics">
-            {%- for block in section.blocks -%}
-              {%- if block.type == 'metric' -%}
-                <div class="ltw-card ltw-card--metric" {{ block.shopify_attributes }}>
-                  <span class="ltw-metric__name">{{ block.settings.metric_name | escape }}</span>
-                  <div class="ltw-bar">
-                    <div class="ltw-bar__fill" style="--w: {{ block.settings.metric_value }}%; background: {{ block.settings.metric_color }};"></div>
+          <div class="ltw-card ltw-card--metrics">
+            <div class="ltw-metrics">
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'metric' -%}
+                  <div class="ltw-metric-row" {{ block.shopify_attributes }}>
+                    <div class="ltw-metric-row__top">
+                      <span class="ltw-metric__name">{{ block.settings.metric_name | escape }}</span>
+                      <span class="ltw-metric__value" style="color: {{ block.settings.metric_color }};">{{ block.settings.metric_value }}%</span>
+                    </div>
+                    <div class="ltw-bar">
+                      <div class="ltw-bar__fill" style="--w: {{ block.settings.metric_value }}%; background: {{ block.settings.metric_color }};"></div>
+                    </div>
                   </div>
-                </div>
-              {%- endif -%}
-            {%- endfor -%}
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
           </div>
 
         </div>
@@ -378,14 +383,29 @@
 .ltw-metrics {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
+  gap: 0;
 }
 
-.ltw-card--metric {
+.ltw-card--metrics {
   width: 100%;
-  max-width: 220px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.ltw-metric-row {
   padding: 16px 18px;
+}
+
+.ltw-metric-row + .ltw-metric-row {
+  border-top: 1px solid #f0f0ee;
+}
+
+.ltw-metric-row__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 10px;
 }
 
 .ltw-metric__name {
@@ -393,9 +413,18 @@
   font-family: var(--font-body);
   font-size: .8125rem;
   font-weight: var(--weight-medium);
-  color: var(--hero-text, #26251e);
-  margin-bottom: 10px;
-  opacity: .7;
+  color: #6b6b63;
+  margin: 0;
+  opacity: 1;
+}
+
+.ltw-metric__value {
+  display: block;
+  font-family: var(--font-body);
+  font-size: .8125rem;
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  margin: 0;
 }
 
 .ltw-bar {
