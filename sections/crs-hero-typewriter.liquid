@@ -85,42 +85,40 @@
           </div>
 
           {%- comment -%} Metric cards {%- endcomment -%}
-          <div class="ltw-card ltw-card--metrics">
-            <div class="ltw-metrics">
-              {%- for block in section.blocks -%}
-                {%- if block.type == 'metric' -%}
-                  {%- liquid
-                    assign metric_detail = ''
-                    case block.settings.metric_name
-                      when 'Langlebigkeit'
-                        assign metric_detail = 'Deine Genetik zeigt Merkmale, die mit verlangsamtem Altern verbunden sind – Gene wie FOXO3 unterstützen deine Langlebigkeit.'
-                      when 'Entzündungsprofil'
-                        assign metric_detail = 'Dein Entzündungsprofil zeigt Optimierungspotenzial – gezielte Maßnahmen können hier einen messbaren Unterschied machen.'
-                      when 'Kognitive Gesundheit'
-                        assign metric_detail = 'Deine epigenetischen Signale deuten auf eine solide kognitive Basis hin, die sich weiter stärken lässt.'
-                    endcase
-                  -%}
-                  <div class="ltw-metric-row" {{ block.shopify_attributes }}>
-                    <button
-                      type="button"
-                      class="ltw-metric-row__button"
-                      aria-expanded="false"
-                    >
-                      <span class="ltw-metric-row__top">
-                        <span class="ltw-metric__name">{{ block.settings.metric_name | escape }}</span>
-                        <span class="ltw-metric__chevron" aria-hidden="true">›</span>
-                      </span>
-                      <span class="ltw-bar">
-                        <span class="ltw-bar__fill" style="--w: {{ block.settings.metric_value }}%; background: {{ block.settings.metric_color }};"></span>
-                      </span>
-                    </button>
-                    <div class="ltw-metric-row__detail-wrap">
-                      <p class="ltw-metric-row__detail">{{ metric_detail }}</p>
-                    </div>
-                  </div>
-                {%- endif -%}
-              {%- endfor -%}
-            </div>
+          <div class="ltw-metrics">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'metric' -%}
+                {%- liquid
+                  assign metric_detail = ''
+                  case block.settings.metric_name
+                    when 'Langlebigkeit'
+                      assign metric_detail = 'Deine Genetik zeigt Merkmale, die mit verlangsamtem Altern verbunden sind – Gene wie FOXO3 unterstützen deine Langlebigkeit.'
+                    when 'Entzündungsprofil'
+                      assign metric_detail = 'Dein Entzündungsprofil zeigt Optimierungspotenzial – gezielte Maßnahmen können hier einen messbaren Unterschied machen.'
+                    when 'Kognitive Gesundheit'
+                      assign metric_detail = 'Deine epigenetischen Signale deuten auf eine solide kognitive Basis hin, die sich weiter stärken lässt.'
+                  endcase
+                -%}
+                <div class="ltw-card ltw-card--metric ltw-metric-row" {{ block.shopify_attributes }}>
+                  <button
+                    type="button"
+                    class="ltw-metric-row__button"
+                    aria-expanded="false"
+                  >
+                    <span class="ltw-metric-row__top">
+                      <span class="ltw-metric__name">{{ block.settings.metric_name | escape }}</span>
+                      <span class="ltw-metric__chevron" aria-hidden="true">›</span>
+                    </span>
+                    <span class="ltw-bar">
+                      <span class="ltw-bar__fill" style="--w: {{ block.settings.metric_value }}%; background: {{ block.settings.metric_color }};"></span>
+                    </span>
+                    <span class="ltw-metric-row__detail-wrap">
+                      <span class="ltw-metric-row__detail">{{ metric_detail }}</span>
+                    </span>
+                  </button>
+                </div>
+              {%- endif -%}
+            {%- endfor -%}
           </div>
 
         </div>
@@ -456,21 +454,14 @@
 .ltw-metrics {
   display: flex;
   flex-direction: column;
-  gap: 0;
-}
-
-.ltw-card--metrics {
-  width: 100%;
-  padding: 0;
-  overflow: hidden;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .ltw-metric-row {
+  width: 100%;
+  max-width: 220px;
   padding: 16px 18px;
-}
-
-.ltw-metric-row + .ltw-metric-row {
-  border-top: 1px solid #f0f0ee;
 }
 
 .ltw-metric-row__button {
@@ -512,7 +503,7 @@
   line-height: 1;
   color: #6b6b63;
   transform: rotate(0deg);
-  transition: transform 250ms ease-out;
+  transition: transform 200ms ease-out;
 }
 
 .ltw-metric-row.is-open .ltw-metric__chevron {
@@ -533,13 +524,15 @@
 }
 
 .ltw-metric-row__detail-wrap {
+  display: block;
   max-height: 0;
   overflow: hidden;
   transition: max-height 250ms ease-out;
 }
 
 .ltw-metric-row__detail {
-  margin: 16px 0 0;
+  display: block;
+  margin: 10px 0 0;
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: var(--weight-regular);
