@@ -1,7 +1,13 @@
 {%- liquid
+  assign crs_rfc_default_product_handle = ''
+  if template.name == 'page' and template.suffix == 'age-dna-landing'
+    assign crs_rfc_default_product_handle = 'lifetime-age-dna'
+  endif
   assign crs_rfc_product = product
   if section.settings.product != blank
     assign crs_rfc_product = all_products[section.settings.product]
+  elsif crs_rfc_product == blank and crs_rfc_default_product_handle != blank
+    assign crs_rfc_product = all_products[crs_rfc_default_product_handle]
   endif
   assign crs_h_align = section.settings.content_align | default: 'left'
   if crs_h_align != 'left' and crs_h_align != 'center' and crs_h_align != 'right'

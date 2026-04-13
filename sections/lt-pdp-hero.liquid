@@ -1,6 +1,12 @@
 {%- liquid
+  assign lt_landing_default_product_handle = ''
+  if template.name == 'page' and template.suffix == 'age-dna-landing'
+    assign lt_landing_default_product_handle = 'lifetime-age-dna'
+  endif
   if section.settings.product != blank
     assign product = all_products[section.settings.product]
+  elsif product == blank and lt_landing_default_product_handle != blank
+    assign product = all_products[lt_landing_default_product_handle]
   endif
   assign current_variant = product.selected_or_first_available_variant
   assign default_to_first_variant = true
