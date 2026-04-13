@@ -68,77 +68,81 @@
   data-show-sound-toggle="{{ hpva_show_sound_toggle }}"
 >
   <div class="hpva__container">
-    <div class="hpva__header crs-heading-stack crs-heading-stack--align-center crs-heading-stack--homepage-truth">
-      {%- if section.settings.kicker != blank -%}
-        <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
-      {%- endif -%}
+    <div class="hpva__layout">
+      <div class="hpva__copy">
+        <div class="hpva__header crs-heading-stack crs-heading-stack--align-center crs-heading-stack--homepage-truth">
+          {%- if section.settings.kicker != blank -%}
+            <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
+          {%- endif -%}
 
-      {%- if section.settings.headline != blank -%}
-        <div class="crs-heading-stack__pair">
-          <h2 class="crs-heading-stack__title">{{ section.settings.headline | escape }}</h2>
-        </div>
-      {%- endif -%}
-    </div>
-
-    <div class="hpva__media">
-      <div class="hpva__video-shell">
-        <div class="hpva__video-frame">
-          {%- if hpva_is_direct_video -%}
-            <video
-              class="hpva__video"
-              {% if section.settings.video_autoplay %}autoplay{% endif %}
-              {% if section.settings.video_muted %}muted{% endif %}
-              {% if section.settings.video_loop %}loop{% endif %}
-              {% unless section.settings.video_autoplay %}controls{% endunless %}
-              playsinline
-              preload="metadata"
-              src="{{ hpva_direct_video_src | escape }}"
-            ></video>
-          {%- elsif hpva_is_youtube and hpva_youtube_id != blank -%}
-            <iframe
-              class="hpva__iframe"
-              src="https://www.youtube.com/embed/{{ hpva_youtube_id }}?playsinline=1&rel=0&controls={{ hpva_youtube_controls }}{% if section.settings.video_autoplay %}&autoplay=1{% endif %}{% if section.settings.video_muted %}&mute=1{% endif %}{% if section.settings.video_loop %}&loop=1&playlist={{ hpva_youtube_id }}{% endif %}"
-              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen
-              title="{{ section.settings.headline | default: section.settings.kicker | default: 'Video' | escape }}"
-            ></iframe>
-          {%- elsif hpva_is_vimeo and hpva_vimeo_id != blank -%}
-            <iframe
-              class="hpva__iframe"
-              src="https://player.vimeo.com/video/{{ hpva_vimeo_id }}?title=0&byline=0&portrait=0&playsinline=1{% if section.settings.video_autoplay %}&autoplay=1{% endif %}{% if section.settings.video_muted %}&muted=1{% endif %}{% if section.settings.video_loop %}&loop=1{% endif %}&background={{ hpva_vimeo_background }}"
-              allow="autoplay; encrypted-media; picture-in-picture"
-              allowfullscreen
-              title="{{ section.settings.headline | default: section.settings.kicker | default: 'Video' | escape }}"
-            ></iframe>
-          {%- elsif request.design_mode -%}
-            <div class="hpva__placeholder">
-              <p class="hpva__placeholder-label">Video-URL hinzufügen</p>
+          {%- if section.settings.headline != blank -%}
+            <div class="crs-heading-stack__pair">
+              <h2 class="crs-heading-stack__title">{{ section.settings.headline | escape }}</h2>
             </div>
           {%- endif -%}
+        </div>
+      </div>
 
-          {%- if hpva_show_sound_toggle -%}
-            <button
-              type="button"
-              class="hpva__sound-toggle"
-              data-hpva-sound-toggle
-              aria-pressed="{% unless section.settings.video_muted %}true{% else %}false{% endunless %}"
-              aria-label="{% unless section.settings.video_muted %}Ton stummschalten{% else %}Ton aktivieren{% endunless %}"
-            >
-              <span class="hpva__sound-icon hpva__sound-icon--muted" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="24" height="24">
-                  <path fill="none" d="M0 0h24v24H0z"></path>
-                  <path d="M5.889 16H2a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h3.889l5.294-4.332a.5.5 0 0 1 .817.387v15.89a.5.5 0 0 1-.817.387L5.89 16zm14.525-4l3.536 3.536-1.414 1.414L19 13.414l-3.536 3.536-1.414-1.414L17.586 12 14.05 8.464l1.414-1.414L19 10.586l3.536-3.536 1.414 1.414L20.414 12z"></path>
-                </svg>
-              </span>
-              <span class="hpva__sound-icon hpva__sound-icon--unmuted" aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="24" height="24">
-                  <path fill="none" d="M0 0h24v24H0z"></path>
-                  <path d="M5.889 16H2a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h3.889l5.294-4.332a.5.5 0 0 1 .817.387v15.89a.5.5 0 0 1-.817.387L5.89 16zm13.517 4.134l-1.416-1.416A8.978 8.978 0 0 0 21 12a8.982 8.982 0 0 0-3.304-6.968l1.42-1.42A10.976 10.976 0 0 1 23 12c0 3.223-1.386 6.122-3.594 8.134zm-3.543-3.543l-1.422-1.422A3.993 3.993 0 0 0 16 12c0-1.43-.75-2.685-1.88-3.392l1.439-1.439A5.991 5.991 0 0 1 18 12c0 1.842-.83 3.49-2.137 4.591z"></path>
-                </svg>
-              </span>
-              <span class="visually-hidden">Ton umschalten</span>
-            </button>
-          {%- endif -%}
+      <div class="hpva__media">
+        <div class="hpva__video-shell">
+          <div class="hpva__video-frame">
+            {%- if hpva_is_direct_video -%}
+              <video
+                class="hpva__video"
+                {% if section.settings.video_autoplay %}autoplay{% endif %}
+                {% if section.settings.video_muted %}muted{% endif %}
+                {% if section.settings.video_loop %}loop{% endif %}
+                {% unless section.settings.video_autoplay %}controls{% endunless %}
+                playsinline
+                preload="metadata"
+                src="{{ hpva_direct_video_src | escape }}"
+              ></video>
+            {%- elsif hpva_is_youtube and hpva_youtube_id != blank -%}
+              <iframe
+                class="hpva__iframe"
+                src="https://www.youtube.com/embed/{{ hpva_youtube_id }}?playsinline=1&rel=0&controls={{ hpva_youtube_controls }}{% if section.settings.video_autoplay %}&autoplay=1{% endif %}{% if section.settings.video_muted %}&mute=1{% endif %}{% if section.settings.video_loop %}&loop=1&playlist={{ hpva_youtube_id }}{% endif %}"
+                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen
+                title="{{ section.settings.headline | default: section.settings.kicker | default: 'Video' | escape }}"
+              ></iframe>
+            {%- elsif hpva_is_vimeo and hpva_vimeo_id != blank -%}
+              <iframe
+                class="hpva__iframe"
+                src="https://player.vimeo.com/video/{{ hpva_vimeo_id }}?title=0&byline=0&portrait=0&playsinline=1{% if section.settings.video_autoplay %}&autoplay=1{% endif %}{% if section.settings.video_muted %}&muted=1{% endif %}{% if section.settings.video_loop %}&loop=1{% endif %}&background={{ hpva_vimeo_background }}"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowfullscreen
+                title="{{ section.settings.headline | default: section.settings.kicker | default: 'Video' | escape }}"
+              ></iframe>
+            {%- elsif request.design_mode -%}
+              <div class="hpva__placeholder">
+                <p class="hpva__placeholder-label">Video-URL hinzufügen</p>
+              </div>
+            {%- endif -%}
+
+            {%- if hpva_show_sound_toggle -%}
+              <button
+                type="button"
+                class="hpva__sound-toggle"
+                data-hpva-sound-toggle
+                aria-pressed="{% unless section.settings.video_muted %}true{% else %}false{% endunless %}"
+                aria-label="{% unless section.settings.video_muted %}Ton stummschalten{% else %}Ton aktivieren{% endunless %}"
+              >
+                <span class="hpva__sound-icon hpva__sound-icon--muted" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="none" d="M0 0h24v24H0z"></path>
+                    <path d="M5.889 16H2a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h3.889l5.294-4.332a.5.5 0 0 1 .817.387v15.89a.5.5 0 0 1-.817.387L5.89 16zm14.525-4l3.536 3.536-1.414 1.414L19 13.414l-3.536 3.536-1.414-1.414L17.586 12 14.05 8.464l1.414-1.414L19 10.586l3.536-3.536 1.414 1.414L20.414 12z"></path>
+                  </svg>
+                </span>
+                <span class="hpva__sound-icon hpva__sound-icon--unmuted" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" width="24" height="24">
+                    <path fill="none" d="M0 0h24v24H0z"></path>
+                    <path d="M5.889 16H2a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1h3.889l5.294-4.332a.5.5 0 0 1 .817.387v15.89a.5.5 0 0 1-.817.387L5.89 16zm13.517 4.134l-1.416-1.416A8.978 8.978 0 0 0 21 12a8.982 8.982 0 0 0-3.304-6.968l1.42-1.42A10.976 10.976 0 0 1 23 12c0 3.223-1.386 6.122-3.594 8.134zm-3.543-3.543l-1.422-1.422A3.993 3.993 0 0 0 16 12c0-1.43-.75-2.685-1.88-3.392l1.439-1.439A5.991 5.991 0 0 1 18 12c0 1.842-.83 3.49-2.137 4.591z"></path>
+                  </svg>
+                </span>
+                <span class="visually-hidden">Ton umschalten</span>
+              </button>
+            {%- endif -%}
+          </div>
         </div>
       </div>
     </div>
@@ -232,9 +236,19 @@
   padding: 0 var(--space-5);
 }
 
+.hpva__layout {
+  display: grid;
+  gap: var(--space-7);
+  align-items: center;
+}
+
+.hpva__copy {
+  min-width: 0;
+}
+
 .hpva__header {
-  max-width: 720px;
-  margin: 0 auto var(--space-8);
+  max-width: 38rem;
+  margin: 0 auto;
 }
 
 .hpva__media {
@@ -344,15 +358,41 @@
     padding: 0 var(--space-4);
   }
 
-  .hpva__header {
-    margin-bottom: var(--space-6);
-  }
-
   .hpva__sound-toggle {
     right: 1rem;
     bottom: 1rem;
     width: 2.75rem;
     height: 2.75rem;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .hpva__layout {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: clamp(2rem, 5vw, 5rem);
+  }
+
+  .hpva__header {
+    margin: 0;
+    text-align: left;
+  }
+
+  .hpva__header.crs-heading-stack {
+    align-items: flex-start;
+  }
+
+  .hpva__header .crs-heading-stack__pair,
+  .hpva__header .crs-heading-stack__title,
+  .hpva__header .crs-heading-stack__kicker {
+    text-align: left;
+  }
+
+  .hpva__video-shell {
+    width: min(100%, var(--hpva-video-max-width, 400px), 300px);
+  }
+
+  .hpva__video-frame {
+    max-height: min(60vh, 33rem);
   }
 }
 {% endstylesheet %}
