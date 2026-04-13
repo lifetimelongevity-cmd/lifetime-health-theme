@@ -89,13 +89,33 @@
             <div class="ltw-metrics">
               {%- for block in section.blocks -%}
                 {%- if block.type == 'metric' -%}
+                  {%- liquid
+                    assign metric_detail = ''
+                    case block.settings.metric_name
+                      when 'Langlebigkeit'
+                        assign metric_detail = 'Deine Genetik zeigt Merkmale, die mit verlangsamtem Altern verbunden sind – Gene wie FOXO3 unterstützen deine Langlebigkeit.'
+                      when 'Entzündungsprofil'
+                        assign metric_detail = 'Dein Entzündungsprofil zeigt Optimierungspotenzial – gezielte Maßnahmen können hier einen messbaren Unterschied machen.'
+                      when 'Kognitive Gesundheit'
+                        assign metric_detail = 'Deine epigenetischen Signale deuten auf eine solide kognitive Basis hin, die sich weiter stärken lässt.'
+                    endcase
+                  -%}
                   <div class="ltw-metric-row" {{ block.shopify_attributes }}>
-                    <div class="ltw-metric-row__top">
-                      <span class="ltw-metric__name">{{ block.settings.metric_name | escape }}</span>
-                      <span class="ltw-metric__value" style="color: {{ block.settings.metric_color }};">{{ block.settings.metric_value }}%</span>
-                    </div>
-                    <div class="ltw-bar">
-                      <div class="ltw-bar__fill" style="--w: {{ block.settings.metric_value }}%; background: {{ block.settings.metric_color }};"></div>
+                    <button
+                      type="button"
+                      class="ltw-metric-row__button"
+                      aria-expanded="false"
+                    >
+                      <span class="ltw-metric-row__top">
+                        <span class="ltw-metric__name">{{ block.settings.metric_name | escape }}</span>
+                        <span class="ltw-metric__chevron" aria-hidden="true">›</span>
+                      </span>
+                      <span class="ltw-bar">
+                        <span class="ltw-bar__fill" style="--w: {{ block.settings.metric_value }}%; background: {{ block.settings.metric_color }};"></span>
+                      </span>
+                    </button>
+                    <div class="ltw-metric-row__detail-wrap">
+                      <p class="ltw-metric-row__detail">{{ metric_detail }}</p>
                     </div>
                   </div>
                 {%- endif -%}
@@ -165,6 +185,59 @@
       el.style.transition = 'width 800ms ease-out';
       el.style.width = el.style.getPropertyValue('--w') || el.dataset.w;
     }, index * 150);
+  });
+
+  var metricRows = document.querySelectorAll('#section-{{ section.id }} .ltw-metric-row');
+
+  function closeMetricRow(row) {
+    var button = row.querySelector('.ltw-metric-row__button');
+    var detailWrap = row.querySelector('.ltw-metric-row__detail-wrap');
+
+    row.classList.remove('is-open');
+    if (button) {
+      button.setAttribute('aria-expanded', 'false');
+    }
+    if (detailWrap) {
+      detailWrap.style.maxHeight = '0px';
+    }
+  }
+
+  function openMetricRow(row) {
+    var button = row.querySelector('.ltw-metric-row__button');
+    var detailWrap = row.querySelector('.ltw-metric-row__detail-wrap');
+
+    metricRows.forEach(function(item) {
+      if (item !== row) {
+        closeMetricRow(item);
+      }
+    });
+
+    row.classList.add('is-open');
+    if (button) {
+      button.setAttribute('aria-expanded', 'true');
+    }
+    if (detailWrap) {
+      detailWrap.style.maxHeight = detailWrap.scrollHeight + 'px';
+    }
+  }
+
+  metricRows.forEach(function(row) {
+    var button = row.querySelector('.ltw-metric-row__button');
+    var detailWrap = row.querySelector('.ltw-metric-row__detail-wrap');
+
+    if (detailWrap) {
+      detailWrap.style.maxHeight = '0px';
+    }
+
+    if (!button) return;
+
+    button.addEventListener('click', function() {
+      if (row.classList.contains('is-open')) {
+        closeMetricRow(row);
+      } else {
+        openMetricRow(row);
+      }
+    });
   });
 })();
 </script>
@@ -400,6 +473,18 @@
   border-top: 1px solid #f0f0ee;
 }
 
+.ltw-metric-row__button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  -webkit-appearance: none;
+}
+
 .ltw-metric-row__top {
   display: flex;
   align-items: center;
@@ -418,13 +503,20 @@
   opacity: 1;
 }
 
-.ltw-metric__value {
-  display: block;
+.ltw-metric__chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-family: var(--font-body);
-  font-size: .8125rem;
-  font-weight: var(--weight-medium);
+  font-size: .95rem;
   line-height: 1;
-  margin: 0;
+  color: #6b6b63;
+  transform: rotate(0deg);
+  transition: transform 250ms ease-out;
+}
+
+.ltw-metric-row.is-open .ltw-metric__chevron {
+  transform: rotate(90deg);
 }
 
 .ltw-bar {
@@ -438,6 +530,21 @@
   height: 100%;
   border-radius: 999px;
   width: 0;
+}
+
+.ltw-metric-row__detail-wrap {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 250ms ease-out;
+}
+
+.ltw-metric-row__detail {
+  margin: 16px 0 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: var(--weight-regular);
+  line-height: 1.5;
+  color: #6b6b63;
 }
 
 /* Responsive */
