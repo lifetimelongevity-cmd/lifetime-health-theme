@@ -69,10 +69,11 @@
                 </blockquote>
               {%- endif -%}
 
-              {%- comment -%} 2 — Protocol tags: what they did {%- endcomment -%}
+              {%- comment -%} 2 — Protocol tags: label + gray pills {%- endcomment -%}
               {%- if block.settings.protocol_label != blank -%}
                 {%- assign sp_protocol_parts = block.settings.protocol_label | split: '·' -%}
                 <div class="sp__protocol" aria-label="Longevity Protokoll">
+                  <span class="sp__protocol-label">Protokoll:</span>
                   {%- for part in sp_protocol_parts -%}
                     {%- assign sp_part_trimmed = part | strip -%}
                     {%- if sp_part_trimmed != blank -%}
@@ -316,7 +317,7 @@
 
 .sp__ba-value {
   font-family: var(--font-body);
-  font-size: var(--text-body-sm);
+  font-size: var(--text-micro);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-tight);
   color: var(--color-text-secondary);
@@ -333,15 +334,25 @@
   align-items: center;
 }
 
-/* Protocol label — row of pill tags split by · separator
-   Each part becomes an individual outlined chip.
-   First tag (always "Longevity Protokoll") carries teal accent to anchor the row.
-*/
+/* Protocol row — "Protokoll:" label + gray pill tags split by · separator */
 .sp__protocol {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1);
   align-items: center;
+}
+
+.sp__protocol-label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  margin-right: var(--space-1);
+  flex-shrink: 0;
 }
 
 .sp__protocol-tag {
@@ -351,9 +362,9 @@
   font-size: var(--text-micro);
   font-weight: var(--weight-medium);
   line-height: var(--leading-tight);
-  color: var(--color-teal-dark);
-  background: var(--color-benefit-bg);
-  border: 1px solid rgba(74, 140, 133, 0.2); /* --color-teal-dark at 20% */
+  color: var(--color-text-secondary);
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-full);
   padding: 3px var(--space-3); /* intentional: between --space-1/--space-2, tighter pill */
   white-space: nowrap;
