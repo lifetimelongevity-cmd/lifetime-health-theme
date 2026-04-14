@@ -1,24 +1,14 @@
 {% comment %}
   LT Page — Report Intro
-  ──────────────────────────────────────────────────────────────────────────────
-  §12 Build Spec:
-  - Surface:         --color-surface-primary (white, clean page opening)
-  - Dominant:        H1 — page orientation, erste Section der Seite
-  - Content:         3 count-badges + anatomy stepper (5 Schritte)
-  - CTA:             keiner — Seite öffnet den Inhalt, kein Verkaufstext
-  - Removed:         decorative dividers, trust badges (gehören auf PDP)
-  - Quality move:    Anatomy-Stepper als 2-col split mit App-Screenshot rechts —
-                     zeigt sofort, wie ein echter Report in der App aussieht
-  - App-Screenshot:  SNPs-Ansicht (app-snps-detail.png) — zeigt Schritt 5 live
+  Reframed as a full-bleed white opener with an interactive 5-step report gallery.
 {% endcomment %}
 
-<div class="container container--large remove-empty-space">
-  <section
-    id="lt-page-report-intro-{{ section.id }}"
-    class="lt-page-report-intro"
-    aria-labelledby="lt-page-report-intro-heading-{{ section.id }}"
-  >
-
+<section
+  id="lt-page-report-intro-{{ section.id }}"
+  class="lt-page-report-intro"
+  aria-labelledby="lt-page-report-intro-heading-{{ section.id }}"
+>
+  <div class="container container--large remove-empty-space">
     <div class="lt-page-report-intro__header crs-heading-stack crs-heading-stack--align-left">
       {%- if section.settings.kicker != blank -%}
         <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
@@ -55,55 +45,152 @@
     </div>
 
     {%- if section.settings.show_anatomy and section.blocks.size > 0 -%}
-      <div class="lt-page-report-intro__anatomy">
-        <div class="lt-page-report-intro__steps">
+      <div class="lt-page-report-intro__anatomy" data-report-intro>
+        <div class="lt-page-report-intro__steps" role="tablist" aria-label="Aufbau eines Reports" aria-orientation="vertical">
           {%- for block in section.blocks -%}
-            <div class="lt-page-report-intro__step" {{ block.shopify_attributes }}>
-              <div class="lt-page-report-intro__step-number" aria-hidden="true">{{ forloop.index }}</div>
-              <div class="lt-page-report-intro__step-body">
+            {%- assign tab_id = 'lt-page-report-intro-tab-' | append: section.id | append: '-' | append: block.id -%}
+            {%- assign panel_id = 'lt-page-report-intro-panel-' | append: section.id | append: '-' | append: block.id -%}
+            <button
+              type="button"
+              id="{{ tab_id }}"
+              class="lt-page-report-intro__step{% if forloop.first %} is-active{% endif %}"
+              role="tab"
+              aria-controls="{{ panel_id }}"
+              aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+              tabindex="{% if forloop.first %}0{% else %}-1{% endif %}"
+              data-report-intro-tab
+              {{ block.shopify_attributes }}
+            >
+              <span class="lt-page-report-intro__step-number" aria-hidden="true">{{ forloop.index }}</span>
+              <span class="lt-page-report-intro__step-body">
                 {%- if block.settings.title != blank -%}
-                  <p class="lt-page-report-intro__step-title">{{ block.settings.title | escape }}</p>
+                  <span class="lt-page-report-intro__step-title">{{ block.settings.title | escape }}</span>
                 {%- endif -%}
                 {%- if block.settings.description != blank -%}
-                  <p class="lt-page-report-intro__step-description">{{ block.settings.description | escape }}</p>
+                  <span class="lt-page-report-intro__step-description">{{ block.settings.description | escape }}</span>
                 {%- endif -%}
-              </div>
-            </div>
+              </span>
+            </button>
           {%- endfor -%}
         </div>
 
-        {%- if section.settings.app_image != blank -%}
-          <div class="lt-page-report-intro__app-visual">
-            {{
-              section.settings.app_image
-              | image_url: width: 600
-              | image_tag:
-                loading: 'lazy',
-                class: 'lt-page-report-intro__app-img',
-                alt: section.settings.app_image_alt | default: 'LIFETIME App Report-Ansicht'
-            }}
-          </div>
-        {%- elsif section.settings.app_image_url != blank -%}
-          <div class="lt-page-report-intro__app-visual">
-            <img
-              src="{{ section.settings.app_image_url | escape }}"
-              alt="{{ section.settings.app_image_alt | default: 'LIFETIME App Report-Ansicht' | escape }}"
-            loading="lazy"
-            class="lt-page-report-intro__app-img"
-            width="320"
+        <div class="lt-page-report-intro__visuals">
+          {%- for block in section.blocks -%}
+            {%- assign tab_id = 'lt-page-report-intro-tab-' | append: section.id | append: '-' | append: block.id -%}
+            {%- assign panel_id = 'lt-page-report-intro-panel-' | append: section.id | append: '-' | append: block.id -%}
+            {%- assign step_alt = block.settings.image_alt | default: block.settings.title | default: section.settings.app_image_alt | default: 'LIFETIME App Report-Ansicht' -%}
+            <div
+              id="{{ panel_id }}"
+              class="lt-page-report-intro__panel{% if forloop.first %} is-active{% endif %}"
+              role="tabpanel"
+              aria-labelledby="{{ tab_id }}"
+              tabindex="0"
+              data-report-intro-panel
+              {% unless forloop.first %}hidden{% endunless %}
             >
-          </div>
-        {%- endif -%}
+              <div class="lt-page-report-intro__panel-frame">
+                {%- if block.settings.image != blank -%}
+                  {{
+                    block.settings.image
+                    | image_url: width: 900
+                    | image_tag:
+                      loading: 'lazy',
+                      class: 'lt-page-report-intro__app-img',
+                      alt: step_alt
+                  }}
+                {%- elsif block.settings.image_url != blank -%}
+                  <img
+                    src="{{ block.settings.image_url | escape }}"
+                    alt="{{ step_alt | escape }}"
+                    loading="lazy"
+                    class="lt-page-report-intro__app-img"
+                    width="420"
+                  >
+                {%- elsif section.settings.app_image != blank -%}
+                  {{
+                    section.settings.app_image
+                    | image_url: width: 900
+                    | image_tag:
+                      loading: 'lazy',
+                      class: 'lt-page-report-intro__app-img',
+                      alt: step_alt
+                  }}
+                {%- elsif section.settings.app_image_url != blank -%}
+                  <img
+                    src="{{ section.settings.app_image_url | escape }}"
+                    alt="{{ step_alt | escape }}"
+                    loading="lazy"
+                    class="lt-page-report-intro__app-img"
+                    width="420"
+                  >
+                {%- else -%}
+                  <div class="lt-page-report-intro__app-placeholder" aria-hidden="true"></div>
+                {%- endif -%}
+              </div>
+              <p class="lt-page-report-intro__panel-caption">{{ block.settings.title | escape }}</p>
+            </div>
+          {%- endfor -%}
+        </div>
       </div>
     {%- endif -%}
+  </div>
+</section>
 
-  </section>
-</div>
+<script>
+  (function () {
+    var root = document.getElementById('lt-page-report-intro-{{ section.id }}');
+    if (!root) return;
+
+    var tabs = Array.prototype.slice.call(root.querySelectorAll('[data-report-intro-tab]'));
+    var panels = Array.prototype.slice.call(root.querySelectorAll('[data-report-intro-panel]'));
+    if (!tabs.length || !panels.length) return;
+
+    function activateTab(nextTab, shouldFocus) {
+      if (!nextTab) return;
+
+      tabs.forEach(function (tab, index) {
+        var isActive = tab === nextTab;
+        tab.classList.toggle('is-active', isActive);
+        tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        tab.setAttribute('tabindex', isActive ? '0' : '-1');
+        panels[index].classList.toggle('is-active', isActive);
+        panels[index].hidden = !isActive;
+      });
+
+      if (shouldFocus) nextTab.focus();
+    }
+
+    tabs.forEach(function (tab, index) {
+      tab.addEventListener('click', function () {
+        activateTab(tab, false);
+      });
+
+      tab.addEventListener('keydown', function (event) {
+        var targetIndex = null;
+
+        if (event.key === 'ArrowDown' || event.key === 'ArrowRight') {
+          targetIndex = (index + 1) % tabs.length;
+        } else if (event.key === 'ArrowUp' || event.key === 'ArrowLeft') {
+          targetIndex = (index - 1 + tabs.length) % tabs.length;
+        } else if (event.key === 'Home') {
+          targetIndex = 0;
+        } else if (event.key === 'End') {
+          targetIndex = tabs.length - 1;
+        }
+
+        if (targetIndex === null) return;
+
+        event.preventDefault();
+        activateTab(tabs[targetIndex], true);
+      });
+    });
+  })();
+</script>
 
 {% stylesheet %}
   .lt-page-report-intro {
     padding-block: var(--space-9);
-    background: var(--color-surface-primary);
+    background: var(--color-surface-secondary);
   }
 
   @media screen and (max-width: 768px) {
@@ -116,7 +203,6 @@
     font-size: var(--text-h1);
   }
 
-  /* ── Badges ── */
   .lt-page-report-intro__badges {
     display: flex;
     flex-wrap: wrap;
@@ -129,7 +215,7 @@
     align-items: center;
     gap: var(--space-2);
     padding: 8px var(--space-4);
-    background: var(--color-surface-secondary);
+    background: var(--color-surface-primary);
     border: 1px solid var(--color-border-default);
     border-radius: var(--radius-full);
     font-family: var(--font-body);
@@ -144,7 +230,6 @@
     color: var(--color-text-secondary);
   }
 
-  /* ── Anatomy Block ── */
   .lt-page-report-intro__anatomy {
     display: grid;
     grid-template-columns: 1fr;
@@ -155,12 +240,11 @@
 
   @media screen and (min-width: 900px) {
     .lt-page-report-intro__anatomy {
-      grid-template-columns: 1fr 280px;
-      align-items: center;
+      grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
+      align-items: stretch;
     }
   }
 
-  /* ── Steps ── */
   .lt-page-report-intro__steps {
     display: flex;
     flex-direction: column;
@@ -172,12 +256,35 @@
     grid-template-columns: 40px 1fr;
     gap: var(--space-4);
     padding: var(--space-5) 0;
+    border-top: 1px solid transparent;
+    border-right: 0;
     border-bottom: 1px solid var(--color-border-default);
-    align-items: start;
+    border-left: 0;
+    width: 100%;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+    transition: color var(--ease-default), background var(--ease-default);
   }
 
   .lt-page-report-intro__step:first-child {
-    border-top: 1px solid var(--color-border-default);
+    border-top-color: var(--color-border-default);
+  }
+
+  .lt-page-report-intro__step.is-active {
+    color: var(--color-text-primary);
+  }
+
+  .lt-page-report-intro__step.is-active .lt-page-report-intro__step-number {
+    background: var(--color-surface-primary);
+    color: var(--color-text-primary);
+    border-color: var(--color-text-primary);
+  }
+
+  .lt-page-report-intro__step:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 4px;
+    border-radius: var(--radius-md);
   }
 
   .lt-page-report-intro__step-number {
@@ -188,24 +295,25 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-full);
-    background: var(--color-surface-secondary);
+    background: rgba(255, 255, 255, 0.72);
     border: 1px solid var(--color-border-default);
     font-family: var(--font-heading);
     font-size: var(--text-body-sm);
     font-weight: var(--weight-bold);
     color: var(--color-text-secondary);
     line-height: 1;
-    margin-top: 2px; /* intentional: visual alignment with step title */
+    margin-top: 2px;
+    transition: background var(--ease-default), border-color var(--ease-default), color var(--ease-default);
   }
 
   .lt-page-report-intro__step-body {
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
+    min-width: 0;
   }
 
   .lt-page-report-intro__step-title {
-    margin: 0;
     font-family: var(--font-heading);
     font-size: var(--text-body);
     font-weight: var(--weight-bold);
@@ -214,30 +322,72 @@
   }
 
   .lt-page-report-intro__step-description {
-    margin: 0;
     font-family: var(--font-body);
     font-size: var(--text-body-sm);
     color: var(--color-text-secondary);
     line-height: var(--leading-body);
   }
 
-  /* ── App Screenshot ── */
-  .lt-page-report-intro__app-visual {
+  .lt-page-report-intro__visuals {
+    position: relative;
+  }
+
+  .lt-page-report-intro__panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .lt-page-report-intro__panel-frame {
     display: flex;
     justify-content: center;
+    align-items: center;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    min-height: 100%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.94));
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 24px 40px rgba(38, 37, 30, 0.08);
+  }
+
+  .lt-page-report-intro__panel-caption {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    color: var(--color-text-secondary);
+    text-align: center;
   }
 
   .lt-page-report-intro__app-img {
     display: block;
     width: 100%;
-    max-width: 260px;
+    max-width: 320px;
     height: auto;
-    border-radius: var(--radius-lg);
+    border-radius: calc(var(--radius-xl) - 4px);
+    box-shadow: 0 12px 24px rgba(38, 37, 30, 0.14);
+  }
+
+  .lt-page-report-intro__app-placeholder {
+    width: min(100%, 280px);
+    aspect-ratio: 9 / 18;
+    border-radius: calc(var(--radius-xl) - 4px);
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.7), rgba(242, 241, 237, 0.95)),
+      var(--color-surface-secondary);
   }
 
   @media screen and (max-width: 899px) {
-    .lt-page-report-intro__app-img {
-      max-width: 200px;
+    .lt-page-report-intro__anatomy {
+      gap: var(--space-6);
+    }
+
+    .lt-page-report-intro__panel-frame {
+      padding: 1rem;
+    }
+
+    .lt-page-report-intro__app-img,
+    .lt-page-report-intro__app-placeholder {
+      max-width: 220px;
       margin: 0 auto;
     }
   }
@@ -303,23 +453,22 @@
     },
     {
       "type": "header",
-      "content": "App-Screenshot (rechts)"
+      "content": "Fallback-Screenshot"
     },
     {
       "type": "image_picker",
       "id": "app_image",
-      "label": "App-Screenshot (Bild-Upload)"
+      "label": "Fallback-Bild (Upload)"
     },
     {
       "type": "url",
       "id": "app_image_url",
-      "label": "App-Screenshot (URL-Fallback)",
-      "info": "Nur wenn kein Bild hochgeladen. Aus Theme-Assets: app-snps-detail.png"
+      "label": "Fallback-Bild (URL)"
     },
     {
       "type": "text",
       "id": "app_image_alt",
-      "label": "Alt-Text Screenshot"
+      "label": "Alt-Text Fallback-Bild"
     }
   ],
   "blocks": [
@@ -338,6 +487,25 @@
           "id": "description",
           "label": "Kurzerklärung",
           "default": "Dein persönlicher Wert, eingeordnet auf einer Skala"
+        },
+        {
+          "type": "header",
+          "content": "Screenshot für diesen Schritt"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Bild-Upload"
+        },
+        {
+          "type": "url",
+          "id": "image_url",
+          "label": "Bild-URL (Fallback)"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Bild Alt-Text"
         }
       ]
     }

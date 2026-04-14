@@ -35,78 +35,105 @@
 
 <div class="fg-section" id="section-{{ section.id }}">
   <div class="fg-container">
-
-    {%- if crs_fg_kicker != blank or crs_fg_head != blank or crs_fg_sub != blank -%}
-      <div class="fg-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
-        {%- if crs_fg_kicker != blank -%}
-          <p class="crs-heading-stack__kicker">{{ crs_fg_kicker | escape }}</p>
-        {%- endif -%}
-        {%- if crs_fg_head != blank or crs_fg_sub != blank -%}
-          <div class="crs-heading-stack__pair">
-            {%- if crs_fg_head != blank -%}
-              <h2 class="crs-heading-stack__title">{{ crs_fg_head | escape | newline_to_br }}</h2>
-            {%- endif -%}
-            {%- if crs_fg_sub != blank -%}
-              <p class="crs-heading-stack__subtitle">{{ crs_fg_sub | escape | newline_to_br }}</p>
-            {%- endif -%}
-          </div>
-        {%- endif -%}
-      </div>
-    {%- endif -%}
-
-    {%- if section.blocks.size > 0 -%}
-      <div class="fg-grid fg-grid--cols-{{ section.settings.columns }}">
-        {%- for block in section.blocks -%}
-          {%- assign fg_popup_plain = block.settings.popup_body | default: '' | strip_html | strip -%}
-          <div class="fg-card" {{ block.shopify_attributes }}>
-            {%- if block.settings.title != blank -%}
-              <h3 class="fg-card-title">{{ block.settings.title | escape }}</h3>
-            {%- endif -%}
-            {%- if block.settings.description != blank -%}
-              <div class="fg-card-desc">{{ block.settings.description | escape }}</div>
-            {%- endif -%}
-            {%- if block.settings.link_label != blank and fg_popup_plain != '' -%}
-              <div class="fg-card-footer">
-                <button
-                  type="button"
-                  class="crs-popup-link"
-                  data-crs-dialog-open
-                  aria-haspopup="dialog"
-                  aria-controls="crs-fg-dialog-{{ section.id }}-{{ block.id }}"
-                >
-                  {{ block.settings.link_label | escape }}&nbsp;↗
-                </button>
-              </div>
-              <dialog
-                id="crs-fg-dialog-{{ section.id }}-{{ block.id }}"
-                class="crs-micro-dialog"
-                aria-modal="true"
-                aria-labelledby="crs-fg-dlg-title-{{ section.id }}-{{ block.id }}"
+    <div class="fg-layout{% if section.settings.image != blank or section.settings.image_url != blank %} fg-layout--has-media fg-layout--media-{{ section.settings.media_position }}{% endif %}">
+      {%- if section.settings.image != blank or section.settings.image_url != blank -%}
+        <div class="fg-media">
+          <div class="fg-media__frame">
+            {%- if section.settings.image != blank -%}
+              {{
+                section.settings.image
+                | image_url: width: 900
+                | image_tag:
+                  loading: 'lazy',
+                  class: 'fg-media__image',
+                  alt: section.settings.image_alt | default: crs_fg_head
+              }}
+            {%- elsif section.settings.image_url != blank -%}
+              <img
+                src="{{ section.settings.image_url | escape }}"
+                alt="{{ section.settings.image_alt | default: crs_fg_head | escape }}"
+                loading="lazy"
+                class="fg-media__image"
+                width="420"
               >
-                <div class="crs-micro-dialog__inner">
-                  <button
-                    type="button"
-                    class="crs-micro-dialog__close"
-                    data-crs-dialog-close
-                    aria-label="{{ 'general.accessibility_labels.close' | t }}"
-                  >
-                    <span aria-hidden="true">×</span>
-                  </button>
-                  {%- assign fg_dlg_title = block.settings.popup_title | default: block.settings.link_label -%}
-                  <h2 id="crs-fg-dlg-title-{{ section.id }}-{{ block.id }}" class="crs-micro-dialog__title">
-                    {{ fg_dlg_title | escape }}
-                  </h2>
-                  <div class="crs-micro-dialog__body rte">
-                    {{ block.settings.popup_body }}
-                  </div>
-                </div>
-              </dialog>
             {%- endif -%}
           </div>
-        {%- endfor -%}
-      </div>
-    {%- endif -%}
+        </div>
+      {%- endif -%}
 
+      <div class="fg-content">
+        {%- if crs_fg_kicker != blank or crs_fg_head != blank or crs_fg_sub != blank -%}
+          <div class="fg-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+            {%- if crs_fg_kicker != blank -%}
+              <p class="crs-heading-stack__kicker">{{ crs_fg_kicker | escape }}</p>
+            {%- endif -%}
+            {%- if crs_fg_head != blank or crs_fg_sub != blank -%}
+              <div class="crs-heading-stack__pair">
+                {%- if crs_fg_head != blank -%}
+                  <h2 class="crs-heading-stack__title">{{ crs_fg_head | escape | newline_to_br }}</h2>
+                {%- endif -%}
+                {%- if crs_fg_sub != blank -%}
+                  <p class="crs-heading-stack__subtitle">{{ crs_fg_sub | escape | newline_to_br }}</p>
+                {%- endif -%}
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- if section.blocks.size > 0 -%}
+          <div class="fg-grid fg-grid--cols-{{ section.settings.columns }}{% if section.settings.image != blank or section.settings.image_url != blank %} fg-grid--with-media{% endif %}">
+            {%- for block in section.blocks -%}
+              {%- assign fg_popup_plain = block.settings.popup_body | default: '' | strip_html | strip -%}
+              <div class="fg-card" {{ block.shopify_attributes }}>
+                {%- if block.settings.title != blank -%}
+                  <h3 class="fg-card-title">{{ block.settings.title | escape }}</h3>
+                {%- endif -%}
+                {%- if block.settings.description != blank -%}
+                  <div class="fg-card-desc">{{ block.settings.description | escape }}</div>
+                {%- endif -%}
+                {%- if block.settings.link_label != blank and fg_popup_plain != '' -%}
+                  <div class="fg-card-footer">
+                    <button
+                      type="button"
+                      class="crs-popup-link"
+                      data-crs-dialog-open
+                      aria-haspopup="dialog"
+                      aria-controls="crs-fg-dialog-{{ section.id }}-{{ block.id }}"
+                    >
+                      {{ block.settings.link_label | escape }}&nbsp;↗
+                    </button>
+                  </div>
+                  <dialog
+                    id="crs-fg-dialog-{{ section.id }}-{{ block.id }}"
+                    class="crs-micro-dialog"
+                    aria-modal="true"
+                    aria-labelledby="crs-fg-dlg-title-{{ section.id }}-{{ block.id }}"
+                  >
+                    <div class="crs-micro-dialog__inner">
+                      <button
+                        type="button"
+                        class="crs-micro-dialog__close"
+                        data-crs-dialog-close
+                        aria-label="{{ 'general.accessibility_labels.close' | t }}"
+                      >
+                        <span aria-hidden="true">×</span>
+                      </button>
+                      {%- assign fg_dlg_title = block.settings.popup_title | default: block.settings.link_label -%}
+                      <h2 id="crs-fg-dlg-title-{{ section.id }}-{{ block.id }}" class="crs-micro-dialog__title">
+                        {{ fg_dlg_title | escape }}
+                      </h2>
+                      <div class="crs-micro-dialog__body rte">
+                        {{ block.settings.popup_body }}
+                      </div>
+                    </div>
+                  </dialog>
+                {%- endif -%}
+              </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
   </div>
 </div>
 
@@ -125,6 +152,58 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 20px;
+}
+
+.fg-layout {
+  display: block;
+}
+
+.fg-layout--has-media {
+  display: grid;
+  gap: var(--space-7);
+  align-items: center;
+}
+
+@media (min-width: 980px) {
+  .fg-layout--has-media {
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+  }
+
+  .fg-layout--media-right {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  }
+
+  .fg-layout--media-right .fg-media {
+    order: 2;
+  }
+}
+
+.fg-content {
+  min-width: 0;
+}
+
+.fg-media {
+  min-width: 0;
+}
+
+.fg-media__frame {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.42), rgba(247, 247, 244, 0.88));
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.05));
+  border-radius: 20px;
+  box-shadow: 0 22px 36px rgba(38, 37, 30, 0.08);
+}
+
+.fg-media__image {
+  display: block;
+  width: 100%;
+  max-width: 280px;
+  height: auto;
+  border-radius: 18px;
+  box-shadow: 0 12px 24px rgba(38, 37, 30, 0.12);
 }
 
 /* Header */
@@ -188,11 +267,27 @@
   }
 }
 
+@media (min-width: 980px) {
+  .fg-grid--with-media.fg-grid--cols-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* Mobile — 1 column */
 @media (max-width: 640px) {
   .fg-grid--cols-3,
   .fg-grid--cols-2 {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 979px) {
+  .fg-layout--has-media {
+    gap: var(--space-6);
+  }
+
+  .fg-media__image {
+    max-width: 220px;
   }
 }
 {% endstylesheet %}
@@ -305,6 +400,35 @@
         { "value": "3", "label": "3 Spalten" }
       ],
       "default": "3"
+    },
+    {
+      "type": "header",
+      "content": "App-Screenshot (optional)"
+    },
+    {
+      "type": "select",
+      "id": "media_position",
+      "label": "Bildposition",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Bild"
+    },
+    {
+      "type": "url",
+      "id": "image_url",
+      "label": "Bild-URL (Fallback)"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Bild Alt-Text"
     }
   ],
   "blocks": [
