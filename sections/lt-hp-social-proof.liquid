@@ -62,26 +62,14 @@
           {%- if block.type == 'testimonial' -%}
             <li class="sp__card" {{ block.shopify_attributes }}>
 
-              {%- comment -%} Verified badge (top) {%- endcomment -%}
-              {%- if block.settings.verified -%}
-                <div class="sp__verified" aria-label="Verifizierter Kauf">
-                  <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-                    <circle cx="6" cy="6" r="5.5" fill="var(--color-teal)"/>
-                    <path d="M3.5 6l1.75 1.75L8.5 4.5" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                  Verifizierter Kauf
-                </div>
-              {%- endif -%}
-
-              {%- comment -%} Quote text {%- endcomment -%}
+              {%- comment -%} 1 — Quote (dominant element) {%- endcomment -%}
               {%- if block.settings.quote != blank -%}
                 <blockquote class="sp__quote">
                   <p>{{ block.settings.quote | escape }}</p>
                 </blockquote>
               {%- endif -%}
 
-              {%- comment -%} Result metric — the key conversion element {%- endcomment -%}
-              {%- comment -%} Protocol tags — what they did (no retest timing here) {%- endcomment -%}
+              {%- comment -%} 2 — Protocol tags: what they did {%- endcomment -%}
               {%- if block.settings.protocol_label != blank -%}
                 {%- assign sp_protocol_parts = block.settings.protocol_label | split: '·' -%}
                 <div class="sp__protocol" aria-label="Longevity Protokoll">
@@ -94,7 +82,7 @@
                 </div>
               {%- endif -%}
 
-              {%- comment -%} Before → After result — retest outcome {%- endcomment -%}
+              {%- comment -%} 3 — Before → After: the retest result {%- endcomment -%}
               {%- if block.settings.result_metric != blank -%}
                 <div class="sp__before-after" aria-label="Vorher-Nachher Ergebnis">
                   <div class="sp__ba-col sp__ba-col--before">
@@ -121,11 +109,22 @@
                 </div>
               {%- endif -%}
 
-              {%- comment -%} Author {%- endcomment -%}
+              {%- comment -%} 4 — Footer: author + verified inline (metadata last) {%- endcomment -%}
               <footer class="sp__author">
-                <span class="sp__author-name">{{ block.settings.name | escape }}</span>
-                {%- if block.settings.age != blank -%}
-                  <span class="sp__author-age">, {{ block.settings.age }} Jahre</span>
+                <div class="sp__author-left">
+                  <span class="sp__author-name">{{ block.settings.name | escape }}</span>
+                  {%- if block.settings.age != blank -%}
+                    <span class="sp__author-age">, {{ block.settings.age }} Jahre</span>
+                  {%- endif -%}
+                </div>
+                {%- if block.settings.verified -%}
+                  <span class="sp__verified" aria-label="Verifizierter Kauf">
+                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+                      <circle cx="5.5" cy="5.5" r="5.5" fill="var(--color-teal)"/>
+                      <path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    Verifiziert
+                  </span>
                 {%- endif -%}
               </footer>
 
@@ -263,17 +262,6 @@
   gap: var(--space-4);
 }
 
-/* Verified badge — top of card */
-.sp__verified {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-medium);
-  color: var(--color-teal-dark);
-  line-height: 1;
-}
 
 /* Quote text */
 .sp__quote {
@@ -371,14 +359,22 @@
   white-space: nowrap;
 }
 
-/* Author */
+/* Author footer — name left, verified badge right */
 .sp__author {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-top: 1px solid var(--color-border-default);
+  padding-top: var(--space-3);
+  margin-top: auto; /* pushes footer to bottom of card */
+}
+
+.sp__author-left {
   font-family: var(--font-body);
   font-size: var(--text-body-sm);
   color: var(--color-text-secondary);
-  border-top: 1px solid var(--color-border-default);
-  padding-top: var(--space-3);
-  margin-top: auto;               /* pushes author to bottom of card */
+  min-width: 0;
 }
 
 .sp__author-name {
@@ -388,6 +384,19 @@
 
 .sp__author-age {
   font-weight: var(--weight-regular);
+}
+
+.sp__verified {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 4px; /* intentional: tight badge gap */
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  color: var(--color-teal-dark);
+  line-height: 1;
+  white-space: nowrap;
 }
 
 /* — Aggregate Stat Banner —
