@@ -19,6 +19,7 @@
   if section.settings.heading_size == 'product_title'
     assign crs_h_headline_lg = true
   endif
+  assign fg_single_frame_media = section.settings.single_frame_media
 -%}
 {% style %}
   #section-{{ section.id }} {
@@ -35,7 +36,7 @@
 
 <div class="fg-section" id="section-{{ section.id }}">
   <div class="fg-container">
-    <div class="fg-layout{% if section.settings.image != blank or section.settings.image_url != blank %} fg-layout--has-media fg-layout--media-{{ section.settings.media_position }}{% endif %}">
+    <div class="fg-layout{% if section.settings.image != blank or section.settings.image_url != blank %} fg-layout--has-media fg-layout--media-{{ section.settings.media_position }}{% endif %}{% if fg_single_frame_media %} fg-layout--single-frame{% endif %}">
       {%- if section.settings.image != blank or section.settings.image_url != blank -%}
         <div class="fg-media">
           <div class="fg-media__frame">
@@ -77,6 +78,14 @@
                 {%- endif -%}
               </div>
             {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+          <div class="fg-actions">
+            <a href="{{ section.settings.cta_url }}" class="fg-cta">
+              {{ section.settings.cta_label | escape }}
+            </a>
           </div>
         {%- endif -%}
 
@@ -206,9 +215,41 @@
   box-shadow: 0 12px 24px rgba(38, 37, 30, 0.12);
 }
 
+.fg-layout--single-frame .fg-media__image {
+  border-radius: 0;
+  box-shadow: none;
+}
+
 /* Header */
 .fg-header {
   margin-bottom: var(--space-7);
+}
+
+.fg-actions {
+  margin: calc(var(--space-7) * -1 + var(--space-4)) 0 var(--space-6);
+}
+
+.fg-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  background: var(--crs-text, #26251e);
+  border: 1px solid var(--crs-text, #26251e);
+  color: var(--crs-bg, #f7f7f4);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: opacity var(--ease-default, 0.2s ease);
+}
+
+.fg-cta:hover,
+.fg-cta:focus-visible {
+  opacity: 0.86;
 }
 
 /* Grid */
@@ -392,6 +433,16 @@
       "info": "__none__ = ausblenden (Theme-Editor)"
     },
     {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA Label"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA Link"
+    },
+    {
       "type": "select",
       "id": "columns",
       "label": "Spalten",
@@ -429,6 +480,12 @@
       "type": "text",
       "id": "image_alt",
       "label": "Bild Alt-Text"
+    },
+    {
+      "type": "checkbox",
+      "id": "single_frame_media",
+      "label": "Nur ein Bildrahmen",
+      "default": false
     }
   ],
   "blocks": [

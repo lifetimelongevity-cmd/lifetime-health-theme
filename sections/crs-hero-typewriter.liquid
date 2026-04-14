@@ -75,7 +75,14 @@
           {%- comment -%} Age card {%- endcomment -%}
           <div class="ltw-card ltw-card--age">
             <div class="ltw-card__label">{{ section.settings.dash_age_label | escape }}</div>
-            <div class="ltw-card__age-num">{{ section.settings.dash_bio_age | escape }}</div>
+            <div
+              class="ltw-card__age-num"
+              data-ltw-age-number
+              data-age-target="{{ section.settings.dash_bio_age | escape }}"
+              data-age-start="{{ section.settings.dash_chron_age | escape }}"
+            >
+              {{ section.settings.dash_bio_age | escape }}
+            </div>
             <div class="ltw-card__age-sub">{{ section.settings.dash_chron_label | escape }}: {{ section.settings.dash_chron_age | escape }}</div>
           </div>
 
@@ -125,8 +132,81 @@
 
 <script>
 (function () {
+  var root = document.getElementById('section-{{ section.id }}');
+  if (!root) return;
+
+  function animateAgeNumber() {
+    var ageNumber = root.querySelector('[data-ltw-age-number]');
+    if (!ageNumber) return;
+
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var target = parseFloat(ageNumber.dataset.ageTarget);
+    var startCandidate = parseFloat(ageNumber.dataset.ageStart);
+
+    if (Number.isNaN(target)) return;
+
+    var start = Number.isNaN(startCandidate) ? target + 6 : startCandidate;
+    if (start <= target) {
+      start = target + 4;
+    }
+
+    function render(value) {
+      var hasFraction = String(ageNumber.dataset.ageTarget || '').indexOf('.') !== -1;
+      ageNumber.textContent = hasFraction ? value.toFixed(1) : String(Math.round(value));
+    }
+
+    if (reducedMotion) {
+      render(target);
+      return;
+    }
+
+    var duration = 1600;
+    var startTime = null;
+
+    function step(timestamp) {
+      if (startTime === null) startTime = timestamp;
+      var progress = Math.min((timestamp - startTime) / duration, 1);
+      var eased = 1 - Math.pow(1 - progress, 3);
+      var current = start + (target - start) * eased;
+      render(current);
+
+      if (progress < 1) {
+        window.requestAnimationFrame(step);
+      }
+    }
+
+    render(start);
+    window.requestAnimationFrame(step);
+  }
+
+  function startAgeAnimationWhenVisible() {
+    var ageNumber = root.querySelector('[data-ltw-age-number]');
+    if (!ageNumber || ageNumber.dataset.ageAnimated === 'true') return;
+
+    function startAnimation() {
+      if (ageNumber.dataset.ageAnimated === 'true') return;
+      ageNumber.dataset.ageAnimated = 'true';
+      animateAgeNumber();
+    }
+
+    if (!('IntersectionObserver' in window)) {
+      startAnimation();
+      return;
+    }
+
+    var observer = new IntersectionObserver(function(entries) {
+      entries.forEach(function(entry) {
+        if (!entry.isIntersecting) return;
+        startAnimation();
+        observer.disconnect();
+      });
+    }, { threshold: 0.45 });
+
+    observer.observe(ageNumber);
+  }
+
   /* Animate dashboard bars on load with a light stagger */
-  document.querySelectorAll('#section-{{ section.id }} .ltw-bar__fill').forEach(function(el, index) {
+  root.querySelectorAll('.ltw-bar__fill').forEach(function(el, index) {
     el.style.width = '0';
     setTimeout(function() {
       el.style.transition = 'width 800ms ease-out';
@@ -134,7 +214,7 @@
     }, index * 150);
   });
 
-  var metricRows = document.querySelectorAll('#section-{{ section.id }} .ltw-metric-row');
+  var metricRows = root.querySelectorAll('.ltw-metric-row');
 
   function closeMetricRow(row) {
     var button = row.querySelector('.ltw-metric-row__button');
@@ -186,6 +266,8 @@
       }
     });
   });
+
+  startAgeAnimationWhenVisible();
 })();
 </script>
 
@@ -345,8 +427,8 @@
 }
 
 .ltw-card {
-  background: #ffffff;
-  border-radius: 4px;
+  background: var(--color-surface-primary);
+  border-radius: var(--radius-xl);
   box-shadow: 0 1px 4px rgba(0,0,0,.06);
   border: 0;
   padding: 20px 24px;
