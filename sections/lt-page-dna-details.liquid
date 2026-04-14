@@ -1,0 +1,405 @@
+{% comment %}
+  LT Page — DNA Details
+  ──────────────────────────────────────────────────────────────────────────────
+  §12 Build Spec:
+  - Surface:         --color-surface-secondary (warm, alternates nach white DNA Basics)
+  - Dominant:        11-Kachel-Grid — zeigt Breite der Analysetiefe auf einen Blick
+  - Content:         3-col Grid (2-col Tablet, 1-col Mobile) mit je Icon + Name + Count + 3 Tags
+  - CTA:             keiner — Informationsarchitektur, kein Conversion-Element
+  - Removed:         Fließtext pro Tile (redundant mit Tags), Unterzeile pro Tile
+  - Quality move:    Count-Badge als kleine Pill neben dem Tile-Titel —
+                     kommuniziert Tiefe ohne Fließtext; Tags zeigen exemplarisch was drin ist
+{% endcomment %}
+
+<div class="container container--large remove-empty-space">
+  <section
+    id="lt-page-dna-details-{{ section.id }}"
+    class="lt-page-dna-details"
+    aria-labelledby="lt-page-dna-details-heading-{{ section.id }}"
+  >
+
+    <div class="lt-page-dna-details__header crs-heading-stack crs-heading-stack--align-left">
+      {%- if section.settings.kicker != blank -%}
+        <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      <div class="crs-heading-stack__pair">
+        <h2 class="crs-heading-stack__title" id="lt-page-dna-details-heading-{{ section.id }}">
+          {{- section.settings.heading | escape -}}
+        </h2>
+        {%- if section.settings.subheading != blank -%}
+          <p class="crs-heading-stack__subtitle">{{ section.settings.subheading | escape }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- if section.blocks.size > 0 -%}
+      <ul class="lt-page-dna-details__grid" role="list">
+        {%- for block in section.blocks -%}
+          <li class="lt-page-dna-details__tile" {{ block.shopify_attributes }}>
+            <div class="lt-page-dna-details__tile-header">
+              {%- if block.settings.icon_svg != blank -%}
+                <span class="lt-page-dna-details__tile-icon" aria-hidden="true">
+                  {{- block.settings.icon_svg -}}
+                </span>
+              {%- endif -%}
+              <span class="lt-page-dna-details__tile-name">{{ block.settings.name | escape }}</span>
+              {%- if block.settings.count != blank -%}
+                <span class="lt-page-dna-details__tile-count">{{ block.settings.count | escape }}</span>
+              {%- endif -%}
+            </div>
+            {%- assign has_tags = false -%}
+            {%- if block.settings.tag_1 != blank or block.settings.tag_2 != blank or block.settings.tag_3 != blank -%}
+              {%- assign has_tags = true -%}
+            {%- endif -%}
+            {%- if has_tags -%}
+              <ul class="lt-page-dna-details__tags" role="list" aria-label="Beispiel-Reports">
+                {%- if block.settings.tag_1 != blank -%}
+                  <li class="lt-page-dna-details__tag">{{ block.settings.tag_1 | escape }}</li>
+                {%- endif -%}
+                {%- if block.settings.tag_2 != blank -%}
+                  <li class="lt-page-dna-details__tag">{{ block.settings.tag_2 | escape }}</li>
+                {%- endif -%}
+                {%- if block.settings.tag_3 != blank -%}
+                  <li class="lt-page-dna-details__tag">{{ block.settings.tag_3 | escape }}</li>
+                {%- endif -%}
+              </ul>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- if section.settings.micro_copy != blank -%}
+      <p class="lt-page-dna-details__micro">{{ section.settings.micro_copy | escape }}</p>
+    {%- endif -%}
+
+  </section>
+</div>
+
+{% stylesheet %}
+  .lt-page-dna-details {
+    padding-block: var(--space-9);
+    background: var(--color-surface-secondary);
+  }
+
+  @media screen and (max-width: 768px) {
+    .lt-page-dna-details {
+      padding-block: var(--space-8);
+    }
+  }
+
+  /* ── Grid ── */
+  .lt-page-dna-details__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+    margin: var(--space-7) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  @media screen and (max-width: 900px) {
+    .lt-page-dna-details__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (max-width: 540px) {
+    .lt-page-dna-details__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ── Tile ── */
+  .lt-page-dna-details__tile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    background: var(--color-surface-primary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-md);
+  }
+
+  .lt-page-dna-details__tile-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .lt-page-dna-details__tile-icon {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    color: var(--color-text-secondary);
+  }
+
+  .lt-page-dna-details__tile-icon svg {
+    display: block;
+    width: 16px;
+    height: 16px;
+  }
+
+  .lt-page-dna-details__tile-name {
+    font-family: var(--font-heading);
+    font-size: var(--text-body);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+    line-height: var(--leading-tight);
+  }
+
+  .lt-page-dna-details__tile-count {
+    display: inline-block;
+    padding: 2px var(--space-2);
+    background: var(--color-surface-secondary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-full);
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+    line-height: var(--leading-tight);
+  }
+
+  /* ── Tags ── */
+  .lt-page-dna-details__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px; /* intentional: between --space-1 (4px) and --space-2 (8px) per spec */
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .lt-page-dna-details__tag {
+    padding: 3px var(--space-2);
+    background: var(--color-surface-secondary);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-full);
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-regular);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-tight);
+  }
+
+  /* ── Micro Copy ── */
+  .lt-page-dna-details__micro {
+    margin: var(--space-6) 0 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    color: var(--color-text-muted);
+    text-align: center;
+    line-height: var(--leading-body);
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT Page DNA Details",
+  "tag": "section",
+  "class": "section-lt-page-dna-details",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "DNA-Details — 135+ Reports in 11 Kategorien"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Von Anti-Aging bis Stress — 11 Bereiche deiner Gesundheit"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Unterzeile"
+    },
+    {
+      "type": "text",
+      "id": "micro_copy",
+      "label": "Mikro-Copy unter Grid",
+      "default": "Jeder Report: Dein Ergebnis · Bedeutung · Handlungsempfehlung · Wissenschaftlicher Hinweis · Relevante SNPs"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Kategorie-Kachel",
+      "settings": [
+        {
+          "type": "html",
+          "id": "icon_svg",
+          "label": "Icon (SVG)",
+          "info": "Lucide SVG einfügen, z.B. <svg width='16' height='16' ...>"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Kategorie-Name",
+          "default": "Anti-Aging"
+        },
+        {
+          "type": "text",
+          "id": "count",
+          "label": "Report-Anzahl",
+          "default": "6 Reports"
+        },
+        {
+          "type": "text",
+          "id": "tag_1",
+          "label": "Beispiel-Report 1",
+          "default": "Kognition"
+        },
+        {
+          "type": "text",
+          "id": "tag_2",
+          "label": "Beispiel-Report 2",
+          "default": "Testosteron & Altern"
+        },
+        {
+          "type": "text",
+          "id": "tag_3",
+          "label": "Beispiel-Report 3",
+          "default": "Rückenschmerzen"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Page DNA Details",
+      "blocks": [
+        {
+          "type": "tile",
+          "settings": {
+            "icon_svg": "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><circle cx='12' cy='12' r='10'/><polyline points='12 6 12 12 16 14'/></svg>",
+            "name": "Anti-Aging",
+            "count": "6 Reports",
+            "tag_1": "Kognition",
+            "tag_2": "Testosteron & Altern",
+            "tag_3": "Rückenschmerzen"
+          }
+        },
+        {
+          "type": "tile",
+          "settings": {
+            "icon_svg": "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z'/><circle cx='12' cy='12' r='3'/></svg>",
+            "name": "Augen",
+            "count": "5 Reports",
+            "tag_1": "Grauer Star",
+            "tag_2": "Glaukom",
+            "tag_3": "Beta-Carotin"
+          }
+        },
+        {
+          "type": "tile",
+          "settings": {
+            "icon_svg": "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><polygon points='12 2 2 7 12 12 22 7 12 2'/><polyline points='2 17 12 22 22 17'/><polyline points='2 12 12 17 22 12'/></svg>",
+            "name": "Bauch & Darm",
+            "count": "5 Reports",
+            "tag_1": "Gluten-Toleranz",
+            "tag_2": "Reizdarm",
+            "tag_3": "Darmgesundheit"
+          }
+        },
+        {
+          "type": "tile",
+          "settings": {
+            "icon_svg": "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'/></svg>",
+            "name": "Herz",
+            "count": "5 Reports",
+            "tag_1": "Bluthochdruck",
+            "tag_2": "Cholesterin LDL/HDL",
+            "tag_3": "Kardio-Gesundheit"
+          }
+        },
+        {
+          "type": "tile",
+          "settings": {
+            "icon_svg": "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/></svg>",
+            "name": "Immunität",
+            "count": "7 Reports",
+            "tag_1": "Immunfunktion",
+            "tag_2": "Vitamin D & Immunität",
+            "tag_3": "Entzündung"
+          }
+        },
+        {
+          "type": "tile",
+          "settings": {
+            "icon_svg": "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z'/><line x1='12' y1='9' x2='12' y2='13'/><line x1='12' y1='17' x2='12.01' y2='17'/></svg>",
+            "name": "Verletzungen",
+            "count": "5 Reports",
+            "tag_1": "Knieverletzungen",
+            "tag_2": "Achillessehne",
+            "tag_3": "Rehabilitation"
+          }
+        },
+        {
+          "type": "tile",
+          "settings": {
+            "icon_svg": "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z'/><path d='M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z'/></svg>",
+            "name": "Mentale Gesundheit",
+            "count": "6 Reports",
+            "tag_1": "Aufmerksamkeit",
+            "tag_2": "Gedächtnis",
+            "tag_3": "Krieger oder Grübler"
+          }
+        },
+        {
+          "type": "tile",
+          "settings": {
+            "icon_svg": "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><polygon points='13 2 3 14 12 14 11 22 21 10 12 10 13 2'/></svg>",
+            "name": "Muskeln",
+            "count": "5 Reports",
+            "tag_1": "Myostatin",
+            "tag_2": "Testosteron",
+            "tag_3": "CoQ10-Mangel"
+          }
+        },
+        {
+          "type": "tile",
+          "settings": {
+            "icon_svg": "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><circle cx='12' cy='12' r='5'/><line x1='12' y1='1' x2='12' y2='3'/><line x1='12' y1='21' x2='12' y2='23'/><line x1='4.22' y1='4.22' x2='5.64' y2='5.64'/><line x1='18.36' y1='18.36' x2='19.78' y2='19.78'/><line x1='1' y1='12' x2='3' y2='12'/><line x1='21' y1='12' x2='23' y2='12'/><line x1='4.22' y1='19.78' x2='5.64' y2='18.36'/><line x1='18.36' y1='5.64' x2='19.78' y2='4.22'/></svg>",
+            "name": "Haut",
+            "count": "10 Reports",
+            "tag_1": "Hautalterung",
+            "tag_2": "Kollagen-Zerfall",
+            "tag_3": "Falten"
+          }
+        },
+        {
+          "type": "tile",
+          "settings": {
+            "icon_svg": "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z'/></svg>",
+            "name": "Schlaf",
+            "count": "6 Reports",
+            "tag_1": "Nachteule",
+            "tag_2": "Schlafdauer",
+            "tag_3": "Narkolepsie"
+          }
+        },
+        {
+          "type": "tile",
+          "settings": {
+            "icon_svg": "<svg width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' aria-hidden='true'><path d='M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2'/><path d='M9.6 4.6A2 2 0 1 1 11 8H2'/><path d='M12.6 19.4A2 2 0 1 0 14 16H2'/></svg>",
+            "name": "Stress",
+            "count": "6 Reports",
+            "tag_1": "Psychischer Druck",
+            "tag_2": "Stressgedächtnis",
+            "tag_3": "Koffein & Stress"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

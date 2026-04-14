@@ -120,9 +120,15 @@
         {%- endif -%}
 
         {%- if crs_rfc_cta != blank -%}
-          <button type="button" class="rfc-cta" data-rfc-scroll>
-            {{ crs_rfc_cta | escape }}
-          </button>
+          {%- if section.settings.cta_url != blank -%}
+            <a href="{{ section.settings.cta_url }}" class="rfc-cta">
+              {{ crs_rfc_cta | escape }}
+            </a>
+          {%- else -%}
+            <button type="button" class="rfc-cta" data-rfc-scroll>
+              {{ crs_rfc_cta | escape }}
+            </button>
+          {%- endif -%}
         {%- endif -%}
       </div>
     </div>
@@ -499,6 +505,12 @@
       "id": "cta_label",
       "label": "CTA-Label",
       "default": "Jetzt im Abo bestellen →"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA-Zielseite",
+      "info": "Wenn gesetzt: direkter Link statt Scroll-Button. Für page-Templates pflicht."
     }
   ],
   "blocks": [

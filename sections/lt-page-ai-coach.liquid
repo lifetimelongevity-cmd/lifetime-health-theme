@@ -1,0 +1,267 @@
+{% comment %}
+  LT Page — AI Coach
+  ──────────────────────────────────────────────────────────────────────────────
+  §12 Build Spec:
+  - Surface:         --color-surface-dark (intentionaler Rhythmusbruch nach 3 hellen Sections)
+  - Dominant:        Headline (--text-h2, weiß) — emotionaler Abschluss der Inhaltsreise
+  - Content:         2-col split: Text + Frage-Bubbles links, App-Screenshot rechts (optional)
+  - CTA:             keiner — Seite hat noch eine CTA-Section danach
+  - Removed:         Icon-Row, Kicker-Label (Element-Reduktion auf dark surface per Regel)
+  - Quality move:    Frage-Bubbles als weiße Karten mit leichtem Schatten —
+                     vermitteln sofort den Konversationscharakter des Coaches
+  - App-Screenshot:  app-snps-full.png (Full-Phone-Mockup) im rechten Panel
+{% endcomment %}
+
+<div class="container container--large remove-empty-space">
+  <section
+    id="lt-page-ai-coach-{{ section.id }}"
+    class="lt-page-ai-coach"
+    aria-labelledby="lt-page-ai-coach-heading-{{ section.id }}"
+  >
+
+    <div class="lt-page-ai-coach__split{% if section.settings.app_image != blank or section.settings.app_image_url != blank %} lt-page-ai-coach__split--has-image{% endif %}">
+
+      <div class="lt-page-ai-coach__content">
+        <div class="lt-page-ai-coach__header crs-heading-stack crs-heading-stack--align-left crs-heading-stack--on-dark">
+          <div class="crs-heading-stack__pair">
+            <h2 class="crs-heading-stack__title" id="lt-page-ai-coach-heading-{{ section.id }}">
+              {{- section.settings.heading | escape -}}
+            </h2>
+            {%- if section.settings.subheading != blank -%}
+              <p class="crs-heading-stack__subtitle">{{ section.settings.subheading | escape }}</p>
+            {%- endif -%}
+          </div>
+        </div>
+
+        {%- if section.settings.body != blank -%}
+          <p class="lt-page-ai-coach__body">{{ section.settings.body | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.blocks.size > 0 -%}
+          <ul class="lt-page-ai-coach__bubbles" role="list" aria-label="Beispiel-Fragen an den KI Health Coach">
+            {%- for block in section.blocks -%}
+              {%- if block.settings.question != blank -%}
+                <li class="lt-page-ai-coach__bubble" {{ block.shopify_attributes }}>
+                  <svg class="lt-page-ai-coach__bubble-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                  <span>{{ block.settings.question | escape }}</span>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.app_image != blank -%}
+        <div class="lt-page-ai-coach__media">
+          {{
+            section.settings.app_image
+            | image_url: width: 700
+            | image_tag:
+              loading: 'lazy',
+              class: 'lt-page-ai-coach__img',
+              alt: section.settings.app_image_alt | default: 'LIFETIME App'
+          }}
+        </div>
+      {%- elsif section.settings.app_image_url != blank -%}
+        <div class="lt-page-ai-coach__media">
+          <img
+            src="{{ section.settings.app_image_url | escape }}"
+            alt="{{ section.settings.app_image_alt | default: 'LIFETIME App' | escape }}"
+            loading="lazy"
+            class="lt-page-ai-coach__img"
+            width="320"
+          >
+        </div>
+      {%- endif -%}
+
+    </div>
+  </section>
+</div>
+
+{% stylesheet %}
+  .lt-page-ai-coach {
+    padding-block: var(--space-9);
+    background: var(--color-surface-dark);
+    color: var(--color-text-on-dark);
+  }
+
+  @media screen and (max-width: 768px) {
+    .lt-page-ai-coach {
+      padding-block: var(--space-8);
+    }
+  }
+
+  /* ── Split Layout ── */
+  .lt-page-ai-coach__split {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-8);
+    align-items: center;
+  }
+
+  @media screen and (min-width: 860px) {
+    .lt-page-ai-coach__split--has-image {
+      grid-template-columns: 1fr 280px;
+    }
+  }
+
+  /* ── Content Column ── */
+  .lt-page-ai-coach__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+
+  .lt-page-ai-coach__body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-relaxed);
+    color: var(--color-text-on-dark-muted);
+  }
+
+  /* ── Bubbles ── */
+  .lt-page-ai-coach__bubbles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .lt-page-ai-coach__bubble {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4) var(--space-5);
+    background: var(--color-surface-primary);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .lt-page-ai-coach__bubble-icon {
+    flex-shrink: 0;
+    margin-top: 2px; /* intentional: optical alignment with first text line */
+    color: var(--color-text-secondary);
+  }
+
+  .lt-page-ai-coach__bubble span {
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+    line-height: var(--leading-body);
+  }
+
+  /* ── Media Column ── */
+  .lt-page-ai-coach__media {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .lt-page-ai-coach__img {
+    display: block;
+    width: 100%;
+    max-width: 260px;
+    height: auto;
+    border-radius: var(--radius-lg);
+  }
+
+  @media screen and (max-width: 859px) {
+    .lt-page-ai-coach__img {
+      max-width: 200px;
+      margin: 0 auto;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT Page AI Coach",
+  "tag": "section",
+  "class": "section-lt-page-ai-coach",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "187 Reports. Einer, der dir erklärt, was du damit tust."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Unterzeile"
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Erklärungstext",
+      "default": "Du hast Zugang zu einem KI Health Coach, der alle deine Ergebnisse kennt. Frag nach einem Trainingsplan, einer Ernährungsumstellung oder was du gegen erhöhte Entzündungswerte tun kannst. Die Antworten kommen nicht aus einer Datenbank — sondern aus deinen Ergebnissen."
+    },
+    {
+      "type": "header",
+      "content": "App-Screenshot (optional)"
+    },
+    {
+      "type": "image_picker",
+      "id": "app_image",
+      "label": "App-Screenshot (Bild-Upload)"
+    },
+    {
+      "type": "url",
+      "id": "app_image_url",
+      "label": "App-Screenshot (URL-Fallback)",
+      "info": "Nur wenn kein Bild hochgeladen. Aus Theme-Assets: app-snps-full.png"
+    },
+    {
+      "type": "text",
+      "id": "app_image_alt",
+      "label": "Alt-Text Screenshot"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "question",
+      "name": "Beispiel-Frage",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Frage",
+          "default": "Wie kann ich mein biologisches Alter senken?"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Page AI Coach",
+      "blocks": [
+        {
+          "type": "question",
+          "settings": {
+            "question": "Wie kann ich mein biologisches Alter senken?"
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "question": "Erstell mir einen Trainingsplan basierend auf meinen Ergebnissen."
+          }
+        },
+        {
+          "type": "question",
+          "settings": {
+            "question": "Was sollte ich essen, um meine Entzündungswerte zu verbessern?"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
