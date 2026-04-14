@@ -1,0 +1,626 @@
+{%- liquid
+  assign cr_kicker = section.settings.kicker | strip
+  assign cr_head   = section.settings.heading | strip
+  assign cr_sub    = section.settings.subheading | strip
+  if cr_kicker == '__none__'
+    assign cr_kicker = ''
+  endif
+  if cr_head == '__none__'
+    assign cr_head = ''
+  endif
+  if cr_sub == '__none__'
+    assign cr_sub = ''
+  endif
+  assign cr_align     = section.settings.content_align | default: 'left'
+  assign cr_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign cr_headline_lg = true
+  endif
+  assign cr_visible = section.settings.visible_count | default: 4
+-%}
+
+{% style %}
+  #section-{{ section.id }} {
+    --cr-bg:       {{ section.settings.color_bg }};
+    --cr-card-bg:  {{ section.settings.color_card_bg }};
+    --cr-text:     {{ section.settings.color_text }};
+    --cr-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.55 }};
+    --cr-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.38 }};
+    --cr-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
+    --cr-visible:  {{ cr_visible }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<div class="cr-section" id="section-{{ section.id }}">
+  <div class="cr-container">
+
+    {%- comment -%} ── Section header ─────────────────────────────── {%- endcomment -%}
+    {%- if cr_kicker != blank or cr_head != blank or cr_sub != blank -%}
+      <div class="cr-head crs-heading-stack crs-heading-stack--align-{{ cr_align }}{% if cr_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+        {%- if cr_kicker != blank -%}
+          <p class="crs-heading-stack__kicker">{{ cr_kicker | escape }}</p>
+        {%- endif -%}
+        {%- if cr_head != blank or cr_sub != blank -%}
+          <div class="crs-heading-stack__pair">
+            {%- if cr_head != blank -%}
+              <h2 class="crs-heading-stack__title">{{ cr_head | escape | newline_to_br }}</h2>
+            {%- endif -%}
+            {%- if cr_sub != blank -%}
+              <p class="crs-heading-stack__subtitle">{{ cr_sub | escape | newline_to_br }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} ── Consensus pill tags ────────────────────────── {%- endcomment -%}
+    {%- assign cr_has_pills = false -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'pill' and block.settings.label != blank -%}
+        {%- assign cr_has_pills = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if cr_has_pills -%}
+      <div class="cr-pills" aria-label="Häufige Themen aus Kundenbewertungen">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'pill' and block.settings.label != blank -%}
+            <span class="cr-pill" {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</span>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- comment -%} ── Review scroll track ────────────────────────── {%- endcomment -%}
+    {%- assign cr_has_reviews = false -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'review' -%}
+        {%- assign cr_has_reviews = true -%}
+        {%- break -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if cr_has_reviews -%}
+      <ul class="cr-track" role="list">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'review' -%}
+            {%- assign cr_rating = block.settings.rating | default: 5 -%}
+            <li class="cr-card" {{ block.shopify_attributes }}>
+
+              {%- comment -%} Stars {%- endcomment -%}
+              <div class="cr-stars" aria-label="{{ cr_rating }} von 5 Sternen">
+                {%- for i in (1..5) -%}
+                  {%- if i <= cr_rating -%}
+                    <svg class="cr-star cr-star--filled" width="14" height="14" viewBox="0 0 14 13" fill="none" aria-hidden="true">
+                      <path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/>
+                    </svg>
+                  {%- else -%}
+                    <svg class="cr-star cr-star--empty" width="14" height="14" viewBox="0 0 14 13" fill="none" aria-hidden="true">
+                      <path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" stroke="currentColor" stroke-width="0.9" fill="none"/>
+                    </svg>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+
+              {%- comment -%} Review text {%- endcomment -%}
+              {%- if block.settings.text != blank -%}
+                <p class="cr-text">{{ block.settings.text | escape }}</p>
+              {%- endif -%}
+
+              {%- comment -%} Author row {%- endcomment -%}
+              <div class="cr-author">
+                <div class="cr-author-left">
+                  {%- if block.settings.avatar != blank -%}
+                    <div class="cr-avatar" aria-hidden="true">
+                      {{
+                        block.settings.avatar
+                        | image_url: width: 80
+                        | image_tag:
+                          loading: 'lazy',
+                          class: 'cr-avatar-img',
+                          alt: block.settings.name | escape,
+                          width: 40,
+                          height: 40
+                      }}
+                    </div>
+                  {%- endif -%}
+                  <div class="cr-meta">
+                    <span class="cr-name">{{ block.settings.name | escape }}</span>
+                    {%- if block.settings.verified -%}
+                      <span class="cr-verified" aria-label="Verifizierter Kauf">
+                        <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+                          <circle cx="5.5" cy="5.5" r="5.5" fill="var(--color-success)"/>
+                          <path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Verifiziert
+                      </span>
+                    {%- endif -%}
+                  </div>
+                </div>
+                {%- if block.settings.date != blank -%}
+                  <time class="cr-date">{{ block.settings.date | escape }}</time>
+                {%- endif -%}
+              </div>
+
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+  </div>
+</div>
+
+{% stylesheet %}
+/* ============================================================
+   Customer Reviews — crs-customer-reviews.liquid
+   §12 Spec:
+   - Surface:          --cr-bg (default --color-surface-secondary, warm)
+   - Card surface:     --cr-card-bg (default white)
+   - Dominant element: Section heading
+   - Content pattern:  card-review horizontal scroll track
+   - CTA:              none (trust signal section)
+   - Quality move:     Pill consensus tags above track; avatar as
+                       40px circle in author row (not top-of-card)
+                       keeps card proportions identical with/without photo.
+                       Horizontal snap-scroll with card peek communicates
+                       more reviews exist without heavy pagination chrome.
+   ============================================================ */
+
+.cr-section {
+  background: var(--cr-bg, var(--color-surface-secondary));
+}
+
+.cr-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+/* ── Section header ───────────────────────────────────────── */
+.cr-head {
+  margin-bottom: var(--space-7);
+}
+
+/* ── Pill tags ────────────────────────────────────────────── */
+.cr-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.cr-pill {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  color: var(--cr-text-sec);
+  background: transparent;
+  border: 1px solid var(--cr-border);
+  border-radius: var(--radius-full);
+  padding: 5px var(--space-3);
+  white-space: nowrap;
+  cursor: default;
+  user-select: none;
+}
+
+/* ── Scroll track ─────────────────────────────────────────── */
+/*
+  Card width formula: show --cr-visible cards + a ~20px peek of the next.
+  (container + gap) / n - gap - peek
+  Using gap = var(--space-5) = 24px; peek ≈ 24px.
+*/
+.cr-track {
+  display: flex;
+  gap: var(--space-5);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+  padding-bottom: var(--space-3); /* room for card shadow */
+  /* Hide scrollbar — scrollability communicated via card peek */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
+}
+
+.cr-track::-webkit-scrollbar {
+  display: none;
+}
+
+/* ── Review card ──────────────────────────────────────────── */
+.cr-card {
+  flex: 0 0 calc(
+    (100% + var(--space-5)) / var(--cr-visible, 4) - var(--space-5) - 24px
+  );
+  min-width: 220px; /* intentional: floor below which review text becomes illegible */
+  scroll-snap-align: start;
+  box-sizing: border-box;
+  background: var(--cr-card-bg, var(--color-surface-primary));
+  border: 1px solid var(--cr-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ── Stars ────────────────────────────────────────────────── */
+.cr-stars {
+  display: flex;
+  align-items: center;
+  gap: 3px; /* intentional: tighter than --space-1 (4px) — stars read as a unit */
+  flex-shrink: 0;
+}
+
+.cr-star {
+  display: block;
+  flex-shrink: 0;
+}
+
+.cr-star--filled {
+  color: var(--color-star, #F4B740);
+}
+
+.cr-star--empty {
+  color: var(--cr-text-ter);
+}
+
+/* ── Review text ──────────────────────────────────────────── */
+.cr-text {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--cr-text);
+  margin: 0;
+  flex: 1 1 auto; /* push author row to bottom */
+}
+
+/* ── Author row ───────────────────────────────────────────── */
+.cr-author {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: auto;
+  flex-shrink: 0;
+}
+
+.cr-author-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+/* Avatar — 40px circle, only rendered when image set */
+.cr-avatar {
+  flex-shrink: 0;
+  width: 40px;  /* intentional: fixed avatar size — no token equivalent; 40px is minimum legible face */
+  height: 40px; /* intentional: fixed avatar size — matches width for 1:1 circle */
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  border: 1px solid var(--cr-border);
+}
+
+.cr-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+}
+
+.cr-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px; /* intentional: between --space-1 (4px) — very tight meta stack */
+  min-width: 0;
+}
+
+.cr-name {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  color: var(--cr-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cr-verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px; /* intentional: between --space-1 (4px) — matches icon visual gap */
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  color: var(--color-success);
+  white-space: nowrap;
+}
+
+.cr-verified svg {
+  flex-shrink: 0;
+}
+
+.cr-date {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-tight);
+  color: var(--cr-text-ter);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ── Responsive ───────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .cr-card {
+    /* Tablet: show ~2.3 cards */
+    flex: 0 0 calc((100% + var(--space-5)) / 2.3 - var(--space-5));
+  }
+}
+
+@media (max-width: 640px) {
+  .cr-card {
+    /* Mobile: show ~1.15 cards — strong peek communicates scroll */
+    flex: 0 0 calc((100% + var(--space-5)) / 1.15 - var(--space-5));
+    min-width: 0;
+  }
+
+  .cr-head {
+    margin-bottom: var(--space-6);
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Customer Reviews",
+  "tag": "section",
+  "class": "crs-customer-reviews",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung (Überschrift)",
+      "options": [
+        { "value": "left",   "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right",  "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section",       "label": "Standard" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": "__none__",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Was echte Käufer berichten"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Unterüberschrift (optional)",
+      "default": "__none__"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "visible_count",
+      "label": "Sichtbare Karten (Desktop)",
+      "options": [
+        { "value": "3", "label": "3 Karten" },
+        { "value": "4", "label": "4 Karten (empfohlen)" },
+        { "value": "5", "label": "5 Karten" },
+        { "value": "6", "label": "6 Karten" }
+      ],
+      "default": "4",
+      "info": "Überzählige Karten sind per horizontalem Scroll erreichbar."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "pill",
+      "name": "Konsens-Tag",
+      "limit": 10,
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Tag-Text",
+          "default": "Mehr Energie",
+          "info": "Kurze Aussage aus Kundenfeedback, z. B. «Besserer Schlaf» oder «Schnelle Lieferung»."
+        }
+      ]
+    },
+    {
+      "type": "review",
+      "name": "Bewertung",
+      "settings": [
+        {
+          "type": "range",
+          "id": "rating",
+          "label": "Sterne (1–5)",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Bewertungstext",
+          "default": "Ein ehrliches Kundenzitat."
+        },
+        {
+          "type": "image_picker",
+          "id": "avatar",
+          "label": "Profilfoto (optional)",
+          "info": "Wird als 40 px Kreis im Autor-Bereich angezeigt. Ohne Bild: normales Text-Layout."
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Vorname N."
+        },
+        {
+          "type": "checkbox",
+          "id": "verified",
+          "label": "Verifizierter Kauf",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "date",
+          "label": "Datum",
+          "default": "März 2025",
+          "info": "Z. B. «März 2025» oder «02/2025»."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Customer Reviews",
+      "blocks": [
+        {
+          "type": "pill",
+          "settings": { "label": "Mehr Energie" }
+        },
+        {
+          "type": "pill",
+          "settings": { "label": "Besserer Schlaf" }
+        },
+        {
+          "type": "pill",
+          "settings": { "label": "Weniger Nachmittagstief" }
+        },
+        {
+          "type": "pill",
+          "settings": { "label": "Mehr Fokus" }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "text": "Ich habe das Buch von David Sinclair gelesen und wollte es unbedingt ausprobieren. Ich fühle mich insgesamt energiegeladener und weniger erschöpft im Alltag.",
+            "name": "Sven M.",
+            "verified": true,
+            "date": "April 2025"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "text": "Es ist nicht nur ein Longevity-Trend, es ist wissenschaftlich bewiesen. Ich merke den Unterschied seit Woche 3 – mehr Fokus, mehr Ausdauer.",
+            "name": "@misscasiraghi",
+            "verified": true,
+            "date": "März 2025"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "rating": 4,
+            "text": "Kein Wow-Effekt — aber nach 3 Monaten hat sich mein Wohlbefinden klar verbessert. Ein ruhiges Gefühl, das Richtige zu tun.",
+            "name": "Mattes J.",
+            "verified": true,
+            "date": "Februar 2025"
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "rating": 5,
+            "text": "LIFETIME ist ein von Ärzten geführtes Unternehmen aus Berlin. Das Vertrauen war von Anfang an da — und die Wirkung kam nach.",
+            "name": "Thomas K.",
+            "verified": true,
+            "date": "Januar 2025"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
