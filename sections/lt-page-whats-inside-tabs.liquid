@@ -1,0 +1,615 @@
+{% liquid
+  assign epigenetic_blocks = section.blocks | where: 'type', 'epigenetic_item'
+  assign dna_blocks = section.blocks | where: 'type', 'dna_category'
+  assign ai_blocks = section.blocks | where: 'type', 'ai_question'
+%}
+
+<section
+  id="lt-page-whats-inside-tabs-{{ section.id }}"
+  class="lt-page-whats-inside-tabs"
+  aria-labelledby="lt-page-whats-inside-tabs-heading-{{ section.id }}"
+>
+  <div class="container container--large remove-empty-space">
+    <div class="lt-page-whats-inside-tabs__tablist" role="tablist" aria-label="Was steckt drin Tabs">
+      <button
+        type="button"
+        class="lt-page-whats-inside-tabs__tab is-active"
+        id="lt-page-whats-inside-tabs-tab-epi-{{ section.id }}"
+        role="tab"
+        aria-selected="true"
+        aria-controls="lt-page-whats-inside-tabs-panel-epi-{{ section.id }}"
+        tabindex="0"
+        data-inside-tab
+      >
+        {{ section.settings.epigenetics_tab_label | escape }}
+      </button>
+      <button
+        type="button"
+        class="lt-page-whats-inside-tabs__tab"
+        id="lt-page-whats-inside-tabs-tab-dna-{{ section.id }}"
+        role="tab"
+        aria-selected="false"
+        aria-controls="lt-page-whats-inside-tabs-panel-dna-{{ section.id }}"
+        tabindex="-1"
+        data-inside-tab
+      >
+        {{ section.settings.dna_tab_label | escape }}
+      </button>
+      <button
+        type="button"
+        class="lt-page-whats-inside-tabs__tab"
+        id="lt-page-whats-inside-tabs-tab-ai-{{ section.id }}"
+        role="tab"
+        aria-selected="false"
+        aria-controls="lt-page-whats-inside-tabs-panel-ai-{{ section.id }}"
+        tabindex="-1"
+        data-inside-tab
+      >
+        {{ section.settings.ai_tab_label | escape }}
+      </button>
+    </div>
+
+    <div class="lt-page-whats-inside-tabs__panels">
+      <div
+        class="lt-page-whats-inside-tabs__panel is-active"
+        id="lt-page-whats-inside-tabs-panel-epi-{{ section.id }}"
+        role="tabpanel"
+        aria-labelledby="lt-page-whats-inside-tabs-tab-epi-{{ section.id }}"
+        data-inside-panel
+        tabindex="0"
+      >
+        <div class="lt-page-whats-inside-tabs__split lt-page-whats-inside-tabs__split--epigenetics">
+          <div class="lt-page-whats-inside-tabs__copy">
+            <div class="crs-heading-stack crs-heading-stack--align-left">
+              {%- if section.settings.epigenetics_kicker != blank -%}
+                <p class="crs-heading-stack__kicker">{{ section.settings.epigenetics_kicker | escape }}</p>
+              {%- endif -%}
+              <div class="crs-heading-stack__pair">
+                <h2 class="crs-heading-stack__title" id="lt-page-whats-inside-tabs-heading-{{ section.id }}">
+                  {{ section.settings.epigenetics_heading | escape }}
+                </h2>
+                {%- if section.settings.epigenetics_body != blank -%}
+                  <p class="crs-heading-stack__subtitle">{{ section.settings.epigenetics_body | escape }}</p>
+                {%- endif -%}
+              </div>
+            </div>
+
+            {%- if epigenetic_blocks.size > 0 -%}
+              <ul class="lt-page-whats-inside-tabs__epi-list" role="list">
+                {%- for block in epigenetic_blocks -%}
+                  <li class="lt-page-whats-inside-tabs__epi-item" {{ block.shopify_attributes }}>
+                    <h3 class="lt-page-whats-inside-tabs__item-title">{{ block.settings.title | escape }}</h3>
+                    {%- if block.settings.description != blank -%}
+                      <p class="lt-page-whats-inside-tabs__item-body">{{ block.settings.description | escape }}</p>
+                    {%- endif -%}
+                  </li>
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+          </div>
+
+          <div class="lt-page-whats-inside-tabs__media">
+            <div class="lt-page-whats-inside-tabs__media-frame">
+              {%- if section.settings.epigenetics_image != blank -%}
+                {{
+                  section.settings.epigenetics_image
+                  | image_url: width: 900
+                  | image_tag:
+                    loading: 'lazy',
+                    class: 'lt-page-whats-inside-tabs__image',
+                    alt: section.settings.epigenetics_image_alt | default: section.settings.epigenetics_heading
+                }}
+              {%- elsif section.settings.epigenetics_image_url != blank -%}
+                <img
+                  src="{{ section.settings.epigenetics_image_url | escape }}"
+                  alt="{{ section.settings.epigenetics_image_alt | default: section.settings.epigenetics_heading | escape }}"
+                  loading="lazy"
+                  class="lt-page-whats-inside-tabs__image"
+                  width="420"
+                >
+              {%- endif -%}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="lt-page-whats-inside-tabs__panel"
+        id="lt-page-whats-inside-tabs-panel-dna-{{ section.id }}"
+        role="tabpanel"
+        aria-labelledby="lt-page-whats-inside-tabs-tab-dna-{{ section.id }}"
+        data-inside-panel
+        tabindex="0"
+        hidden
+      >
+        <div class="lt-page-whats-inside-tabs__copy lt-page-whats-inside-tabs__copy--wide">
+          <div class="crs-heading-stack crs-heading-stack--align-left">
+            {%- if section.settings.dna_kicker != blank -%}
+              <p class="crs-heading-stack__kicker">{{ section.settings.dna_kicker | escape }}</p>
+            {%- endif -%}
+            <div class="crs-heading-stack__pair">
+              <h2 class="crs-heading-stack__title">{{ section.settings.dna_heading | escape }}</h2>
+              {%- if section.settings.dna_body != blank -%}
+                <p class="crs-heading-stack__subtitle">{{ section.settings.dna_body | escape }}</p>
+              {%- endif -%}
+            </div>
+          </div>
+
+          {%- if dna_blocks.size > 0 -%}
+            <div class="lt-page-whats-inside-tabs__dna-grid">
+              {%- for block in dna_blocks -%}
+                <article class="lt-page-whats-inside-tabs__dna-card" {{ block.shopify_attributes }}>
+                  <h3 class="lt-page-whats-inside-tabs__item-title">{{ block.settings.title | escape }}</h3>
+                  {%- if block.settings.examples != blank -%}
+                    <p class="lt-page-whats-inside-tabs__item-body">{{ block.settings.examples | escape }}</p>
+                  {%- endif -%}
+                </article>
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div
+        class="lt-page-whats-inside-tabs__panel"
+        id="lt-page-whats-inside-tabs-panel-ai-{{ section.id }}"
+        role="tabpanel"
+        aria-labelledby="lt-page-whats-inside-tabs-tab-ai-{{ section.id }}"
+        data-inside-panel
+        tabindex="0"
+        hidden
+      >
+        <div class="lt-page-whats-inside-tabs__split lt-page-whats-inside-tabs__split--ai">
+          <div class="lt-page-whats-inside-tabs__copy">
+            <div class="crs-heading-stack crs-heading-stack--align-left">
+              {%- if section.settings.ai_kicker != blank -%}
+                <p class="crs-heading-stack__kicker">{{ section.settings.ai_kicker | escape }}</p>
+              {%- endif -%}
+              <div class="crs-heading-stack__pair">
+                <h2 class="crs-heading-stack__title">{{ section.settings.ai_heading | escape }}</h2>
+                {%- if section.settings.ai_body != blank -%}
+                  <p class="crs-heading-stack__subtitle">{{ section.settings.ai_body | escape }}</p>
+                {%- endif -%}
+              </div>
+            </div>
+
+            {%- if ai_blocks.size > 0 -%}
+              <ul class="lt-page-whats-inside-tabs__ai-list" role="list" aria-label="Beispielfragen an den AI Health Coach">
+                {%- for block in ai_blocks -%}
+                  <li class="lt-page-whats-inside-tabs__ai-item" {{ block.shopify_attributes }}>
+                    <svg class="lt-page-whats-inside-tabs__ai-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    <span>{{ block.settings.question | escape }}</span>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            {%- endif -%}
+          </div>
+
+          <div class="lt-page-whats-inside-tabs__media">
+            <div class="lt-page-whats-inside-tabs__media-frame">
+              {%- if section.settings.ai_image != blank -%}
+                {{
+                  section.settings.ai_image
+                  | image_url: width: 900
+                  | image_tag:
+                    loading: 'lazy',
+                    class: 'lt-page-whats-inside-tabs__image',
+                    alt: section.settings.ai_image_alt | default: section.settings.ai_heading
+                }}
+              {%- elsif section.settings.ai_image_url != blank -%}
+                <img
+                  src="{{ section.settings.ai_image_url | escape }}"
+                  alt="{{ section.settings.ai_image_alt | default: section.settings.ai_heading | escape }}"
+                  loading="lazy"
+                  class="lt-page-whats-inside-tabs__image"
+                  width="420"
+                >
+              {%- endif -%}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    var root = document.getElementById('lt-page-whats-inside-tabs-{{ section.id }}');
+    if (!root) return;
+
+    var tabs = Array.prototype.slice.call(root.querySelectorAll('[data-inside-tab]'));
+    var panels = Array.prototype.slice.call(root.querySelectorAll('[data-inside-panel]'));
+    if (!tabs.length || tabs.length !== panels.length) return;
+
+    function activateTab(nextTab, shouldFocus) {
+      if (!nextTab) return;
+
+      tabs.forEach(function (tab, index) {
+        var isActive = tab === nextTab;
+        tab.classList.toggle('is-active', isActive);
+        tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        tab.setAttribute('tabindex', isActive ? '0' : '-1');
+        panels[index].classList.toggle('is-active', isActive);
+        panels[index].hidden = !isActive;
+      });
+
+      if (shouldFocus) nextTab.focus();
+    }
+
+    tabs.forEach(function (tab, index) {
+      tab.addEventListener('click', function () {
+        activateTab(tab, false);
+      });
+
+      tab.addEventListener('keydown', function (event) {
+        var targetIndex = null;
+
+        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+          targetIndex = (index + 1) % tabs.length;
+        } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+          targetIndex = (index - 1 + tabs.length) % tabs.length;
+        } else if (event.key === 'Home') {
+          targetIndex = 0;
+        } else if (event.key === 'End') {
+          targetIndex = tabs.length - 1;
+        }
+
+        if (targetIndex === null) return;
+
+        event.preventDefault();
+        activateTab(tabs[targetIndex], true);
+      });
+    });
+  })();
+</script>
+
+{% stylesheet %}
+  .lt-page-whats-inside-tabs {
+    padding-block: var(--space-9);
+    background: var(--color-surface-secondary);
+  }
+
+  .lt-page-whats-inside-tabs__tablist {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+    margin-bottom: var(--space-7);
+  }
+
+  .lt-page-whats-inside-tabs__tab {
+    padding: 0.85rem 1.25rem;
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.72);
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+    line-height: var(--leading-tight);
+    cursor: pointer;
+    transition: background var(--ease-default), border-color var(--ease-default), color var(--ease-default);
+  }
+
+  .lt-page-whats-inside-tabs__tab.is-active {
+    background: var(--color-text-primary);
+    border-color: var(--color-text-primary);
+    color: var(--color-surface-primary);
+  }
+
+  .lt-page-whats-inside-tabs__tab:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 3px;
+  }
+
+  .lt-page-whats-inside-tabs__panel {
+    display: block;
+  }
+
+  .lt-page-whats-inside-tabs__split {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-7);
+    align-items: start;
+  }
+
+  @media screen and (min-width: 980px) {
+    .lt-page-whats-inside-tabs__split {
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+    }
+  }
+
+  .lt-page-whats-inside-tabs__copy {
+    min-width: 0;
+  }
+
+  .lt-page-whats-inside-tabs__copy--wide .crs-heading-stack {
+    margin-bottom: var(--space-7);
+  }
+
+  .lt-page-whats-inside-tabs__media {
+    min-width: 0;
+  }
+
+  .lt-page-whats-inside-tabs__media-frame {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.9));
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 22px 36px rgba(38, 37, 30, 0.08);
+  }
+
+  .lt-page-whats-inside-tabs__image {
+    display: block;
+    width: 100%;
+    max-width: 280px;
+    height: auto;
+    border-radius: calc(var(--radius-xl) - 4px);
+    box-shadow: 0 12px 24px rgba(38, 37, 30, 0.14);
+  }
+
+  .lt-page-whats-inside-tabs__epi-list,
+  .lt-page-whats-inside-tabs__ai-list {
+    display: grid;
+    gap: var(--space-3);
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .lt-page-whats-inside-tabs__epi-item,
+  .lt-page-whats-inside-tabs__dna-card,
+  .lt-page-whats-inside-tabs__ai-item {
+    padding: var(--space-4) var(--space-5);
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-lg);
+  }
+
+  .lt-page-whats-inside-tabs__dna-grid {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  @media screen and (min-width: 720px) {
+    .lt-page-whats-inside-tabs__dna-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (min-width: 1100px) {
+    .lt-page-whats-inside-tabs__dna-grid {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .lt-page-whats-inside-tabs__item-title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: var(--text-body);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-primary);
+    line-height: var(--leading-tight);
+  }
+
+  .lt-page-whats-inside-tabs__item-body {
+    margin: var(--space-2) 0 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    color: var(--color-text-secondary);
+    line-height: var(--leading-body);
+  }
+
+  .lt-page-whats-inside-tabs__ai-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .lt-page-whats-inside-tabs__ai-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--color-text-secondary);
+  }
+
+  .lt-page-whats-inside-tabs__ai-item span {
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+    line-height: var(--leading-body);
+  }
+
+  @media screen and (max-width: 767px) {
+    .lt-page-whats-inside-tabs {
+      padding-block: var(--space-8);
+    }
+
+    .lt-page-whats-inside-tabs__tablist {
+      margin-bottom: var(--space-6);
+    }
+
+    .lt-page-whats-inside-tabs__image {
+      max-width: 220px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT Page Whats Inside Tabs",
+  "tag": "section",
+  "class": "section-lt-page-whats-inside-tabs",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "epigenetics_tab_label",
+      "label": "Tab 1",
+      "default": "Epigenetik-Ergebnisse"
+    },
+    {
+      "type": "text",
+      "id": "dna_tab_label",
+      "label": "Tab 2",
+      "default": "DNA-Ergebnisse"
+    },
+    {
+      "type": "text",
+      "id": "ai_tab_label",
+      "label": "Tab 3",
+      "default": "AI Coach"
+    },
+    {
+      "type": "header",
+      "content": "Epigenetik"
+    },
+    {
+      "type": "text",
+      "id": "epigenetics_kicker",
+      "label": "Kicker",
+      "default": "Epigenetik Reports · 6 Bereiche"
+    },
+    {
+      "type": "text",
+      "id": "epigenetics_heading",
+      "label": "Überschrift",
+      "default": "Epigenetik-Ergebnisse"
+    },
+    {
+      "type": "textarea",
+      "id": "epigenetics_body",
+      "label": "Text"
+    },
+    {
+      "type": "image_picker",
+      "id": "epigenetics_image",
+      "label": "Bild"
+    },
+    {
+      "type": "url",
+      "id": "epigenetics_image_url",
+      "label": "Bild-URL"
+    },
+    {
+      "type": "text",
+      "id": "epigenetics_image_alt",
+      "label": "Bild Alt-Text"
+    },
+    {
+      "type": "header",
+      "content": "DNA"
+    },
+    {
+      "type": "text",
+      "id": "dna_kicker",
+      "label": "Kicker",
+      "default": "DNA-Ergebnisse · 16 Kategorien"
+    },
+    {
+      "type": "text",
+      "id": "dna_heading",
+      "label": "Überschrift",
+      "default": "Von Gesunder Alterung bis Niere"
+    },
+    {
+      "type": "textarea",
+      "id": "dna_body",
+      "label": "Text"
+    },
+    {
+      "type": "header",
+      "content": "AI Coach"
+    },
+    {
+      "type": "text",
+      "id": "ai_kicker",
+      "label": "Kicker",
+      "default": "AI Health Coach"
+    },
+    {
+      "type": "text",
+      "id": "ai_heading",
+      "label": "Überschrift",
+      "default": "Einer, der dir erklärt, was du damit tust."
+    },
+    {
+      "type": "textarea",
+      "id": "ai_body",
+      "label": "Text"
+    },
+    {
+      "type": "image_picker",
+      "id": "ai_image",
+      "label": "Bild"
+    },
+    {
+      "type": "url",
+      "id": "ai_image_url",
+      "label": "Bild-URL"
+    },
+    {
+      "type": "text",
+      "id": "ai_image_alt",
+      "label": "Bild Alt-Text"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "epigenetic_item",
+      "name": "Epigenetik Bereich",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Beschreibung"
+        }
+      ]
+    },
+    {
+      "type": "dna_category",
+      "name": "DNA Kategorie",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel"
+        },
+        {
+          "type": "textarea",
+          "id": "examples",
+          "label": "Beispiele"
+        }
+      ]
+    },
+    {
+      "type": "ai_question",
+      "name": "AI Frage",
+      "settings": [
+        {
+          "type": "text",
+          "id": "question",
+          "label": "Frage"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Page Whats Inside Tabs"
+    }
+  ]
+}
+{% endschema %}
