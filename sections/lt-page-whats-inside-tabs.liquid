@@ -8,6 +8,7 @@
   id="lt-page-whats-inside-tabs-{{ section.id }}"
   class="lt-page-whats-inside-tabs"
   aria-labelledby="lt-page-whats-inside-tabs-heading-{{ section.id }}"
+  data-inside-tabs-root
 >
   <div class="container container--large remove-empty-space">
     <div class="lt-page-whats-inside-tabs__tablist" role="tablist" aria-label="Was steckt drin Tabs">
@@ -213,56 +214,79 @@
   </div>
 </section>
 
-<script>
+{% javascript %}
   (function () {
-    var root = document.getElementById('lt-page-whats-inside-tabs-{{ section.id }}');
-    if (!root) return;
+    function initializeInsideTabs(root) {
+      if (!root || root.dataset.insideTabsReady === 'true') return;
 
-    var tabs = Array.prototype.slice.call(root.querySelectorAll('[data-inside-tab]'));
-    var panels = Array.prototype.slice.call(root.querySelectorAll('[data-inside-panel]'));
-    if (!tabs.length || tabs.length !== panels.length) return;
+      var tabs = Array.prototype.slice.call(root.querySelectorAll('[data-inside-tab]'));
+      var panels = Array.prototype.slice.call(root.querySelectorAll('[data-inside-panel]'));
+      if (!tabs.length || tabs.length !== panels.length) return;
 
-    function activateTab(nextTab, shouldFocus) {
-      if (!nextTab) return;
+      function activateTab(nextTab, shouldFocus) {
+        if (!nextTab) return;
+
+        tabs.forEach(function (tab, index) {
+          var isActive = tab === nextTab;
+          tab.classList.toggle('is-active', isActive);
+          tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+          tab.setAttribute('tabindex', isActive ? '0' : '-1');
+          panels[index].classList.toggle('is-active', isActive);
+          panels[index].hidden = !isActive;
+        });
+
+        if (shouldFocus) nextTab.focus();
+      }
 
       tabs.forEach(function (tab, index) {
-        var isActive = tab === nextTab;
-        tab.classList.toggle('is-active', isActive);
-        tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
-        tab.setAttribute('tabindex', isActive ? '0' : '-1');
-        panels[index].classList.toggle('is-active', isActive);
-        panels[index].hidden = !isActive;
+        tab.addEventListener('click', function () {
+          activateTab(tab, false);
+        });
+
+        tab.addEventListener('keydown', function (event) {
+          var targetIndex = null;
+
+          if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+            targetIndex = (index + 1) % tabs.length;
+          } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+            targetIndex = (index - 1 + tabs.length) % tabs.length;
+          } else if (event.key === 'Home') {
+            targetIndex = 0;
+          } else if (event.key === 'End') {
+            targetIndex = tabs.length - 1;
+          }
+
+          if (targetIndex === null) return;
+
+          event.preventDefault();
+          activateTab(tabs[targetIndex], true);
+        });
       });
 
-      if (shouldFocus) nextTab.focus();
+      root.dataset.insideTabsReady = 'true';
     }
 
-    tabs.forEach(function (tab, index) {
-      tab.addEventListener('click', function () {
-        activateTab(tab, false);
+    function initializeAllInsideTabs(container) {
+      var scope = container || document;
+      var roots = scope.querySelectorAll('[data-inside-tabs-root]');
+      roots.forEach(function (root) {
+        initializeInsideTabs(root);
       });
+    }
 
-      tab.addEventListener('keydown', function (event) {
-        var targetIndex = null;
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        initializeAllInsideTabs(document);
+      }, { once: true });
+    } else {
+      initializeAllInsideTabs(document);
+    }
 
-        if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
-          targetIndex = (index + 1) % tabs.length;
-        } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
-          targetIndex = (index - 1 + tabs.length) % tabs.length;
-        } else if (event.key === 'Home') {
-          targetIndex = 0;
-        } else if (event.key === 'End') {
-          targetIndex = tabs.length - 1;
-        }
-
-        if (targetIndex === null) return;
-
-        event.preventDefault();
-        activateTab(tabs[targetIndex], true);
-      });
+    document.addEventListener('shopify:section:load', function (event) {
+      initializeAllInsideTabs(event.target);
     });
   })();
-</script>
+{% endjavascript %}
 
 {% stylesheet %}
   .lt-page-whats-inside-tabs {
@@ -336,11 +360,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: clamp(1rem, 3vw, 1.5rem);
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0.9));
-    border: 1px solid var(--color-border-default);
-    border-radius: var(--radius-xl);
-    box-shadow: 0 22px 36px rgba(38, 37, 30, 0.08);
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .lt-page-whats-inside-tabs__image {
@@ -348,8 +372,8 @@
     width: 100%;
     max-width: 280px;
     height: auto;
-    border-radius: calc(var(--radius-xl) - 4px);
-    box-shadow: 0 12px 24px rgba(38, 37, 30, 0.14);
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .lt-page-whats-inside-tabs__epi-list,
