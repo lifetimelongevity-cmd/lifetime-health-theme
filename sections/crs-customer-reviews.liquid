@@ -131,7 +131,7 @@
                     {%- if block.settings.verified -%}
                       <span class="cr-verified" aria-label="Verifizierter Kauf">
                         <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                          <circle cx="5.5" cy="5.5" r="5.5" fill="var(--color-success)"/>
+                          <circle cx="5.5" cy="5.5" r="5.5" fill="var(--color-teal)"/>
                           <path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                         Verifiziert
@@ -148,6 +148,15 @@
           {%- endif -%}
         {%- endfor -%}
       </ul>
+
+      {%- comment -%} ── Optional CTA ───────────────────────────────── {%- endcomment -%}
+      {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+        <div class="cr-cta-wrap">
+          <a href="{{ section.settings.cta_url }}" class="cr-cta-link">
+            {{ section.settings.cta_label | escape }}
+          </a>
+        </div>
+      {%- endif -%}
     {%- endif -%}
 
   </div>
@@ -344,8 +353,37 @@
   font-size: var(--text-micro);
   font-weight: var(--weight-medium);
   line-height: var(--leading-tight);
-  color: var(--color-success);
+  color: var(--color-teal-dark);
   white-space: nowrap;
+}
+
+/* ── CTA below track ──────────────────────────────────────── */
+.cr-cta-wrap {
+  margin-top: var(--space-6);
+  display: flex;
+  justify-content: center;
+}
+
+.cr-cta-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 14px var(--space-7);
+  border-radius: var(--radius-full);
+  border: 1px solid var(--cr-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  color: var(--cr-text);
+  text-decoration: none;
+  transition: background var(--ease-default), color var(--ease-default);
+}
+
+.cr-cta-link:hover {
+  background: var(--cr-text);
+  color: var(--color-text-on-dark);
 }
 
 .cr-verified svg {
@@ -477,6 +515,27 @@
       "id": "subheading",
       "label": "Unterüberschrift (optional)",
       "default": "__none__"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "header",
+      "content": "CTA"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button-Text",
+      "default": "Alle Bewertungen ansehen",
+      "info": "Leer lassen = kein Button."
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Button-URL",
+      "info": "Z. B. Link zur Loox-Bewertungsseite oder einem Anker."
     },
     {
       "type": "header",
