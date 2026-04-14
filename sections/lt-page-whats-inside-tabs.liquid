@@ -2,6 +2,8 @@
   assign epigenetic_blocks = section.blocks | where: 'type', 'epigenetic_item'
   assign dna_blocks = section.blocks | where: 'type', 'dna_category'
   assign ai_blocks = section.blocks | where: 'type', 'ai_question'
+  assign dna_cards_per_page = section.settings.dna_cards_per_page | default: 8
+  assign dna_total_pages = dna_blocks.size | plus: dna_cards_per_page | minus: 1 | divided_by: dna_cards_per_page
 %}
 
 <section
@@ -138,15 +140,39 @@
             </div>
 
             {%- if dna_blocks.size > 0 -%}
-              <div class="lt-page-whats-inside-tabs__dna-grid">
+              <div class="lt-page-whats-inside-tabs__dna-stack" data-dna-pagination data-page-size="{{ dna_cards_per_page }}">
+                <div class="lt-page-whats-inside-tabs__dna-grid">
                 {%- for block in dna_blocks -%}
-                  <article class="lt-page-whats-inside-tabs__dna-card" {{ block.shopify_attributes }}>
+                  <article class="lt-page-whats-inside-tabs__dna-card" data-dna-card {{ block.shopify_attributes }}>
                     <h3 class="lt-page-whats-inside-tabs__item-title">{{ block.settings.title | escape }}</h3>
                     {%- if block.settings.examples != blank -%}
                       <p class="lt-page-whats-inside-tabs__item-body">{{ block.settings.examples | escape }}</p>
                     {%- endif -%}
                   </article>
                 {%- endfor -%}
+                </div>
+
+                {%- if dna_total_pages > 1 -%}
+                  <div class="lt-page-whats-inside-tabs__pagination" role="navigation" aria-label="DNA Kategorien Seiten">
+                    <div class="lt-page-whats-inside-tabs__pagination-buttons">
+                      {%- for i in (1..dna_total_pages) -%}
+                        <button
+                          type="button"
+                          class="lt-page-whats-inside-tabs__pagination-button{% if forloop.first %} is-active{% endif %}"
+                          data-dna-page-button
+                          data-page-index="{{ forloop.index0 }}"
+                          aria-label="Seite {{ i }}"
+                          {% if forloop.first %}aria-current="page"{% endif %}
+                        >
+                          {{ i }}
+                        </button>
+                      {%- endfor -%}
+                    </div>
+                    <p class="lt-page-whats-inside-tabs__pagination-status" data-dna-page-status aria-live="polite">
+                      Seite 1 von {{ dna_total_pages }}
+                    </p>
+                  </div>
+                {%- endif -%}
               </div>
             {%- endif -%}
           </div>
@@ -241,6 +267,57 @@
 
 {% javascript %}
   (function () {
+    function initializeDnaPagination(root) {
+      if (!root) return;
+
+      var paginations = root.querySelectorAll('[data-dna-pagination]');
+      paginations.forEach(function (paginationRoot) {
+        if (paginationRoot.dataset.dnaPaginationReady === 'true') return;
+
+        var cards = Array.prototype.slice.call(paginationRoot.querySelectorAll('[data-dna-card]'));
+        if (!cards.length) return;
+
+        var pageButtons = Array.prototype.slice.call(paginationRoot.querySelectorAll('[data-dna-page-button]'));
+        var status = paginationRoot.querySelector('[data-dna-page-status]');
+        var pageSize = parseInt(paginationRoot.dataset.pageSize, 10) || cards.length;
+        var totalPages = Math.max(1, Math.ceil(cards.length / pageSize));
+
+        function setPage(pageIndex) {
+          var safePageIndex = Math.max(0, Math.min(pageIndex, totalPages - 1));
+
+          cards.forEach(function (card, index) {
+            var cardPage = Math.floor(index / pageSize);
+            card.hidden = cardPage !== safePageIndex;
+          });
+
+          pageButtons.forEach(function (button, index) {
+            var isActive = index === safePageIndex;
+            button.classList.toggle('is-active', isActive);
+            if (isActive) {
+              button.setAttribute('aria-current', 'page');
+            } else {
+              button.removeAttribute('aria-current');
+            }
+          });
+
+          if (status) {
+            status.textContent = 'Seite ' + (safePageIndex + 1) + ' von ' + totalPages;
+          }
+        }
+
+        if (pageButtons.length) {
+          pageButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+              setPage(parseInt(button.dataset.pageIndex, 10) || 0);
+            });
+          });
+        }
+
+        setPage(0);
+        paginationRoot.dataset.dnaPaginationReady = 'true';
+      });
+    }
+
     function initializeInsideTabs(root) {
       if (!root || root.dataset.insideTabsReady === 'true') return;
 
@@ -288,6 +365,7 @@
         });
       });
 
+      initializeDnaPagination(root);
       root.dataset.insideTabsReady = 'true';
     }
 
@@ -434,6 +512,59 @@
     grid-template-columns: repeat(1, minmax(0, 1fr));
     grid-auto-rows: 1fr;
     gap: var(--space-3);
+    margin-top: var(--space-7);
+  }
+
+  .lt-page-whats-inside-tabs__dna-card[hidden] {
+    display: none !important;
+  }
+
+  .lt-page-whats-inside-tabs__pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+  }
+
+  .lt-page-whats-inside-tabs__pagination-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .lt-page-whats-inside-tabs__pagination-button {
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0 0.875rem;
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, 0.82);
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: background var(--ease-default), border-color var(--ease-default), color var(--ease-default);
+  }
+
+  .lt-page-whats-inside-tabs__pagination-button.is-active {
+    background: var(--color-text-primary);
+    border-color: var(--color-text-primary);
+    color: var(--color-surface-primary);
+  }
+
+  .lt-page-whats-inside-tabs__pagination-button:focus-visible {
+    outline: 2px solid var(--color-text-primary);
+    outline-offset: 3px;
+  }
+
+  .lt-page-whats-inside-tabs__pagination-status {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    color: var(--color-text-secondary);
   }
 
   @media screen and (min-width: 720px) {
@@ -591,6 +722,15 @@
       "type": "textarea",
       "id": "dna_body",
       "label": "Text"
+    },
+    {
+      "type": "range",
+      "id": "dna_cards_per_page",
+      "label": "Karten pro Seite",
+      "min": 4,
+      "max": 12,
+      "step": 2,
+      "default": 8
     },
     {
       "type": "image_picker",
