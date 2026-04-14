@@ -123,31 +123,56 @@
         tabindex="0"
         hidden
       >
-        <div class="lt-page-whats-inside-tabs__copy lt-page-whats-inside-tabs__copy--wide">
-          <div class="crs-heading-stack crs-heading-stack--align-left">
-            {%- if section.settings.dna_kicker != blank -%}
-              <p class="crs-heading-stack__kicker">{{ section.settings.dna_kicker | escape }}</p>
+        <div class="lt-page-whats-inside-tabs__split lt-page-whats-inside-tabs__split--dna">
+          <div class="lt-page-whats-inside-tabs__copy">
+            <div class="crs-heading-stack crs-heading-stack--align-left">
+              {%- if section.settings.dna_kicker != blank -%}
+                <p class="crs-heading-stack__kicker">{{ section.settings.dna_kicker | escape }}</p>
+              {%- endif -%}
+              <div class="crs-heading-stack__pair">
+                <h2 class="crs-heading-stack__title">{{ section.settings.dna_heading | escape }}</h2>
+                {%- if section.settings.dna_body != blank -%}
+                  <p class="crs-heading-stack__subtitle">{{ section.settings.dna_body | escape }}</p>
+                {%- endif -%}
+              </div>
+            </div>
+
+            {%- if dna_blocks.size > 0 -%}
+              <div class="lt-page-whats-inside-tabs__dna-grid">
+                {%- for block in dna_blocks -%}
+                  <article class="lt-page-whats-inside-tabs__dna-card" {{ block.shopify_attributes }}>
+                    <h3 class="lt-page-whats-inside-tabs__item-title">{{ block.settings.title | escape }}</h3>
+                    {%- if block.settings.examples != blank -%}
+                      <p class="lt-page-whats-inside-tabs__item-body">{{ block.settings.examples | escape }}</p>
+                    {%- endif -%}
+                  </article>
+                {%- endfor -%}
+              </div>
             {%- endif -%}
-            <div class="crs-heading-stack__pair">
-              <h2 class="crs-heading-stack__title">{{ section.settings.dna_heading | escape }}</h2>
-              {%- if section.settings.dna_body != blank -%}
-                <p class="crs-heading-stack__subtitle">{{ section.settings.dna_body | escape }}</p>
+          </div>
+
+          <div class="lt-page-whats-inside-tabs__media">
+            <div class="lt-page-whats-inside-tabs__media-frame">
+              {%- if section.settings.dna_image != blank -%}
+                {{
+                  section.settings.dna_image
+                  | image_url: width: 900
+                  | image_tag:
+                    loading: 'lazy',
+                    class: 'lt-page-whats-inside-tabs__image',
+                    alt: section.settings.dna_image_alt | default: section.settings.dna_heading
+                }}
+              {%- elsif section.settings.dna_image_url != blank -%}
+                <img
+                  src="{{ section.settings.dna_image_url | escape }}"
+                  alt="{{ section.settings.dna_image_alt | default: section.settings.dna_heading | escape }}"
+                  loading="lazy"
+                  class="lt-page-whats-inside-tabs__image"
+                  width="420"
+                >
               {%- endif -%}
             </div>
           </div>
-
-          {%- if dna_blocks.size > 0 -%}
-            <div class="lt-page-whats-inside-tabs__dna-grid">
-              {%- for block in dna_blocks -%}
-                <article class="lt-page-whats-inside-tabs__dna-card" {{ block.shopify_attributes }}>
-                  <h3 class="lt-page-whats-inside-tabs__item-title">{{ block.settings.title | escape }}</h3>
-                  {%- if block.settings.examples != blank -%}
-                    <p class="lt-page-whats-inside-tabs__item-body">{{ block.settings.examples | escape }}</p>
-                  {%- endif -%}
-                </article>
-              {%- endfor -%}
-            </div>
-          {%- endif -%}
         </div>
       </div>
 
@@ -346,14 +371,16 @@
     .lt-page-whats-inside-tabs__split {
       grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
     }
+
+    .lt-page-whats-inside-tabs__media {
+      position: sticky;
+      top: var(--space-7);
+      align-self: start;
+    }
   }
 
   .lt-page-whats-inside-tabs__copy {
     min-width: 0;
-  }
-
-  .lt-page-whats-inside-tabs__copy--wide .crs-heading-stack {
-    margin-bottom: var(--space-7);
   }
 
   .lt-page-whats-inside-tabs__media {
@@ -392,6 +419,10 @@
   .lt-page-whats-inside-tabs__epi-item,
   .lt-page-whats-inside-tabs__dna-card,
   .lt-page-whats-inside-tabs__ai-item {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    height: 100%;
     padding: var(--space-4) var(--space-5);
     background: rgba(255, 255, 255, 0.78);
     border: 1px solid var(--color-border-default);
@@ -401,7 +432,16 @@
   .lt-page-whats-inside-tabs__dna-grid {
     display: grid;
     grid-template-columns: repeat(1, minmax(0, 1fr));
+    grid-auto-rows: 1fr;
     gap: var(--space-3);
+  }
+
+  @media screen and (min-width: 720px) {
+    .lt-page-whats-inside-tabs__epi-list,
+    .lt-page-whats-inside-tabs__ai-list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: 1fr;
+    }
   }
 
   @media screen and (min-width: 720px) {
@@ -551,6 +591,21 @@
       "type": "textarea",
       "id": "dna_body",
       "label": "Text"
+    },
+    {
+      "type": "image_picker",
+      "id": "dna_image",
+      "label": "Bild"
+    },
+    {
+      "type": "url",
+      "id": "dna_image_url",
+      "label": "Bild-URL"
+    },
+    {
+      "type": "text",
+      "id": "dna_image_alt",
+      "label": "Bild Alt-Text"
     },
     {
       "type": "header",
