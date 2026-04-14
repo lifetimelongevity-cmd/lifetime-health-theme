@@ -81,12 +81,43 @@
               {%- endif -%}
 
               {%- comment -%} Result metric — the key conversion element {%- endcomment -%}
+              {%- comment -%} Protocol tags — what they did (no retest timing here) {%- endcomment -%}
+              {%- if block.settings.protocol_label != blank -%}
+                {%- assign sp_protocol_parts = block.settings.protocol_label | split: '·' -%}
+                <div class="sp__protocol" aria-label="Longevity Protokoll">
+                  {%- for part in sp_protocol_parts -%}
+                    {%- assign sp_part_trimmed = part | strip -%}
+                    {%- if sp_part_trimmed != blank -%}
+                      <span class="sp__protocol-tag">{{ sp_part_trimmed | escape }}</span>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </div>
+              {%- endif -%}
+
+              {%- comment -%} Before → After result — retest outcome {%- endcomment -%}
               {%- if block.settings.result_metric != blank -%}
-                <div class="sp__result-metric" aria-label="Messergebnis">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-                  </svg>
-                  {{ block.settings.result_metric | escape }}
+                <div class="sp__before-after" aria-label="Vorher-Nachher Ergebnis">
+                  <div class="sp__ba-col sp__ba-col--before">
+                    <span class="sp__ba-label">Vorher</span>
+                    <span class="sp__ba-value">{{ block.settings.result_metric | escape }}</span>
+                  </div>
+                  {%- if block.settings.retest_result != blank -%}
+                    <div class="sp__ba-arrow" aria-hidden="true">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                    <div class="sp__ba-col sp__ba-col--after">
+                      <span class="sp__ba-label">
+                        {%- if block.settings.retest_duration != blank -%}
+                          {{ block.settings.retest_duration | escape }}
+                        {%- else -%}
+                          Nachher
+                        {%- endif -%}
+                      </span>
+                      <span class="sp__ba-value sp__ba-value--after">{{ block.settings.retest_result | escape }}</span>
+                    </div>
+                  {%- endif -%}
                 </div>
               {%- endif -%}
 
@@ -258,28 +289,86 @@
   margin: 0;
 }
 
-/* Result metric — the quality move
-   This pill is the single most important conversion element on the card.
-   It visualises the concrete outcome, making the abstract product real.
+/* Before → After result block
+   Quality move: shows the concrete transformation, not just an initial metric.
+   Vorher (muted) + arrow (teal) + Nachher (teal, bold) = readable at a glance.
 */
-.sp__result-metric {
-  display: inline-flex;
+.sp__before-after {
+  display: flex;
   align-items: center;
-  gap: var(--space-2);
-  background: var(--color-surface-secondary);
+  gap: var(--space-3);
+  background: var(--color-surface-primary);
   border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-sm);
-  padding: var(--space-2) var(--space-3);
-  font-family: var(--font-body);
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-medium);
-  color: var(--color-text-secondary);
-  line-height: 1;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
 }
 
-.sp__result-metric svg {
-  flex-shrink: 0;
+.sp__ba-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px; /* intentional: very tight label-value stack */
+  min-width: 0;
+  flex: 1;
+}
+
+.sp__ba-col--after {
+  text-align: right;
+}
+
+.sp__ba-label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
   color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.sp__ba-value {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-secondary);
+}
+
+.sp__ba-value--after {
+  color: var(--color-teal-dark);
+}
+
+.sp__ba-arrow {
+  flex-shrink: 0;
+  color: var(--color-teal);
+  display: flex;
+  align-items: center;
+}
+
+/* Protocol label — row of pill tags split by · separator
+   Each part becomes an individual outlined chip.
+   First tag (always "Longevity Protokoll") carries teal accent to anchor the row.
+*/
+.sp__protocol {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+}
+
+.sp__protocol-tag {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  color: var(--color-teal-dark);
+  background: var(--color-benefit-bg);
+  border: 1px solid rgba(74, 140, 133, 0.2); /* --color-teal-dark at 20% */
+  border-radius: var(--radius-full);
+  padding: 3px var(--space-3); /* intentional: between --space-1/--space-2, tighter pill */
+  white-space: nowrap;
 }
 
 /* Author */
@@ -567,8 +656,26 @@
         {
           "type": "text",
           "id": "result_metric",
-          "label": "Messergebnis",
-          "info": "z.B. Biologisches Alter: 37 · Chronologisch: 44"
+          "label": "Ergebnis Ersttest (Vorher)",
+          "info": "Kurzform, z. B. «Bio-Alter: 64 Jahre»"
+        },
+        {
+          "type": "text",
+          "id": "retest_result",
+          "label": "Ergebnis Retest (Nachher)",
+          "info": "Kurzform, z. B. «Bio-Alter: 60 Jahre». Leer = kein Vorher→Nachher."
+        },
+        {
+          "type": "text",
+          "id": "retest_duration",
+          "label": "Zeitraum Retest",
+          "info": "z. B. «nach 16 Monaten». Erscheint als Label über dem Nachher-Wert."
+        },
+        {
+          "type": "text",
+          "id": "protocol_label",
+          "label": "Longevity Protokoll (optional)",
+          "info": "Einträge mit · trennen, z. B. «Longevity Protokoll · NAD⁺ Level erhöhen · Ernährung · Schlaf · Retest nach 12 Monaten». Jeder Teil wird als eigener Tag angezeigt."
         },
         {
           "type": "checkbox",
