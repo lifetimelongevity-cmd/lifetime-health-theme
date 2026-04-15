@@ -15,12 +15,14 @@
 >
 
   {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
-    <div class="cg-header">
-      {%- if section.settings.heading != blank -%}
-        <h2 class="cg-heading">{{ section.settings.heading | escape }}</h2>
-      {%- endif -%}
+    <div class="cg-header crs-heading-stack crs-heading-stack--align-left">
       {%- if section.settings.subheading != blank -%}
-        <p class="cg-subheading">{{ section.settings.subheading | escape }}</p>
+        <p class="crs-heading-stack__kicker">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.heading != blank -%}
+        <div class="crs-heading-stack__pair">
+          <h2 class="cg-heading crs-heading-stack__title">{{ section.settings.heading | escape }}</h2>
+        </div>
       {%- endif -%}
     </div>
   {%- endif -%}
@@ -158,28 +160,21 @@
 
   /* ---- Header ---- */
   .section-{{ section.id }}-cg .cg-header {
-    border-top: 1px solid currentColor;
-    padding-top: 2rem;
-    margin-bottom: 1.5rem;
+    border-top: 1px solid var(--color-border-default);
+    padding-top: var(--space-6);
+    margin-bottom: var(--space-5);
+  }
+
+  @media (max-width: 749px) {
+    .section-{{ section.id }}-cg .cg-header {
+      padding-top: var(--space-5);
+      margin-bottom: var(--space-4);
+    }
   }
 
   .section-{{ section.id }}-cg .cg-heading {
-    margin: 0 0 0.25rem;
-    font-family: var(--font-heading-family);
-    font-weight: var(--font-heading-weight);
-    font-style: var(--font-heading-style);
-    font-size: {{ section.settings.heading_size }}px;
-    line-height: var(--line-height-heading, 1.1);
-    letter-spacing: var(--letter-spacing-heading, 0);
-  }
-
-  .section-{{ section.id }}-cg .cg-subheading {
     margin: 0;
-    font-family: var(--font-body-family);
-    font-weight: var(--font-body-weight);
-    font-style: var(--font-body-style);
-    font-size: calc(var(--font-body-size, 1rem) * 0.875);
-    opacity: 0.85;
+    font-size: {{ section.settings.heading_size }}px;
   }
 
   /* Equalize row heights for all cards */
@@ -194,10 +189,16 @@
     flex-direction: column;
     justify-content: space-between;
     overflow: hidden;
-    padding: 1.75rem 0.5rem 0;
+    padding: var(--space-7) var(--space-2) 0;
     text-align: center;
     text-decoration: none;
     color: inherit;
+  }
+
+  @media (max-width: 749px) {
+    .section-{{ section.id }}-cg .cg-card {
+      padding: var(--space-6) var(--space-3) 0;
+    }
   }
 
   /* ---- Card – background-image mode ---- */
@@ -217,7 +218,7 @@
     object-fit: cover;
     object-position: center;
     display: block;
-    transition: transform 0.35s ease;
+    transition: transform var(--ease-smooth);
   }
 
   .section-{{ section.id }}-cg .cg-card--bg:hover .cg-card__bg-image {
@@ -228,7 +229,7 @@
   .section-{{ section.id }}-cg .cg-card__overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.1) 55%, transparent 100%);
+    background: linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.1) 55%, transparent 100%);
     pointer-events: none;
   }
 
@@ -236,18 +237,18 @@
   .section-{{ section.id }}-cg .cg-card--bg .cg-card__body {
     position: relative;
     z-index: 1;
-    padding: 1.25rem 1.25rem 1.5rem;
+    padding: var(--space-5) var(--space-5) var(--space-6);
     margin-bottom: 0;
   }
 
   /* ---- Badge ---- */
   .section-{{ section.id }}-cg .cg-badge {
     position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
+    top: var(--space-2);
+    right: var(--space-2);
     z-index: 2;
-    background: #fff;
-    padding: 0.15rem 0.35rem;
+    background: var(--color-surface-primary);
+    padding: 0.15rem var(--space-2);
     font-family: var(--font-body-family);
     font-weight: var(--font-body-weight);
     font-style: var(--font-body-style);
@@ -256,26 +257,26 @@
     text-transform: uppercase;
     line-height: 1.4;
     white-space: nowrap;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
   }
 
   @media (min-width: 750px) {
     .section-{{ section.id }}-cg .cg-badge {
       font-size: calc(var(--font-body-size, 1rem) * 0.7);
-      padding: 0.25rem 0.5rem;
-      top: 0.7rem;
-      right: 0.7rem;
+      padding: var(--space-1) var(--space-2);
+      top: var(--space-3);
+      right: var(--space-3);
     }
   }
 
   /* ---- Card body ---- */
   .section-{{ section.id }}-cg .cg-card__body {
-    margin-bottom: 0.75rem;
+    margin-bottom: var(--space-3);
   }
 
   @media (min-width: 750px) {
     .section-{{ section.id }}-cg .cg-card__body {
-      margin-bottom: 2rem;
+      margin-bottom: var(--space-6);
     }
 
     .section-{{ section.id }}-cg .cg-card--bg .cg-card__body {
@@ -284,13 +285,19 @@
   }
 
   .section-{{ section.id }}-cg .cg-card__title {
-    margin: 0 0 0.25rem;
+    margin: 0 0 var(--space-1);
     font-family: var(--font-heading-family);
     font-weight: var(--font-heading-weight);
     font-style: var(--font-heading-style);
     font-size: calc(var(--font-body-size, 1rem) * 1.1);
     line-height: var(--line-height-heading, 1.1);
     letter-spacing: var(--letter-spacing-heading, 0);
+  }
+
+  @media (max-width: 749px) {
+    .section-{{ section.id }}-cg .cg-card__title {
+      font-size: calc(var(--font-body-size, 1rem) * 1.05);
+    }
   }
 
   @media (min-width: 750px) {
@@ -300,12 +307,19 @@
   }
 
   .section-{{ section.id }}-cg .cg-card__subline {
-    margin: 0 0 0.4rem;
+    margin: 0 0 var(--space-2);
     font-family: var(--font-body-family);
     font-weight: var(--font-body-weight);
     font-style: var(--font-body-style);
     font-size: calc(var(--font-body-size, 1rem) * 0.9);
-    line-height: 1.2;
+    line-height: var(--leading-body);
+  }
+
+  @media (max-width: 749px) {
+    .section-{{ section.id }}-cg .cg-card__subline {
+      font-size: calc(var(--font-body-size, 1rem) * 0.82);
+      margin-bottom: var(--space-1);
+    }
   }
 
   .section-{{ section.id }}-cg .cg-card__price {
@@ -319,22 +333,22 @@
 
   .section-{{ section.id }}-cg .cg-card__price s {
     text-decoration: line-through;
-    margin-left: 0.2rem;
+    margin-left: var(--space-1);
   }
 
   /* ---- CTA Button ---- */
   .section-{{ section.id }}-cg .cg-card__btn {
     display: inline-block;
-    margin-top: 0.9rem;
+    margin-top: var(--space-4);
     padding: 0.55em 1.2em;
     font-family: var(--font-body-family);
     font-weight: var(--font-body-weight);
     font-style: var(--font-body-style);
     font-size: calc(var(--font-body-size, 1rem) * 0.85);
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
     line-height: 1.2;
     border-radius: {{ section.settings.card_border_radius }}px;
-    transition: opacity 0.15s ease;
+    transition: opacity var(--ease-default);
   }
 
   .section-{{ section.id }}-cg .cg-card:hover .cg-card__btn {
@@ -350,6 +364,13 @@
     align-items: flex-end;
     overflow: hidden;
     flex-shrink: 0;
+  }
+
+  @media (max-width: 749px) {
+    .section-{{ section.id }}-cg .cg-card__image-wrap {
+      height: clamp(130px, 42vw, {{ section.settings.card_image_height }}px);
+      max-height: clamp(130px, 42vw, {{ section.settings.card_image_height }}px);
+    }
   }
 
   .section-{{ section.id }}-cg .cg-card__image {
