@@ -69,21 +69,7 @@
                 </blockquote>
               {%- endif -%}
 
-              {%- comment -%} 2 — Protocol tags: label + gray pills {%- endcomment -%}
-              {%- if block.settings.protocol_label != blank -%}
-                {%- assign sp_protocol_parts = block.settings.protocol_label | split: '·' -%}
-                <div class="sp__protocol" aria-label="Longevity Protokoll">
-                  <span class="sp__protocol-label">Protokoll:</span>
-                  {%- for part in sp_protocol_parts -%}
-                    {%- assign sp_part_trimmed = part | strip -%}
-                    {%- if sp_part_trimmed != blank -%}
-                      <span class="sp__protocol-tag">{{ sp_part_trimmed | escape }}</span>
-                    {%- endif -%}
-                  {%- endfor -%}
-                </div>
-              {%- endif -%}
-
-              {%- comment -%} 3 — Before → After: the retest result {%- endcomment -%}
+              {%- comment -%} 2 — Before / After: the retest result {%- endcomment -%}
               {%- if block.settings.result_metric != blank -%}
                 <div class="sp__before-after" aria-label="Vorher-Nachher Ergebnis">
                   <div class="sp__ba-col sp__ba-col--before">
@@ -91,19 +77,8 @@
                     <span class="sp__ba-value">{{ block.settings.result_metric | escape }}</span>
                   </div>
                   {%- if block.settings.retest_result != blank -%}
-                    <div class="sp__ba-arrow" aria-hidden="true">
-                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                    </div>
                     <div class="sp__ba-col sp__ba-col--after">
-                      <span class="sp__ba-label">
-                        {%- if block.settings.retest_duration != blank -%}
-                          {{ block.settings.retest_duration | escape }}
-                        {%- else -%}
-                          Nachher
-                        {%- endif -%}
-                      </span>
+                      <span class="sp__ba-label">Nachher</span>
                       <span class="sp__ba-value sp__ba-value--after">{{ block.settings.retest_result | escape }}</span>
                     </div>
                   {%- endif -%}
@@ -278,18 +253,16 @@
   margin: 0;
 }
 
-/* Before → After result block
-   Quality move: shows the concrete transformation, not just an initial metric.
-   Vorher (muted) + arrow (teal) + Nachher (teal, bold) = readable at a glance.
+/* Before / After result block
+   Two-column layout separated by a hairline border.
+   Vorher (muted) | Nachher (teal, bold) — readable at a glance.
 */
 .sp__before-after {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
   background: var(--color-surface-primary);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
+  overflow: hidden;
 }
 
 .sp__ba-col {
@@ -298,6 +271,11 @@
   gap: 3px; /* intentional: very tight label-value stack */
   min-width: 0;
   flex: 1;
+  padding: var(--space-3) var(--space-4);
+}
+
+.sp__ba-col--before {
+  border-right: 1px solid var(--color-border-default);
 }
 
 .sp__ba-col--after {
@@ -312,62 +290,20 @@
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  white-space: nowrap;
 }
 
 .sp__ba-value {
   font-family: var(--font-body);
-  font-size: var(--text-micro);
+  font-size: var(--text-body-sm);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-tight);
   color: var(--color-text-secondary);
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .sp__ba-value--after {
-  color: var(--color-teal-dark);
-}
-
-.sp__ba-arrow {
-  flex-shrink: 0;
-  color: var(--color-teal);
-  display: flex;
-  align-items: center;
-}
-
-/* Protocol row — "Protokoll:" label + gray pill tags split by · separator */
-.sp__protocol {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-  align-items: center;
-}
-
-.sp__protocol-label {
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-tight);
-  color: var(--color-text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  white-space: nowrap;
-  margin-right: var(--space-1);
-  flex-shrink: 0;
-}
-
-.sp__protocol-tag {
-  display: inline-flex;
-  align-items: center;
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-medium);
-  line-height: var(--leading-tight);
-  color: var(--color-text-secondary);
-  background: var(--color-surface-secondary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-full);
-  padding: 3px var(--space-3); /* intentional: between --space-1/--space-2, tighter pill */
-  white-space: nowrap;
+  color: var(--color-text-primary);
 }
 
 /* Author footer — name left, verified badge right */
@@ -405,7 +341,7 @@
   font-family: var(--font-body);
   font-size: var(--text-micro);
   font-weight: var(--weight-medium);
-  color: var(--color-teal-dark);
+  color: var(--color-text-secondary);
   line-height: 1;
   white-space: nowrap;
 }
