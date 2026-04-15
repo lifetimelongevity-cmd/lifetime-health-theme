@@ -1,26 +1,43 @@
 /* ============================================================
    LIFETIME — Longevity Quiz Section
    section-lt-longevity-quiz.css
-   All values via design tokens from docs/design-governance.md §3
+
+   §12 Build Spec:
+   - Surface:        --color-surface-secondary (warm, alternating rhythm)
+   - Dominant:       question heading (--text-h2) / profile title (--text-h2)
+   - Heading font:   --font-heading for all titles ≥ --text-h3
+   - Body font:      --font-body for all labels, descriptions, answers
+   - Section pad:    --space-9 desktop / --space-8 mobile (standard section)
+   - Quality move:   primary product card horizontal split (image + body side
+                     by side) creates premium editorial feel vs. stacked cards
    ============================================================ */
 
 /* ── Section wrapper ─────────────────────────────────────── */
 
 .lt-quiz {
   background-color: var(--color-surface-secondary);
-  padding: var(--space-10) var(--space-5);
+  padding: var(--space-9) 0;
 }
 
 .lt-quiz__container {
   max-width: 720px;
   margin: 0 auto;
+  padding: 0 var(--space-5);
 }
 
 /* ── Header ──────────────────────────────────────────────── */
 
 .lt-quiz__header {
   text-align: center;
-  margin-bottom: var(--space-8);
+  margin-bottom: var(--space-6);
+}
+
+.lt-quiz__title-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 640px;
+  margin: 0 auto;
 }
 
 .lt-quiz__label {
@@ -29,7 +46,7 @@
   font-weight: var(--weight-semibold);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--color-text-accent);
+  color: var(--color-text-muted);
   margin: 0 0 var(--space-3);
 }
 
@@ -39,15 +56,17 @@
   font-weight: var(--weight-bold);
   line-height: var(--leading-heading);
   color: var(--color-text-primary);
-  margin: 0 0 var(--space-3);
+  margin: 0;
 }
 
 .lt-quiz__subtitle {
-  font-family: var(--font-body);
-  font-size: var(--text-body-lg);
-  color: var(--color-text-secondary);
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+  opacity: 0.62;
   margin: 0;
-  line-height: var(--leading-body);
 }
 
 /* ── Progress ────────────────────────────────────────────── */
@@ -55,7 +74,7 @@
 .lt-quiz__progress {
   background-color: var(--color-gray-200);
   border-radius: var(--radius-full);
-  height: 4px;
+  height: 3px;
   overflow: hidden;
   margin-bottom: var(--space-3);
 }
@@ -73,7 +92,7 @@
   font-size: var(--text-body-sm);
   color: var(--color-text-muted);
   text-align: right;
-  margin: 0 0 var(--space-7);
+  margin: 0 0 var(--space-6);
 }
 
 /* ── Question step ───────────────────────────────────────── */
@@ -83,15 +102,24 @@
 }
 
 @keyframes lt-quiz-fadein {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-.lt-quiz__question-emoji {
-  font-size: 2.5rem;
-  text-align: center;
-  margin: 0 0 var(--space-4);
-  line-height: 1;
+.lt-quiz__question-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  background-color: var(--color-surface-benefit);
+  border-radius: var(--radius-full);
+  margin: 0 auto var(--space-4);
+  color: var(--color-teal-dark);
+}
+
+.lt-quiz__question-icon svg {
+  display: block;
 }
 
 .lt-quiz__question {
@@ -101,7 +129,7 @@
   line-height: var(--leading-heading);
   color: var(--color-text-primary);
   text-align: center;
-  margin: 0 0 var(--space-7);
+  margin: 0 0 var(--space-6);
 }
 
 /* ── Answer options ──────────────────────────────────────── */
@@ -150,7 +178,6 @@
   opacity: 1;
 }
 
-/* Custom radio circle */
 .lt-quiz__answer-check {
   flex-shrink: 0;
   width: 20px;
@@ -194,7 +221,7 @@
 .lt-quiz__results-inner {
   display: flex;
   flex-direction: column;
-  gap: var(--space-7);
+  gap: var(--space-6);
 }
 
 /* Profile card */
@@ -217,26 +244,45 @@
 }
 
 .lt-quiz__profile-icon-wrap {
-  font-size: 3rem;
-  line-height: 1;
-  margin: 0 0 var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  background-color: rgba(101, 192, 182, 0.15); /* teal at low opacity on dark */
+  border-radius: var(--radius-full);
+  margin: 0 auto var(--space-4);
+  color: var(--color-teal);
+}
+
+.lt-quiz__profile-icon-wrap svg {
+  display: block;
 }
 
 .lt-quiz__profile-title {
   font-family: var(--font-heading);
   font-size: var(--text-h2);
   font-weight: var(--weight-bold);
-  color: var(--color-text-on-dark);
-  margin: 0 0 var(--space-3);
   line-height: var(--leading-heading);
+  color: var(--color-text-on-dark);
+  margin: 0;
 }
 
 .lt-quiz__profile-headline {
-  font-family: var(--font-body);
-  font-size: var(--text-body-lg);
-  font-weight: var(--weight-semibold);
-  color: var(--color-teal);
-  margin: 0 0 var(--space-4);
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-on-dark);
+  opacity: 0.7;
+  margin: 0;
+}
+
+.lt-quiz__profile-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
 }
 
 .lt-quiz__profile-description {
@@ -244,42 +290,35 @@
   font-size: var(--text-body);
   color: var(--color-text-on-dark-muted);
   line-height: var(--leading-relaxed);
-  margin: 0;
+  margin: 0 auto;
   max-width: 520px;
-  margin-left: auto;
-  margin-right: auto;
 }
 
-/* Plan header */
-.lt-quiz__plan-header {
-  text-align: center;
+/* ── Plan sections ───────────────────────────────────────── */
+
+.lt-quiz__plan-section,
+.lt-quiz__secondary-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
-.lt-quiz__plan-label {
-  font-family: var(--font-heading);
-  font-size: var(--text-h3);
-  font-weight: var(--weight-bold);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--space-2);
-}
-
-.lt-quiz__plan-sub {
+.lt-quiz__plan-label,
+.lt-quiz__secondary-label {
   font-family: var(--font-body);
-  font-size: var(--text-body-sm);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: var(--color-text-muted);
   margin: 0;
 }
 
-/* Product cards */
-.lt-quiz__products {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-5);
-}
+/* ── Primäre Produktkarte ────────────────────────────────── */
 
-.lt-quiz__product {
+.lt-quiz__product-primary {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   background-color: var(--color-surface-primary);
   border: 1.5px solid var(--color-border-default);
   border-radius: var(--radius-lg);
@@ -291,63 +330,152 @@
     border-color var(--ease-default);
 }
 
-.lt-quiz__product:hover {
+.lt-quiz__product-primary:hover {
   box-shadow: var(--shadow-md);
   border-color: var(--color-teal);
 }
 
-.lt-quiz__product--placeholder {
-  cursor: default;
-  opacity: 0.6;
+.lt-quiz__product-primary-image-wrap {
+  flex-shrink: 0;
+  width: 180px;
+  background-color: var(--color-surface-tertiary);
+  overflow: hidden;
 }
 
-.lt-quiz__product-image-wrap {
+.lt-quiz__product-primary-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lt-quiz__product-primary-body {
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  justify-content: center;
+}
+
+.lt-quiz__product-primary-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.lt-quiz__product-primary-reason {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--leading-body);
+  margin: 0;
+}
+
+.lt-quiz__product-primary-price {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.lt-quiz__product-primary-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 14px var(--space-6);
+  background-color: var(--color-button-primary-bg);
+  color: var(--color-button-primary-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  border-radius: var(--radius-full);
+  text-decoration: none;
+  margin-top: var(--space-2);
+  align-self: flex-start;
+  transition: opacity var(--ease-default);
+}
+
+.lt-quiz__product-primary:hover .lt-quiz__product-primary-cta {
+  opacity: 0.85;
+}
+
+/* ── Sekundäre Produktkarten ─────────────────────────────── */
+
+.lt-quiz__secondary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4);
+}
+
+.lt-quiz__product-secondary {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface-primary);
+  border: 1.5px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  transition:
+    box-shadow var(--ease-default),
+    border-color var(--ease-default);
+  opacity: 0.85;
+}
+
+.lt-quiz__product-secondary:hover {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--color-gray-400);
+  opacity: 1;
+}
+
+.lt-quiz__product-secondary-image-wrap {
   width: 100%;
   aspect-ratio: 4 / 3;
   overflow: hidden;
   background-color: var(--color-surface-tertiary);
 }
 
-.lt-quiz__product-image {
+.lt-quiz__product-secondary-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  border-radius: 0;
 }
 
-.lt-quiz__product-body {
-  padding: var(--space-5);
-  flex: 1;
+.lt-quiz__product-secondary-body {
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
 }
 
-.lt-quiz__product-step {
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-semibold);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-accent);
-  margin: 0;
-}
-
-.lt-quiz__product-title {
+.lt-quiz__product-secondary-title {
   font-family: var(--font-heading);
-  font-size: var(--text-body-lg);
-  font-weight: var(--weight-bold);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
   color: var(--color-text-primary);
   margin: 0;
-  line-height: var(--leading-tight);
 }
 
-.lt-quiz__product-price {
+.lt-quiz__product-secondary-price {
   font-family: var(--font-body);
-  font-size: var(--text-body);
-  color: var(--color-text-secondary);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
   margin: 0;
+}
+
+/* ── Placeholder ─────────────────────────────────────────── */
+
+.lt-quiz__product--placeholder {
+  cursor: default;
+  opacity: 0.45;
+  padding: var(--space-5);
 }
 
 .lt-quiz__product-hint {
@@ -357,18 +485,11 @@
   margin: 0;
 }
 
-.lt-quiz__product-cta {
-  font-family: var(--font-body);
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-semibold);
-  color: var(--color-teal-dark);
-  margin-top: auto;
-  padding-top: var(--space-3);
-}
+/* ── Restart ─────────────────────────────────────────────── */
 
-/* Restart */
 .lt-quiz__restart-wrap {
   text-align: center;
+  padding-top: var(--space-2);
 }
 
 .lt-quiz__restart {
@@ -392,10 +513,18 @@
 
 @media (max-width: 640px) {
   .lt-quiz {
-    padding: var(--space-9) var(--space-4);
+    padding: var(--space-8) 0;
+  }
+
+  .lt-quiz__container {
+    padding: 0 var(--space-4);
   }
 
   .lt-quiz__title {
+    font-size: var(--text-h2);
+  }
+
+  .lt-quiz__subtitle {
     font-size: var(--text-h2);
   }
 
@@ -404,10 +533,19 @@
   }
 
   .lt-quiz__profile-card {
-    padding: var(--space-7) var(--space-5);
+    padding: var(--space-6) var(--space-5);
   }
 
-  .lt-quiz__products {
-    grid-template-columns: 1fr;
+  .lt-quiz__product-primary {
+    flex-direction: column;
+  }
+
+  .lt-quiz__product-primary-image-wrap {
+    width: 100%;
+    height: 200px;
+  }
+
+  .lt-quiz__secondary-grid {
+    grid-template-columns: 1fr 1fr;
   }
 }

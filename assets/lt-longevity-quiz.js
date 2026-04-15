@@ -1,18 +1,35 @@
 /**
  * LIFETIME — Longevity Quiz
  * Vanilla JS, no framework. Self-contained.
- * 6 Fragen → 4 Profile → Produktempfehlungen
+ *
+ * Finale Empfehlungsmatrix:
+ *   Energie      → NMN (primär) | Kreatin | TMG
+ *   Fokus        → Kreatin (primär) | Fisetin | Trans-Resveratrol
+ *   Schlaf       → Schlafspray (primär) | Spermidin | Kreatin
+ *   Langlebigkeit → NMN (primär) | Trans-Resveratrol | CaAKG
  */
 
 (function () {
   'use strict';
 
-  // ─── Quiz-Daten ──────────────────────────────────────────────────────────────
+  // ─── SVG Icon Library (Lucide-style, 24×24, stroke) ─────────────────────────
+
+  const ICONS = {
+    target: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+    moon:   `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
+    zap:    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+    brain:  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>`,
+    leaf:   `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 22 16 8"/><path d="M3.47 12.53A5 5 0 0 0 5 22a5 5 0 0 0 5-5 5 5 0 0 0-5.5-4.97"/><path d="M21 3a8 8 0 0 0-8 8 5 5 0 0 0 5 5 8 8 0 0 0 8-8 5 5 0 0 0-5-5z"/></svg>`,
+    wind:   `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>`,
+    scope:  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/></svg>`,
+  };
+
+  // ─── Quiz-Fragen ─────────────────────────────────────────────────────────────
 
   const QUESTIONS = [
     {
       id: 'ziel',
-      emoji: '🎯',
+      icon: ICONS.target,
       question: 'Was ist dein wichtigstes Gesundheitsziel?',
       answers: [
         { text: 'Mehr Energie & Vitalität im Alltag', scores: { energie: 3 } },
@@ -23,7 +40,7 @@
     },
     {
       id: 'schlaf',
-      emoji: '🌙',
+      icon: ICONS.moon,
       question: 'Wie erholsam ist dein Schlaf?',
       answers: [
         { text: 'Tief und erholt – ich fühle mich morgens fit', scores: { langlebigkeit: 1 } },
@@ -34,7 +51,7 @@
     },
     {
       id: 'energie',
-      emoji: '⚡',
+      icon: ICONS.zap,
       question: 'Wie ist dein Energieniveau tagsüber?',
       answers: [
         { text: 'Konstant hoch – keine Einbrüche', scores: { langlebigkeit: 1 } },
@@ -45,7 +62,7 @@
     },
     {
       id: 'fokus',
-      emoji: '🧠',
+      icon: ICONS.brain,
       question: 'Wie ist deine mentale Schärfe & Konzentration?',
       answers: [
         { text: 'Ich bin den ganzen Tag fokussiert und klar', scores: { langlebigkeit: 1 } },
@@ -56,7 +73,7 @@
     },
     {
       id: 'ernaehrung',
-      emoji: '🥗',
+      icon: ICONS.leaf,
       question: 'Wie würdest du deine Ernährung beschreiben?',
       answers: [
         { text: 'Sehr ausgewogen – viel Gemüse, gute Proteine', scores: { langlebigkeit: 2 } },
@@ -67,7 +84,7 @@
     },
     {
       id: 'stress',
-      emoji: '🧘',
+      icon: ICONS.wind,
       question: 'Wie hoch ist dein Stresslevel im Alltag?',
       answers: [
         { text: 'Niedrig – ich fühle mich ausgeglichen', scores: { langlebigkeit: 1 } },
@@ -78,53 +95,67 @@
     },
   ];
 
+  // ─── Profile & Empfehlungsmatrix ──────────────────────────────────────────────
+
   const PROFILES = {
     energie: {
-      icon: '⚡',
+      icon: ICONS.zap,
       label: 'Dein Longevity-Profil',
       title: 'Energie & Vitalität',
       headline: 'Dein Fokus: Mehr Energie im Alltag',
       description:
-        'Deine Antworten zeigen, dass dein Körper gezielte Unterstützung bei der Energieproduktion braucht. Viele Menschen spüren nach 30 bereits erste Einbußen – das ist biologisch normal, aber nicht unausweichlich. Dein Plan kombiniert die Analyse deiner genetischen Voraussetzungen mit gezielter Supplementierung.',
-      step1: 'Schritt 1 – Deine Basis verstehen',
-      step2: 'Schritt 2 – Gezielt unterstützen',
+        'Deine Antworten zeigen, dass dein Körper gezielte Unterstützung bei der zellulären Energieproduktion braucht. Mit dem richtigen Plan kannst du Energieeinbrüche reduzieren und dein Vitalitätslevel langfristig stabilisieren.',
+      primary: {
+        key: 'energie_primary',
+        reason: 'Dein NAD⁺-Spiegel sinkt mit dem Alter – NMN unterstützt die Energieproduktion direkt in deinen Mitochondrien.',
+      },
+      secondary: ['energie_sec1', 'energie_sec2'],
     },
     fokus: {
-      icon: '🧠',
+      icon: ICONS.brain,
       label: 'Dein Longevity-Profil',
       title: 'Fokus & Klarheit',
       headline: 'Dein Fokus: Mentale Schärfe & Klarheit',
       description:
-        'Deine Antworten deuten auf einen klaren Bedarf an kognitiver Unterstützung hin. Konzentration, Gedächtnis und mentale Energie sind eng mit deinem Nährstoffhaushalt verknüpft. Dein Plan setzt auf eine genaue Analyse und die richtigen Nährstoffe für dein Gehirn.',
-      step1: 'Schritt 1 – Deine Basis verstehen',
-      step2: 'Schritt 2 – Gehirn gezielt unterstützen',
+        'Deine Antworten deuten auf einen klaren Bedarf an kognitiver Unterstützung hin. Konzentration, Gedächtnis und mentale Energie hängen eng mit deinem Nährstoffhaushalt zusammen – und lassen sich gezielt beeinflussen.',
+      primary: {
+        key: 'fokus_primary',
+        reason: 'Kreatin versorgt dein Gehirn mit schnell verfügbarer Energie – besonders bei mentalem Stress und Erschöpfung gut belegt.',
+      },
+      secondary: ['fokus_sec1', 'fokus_sec2'],
     },
     schlaf: {
-      icon: '🌙',
+      icon: ICONS.moon,
       label: 'Dein Longevity-Profil',
       title: 'Schlaf & Regeneration',
       headline: 'Dein Fokus: Tieferer Schlaf & Erholung',
       description:
         'Guter Schlaf ist die Basis für alles – Energie, Fokus, Immunsystem und Langlebigkeit. Deine Antworten zeigen, dass hier der größte Hebel liegt. Dein Plan zielt direkt auf Schlafqualität und nächtliche Regeneration ab.',
-      step1: 'Schritt 1 – Deine Basis verstehen',
-      step2: 'Schritt 2 – Regeneration optimieren',
+      primary: {
+        key: 'schlaf_primary',
+        reason: 'Melatonin ist der am besten belegte Weg zur Verbesserung von Einschlafzeit und Schlaftiefe – direkt und alltagstauglich.',
+      },
+      secondary: ['schlaf_sec1', 'schlaf_sec2'],
     },
     langlebigkeit: {
-      icon: '🔬',
+      icon: ICONS.scope,
       label: 'Dein Longevity-Profil',
       title: 'Langlebigkeit & Zellgesundheit',
       headline: 'Dein Fokus: Biologisches Alter aktiv gestalten',
       description:
         'Du bist bereits auf einem guten Weg. Dein Plan zielt darauf ab, diesen Zustand langfristig zu erhalten und biologisches Altern aktiv zu verlangsamen – auf zellulärer Ebene, mit wissenschaftlicher Grundlage.',
-      step1: 'Schritt 1 – Deine genetische Basis kennen',
-      step2: 'Schritt 2 – Zellgesundheit langfristig sichern',
+      primary: {
+        key: 'lang_primary',
+        reason: 'NMN ist der am besten untersuchte NAD⁺-Baustein – zentral für Zellreparatur und die Verlangsamung biologischer Alterungsprozesse.',
+      },
+      secondary: ['lang_sec1', 'lang_sec2'],
     },
   };
 
   // ─── State ───────────────────────────────────────────────────────────────────
 
   let currentStep = 0;
-  let answers = []; // { questionIndex, answerIndex, scores }
+  let answers = [];
 
   // ─── DOM-Referenzen ──────────────────────────────────────────────────────────
 
@@ -152,7 +183,7 @@
 
     stepsEl.innerHTML = `
       <div class="lt-quiz__step" data-step="${index}">
-        <p class="lt-quiz__question-emoji" aria-hidden="true">${q.emoji}</p>
+        <div class="lt-quiz__question-icon" aria-hidden="true">${q.icon}</div>
         <h3 class="lt-quiz__question">${escapeHtml(q.question)}</h3>
         <ul class="lt-quiz__answers" role="list">
           ${q.answers
@@ -173,7 +204,6 @@
       </div>
     `;
 
-    // Bind click events
     stepsEl.querySelectorAll('.lt-quiz__answer').forEach((el) => {
       el.addEventListener('click', () => handleAnswer(index, parseInt(el.dataset.index)));
       el.addEventListener('keydown', (e) => {
@@ -184,15 +214,16 @@
       });
     });
 
-    // Scroll quiz into view smoothly
     document.getElementById('lt-longevity-quiz')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function renderResults(profileKey) {
     const profile = PROFILES[profileKey];
     const products = window.LT_QUIZ_PRODUCTS || {};
-    const dna = products.dna;
-    const supplement = products[profileKey];
+
+    const primaryProduct = products[profile.primary.key];
+    const sec1Product = products[profile.secondary[0]];
+    const sec2Product = products[profile.secondary[1]];
 
     stepsEl.hidden = true;
     progressBarEl.closest('.lt-quiz__progress').hidden = true;
@@ -205,26 +236,30 @@
         <div class="lt-quiz__profile-card">
           <p class="lt-quiz__profile-label">${escapeHtml(profile.label)}</p>
           <div class="lt-quiz__profile-icon-wrap" aria-hidden="true">${profile.icon}</div>
-          <h3 class="lt-quiz__profile-title">${escapeHtml(profile.title)}</h3>
-          <p class="lt-quiz__profile-headline">${escapeHtml(profile.headline)}</p>
+          <div class="lt-quiz__profile-title-group">
+            <h3 class="lt-quiz__profile-title">${escapeHtml(profile.title)}</h3>
+            <p class="lt-quiz__profile-headline">${escapeHtml(profile.headline)}</p>
+          </div>
           <p class="lt-quiz__profile-description">${escapeHtml(profile.description)}</p>
         </div>
 
-        <div class="lt-quiz__plan-header">
-          <p class="lt-quiz__plan-label">Dein persönlicher Plan</p>
-          <p class="lt-quiz__plan-sub">Zwei Schritte für deinen Einstieg</p>
+        <div class="lt-quiz__plan-section">
+          <p class="lt-quiz__plan-label">Dein Kernprodukt</p>
+          ${renderPrimaryCard(primaryProduct, profile.primary.reason)}
         </div>
 
-        <div class="lt-quiz__products">
-          ${renderProductCard(dna, profile.step1, 1)}
-          ${renderProductCard(supplement, profile.step2, 2)}
+        <div class="lt-quiz__secondary-section">
+          <p class="lt-quiz__secondary-label">Ergänzt deinen Plan</p>
+          <div class="lt-quiz__secondary-grid">
+            ${renderSecondaryCard(sec1Product)}
+            ${renderSecondaryCard(sec2Product)}
+          </div>
         </div>
 
         <div class="lt-quiz__restart-wrap">
-          <button class="lt-quiz__restart" id="lt-quiz-restart">
-            Quiz wiederholen
-          </button>
+          <button class="lt-quiz__restart" id="lt-quiz-restart">Quiz wiederholen</button>
         </div>
+
       </div>
     `;
 
@@ -232,92 +267,84 @@
     document.getElementById('lt-longevity-quiz')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function renderProductCard(product, stepLabel, stepNum) {
+  function renderPrimaryCard(product, reason) {
     if (!product || !product.title) {
-      return `
-        <div class="lt-quiz__product lt-quiz__product--placeholder">
-          <div class="lt-quiz__product-body">
-            <p class="lt-quiz__product-step">Schritt ${stepNum}</p>
-            <h4 class="lt-quiz__product-title">Produkt nicht konfiguriert</h4>
-            <p class="lt-quiz__product-hint">Bitte Produkt in den Section-Einstellungen hinterlegen.</p>
-          </div>
-        </div>
-      `;
+      return `<div class="lt-quiz__product-primary lt-quiz__product--placeholder">
+        <p class="lt-quiz__product-hint">Produkt noch nicht konfiguriert.</p>
+      </div>`;
     }
-
     return `
-      <a class="lt-quiz__product" href="${product.url}">
-        ${
-          product.image
-            ? `<div class="lt-quiz__product-image-wrap">
-                 <img src="${product.image}" alt="${escapeHtml(product.title)}" class="lt-quiz__product-image" loading="lazy">
-               </div>`
-            : ''
-        }
-        <div class="lt-quiz__product-body">
-          <p class="lt-quiz__product-step">${escapeHtml(stepLabel)}</p>
-          <h4 class="lt-quiz__product-title">${escapeHtml(product.title)}</h4>
-          ${product.price ? `<p class="lt-quiz__product-price">${escapeHtml(product.price)}</p>` : ''}
-          <span class="lt-quiz__product-cta">Jetzt ansehen →</span>
+      <a class="lt-quiz__product-primary" href="${product.url}">
+        ${product.image
+          ? `<div class="lt-quiz__product-primary-image-wrap">
+               <img src="${product.image}" alt="${escapeHtml(product.title)}" class="lt-quiz__product-primary-image" loading="lazy">
+             </div>`
+          : ''}
+        <div class="lt-quiz__product-primary-body">
+          <h4 class="lt-quiz__product-primary-title">${escapeHtml(product.title)}</h4>
+          <p class="lt-quiz__product-primary-reason">${escapeHtml(reason)}</p>
+          ${product.price ? `<p class="lt-quiz__product-primary-price">${escapeHtml(product.price)}</p>` : ''}
+          <span class="lt-quiz__product-primary-cta">Jetzt ansehen →</span>
         </div>
       </a>
     `;
   }
 
-  // ─── Logic ───────────────────────────────────────────────────────────────────
+  function renderSecondaryCard(product) {
+    if (!product || !product.title) {
+      return `<div class="lt-quiz__product-secondary lt-quiz__product--placeholder">
+        <p class="lt-quiz__product-hint">Produkt nicht konfiguriert.</p>
+      </div>`;
+    }
+    return `
+      <a class="lt-quiz__product-secondary" href="${product.url}">
+        ${product.image
+          ? `<div class="lt-quiz__product-secondary-image-wrap">
+               <img src="${product.image}" alt="${escapeHtml(product.title)}" class="lt-quiz__product-secondary-image" loading="lazy">
+             </div>`
+          : ''}
+        <div class="lt-quiz__product-secondary-body">
+          <h5 class="lt-quiz__product-secondary-title">${escapeHtml(product.title)}</h5>
+          ${product.price ? `<p class="lt-quiz__product-secondary-price">${escapeHtml(product.price)}</p>` : ''}
+        </div>
+      </a>
+    `;
+  }
+
+  // ─── Logik ───────────────────────────────────────────────────────────────────
 
   function handleAnswer(questionIndex, answerIndex) {
     const answer = QUESTIONS[questionIndex].answers[answerIndex];
-
-    // Save answer
     answers[questionIndex] = { answerIndex, scores: answer.scores };
 
-    // Highlight selected
     stepsEl.querySelectorAll('.lt-quiz__answer').forEach((el, i) => {
-      const isSelected = i === answerIndex;
-      el.classList.toggle('lt-quiz__answer--selected', isSelected);
-      el.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+      const sel = i === answerIndex;
+      el.classList.toggle('lt-quiz__answer--selected', sel);
+      el.setAttribute('aria-pressed', sel ? 'true' : 'false');
     });
 
-    // Auto-advance after short delay for UX feedback
     setTimeout(() => {
       if (questionIndex < QUESTIONS.length - 1) {
         currentStep = questionIndex + 1;
         updateProgress();
         renderStep(currentStep);
       } else {
-        // All questions answered — calculate result
-        const profileKey = calculateProfile();
-        renderResults(profileKey);
+        renderResults(calculateProfile());
       }
     }, 350);
   }
 
   function calculateProfile() {
     const scores = { energie: 0, fokus: 0, schlaf: 0, langlebigkeit: 0 };
-
-    answers.forEach((answer) => {
-      if (!answer) return;
-      Object.entries(answer.scores).forEach(([key, val]) => {
-        scores[key] = (scores[key] || 0) + val;
-      });
+    answers.forEach((a) => {
+      if (!a) return;
+      Object.entries(a.scores).forEach(([k, v]) => { scores[k] = (scores[k] || 0) + v; });
     });
-
-    let maxKey = 'langlebigkeit';
-    let maxScore = -1;
-
-    Object.entries(scores).forEach(([key, val]) => {
-      if (val > maxScore) {
-        maxScore = val;
-        maxKey = key;
-      }
-    });
-
-    return maxKey;
+    return Object.entries(scores).reduce((best, [k, v]) => v > scores[best] ? k : best, 'langlebigkeit');
   }
 
   function updateProgress() {
-    const pct = Math.round(((currentStep) / QUESTIONS.length) * 100);
+    const pct = Math.round((currentStep / QUESTIONS.length) * 100);
     if (progressBarEl) progressBarEl.style.width = pct + '%';
     if (stepCounterEl) stepCounterEl.textContent = `Frage ${currentStep + 1} von ${QUESTIONS.length}`;
   }
@@ -325,13 +352,11 @@
   function resetQuiz() {
     currentStep = 0;
     answers = [];
-
     stepsEl.hidden = false;
     progressBarEl.closest('.lt-quiz__progress').hidden = false;
     stepCounterEl.hidden = false;
     resultsEl.hidden = true;
     resultsEl.innerHTML = '';
-
     updateProgress();
     renderStep(0);
   }
@@ -341,11 +366,8 @@
   function escapeHtml(str) {
     if (str == null) return '';
     return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
   }
 
   // ─── Boot ────────────────────────────────────────────────────────────────────
@@ -355,8 +377,6 @@
   } else {
     init();
   }
-
-  // Shopify section re-init
   document.addEventListener('shopify:section:load', (e) => {
     if (e.target.querySelector('#lt-longevity-quiz')) init();
   });

@@ -1,27 +1,32 @@
 {% comment %}
   LIFETIME — Longevity Quiz Section
   ────────────────────────────────────────────────────────────
-  Datei:     sections/lt-longevity-quiz.liquid
-  CSS:       assets/section-lt-longevity-quiz.css
-  JS:        assets/lt-longevity-quiz.js
-
-  §12 Spec:
-  - Surface:     --color-surface-secondary
-  - Inhalt:      6-Fragen-Quiz → 4 Longevity-Profile → 2 Produktempfehlungen
-  - Produkte:    Über Section-Settings in der Shopify-Admin hinterlegen
-                 (ein Produkt pro Profil + DNA-Test)
-  - Sprache:     Deutsch, Du-form
+  Finale Empfehlungsmatrix:
+    Energie      → NMN (primär) | Kreatin | TMG
+    Fokus        → Kreatin (primär) | Fisetin | Trans-Resveratrol
+    Schlaf       → Schlafspray (primär) | Spermidin | Kreatin
+    Langlebigkeit → NMN (primär) | Trans-Resveratrol | CaAKG
   ────────────────────────────────────────────────────────────
 {% endcomment %}
 
 {{ 'section-lt-longevity-quiz.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
-  assign p_dna           = all_products[section.settings.product_dna]
-  assign p_energie       = all_products[section.settings.product_energie]
-  assign p_fokus         = all_products[section.settings.product_fokus]
-  assign p_schlaf        = all_products[section.settings.product_schlaf]
-  assign p_langlebigkeit = all_products[section.settings.product_langlebigkeit]
+  assign p_energie_primary = all_products[section.settings.product_energie_primary]
+  assign p_energie_sec1    = all_products[section.settings.product_energie_sec1]
+  assign p_energie_sec2    = all_products[section.settings.product_energie_sec2]
+
+  assign p_fokus_primary   = all_products[section.settings.product_fokus_primary]
+  assign p_fokus_sec1      = all_products[section.settings.product_fokus_sec1]
+  assign p_fokus_sec2      = all_products[section.settings.product_fokus_sec2]
+
+  assign p_schlaf_primary  = all_products[section.settings.product_schlaf_primary]
+  assign p_schlaf_sec1     = all_products[section.settings.product_schlaf_sec1]
+  assign p_schlaf_sec2     = all_products[section.settings.product_schlaf_sec2]
+
+  assign p_lang_primary    = all_products[section.settings.product_lang_primary]
+  assign p_lang_sec1       = all_products[section.settings.product_lang_sec1]
+  assign p_lang_sec2       = all_products[section.settings.product_lang_sec2]
 -%}
 
 <section class="lt-quiz" id="lt-longevity-quiz">
@@ -31,10 +36,12 @@
       {%- if section.settings.label != blank -%}
         <p class="lt-quiz__label">{{ section.settings.label | escape }}</p>
       {%- endif -%}
-      <h2 class="lt-quiz__title">{{ section.settings.title | escape }}</h2>
-      {%- if section.settings.subtitle != blank -%}
-        <p class="lt-quiz__subtitle">{{ section.settings.subtitle | escape }}</p>
-      {%- endif -%}
+      <div class="lt-quiz__title-group">
+        <h2 class="lt-quiz__title">{{ section.settings.title | escape }}</h2>
+        {%- if section.settings.subtitle != blank -%}
+          <p class="lt-quiz__subtitle">{{ section.settings.subtitle | escape }}</p>
+        {%- endif -%}
+      </div>
     </div>
 
     <div class="lt-quiz__progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
@@ -43,44 +50,84 @@
     <p class="lt-quiz__step-counter" id="lt-quiz-step-counter" aria-live="polite">Frage 1 von 6</p>
 
     <div class="lt-quiz__steps" id="lt-quiz-steps"></div>
-
     <div class="lt-quiz__results" id="lt-quiz-results" hidden></div>
 
   </div>
 </section>
 
-{% comment %} Produktdaten als JSON an JS übergeben {% endcomment %}
 <script>
 window.LT_QUIZ_PRODUCTS = {
-  dna: {
-    title: {{ p_dna.title | default: '' | json }},
-    url: {{ p_dna.url | default: '' | json }},
-    price: {{ p_dna.price | money | default: '' | json }},
-    image: {{ p_dna.featured_image | image_url: width: 600 | default: '' | json }}
+  energie_primary: {
+    title: {{ p_energie_primary.title | default: '' | json }},
+    url: {{ p_energie_primary.url | default: '' | json }},
+    price: {{ p_energie_primary.price | money | default: '' | json }},
+    image: {{ p_energie_primary.featured_image | image_url: width: 600 | default: '' | json }}
   },
-  energie: {
-    title: {{ p_energie.title | default: '' | json }},
-    url: {{ p_energie.url | default: '' | json }},
-    price: {{ p_energie.price | money | default: '' | json }},
-    image: {{ p_energie.featured_image | image_url: width: 600 | default: '' | json }}
+  energie_sec1: {
+    title: {{ p_energie_sec1.title | default: '' | json }},
+    url: {{ p_energie_sec1.url | default: '' | json }},
+    price: {{ p_energie_sec1.price | money | default: '' | json }},
+    image: {{ p_energie_sec1.featured_image | image_url: width: 400 | default: '' | json }}
   },
-  fokus: {
-    title: {{ p_fokus.title | default: '' | json }},
-    url: {{ p_fokus.url | default: '' | json }},
-    price: {{ p_fokus.price | money | default: '' | json }},
-    image: {{ p_fokus.featured_image | image_url: width: 600 | default: '' | json }}
+  energie_sec2: {
+    title: {{ p_energie_sec2.title | default: '' | json }},
+    url: {{ p_energie_sec2.url | default: '' | json }},
+    price: {{ p_energie_sec2.price | money | default: '' | json }},
+    image: {{ p_energie_sec2.featured_image | image_url: width: 400 | default: '' | json }}
   },
-  schlaf: {
-    title: {{ p_schlaf.title | default: '' | json }},
-    url: {{ p_schlaf.url | default: '' | json }},
-    price: {{ p_schlaf.price | money | default: '' | json }},
-    image: {{ p_schlaf.featured_image | image_url: width: 600 | default: '' | json }}
+  fokus_primary: {
+    title: {{ p_fokus_primary.title | default: '' | json }},
+    url: {{ p_fokus_primary.url | default: '' | json }},
+    price: {{ p_fokus_primary.price | money | default: '' | json }},
+    image: {{ p_fokus_primary.featured_image | image_url: width: 600 | default: '' | json }}
   },
-  langlebigkeit: {
-    title: {{ p_langlebigkeit.title | default: '' | json }},
-    url: {{ p_langlebigkeit.url | default: '' | json }},
-    price: {{ p_langlebigkeit.price | money | default: '' | json }},
-    image: {{ p_langlebigkeit.featured_image | image_url: width: 600 | default: '' | json }}
+  fokus_sec1: {
+    title: {{ p_fokus_sec1.title | default: '' | json }},
+    url: {{ p_fokus_sec1.url | default: '' | json }},
+    price: {{ p_fokus_sec1.price | money | default: '' | json }},
+    image: {{ p_fokus_sec1.featured_image | image_url: width: 400 | default: '' | json }}
+  },
+  fokus_sec2: {
+    title: {{ p_fokus_sec2.title | default: '' | json }},
+    url: {{ p_fokus_sec2.url | default: '' | json }},
+    price: {{ p_fokus_sec2.price | money | default: '' | json }},
+    image: {{ p_fokus_sec2.featured_image | image_url: width: 400 | default: '' | json }}
+  },
+  schlaf_primary: {
+    title: {{ p_schlaf_primary.title | default: '' | json }},
+    url: {{ p_schlaf_primary.url | default: '' | json }},
+    price: {{ p_schlaf_primary.price | money | default: '' | json }},
+    image: {{ p_schlaf_primary.featured_image | image_url: width: 600 | default: '' | json }}
+  },
+  schlaf_sec1: {
+    title: {{ p_schlaf_sec1.title | default: '' | json }},
+    url: {{ p_schlaf_sec1.url | default: '' | json }},
+    price: {{ p_schlaf_sec1.price | money | default: '' | json }},
+    image: {{ p_schlaf_sec1.featured_image | image_url: width: 400 | default: '' | json }}
+  },
+  schlaf_sec2: {
+    title: {{ p_schlaf_sec2.title | default: '' | json }},
+    url: {{ p_schlaf_sec2.url | default: '' | json }},
+    price: {{ p_schlaf_sec2.price | money | default: '' | json }},
+    image: {{ p_schlaf_sec2.featured_image | image_url: width: 400 | default: '' | json }}
+  },
+  lang_primary: {
+    title: {{ p_lang_primary.title | default: '' | json }},
+    url: {{ p_lang_primary.url | default: '' | json }},
+    price: {{ p_lang_primary.price | money | default: '' | json }},
+    image: {{ p_lang_primary.featured_image | image_url: width: 600 | default: '' | json }}
+  },
+  lang_sec1: {
+    title: {{ p_lang_sec1.title | default: '' | json }},
+    url: {{ p_lang_sec1.url | default: '' | json }},
+    price: {{ p_lang_sec1.price | money | default: '' | json }},
+    image: {{ p_lang_sec1.featured_image | image_url: width: 400 | default: '' | json }}
+  },
+  lang_sec2: {
+    title: {{ p_lang_sec2.title | default: '' | json }},
+    url: {{ p_lang_sec2.url | default: '' | json }},
+    price: {{ p_lang_sec2.price | money | default: '' | json }},
+    image: {{ p_lang_sec2.featured_image | image_url: width: 400 | default: '' | json }}
   }
 };
 </script>
@@ -96,7 +143,7 @@ window.LT_QUIZ_PRODUCTS = {
     {
       "type": "text",
       "id": "label",
-      "label": "Label (klein oben)",
+      "label": "Label",
       "default": "Dein persönlicher Plan"
     },
     {
@@ -113,36 +160,95 @@ window.LT_QUIZ_PRODUCTS = {
     },
     {
       "type": "header",
-      "content": "Produkte konfigurieren"
+      "content": "Profil: Energie & Vitalität"
     },
     {
       "type": "paragraph",
-      "content": "Hinterlege für jedes Profil das passende Produkt. Der DNA-Test erscheint immer als Schritt 1 in den Ergebnissen."
+      "content": "Empfehlung: NMN (primär) · Kreatin · TMG"
     },
     {
       "type": "product",
-      "id": "product_dna",
-      "label": "DNA-Test (immer Schritt 1)"
+      "id": "product_energie_primary",
+      "label": "Primärprodukt (z. B. NMN)"
     },
     {
       "type": "product",
-      "id": "product_energie",
-      "label": "Profil Energie & Vitalität"
+      "id": "product_energie_sec1",
+      "label": "Sekundär 1 (z. B. Kreatin)"
     },
     {
       "type": "product",
-      "id": "product_fokus",
-      "label": "Profil Fokus & Klarheit"
+      "id": "product_energie_sec2",
+      "label": "Sekundär 2 (z. B. TMG)"
+    },
+    {
+      "type": "header",
+      "content": "Profil: Fokus & Klarheit"
+    },
+    {
+      "type": "paragraph",
+      "content": "Empfehlung: Kreatin (primär) · Fisetin · Trans-Resveratrol"
     },
     {
       "type": "product",
-      "id": "product_schlaf",
-      "label": "Profil Schlaf & Regeneration"
+      "id": "product_fokus_primary",
+      "label": "Primärprodukt (z. B. Kreatin)"
     },
     {
       "type": "product",
-      "id": "product_langlebigkeit",
-      "label": "Profil Langlebigkeit & Zellgesundheit"
+      "id": "product_fokus_sec1",
+      "label": "Sekundär 1 (z. B. Fisetin)"
+    },
+    {
+      "type": "product",
+      "id": "product_fokus_sec2",
+      "label": "Sekundär 2 (z. B. Trans-Resveratrol)"
+    },
+    {
+      "type": "header",
+      "content": "Profil: Schlaf & Regeneration"
+    },
+    {
+      "type": "paragraph",
+      "content": "Empfehlung: Schlafspray (primär) · Spermidin · Kreatin"
+    },
+    {
+      "type": "product",
+      "id": "product_schlaf_primary",
+      "label": "Primärprodukt (z. B. Schlafspray)"
+    },
+    {
+      "type": "product",
+      "id": "product_schlaf_sec1",
+      "label": "Sekundär 1 (z. B. Spermidin)"
+    },
+    {
+      "type": "product",
+      "id": "product_schlaf_sec2",
+      "label": "Sekundär 2 (z. B. Kreatin)"
+    },
+    {
+      "type": "header",
+      "content": "Profil: Langlebigkeit & Zellgesundheit"
+    },
+    {
+      "type": "paragraph",
+      "content": "Empfehlung: NMN (primär) · Trans-Resveratrol · CaAKG"
+    },
+    {
+      "type": "product",
+      "id": "product_lang_primary",
+      "label": "Primärprodukt (z. B. NMN)"
+    },
+    {
+      "type": "product",
+      "id": "product_lang_sec1",
+      "label": "Sekundär 1 (z. B. Trans-Resveratrol)"
+    },
+    {
+      "type": "product",
+      "id": "product_lang_sec2",
+      "label": "Sekundär 2 (z. B. CaAKG)"
     }
   ],
   "presets": [
