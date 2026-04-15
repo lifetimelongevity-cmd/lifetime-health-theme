@@ -55,12 +55,21 @@
       </div>
     </div>
 
-    {%- comment -%}=== Stat Grid ==={%- endcomment -%}
-    {%- if section.blocks.size > 0 -%}
-      <ul class="prob__grid" role="list">
+    {%- comment -%}=== Stat Banner (Blueprint from Social Proof) ==={%- endcomment -%}
+    {%- assign prob_stat_count = 0 -%}
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'stat' -%}
+        {%- assign prob_stat_count = prob_stat_count | plus: 1 -%}
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if prob_stat_count > 0 -%}
+      {%- assign prob_stat_index = 0 -%}
+      <div class="prob__stat-banner{% if prob_stat_count > 1 %} prob__stat-banner--multi{% endif %}">
         {%- for block in section.blocks -%}
           {%- if block.type == 'stat' -%}
-            <li class="prob__stat" {{ block.shopify_attributes }}>
+            {%- assign prob_stat_index = prob_stat_index | plus: 1 -%}
+            <div class="prob__stat-item" {{ block.shopify_attributes }}>
               {%- if block.settings.stat_value != blank -%}
                 <p class="prob__stat-value">{{ block.settings.stat_value | escape }}</p>
               {%- endif -%}
@@ -70,10 +79,13 @@
               {%- if block.settings.stat_source != blank -%}
                 <p class="prob__stat-source">{{ block.settings.stat_source | escape }}</p>
               {%- endif -%}
-            </li>
+            </div>
+            {%- if prob_stat_index < prob_stat_count -%}
+              <div class="prob__stat-divider" aria-hidden="true"></div>
+            {%- endif -%}
           {%- endif -%}
         {%- endfor -%}
-      </ul>
+      </div>
     {%- endif -%}
 
   </div>
@@ -103,30 +115,40 @@
 }
 
 
-/* — Stat grid — */
-/*
-  DECISION: 3-col grid on white background — inverts the dark stat-callout pattern.
-  Large stat values (--text-stat or mixed text) create visual tension
-  against the clinical-light background — unexpected, not decorative.
-  No box/card framing: stats bleed into the white surface.
-  Thin left-border as the only separator element (§11 Subtraction Rules applied).
-*/
-.prob__grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-7);             /* 48px — generous, each stat breathes */
-  list-style: none;
-  padding: 0;
+/* — Stat banner (same blueprint as social-proof stats) — */
+.prob__stat-banner {
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-7) var(--space-6);
   margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
 }
 
-/* — Stat item — */
-.prob__stat {
+.prob__stat-banner--multi {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+}
+
+.prob__stat-item {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: var(--space-3);
-  padding-left: var(--space-5);   /* 24px indent from left border */
-  border-left: 2px solid var(--color-border-default);
+  flex: 1;
+  padding: var(--space-4) var(--space-5);
+}
+
+.prob__stat-divider {
+  width: 1px;
+  background: var(--color-border-default);
+  align-self: stretch;
+  flex-shrink: 0;
+  margin: var(--space-4) 0;
 }
 
 /* Stat value — the dominant element */
@@ -138,7 +160,7 @@
 */
 .prob__stat-value {
   font-family: var(--font-heading);
-  font-size: var(--text-h1);      /* 36px — authoritative but line-safe */
+  font-size: var(--text-display); /* 48px */
   font-weight: var(--weight-regular);
   line-height: var(--leading-tight);
   color: var(--color-text-primary);
@@ -153,6 +175,7 @@
   font-weight: var(--weight-regular);
   line-height: var(--leading-relaxed);
   color: var(--color-text-secondary);
+  max-width: 260px;
   margin: 0;
 }
 
@@ -162,14 +185,14 @@
   font-size: var(--text-micro);   /* 12px */
   font-weight: var(--weight-regular);
   color: var(--color-text-muted);
+  max-width: 260px;
   margin: 0;
 }
 
 /* — Responsive — */
 @media screen and (max-width: 1024px) {
-  .prob__grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-6) var(--space-7);
+  .prob__stat-value {
+    font-size: var(--text-h1);
   }
 }
 
@@ -182,13 +205,28 @@
     margin-bottom: var(--space-7);
   }
 
-  .prob__grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-6);
+  .prob__stat-banner {
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .prob__stat-banner--multi {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .prob__stat-divider {
+    width: 100%;
+    height: 1px;
+    margin: 0;
+    align-self: auto;
+  }
+
+  .prob__stat-item {
+    padding: var(--space-5) var(--space-4);
   }
 
   .prob__stat-value {
-    font-size: var(--text-h2);   /* 28px on mobile */
+    font-size: var(--text-h1);
   }
 }
 {% endstylesheet %}
