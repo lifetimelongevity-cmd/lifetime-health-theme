@@ -7,171 +7,316 @@
   #shopify-section-{{ section.id }} {
     background: {{ section.settings.color_bg }};
     color: {{ section.settings.color_text }};
-    padding-top: {{ section.settings.padding_top }}px;
-    padding-bottom: {{ section.settings.padding_bottom }}px;
     border-top: 1px solid {{ section.settings.color_border }};
     border-bottom: 1px solid {{ section.settings.color_border }};
+    position: sticky;
+    top: 64px;
+    z-index: 30;
+  }
+
+  @media screen and (max-width: 767px) {
+    #shopify-section-{{ section.id }} {
+      top: 56px;
+    }
   }
 {% endstyle %}
 
-<nav id="{{ toc_id | escape }}" class="lt-guide-toc" aria-label="{{ toc_title | escape }}">
-  <div class="lt-guide-toc__container">
-    <p class="lt-guide-toc__label">{{ toc_title | escape }}</p>
-    <ul class="lt-guide-toc__list" role="list">
-      {%- for block in section.blocks -%}
-        {%- assign target_id = block.settings.target_id | strip -%}
-        <li class="lt-guide-toc__item" {{ block.shopify_attributes }}>
-          {%- if target_id != blank -%}
-            <a class="lt-guide-toc__link" href="#{{ target_id | escape }}" data-guide-toc-link>
-              {{ block.settings.label | escape }}
-            </a>
-          {%- else -%}
-            <span class="lt-guide-toc__group-label">{{ block.settings.label | escape }}</span>
-          {%- endif -%}
-        </li>
-      {%- endfor -%}
-    </ul>
+<nav id="{{ toc_id | escape }}" class="lt-guide-nav" aria-label="{{ toc_title | escape }}">
+  <div class="lt-guide-nav__container">
+    <div class="lt-guide-nav__left">
+      <p class="lt-guide-nav__eyebrow">{{ toc_title | escape }}</p>
+      <p class="lt-guide-nav__current" data-guide-current>Kapitel 1</p>
+    </div>
+
+    <div class="lt-guide-nav__right">
+      <div class="lt-guide-nav__progress" aria-hidden="true">
+        <span class="lt-guide-nav__progress-fill" data-guide-progress></span>
+      </div>
+      <button type="button" class="lt-guide-nav__button" data-guide-open aria-haspopup="dialog" aria-expanded="false">
+        Inhalt
+      </button>
+    </div>
   </div>
+
+  <dialog class="lt-guide-sheet" data-guide-sheet aria-label="{{ toc_title | escape }}">
+    <div class="lt-guide-sheet__surface">
+      <div class="lt-guide-sheet__header">
+        <p class="lt-guide-sheet__title">{{ toc_title | escape }}</p>
+        <button type="button" class="lt-guide-sheet__close" data-guide-close aria-label="Schließen">×</button>
+      </div>
+
+      <ul class="lt-guide-sheet__list" role="list">
+        {%- for block in section.blocks -%}
+          {%- assign target_id = block.settings.target_id | strip -%}
+          <li class="lt-guide-sheet__item" {{ block.shopify_attributes }}>
+            {%- if target_id != blank -%}
+              <button
+                type="button"
+                class="lt-guide-sheet__link"
+                data-guide-link
+                data-target-id="{{ target_id | escape }}"
+              >
+                {{ block.settings.label | escape }}
+              </button>
+            {%- else -%}
+              <p class="lt-guide-sheet__group">{{ block.settings.label | escape }}</p>
+            {%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  </dialog>
 </nav>
 
 {% stylesheet %}
-.lt-guide-toc {
-  position: sticky;
-  top: 64px;
-  z-index: 20;
-}
-
-.lt-guide-toc__container {
+.lt-guide-nav__container {
   max-width: 1320px;
   margin: 0 auto;
-  padding: 0 var(--space-5);
-  display: flex;
+  padding: 10px var(--space-5);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--space-4);
 }
 
-.lt-guide-toc__label {
-  margin: 0;
-  font-size: var(--text-micro);
-  line-height: var(--leading-body);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-}
-
-.lt-guide-toc__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  gap: var(--space-2);
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
+.lt-guide-nav__left {
   min-width: 0;
 }
 
-.lt-guide-toc__list::-webkit-scrollbar {
-  display: none;
+.lt-guide-nav__eyebrow {
+  margin: 0;
+  font-size: var(--text-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
 }
 
-.lt-guide-toc__link {
-  display: inline-flex;
+.lt-guide-nav__current {
+  margin: 2px 0 0;
+  font-size: var(--text-body-sm);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lt-guide-nav__right {
+  display: flex;
   align-items: center;
-  padding: 8px 12px;
+  gap: var(--space-3);
+}
+
+.lt-guide-nav__progress {
+  width: 96px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-border-default);
+  overflow: hidden;
+}
+
+.lt-guide-nav__progress-fill {
+  display: block;
+  width: 0%;
+  height: 100%;
+  background: var(--color-surface-accent);
+  transition: width 220ms ease;
+}
+
+.lt-guide-nav__button {
+  min-height: 36px;
+  padding: 6px 12px;
   border-radius: 999px;
   border: 1px solid var(--color-border-default);
   background: var(--color-surface-primary);
   color: var(--color-text-primary);
   font-size: var(--text-body-sm);
-  line-height: var(--leading-body);
-  text-decoration: none;
-  white-space: nowrap;
 }
 
-.lt-guide-toc__link.is-active {
-  border-color: var(--color-surface-accent);
-  color: var(--color-text-on-dark);
-  background: var(--color-surface-accent);
+.lt-guide-sheet {
+  width: min(720px, calc(100vw - 24px));
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0;
+  background: transparent;
 }
 
-.lt-guide-toc__group-label {
-  display: inline-flex;
+.lt-guide-sheet::backdrop {
+  background: rgba(38, 37, 30, 0.38);
+}
+
+.lt-guide-sheet__surface {
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  max-height: min(80vh, 760px);
+  overflow: auto;
+}
+
+.lt-guide-sheet__header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--color-surface-primary);
+  border-bottom: 1px solid var(--color-border-default);
+  padding: 12px var(--space-4);
+  display: flex;
   align-items: center;
-  padding: 8px 6px 8px 2px;
+  justify-content: space-between;
+}
+
+.lt-guide-sheet__title {
+  margin: 0;
+  font-size: var(--text-body);
+  font-weight: 600;
+}
+
+.lt-guide-sheet__close {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-surface-primary);
+  color: var(--color-text-primary);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.lt-guide-sheet__list {
+  list-style: none;
+  margin: 0;
+  padding: 8px;
+  display: grid;
+  gap: 4px;
+}
+
+.lt-guide-sheet__group {
+  margin: 8px 4px 2px;
   font-size: var(--text-micro);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--color-text-secondary);
-  white-space: nowrap;
+}
+
+.lt-guide-sheet__link {
+  width: 100%;
+  text-align: left;
+  min-height: 44px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: var(--text-body-sm);
+}
+
+.lt-guide-sheet__link.is-active {
+  border-color: var(--color-border-default);
+  background: var(--color-surface-secondary);
 }
 
 @media screen and (max-width: 767px) {
-  .lt-guide-toc {
-    top: 56px;
+  .lt-guide-nav__container {
+    padding: 8px var(--space-4);
   }
 
-  .lt-guide-toc__container {
-    padding: 0 var(--space-4);
-    align-items: flex-start;
-    flex-direction: column;
-    gap: var(--space-2);
+  .lt-guide-nav__progress {
+    width: 72px;
   }
 
-  .lt-guide-toc__label {
-    font-size: 11px;
+  .lt-guide-sheet {
+    width: 100vw;
+    max-width: none;
+    margin: 0;
+    border-radius: 0;
   }
 
-  .lt-guide-toc__link {
-    min-height: 40px;
-  }
-
-  .lt-guide-toc.is-compact .lt-guide-toc__container {
-    gap: 4px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-  }
-
-  .lt-guide-toc.is-compact .lt-guide-toc__label {
-    font-size: 10px;
-    opacity: 0.8;
-  }
-
-  .lt-guide-toc.is-compact .lt-guide-toc__link {
-    min-height: 34px;
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-
-  .lt-guide-toc.is-compact .lt-guide-toc__group-label {
-    padding: 6px 4px 6px 0;
-    font-size: 10px;
+  .lt-guide-sheet__surface {
+    border-radius: 0;
+    max-height: 84vh;
   }
 }
 {% endstylesheet %}
 
 {% javascript %}
 (function () {
-  const toc = document.querySelector('.lt-guide-toc');
-  const links = Array.from(toc?.querySelectorAll('[data-guide-toc-link]') || []);
-  if (!toc || !links.length) return;
+  const nav = document.querySelector('.lt-guide-nav');
+  if (!nav) return;
 
-  const targets = links
-    .map((link) => {
-      const id = link.getAttribute('href')?.replace('#', '');
+  const sheet = nav.querySelector('[data-guide-sheet]');
+  const openBtn = nav.querySelector('[data-guide-open]');
+  const closeBtn = nav.querySelector('[data-guide-close]');
+  const currentEl = nav.querySelector('[data-guide-current]');
+  const progressEl = nav.querySelector('[data-guide-progress]');
+  const linkButtons = Array.from(nav.querySelectorAll('[data-guide-link]'));
+  if (!sheet || !openBtn || !closeBtn || !linkButtons.length || !currentEl || !progressEl) return;
+
+  const targets = linkButtons
+    .map((btn) => {
+      const id = btn.getAttribute('data-target-id');
       const el = id ? document.getElementById(id) : null;
-      return el ? { link, el } : null;
+      return el ? { btn, el, label: btn.textContent?.trim() || '' } : null;
     })
     .filter(Boolean);
 
   if (!targets.length) return;
 
-  const setActive = (activeId) => {
-    for (const { link, el } of targets) {
-      link.classList.toggle('is-active', el.id === activeId);
-    }
+  const chapterCount = targets.length;
+
+  const setActive = (id) => {
+    let activeIndex = 0;
+    targets.forEach(({ btn, el }, index) => {
+      const active = el.id === id;
+      btn.classList.toggle('is-active', active);
+      if (active) activeIndex = index;
+    });
+
+    const chapterLabel = targets[activeIndex]?.label || 'Kapitel';
+    currentEl.textContent = `${activeIndex + 1}/${chapterCount} - ${chapterLabel}`;
+    const progress = ((activeIndex + 1) / chapterCount) * 100;
+    progressEl.style.width = `${progress}%`;
   };
+
+  const getTopOffset = () => {
+    const navHeight = nav.getBoundingClientRect().height;
+    const headerOffset = window.matchMedia('(max-width: 767px)').matches ? 56 : 64;
+    return navHeight + headerOffset + 12;
+  };
+
+  const scrollToTarget = (el) => {
+    const y = window.scrollY + el.getBoundingClientRect().top - getTopOffset();
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+  };
+
+  const openSheet = () => {
+    if (!sheet.open) sheet.showModal();
+    openBtn.setAttribute('aria-expanded', 'true');
+  };
+
+  const closeSheet = () => {
+    if (sheet.open) sheet.close();
+    openBtn.setAttribute('aria-expanded', 'false');
+  };
+
+  openBtn.addEventListener('click', openSheet);
+  closeBtn.addEventListener('click', closeSheet);
+
+  sheet.addEventListener('click', (event) => {
+    const rect = sheet.getBoundingClientRect();
+    const isBackdropClick =
+      event.clientX < rect.left ||
+      event.clientX > rect.right ||
+      event.clientY < rect.top ||
+      event.clientY > rect.bottom;
+    if (isBackdropClick) closeSheet();
+  });
+
+  targets.forEach(({ btn, el }) => {
+    btn.addEventListener('click', () => {
+      scrollToTarget(el);
+      setActive(el.id);
+      closeSheet();
+    });
+  });
 
   const observer = new IntersectionObserver(
     (entries) => {
@@ -183,32 +328,8 @@
     { rootMargin: '-42% 0px -48% 0px', threshold: 0.01 }
   );
 
-  for (const { el } of targets) observer.observe(el);
+  targets.forEach(({ el }) => observer.observe(el));
   setActive(targets[0].el.id);
-
-  const isMobile = window.matchMedia('(max-width: 767px)');
-  const applyCompact = () => {
-    if (!isMobile.matches) {
-      toc.classList.remove('is-compact');
-      return;
-    }
-    toc.classList.toggle('is-compact', window.scrollY > 80);
-  };
-
-  applyCompact();
-  window.addEventListener('scroll', applyCompact, { passive: true });
-  window.addEventListener('resize', applyCompact);
-
-  for (const { link, el } of targets) {
-    link.addEventListener('click', (event) => {
-      event.preventDefault();
-      const tocHeight = toc.getBoundingClientRect().height;
-      const extraOffset = window.matchMedia('(max-width: 767px)').matches ? 56 : 64;
-      const y = window.scrollY + el.getBoundingClientRect().top - tocHeight - extraOffset - 12;
-      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
-      setActive(el.id);
-    });
-  }
 })();
 {% endjavascript %}
 
@@ -283,17 +404,18 @@
         {
           "type": "text",
           "id": "target_id",
-          "label": "Target id",
+          "label": "Target id (leave empty for group labels)",
           "default": "kapitel-schlaf"
         }
       ]
     }
   ],
-  "max_blocks": 14,
+  "max_blocks": 20,
   "presets": [
     {
       "name": "LT Guide TOC",
       "blocks": [
+        { "type": "item", "settings": { "label": "Level I", "target_id": "" } },
         { "type": "item", "settings": { "label": "Priorisiere deinen Schlaf", "target_id": "kapitel-schlaf" } },
         { "type": "item", "settings": { "label": "Bleibe ständig in Bewegung", "target_id": "kapitel-bewegung" } },
         { "type": "item", "settings": { "label": "Iss die richtigen Nährstoffe", "target_id": "kapitel-ernaehrung" } }

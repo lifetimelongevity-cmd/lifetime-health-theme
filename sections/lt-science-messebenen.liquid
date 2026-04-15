@@ -1,0 +1,470 @@
+{%- liquid
+  assign measurements_align = section.settings.content_align | default: 'left'
+  if measurements_align != 'left' and measurements_align != 'center' and measurements_align != 'right'
+    assign measurements_align = 'left'
+  endif
+  assign measurements_kicker = section.settings.kicker | strip
+  assign measurements_heading = section.settings.heading | strip
+  assign measurements_subheading = section.settings.subheading | strip
+  assign measurements_closing = section.settings.closing_text | strip
+  if measurements_kicker == '__none__'
+    assign measurements_kicker = ''
+  endif
+  assign measurements_heading_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign measurements_heading_lg = true
+  endif
+-%}
+
+{% style %}
+  #section-{{ section.id }} {
+    --science-measurements-bg: {{ section.settings.color_bg }};
+    --science-measurements-card-bg: {{ section.settings.color_card_bg }};
+    --science-measurements-text: {{ section.settings.color_text }};
+    --science-measurements-text-secondary: {{ section.settings.color_text | color_modify: 'alpha', 0.68 }};
+    --science-measurements-border: {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
+    --science-measurements-accent: {{ section.settings.color_accent }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<section class="science-measurements" id="section-{{ section.id }}">
+  <div class="science-measurements__container">
+    {%- if measurements_kicker != blank or measurements_heading != blank or measurements_subheading != blank -%}
+      <header class="science-measurements__header crs-heading-stack crs-heading-stack--align-{{ measurements_align }}{% if measurements_heading_lg %} crs-heading-stack--headline-lg{% endif %}">
+        {%- if measurements_kicker != blank -%}
+          <p class="crs-heading-stack__kicker">{{ measurements_kicker | escape }}</p>
+        {%- endif -%}
+        <div class="crs-heading-stack__pair">
+          {%- if measurements_heading != blank -%}
+            <h2 class="crs-heading-stack__title">{{ measurements_heading | escape | newline_to_br }}</h2>
+          {%- endif -%}
+          {%- if measurements_subheading != blank -%}
+            <p class="crs-heading-stack__subtitle">{{ measurements_subheading | escape | newline_to_br }}</p>
+          {%- endif -%}
+        </div>
+      </header>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="science-measurements__grid">
+        {%- for block in section.blocks -%}
+          <article class="science-measurements__card" {{ block.shopify_attributes }}>
+            <div class="science-measurements__card-head">
+              <div class="science-measurements__ordinal" aria-hidden="true">
+                {%- if forloop.index < 10 -%}
+                  0{{ forloop.index }}
+                {%- else -%}
+                  {{ forloop.index }}
+                {%- endif -%}
+              </div>
+              {%- if block.settings.label != blank -%}
+                <p class="science-measurements__label">{{ block.settings.label | escape }}</p>
+              {%- endif -%}
+            </div>
+
+            {%- if block.settings.title != blank -%}
+              <h3 class="science-measurements__title">{{ block.settings.title | escape }}</h3>
+            {%- endif -%}
+
+            {%- if block.settings.strength != blank -%}
+              <div class="science-measurements__entry">
+                <p class="science-measurements__entry-label">Staerke</p>
+                <p class="science-measurements__entry-text">{{ block.settings.strength | escape }}</p>
+              </div>
+            {%- endif -%}
+
+            {%- if block.settings.limitation != blank -%}
+              <div class="science-measurements__entry">
+                <p class="science-measurements__entry-label">Grenze</p>
+                <p class="science-measurements__entry-text">{{ block.settings.limitation | escape }}</p>
+              </div>
+            {%- endif -%}
+
+            {%- if block.settings.note != blank -%}
+              <p class="science-measurements__note">{{ block.settings.note | escape }}</p>
+            {%- endif -%}
+          </article>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if measurements_closing != blank or section.settings.cta_label != blank -%}
+      <div class="science-measurements__footer">
+        {%- if measurements_closing != blank -%}
+          <p class="science-measurements__closing">{{ measurements_closing | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+          <a class="science-measurements__cta" href="{{ section.settings.cta_url }}">
+            {{ section.settings.cta_label | escape }}
+          </a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .science-measurements {
+    background: var(--science-measurements-bg, #f2f1ed);
+  }
+
+  .science-measurements__container {
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: var(--space-5);
+  }
+
+  .science-measurements__header {
+    max-width: 48rem;
+    margin-bottom: var(--space-7);
+  }
+
+  .science-measurements__header.crs-heading-stack--align-center {
+    margin-inline: auto;
+  }
+
+  .science-measurements__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .science-measurements__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+    height: 100%;
+    padding: var(--space-5);
+    border: 1px solid var(--science-measurements-border, rgba(38, 37, 30, 0.08));
+    border-radius: var(--radius-md);
+    background: var(--science-measurements-card-bg, #f7f7f4);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .science-measurements__card-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+
+  .science-measurements__ordinal {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-full);
+    background: var(--science-measurements-accent, #364f56);
+    color: var(--color-white);
+    font-family: var(--font-heading);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .science-measurements__label {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-body);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--science-measurements-text-secondary, rgba(38, 37, 30, 0.68));
+  }
+
+  .science-measurements__title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: var(--text-h3);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-tight);
+    color: var(--science-measurements-text, #26251e);
+  }
+
+  .science-measurements__entry {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .science-measurements__entry-label {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-body);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--science-measurements-text-secondary, rgba(38, 37, 30, 0.68));
+  }
+
+  .science-measurements__entry-text {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--science-measurements-text, #26251e);
+  }
+
+  .science-measurements__note {
+    margin: auto 0 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--science-measurements-border, rgba(38, 37, 30, 0.08));
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-body);
+    color: var(--science-measurements-text-secondary, rgba(38, 37, 30, 0.68));
+  }
+
+  .science-measurements__footer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-5);
+    align-items: center;
+    margin-top: var(--space-6);
+    padding: var(--space-5);
+    border: 1px solid var(--science-measurements-border, rgba(38, 37, 30, 0.08));
+    border-radius: var(--radius-md);
+    background: var(--science-measurements-card-bg, #f7f7f4);
+  }
+
+  .science-measurements__closing {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-relaxed);
+    color: var(--science-measurements-text, #26251e);
+  }
+
+  .science-measurements__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 3.25rem;
+    padding-inline: var(--space-7);
+    border-radius: var(--radius-full);
+    background: var(--science-measurements-accent, #364f56);
+    color: var(--color-white);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: opacity var(--ease-default);
+  }
+
+  .science-measurements__cta:hover {
+    opacity: 0.92;
+  }
+
+  @media screen and (max-width: 1024px) {
+    .science-measurements__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media screen and (max-width: 767px) {
+    .science-measurements__container {
+      padding-inline: var(--space-4);
+    }
+
+    .science-measurements__footer {
+      grid-template-columns: 1fr;
+    }
+
+    .science-measurements__cta {
+      width: 100%;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Science Measurements",
+  "tag": "section",
+  "class": "lt-science-messebenen",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "color",
+      "id": "color_accent",
+      "label": "Akzentfarbe",
+      "default": "#364f56"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung (Überschrift)",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": "__none__",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Drei Wege, deinen Koerper zu verstehen."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Unterüberschrift",
+      "default": "Nicht jede Messung beantwortet dieselbe Frage."
+    },
+    {
+      "type": "textarea",
+      "id": "closing_text",
+      "label": "Abschluss-Text",
+      "default": "Blutmarker zeigen, wo du heute stehst. Genetik zeigt, womit du arbeitest. Epigenetik zeigt, wie gut du bisher gealtert bist."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA Text"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA Link"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "measurement",
+      "name": "Messebene",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Blutmarker"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel",
+          "default": "Momentaufnahme und Fruehwarnsystem"
+        },
+        {
+          "type": "textarea",
+          "id": "strength",
+          "label": "Staerke"
+        },
+        {
+          "type": "textarea",
+          "id": "limitation",
+          "label": "Grenze"
+        },
+        {
+          "type": "textarea",
+          "id": "note",
+          "label": "Hinweis"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Science Measurements",
+      "blocks": [
+        {
+          "type": "measurement",
+          "settings": {
+            "label": "Blutmarker",
+            "title": "Momentaufnahme und Fruehwarnsystem"
+          }
+        },
+        {
+          "type": "measurement",
+          "settings": {
+            "label": "Genetik",
+            "title": "Dein biologischer Bauplan"
+          }
+        },
+        {
+          "type": "measurement",
+          "settings": {
+            "label": "Epigenetik",
+            "title": "Biologisches Alter als Langzeitperspektive"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

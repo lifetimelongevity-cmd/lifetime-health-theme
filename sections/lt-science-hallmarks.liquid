@@ -1,0 +1,369 @@
+{%- liquid
+  assign hallmarks_align = section.settings.content_align | default: 'left'
+  if hallmarks_align != 'left' and hallmarks_align != 'center' and hallmarks_align != 'right'
+    assign hallmarks_align = 'left'
+  endif
+  assign hallmarks_kicker = section.settings.kicker | strip
+  assign hallmarks_heading = section.settings.heading | strip
+  assign hallmarks_subheading = section.settings.subheading | strip
+  assign hallmarks_source = section.settings.source_text | strip
+  if hallmarks_kicker == '__none__'
+    assign hallmarks_kicker = ''
+  endif
+  assign hallmarks_heading_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign hallmarks_heading_lg = true
+  endif
+-%}
+
+{% style %}
+  #section-{{ section.id }} {
+    --science-hallmarks-bg: {{ section.settings.color_bg }};
+    --science-hallmarks-card-bg: {{ section.settings.color_card_bg }};
+    --science-hallmarks-text: {{ section.settings.color_text }};
+    --science-hallmarks-text-secondary: {{ section.settings.color_text | color_modify: 'alpha', 0.68 }};
+    --science-hallmarks-border: {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<section class="science-hallmarks" id="section-{{ section.id }}">
+  <div class="science-hallmarks__container">
+    {%- if hallmarks_kicker != blank or hallmarks_heading != blank or hallmarks_subheading != blank -%}
+      <header class="science-hallmarks__header crs-heading-stack crs-heading-stack--align-{{ hallmarks_align }}{% if hallmarks_heading_lg %} crs-heading-stack--headline-lg{% endif %}">
+        {%- if hallmarks_kicker != blank -%}
+          <p class="crs-heading-stack__kicker">{{ hallmarks_kicker | escape }}</p>
+        {%- endif -%}
+        <div class="crs-heading-stack__pair">
+          {%- if hallmarks_heading != blank -%}
+            <h2 class="crs-heading-stack__title">{{ hallmarks_heading | escape | newline_to_br }}</h2>
+          {%- endif -%}
+          {%- if hallmarks_subheading != blank -%}
+            <p class="crs-heading-stack__subtitle">{{ hallmarks_subheading | escape | newline_to_br }}</p>
+          {%- endif -%}
+        </div>
+      </header>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <ol class="science-hallmarks__grid" role="list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign hallmark_number = block.settings.number | strip
+            if hallmark_number == blank
+              if forloop.index < 10
+                assign hallmark_number = '0' | append: forloop.index
+              else
+                assign hallmark_number = forloop.index
+              endif
+            endif
+          -%}
+          <li class="science-hallmarks__card" {{ block.shopify_attributes }}>
+            <div class="science-hallmarks__number" aria-hidden="true">{{ hallmark_number | escape }}</div>
+            <div class="science-hallmarks__content">
+              {%- if block.settings.name != blank -%}
+                <h3 class="science-hallmarks__name">{{ block.settings.name | escape }}</h3>
+              {%- endif -%}
+              {%- if block.settings.body != blank -%}
+                <p class="science-hallmarks__body">{{ block.settings.body | escape }}</p>
+              {%- endif -%}
+            </div>
+          </li>
+        {%- endfor -%}
+      </ol>
+    {%- endif -%}
+
+    {%- if hallmarks_source != blank -%}
+      <div class="science-hallmarks__source">
+        <p class="science-hallmarks__source-text">{{ hallmarks_source | escape }}</p>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+  .science-hallmarks {
+    background: var(--science-hallmarks-bg, #f7f7f4);
+  }
+
+  .science-hallmarks__container {
+    max-width: 1280px;
+    margin-inline: auto;
+    padding-inline: var(--space-5);
+  }
+
+  .science-hallmarks__header {
+    max-width: 48rem;
+    margin-bottom: var(--space-7);
+  }
+
+  .science-hallmarks__header.crs-heading-stack--align-center {
+    margin-inline: auto;
+  }
+
+  .science-hallmarks__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-4);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .science-hallmarks__card {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-4);
+    min-width: 0;
+    padding: var(--space-5);
+    border: 1px solid var(--science-hallmarks-border, rgba(38, 37, 30, 0.08));
+    border-radius: var(--radius-md);
+    background: var(--science-hallmarks-card-bg, #f2f1ed);
+    box-shadow: var(--shadow-sm);
+    overflow-wrap: break-word;
+  }
+
+  .science-hallmarks__number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--radius-full);
+    background: var(--science-hallmarks-text, #26251e);
+    color: var(--color-white);
+    font-family: var(--font-heading);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .science-hallmarks__content {
+    min-width: 0;
+  }
+
+  .science-hallmarks__name {
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-heading);
+    font-size: var(--text-section);
+    font-weight: var(--weight-semibold);
+    line-height: var(--leading-tight);
+    color: var(--science-hallmarks-text, #26251e);
+  }
+
+  .science-hallmarks__body {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-relaxed);
+    color: var(--science-hallmarks-text-secondary, rgba(38, 37, 30, 0.68));
+  }
+
+  .science-hallmarks__source {
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--science-hallmarks-border, rgba(38, 37, 30, 0.08));
+  }
+
+  .science-hallmarks__source-text {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-body);
+    color: var(--science-hallmarks-text-secondary, rgba(38, 37, 30, 0.68));
+  }
+
+  @media screen and (max-width: 1024px) {
+    .science-hallmarks__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media screen and (max-width: 767px) {
+    .science-hallmarks__container {
+      padding-inline: var(--space-4);
+    }
+
+    .science-hallmarks__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+
+    .science-hallmarks__card {
+      gap: var(--space-3);
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Science Hallmarks",
+  "tag": "section",
+  "class": "lt-science-hallmarks",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung (Überschrift)",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": "__none__",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "12 Mechanismen. Ein biologischer Prozess."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Unterüberschrift",
+      "default": "Altern ist kein einzelnes Ereignis, sondern das Zusammenspiel zentraler Prozesse in unseren Zellen."
+    },
+    {
+      "type": "text",
+      "id": "source_text",
+      "label": "Quellenzeile",
+      "default": "Quelle: Lopez-Otin et al., Cell 2023"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "hallmark",
+      "name": "Hallmark",
+      "settings": [
+        {
+          "type": "text",
+          "id": "number",
+          "label": "Nummer",
+          "default": "01"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Genomische Instabilitaet"
+        },
+        {
+          "type": "textarea",
+          "id": "body",
+          "label": "Beschreibung",
+          "default": "Mit der Zeit sammeln sich Schaeden in unserer DNA an."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Science Hallmarks",
+      "blocks": [
+        {
+          "type": "hallmark",
+          "settings": {
+            "number": "01",
+            "name": "Genomische Instabilitaet",
+            "body": "Mit der Zeit sammeln sich Schaeden in unserer DNA an."
+          }
+        },
+        {
+          "type": "hallmark",
+          "settings": {
+            "number": "02",
+            "name": "Telomerverkuerzung",
+            "body": "Telomere schuetzen die Enden unserer Chromosomen."
+          }
+        },
+        {
+          "type": "hallmark",
+          "settings": {
+            "number": "03",
+            "name": "Epigenetische Veraenderungen",
+            "body": "Die Steuerung unserer Gene veraendert sich im Laufe des Lebens."
+          }
+        },
+        {
+          "type": "hallmark",
+          "settings": {
+            "number": "04",
+            "name": "Verlust der Proteostase",
+            "body": "Proteine muessen korrekt gefaltet und recycelt werden."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
