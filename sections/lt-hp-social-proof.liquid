@@ -62,47 +62,66 @@
           {%- if block.type == 'testimonial' -%}
             <li class="sp__card" {{ block.shopify_attributes }}>
 
-              {%- comment -%} 1 — Quote (dominant element) {%- endcomment -%}
-              {%- if block.settings.quote != blank -%}
-                <blockquote class="sp__quote">
-                  <p>{{ block.settings.quote | escape }}</p>
-                </blockquote>
-              {%- endif -%}
-
-              {%- comment -%} 2 — Before / After: the retest result {%- endcomment -%}
-              {%- if block.settings.result_metric != blank -%}
-                <div class="sp__before-after" aria-label="Vorher-Nachher Ergebnis">
-                  <div class="sp__ba-col sp__ba-col--before">
-                    <span class="sp__ba-label">Vorher</span>
-                    <span class="sp__ba-value">{{ block.settings.result_metric | escape }}</span>
-                  </div>
-                  {%- if block.settings.retest_result != blank -%}
-                    <div class="sp__ba-col sp__ba-col--after">
-                      <span class="sp__ba-label">Nachher</span>
-                      <span class="sp__ba-value sp__ba-value--after">{{ block.settings.retest_result | escape }}</span>
-                    </div>
+              {%- comment -%} 1 — Author header (name top = person before quote) {%- endcomment -%}
+              <div class="sp__card-header">
+                {%- liquid
+                  assign sp_avatar_src = block.settings.avatar_image_url | strip
+                  if sp_avatar_src contains 'shopify://shop_images/'
+                    assign sp_avatar_src = sp_avatar_src | remove: 'shopify://shop_images/' | file_url
+                  elsif sp_avatar_src != blank
+                    unless sp_avatar_src contains '://'
+                      assign sp_avatar_src = sp_avatar_src | file_url
+                    endunless
+                  endif
+                -%}
+                <div class="sp__avatar" aria-hidden="true">
+                  {%- if sp_avatar_src != blank -%}
+                    <img src="{{ sp_avatar_src | escape }}" alt="{{ block.settings.name | escape }}" class="sp__avatar-img" loading="lazy" width="40" height="40">
+                  {%- else -%}
+                    <span class="sp__avatar-initial">{{ block.settings.name | slice: 0 | upcase }}</span>
                   {%- endif -%}
                 </div>
-              {%- endif -%}
-
-              {%- comment -%} 4 — Footer: author + verified inline (metadata last) {%- endcomment -%}
-              <footer class="sp__author">
-                <div class="sp__author-left">
+                <div class="sp__author-meta">
                   <span class="sp__author-name">{{ block.settings.name | escape }}</span>
                   {%- if block.settings.age != blank -%}
                     <span class="sp__author-age">, {{ block.settings.age }} Jahre</span>
                   {%- endif -%}
                 </div>
                 {%- if block.settings.verified -%}
-                  <span class="sp__verified" aria-label="Verifizierter Kauf">
-                    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                      <circle cx="5.5" cy="5.5" r="5.5" fill="var(--color-teal)"/>
-                      <path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    Verifiziert
-                  </span>
+                  <span class="sp__badge">Begleitprogramm</span>
                 {%- endif -%}
-              </footer>
+              </div>
+
+              {%- comment -%} 2 — Quote {%- endcomment -%}
+              {%- if block.settings.quote != blank -%}
+                <blockquote class="sp__quote">
+                  <p>{{ block.settings.quote | escape }}</p>
+                </blockquote>
+              {%- endif -%}
+
+              {%- comment -%} 3 — Before / After with chronological age as context {%- endcomment -%}
+              {%- if block.settings.result_metric != blank -%}
+                <div class="sp__before-after" aria-label="Vorher-Nachher Ergebnis">
+                  <div class="sp__ba-col sp__ba-col--before">
+                    <span class="sp__ba-label">Vorher</span>
+                    {%- if block.settings.age != blank -%}
+                      <span class="sp__ba-chron">Chron. {{ block.settings.age }} J.</span>
+                    {%- endif -%}
+                    <span class="sp__ba-value">{{ block.settings.result_metric | escape }}</span>
+                  </div>
+                  {%- if block.settings.retest_result != blank -%}
+                    <div class="sp__ba-col sp__ba-col--after">
+                      <span class="sp__ba-label">Nachher</span>
+                      {%- if block.settings.retest_duration != blank -%}
+                        <span class="sp__ba-chron">{{ block.settings.retest_duration | escape }}</span>
+                      {%- else -%}
+                        <span class="sp__ba-chron">&nbsp;</span>
+                      {%- endif -%}
+                      <span class="sp__ba-value sp__ba-value--after">{{ block.settings.retest_result | escape }}</span>
+                    </div>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
 
             </li>
           {%- endif -%}
@@ -253,9 +272,79 @@
   margin: 0;
 }
 
+/* — Card header: avatar + name + badge — */
+.sp__card-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+/* Avatar circle — photo or initial fallback */
+.sp__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-default);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sp__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.sp__avatar-initial {
+  font-family: var(--font-heading);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+  line-height: 1;
+}
+
+.sp__author-meta {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+}
+
+.sp__author-name {
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+}
+
+.sp__author-age {
+  font-weight: var(--weight-regular);
+}
+
+/* Begleitprogramm badge — communicates ongoing relationship, not just purchase */
+.sp__badge {
+  flex-shrink: 0;
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: var(--weight-medium);
+  color: var(--color-text-muted);
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  padding: 3px 8px;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
 /* Before / After result block
    Two-column layout separated by a hairline border.
-   Vorher (muted) | Nachher (teal, bold) — readable at a glance.
+   Chron. age as context above bio age — shows the transformation clearly.
 */
 .sp__before-after {
   display: flex;
@@ -268,7 +357,7 @@
 .sp__ba-col {
   display: flex;
   flex-direction: column;
-  gap: 3px; /* intentional: very tight label-value stack */
+  gap: 2px;
   min-width: 0;
   flex: 1;
   padding: var(--space-3) var(--space-4);
@@ -292,6 +381,16 @@
   letter-spacing: 0.06em;
 }
 
+/* Contextual sub-label: chronological age (before) or duration (after) */
+.sp__ba-chron {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  color: var(--color-text-muted);
+  opacity: 0.75;
+}
+
 .sp__ba-value {
   font-family: var(--font-body);
   font-size: var(--text-body-sm);
@@ -300,50 +399,11 @@
   color: var(--color-text-secondary);
   overflow-wrap: break-word;
   word-break: break-word;
+  margin-top: 2px;
 }
 
 .sp__ba-value--after {
   color: var(--color-text-primary);
-}
-
-/* Author footer — name left, verified badge right */
-.sp__author {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  border-top: 1px solid var(--color-border-default);
-  padding-top: var(--space-3);
-  margin-top: auto; /* pushes footer to bottom of card */
-}
-
-.sp__author-left {
-  font-family: var(--font-body);
-  font-size: var(--text-body-sm);
-  color: var(--color-text-secondary);
-  min-width: 0;
-}
-
-.sp__author-name {
-  font-weight: var(--weight-medium);
-  color: var(--color-text-primary);
-}
-
-.sp__author-age {
-  font-weight: var(--weight-regular);
-}
-
-.sp__verified {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-  gap: 4px; /* intentional: tight badge gap */
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-medium);
-  color: var(--color-text-secondary);
-  line-height: 1;
-  white-space: nowrap;
 }
 
 /* — Aggregate Stat Banner —
@@ -594,6 +654,12 @@
       "name": "Testimonial",
       "settings": [
         {
+          "type": "image_picker",
+          "id": "avatar_image_url",
+          "label": "Foto (optional)",
+          "info": "Quadratisches Bild, wird als Kreis angezeigt. Leer = Initiale."
+        },
+        {
           "type": "textarea",
           "id": "quote",
           "label": "Zitat"
@@ -606,8 +672,8 @@
         {
           "type": "text",
           "id": "age",
-          "label": "Alter",
-          "info": "Nur Zahl, z.B. 44"
+          "label": "Chronologisches Alter",
+          "info": "Nur Zahl, z.B. 44 — wird als Kontext im Vorher/Nachher-Feld angezeigt"
         },
         {
           "type": "text",
@@ -636,7 +702,8 @@
         {
           "type": "checkbox",
           "id": "verified",
-          "label": "Verifizierter Kauf",
+          "label": "Begleitprogramm-Badge anzeigen",
+          "info": "Zeigt 'Begleitprogramm' — für Kund*innen aus dem intensiven Begleitprogramm",
           "default": true
         }
       ]
