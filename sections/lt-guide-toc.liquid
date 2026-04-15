@@ -37,8 +37,8 @@
 {% stylesheet %}
 .lt-guide-toc {
   position: sticky;
-  top: 0;
-  z-index: 5;
+  top: 64px;
+  z-index: 20;
 }
 
 .lt-guide-toc__container {
@@ -108,6 +108,10 @@
 }
 
 @media screen and (max-width: 767px) {
+  .lt-guide-toc {
+    top: 56px;
+  }
+
   .lt-guide-toc__container {
     padding: 0 var(--space-4);
     align-items: flex-start;
@@ -122,13 +126,36 @@
   .lt-guide-toc__link {
     min-height: 40px;
   }
+
+  .lt-guide-toc.is-compact .lt-guide-toc__container {
+    gap: 4px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+  }
+
+  .lt-guide-toc.is-compact .lt-guide-toc__label {
+    font-size: 10px;
+    opacity: 0.8;
+  }
+
+  .lt-guide-toc.is-compact .lt-guide-toc__link {
+    min-height: 34px;
+    padding: 6px 10px;
+    font-size: 12px;
+  }
+
+  .lt-guide-toc.is-compact .lt-guide-toc__group-label {
+    padding: 6px 4px 6px 0;
+    font-size: 10px;
+  }
 }
 {% endstylesheet %}
 
 {% javascript %}
 (function () {
-  const links = Array.from(document.querySelectorAll('[data-guide-toc-link]'));
-  if (!links.length) return;
+  const toc = document.querySelector('.lt-guide-toc');
+  const links = Array.from(toc?.querySelectorAll('[data-guide-toc-link]') || []);
+  if (!toc || !links.length) return;
 
   const targets = links
     .map((link) => {
@@ -153,11 +180,35 @@
         .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
       if (visible.length) setActive(visible[0].target.id);
     },
-    { rootMargin: '-35% 0px -55% 0px', threshold: 0.01 }
+    { rootMargin: '-42% 0px -48% 0px', threshold: 0.01 }
   );
 
   for (const { el } of targets) observer.observe(el);
   setActive(targets[0].el.id);
+
+  const isMobile = window.matchMedia('(max-width: 767px)');
+  const applyCompact = () => {
+    if (!isMobile.matches) {
+      toc.classList.remove('is-compact');
+      return;
+    }
+    toc.classList.toggle('is-compact', window.scrollY > 80);
+  };
+
+  applyCompact();
+  window.addEventListener('scroll', applyCompact, { passive: true });
+  window.addEventListener('resize', applyCompact);
+
+  for (const { link, el } of targets) {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      const tocHeight = toc.getBoundingClientRect().height;
+      const extraOffset = window.matchMedia('(max-width: 767px)').matches ? 56 : 64;
+      const y = window.scrollY + el.getBoundingClientRect().top - tocHeight - extraOffset - 12;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+      setActive(el.id);
+    });
+  }
 })();
 {% endjavascript %}
 
