@@ -48,6 +48,11 @@
     endunless
   endif
 
+  assign hpva_media_image_src = section.settings.media_image_url
+  if hpva_media_image_src != blank
+    assign hpva_media_image_src = hpva_media_image_src | image_url: width: 1400
+  endif
+
   assign hpva_youtube_controls = '1'
   assign hpva_vimeo_background = '0'
   if section.settings.video_autoplay
@@ -162,6 +167,15 @@
                 allowfullscreen
                 title="{{ section.settings.headline | default: section.settings.kicker | default: 'Video' | escape }}"
               ></iframe>
+            {%- elsif hpva_media_image_src != blank -%}
+              <img
+                class="hpva__media-image"
+                src="{{ hpva_media_image_src }}"
+                alt="{{ section.settings.expert_name | default: section.settings.headline | escape }}"
+                loading="lazy"
+                width="1400"
+                height="1575"
+              >
             {%- elsif request.design_mode -%}
               <div class="hpva__placeholder">
                 <p class="hpva__placeholder-label">Video-URL hinzufügen</p>
@@ -403,6 +417,13 @@
   background: #d9d5ca;
 }
 
+.hpva__media-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .hpva__video {
   object-fit: contain;
 }
@@ -637,6 +658,11 @@
       "type": "text",
       "id": "video_url",
       "label": "Video-URL oder Shopify-Datei"
+    },
+    {
+      "type": "image_picker",
+      "id": "media_image_url",
+      "label": "Alternativbild (wenn kein Video)"
     },
     {
       "type": "checkbox",
