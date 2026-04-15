@@ -1,0 +1,323 @@
+{%- liquid
+  assign chapter_anchor = section.settings.anchor_id | default: section.id
+  assign chapter_kicker = section.settings.kicker
+  assign chapter_heading = section.settings.heading
+  assign chapter_subheading = section.settings.subheading
+-%}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    background: {{ section.settings.color_bg }};
+    color: {{ section.settings.color_text }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<section id="{{ chapter_anchor | escape }}" class="lt-longevity-chapter">
+  <div class="lt-longevity-chapter__container">
+    <div class="lt-longevity-chapter__intro-card">
+      <div class="lt-longevity-chapter__header crs-heading-stack crs-heading-stack--align-left">
+        {%- if chapter_kicker != blank -%}
+          <p class="crs-heading-stack__kicker">{{ chapter_kicker | escape }}</p>
+        {%- endif -%}
+        <div class="crs-heading-stack__pair">
+          {%- if chapter_heading != blank -%}
+            <h2 class="crs-heading-stack__title">{{ chapter_heading | escape }}</h2>
+          {%- endif -%}
+          {%- if chapter_subheading != blank -%}
+            <p class="crs-heading-stack__subtitle">{{ chapter_subheading }}</p>
+          {%- endif -%}
+        </div>
+      </div>
+
+      <div class="lt-longevity-chapter__intro-grid">
+        <div class="lt-longevity-chapter__intro-rte rte remove-empty-space">
+          {{ section.settings.intro_text }}
+        </div>
+        {%- if section.settings.image != blank -%}
+          <div class="lt-longevity-chapter__media-wrap">
+            {{
+              section.settings.image
+              | image_url: width: 1200
+              | image_tag:
+                loading: 'lazy',
+                widths: '360, 540, 760, 960, 1200',
+                class: 'lt-longevity-chapter__media',
+                alt: section.settings.image.alt
+            }}
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+
+    <div class="lt-longevity-chapter__tips">
+      {%- for block in section.blocks -%}
+        <details class="lt-longevity-chapter__tip" {% if forloop.first and section.settings.open_first_tip %}open{% endif %} {{ block.shopify_attributes }}>
+          <summary class="lt-longevity-chapter__tip-summary">
+            <span class="lt-longevity-chapter__tip-title">{{ block.settings.title | escape }}</span>
+            <span class="lt-longevity-chapter__tip-icon" aria-hidden="true">+</span>
+          </summary>
+          <div class="lt-longevity-chapter__tip-body rte remove-empty-space">
+            {{ block.settings.body }}
+            {%- if block.settings.link_label != blank and block.settings.link_url != blank -%}
+              <p class="lt-longevity-chapter__tip-link-wrap">
+                <a href="{{ block.settings.link_url }}" class="lt-longevity-chapter__tip-link">{{ block.settings.link_label | escape }}</a>
+              </p>
+            {%- endif -%}
+          </div>
+        </details>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+.lt-longevity-chapter__container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.lt-longevity-chapter {
+  scroll-margin-top: 120px;
+}
+
+.lt-longevity-chapter__intro-card {
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  margin-bottom: var(--space-6);
+}
+
+.lt-longevity-chapter__intro-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.lt-longevity-chapter__intro-rte {
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.lt-longevity-chapter__media-wrap {
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.lt-longevity-chapter__media {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  aspect-ratio: 4 / 3;
+}
+
+.lt-longevity-chapter__tips {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.lt-longevity-chapter__tip {
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.lt-longevity-chapter__tip-summary {
+  list-style: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-5);
+  cursor: pointer;
+}
+
+.lt-longevity-chapter__tip-summary::-webkit-details-marker {
+  display: none;
+}
+
+.lt-longevity-chapter__tip-title {
+  font-size: var(--text-body);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.lt-longevity-chapter__tip-icon {
+  color: var(--color-text-muted);
+  font-size: 20px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.lt-longevity-chapter__tip[open] .lt-longevity-chapter__tip-icon {
+  transform: rotate(45deg);
+}
+
+.lt-longevity-chapter__tip-body {
+  padding: 0 var(--space-5) var(--space-5);
+  color: var(--color-text-secondary);
+  line-height: 1.65;
+}
+
+.lt-longevity-chapter__tip-link-wrap {
+  margin-top: var(--space-3);
+}
+
+.lt-longevity-chapter__tip-link {
+  color: var(--color-text-primary);
+  border-bottom: 1px solid var(--color-text-primary);
+  text-decoration: none;
+}
+
+@media screen and (max-width: 989px) {
+  .lt-longevity-chapter__container {
+    padding: 0 var(--space-4);
+  }
+
+  .lt-longevity-chapter__intro-card {
+    padding: var(--space-5);
+  }
+
+  .lt-longevity-chapter__intro-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .lt-longevity-chapter {
+    scroll-margin-top: 152px;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT Longevity chapter",
+  "tag": "section",
+  "class": "lt-longevity-chapter-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "Anchor id",
+      "default": "kapitel-schlaf"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Level I: Longevity-Grundlagen"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Priorisiere deinen Schlaf"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>Schlaf ist die Basis für Regeneration, Hormone und ein gesundes Altern.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "intro_text",
+      "label": "Intro text",
+      "default": "<p>Schlaf beeinflusst Entzündungen, Stoffwechsel und kognitive Leistung. Schon kleine Verbesserungen in deiner Schlafroutine haben messbare Wirkung auf deine langfristige Gesundheit.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Chapter image"
+    },
+    {
+      "type": "checkbox",
+      "id": "open_first_tip",
+      "label": "Open first tip",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Section background",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Section text",
+      "default": "#26251e"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tip",
+      "name": "Tip",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Etabliere einen festen Schlafrhythmus"
+        },
+        {
+          "type": "richtext",
+          "id": "body",
+          "label": "Body",
+          "default": "<p>Gehe jeden Tag zur gleichen Zeit schlafen und stehe zur gleichen Zeit auf. Das stabilisiert deinen zirkadianen Rhythmus und verbessert Schlafqualität und Regeneration.</p>"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Optional link label",
+          "default": "Mehr zur Studienlage"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Optional link URL"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "LT Longevity chapter",
+      "blocks": [
+        { "type": "tip", "settings": { "title": "Etabliere einen festen Schlafrhythmus" } },
+        { "type": "tip", "settings": { "title": "Schlafe 7-9 Stunden pro Nacht" } },
+        { "type": "tip", "settings": { "title": "Meide Bildschirme vor dem Schlafengehen" } }
+      ]
+    }
+  ]
+}
+{% endschema %}

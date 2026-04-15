@@ -1,0 +1,253 @@
+{%- liquid
+  assign toc_id = section.settings.anchor_id | default: 'guide-inhalt'
+  assign toc_title = section.settings.heading | default: 'Inhalt'
+-%}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    background: {{ section.settings.color_bg }};
+    color: {{ section.settings.color_text }};
+    padding-top: {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+    border-top: 1px solid {{ section.settings.color_border }};
+    border-bottom: 1px solid {{ section.settings.color_border }};
+  }
+{% endstyle %}
+
+<nav id="{{ toc_id | escape }}" class="lt-guide-toc" aria-label="{{ toc_title | escape }}">
+  <div class="lt-guide-toc__container">
+    <p class="lt-guide-toc__label">{{ toc_title | escape }}</p>
+    <ul class="lt-guide-toc__list" role="list">
+      {%- for block in section.blocks -%}
+        {%- assign target_id = block.settings.target_id | strip -%}
+        <li class="lt-guide-toc__item" {{ block.shopify_attributes }}>
+          {%- if target_id != blank -%}
+            <a class="lt-guide-toc__link" href="#{{ target_id | escape }}" data-guide-toc-link>
+              {{ block.settings.label | escape }}
+            </a>
+          {%- else -%}
+            <span class="lt-guide-toc__group-label">{{ block.settings.label | escape }}</span>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</nav>
+
+{% stylesheet %}
+.lt-guide-toc {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.lt-guide-toc__container {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.lt-guide-toc__label {
+  margin: 0;
+  font-size: var(--text-micro);
+  line-height: var(--leading-body);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+.lt-guide-toc__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  min-width: 0;
+}
+
+.lt-guide-toc__list::-webkit-scrollbar {
+  display: none;
+}
+
+.lt-guide-toc__link {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border-default);
+  background: var(--color-surface-primary);
+  color: var(--color-text-primary);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.lt-guide-toc__link.is-active {
+  border-color: var(--color-surface-accent);
+  color: var(--color-text-on-dark);
+  background: var(--color-surface-accent);
+}
+
+.lt-guide-toc__group-label {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 6px 8px 2px;
+  font-size: var(--text-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  white-space: nowrap;
+}
+
+@media screen and (max-width: 767px) {
+  .lt-guide-toc__container {
+    padding: 0 var(--space-4);
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .lt-guide-toc__label {
+    font-size: 11px;
+  }
+
+  .lt-guide-toc__link {
+    min-height: 40px;
+  }
+}
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  const links = Array.from(document.querySelectorAll('[data-guide-toc-link]'));
+  if (!links.length) return;
+
+  const targets = links
+    .map((link) => {
+      const id = link.getAttribute('href')?.replace('#', '');
+      const el = id ? document.getElementById(id) : null;
+      return el ? { link, el } : null;
+    })
+    .filter(Boolean);
+
+  if (!targets.length) return;
+
+  const setActive = (activeId) => {
+    for (const { link, el } of targets) {
+      link.classList.toggle('is-active', el.id === activeId);
+    }
+  };
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+      if (visible.length) setActive(visible[0].target.id);
+    },
+    { rootMargin: '-35% 0px -55% 0px', threshold: 0.01 }
+  );
+
+  for (const { el } of targets) observer.observe(el);
+  setActive(targets[0].el.id);
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "LT Guide TOC",
+  "tag": "section",
+  "class": "lt-guide-toc-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Navigation title",
+      "default": "Inhalt"
+    },
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "TOC anchor id",
+      "default": "guide-inhalt"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Background",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Text color",
+      "default": "#26251e"
+    },
+    {
+      "type": "color",
+      "id": "color_border",
+      "label": "Border color",
+      "default": "#e5e2da"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 12
+    }
+  ],
+  "blocks": [
+    {
+      "type": "item",
+      "name": "Nav item",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Priorisiere deinen Schlaf"
+        },
+        {
+          "type": "text",
+          "id": "target_id",
+          "label": "Target id",
+          "default": "kapitel-schlaf"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 14,
+  "presets": [
+    {
+      "name": "LT Guide TOC",
+      "blocks": [
+        { "type": "item", "settings": { "label": "Priorisiere deinen Schlaf", "target_id": "kapitel-schlaf" } },
+        { "type": "item", "settings": { "label": "Bleibe ständig in Bewegung", "target_id": "kapitel-bewegung" } },
+        { "type": "item", "settings": { "label": "Iss die richtigen Nährstoffe", "target_id": "kapitel-ernaehrung" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
