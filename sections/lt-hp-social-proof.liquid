@@ -65,13 +65,20 @@
               {%- comment -%} 1 — Author header (name top = person before quote) {%- endcomment -%}
               <div class="sp__card-header">
                 {%- liquid
-                  assign sp_avatar_src = block.settings.avatar_image_url | strip
-                  if sp_avatar_src contains 'shopify://shop_images/'
-                    assign sp_avatar_src = sp_avatar_src | remove: 'shopify://shop_images/' | file_url
-                  elsif sp_avatar_src != blank
-                    unless sp_avatar_src contains '://'
-                      assign sp_avatar_src = sp_avatar_src | file_url
-                    endunless
+                  assign sp_avatar_raw = block.settings.avatar_image_url | strip
+                  assign sp_avatar_src = blank
+                  if sp_avatar_raw != blank
+                    assign sp_avatar_src = block.settings.avatar_image_url | image_url: width: 80
+                    if sp_avatar_src == blank
+                      assign sp_avatar_src = sp_avatar_raw
+                      if sp_avatar_src contains 'shopify://shop_images/'
+                        assign sp_avatar_src = sp_avatar_src | remove: 'shopify://shop_images/' | file_url
+                      elsif sp_avatar_src != blank
+                        unless sp_avatar_src contains '://'
+                          assign sp_avatar_src = sp_avatar_src | file_url
+                        endunless
+                      endif
+                    endif
                   endif
                 -%}
                 <div class="sp__avatar" aria-hidden="true">
@@ -85,6 +92,9 @@
                   <span class="sp__author-name">{{ block.settings.name | escape }}</span>
                   {%- if block.settings.age != blank -%}
                     <span class="sp__author-age">, {{ block.settings.age }} Jahre</span>
+                  {%- endif -%}
+                  {%- if block.settings.verified -%}
+                    <span class="sp__verified-badge">Begleitprogramm</span>
                   {%- endif -%}
                 </div>
               </div>
@@ -182,20 +192,28 @@
             {%- for block in section.blocks -%}
               {%- if block.type == 'press_logo' -%}
                 {%- liquid
-                  assign sp_logo_image_src = block.settings.logo_image_url | strip
-                  if sp_logo_image_src == blank
+                  assign sp_logo_raw = block.settings.logo_image_url | strip
+                  assign sp_logo_image_src = blank
+                  if sp_logo_raw == blank
                     case block.settings.logo_alt
                       when 'RTL'
-                        assign sp_logo_image_src = '1_b5d8bee0-0588-4cab-8e38-b3eee8285532.png'
+                        assign sp_logo_raw = '1_b5d8bee0-0588-4cab-8e38-b3eee8285532.png'
                       when 'Kölner Stadt Anzeiger'
-                        assign sp_logo_image_src = 'ksta-logo-grau-nobg.png'
+                        assign sp_logo_raw = 'ksta-logo-grau-nobg.png'
                       when 'SWR1'
-                        assign sp_logo_image_src = 'swr1-logo.png'
+                        assign sp_logo_raw = 'swr1-logo.png'
                       when 'SAT.1'
-                        assign sp_logo_image_src = 'Kein_Titel_600_x_400_px_2.png'
+                        assign sp_logo_raw = 'Kein_Titel_600_x_400_px_2.png'
                       when 'Spiegel Bestseller'
-                        assign sp_logo_image_src = '3_9df4d585-1a85-4c48-80bb-c8585a85cce7.png'
+                        assign sp_logo_raw = '3_9df4d585-1a85-4c48-80bb-c8585a85cce7.png'
                     endcase
+                  endif
+
+                  if sp_logo_raw != blank
+                    assign sp_logo_image_src = block.settings.logo_image_url | image_url: width: 240
+                    if sp_logo_image_src == blank
+                      assign sp_logo_image_src = sp_logo_raw
+                    endif
                   endif
 
                   if sp_logo_image_src contains 'shopify://shop_images/'
@@ -354,6 +372,22 @@
 
 .sp__author-age {
   font-weight: var(--weight-regular);
+}
+
+.sp__verified-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: var(--space-2);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border-default);
+  background: var(--color-surface-primary);
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  white-space: nowrap;
 }
 
 /* — Testimonial context note — */
@@ -850,10 +884,10 @@
       "name": "Presse-Logo",
       "settings": [
         {
-          "type": "text",
+          "type": "image_picker",
           "id": "logo_image_url",
-          "label": "Logo Bild URL",
-          "info": "Leer lassen → Standard-Presse-Logo aus den PDPs wird anhand des Namens verwendet"
+          "label": "Logo Bild",
+          "info": "Leer lassen -> Standard-Presse-Logo aus den PDPs wird anhand des Namens verwendet"
         },
         {
           "type": "text",
