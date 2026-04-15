@@ -22,15 +22,23 @@
     leaf:   `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 22 16 8"/><path d="M3.47 12.53A5 5 0 0 0 5 22a5 5 0 0 0 5-5 5 5 0 0 0-5.5-4.97"/><path d="M21 3a8 8 0 0 0-8 8 5 5 0 0 0 5 5 8 8 0 0 0 8-8 5 5 0 0 0-5-5z"/></svg>`,
     wind:   `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>`,
     scope:  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/></svg>`,
+    dna:    `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"/><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"/><path d="m17 6-2.5-2.5"/><path d="m14 8-1-1"/><path d="m7 18 2.5 2.5"/><path d="m3.5 14.5.5.5"/><path d="m10 16 1 1"/><path d="m17 7 3-3"/><path d="m14 14 3 3"/></svg>`,
+    run:    `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="4" r="1"/><path d="M6 20v-6l2-2 4-2 4 4 2 6"/><path d="m6 20 2-2"/><path d="M18 14v4l-4-2"/><path d="M8 12 6 8l4-1 3 3-2 4-1-2"/></svg>`,
+    apple:  `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.94c1.5 0 2.75-.15 4-.52 1.95-.52 3-1.48 3-2.42V6c0-.94-1.05-1.9-3-2.42C14.75 3.15 13.5 3 12 3s-2.75.15-4 .52C6.05 4.1 5 5.06 5 6v12c0 .94 1.05 1.9 3 2.42 1.25.37 2.5.52 4 .52Z"/><path d="M12 3a4 4 0 0 0 4-4"/><path d="M8 3a4 4 0 0 1 4-4"/></svg>`,
+    clock:  `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    sun:    `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>`,
+    flame:  `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>`,
+    person: `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 20a6 6 0 0 0-12 0"/><circle cx="12" cy="10" r="4"/></svg>`,
   };
 
-  // ─── Quiz-Fragen ─────────────────────────────────────────────────────────────
+  // ─── Quiz-Fragen mit Kontext-Hinweisen ───────────────────────────────────────
 
   const QUESTIONS = [
     {
       id: 'ziel',
       icon: ICONS.target,
       question: 'Was ist dein wichtigstes Gesundheitsziel?',
+      hint: 'Dein Ziel bestimmt, welche biologischen Prozesse wir priorisieren – nicht jede Intervention wirkt auf denselben Hebel.',
       answers: [
         { text: 'Mehr Energie & Vitalität im Alltag', scores: { energie: 3 } },
         { text: 'Schärfer denken & mehr Fokus', scores: { fokus: 3 } },
@@ -42,6 +50,7 @@
       id: 'schlaf',
       icon: ICONS.moon,
       question: 'Wie erholsam ist dein Schlaf?',
+      hint: 'Schlechter Schlaf erhöht messbar den inflammatorischen Stress und beschleunigt biologisches Altern – auch ohne subjektives Krankheitsgefühl.',
       answers: [
         { text: 'Tief und erholt – ich fühle mich morgens fit', scores: { langlebigkeit: 1 } },
         { text: 'Meistens ok, manchmal unruhige Nächte', scores: { energie: 1 } },
@@ -53,6 +62,7 @@
       id: 'energie',
       icon: ICONS.zap,
       question: 'Wie ist dein Energieniveau tagsüber?',
+      hint: 'Energieeinbrüche sind oft ein frühes Signal für sinkende NAD⁺-Spiegel oder mitochondriale Dysfunktion – beides verändert sich mit dem Alter.',
       answers: [
         { text: 'Konstant hoch – keine Einbrüche', scores: { langlebigkeit: 1 } },
         { text: 'Nachmittagstief, aber insgesamt ok', scores: { energie: 2 } },
@@ -64,6 +74,7 @@
       id: 'fokus',
       icon: ICONS.brain,
       question: 'Wie ist deine mentale Schärfe & Konzentration?',
+      hint: 'Kognitive Leistung ist einer der sensitivsten Frühindikatoren für zelluläre Gesundheit – Brain Fog ist selten zufällig.',
       answers: [
         { text: 'Ich bin den ganzen Tag fokussiert und klar', scores: { langlebigkeit: 1 } },
         { text: 'Manchmal verliere ich den Faden', scores: { fokus: 1 } },
@@ -75,6 +86,7 @@
       id: 'ernaehrung',
       icon: ICONS.leaf,
       question: 'Wie würdest du deine Ernährung beschreiben?',
+      hint: 'Ernährungsqualität beeinflusst die epigenetische Uhr direkt – schlechte Ernährung beschleunigt biologisches Altern nachweislich um mehrere Jahre.',
       answers: [
         { text: 'Sehr ausgewogen – viel Gemüse, gute Proteine', scores: { langlebigkeit: 2 } },
         { text: 'Relativ gut, aber mit Lücken', scores: { langlebigkeit: 1, energie: 1 } },
@@ -86,6 +98,7 @@
       id: 'stress',
       icon: ICONS.wind,
       question: 'Wie hoch ist dein Stresslevel im Alltag?',
+      hint: 'Chronischer Stress senkt NAD⁺-Spiegel, stört den Schlafzyklus und beeinträchtigt die Zellreparatur – ein unterschätzter Treiber biologischen Alterns.',
       answers: [
         { text: 'Niedrig – ich fühle mich ausgeglichen', scores: { langlebigkeit: 1 } },
         { text: 'Moderat – gelegentlich stressige Phasen', scores: { energie: 1 } },
@@ -110,6 +123,12 @@
         reason: 'Dein NAD⁺-Spiegel sinkt mit dem Alter – NMN unterstützt die Energieproduktion direkt in deinen Mitochondrien.',
       },
       secondary: ['energie_sec1', 'energie_sec2'],
+      lifestyle: [
+        { icon: ICONS.clock, tip: 'Mahlzeiten auf ein 8–10-Stunden-Fenster begrenzen (Time-Restricted Eating stärkt die mitochondriale Funktion nachweislich).' },
+        { icon: ICONS.run,   tip: '3× wöchentlich 30 Min. moderate Ausdauerbelastung – das erhöht den NAD⁺-Spiegel auf natürlichem Weg.' },
+        { icon: ICONS.sun,   tip: 'Kaffee erst 90 Minuten nach dem Aufwachen – vermeidet den Cortisol-Spike und stabilisiert die Energie über den Tag.' },
+        { icon: ICONS.apple, tip: 'Proteinzufuhr auf mindestens 1,6 g pro kg Körpergewicht optimieren – wichtig für Mitochondrien und Muskelerhalt.' },
+      ],
     },
     fokus: {
       icon: ICONS.brain,
@@ -123,6 +142,12 @@
         reason: 'Kreatin versorgt dein Gehirn mit schnell verfügbarer Energie – besonders bei mentalem Stress und Erschöpfung gut belegt.',
       },
       secondary: ['fokus_sec1', 'fokus_sec2'],
+      lifestyle: [
+        { icon: ICONS.run,    tip: 'Zone-2-Training 3× wöchentlich (leicht erhöhte Herzfrequenz, Gespräch möglich) – fördert BDNF und Neuroplastizität.' },
+        { icon: ICONS.moon,   tip: 'Bildschirme ab 21 Uhr auf Nachtmodus oder weglegen – Blaulicht verzögert die Melatonin-Ausschüttung und verschlechtert die Schlafqualität.' },
+        { icon: ICONS.apple,  tip: 'Omega-3-reiche Lebensmittel täglich: fetter Fisch, Walnüsse, Leinsamen – direkte Nahrung für neuronale Membranen.' },
+        { icon: ICONS.wind,   tip: '10 Minuten strukturierte Atemübungen täglich reduzieren die präfrontale Cortex-Belastung messbar.' },
+      ],
     },
     schlaf: {
       icon: ICONS.moon,
@@ -136,6 +161,12 @@
         reason: 'Melatonin ist der am besten belegte Weg zur Verbesserung von Einschlafzeit und Schlaftiefe – direkt und alltagstauglich.',
       },
       secondary: ['schlaf_sec1', 'schlaf_sec2'],
+      lifestyle: [
+        { icon: ICONS.clock,  tip: 'Feste Schlaf- und Aufwachzeiten – auch am Wochenende. Der zirkadiane Rhythmus braucht Verlässlichkeit als Anker.' },
+        { icon: ICONS.apple,  tip: 'Letzte Mahlzeit mindestens 3 Stunden vor dem Schlafen – reduziert die nächtliche Verdauungsbelastung erheblich.' },
+        { icon: ICONS.flame,  tip: 'Schlafzimmer auf 16–18°C kühlen – die Absenkung der Kernkörpertemperatur ist ein zentraler Auslöser für Tiefschlaf.' },
+        { icon: ICONS.sun,    tip: '20 Minuten natürliches Tageslicht morgens regulieren den Melatonin-Zyklus und verbessern die Schlafqualität abends.' },
+      ],
     },
     langlebigkeit: {
       icon: ICONS.scope,
@@ -149,6 +180,12 @@
         reason: 'NMN ist der am besten untersuchte NAD⁺-Baustein – zentral für Zellreparatur und die Verlangsamung biologischer Alterungsprozesse.',
       },
       secondary: ['lang_sec1', 'lang_sec2'],
+      lifestyle: [
+        { icon: ICONS.clock,  tip: 'Intervallfasten (16:8 oder 5:2) aktiviert Autophagie – den zelleigenen Reinigungsprozess, der für biologisches Altern entscheidend ist.' },
+        { icon: ICONS.flame,  tip: 'Sauna 2–3× wöchentlich (wenn möglich): Hitzeschockproteine verbessern die zelluläre Stressresistenz nachweislich.' },
+        { icon: ICONS.run,    tip: 'Regelmäßiges Krafttraining erhält Muskelmasse – einer der stärksten unabhängigen Prädiktoren für Langlebigkeit.' },
+        { icon: ICONS.apple,  tip: 'Antientzündliche Ernährung: Kurkuma, Beeren, Kreuzblütler, Olivenöl – senkt systemische Inflammation als Haupttreiber des Alterns.' },
+      ],
     },
   };
 
@@ -186,21 +223,16 @@
         <div class="lt-quiz__question-icon" aria-hidden="true">${q.icon}</div>
         <h3 class="lt-quiz__question">${escapeHtml(q.question)}</h3>
         <ul class="lt-quiz__answers" role="list">
-          ${q.answers
-            .map(
-              (a, i) => `
+          ${q.answers.map((a, i) => `
             <li class="lt-quiz__answer${answers[index] && answers[index].answerIndex === i ? ' lt-quiz__answer--selected' : ''}"
-                role="button"
-                tabindex="0"
-                data-index="${i}"
+                role="button" tabindex="0" data-index="${i}"
                 aria-pressed="${answers[index] && answers[index].answerIndex === i ? 'true' : 'false'}">
               <span class="lt-quiz__answer-check" aria-hidden="true"></span>
               <span class="lt-quiz__answer-text">${escapeHtml(a.text)}</span>
             </li>
-          `
-            )
-            .join('')}
+          `).join('')}
         </ul>
+        ${q.hint ? `<p class="lt-quiz__question-hint">${escapeHtml(q.hint)}</p>` : ''}
       </div>
     `;
 
@@ -220,10 +252,6 @@
   function renderResults(profileKey) {
     const profile = PROFILES[profileKey];
     const products = window.LT_QUIZ_PRODUCTS || {};
-
-    const primaryProduct = products[profile.primary.key];
-    const sec1Product = products[profile.secondary[0]];
-    const sec2Product = products[profile.secondary[1]];
 
     stepsEl.hidden = true;
     progressBarEl.closest('.lt-quiz__progress').hidden = true;
@@ -245,16 +273,18 @@
 
         <div class="lt-quiz__plan-section">
           <p class="lt-quiz__plan-label">Dein Kernprodukt</p>
-          ${renderPrimaryCard(primaryProduct, profile.primary.reason)}
+          ${renderPrimaryCard(products[profile.primary.key], profile.primary.reason)}
         </div>
 
         <div class="lt-quiz__secondary-section">
           <p class="lt-quiz__secondary-label">Ergänzt deinen Plan</p>
           <div class="lt-quiz__secondary-grid">
-            ${renderSecondaryCard(sec1Product)}
-            ${renderSecondaryCard(sec2Product)}
+            ${renderSecondaryCard(products[profile.secondary[0]])}
+            ${renderSecondaryCard(products[profile.secondary[1]])}
           </div>
         </div>
+
+        ${renderLifestyleSection(profile)}
 
         <div class="lt-quiz__restart-wrap">
           <button class="lt-quiz__restart" id="lt-quiz-restart">Quiz wiederholen</button>
@@ -275,11 +305,10 @@
     }
     return `
       <a class="lt-quiz__product-primary" href="${product.url}">
-        ${product.image
-          ? `<div class="lt-quiz__product-primary-image-wrap">
-               <img src="${product.image}" alt="${escapeHtml(product.title)}" class="lt-quiz__product-primary-image" loading="lazy">
-             </div>`
-          : ''}
+        ${product.image ? `
+          <div class="lt-quiz__product-primary-image-wrap">
+            <img src="${product.image}" alt="${escapeHtml(product.title)}" class="lt-quiz__product-primary-image" loading="lazy">
+          </div>` : ''}
         <div class="lt-quiz__product-primary-body">
           <h4 class="lt-quiz__product-primary-title">${escapeHtml(product.title)}</h4>
           <p class="lt-quiz__product-primary-reason">${escapeHtml(reason)}</p>
@@ -298,16 +327,41 @@
     }
     return `
       <a class="lt-quiz__product-secondary" href="${product.url}">
-        ${product.image
-          ? `<div class="lt-quiz__product-secondary-image-wrap">
-               <img src="${product.image}" alt="${escapeHtml(product.title)}" class="lt-quiz__product-secondary-image" loading="lazy">
-             </div>`
-          : ''}
+        ${product.image ? `
+          <div class="lt-quiz__product-secondary-image-wrap">
+            <img src="${product.image}" alt="${escapeHtml(product.title)}" class="lt-quiz__product-secondary-image" loading="lazy">
+          </div>` : ''}
         <div class="lt-quiz__product-secondary-body">
           <h5 class="lt-quiz__product-secondary-title">${escapeHtml(product.title)}</h5>
           ${product.price ? `<p class="lt-quiz__product-secondary-price">${escapeHtml(product.price)}</p>` : ''}
         </div>
       </a>
+    `;
+  }
+
+  function renderLifestyleSection(profile) {
+    const tips = profile.lifestyle || [];
+    if (!tips.length) return '';
+
+    return `
+      <div class="lt-quiz__lifestyle-section">
+        <div class="lt-quiz__lifestyle-header">
+          <p class="lt-quiz__lifestyle-label">Lebensstil-Empfehlungen</p>
+          <p class="lt-quiz__lifestyle-sub">Was du sofort umsetzen kannst – ohne Produkte.</p>
+        </div>
+        <ul class="lt-quiz__lifestyle-list" role="list">
+          ${tips.map(t => `
+            <li class="lt-quiz__lifestyle-item">
+              <span class="lt-quiz__lifestyle-icon" aria-hidden="true">${t.icon}</span>
+              <span class="lt-quiz__lifestyle-tip">${escapeHtml(t.tip)}</span>
+            </li>
+          `).join('')}
+        </ul>
+        <p class="lt-quiz__lifestyle-dna-note">
+          ${ICONS.dna}
+          Dein AGE &amp; DNA-Test liefert dir eine noch präzisere Auswertung – auf Basis deiner individuellen Genetik und epigenetischen Uhr.
+        </p>
+      </div>
     `;
   }
 
