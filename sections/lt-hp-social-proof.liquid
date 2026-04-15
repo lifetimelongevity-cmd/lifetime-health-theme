@@ -87,9 +87,6 @@
                     <span class="sp__author-age">, {{ block.settings.age }} Jahre</span>
                   {%- endif -%}
                 </div>
-                {%- if block.settings.verified -%}
-                  <span class="sp__badge">Begleitprogramm</span>
-                {%- endif -%}
               </div>
 
               {%- comment -%} 2 — Quote {%- endcomment -%}
@@ -129,12 +126,41 @@
       </ul>
     {%- endif -%}
 
-    {%- comment -%}=== Aggregate Stat Banner ==={%- endcomment -%}
+    {%- comment -%}=== Testimonial Context Note ==={%- endcomment -%}
+    {%- if section.settings.testimonial_context_note != blank -%}
+      <p class="sp__context-note">{{ section.settings.testimonial_context_note | escape }}</p>
+    {%- endif -%}
+
+    {%- comment -%}=== Aggregate Stat Banner (up to 3 stats) ==={%- endcomment -%}
     {%- if section.settings.aggregate_stat_number != blank -%}
-      <div class="sp__stat-banner" aria-label="{{ section.settings.aggregate_stat_number }} {{ section.settings.aggregate_stat_label }}">
-        <span class="sp__stat-number">{{ section.settings.aggregate_stat_number | escape }}</span>
-        {%- if section.settings.aggregate_stat_label != blank -%}
-          <p class="sp__stat-label">{{ section.settings.aggregate_stat_label | escape }}</p>
+      {%- assign sp_has_stat2 = false -%}
+      {%- assign sp_has_stat3 = false -%}
+      {%- if section.settings.aggregate_stat_number_2 != blank -%}{%- assign sp_has_stat2 = true -%}{%- endif -%}
+      {%- if section.settings.aggregate_stat_number_3 != blank -%}{%- assign sp_has_stat3 = true -%}{%- endif -%}
+      <div class="sp__stat-banner{% if sp_has_stat2 %} sp__stat-banner--multi{% endif %}">
+        <div class="sp__stat-item">
+          <span class="sp__stat-number">{{ section.settings.aggregate_stat_number | escape }}</span>
+          {%- if section.settings.aggregate_stat_label != blank -%}
+            <p class="sp__stat-label">{{ section.settings.aggregate_stat_label | escape }}</p>
+          {%- endif -%}
+        </div>
+        {%- if sp_has_stat2 -%}
+          <div class="sp__stat-divider" aria-hidden="true"></div>
+          <div class="sp__stat-item">
+            <span class="sp__stat-number">{{ section.settings.aggregate_stat_number_2 | escape }}</span>
+            {%- if section.settings.aggregate_stat_label_2 != blank -%}
+              <p class="sp__stat-label">{{ section.settings.aggregate_stat_label_2 | escape }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+        {%- if sp_has_stat3 -%}
+          <div class="sp__stat-divider" aria-hidden="true"></div>
+          <div class="sp__stat-item">
+            <span class="sp__stat-number">{{ section.settings.aggregate_stat_number_3 | escape }}</span>
+            {%- if section.settings.aggregate_stat_label_3 != blank -%}
+              <p class="sp__stat-label">{{ section.settings.aggregate_stat_label_3 | escape }}</p>
+            {%- endif -%}
+          </div>
         {%- endif -%}
       </div>
     {%- endif -%}
@@ -327,19 +353,17 @@
   font-weight: var(--weight-regular);
 }
 
-/* Begleitprogramm badge — communicates ongoing relationship, not just purchase */
-.sp__badge {
-  flex-shrink: 0;
+/* — Testimonial context note — */
+.sp__context-note {
   font-family: var(--font-body);
-  font-size: 10px;
-  font-weight: var(--weight-medium);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
   color: var(--color-text-muted);
-  background: var(--color-surface-secondary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-full);
-  padding: 3px 8px;
-  white-space: nowrap;
-  line-height: 1.4;
+  text-align: center;
+  max-width: 560px;
+  margin: 0 auto var(--space-8);
+  padding: 0 var(--space-4);
 }
 
 /* Before / After result block
@@ -407,21 +431,44 @@
 }
 
 /* — Aggregate Stat Banner —
-   DECISION: Full-width benefit-surface banner.
+   Single stat: centered column. Multi-stat (--multi modifier): row with dividers.
    Stat number in --text-stat (56px) commands the section.
-   This is the section's dominant element — not the cards.
 */
 .sp__stat-banner {
   background: var(--color-surface-secondary);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
-  padding: var(--space-8) var(--space-6);      /* 64px 32px */
-  text-align: center;
-  margin-bottom: var(--space-8);               /* 64px → press row */
+  padding: var(--space-8) var(--space-6);
+  margin-bottom: var(--space-8);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-4);
+}
+
+.sp__stat-banner--multi {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 0;
+  padding: var(--space-7) var(--space-6);
+}
+
+.sp__stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  flex: 1;
+  text-align: center;
+  padding: var(--space-4) var(--space-5);
+}
+
+.sp__stat-divider {
+  width: 1px;
+  background: var(--color-border-default);
+  align-self: stretch;
+  flex-shrink: 0;
+  margin: var(--space-4) 0;
 }
 
 .sp__stat-number {
@@ -433,13 +480,17 @@
   letter-spacing: -0.03em;
 }
 
+.sp__stat-banner--multi .sp__stat-number {
+  font-size: var(--text-display); /* 48px — slightly smaller in multi-col */
+}
+
 .sp__stat-label {
   font-family: var(--font-body);
-  font-size: var(--text-body-lg); /* 18px */
+  font-size: var(--text-body);
   font-weight: var(--weight-regular);
   line-height: var(--leading-relaxed);
   color: var(--color-text-secondary);
-  max-width: 540px;
+  max-width: 240px;
   margin: 0;
 }
 
@@ -540,12 +591,37 @@
   }
 
   .sp__stat-banner {
-    padding: var(--space-7) var(--space-5);
+    padding: var(--space-7) var(--space-4);
     margin-bottom: var(--space-7);
+  }
+
+  .sp__stat-banner--multi {
+    flex-direction: column;
+    gap: 0;
+    padding: var(--space-5) var(--space-4);
+  }
+
+  .sp__stat-divider {
+    width: 100%;
+    height: 1px;
+    margin: 0 var(--space-4);
+    align-self: auto;
+  }
+
+  .sp__stat-item {
+    padding: var(--space-5) var(--space-4);
   }
 
   .sp__stat-number {
     font-size: var(--text-display);  /* 48px on mobile */
+  }
+
+  .sp__stat-banner--multi .sp__stat-number {
+    font-size: var(--text-h1); /* slightly smaller in stacked multi */
+  }
+
+  .sp__stat-label {
+    max-width: 320px;
   }
 
   .sp__press-row {
@@ -624,18 +700,56 @@
     },
     {
       "type": "header",
-      "content": "Aggregat-Statistik"
+      "content": "Testimonial Kontext"
+    },
+    {
+      "type": "textarea",
+      "id": "testimonial_context_note",
+      "label": "Kontextnotiz unter den Karten",
+      "info": "Erklärt den Begleitprogramm-Kontext. Erscheint klein und muted zwischen Karten und Statistik-Banner."
+    },
+    {
+      "type": "header",
+      "content": "Statistik 1"
     },
     {
       "type": "text",
       "id": "aggregate_stat_number",
-      "label": "Stat-Zahl",
-      "info": "z.B. 87 % — wird als --text-stat (56px) angezeigt"
+      "label": "Zahl",
+      "info": "z.B. 87 %"
     },
     {
       "type": "textarea",
       "id": "aggregate_stat_label",
-      "label": "Stat-Beschreibung"
+      "label": "Beschreibung"
+    },
+    {
+      "type": "header",
+      "content": "Statistik 2 (optional)"
+    },
+    {
+      "type": "text",
+      "id": "aggregate_stat_number_2",
+      "label": "Zahl"
+    },
+    {
+      "type": "textarea",
+      "id": "aggregate_stat_label_2",
+      "label": "Beschreibung"
+    },
+    {
+      "type": "header",
+      "content": "Statistik 3 (optional)"
+    },
+    {
+      "type": "text",
+      "id": "aggregate_stat_number_3",
+      "label": "Zahl"
+    },
+    {
+      "type": "textarea",
+      "id": "aggregate_stat_label_3",
+      "label": "Beschreibung"
     },
     {
       "type": "header",
