@@ -1,0 +1,154 @@
+{% comment %}
+  LIFETIME — Longevity Quiz Section
+  ────────────────────────────────────────────────────────────
+  Datei:     sections/lt-longevity-quiz.liquid
+  CSS:       assets/section-lt-longevity-quiz.css
+  JS:        assets/lt-longevity-quiz.js
+
+  §12 Spec:
+  - Surface:     --color-surface-secondary
+  - Inhalt:      6-Fragen-Quiz → 4 Longevity-Profile → 2 Produktempfehlungen
+  - Produkte:    Über Section-Settings in der Shopify-Admin hinterlegen
+                 (ein Produkt pro Profil + DNA-Test)
+  - Sprache:     Deutsch, Du-form
+  ────────────────────────────────────────────────────────────
+{% endcomment %}
+
+{{ 'section-lt-longevity-quiz.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign p_dna           = all_products[section.settings.product_dna]
+  assign p_energie       = all_products[section.settings.product_energie]
+  assign p_fokus         = all_products[section.settings.product_fokus]
+  assign p_schlaf        = all_products[section.settings.product_schlaf]
+  assign p_langlebigkeit = all_products[section.settings.product_langlebigkeit]
+-%}
+
+<section class="lt-quiz" id="lt-longevity-quiz">
+  <div class="lt-quiz__container">
+
+    <div class="lt-quiz__header">
+      {%- if section.settings.label != blank -%}
+        <p class="lt-quiz__label">{{ section.settings.label | escape }}</p>
+      {%- endif -%}
+      <h2 class="lt-quiz__title">{{ section.settings.title | escape }}</h2>
+      {%- if section.settings.subtitle != blank -%}
+        <p class="lt-quiz__subtitle">{{ section.settings.subtitle | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <div class="lt-quiz__progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+      <div class="lt-quiz__progress-bar" id="lt-quiz-progress-bar"></div>
+    </div>
+    <p class="lt-quiz__step-counter" id="lt-quiz-step-counter" aria-live="polite">Frage 1 von 6</p>
+
+    <div class="lt-quiz__steps" id="lt-quiz-steps"></div>
+
+    <div class="lt-quiz__results" id="lt-quiz-results" hidden></div>
+
+  </div>
+</section>
+
+{% comment %} Produktdaten als JSON an JS übergeben {% endcomment %}
+<script>
+window.LT_QUIZ_PRODUCTS = {
+  dna: {
+    title: {{ p_dna.title | default: '' | json }},
+    url: {{ p_dna.url | default: '' | json }},
+    price: {{ p_dna.price | money | default: '' | json }},
+    image: {{ p_dna.featured_image | image_url: width: 600 | default: '' | json }}
+  },
+  energie: {
+    title: {{ p_energie.title | default: '' | json }},
+    url: {{ p_energie.url | default: '' | json }},
+    price: {{ p_energie.price | money | default: '' | json }},
+    image: {{ p_energie.featured_image | image_url: width: 600 | default: '' | json }}
+  },
+  fokus: {
+    title: {{ p_fokus.title | default: '' | json }},
+    url: {{ p_fokus.url | default: '' | json }},
+    price: {{ p_fokus.price | money | default: '' | json }},
+    image: {{ p_fokus.featured_image | image_url: width: 600 | default: '' | json }}
+  },
+  schlaf: {
+    title: {{ p_schlaf.title | default: '' | json }},
+    url: {{ p_schlaf.url | default: '' | json }},
+    price: {{ p_schlaf.price | money | default: '' | json }},
+    image: {{ p_schlaf.featured_image | image_url: width: 600 | default: '' | json }}
+  },
+  langlebigkeit: {
+    title: {{ p_langlebigkeit.title | default: '' | json }},
+    url: {{ p_langlebigkeit.url | default: '' | json }},
+    price: {{ p_langlebigkeit.price | money | default: '' | json }},
+    image: {{ p_langlebigkeit.featured_image | image_url: width: 600 | default: '' | json }}
+  }
+};
+</script>
+
+<script src="{{ 'lt-longevity-quiz.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "Longevity Quiz",
+  "tag": "section",
+  "class": "lt-quiz-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label (klein oben)",
+      "default": "Dein persönlicher Plan"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Titel",
+      "default": "Finde deine Longevity-Routine"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Untertitel",
+      "default": "6 kurze Fragen — dein individueller Fokus und Produktplan"
+    },
+    {
+      "type": "header",
+      "content": "Produkte konfigurieren"
+    },
+    {
+      "type": "paragraph",
+      "content": "Hinterlege für jedes Profil das passende Produkt. Der DNA-Test erscheint immer als Schritt 1 in den Ergebnissen."
+    },
+    {
+      "type": "product",
+      "id": "product_dna",
+      "label": "DNA-Test (immer Schritt 1)"
+    },
+    {
+      "type": "product",
+      "id": "product_energie",
+      "label": "Profil Energie & Vitalität"
+    },
+    {
+      "type": "product",
+      "id": "product_fokus",
+      "label": "Profil Fokus & Klarheit"
+    },
+    {
+      "type": "product",
+      "id": "product_schlaf",
+      "label": "Profil Schlaf & Regeneration"
+    },
+    {
+      "type": "product",
+      "id": "product_langlebigkeit",
+      "label": "Profil Langlebigkeit & Zellgesundheit"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Longevity Quiz"
+    }
+  ]
+}
+{% endschema %}

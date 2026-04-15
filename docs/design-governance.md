@@ -261,9 +261,12 @@ No instruction to "find an image" is needed in the build prompt.
 - All spacing, color, typography, radius, and shadow values should reference tokens
 - Avoid hardcoded hex, px, or raw values in component-level CSS
 - If the theme already defines CSS custom properties that map to the same values, prefer the theme's variable names and alias them to these tokens at the root level
-- `--color-black` (#000000) is for text only — use `--color-dark` (#364F56) for all background surfaces
+- `--color-black` (#000000) is for text only — **never use for backgrounds**
+- `--color-dark` (#364F56) is for **emphasis surfaces only** (dark sections, dark CTAs, dark testimonial blocks) — not as a general background color
+- Section backgrounds follow a warm-neutral rhythm: `#f7f7f4` (primary) alternating with `#f2f1ed` (secondary); dark `#364f56` sections are deliberate exceptions, not the default
 - `--color-surface-tertiary` (#FAFAFA) is for form fields and inputs — not for full section backgrounds
 - Default alternating section background is `--color-surface-secondary` (#F6F4F1)
+- Text on light surfaces: `#26251e` (warm near-black); text on dark surfaces: `#f7f7f4` or `#ffffff`
 
 ---
 
