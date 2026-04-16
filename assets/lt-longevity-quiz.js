@@ -18,9 +18,10 @@
     target: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
     moon:   `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>`,
     zap:    `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
+    battery:`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m11 7l-3 5h4l-3 5"/><path d="M14.5 6H16a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-1.5"/><path d="M22 14v-4"/><path d="M5.5 18H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h1.5"/></svg>`,
     brain:  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>`,
     leaf:   `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 22 16 8"/><path d="M3.47 12.53A5 5 0 0 0 5 22a5 5 0 0 0 5-5 5 5 0 0 0-5.5-4.97"/><path d="M21 3a8 8 0 0 0-8 8 5 5 0 0 0 5 5 8 8 0 0 0 8-8 5 5 0 0 0-5-5z"/></svg>`,
-    wind:   `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2"/><path d="M9.6 4.6A2 2 0 1 1 11 8H2"/><path d="M12.6 19.4A2 2 0 1 0 14 16H2"/></svg>`,
+    gauge:  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 14l4-4"/><path d="M3.34 19a10 10 0 1 1 17.32 0"/></svg>`,
     scope:  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/></svg>`,
     dna:    `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"/><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"/><path d="m17 6-2.5-2.5"/><path d="m14 8-1-1"/><path d="m7 18 2.5 2.5"/><path d="m3.5 14.5.5.5"/><path d="m10 16 1 1"/><path d="m17 7 3-3"/><path d="m14 14 3 3"/></svg>`,
     run:    `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="4" r="1"/><path d="M6 20v-6l2-2 4-2 4 4 2 6"/><path d="m6 20 2-2"/><path d="M18 14v4l-4-2"/><path d="M8 12 6 8l4-1 3 3-2 4-1-2"/></svg>`,
@@ -36,6 +37,7 @@
   const QUESTIONS = [
     {
       id: 'ziel',
+      stepLabel: 'Ziel',
       icon: ICONS.target,
       question: 'Was ist dein wichtigstes Gesundheitsziel?',
       hint: 'Dein Ziel bestimmt, welche biologischen Prozesse wir priorisieren – nicht jede Intervention wirkt auf denselben Hebel.',
@@ -48,6 +50,7 @@
     },
     {
       id: 'schlaf',
+      stepLabel: 'Schlaf',
       icon: ICONS.moon,
       question: 'Wie erholsam ist dein Schlaf?',
       hint: 'Schlechter Schlaf erhöht messbar den inflammatorischen Stress und beschleunigt biologisches Altern – auch ohne subjektives Krankheitsgefühl.',
@@ -60,7 +63,8 @@
     },
     {
       id: 'energie',
-      icon: ICONS.zap,
+      stepLabel: 'Energie',
+      icon: ICONS.battery,
       question: 'Wie ist dein Energieniveau tagsüber?',
       hint: 'Energieeinbrüche sind oft ein frühes Signal für sinkende NAD⁺-Spiegel oder mitochondriale Dysfunktion – beides verändert sich mit dem Alter.',
       answers: [
@@ -72,6 +76,7 @@
     },
     {
       id: 'fokus',
+      stepLabel: 'Fokus',
       icon: ICONS.brain,
       question: 'Wie ist deine mentale Schärfe & Konzentration?',
       hint: 'Kognitive Leistung ist einer der sensitivsten Frühindikatoren für zelluläre Gesundheit – Brain Fog ist selten zufällig.',
@@ -84,6 +89,7 @@
     },
     {
       id: 'ernaehrung',
+      stepLabel: 'Ernährung',
       icon: ICONS.leaf,
       question: 'Wie würdest du deine Ernährung beschreiben?',
       hint: 'Ernährungsqualität beeinflusst die epigenetische Uhr direkt – schlechte Ernährung beschleunigt biologisches Altern nachweislich um mehrere Jahre.',
@@ -96,7 +102,8 @@
     },
     {
       id: 'stress',
-      icon: ICONS.wind,
+      stepLabel: 'Stress',
+      icon: ICONS.gauge,
       question: 'Wie hoch ist dein Stresslevel im Alltag?',
       hint: 'Chronischer Stress senkt NAD⁺-Spiegel, stört den Schlafzyklus und beeinträchtigt die Zellreparatur – ein unterschätzter Treiber biologischen Alterns.',
       answers: [
@@ -196,7 +203,7 @@
 
   // ─── DOM-Referenzen ──────────────────────────────────────────────────────────
 
-  let quizEl, stepsEl, resultsEl, progressEl, progressBarEl, stepCounterEl;
+  let quizEl, stepsEl, resultsEl, progressEl, progressBarEl, milestonesEl, stepCounterEl;
 
   // ─── Init ────────────────────────────────────────────────────────────────────
 
@@ -206,9 +213,14 @@
 
     stepsEl = document.getElementById('lt-quiz-steps');
     resultsEl = document.getElementById('lt-quiz-results');
-    progressEl = document.querySelector('.lt-quiz__progress');
+    progressEl = quizEl.querySelector('.lt-quiz__progress');
     progressBarEl = document.getElementById('lt-quiz-progress-bar');
+    milestonesEl = document.getElementById('lt-quiz-milestones');
     stepCounterEl = document.getElementById('lt-quiz-step-counter');
+
+    if (progressEl) {
+      progressEl.style.setProperty('--lt-quiz-step-count', String(QUESTIONS.length));
+    }
 
     renderStep(0);
     updateProgress();
@@ -221,7 +233,6 @@
 
     stepsEl.innerHTML = `
       <div class="lt-quiz__step" data-step="${index}">
-        <div class="lt-quiz__question-icon" aria-hidden="true">${q.icon}</div>
         <h3 class="lt-quiz__question">${escapeHtml(q.question)}</h3>
         <ul class="lt-quiz__answers" role="list">
           ${q.answers.map((a, i) => `
@@ -251,6 +262,23 @@
         }
       });
     });
+  }
+
+  function renderMilestones() {
+    if (!milestonesEl) return;
+
+    milestonesEl.innerHTML = QUESTIONS.map((question, index) => {
+      let state = '';
+      if (index < currentStep) state = ' lt-quiz__milestone--done';
+      if (index === currentStep) state = ' lt-quiz__milestone--current';
+
+      return `
+        <li class="lt-quiz__milestone${state}" aria-label="Schritt ${index + 1}: ${escapeHtml(question.stepLabel)}">
+          <span class="lt-quiz__milestone-dot" aria-hidden="true">${question.icon}</span>
+          <span class="lt-quiz__milestone-label">${escapeHtml(question.stepLabel)}</span>
+        </li>
+      `;
+    }).join('');
   }
 
   function renderResults(profileKey) {
@@ -402,9 +430,14 @@
   }
 
   function updateProgress() {
-    const pct = Math.round((currentStep / QUESTIONS.length) * 100);
+    const maxStep = Math.max(QUESTIONS.length - 1, 1);
+    const pct = Math.round((currentStep / maxStep) * 100);
     if (progressBarEl) progressBarEl.style.width = pct + '%';
-    if (progressEl) progressEl.setAttribute('aria-valuenow', String(pct));
+    if (progressEl) {
+      progressEl.setAttribute('aria-valuenow', String(pct));
+      progressEl.setAttribute('aria-valuetext', `Frage ${currentStep + 1} von ${QUESTIONS.length}`);
+    }
+    renderMilestones();
     if (stepCounterEl) stepCounterEl.textContent = `Frage ${currentStep + 1} von ${QUESTIONS.length}`;
   }
 
