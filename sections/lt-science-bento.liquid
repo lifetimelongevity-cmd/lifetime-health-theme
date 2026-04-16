@@ -4,13 +4,10 @@
   §12 Build Spec:
   - Surface:         --color-surface-dark (#364F56) — direkte Fortsetzung von lt-hp-science,
                      sodass beide Sections visuell zusammenfließen
-  - Dominant:        Große Text-Kachel mit Kernaussage — Auge landet dort zuerst
-  - Heading:         Kein Section-Heading — die Kacheln sind der Inhalt
-  - Content pattern: Bento-Grid: unterschiedlich große Kacheln (CSS Grid areas)
-                     Kachel A (groß): Kernaussage als Statement
-                     Kachel B (Foto): Mood-Bild — körnig, atmosphärisch, kein Produktfoto
-                     Kachel C/D/E (klein): Facts/Stats/Claims — je ein Wort + Satz
-  - CTA:             Optional, als Kachel oder keiner
+  - Dominant:        Variante 1 = Bento-Grid mit Statement, Foto und Facts
+                     Variante 2 = Split-Bento mit Copy links und Bild rechts
+  - Heading:         Kein klassischer Section-Header — die Flächen selbst tragen die Aussage
+  - CTA:             In Split-Variante über zwei Buttons unterhalb der Copy
   - Removed:         Section-Header (kein Kicker/Heading nötig — Bento ist visuelles Element),
                      dekorative Icons, gleichförmige Karten
   - Inspiration:     timeline.com/science — Bento mit variierenden Kacheln + Mood-Foto
@@ -19,6 +16,7 @@
 {% endcomment %}
 
 {%- liquid
+  assign layout_variant = section.settings.layout_variant | default: 'grid'
   assign bento_image_src = section.settings.mood_image | strip
   if bento_image_src contains 'shopify://shop_images/'
     assign bento_image_src = bento_image_src | remove: 'shopify://shop_images/' | file_url
@@ -26,6 +24,14 @@
     unless bento_image_src contains '://'
       assign bento_image_src = bento_image_src | file_url
     endunless
+  endif
+  assign has_primary_cta = false
+  assign has_secondary_cta = false
+  if section.settings.primary_button_label != blank and section.settings.primary_button_link != blank
+    assign has_primary_cta = true
+  endif
+  if section.settings.secondary_button_label != blank and section.settings.secondary_button_link != blank
+    assign has_secondary_cta = true
   endif
 -%}
 
@@ -43,56 +49,115 @@
 
 <section class="science-bento" id="section-{{ section.id }}">
   <div class="science-bento__container">
-    <div class="science-bento__grid">
+    {%- assign bento_image_alt = section.settings.mood_image_alt | default: '' -%}
 
-      {%- comment -%}── Kachel A: Große Kernaussage ──{%- endcomment -%}
-      <div class="science-bento__tile science-bento__tile--statement">
-        {%- if section.settings.statement_kicker != blank -%}
-          <p class="science-bento__tile-kicker">{{ section.settings.statement_kicker | escape }}</p>
-        {%- endif -%}
-        {%- if section.settings.statement_text != blank -%}
-          <p class="science-bento__statement">{{ section.settings.statement_text | escape }}</p>
-        {%- endif -%}
-        {%- if section.settings.statement_sub != blank -%}
-          <p class="science-bento__statement-sub">{{ section.settings.statement_sub | escape }}</p>
-        {%- endif -%}
+    {%- if layout_variant == 'split' -%}
+      <div class="science-bento__split">
+        <div class="science-bento__tile science-bento__tile--statement science-bento__tile--split-copy">
+          {%- if section.settings.statement_kicker != blank -%}
+            <p class="science-bento__tile-kicker">{{ section.settings.statement_kicker | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.statement_text != blank -%}
+            <p class="science-bento__statement">{{ section.settings.statement_text | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.statement_sub != blank -%}
+            <p class="science-bento__statement-sub">{{ section.settings.statement_sub | escape }}</p>
+          {%- endif -%}
+
+          {%- if has_primary_cta or has_secondary_cta -%}
+            <div class="science-bento__actions">
+              {%- if has_primary_cta -%}
+                <a
+                  href="{{ section.settings.primary_button_link }}"
+                  class="button button--{{ section.settings.primary_button_style | default: 'solid' }} button--icon"
+                >
+                  <span aria-hidden="true" class="button__icon">
+                    {%- render 'theme-symbols', icon: 'arrow-right' -%}
+                  </span>
+                  <span>{{ section.settings.primary_button_label | escape }}</span>
+                </a>
+              {%- endif -%}
+              {%- if has_secondary_cta -%}
+                <a
+                  href="{{ section.settings.secondary_button_link }}"
+                  class="button button--{{ section.settings.secondary_button_style | default: 'outline' }} button--icon"
+                >
+                  <span aria-hidden="true" class="button__icon">
+                    {%- render 'theme-symbols', icon: 'arrow-right' -%}
+                  </span>
+                  <span>{{ section.settings.secondary_button_label | escape }}</span>
+                </a>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
+
+        <div class="science-bento__tile science-bento__tile--photo science-bento__tile--split-photo">
+          {%- if bento_image_src != blank -%}
+            <img
+              src="{{ bento_image_src }}"
+              alt="{{ bento_image_alt | escape }}"
+              class="science-bento__photo"
+              loading="lazy"
+              width="800"
+              height="900"
+            >
+          {%- else -%}
+            <div class="science-bento__photo-placeholder" aria-hidden="true"></div>
+          {%- endif -%}
+        </div>
       </div>
+    {%- else -%}
+      <div class="science-bento__grid">
 
-      {%- comment -%}── Kachel B: Mood-Foto ──{%- endcomment -%}
-      <div class="science-bento__tile science-bento__tile--photo">
-        {%- if bento_image_src != blank -%}
-          {%- assign bento_image_alt = section.settings.mood_image_alt | default: '' -%}
-          <img
-            src="{{ bento_image_src }}"
-            alt="{{ bento_image_alt | escape }}"
-            class="science-bento__photo"
-            loading="lazy"
-            width="600"
-            height="600"
-          >
-        {%- else -%}
-          <div class="science-bento__photo-placeholder" aria-hidden="true"></div>
-        {%- endif -%}
+        {%- comment -%}── Kachel A: Große Kernaussage ──{%- endcomment -%}
+        <div class="science-bento__tile science-bento__tile--statement">
+          {%- if section.settings.statement_kicker != blank -%}
+            <p class="science-bento__tile-kicker">{{ section.settings.statement_kicker | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.statement_text != blank -%}
+            <p class="science-bento__statement">{{ section.settings.statement_text | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.statement_sub != blank -%}
+            <p class="science-bento__statement-sub">{{ section.settings.statement_sub | escape }}</p>
+          {%- endif -%}
+        </div>
+
+        {%- comment -%}── Kachel B: Mood-Foto ──{%- endcomment -%}
+        <div class="science-bento__tile science-bento__tile--photo">
+          {%- if bento_image_src != blank -%}
+            <img
+              src="{{ bento_image_src }}"
+              alt="{{ bento_image_alt | escape }}"
+              class="science-bento__photo"
+              loading="lazy"
+              width="600"
+              height="600"
+            >
+          {%- else -%}
+            <div class="science-bento__photo-placeholder" aria-hidden="true"></div>
+          {%- endif -%}
+        </div>
+
+        {%- comment -%}── Kacheln C–E: Kleine Fact-Kacheln (Blocks) ──{%- endcomment -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'fact' -%}
+            <div class="science-bento__tile science-bento__tile--fact" {{ block.shopify_attributes }}>
+              {%- if block.settings.fact_label != blank -%}
+                <p class="science-bento__fact-label">{{ block.settings.fact_label | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.fact_value != blank -%}
+                <p class="science-bento__fact-value">{{ block.settings.fact_value | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.fact_desc != blank -%}
+                <p class="science-bento__fact-desc">{{ block.settings.fact_desc | escape }}</p>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+
       </div>
-
-      {%- comment -%}── Kacheln C–E: Kleine Fact-Kacheln (Blocks) ──{%- endcomment -%}
-      {%- for block in section.blocks -%}
-        {%- if block.type == 'fact' -%}
-          <div class="science-bento__tile science-bento__tile--fact" {{ block.shopify_attributes }}>
-            {%- if block.settings.fact_label != blank -%}
-              <p class="science-bento__fact-label">{{ block.settings.fact_label | escape }}</p>
-            {%- endif -%}
-            {%- if block.settings.fact_value != blank -%}
-              <p class="science-bento__fact-value">{{ block.settings.fact_value | escape }}</p>
-            {%- endif -%}
-            {%- if block.settings.fact_desc != blank -%}
-              <p class="science-bento__fact-desc">{{ block.settings.fact_desc | escape }}</p>
-            {%- endif -%}
-          </div>
-        {%- endif -%}
-      {%- endfor -%}
-
-    </div>
+    {%- endif -%}
   </div>
 </section>
 
@@ -105,6 +170,13 @@
     max-width: 1280px;
     margin-inline: auto;
     padding-inline: var(--space-5);
+  }
+
+  .science-bento__split {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(320px, 0.9fr);
+    gap: var(--space-3);
+    align-items: stretch;
   }
 
   /* ─── BENTO GRID ─── */
@@ -150,6 +222,11 @@
     gap: var(--space-3);
   }
 
+  .science-bento__tile--split-copy {
+    justify-content: center;
+    min-height: 32rem;
+  }
+
   .science-bento__tile-kicker {
     margin: 0;
     font-family: var(--font-body);
@@ -177,6 +254,17 @@
     color: rgba(247, 247, 244, 0.6);
   }
 
+  .science-bento__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+
+  .science-bento__actions .button {
+    margin: 0;
+  }
+
   /* ─── FOTO TILE ─── */
   .science-bento__tile--photo {
     position: relative;
@@ -197,6 +285,10 @@
     height: 100%;
     min-height: 360px;
     background: rgba(255, 255, 255, 0.03);
+  }
+
+  .science-bento__tile--split-photo {
+    min-height: 32rem;
   }
 
   /* ─── FACT TILES ─── */
@@ -240,6 +332,15 @@
 
   /* ─── RESPONSIVE ─── */
   @media screen and (max-width: 1024px) {
+    .science-bento__split {
+      grid-template-columns: 1fr;
+    }
+
+    .science-bento__tile--split-copy,
+    .science-bento__tile--split-photo {
+      min-height: 24rem;
+    }
+
     /* Tablet: 2 Spalten, Foto oben rechts, Facts darunter */
     .science-bento__grid {
       grid-template-columns: 1fr 1fr;
@@ -265,6 +366,10 @@
       padding-inline: var(--space-4);
     }
 
+    .science-bento__split {
+      gap: var(--space-2);
+    }
+
     .science-bento__grid {
       grid-template-columns: 1fr;
       gap: var(--space-2);
@@ -275,6 +380,11 @@
       grid-row: auto;
       min-height: 180px;
       padding: var(--space-6);
+    }
+
+    .science-bento__tile--split-copy,
+    .science-bento__tile--split-photo {
+      min-height: 18rem;
     }
 
     .science-bento__tile--photo {
@@ -291,6 +401,11 @@
     .science-bento__statement {
       font-size: var(--text-h3);
     }
+
+    .science-bento__actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
   }
 {% endstylesheet %}
 
@@ -300,6 +415,20 @@
   "tag": "section",
   "class": "lt-science-bento",
   "settings": [
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout_variant",
+      "label": "Variante",
+      "options": [
+        { "value": "grid", "label": "Bento Grid" },
+        { "value": "split", "label": "Split mit Bild rechts" }
+      ],
+      "default": "grid"
+    },
     {
       "type": "header",
       "content": "Farben"
@@ -368,6 +497,50 @@
       "id": "statement_sub",
       "label": "Untertext (optional)",
       "default": "Epigenetik und Genetik zeigen zusammen, was kein Blutmarker leisten kann."
+    },
+    {
+      "type": "header",
+      "content": "Buttons (nur Split-Variante)"
+    },
+    {
+      "type": "text",
+      "id": "primary_button_label",
+      "label": "Primärer Button Label"
+    },
+    {
+      "type": "url",
+      "id": "primary_button_link",
+      "label": "Primärer Button Link"
+    },
+    {
+      "type": "select",
+      "id": "primary_button_style",
+      "label": "Primärer Button Stil",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "outline", "label": "Outline" }
+      ],
+      "default": "solid"
+    },
+    {
+      "type": "text",
+      "id": "secondary_button_label",
+      "label": "Sekundärer Button Label"
+    },
+    {
+      "type": "url",
+      "id": "secondary_button_link",
+      "label": "Sekundärer Button Link"
+    },
+    {
+      "type": "select",
+      "id": "secondary_button_style",
+      "label": "Sekundärer Button Stil",
+      "options": [
+        { "value": "solid", "label": "Solid" },
+        { "value": "outline", "label": "Outline" }
+      ],
+      "default": "outline"
     },
     {
       "type": "header",
