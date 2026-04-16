@@ -196,16 +196,17 @@
 
   // ─── DOM-Referenzen ──────────────────────────────────────────────────────────
 
-  let stepsEl, resultsEl, progressBarEl, stepCounterEl;
+  let quizEl, stepsEl, resultsEl, progressEl, progressBarEl, stepCounterEl;
 
   // ─── Init ────────────────────────────────────────────────────────────────────
 
   function init() {
-    const quizEl = document.getElementById('lt-longevity-quiz');
+    quizEl = document.getElementById('lt-longevity-quiz');
     if (!quizEl) return;
 
     stepsEl = document.getElementById('lt-quiz-steps');
     resultsEl = document.getElementById('lt-quiz-results');
+    progressEl = document.querySelector('.lt-quiz__progress');
     progressBarEl = document.getElementById('lt-quiz-progress-bar');
     stepCounterEl = document.getElementById('lt-quiz-step-counter');
 
@@ -224,11 +225,16 @@
         <h3 class="lt-quiz__question">${escapeHtml(q.question)}</h3>
         <ul class="lt-quiz__answers" role="list">
           ${q.answers.map((a, i) => `
-            <li class="lt-quiz__answer${answers[index] && answers[index].answerIndex === i ? ' lt-quiz__answer--selected' : ''}"
-                role="button" tabindex="0" data-index="${i}"
-                aria-pressed="${answers[index] && answers[index].answerIndex === i ? 'true' : 'false'}">
-              <span class="lt-quiz__answer-check" aria-hidden="true"></span>
-              <span class="lt-quiz__answer-text">${escapeHtml(a.text)}</span>
+            <li class="lt-quiz__answer-item">
+              <button
+                type="button"
+                class="lt-quiz__answer${answers[index] && answers[index].answerIndex === i ? ' lt-quiz__answer--selected' : ''}"
+                data-index="${i}"
+                aria-pressed="${answers[index] && answers[index].answerIndex === i ? 'true' : 'false'}"
+              >
+                <span class="lt-quiz__answer-check" aria-hidden="true"></span>
+                <span class="lt-quiz__answer-text">${escapeHtml(a.text)}</span>
+              </button>
             </li>
           `).join('')}
         </ul>
@@ -245,8 +251,6 @@
         }
       });
     });
-
-    document.getElementById('lt-longevity-quiz')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function renderResults(profileKey) {
@@ -254,7 +258,7 @@
     const products = window.LT_QUIZ_PRODUCTS || {};
 
     stepsEl.hidden = true;
-    progressBarEl.closest('.lt-quiz__progress').hidden = true;
+    if (progressEl) progressEl.hidden = true;
     stepCounterEl.hidden = true;
 
     resultsEl.hidden = false;
@@ -294,7 +298,6 @@
     `;
 
     document.getElementById('lt-quiz-restart')?.addEventListener('click', resetQuiz);
-    document.getElementById('lt-longevity-quiz')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   function renderPrimaryCard(product, reason) {
@@ -360,6 +363,7 @@
         <p class="lt-quiz__lifestyle-dna-note">
           ${ICONS.dna}
           Dein AGE &amp; DNA-Test liefert dir eine noch präzisere Auswertung – auf Basis deiner individuellen Genetik und epigenetischen Uhr.
+          <a href="/products/lifetime-age-dna">Mit dem AGE &amp; DNA-Test starten</a>
         </p>
       </div>
     `;
@@ -400,6 +404,7 @@
   function updateProgress() {
     const pct = Math.round((currentStep / QUESTIONS.length) * 100);
     if (progressBarEl) progressBarEl.style.width = pct + '%';
+    if (progressEl) progressEl.setAttribute('aria-valuenow', String(pct));
     if (stepCounterEl) stepCounterEl.textContent = `Frage ${currentStep + 1} von ${QUESTIONS.length}`;
   }
 
@@ -407,12 +412,13 @@
     currentStep = 0;
     answers = [];
     stepsEl.hidden = false;
-    progressBarEl.closest('.lt-quiz__progress').hidden = false;
+    if (progressEl) progressEl.hidden = false;
     stepCounterEl.hidden = false;
     resultsEl.hidden = true;
     resultsEl.innerHTML = '';
     updateProgress();
     renderStep(0);
+    quizEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
   // ─── Helpers ─────────────────────────────────────────────────────────────────
