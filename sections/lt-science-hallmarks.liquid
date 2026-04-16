@@ -14,16 +14,6 @@
   if section.settings.heading_size == 'product_title'
     assign hallmarks_heading_lg = true
   endif
-
-  assign featured_count = 0
-  assign secondary_count = 0
-  for block in section.blocks
-    if block.settings.featured
-      assign featured_count = featured_count | plus: 1
-    else
-      assign secondary_count = secondary_count | plus: 1
-    endif
-  endfor
 -%}
 
 {% style %}
@@ -31,7 +21,8 @@
     --science-hallmarks-bg: {{ section.settings.color_bg }};
     --science-hallmarks-card-bg: {{ section.settings.color_card_bg }};
     --science-hallmarks-text: {{ section.settings.color_text }};
-    --science-hallmarks-text-secondary: {{ section.settings.color_text | color_modify: 'alpha', 0.68 }};
+    --science-hallmarks-text-secondary: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
+    --science-hallmarks-text-muted: {{ section.settings.color_text | color_modify: 'alpha', 0.35 }};
     --science-hallmarks-border: {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
@@ -40,6 +31,7 @@
 
 <section class="science-hallmarks" id="section-{{ section.id }}">
   <div class="science-hallmarks__container">
+
     {%- if hallmarks_kicker != blank or hallmarks_heading != blank or hallmarks_subheading != blank -%}
       <header class="science-hallmarks__header crs-heading-stack crs-heading-stack--align-{{ hallmarks_align }}{% if hallmarks_heading_lg %} crs-heading-stack--headline-lg{% endif %}">
         {%- if hallmarks_kicker != blank -%}
@@ -56,86 +48,64 @@
       </header>
     {%- endif -%}
 
-    {%- if featured_count > 0 -%}
-      <ol class="science-hallmarks__featured-grid" role="list">
-        {%- for block in section.blocks -%}
-          {%- if block.settings.featured -%}
-            {%- liquid
-              assign hallmark_number = block.settings.number | strip
-              if hallmark_number == blank
-                if forloop.index < 10
-                  assign hallmark_number = '0' | append: forloop.index
-                else
-                  assign hallmark_number = forloop.index
-                endif
-              endif
-            -%}
-            <li class="science-hallmarks__featured-card" {{ block.shopify_attributes }}>
-              <div class="science-hallmarks__featured-number" aria-hidden="true">{{ hallmark_number | escape }}</div>
-              <div class="science-hallmarks__content">
-                {%- if block.settings.name != blank -%}
-                  <h3 class="science-hallmarks__featured-name">{{ block.settings.name | escape }}</h3>
-                {%- endif -%}
-                {%- if block.settings.body != blank -%}
-                  <p class="science-hallmarks__body">{{ block.settings.body | escape }}</p>
-                {%- endif -%}
-                {%- if block.settings.featured_note != blank -%}
-                  <div class="science-hallmarks__featured-relevance">
-                    <p class="science-hallmarks__relevance-label">Relevanz</p>
-                    <p class="science-hallmarks__relevance-text">{{ block.settings.featured_note | escape }}</p>
-                  </div>
-                {%- endif -%}
-              </div>
-            </li>
+    <div class="science-hallmarks__body-wrap">
+      {%- assign in_group = false -%}
+      {%- for block in section.blocks -%}
+
+        {%- if block.type == 'category_header' -%}
+          {%- if in_group -%}
+            </ol>
+          </div>
           {%- endif -%}
-        {%- endfor -%}
-      </ol>
-    {%- endif -%}
+          <div class="science-hallmarks__category" {{ block.shopify_attributes }}>
+            <div class="science-hallmarks__cat-row">
+              {%- if block.settings.category_name != blank -%}
+                <span class="science-hallmarks__cat-label">{{ block.settings.category_name | escape }}</span>
+              {%- endif -%}
+              {%- if block.settings.category_desc != blank -%}
+                <span class="science-hallmarks__cat-desc">{{ block.settings.category_desc | escape }}</span>
+              {%- endif -%}
+            </div>
+            <ol class="science-hallmarks__grid" role="list">
+          {%- assign in_group = true -%}
 
-    {%- if secondary_count > 0 -%}
-      <div class="science-hallmarks__secondary-wrap">
-        <button class="science-hallmarks__expand-btn" aria-expanded="false" onclick="this.setAttribute('aria-expanded', this.getAttribute('aria-expanded') === 'true' ? 'false' : 'true'); this.closest('.science-hallmarks__secondary-wrap').classList.toggle('is-open')">
-          <span class="science-hallmarks__expand-label">{{ secondary_count }} weitere Mechanismen anzeigen</span>
-          <svg class="science-hallmarks__expand-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </button>
+        {%- elsif block.type == 'hallmark' -%}
+          {%- unless in_group -%}
+            <div class="science-hallmarks__category">
+              <ol class="science-hallmarks__grid" role="list">
+            {%- assign in_group = true -%}
+          {%- endunless -%}
+          {%- assign hallmark_number = block.settings.number | strip -%}
+          <li class="science-hallmarks__card" {{ block.shopify_attributes }}>
+            <div class="science-hallmarks__card-inner">
+              {%- if block.settings.name != blank -%}
+                <h3 class="science-hallmarks__name">
+                  {%- if hallmark_number != blank -%}
+                    <span class="science-hallmarks__num" aria-hidden="true">{{ hallmark_number | escape }}</span>
+                  {%- endif -%}
+                  {{ block.settings.name | escape }}
+                </h3>
+              {%- endif -%}
+              {%- if block.settings.body != blank -%}
+                <p class="science-hallmarks__desc">{{ block.settings.body | escape }}</p>
+              {%- endif -%}
+            </div>
+          </li>
 
-        <ol class="science-hallmarks__secondary-grid" role="list">
-          {%- for block in section.blocks -%}
-            {%- unless block.settings.featured -%}
-              {%- liquid
-                assign hallmark_number = block.settings.number | strip
-                if hallmark_number == blank
-                  if forloop.index < 10
-                    assign hallmark_number = '0' | append: forloop.index
-                  else
-                    assign hallmark_number = forloop.index
-                  endif
-                endif
-              -%}
-              <li class="science-hallmarks__card" {{ block.shopify_attributes }}>
-                <div class="science-hallmarks__number" aria-hidden="true">{{ hallmark_number | escape }}</div>
-                <div class="science-hallmarks__content">
-                  {%- if block.settings.name != blank -%}
-                    <h3 class="science-hallmarks__name">{{ block.settings.name | escape }}</h3>
-                  {%- endif -%}
-                  {%- if block.settings.body != blank -%}
-                    <p class="science-hallmarks__body">{{ block.settings.body | escape }}</p>
-                  {%- endif -%}
-                </div>
-              </li>
-            {%- endunless -%}
-          {%- endfor -%}
-        </ol>
-      </div>
-    {%- endif -%}
+        {%- endif -%}
+      {%- endfor -%}
+      {%- if in_group -%}
+          </ol>
+        </div>
+      {%- endif -%}
+    </div>
 
     {%- if hallmarks_source != blank -%}
       <div class="science-hallmarks__source">
         <p class="science-hallmarks__source-text">{{ hallmarks_source | escape }}</p>
       </div>
     {%- endif -%}
+
   </div>
 </section>
 
@@ -152,199 +122,107 @@
 
   .science-hallmarks__header {
     max-width: 48rem;
-    margin-bottom: var(--space-7);
+    margin-bottom: var(--space-8);
   }
 
   .science-hallmarks__header.crs-heading-stack--align-center {
     margin-inline: auto;
   }
 
-  /* ─── FEATURED GRID ─── */
-  .science-hallmarks__featured-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  /* ─── CATEGORY GROUPS ─── */
+  .science-hallmarks__body-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-7);
+  }
+
+  .science-hallmarks__category {
+    display: flex;
+    flex-direction: column;
     gap: var(--space-5);
-    list-style: none;
-    margin: 0 0 var(--space-6);
-    padding: 0;
   }
 
-  .science-hallmarks__featured-card {
+  .science-hallmarks__cat-row {
     display: flex;
-    flex-direction: column;
+    align-items: baseline;
     gap: var(--space-4);
-    min-width: 0;
-    padding: var(--space-6);
-    border: 1px solid var(--science-hallmarks-border, rgba(38, 37, 30, 0.08));
-    border-radius: var(--radius-md);
-    background: var(--science-hallmarks-card-bg, #f2f1ed);
-    box-shadow: var(--shadow-sm);
-    overflow-wrap: break-word;
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--science-hallmarks-border, rgba(38, 37, 30, 0.08));
   }
 
-  .science-hallmarks__featured-number {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 3rem;
-    height: 3rem;
-    border-radius: var(--radius-full);
-    background: var(--science-hallmarks-text, #26251e);
-    color: var(--color-white);
-    font-family: var(--font-heading);
-    font-size: var(--text-body-sm);
-    font-weight: var(--weight-semibold);
-    line-height: 1;
-    flex-shrink: 0;
-  }
-
-  .science-hallmarks__featured-name {
-    margin: 0;
-    font-family: var(--font-heading);
-    font-size: var(--text-h3);
-    font-weight: var(--weight-semibold);
-    line-height: var(--leading-tight);
-    color: var(--science-hallmarks-text, #26251e);
-  }
-
-  .science-hallmarks__featured-relevance {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    margin-top: auto;
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--science-hallmarks-border, rgba(38, 37, 30, 0.08));
-  }
-
-  .science-hallmarks__relevance-label {
-    margin: 0;
+  .science-hallmarks__cat-label {
     font-family: var(--font-body);
     font-size: var(--text-micro);
     font-weight: var(--weight-medium);
-    line-height: var(--leading-body);
-    letter-spacing: 0.08em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: var(--science-hallmarks-text-secondary, rgba(38, 37, 30, 0.68));
+    color: var(--science-hallmarks-text-secondary, rgba(38, 37, 30, 0.6));
+    white-space: nowrap;
   }
 
-  .science-hallmarks__relevance-text {
-    margin: 0;
+  .science-hallmarks__cat-desc {
     font-family: var(--font-body);
     font-size: var(--text-body-sm);
-    line-height: var(--leading-relaxed);
-    color: var(--science-hallmarks-text, #26251e);
+    line-height: var(--leading-body);
+    color: var(--science-hallmarks-text-muted, rgba(38, 37, 30, 0.35));
   }
 
-  /* ─── SECONDARY GRID (COMPACT) ─── */
-  .science-hallmarks__secondary-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-  }
-
-  .science-hallmarks__expand-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-5);
-    border: 1px solid var(--science-hallmarks-border, rgba(38, 37, 30, 0.08));
-    border-radius: var(--radius-full);
-    background: transparent;
-    font-family: var(--font-body);
-    font-size: var(--text-body-sm);
-    font-weight: var(--weight-medium);
-    color: var(--science-hallmarks-text, #26251e);
-    cursor: pointer;
-    transition: background var(--ease-default), border-color var(--ease-default);
-  }
-
-  .science-hallmarks__expand-btn:hover {
-    background: var(--science-hallmarks-card-bg, #f2f1ed);
-    border-color: var(--science-hallmarks-text, #26251e);
-  }
-
-  .science-hallmarks__expand-icon {
-    transition: transform var(--ease-default);
-  }
-
-  .science-hallmarks__secondary-wrap.is-open .science-hallmarks__expand-icon {
-    transform: rotate(180deg);
-  }
-
-  .science-hallmarks__secondary-grid {
-    display: none;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* ─── GRID ─── */
+  .science-hallmarks__grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-3);
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
-  .science-hallmarks__secondary-wrap.is-open .science-hallmarks__secondary-grid {
-    display: grid;
+  /* ─── CARD ─── */
+  .science-hallmarks__card {
+    min-width: 0;
   }
 
-
-  .science-hallmarks__card {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: var(--space-3);
-    min-width: 0;
-    padding: var(--space-4);
-    border: 1px solid var(--science-hallmarks-border, rgba(38, 37, 30, 0.08));
+  .science-hallmarks__card-inner {
+    padding: var(--space-5);
     border-radius: var(--radius-md);
     background: var(--science-hallmarks-card-bg, #f2f1ed);
-    box-shadow: var(--shadow-sm);
-    overflow-wrap: break-word;
-  }
-
-  .science-hallmarks__number {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    border-radius: var(--radius-full);
-    background: var(--science-hallmarks-border, rgba(38, 37, 30, 0.08));
-    color: var(--science-hallmarks-text-secondary, rgba(38, 37, 30, 0.68));
-    font-family: var(--font-heading);
-    font-size: var(--text-body-sm);
-    font-weight: var(--weight-semibold);
-    line-height: 1;
-    flex-shrink: 0;
-  }
-
-  .science-hallmarks__content {
-    min-width: 0;
-  }
-
-  /* Featured-Content als flex-column, damit margin-top: auto auf Relevanz greift */
-  .science-hallmarks__featured-card .science-hallmarks__content {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
+    height: 100%;
   }
 
   .science-hallmarks__name {
-    margin: 0 0 var(--space-2);
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-3);
     font-family: var(--font-heading);
-    font-size: var(--text-body-sm);
+    font-size: var(--text-body);
     font-weight: var(--weight-semibold);
     line-height: var(--leading-tight);
     color: var(--science-hallmarks-text, #26251e);
   }
 
-  .science-hallmarks__body {
+  .science-hallmarks__num {
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-regular);
+    color: var(--science-hallmarks-text-muted, rgba(38, 37, 30, 0.35));
+    flex-shrink: 0;
+    line-height: 1;
+    position: relative;
+    top: -1px;
+  }
+
+  .science-hallmarks__desc {
     margin: 0;
     font-family: var(--font-body);
     font-size: var(--text-body-sm);
     line-height: var(--leading-relaxed);
-    color: var(--science-hallmarks-text-secondary, rgba(38, 37, 30, 0.68));
+    color: var(--science-hallmarks-text-secondary, rgba(38, 37, 30, 0.6));
   }
 
+  /* ─── SOURCE ─── */
   .science-hallmarks__source {
-    margin-top: var(--space-6);
+    margin-top: var(--space-7);
     padding-top: var(--space-4);
     border-top: 1px solid var(--science-hallmarks-border, rgba(38, 37, 30, 0.08));
   }
@@ -354,27 +232,18 @@
     font-family: var(--font-body);
     font-size: var(--text-body-sm);
     line-height: var(--leading-body);
-    color: var(--science-hallmarks-text-secondary, rgba(38, 37, 30, 0.68));
+    color: var(--science-hallmarks-text-muted, rgba(38, 37, 30, 0.35));
   }
 
   /* ─── RESPONSIVE ─── */
   @media screen and (max-width: 1024px) {
-    .science-hallmarks__featured-grid {
+    .science-hallmarks__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .science-hallmarks__secondary-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  @media screen and (min-width: 1024px) {
-    .science-hallmarks__expand-btn {
-      display: none;
-    }
-
-    .science-hallmarks__secondary-grid {
-      display: grid !important;
+    .science-hallmarks__cat-row {
+      flex-direction: column;
+      gap: var(--space-2);
     }
   }
 
@@ -383,27 +252,17 @@
       padding-inline: var(--space-4);
     }
 
-    .science-hallmarks__featured-card {
-      padding: var(--space-5);
-      gap: var(--space-3);
-    }
-
-    .science-hallmarks__featured-number {
-      width: 2.75rem;
-      height: 2.75rem;
-    }
-
-    .science-hallmarks__featured-name {
-      font-size: var(--text-section);
-    }
-
-    .science-hallmarks__secondary-grid {
+    .science-hallmarks__grid {
       grid-template-columns: 1fr;
-      gap: var(--space-3);
+      gap: var(--space-2);
     }
 
-    .science-hallmarks__card {
-      gap: var(--space-3);
+    .science-hallmarks__body-wrap {
+      gap: var(--space-6);
+    }
+
+    .science-hallmarks__card-inner {
+      padding: var(--space-4);
     }
   }
 {% endstylesheet %}
@@ -513,6 +372,24 @@
   ],
   "blocks": [
     {
+      "type": "category_header",
+      "name": "Kategorie-Trenner",
+      "settings": [
+        {
+          "type": "text",
+          "id": "category_name",
+          "label": "Kategorie-Label",
+          "default": "Primäre Hallmarks"
+        },
+        {
+          "type": "text",
+          "id": "category_desc",
+          "label": "Kurzbeschreibung (optional)",
+          "info": "Erscheint neben dem Kategorie-Label als ergänzende Einordnung."
+        }
+      ]
+    },
+    {
       "type": "hallmark",
       "name": "Hallmark",
       "settings": [
@@ -533,18 +410,6 @@
           "id": "body",
           "label": "Beschreibung",
           "default": "Mit der Zeit sammeln sich Schäden in unserer DNA an."
-        },
-        {
-          "type": "checkbox",
-          "id": "featured",
-          "label": "Featured (Hauptkarte)",
-          "default": false
-        },
-        {
-          "type": "textarea",
-          "id": "featured_note",
-          "label": "Relevanz-Hinweis (nur bei Featured)",
-          "info": "Verbindet diesen Hallmark mit LIFETIME-Produkten. Wird nur angezeigt wenn Featured aktiviert."
         }
       ]
     }
@@ -554,35 +419,18 @@
       "name": "Science Hallmarks",
       "blocks": [
         {
+          "type": "category_header",
+          "settings": {
+            "category_name": "Primäre Hallmarks",
+            "category_desc": "Ursachen biologischer Alterung"
+          }
+        },
+        {
           "type": "hallmark",
           "settings": {
             "number": "01",
             "name": "Genomische Instabilität",
             "body": "Mit der Zeit sammeln sich Schäden in unserer DNA an."
-          }
-        },
-        {
-          "type": "hallmark",
-          "settings": {
-            "number": "02",
-            "name": "Telomerverkürzung",
-            "body": "Telomere schützen die Enden unserer Chromosomen."
-          }
-        },
-        {
-          "type": "hallmark",
-          "settings": {
-            "number": "03",
-            "name": "Epigenetische Veränderungen",
-            "body": "Die Steuerung unserer Gene verändert sich im Laufe des Lebens."
-          }
-        },
-        {
-          "type": "hallmark",
-          "settings": {
-            "number": "04",
-            "name": "Verlust der Proteostase",
-            "body": "Proteine müssen korrekt gefaltet und recycelt werden."
           }
         }
       ]

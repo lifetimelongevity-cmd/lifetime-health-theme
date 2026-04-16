@@ -202,15 +202,13 @@
 
 /* — Block grid — */
 /*
-  DECISION: 3-col grid for desktop — order from block_order in JSON:
-  pillar_1 | expert_1 | pillar_3
-  Expert card is taller (auto height on stretch); pillars match its height.
-  Glass-effect cards: semi-transparent bg + light border on dark surface.
-  This is a known approved pattern for dark sections (§5 Stat Callout variant).
+  DECISION: Asymmetrisches Grid — Expert-Karte erhält deutlich mehr Breite.
+  1fr | 1.8fr | 1fr — Limmroth-Karte dominiert als zentrales Schwergewicht.
+  Pillar-Karten sind dezenter: kleinere Schrift, gleiche Struktur, weniger Gewicht.
 */
 .sci__grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1.8fr 1fr;
   gap: var(--space-5);
   margin-bottom: var(--space-9);   /* 80px before CTA */
 }
@@ -251,11 +249,11 @@
   opacity: 0.8;
 }
 
-/* Pillar headline */
+/* Pillar headline — eine Stufe kleiner als Expert-Quote, bewusst sekundär */
 .sci__card-headline {
   font-family: var(--font-heading);
-  font-size: var(--text-h3);       /* 24px */
-  font-weight: var(--weight-regular);
+  font-size: var(--text-body-lg);  /* 18px statt 24px */
+  font-weight: var(--weight-medium);
   line-height: var(--leading-tight);
   color: var(--color-text-on-dark);
   margin: 0;
@@ -264,7 +262,7 @@
 /* Pillar body */
 .sci__card-body {
   font-family: var(--font-body);
-  font-size: var(--text-body);     /* 16px */
+  font-size: var(--text-body-sm);  /* 14px — dezent */
   font-weight: var(--weight-regular);
   line-height: var(--leading-relaxed);
   color: var(--color-text-on-dark-muted);
@@ -293,10 +291,11 @@
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-/* — Expert card — */
+/* — Expert card — elevated gegenüber Pillars */
 .sci__card--expert {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.22);
+  padding: var(--space-7);
 }
 
 .sci__expert-header {
@@ -305,19 +304,19 @@
   gap: var(--space-4);
 }
 
-/* Expert avatar */
+/* Expert avatar — größer als in Pillar-Karten */
 .sci__expert-avatar {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
   border-radius: var(--radius-full);
   object-fit: cover;
   flex-shrink: 0;
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
 }
 
 .sci__expert-avatar-placeholder {
-  width: 64px;
-  height: 64px;
+  width: 80px;
+  height: 80px;
   border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.08);
   color: var(--color-text-on-dark-muted);
@@ -325,7 +324,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
 }
 
 /* Expert identity */
@@ -336,8 +335,8 @@
 
 .sci__expert-name {
   font-family: var(--font-heading);
-  font-size: var(--text-body);
-  font-weight: var(--weight-medium);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-semibold);
   color: var(--color-text-on-dark);
   line-height: var(--leading-tight);
   margin: 0 0 var(--space-1);
@@ -345,32 +344,33 @@
 
 .sci__expert-title {
   font-family: var(--font-body);
-  font-size: var(--text-micro);
+  font-size: var(--text-body-sm);
   font-weight: var(--weight-regular);
   color: var(--color-text-on-dark-muted);
   line-height: var(--leading-body);
   margin: 0;
 }
 
+/* Zitat — prominenteste Textstelle der Karte */
 .sci__expert-quote {
   margin: 0;
   padding-inline-start: var(--space-4);
-  border-inline-start: 1px solid rgba(255, 255, 255, 0.18);
+  border-inline-start: 2px solid rgba(255, 255, 255, 0.25);
 }
 
 .sci__expert-quote-text {
   margin: 0;
   font-family: var(--font-heading);
-  font-size: var(--text-section);
+  font-size: var(--text-h3);
   font-weight: var(--weight-regular);
   line-height: var(--leading-tight);
   color: var(--color-text-on-dark);
 }
 
-/* Expert credentials */
+/* Expert credentials — dezenter als Quote */
 .sci__expert-credentials {
   font-family: var(--font-body);
-  font-size: var(--text-body);
+  font-size: var(--text-body-sm);
   font-weight: var(--weight-regular);
   line-height: var(--leading-relaxed);
   color: var(--color-text-on-dark-muted);
@@ -409,8 +409,16 @@
 
 /* — Responsive — */
 @media screen and (max-width: 1024px) {
+  /* Expert-Karte nimmt volle Breite, Pillars darunter nebeneinander */
   .sci__grid {
     grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+  }
+
+  /* Expert (2. Block) streckt sich über beide Spalten */
+  .sci__card--expert {
+    grid-column: 1 / -1;
+    order: -1;
   }
 }
 
