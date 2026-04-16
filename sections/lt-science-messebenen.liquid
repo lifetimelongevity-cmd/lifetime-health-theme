@@ -2,18 +2,17 @@
   lt-science-messebenen — Messebenen & LIFETIME-Instrument
   ─────────────────────────────────────────────────────────
   §12 Build Spec:
-  - Surface:         --color-surface-secondary (#f2f1ed) für Section
-                     Linke Spalte: helle Karte — Kontext "was andere messen"
-                     Rechte Spalte: --color-dark (#364F56) — LIFETIME-Hauptfläche
-  - Dominant:        Die dunkle rechte Spalte zieht das Auge — Genetik + Epigenetik
-                     als ein zusammenhängendes Narrativ, nicht zwei separate Karten
+  - Surface:         --color-surface-secondary (#f2f1ed) als ruhige Basis
+                     Linke Spalte: kompakte Kontext-Notiz
+                     Rechte Spalte: editoriale Instrument-Fläche in --color-dark
+  - Dominant:        Rechte Spalte bekommt Messlogik + zwei klar getrennte Panels
+                     statt eines langen dunklen Textblocks
   - Heading:         --text-h1 für Section-Heading
-  - Content pattern: Asymmetrisches 2-Spalten-Split (1fr | 1.7fr)
-  - CTA:             Keiner in dieser Section (wurde aus plan.science.json entfernt)
-  - Removed:         Gleiches 3-Karten-Grid, nummerierte Ordinals, Stärke/Grenze-Labels,
-                     Abschluss-CTA, gleiche visuelle Gewichtung aller drei Messebenen
-  - Story:           Blutmarker = Kontext und Abgrenzung
-                     Genetik + Epigenetik = das LIFETIME-Instrument, fließende Narrative
+  - Content pattern: Asymmetrisches Split (0.92fr | 1.78fr)
+  - Visual move:     Mess-Skala links + "LIFETIME Lens" oben rechts als nicht-textlicher Fokus
+  - Story:           Blutmarker = Heute
+                     Genetik = Ausgangslage
+                     Epigenetik = bisherige Entwicklung
 {% endcomment %}
 
 {%- liquid
@@ -34,9 +33,11 @@
 
   assign has_context_blocks = false
   assign has_main_blocks = false
+  assign main_block_count = 0
   for block in section.blocks
     if block.settings.is_lifetime
       assign has_main_blocks = true
+      assign main_block_count = main_block_count | plus: 1
     else
       assign has_context_blocks = true
     endif
@@ -80,16 +81,23 @@
 
       {%- comment -%}── Linke Spalte: Kontext-Blöcke (Blutmarker) ──{%- endcomment -%}
       {%- if has_context_blocks -%}
-        <div class="science-msmt__col science-msmt__col--context">
+        <aside class="science-msmt__col science-msmt__col--context">
           {%- if section.settings.context_col_label != blank -%}
             <p class="science-msmt__col-label">{{ section.settings.context_col_label | escape }}</p>
           {%- endif -%}
           {%- for block in section.blocks -%}
             {%- unless block.settings.is_lifetime -%}
               <article class="science-msmt__context-card" {{ block.shopify_attributes }}>
-                {%- if block.settings.label != blank -%}
-                  <p class="science-msmt__badge">{{ block.settings.label | escape }}</p>
-                {%- endif -%}
+                <div class="science-msmt__context-top">
+                  {%- if block.settings.label != blank -%}
+                    <p class="science-msmt__badge">{{ block.settings.label | escape }}</p>
+                  {%- endif -%}
+                  <div class="science-msmt__scale" aria-hidden="true">
+                    <span class="science-msmt__scale-step science-msmt__scale-step--active">Heute</span>
+                    <span class="science-msmt__scale-step">Bauplan</span>
+                    <span class="science-msmt__scale-step">Verlauf</span>
+                  </div>
+                </div>
                 {%- if block.settings.title != blank -%}
                   <h3 class="science-msmt__context-title">{{ block.settings.title | escape }}</h3>
                 {%- endif -%}
@@ -105,44 +113,67 @@
               </article>
             {%- endunless -%}
           {%- endfor -%}
-        </div>
+        </aside>
       {%- endif -%}
 
       {%- comment -%}── Rechte Spalte: LIFETIME-Hauptfläche (Genetik + Epigenetik) ──{%- endcomment -%}
       {%- if has_main_blocks -%}
         <div class="science-msmt__col science-msmt__col--main">
-          {%- if section.settings.main_col_label != blank -%}
-            <p class="science-msmt__col-label science-msmt__col-label--on-dark">{{ section.settings.main_col_label | escape }}</p>
-          {%- endif -%}
-          {%- assign main_index = 0 -%}
-          {%- for block in section.blocks -%}
-            {%- if block.settings.is_lifetime -%}
-              {%- if main_index > 0 -%}
-                <div class="science-msmt__divider" aria-hidden="true"></div>
-              {%- endif -%}
-              <article class="science-msmt__main-block" {{ block.shopify_attributes }}>
-                {%- if block.settings.label != blank -%}
-                  <p class="science-msmt__main-label">{{ block.settings.label | escape }}</p>
-                {%- endif -%}
-                {%- if block.settings.title != blank -%}
-                  <h3 class="science-msmt__main-title">{{ block.settings.title | escape }}</h3>
-                {%- endif -%}
-                {%- if block.settings.strength != blank -%}
-                  <p class="science-msmt__main-body">{{ block.settings.strength | escape }}</p>
-                {%- endif -%}
-                {%- if block.settings.note != blank -%}
-                  <p class="science-msmt__main-note">{{ block.settings.note | escape }}</p>
-                {%- endif -%}
-              </article>
-              {%- assign main_index = main_index | plus: 1 -%}
-            {%- endif -%}
-          {%- endfor -%}
+          <div class="science-msmt__main-shell">
+            <div class="science-msmt__main-backdrop" aria-hidden="true"></div>
 
-          {%- if section.settings.main_closing != blank -%}
-            <div class="science-msmt__main-closing">
-              <p class="science-msmt__main-closing-text">{{ section.settings.main_closing | escape }}</p>
+            <div class="science-msmt__main-topline">
+              {%- if section.settings.main_col_label != blank -%}
+                <p class="science-msmt__col-label science-msmt__col-label--on-dark">{{ section.settings.main_col_label | escape }}</p>
+              {%- endif -%}
+              <p class="science-msmt__main-topline-text">Von Ausgangslage zu biologischer Entwicklung.</p>
             </div>
-          {%- endif -%}
+
+            <div class="science-msmt__lens" aria-hidden="true">
+              <div class="science-msmt__lens-rail"></div>
+              <div class="science-msmt__lens-nodes">
+                {%- assign lens_index = 0 -%}
+                {%- for block in section.blocks -%}
+                  {%- if block.settings.is_lifetime -%}
+                    {%- assign lens_index = lens_index | plus: 1 -%}
+                    <div class="science-msmt__lens-node science-msmt__lens-node--{{ lens_index }}">
+                      <span class="science-msmt__lens-index">
+                        {%- if lens_index < 10 -%}0{{ lens_index }}{%- else -%}{{ lens_index }}{%- endif -%}
+                      </span>
+                      <span class="science-msmt__lens-label">{{ block.settings.label | escape }}</span>
+                    </div>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+            </div>
+
+            <div class="science-msmt__main-grid science-msmt__main-grid--count-{{ main_block_count }}">
+              {%- for block in section.blocks -%}
+                {%- if block.settings.is_lifetime -%}
+                  <article class="science-msmt__main-card" {{ block.shopify_attributes }}>
+                    {%- if block.settings.label != blank -%}
+                      <p class="science-msmt__main-label">{{ block.settings.label | escape }}</p>
+                    {%- endif -%}
+                    {%- if block.settings.title != blank -%}
+                      <h3 class="science-msmt__main-title">{{ block.settings.title | escape }}</h3>
+                    {%- endif -%}
+                    {%- if block.settings.strength != blank -%}
+                      <p class="science-msmt__main-body">{{ block.settings.strength | escape }}</p>
+                    {%- endif -%}
+                    {%- if block.settings.note != blank -%}
+                      <p class="science-msmt__main-note">{{ block.settings.note | escape }}</p>
+                    {%- endif -%}
+                  </article>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+
+            {%- if section.settings.main_closing != blank -%}
+              <div class="science-msmt__main-closing">
+                <p class="science-msmt__main-closing-text">{{ section.settings.main_closing | escape }}</p>
+              </div>
+            {%- endif -%}
+          </div>
         </div>
       {%- endif -%}
 
@@ -170,15 +201,13 @@
     margin-inline: auto;
   }
 
-  /* ─── SPLIT LAYOUT ─── */
   .science-msmt__split {
     display: grid;
-    grid-template-columns: 1fr 1.7fr;
-    gap: var(--space-5);
+    grid-template-columns: minmax(18rem, 0.92fr) minmax(0, 1.78fr);
+    gap: var(--space-6);
     align-items: start;
   }
 
-  /* ─── SPALTEN-LABEL ─── */
   .science-msmt__col-label {
     font-family: var(--font-body);
     font-size: var(--text-micro);
@@ -194,7 +223,6 @@
     margin-bottom: var(--space-5);
   }
 
-  /* ─── LINKE SPALTE: KONTEXT ─── */
   .science-msmt__col--context {
     display: flex;
     flex-direction: column;
@@ -204,30 +232,78 @@
   .science-msmt__context-card {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--space-4);
     padding: var(--space-5);
     border-radius: var(--radius-md);
     background: var(--sm-card-bg, #f7f7f4);
+    border: 1px solid var(--sm-border, rgba(38, 37, 30, 0.08));
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .science-msmt__context-card::after {
+    content: '';
+    position: absolute;
+    inset-block: auto 0;
+    inset-inline: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--sm-accent, #364f56) 0 34%, rgba(54, 79, 86, 0.14) 34% 100%);
+  }
+
+  .science-msmt__context-top {
+    display: grid;
+    gap: var(--space-3);
   }
 
   .science-msmt__badge {
     display: inline-block;
     margin: 0;
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-sm);
-    background: var(--sm-border, rgba(38, 37, 30, 0.08));
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-full);
+    background: rgba(54, 79, 86, 0.08);
     font-family: var(--font-body);
     font-size: var(--text-micro);
     font-weight: var(--weight-medium);
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: var(--sm-text-sec, rgba(38, 37, 30, 0.6));
+    color: var(--sm-text, #26251e);
+    width: fit-content;
+  }
+
+  .science-msmt__scale {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .science-msmt__scale-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.5rem;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--sm-border, rgba(38, 37, 30, 0.08));
+    border-radius: var(--radius-full);
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    line-height: 1;
+    color: var(--sm-text-muted, rgba(38, 37, 30, 0.38));
+    background: rgba(255, 255, 255, 0.7);
+    text-align: center;
+  }
+
+  .science-msmt__scale-step--active {
+    color: var(--color-white);
+    background: var(--sm-accent, #364f56);
+    border-color: transparent;
   }
 
   .science-msmt__context-title {
     margin: 0;
     font-family: var(--font-heading);
-    font-size: var(--text-body-lg);
+    font-size: var(--text-h3);
     font-weight: var(--weight-semibold);
     line-height: var(--leading-tight);
     color: var(--sm-text, #26251e);
@@ -246,7 +322,7 @@
   }
 
   .science-msmt__context-note {
-    margin: var(--space-2) 0 0;
+    margin: var(--space-1) 0 0;
     padding-top: var(--space-3);
     border-top: 1px solid var(--sm-border, rgba(38, 37, 30, 0.08));
     font-family: var(--font-body);
@@ -256,26 +332,122 @@
     color: var(--sm-text-sec, rgba(38, 37, 30, 0.6));
   }
 
-  /* ─── RECHTE SPALTE: LIFETIME-HAUPTFLÄCHE ─── */
   .science-msmt__col--main {
-    background: var(--sm-accent, #364f56);
-    border-radius: var(--radius-lg);
-    padding: var(--space-7);
-    display: flex;
-    flex-direction: column;
+    min-width: 0;
+  }
+
+  .science-msmt__main-shell {
+    position: relative;
+    display: grid;
     gap: var(--space-6);
+    padding: clamp(2rem, 3vw, 3rem);
+    border-radius: var(--radius-lg);
+    background:
+      radial-gradient(circle at top right, rgba(101, 192, 182, 0.18), transparent 32%),
+      radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.08), transparent 28%),
+      var(--sm-accent, #364f56);
+    overflow: hidden;
+    isolation: isolate;
   }
 
-  .science-msmt__divider {
-    height: 1px;
-    background: rgba(247, 247, 244, 0.12);
-    margin: 0;
+  .science-msmt__main-backdrop {
+    position: absolute;
+    inset: auto -12% -18% auto;
+    width: 18rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    border: 1px solid rgba(247, 247, 244, 0.08);
+    background: radial-gradient(circle, rgba(247, 247, 244, 0.08), transparent 70%);
+    z-index: -1;
   }
 
-  .science-msmt__main-block {
+  .science-msmt__main-topline {
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+    max-width: 34rem;
+  }
+
+  .science-msmt__main-topline-text {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: var(--text-section);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-tight);
+    color: rgba(247, 247, 244, 0.82);
+  }
+
+  .science-msmt__lens {
+    display: grid;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    border: 1px solid rgba(247, 247, 244, 0.12);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+  }
+
+  .science-msmt__lens-rail {
+    height: 1px;
+    background: linear-gradient(90deg, rgba(247, 247, 244, 0.18), rgba(101, 192, 182, 0.7));
+  }
+
+  .science-msmt__lens-nodes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .science-msmt__lens-node {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-3);
+    align-items: center;
+    min-width: 0;
+  }
+
+  .science-msmt__lens-index {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--radius-full);
+    border: 1px solid rgba(247, 247, 244, 0.16);
+    background: rgba(247, 247, 244, 0.08);
+    font-family: var(--font-heading);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-semibold);
+    line-height: 1;
+    color: var(--color-white);
+    flex-shrink: 0;
+  }
+
+  .science-msmt__lens-label {
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-body);
+    color: rgba(247, 247, 244, 0.68);
+    overflow-wrap: break-word;
+  }
+
+  .science-msmt__main-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .science-msmt__main-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    min-width: 0;
+    padding: var(--space-5);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(247, 247, 244, 0.12);
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(14px);
   }
 
   .science-msmt__main-label {
@@ -306,7 +478,9 @@
   }
 
   .science-msmt__main-note {
-    margin: var(--space-2) 0 0;
+    margin: auto 0 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid rgba(247, 247, 244, 0.12);
     font-family: var(--font-body);
     font-size: var(--text-body-sm);
     font-style: italic;
@@ -314,31 +488,34 @@
     color: rgba(247, 247, 244, 0.55);
   }
 
-  /* Abschluss-Synthese am Ende der rechten Spalte */
   .science-msmt__main-closing {
-    margin-top: var(--space-2);
-    padding-top: var(--space-5);
-    border-top: 1px solid rgba(247, 247, 244, 0.12);
+    padding: var(--space-5);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(247, 247, 244, 0.14);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04));
   }
 
   .science-msmt__main-closing-text {
     margin: 0;
     font-family: var(--font-heading);
-    font-size: var(--text-section);
+    font-size: var(--text-h3);
     font-weight: var(--weight-regular);
     line-height: var(--leading-tight);
     color: #f7f7f4;
   }
 
-  /* ─── RESPONSIVE ─── */
   @media screen and (max-width: 1024px) {
     .science-msmt__split {
       grid-template-columns: 1fr;
       gap: var(--space-4);
     }
 
-    .science-msmt__col--main {
-      padding: var(--space-6);
+    .science-msmt__main-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .science-msmt__lens-nodes {
+      grid-template-columns: 1fr;
     }
   }
 
@@ -347,10 +524,26 @@
       padding-inline: var(--space-4);
     }
 
-    .science-msmt__col--main {
+    .science-msmt__header {
+      margin-bottom: var(--space-7);
+    }
+
+    .science-msmt__main-shell {
       padding: var(--space-5);
       gap: var(--space-5);
       border-radius: var(--radius-md);
+    }
+
+    .science-msmt__context-card {
+      padding: var(--space-4);
+    }
+
+    .science-msmt__scale {
+      grid-template-columns: 1fr;
+    }
+
+    .science-msmt__main-topline-text {
+      font-size: var(--text-body-lg);
     }
   }
 {% endstylesheet %}
