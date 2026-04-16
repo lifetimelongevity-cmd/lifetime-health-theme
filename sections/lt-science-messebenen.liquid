@@ -3,16 +3,13 @@
   ─────────────────────────────────────────────────────────
   §12 Build Spec:
   - Surface:         --color-surface-secondary (#f2f1ed) als ruhige Basis
-                     Linke Spalte: kompakte Kontext-Notiz
-                     Rechte Spalte: editoriale Instrument-Fläche in --color-dark
-  - Dominant:        Rechte Spalte bekommt Messlogik + zwei klar getrennte Panels
-                     statt eines langen dunklen Textblocks
-  - Heading:         --text-h1 für Section-Heading
-  - Content pattern: Asymmetrisches Split (0.92fr | 1.78fr)
-  - Visual move:     Mess-Skala links + "LIFETIME Lens" oben rechts als nicht-textlicher Fokus
-  - Story:           Blutmarker = Heute
-                     Genetik = Ausgangslage
+  - Dominant:        Eine volle, dunkelgrüne Hauptfläche zeigt die beiden
+                     LIFETIME-Messebenen nebeneinander
+  - Context:         Blutmarker erscheinen bewusst erst darunter als
+                     zurückgenommene Einordnung mit geringerer Opazität
+  - Story:           Genetik = Ausgangslage
                      Epigenetik = bisherige Entwicklung
+                     Blutmarker = kurzfristige Momentaufnahme
 {% endcomment %}
 
 {%- liquid
@@ -77,107 +74,62 @@
       </header>
     {%- endif -%}
 
-    <div class="science-msmt__split">
-
-      {%- comment -%}── Linke Spalte: Kontext-Blöcke (Blutmarker) ──{%- endcomment -%}
-      {%- if has_context_blocks -%}
-        <aside class="science-msmt__col science-msmt__col--context">
-          {%- if section.settings.context_col_label != blank -%}
-            <p class="science-msmt__col-label">{{ section.settings.context_col_label | escape }}</p>
+    {%- if has_main_blocks -%}
+      <div class="science-msmt__main-shell">
+        <div class="science-msmt__main-topline">
+          {%- if section.settings.main_col_label != blank -%}
+            <p class="science-msmt__col-label science-msmt__col-label--on-dark">{{ section.settings.main_col_label | escape }}</p>
           {%- endif -%}
+          <p class="science-msmt__main-topline-text">Von Ausgangslage zu biologischer Entwicklung.</p>
+        </div>
+
+        <div class="science-msmt__main-grid science-msmt__main-grid--count-{{ main_block_count }}">
           {%- for block in section.blocks -%}
-            {%- unless block.settings.is_lifetime -%}
-              <article class="science-msmt__context-card" {{ block.shopify_attributes }}>
-                <div class="science-msmt__context-top">
-                  {%- if block.settings.label != blank -%}
-                    <p class="science-msmt__badge">{{ block.settings.label | escape }}</p>
-                  {%- endif -%}
-                  <div class="science-msmt__scale" aria-hidden="true">
-                    <span class="science-msmt__scale-step science-msmt__scale-step--active">Heute</span>
-                    <span class="science-msmt__scale-step">Bauplan</span>
-                    <span class="science-msmt__scale-step">Verlauf</span>
-                  </div>
-                </div>
+            {%- if block.settings.is_lifetime -%}
+              <article class="science-msmt__main-panel" {{ block.shopify_attributes }}>
+                {%- if block.settings.label != blank -%}
+                  <p class="science-msmt__main-label">{{ block.settings.label | escape }}</p>
+                {%- endif -%}
                 {%- if block.settings.title != blank -%}
-                  <h3 class="science-msmt__context-title">{{ block.settings.title | escape }}</h3>
+                  <h3 class="science-msmt__main-title">{{ block.settings.title | escape }}</h3>
                 {%- endif -%}
                 {%- if block.settings.strength != blank -%}
-                  <p class="science-msmt__context-body">{{ block.settings.strength | escape }}</p>
-                {%- endif -%}
-                {%- if block.settings.limitation != blank -%}
-                  <p class="science-msmt__context-body science-msmt__context-body--muted">{{ block.settings.limitation | escape }}</p>
+                  <p class="science-msmt__main-body">{{ block.settings.strength | escape }}</p>
                 {%- endif -%}
                 {%- if block.settings.note != blank -%}
-                  <p class="science-msmt__context-note">{{ block.settings.note | escape }}</p>
+                  <p class="science-msmt__main-note">{{ block.settings.note | escape }}</p>
                 {%- endif -%}
               </article>
-            {%- endunless -%}
-          {%- endfor -%}
-        </aside>
-      {%- endif -%}
-
-      {%- comment -%}── Rechte Spalte: LIFETIME-Hauptfläche (Genetik + Epigenetik) ──{%- endcomment -%}
-      {%- if has_main_blocks -%}
-        <div class="science-msmt__col science-msmt__col--main">
-          <div class="science-msmt__main-shell">
-            <div class="science-msmt__main-backdrop" aria-hidden="true"></div>
-
-            <div class="science-msmt__main-topline">
-              {%- if section.settings.main_col_label != blank -%}
-                <p class="science-msmt__col-label science-msmt__col-label--on-dark">{{ section.settings.main_col_label | escape }}</p>
-              {%- endif -%}
-              <p class="science-msmt__main-topline-text">Von Ausgangslage zu biologischer Entwicklung.</p>
-            </div>
-
-            <div class="science-msmt__lens" aria-hidden="true">
-              <div class="science-msmt__lens-rail"></div>
-              <div class="science-msmt__lens-nodes">
-                {%- assign lens_index = 0 -%}
-                {%- for block in section.blocks -%}
-                  {%- if block.settings.is_lifetime -%}
-                    {%- assign lens_index = lens_index | plus: 1 -%}
-                    <div class="science-msmt__lens-node science-msmt__lens-node--{{ lens_index }}">
-                      <span class="science-msmt__lens-index">
-                        {%- if lens_index < 10 -%}0{{ lens_index }}{%- else -%}{{ lens_index }}{%- endif -%}
-                      </span>
-                      <span class="science-msmt__lens-label">{{ block.settings.label | escape }}</span>
-                    </div>
-                  {%- endif -%}
-                {%- endfor -%}
-              </div>
-            </div>
-
-            <div class="science-msmt__main-grid science-msmt__main-grid--count-{{ main_block_count }}">
-              {%- for block in section.blocks -%}
-                {%- if block.settings.is_lifetime -%}
-                  <article class="science-msmt__main-card" {{ block.shopify_attributes }}>
-                    {%- if block.settings.label != blank -%}
-                      <p class="science-msmt__main-label">{{ block.settings.label | escape }}</p>
-                    {%- endif -%}
-                    {%- if block.settings.title != blank -%}
-                      <h3 class="science-msmt__main-title">{{ block.settings.title | escape }}</h3>
-                    {%- endif -%}
-                    {%- if block.settings.strength != blank -%}
-                      <p class="science-msmt__main-body">{{ block.settings.strength | escape }}</p>
-                    {%- endif -%}
-                    {%- if block.settings.note != blank -%}
-                      <p class="science-msmt__main-note">{{ block.settings.note | escape }}</p>
-                    {%- endif -%}
-                  </article>
-                {%- endif -%}
-              {%- endfor -%}
-            </div>
-
-            {%- if section.settings.main_closing != blank -%}
-              <div class="science-msmt__main-closing">
-                <p class="science-msmt__main-closing-text">{{ section.settings.main_closing | escape }}</p>
-              </div>
             {%- endif -%}
-          </div>
+          {%- endfor -%}
         </div>
-      {%- endif -%}
 
-    </div>
+        {%- if section.settings.main_closing != blank -%}
+          <div class="science-msmt__main-closing">
+            <p class="science-msmt__main-closing-text">{{ section.settings.main_closing | escape }}</p>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if has_context_blocks -%}
+      <div class="science-msmt__context-copy">
+        <p class="science-msmt__context-copy-label">{{ section.settings.context_col_label | default: 'Im Unterschied zu Blutmarkern' | escape }}</p>
+        {%- for block in section.blocks -%}
+          {%- unless block.settings.is_lifetime -%}
+            {%- if block.settings.strength != blank -%}
+              <p class="science-msmt__context-copy-text">{{ block.settings.strength | escape }}</p>
+            {%- endif -%}
+            {%- if block.settings.limitation != blank -%}
+              <p class="science-msmt__context-copy-text science-msmt__context-copy-text--muted">{{ block.settings.limitation | escape }}</p>
+            {%- endif -%}
+            {%- if block.settings.note != blank -%}
+              <p class="science-msmt__context-copy-note">{{ block.settings.note | escape }}</p>
+            {%- endif -%}
+          {%- endunless -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
   </div>
 </section>
 
@@ -201,13 +153,6 @@
     margin-inline: auto;
   }
 
-  .science-msmt__split {
-    display: grid;
-    grid-template-columns: minmax(18rem, 0.92fr) minmax(0, 1.78fr);
-    gap: var(--space-6);
-    align-items: start;
-  }
-
   .science-msmt__col-label {
     font-family: var(--font-body);
     font-size: var(--text-micro);
@@ -223,142 +168,12 @@
     margin-bottom: var(--space-5);
   }
 
-  .science-msmt__col--context {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-  }
-
-  .science-msmt__context-card {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    padding: var(--space-5);
-    border-radius: var(--radius-md);
-    background: var(--sm-card-bg, #f7f7f4);
-    border: 1px solid var(--sm-border, rgba(38, 37, 30, 0.08));
-    box-shadow: var(--shadow-sm);
-    position: relative;
-    overflow: hidden;
-  }
-
-  .science-msmt__context-card::after {
-    content: '';
-    position: absolute;
-    inset-block: auto 0;
-    inset-inline: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--sm-accent, #364f56) 0 34%, rgba(54, 79, 86, 0.14) 34% 100%);
-  }
-
-  .science-msmt__context-top {
-    display: grid;
-    gap: var(--space-3);
-  }
-
-  .science-msmt__badge {
-    display: inline-block;
-    margin: 0;
-    padding: var(--space-1) var(--space-3);
-    border-radius: var(--radius-full);
-    background: rgba(54, 79, 86, 0.08);
-    font-family: var(--font-body);
-    font-size: var(--text-micro);
-    font-weight: var(--weight-medium);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--sm-text, #26251e);
-    width: fit-content;
-  }
-
-  .science-msmt__scale {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-2);
-  }
-
-  .science-msmt__scale-step {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 2.5rem;
-    padding: var(--space-2) var(--space-3);
-    border: 1px solid var(--sm-border, rgba(38, 37, 30, 0.08));
-    border-radius: var(--radius-full);
-    font-family: var(--font-body);
-    font-size: var(--text-micro);
-    font-weight: var(--weight-medium);
-    line-height: 1;
-    color: var(--sm-text-muted, rgba(38, 37, 30, 0.38));
-    background: rgba(255, 255, 255, 0.7);
-    text-align: center;
-  }
-
-  .science-msmt__scale-step--active {
-    color: var(--color-white);
-    background: var(--sm-accent, #364f56);
-    border-color: transparent;
-  }
-
-  .science-msmt__context-title {
-    margin: 0;
-    font-family: var(--font-heading);
-    font-size: var(--text-h3);
-    font-weight: var(--weight-semibold);
-    line-height: var(--leading-tight);
-    color: var(--sm-text, #26251e);
-  }
-
-  .science-msmt__context-body {
-    margin: 0;
-    font-family: var(--font-body);
-    font-size: var(--text-body-sm);
-    line-height: var(--leading-relaxed);
-    color: var(--sm-text-sec, rgba(38, 37, 30, 0.6));
-  }
-
-  .science-msmt__context-body--muted {
-    color: var(--sm-text-muted, rgba(38, 37, 30, 0.38));
-  }
-
-  .science-msmt__context-note {
-    margin: var(--space-1) 0 0;
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--sm-border, rgba(38, 37, 30, 0.08));
-    font-family: var(--font-body);
-    font-size: var(--text-body-sm);
-    font-style: italic;
-    line-height: var(--leading-relaxed);
-    color: var(--sm-text-sec, rgba(38, 37, 30, 0.6));
-  }
-
-  .science-msmt__col--main {
-    min-width: 0;
-  }
-
   .science-msmt__main-shell {
-    position: relative;
     display: grid;
     gap: var(--space-6);
     padding: clamp(2rem, 3vw, 3rem);
     border-radius: var(--radius-lg);
-    background:
-      radial-gradient(circle at top right, rgba(101, 192, 182, 0.18), transparent 32%),
-      radial-gradient(circle at bottom left, rgba(255, 255, 255, 0.08), transparent 28%),
-      var(--sm-accent, #364f56);
-    overflow: hidden;
-    isolation: isolate;
-  }
-
-  .science-msmt__main-backdrop {
-    position: absolute;
-    inset: auto -12% -18% auto;
-    width: 18rem;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    border: 1px solid rgba(247, 247, 244, 0.08);
-    background: radial-gradient(circle, rgba(247, 247, 244, 0.08), transparent 70%);
-    z-index: -1;
+    background: var(--sm-accent, #364f56);
   }
 
   .science-msmt__main-topline {
@@ -377,77 +192,24 @@
     color: rgba(247, 247, 244, 0.82);
   }
 
-  .science-msmt__lens {
-    display: grid;
-    gap: var(--space-3);
-    padding: var(--space-5);
-    border: 1px solid rgba(247, 247, 244, 0.12);
-    border-radius: var(--radius-md);
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-  }
-
-  .science-msmt__lens-rail {
-    height: 1px;
-    background: linear-gradient(90deg, rgba(247, 247, 244, 0.18), rgba(101, 192, 182, 0.7));
-  }
-
-  .science-msmt__lens-nodes {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4);
-  }
-
-  .science-msmt__lens-node {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: var(--space-3);
-    align-items: center;
-    min-width: 0;
-  }
-
-  .science-msmt__lens-index {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: var(--radius-full);
-    border: 1px solid rgba(247, 247, 244, 0.16);
-    background: rgba(247, 247, 244, 0.08);
-    font-family: var(--font-heading);
-    font-size: var(--text-body-sm);
-    font-weight: var(--weight-semibold);
-    line-height: 1;
-    color: var(--color-white);
-    flex-shrink: 0;
-  }
-
-  .science-msmt__lens-label {
-    font-family: var(--font-body);
-    font-size: var(--text-body-sm);
-    font-weight: var(--weight-medium);
-    line-height: var(--leading-body);
-    color: rgba(247, 247, 244, 0.68);
-    overflow-wrap: break-word;
-  }
-
   .science-msmt__main-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4);
+    gap: 0;
+    border-top: 1px solid rgba(247, 247, 244, 0.12);
+    border-bottom: 1px solid rgba(247, 247, 244, 0.12);
   }
 
-  .science-msmt__main-card {
+  .science-msmt__main-panel {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
     min-width: 0;
-    padding: var(--space-5);
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(247, 247, 244, 0.12);
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(14px);
+    padding: var(--space-6) var(--space-5);
+  }
+
+  .science-msmt__main-panel + .science-msmt__main-panel {
+    border-inline-start: 1px solid rgba(247, 247, 244, 0.12);
   }
 
   .science-msmt__main-label {
@@ -480,7 +242,7 @@
   .science-msmt__main-note {
     margin: auto 0 0;
     padding-top: var(--space-4);
-    border-top: 1px solid rgba(247, 247, 244, 0.12);
+    border-top: 1px solid rgba(247, 247, 244, 0.14);
     font-family: var(--font-body);
     font-size: var(--text-body-sm);
     font-style: italic;
@@ -489,10 +251,7 @@
   }
 
   .science-msmt__main-closing {
-    padding: var(--space-5);
-    border-radius: var(--radius-md);
-    border: 1px solid rgba(247, 247, 244, 0.14);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.04));
+    padding-top: var(--space-2);
   }
 
   .science-msmt__main-closing-text {
@@ -504,17 +263,48 @@
     color: #f7f7f4;
   }
 
+  .science-msmt__context-copy {
+    max-width: 52rem;
+    margin-top: var(--space-5);
+  }
+
+  .science-msmt__context-copy-label {
+    margin: 0 0 var(--space-3);
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sm-text-muted, rgba(38, 37, 30, 0.38));
+  }
+
+  .science-msmt__context-copy-text,
+  .science-msmt__context-copy-note {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-relaxed);
+    color: var(--sm-text-sec, rgba(38, 37, 30, 0.6));
+  }
+
+  .science-msmt__context-copy-text + .science-msmt__context-copy-text,
+  .science-msmt__context-copy-text + .science-msmt__context-copy-note,
+  .science-msmt__context-copy-note + .science-msmt__context-copy-text,
+  .science-msmt__context-copy-note + .science-msmt__context-copy-note {
+    margin-top: var(--space-3);
+  }
+
+  .science-msmt__context-copy-text--muted,
+  .science-msmt__context-copy-note {
+    color: var(--sm-text-muted, rgba(38, 37, 30, 0.44));
+  }
+
+  .science-msmt__context-copy-note {
+    font-style: italic;
+  }
+
   @media screen and (max-width: 1024px) {
-    .science-msmt__split {
-      grid-template-columns: 1fr;
-      gap: var(--space-4);
-    }
-
     .science-msmt__main-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .science-msmt__lens-nodes {
       grid-template-columns: 1fr;
     }
   }
@@ -534,16 +324,21 @@
       border-radius: var(--radius-md);
     }
 
-    .science-msmt__context-card {
-      padding: var(--space-4);
-    }
-
-    .science-msmt__scale {
-      grid-template-columns: 1fr;
-    }
-
     .science-msmt__main-topline-text {
       font-size: var(--text-body-lg);
+    }
+
+    .science-msmt__main-panel {
+      padding: var(--space-5) 0;
+    }
+
+    .science-msmt__main-panel + .science-msmt__main-panel {
+      border-inline-start: 0;
+      border-top: 1px solid rgba(247, 247, 244, 0.12);
+    }
+
+    .science-msmt__context-copy {
+      margin-top: var(--space-4);
     }
   }
 {% endstylesheet %}
@@ -653,13 +448,13 @@
     {
       "type": "text",
       "id": "context_col_label",
-      "label": "Label linke Spalte",
-      "default": "Was andere messen"
+      "label": "Label Kontextzeile unten",
+      "default": "Im Unterschied zu Blutmarkern"
     },
     {
       "type": "text",
       "id": "main_col_label",
-      "label": "Label rechte Spalte",
+      "label": "Label Hauptfläche",
       "default": "Das LIFETIME-Instrument"
     },
     {
