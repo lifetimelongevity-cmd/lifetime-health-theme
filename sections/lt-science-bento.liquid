@@ -25,12 +25,14 @@
       assign bento_image_src = bento_image_src | file_url
     endunless
   endif
+  assign primary_button_href = section.settings.primary_button_link | strip
+  assign secondary_button_href = section.settings.secondary_button_link | strip
   assign has_primary_cta = false
   assign has_secondary_cta = false
-  if section.settings.primary_button_label != blank and section.settings.primary_button_link != blank
+  if section.settings.primary_button_label != blank
     assign has_primary_cta = true
   endif
-  if section.settings.secondary_button_label != blank and section.settings.secondary_button_link != blank
+  if section.settings.secondary_button_label != blank
     assign has_secondary_cta = true
   endif
 -%}
@@ -68,7 +70,7 @@
             <div class="science-bento__actions">
               {%- if has_primary_cta -%}
                 <a
-                  href="{{ section.settings.primary_button_link }}"
+                  href="{{ primary_button_href | default: '#' | escape }}"
                   class="button button--{{ section.settings.primary_button_style | default: 'solid' }} button--icon"
                 >
                   <span aria-hidden="true" class="button__icon">
@@ -79,7 +81,7 @@
               {%- endif -%}
               {%- if has_secondary_cta -%}
                 <a
-                  href="{{ section.settings.secondary_button_link }}"
+                  href="{{ secondary_button_href | default: '#' | escape }}"
                   class="button button--{{ section.settings.secondary_button_style | default: 'outline' }} button--icon"
                 >
                   <span aria-hidden="true" class="button__icon">
@@ -508,9 +510,10 @@
       "label": "Primärer Button Label"
     },
     {
-      "type": "url",
+      "type": "text",
       "id": "primary_button_link",
-      "label": "Primärer Button Link"
+      "label": "Primärer Button URL",
+      "info": "Zum Beispiel /pages/longevity-guide-101 oder https://..."
     },
     {
       "type": "select",
@@ -528,9 +531,10 @@
       "label": "Sekundärer Button Label"
     },
     {
-      "type": "url",
+      "type": "text",
       "id": "secondary_button_link",
-      "label": "Sekundärer Button Link"
+      "label": "Sekundärer Button URL",
+      "info": "Zum Beispiel /products/lifetime-age-dna oder https://..."
     },
     {
       "type": "select",
