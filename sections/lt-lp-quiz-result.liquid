@@ -1,0 +1,547 @@
+{%- liquid
+  assign cta_block = section.blocks | where: 'type', 'cta_block' | first
+-%}
+
+{% style %}
+  #lt-lp-quiz-result-{{ section.id }} {
+    --lt-lp-quiz-bg: {{ section.settings.color_bg }};
+    --lt-lp-quiz-surface: {{ section.settings.color_card_bg }};
+    --lt-lp-quiz-text: {{ section.settings.color_text }};
+    --lt-lp-quiz-border: {{ section.settings.color_text | color_modify: 'alpha', 0.12 }};
+    --lt-lp-quiz-muted: {{ section.settings.color_text | color_modify: 'alpha', 0.64 }};
+    --lt-lp-quiz-soft: {{ section.settings.color_text | color_modify: 'alpha', 0.06 }};
+    --lt-lp-quiz-soft-strong: {{ section.settings.color_text | color_modify: 'alpha', 0.1 }};
+    --lt-lp-quiz-padding-top: {{ section.settings.padding_top }}px;
+    --lt-lp-quiz-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --lt-lp-quiz-radius: 24px;
+    --lt-lp-quiz-chip-radius: 999px;
+  }
+{% endstyle %}
+
+<section id="lt-lp-quiz-result-{{ section.id }}" class="lt-lp-quiz-result-section" data-active-goal="">
+  <div class="lt-lp-quiz-result page-width">
+    <div class="lt-lp-quiz-result__intro">
+      <div class="lt-lp-quiz-result__placeholder" data-quiz-placeholder>
+        {%- if section.settings.placeholder_kicker != blank -%}
+          <p class="lt-lp-quiz-result__kicker">{{ section.settings.placeholder_kicker | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.placeholder_headline != blank -%}
+          <h2 class="lt-lp-quiz-result__headline">{{ section.settings.placeholder_headline | escape }}</h2>
+        {%- endif -%}
+        {%- if section.settings.placeholder_body != blank -%}
+          <p class="lt-lp-quiz-result__body">{{ section.settings.placeholder_body | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'goal_state' -%}
+          {%- assign lt_highlights = block.settings.highlighted_categories | split: ',' -%}
+          <article
+            class="lt-lp-quiz-result__state"
+            data-goal-id="{{ block.settings.goal_id | escape }}"
+            data-highlighted-categories="{{ block.settings.highlighted_categories | escape }}"
+            hidden
+            {{ block.shopify_attributes }}
+          >
+            {%- if block.settings.result_kicker != blank -%}
+              <p class="lt-lp-quiz-result__kicker">{{ block.settings.result_kicker | escape }}</p>
+            {%- endif -%}
+            {%- if block.settings.result_headline != blank -%}
+              <h2 class="lt-lp-quiz-result__headline">{{ block.settings.result_headline | escape }}</h2>
+            {%- endif -%}
+            {%- if block.settings.result_subline != blank -%}
+              <p class="lt-lp-quiz-result__body">{{ block.settings.result_subline | escape }}</p>
+            {%- endif -%}
+            <div class="lt-lp-quiz-result__highlight-list" aria-label="Hervorgehobene Kategorien">
+              {%- for item in lt_highlights -%}
+                {%- assign title = item | strip -%}
+                {%- if title != blank -%}
+                  <span class="lt-lp-quiz-result__highlight-chip">{{ title | escape }}</span>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          </article>
+        {%- endif -%}
+      {%- endfor -%}
+    </div>
+
+    <details class="lt-lp-quiz-result__categories" data-quiz-categories>
+      <summary class="lt-lp-quiz-result__summary">
+        <span>{{ section.settings.expand_all_label | default: 'Alle Kategorien ansehen' | escape }}</span>
+        <span class="lt-lp-quiz-result__summary-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
+          </svg>
+        </span>
+      </summary>
+      {%- if section.settings.expand_all_helper != blank -%}
+        <p class="lt-lp-quiz-result__helper">{{ section.settings.expand_all_helper | escape }}</p>
+      {%- endif -%}
+
+      <div class="lt-lp-quiz-result__category-groups">
+        <div class="lt-lp-quiz-result__category-group">
+          <p class="lt-lp-quiz-result__group-label">Epigenetik</p>
+          <div class="lt-lp-quiz-result__category-grid">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'category_item' and block.settings.category_type == 'epigenetic' -%}
+                <article
+                  class="lt-lp-quiz-result__category-item"
+                  data-category-title="{{ block.settings.title | strip | escape }}"
+                  {{ block.shopify_attributes }}
+                >
+                  <span class="lt-lp-quiz-result__category-type">Epigenetik</span>
+                  <h3 class="lt-lp-quiz-result__category-title">{{ block.settings.title | escape }}</h3>
+                  <p class="lt-lp-quiz-result__category-examples">{{ block.settings.examples | escape }}</p>
+                </article>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+
+        <div class="lt-lp-quiz-result__category-group">
+          <p class="lt-lp-quiz-result__group-label">DNA</p>
+          <div class="lt-lp-quiz-result__category-grid">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'category_item' and block.settings.category_type == 'dna' -%}
+                <article
+                  class="lt-lp-quiz-result__category-item"
+                  data-category-title="{{ block.settings.title | strip | escape }}"
+                  {{ block.shopify_attributes }}
+                >
+                  <span class="lt-lp-quiz-result__category-type">DNA</span>
+                  <h3 class="lt-lp-quiz-result__category-title">{{ block.settings.title | escape }}</h3>
+                  <p class="lt-lp-quiz-result__category-examples">{{ block.settings.examples | escape }}</p>
+                </article>
+              {%- endif -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      </div>
+    </details>
+
+    {%- if cta_block != blank -%}
+      <div class="lt-lp-quiz-result__cta" {{ cta_block.shopify_attributes }}>
+        <a href="{{ cta_block.settings.cta_url | default: '/products/lifetime-age-dna' }}" class="button button--solid button--move lt-lp-quiz-result__button">
+          {{ cta_block.settings.cta_label | default: 'Jetzt für 349€ bestellen →' | escape }}
+        </a>
+        {%- if cta_block.settings.cta_subline != blank -%}
+          <p class="lt-lp-quiz-result__cta-subline">{{ cta_block.settings.cta_subline | escape }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+<script>
+  (function() {
+    const section = document.getElementById('lt-lp-quiz-result-{{ section.id }}');
+    if (!section) return;
+
+    const placeholder = section.querySelector('[data-quiz-placeholder]');
+    const states = Array.prototype.slice.call(section.querySelectorAll('[data-goal-id]'));
+    const categoryItems = Array.prototype.slice.call(section.querySelectorAll('[data-category-title]'));
+
+    function normalizeValue(value) {
+      return String(value || '').trim().toLowerCase();
+    }
+
+    function parseHighlights(value) {
+      return String(value || '')
+        .split(',')
+        .map(function(item) {
+          return normalizeValue(item);
+        })
+        .filter(Boolean);
+    }
+
+    function setGoal(goalId, shouldScroll) {
+      const normalizedGoalId = normalizeValue(goalId);
+      let activeState = null;
+
+      states.forEach(function(state) {
+        const isActive = normalizeValue(state.dataset.goalId) === normalizedGoalId;
+        state.hidden = !isActive;
+        if (isActive) activeState = state;
+      });
+
+      if (placeholder) {
+        placeholder.hidden = Boolean(activeState);
+      }
+
+      const activeHighlights = activeState ? parseHighlights(activeState.dataset.highlightedCategories) : [];
+      categoryItems.forEach(function(item) {
+        const isHighlighted = activeHighlights.indexOf(normalizeValue(item.dataset.categoryTitle)) !== -1;
+        item.classList.toggle('is-highlighted', isHighlighted);
+      });
+
+      section.dataset.activeGoal = activeState ? normalizedGoalId : '';
+
+      if (shouldScroll) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    window.addEventListener('quiz-goal-selected', function(event) {
+      if (!event.detail || !event.detail.goalId) return;
+      setGoal(event.detail.goalId, Boolean(event.detail.shouldScroll));
+    });
+  })();
+</script>
+
+{% stylesheet %}
+.lt-lp-quiz-result-section {
+  background: var(--lt-lp-quiz-bg);
+  color: var(--lt-lp-quiz-text);
+}
+
+.lt-lp-quiz-result {
+  padding-top: var(--lt-lp-quiz-padding-top);
+  padding-bottom: var(--lt-lp-quiz-padding-bottom);
+}
+
+.lt-lp-quiz-result__intro,
+.lt-lp-quiz-result__categories,
+.lt-lp-quiz-result__cta {
+  border-radius: var(--lt-lp-quiz-radius);
+  background: var(--lt-lp-quiz-surface);
+  border: 1px solid var(--lt-lp-quiz-border);
+}
+
+.lt-lp-quiz-result__intro {
+  padding: 28px 24px;
+}
+
+.lt-lp-quiz-result__placeholder,
+.lt-lp-quiz-result__state {
+  display: grid;
+  gap: 14px;
+}
+
+.lt-lp-quiz-result__kicker,
+.lt-lp-quiz-result__group-label,
+.lt-lp-quiz-result__category-type {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lt-lp-quiz-muted);
+}
+
+.lt-lp-quiz-result__headline,
+.lt-lp-quiz-result__category-title {
+  margin: 0;
+  color: var(--lt-lp-quiz-text);
+}
+
+.lt-lp-quiz-result__headline {
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+}
+
+.lt-lp-quiz-result__body,
+.lt-lp-quiz-result__helper,
+.lt-lp-quiz-result__category-examples,
+.lt-lp-quiz-result__cta-subline {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--lt-lp-quiz-muted);
+}
+
+.lt-lp-quiz-result__highlight-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.lt-lp-quiz-result__highlight-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 16px;
+  border-radius: var(--lt-lp-quiz-chip-radius);
+  background: var(--lt-lp-quiz-soft);
+  border: 1px solid var(--lt-lp-quiz-border);
+  font-size: 0.92rem;
+  line-height: 1.3;
+}
+
+.lt-lp-quiz-result__categories {
+  margin-top: 20px;
+  padding: 0;
+  overflow: hidden;
+}
+
+.lt-lp-quiz-result__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 22px 24px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  list-style: none;
+}
+
+.lt-lp-quiz-result__summary::-webkit-details-marker {
+  display: none;
+}
+
+.lt-lp-quiz-result__summary-icon {
+  display: inline-flex;
+  width: 20px;
+  height: 20px;
+  transition: transform 0.2s ease;
+}
+
+.lt-lp-quiz-result__summary-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.lt-lp-quiz-result__categories[open] .lt-lp-quiz-result__summary-icon {
+  transform: rotate(180deg);
+}
+
+.lt-lp-quiz-result__helper {
+  padding: 0 24px 20px;
+}
+
+.lt-lp-quiz-result__category-groups {
+  display: grid;
+  gap: 24px;
+  padding: 0 24px 24px;
+}
+
+.lt-lp-quiz-result__category-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.lt-lp-quiz-result__category-item {
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border-radius: 20px;
+  background: var(--lt-lp-quiz-bg);
+  border: 1px solid var(--lt-lp-quiz-border);
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.lt-lp-quiz-result__category-item.is-highlighted {
+  border-color: var(--lt-lp-quiz-text);
+  background: var(--lt-lp-quiz-soft-strong);
+  transform: translateY(-1px);
+}
+
+.lt-lp-quiz-result__category-title {
+  font-size: 1.08rem;
+  line-height: 1.2;
+}
+
+.lt-lp-quiz-result__cta {
+  margin-top: 20px;
+  padding: 24px;
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+}
+
+.lt-lp-quiz-result__button.button {
+  border-radius: 999px;
+}
+
+@media screen and (min-width: 750px) {
+  .lt-lp-quiz-result__intro {
+    padding: 36px;
+  }
+
+  .lt-lp-quiz-result__category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lt-lp-quiz-result__cta {
+    padding: 28px 36px;
+  }
+}
+
+@media screen and (min-width: 990px) {
+  .lt-lp-quiz-result__category-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT — LP Quiz Result",
+  "settings": [
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding oben",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding unten",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "text",
+      "id": "placeholder_kicker",
+      "label": "Placeholder — Kicker",
+      "default": "Dein personalisiertes Ergebnis"
+    },
+    {
+      "type": "text",
+      "id": "placeholder_headline",
+      "label": "Placeholder — Headline",
+      "default": "Wähle oben dein Einstiegsthema."
+    },
+    {
+      "type": "textarea",
+      "id": "placeholder_body",
+      "label": "Placeholder — Body",
+      "default": "Sobald du oben auf ein Ziel klickst, zeigen wir dir hier die Kategorien, die für dich am relevantesten sind — und wo du mit deinen 187 Reports am besten einsteigst."
+    },
+    {
+      "type": "text",
+      "id": "expand_all_label",
+      "label": "Expand-All Label",
+      "default": "Alle Kategorien ansehen"
+    },
+    {
+      "type": "textarea",
+      "id": "expand_all_helper",
+      "label": "Expand-All Hilfstext",
+      "default": "Dein Test enthält alle 22 Bereiche (16 DNA + 6 Epigenetik) — unabhängig von deinem gewählten Einstiegsthema."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "goal_state",
+      "name": "Goal State",
+      "settings": [
+        {
+          "type": "text",
+          "id": "goal_id",
+          "label": "Goal ID"
+        },
+        {
+          "type": "text",
+          "id": "result_kicker",
+          "label": "Kicker"
+        },
+        {
+          "type": "text",
+          "id": "result_headline",
+          "label": "Headline"
+        },
+        {
+          "type": "textarea",
+          "id": "result_subline",
+          "label": "Subline"
+        },
+        {
+          "type": "textarea",
+          "id": "highlighted_categories",
+          "label": "Highlighted Categories"
+        }
+      ]
+    },
+    {
+      "type": "category_item",
+      "name": "Category Item",
+      "settings": [
+        {
+          "type": "select",
+          "id": "category_type",
+          "label": "Kategorie-Typ",
+          "options": [
+            {
+              "value": "epigenetic",
+              "label": "Epigenetik"
+            },
+            {
+              "value": "dna",
+              "label": "DNA"
+            }
+          ],
+          "default": "dna"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel"
+        },
+        {
+          "type": "text",
+          "id": "examples",
+          "label": "Beispiele"
+        }
+      ]
+    },
+    {
+      "type": "cta_block",
+      "name": "CTA Block",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA Label",
+          "default": "Jetzt für 349€ bestellen →"
+        },
+        {
+          "type": "url",
+          "id": "cta_url",
+          "label": "CTA URL"
+        },
+        {
+          "type": "text",
+          "id": "cta_subline",
+          "label": "CTA Subline",
+          "default": "Einmaliger Kauf · kein Abo · Ergebnisse in 6 Wochen"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT — LP Quiz Result"
+    }
+  ]
+}
+{% endschema %}

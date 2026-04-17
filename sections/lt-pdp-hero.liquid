@@ -247,6 +247,29 @@
         {%- assign lt_rating = product.metafields.loox.avg_rating | default: 0 | plus: 0 -%}
         {%- assign lt_count = product.metafields.loox.num_reviews | default: 0 | plus: 0 -%}
         {%- assign lt_show_sub = section.settings.show_subscription_toggle -%}
+        {%- assign lt_has_goal_quiz = false -%}
+        {%- if section.settings.quiz_question != blank
+          or section.settings.quiz_option_1_label != blank
+          or section.settings.quiz_option_2_label != blank
+          or section.settings.quiz_option_3_label != blank
+          or section.settings.quiz_option_4_label != blank
+        -%}
+          {%- assign lt_has_goal_quiz = true -%}
+        {%- endif -%}
+        {%- assign lt_tagline_text = section.settings.tagline | strip -%}
+        {%- unless lt_has_goal_quiz -%}
+          {%- assign lt_tagline_text = product.metafields.custom.tagline | default: section.settings.tagline | default: 'Uthever® NMN · >99,9 % Reinheit · laborgeprüft in Deutschland' -%}
+        {%- endunless -%}
+        {%- assign hb1 = section.settings.hero_bullet_1 | strip -%}
+        {%- assign hb2 = section.settings.hero_bullet_2 | strip -%}
+        {%- assign hb3 = section.settings.hero_bullet_3 | strip -%}
+        {%- assign lt_show_hero_bullets = false -%}
+        {%- if hb1 != blank or hb2 != blank or hb3 != blank -%}
+          {%- assign lt_show_hero_bullets = true -%}
+        {%- endif -%}
+        {%- assign lt_primary_cta_label = section.settings.cta_label | default: 'Jetzt kaufen →' -%}
+        {%- assign lt_primary_cta_aria = lt_primary_cta_label | replace: '→', '' | strip -%}
+        {%- assign lt_sticky_cta_label = section.settings.cta_label | default: 'In den Warenkorb' -%}
 
         {%- comment -%}Reusable blocks — captured early so they can be placed before or after CTA depending on lt_show_sub{%- endcomment -%}
         {%- capture lt_trust_block -%}
@@ -451,66 +474,218 @@
         </button>
         {%- endif -%}
 
-        <h1 class="lt-pdp-hero__title lt-hero-title">{{ product.title | escape }}</h1>
+        {%- if lt_has_goal_quiz and section.settings.hero_headline != blank -%}
+          <h1 class="lt-pdp-hero__title lt-hero-title">{{ section.settings.hero_headline | escape }}</h1>
+        {%- else -%}
+          <h1 class="lt-pdp-hero__title lt-hero-title">{{ product.title | escape }}</h1>
+        {%- endif -%}
 
-        <p class="lt-pdp-hero__tagline lt-hero-tagline">
-          {{ product.metafields.custom.tagline | default: section.settings.tagline | default: 'Uthever® NMN · >99,9 % Reinheit · laborgeprüft in Deutschland' }}
-        </p>
+        {%- if lt_tagline_text != blank -%}
+          <p class="lt-pdp-hero__tagline lt-hero-tagline">
+            {{ lt_tagline_text | escape }}
+          </p>
+        {%- endif -%}
 
-        {%- if section.settings.hero_headline != blank -%}
+        {%- if section.settings.hero_headline != blank and lt_has_goal_quiz == false -%}
           <p class="lt-pdp-hero__headline-copy lt-hero-headline">{{ section.settings.hero_headline | escape }}</p>
         {%- endif -%}
 
-        <div class="lt-pdp-hero__bullets lt-hero-bullets">
-          {%- assign hb1 = section.settings.hero_bullet_1 | default: 'Uthever® NMN mit >99,9 % Reinheit — Rohstoff laborgeprüft in Deutschland' -%}
-          {%- assign hb2 = section.settings.hero_bullet_2 | default: 'GMP & HACCP — arztgeführtes Unternehmen aus Berlin' -%}
-          {%- assign hb3 = section.settings.hero_bullet_3 | default: '30 g Pulver · ca. 60 Portionen à 500 mg (1 Messlöffel)' -%}
-          <div class="lt-pdp-hero__bullet">
-            {%- if section.settings.hero_bullet_1_icon != blank -%}
-              {{
-                section.settings.hero_bullet_1_icon
-                | image_url: width: 64
-                | image_tag: loading: 'lazy', class: 'lt-hero-bullet-icon', alt: ''
-              }}
-            {%- else -%}
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"></circle>
-                <path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-              </svg>
+        {%- if lt_has_goal_quiz -%}
+          <div class="lt-pdp-hero__quiz" data-lt-goal-quiz>
+            {%- if section.settings.quiz_question != blank -%}
+              <p class="lt-pdp-hero__quiz-question">{{ section.settings.quiz_question | escape }}</p>
             {%- endif -%}
-            <span>{{ hb1 | escape }}</span>
-          </div>
-          <div class="lt-pdp-hero__bullet">
-            {%- if section.settings.hero_bullet_2_icon != blank -%}
-              {{
-                section.settings.hero_bullet_2_icon
-                | image_url: width: 64
-                | image_tag: loading: 'lazy', class: 'lt-hero-bullet-icon', alt: ''
-              }}
-            {%- else -%}
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"></circle>
-                <path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-              </svg>
+            {%- if section.settings.quiz_helper_text != blank -%}
+              <p class="lt-pdp-hero__quiz-helper">{{ section.settings.quiz_helper_text | escape }}</p>
             {%- endif -%}
-            <span>{{ hb2 | escape }}</span>
+            <div class="lt-pdp-hero__quiz-grid" role="group" aria-label="{{ section.settings.quiz_question | default: 'Einstiegsthema wählen' | escape }}">
+              {%- if section.settings.quiz_option_1_label != blank -%}
+                <button type="button" class="lt-pdp-hero__quiz-button" data-lt-quiz-goal="goal_1" aria-pressed="false">
+                  <span class="lt-pdp-hero__quiz-icon" aria-hidden="true">
+                    {%- assign lt_quiz_icon = section.settings.quiz_option_1_icon | default: 'ph:clock-counter-clockwise-thin' -%}
+                    {%- case lt_quiz_icon -%}
+                      {%- when 'ph:clock-counter-clockwise-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M128 40a88 88 0 1 1-62.23 25.77L40 40" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                          <path d="M40 72V40h32" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                          <path d="M128 88v40l28 28" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- when 'ph:lightning-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M144 16 56 144h56l-16 96 104-136h-56l16-88Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- when 'ph:barbell-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M32 96v64M56 88v80M80 104v48M176 104v48M200 88v80M224 96v64M80 128h96" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- when 'ph:user-focus-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M88 48H48v40M168 48h40v40M208 168v40h-40M88 208H48v-40M128 144a36 36 0 1 0-36-36 36 36 0 0 0 36 36Zm-64 56a72 72 0 0 1 128 0" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- else -%}
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.5"></circle>
+                        </svg>
+                    {%- endcase -%}
+                  </span>
+                  <span class="lt-pdp-hero__quiz-label">{{ section.settings.quiz_option_1_label | escape }}</span>
+                </button>
+              {%- endif -%}
+              {%- if section.settings.quiz_option_2_label != blank -%}
+                <button type="button" class="lt-pdp-hero__quiz-button" data-lt-quiz-goal="goal_2" aria-pressed="false">
+                  <span class="lt-pdp-hero__quiz-icon" aria-hidden="true">
+                    {%- assign lt_quiz_icon = section.settings.quiz_option_2_icon | default: 'ph:lightning-thin' -%}
+                    {%- case lt_quiz_icon -%}
+                      {%- when 'ph:clock-counter-clockwise-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M128 40a88 88 0 1 1-62.23 25.77L40 40" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                          <path d="M40 72V40h32" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                          <path d="M128 88v40l28 28" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- when 'ph:lightning-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M144 16 56 144h56l-16 96 104-136h-56l16-88Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- when 'ph:barbell-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M32 96v64M56 88v80M80 104v48M176 104v48M200 88v80M224 96v64M80 128h96" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- when 'ph:user-focus-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M88 48H48v40M168 48h40v40M208 168v40h-40M88 208H48v-40M128 144a36 36 0 1 0-36-36 36 36 0 0 0 36 36Zm-64 56a72 72 0 0 1 128 0" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- else -%}
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.5"></circle>
+                        </svg>
+                    {%- endcase -%}
+                  </span>
+                  <span class="lt-pdp-hero__quiz-label">{{ section.settings.quiz_option_2_label | escape }}</span>
+                </button>
+              {%- endif -%}
+              {%- if section.settings.quiz_option_3_label != blank -%}
+                <button type="button" class="lt-pdp-hero__quiz-button" data-lt-quiz-goal="goal_3" aria-pressed="false">
+                  <span class="lt-pdp-hero__quiz-icon" aria-hidden="true">
+                    {%- assign lt_quiz_icon = section.settings.quiz_option_3_icon | default: 'ph:barbell-thin' -%}
+                    {%- case lt_quiz_icon -%}
+                      {%- when 'ph:clock-counter-clockwise-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M128 40a88 88 0 1 1-62.23 25.77L40 40" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                          <path d="M40 72V40h32" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                          <path d="M128 88v40l28 28" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- when 'ph:lightning-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M144 16 56 144h56l-16 96 104-136h-56l16-88Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- when 'ph:barbell-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M32 96v64M56 88v80M80 104v48M176 104v48M200 88v80M224 96v64M80 128h96" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- when 'ph:user-focus-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M88 48H48v40M168 48h40v40M208 168v40h-40M88 208H48v-40M128 144a36 36 0 1 0-36-36 36 36 0 0 0 36 36Zm-64 56a72 72 0 0 1 128 0" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- else -%}
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.5"></circle>
+                        </svg>
+                    {%- endcase -%}
+                  </span>
+                  <span class="lt-pdp-hero__quiz-label">{{ section.settings.quiz_option_3_label | escape }}</span>
+                </button>
+              {%- endif -%}
+              {%- if section.settings.quiz_option_4_label != blank -%}
+                <button type="button" class="lt-pdp-hero__quiz-button" data-lt-quiz-goal="goal_4" aria-pressed="false">
+                  <span class="lt-pdp-hero__quiz-icon" aria-hidden="true">
+                    {%- assign lt_quiz_icon = section.settings.quiz_option_4_icon | default: 'ph:user-focus-thin' -%}
+                    {%- case lt_quiz_icon -%}
+                      {%- when 'ph:clock-counter-clockwise-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M128 40a88 88 0 1 1-62.23 25.77L40 40" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                          <path d="M40 72V40h32" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                          <path d="M128 88v40l28 28" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- when 'ph:lightning-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M144 16 56 144h56l-16 96 104-136h-56l16-88Z" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- when 'ph:barbell-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M32 96v64M56 88v80M80 104v48M176 104v48M200 88v80M224 96v64M80 128h96" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- when 'ph:user-focus-thin' -%}
+                        <svg viewBox="0 0 256 256" fill="none">
+                          <path d="M88 48H48v40M168 48h40v40M208 168v40h-40M88 208H48v-40M128 144a36 36 0 1 0-36-36 36 36 0 0 0 36 36Zm-64 56a72 72 0 0 1 128 0" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="12"></path>
+                        </svg>
+                      {%- else -%}
+                        <svg viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1.5"></circle>
+                        </svg>
+                    {%- endcase -%}
+                  </span>
+                  <span class="lt-pdp-hero__quiz-label">{{ section.settings.quiz_option_4_label | escape }}</span>
+                </button>
+              {%- endif -%}
+            </div>
           </div>
-          <div class="lt-pdp-hero__bullet">
-            {%- if section.settings.hero_bullet_3_icon != blank -%}
-              {{
-                section.settings.hero_bullet_3_icon
-                | image_url: width: 64
-                | image_tag: loading: 'lazy', class: 'lt-hero-bullet-icon', alt: ''
-              }}
-            {%- else -%}
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"></circle>
-                <path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-              </svg>
+        {%- endif -%}
+
+        {%- if lt_show_hero_bullets -%}
+          <div class="lt-pdp-hero__bullets lt-hero-bullets">
+            {%- if hb1 != blank -%}
+              <div class="lt-pdp-hero__bullet">
+                {%- if section.settings.hero_bullet_1_icon != blank -%}
+                  {{
+                    section.settings.hero_bullet_1_icon
+                    | image_url: width: 64
+                    | image_tag: loading: 'lazy', class: 'lt-hero-bullet-icon', alt: ''
+                  }}
+                {%- else -%}
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"></circle>
+                    <path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                {%- endif -%}
+                <span>{{ hb1 | escape }}</span>
+              </div>
             {%- endif -%}
-            <span>{{ hb3 | escape }}</span>
+            {%- if hb2 != blank -%}
+              <div class="lt-pdp-hero__bullet">
+                {%- if section.settings.hero_bullet_2_icon != blank -%}
+                  {{
+                    section.settings.hero_bullet_2_icon
+                    | image_url: width: 64
+                    | image_tag: loading: 'lazy', class: 'lt-hero-bullet-icon', alt: ''
+                  }}
+                {%- else -%}
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"></circle>
+                    <path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                {%- endif -%}
+                <span>{{ hb2 | escape }}</span>
+              </div>
+            {%- endif -%}
+            {%- if hb3 != blank -%}
+              <div class="lt-pdp-hero__bullet">
+                {%- if section.settings.hero_bullet_3_icon != blank -%}
+                  {{
+                    section.settings.hero_bullet_3_icon
+                    | image_url: width: 64
+                    | image_tag: loading: 'lazy', class: 'lt-hero-bullet-icon', alt: ''
+                  }}
+                {%- else -%}
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                    <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"></circle>
+                    <path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                {%- endif -%}
+                <span>{{ hb3 | escape }}</span>
+              </div>
+            {%- endif -%}
           </div>
-        </div>
+        {%- endif -%}
 
         {%- if lt_show_sub -%}
           {%- liquid
@@ -760,9 +935,10 @@
                   class="add-to-cart button button--solid button--product button--loader button--move lt-pdp-hero__atc {% unless current_variant.available %}disabled{% endunless %}"
                   data-js-product-add-to-cart
                   data-main-product-add-to-cart
+                  aria-label="{{ lt_primary_cta_aria | escape }}"
                 >
                   <span class="button__text" data-js-product-add-to-cart-text>
-                    Jetzt kaufen →
+                    {{ lt_primary_cta_label | escape }}
                   </span>
                   <span class="button__preloader">
                     <svg class="button__preloader-element" viewBox="25 25 50 50">
@@ -977,7 +1153,7 @@
       </div>
       <div class="lt-sticky-atc__right">
         <button data-js-atc class="button button--solid button--move button--product button--loader lt-sticky-btn">
-          <span class="button__text">In den Warenkorb</span>
+          <span class="button__text">{{ lt_sticky_cta_label | escape }}</span>
           <span class="button__preloader">
             <svg class="button__preloader-element" viewBox="25 25 50 50">
               <circle cx="50" cy="50" r="20" fill="none" stroke-width="4"></circle>
@@ -1005,6 +1181,39 @@
     const ltStickyShowCompare = section.dataset.ltStickyShowCompare !== '0';
 
     const reviewButton = section.querySelector('[data-lt-reviews-scroll]');
+    const quizButtons = section.querySelectorAll('[data-lt-quiz-goal]');
+
+    function setActiveQuizButton(goalId) {
+      if (!quizButtons.length) return;
+      quizButtons.forEach(function(button) {
+        var isActive = button.dataset.ltQuizGoal === goalId;
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+      });
+    }
+
+    if (quizButtons.length) {
+      quizButtons.forEach(function(button) {
+        button.addEventListener('click', function() {
+          var goalId = button.dataset.ltQuizGoal;
+          setActiveQuizButton(goalId);
+          window.dispatchEvent(
+            new CustomEvent('quiz-goal-selected', {
+              detail: {
+                goalId: goalId,
+                sourceSectionId: '{{ section.id }}',
+                shouldScroll: true
+              }
+            })
+          );
+        });
+      });
+
+      window.addEventListener('quiz-goal-selected', function(event) {
+        if (!event.detail || !event.detail.goalId) return;
+        setActiveQuizButton(event.detail.goalId);
+      });
+    }
 
     function markLooxSection() {
       const looxRoot = document.querySelector(
@@ -1323,6 +1532,82 @@
   font-size: 13px !important;
 }
 
+.lt-pdp-hero__quiz {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.lt-pdp-hero__quiz-question {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--lt-text, #26251e);
+}
+
+.lt-pdp-hero__quiz-helper {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--lt-muted, rgba(38,37,30,0.55));
+}
+
+.lt-pdp-hero__quiz-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.lt-pdp-hero__quiz-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 60px;
+  padding: 14px 16px;
+  border: 1px solid var(--lt-border, rgba(38,37,30,0.1));
+  border-radius: 999px;
+  background: var(--lt-surface, #f2f1ed);
+  color: var(--lt-text, #26251e);
+  text-align: left;
+  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+}
+
+.lt-pdp-hero__quiz-button:hover,
+.lt-pdp-hero__quiz-button:focus-visible {
+  border-color: var(--lt-text, #26251e);
+  background: color-mix(in srgb, var(--lt-surface, #f2f1ed) 72%, white);
+  transform: translateY(-1px);
+}
+
+.lt-pdp-hero__quiz-button.is-active {
+  border-color: var(--lt-text, #26251e);
+  background: color-mix(in srgb, var(--lt-surface, #f2f1ed) 56%, white);
+}
+
+.lt-pdp-hero__quiz-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--lt-text, #26251e) 6%, transparent);
+  flex-shrink: 0;
+}
+
+.lt-pdp-hero__quiz-icon svg {
+  width: 22px;
+  height: 22px;
+}
+
+.lt-pdp-hero__quiz-label {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
 /* Gallery frame — sharp corners */
 .lt-pdp-hero__gallery-frame {
   border-radius: 4px !important;
@@ -1469,6 +1754,12 @@
 
   .lt-pdp-hero .css-slider-dot-navigation {
     display: block !important;
+  }
+}
+
+@media screen and (min-width: 560px) {
+  .lt-pdp-hero__quiz-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
@@ -1704,6 +1995,74 @@
       "id": "hero_headline",
       "label": "Zwischenüberschrift (unter Tagline)",
       "default": "NMN als Baustein für deinen NAD⁺-Stoffwechsel — mit messbar hoher Reinheit und laborgeprüftem Uthever®-Rohstoff."
+    },
+    {
+      "type": "header",
+      "content": "Landing Quiz"
+    },
+    {
+      "type": "text",
+      "id": "quiz_question",
+      "label": "Quiz-Frage"
+    },
+    {
+      "type": "text",
+      "id": "quiz_helper_text",
+      "label": "Quiz-Hilfstext"
+    },
+    {
+      "type": "text",
+      "id": "quiz_option_1_label",
+      "label": "Quiz-Option 1 — Label"
+    },
+    {
+      "type": "text",
+      "id": "quiz_option_1_icon",
+      "label": "Quiz-Option 1 — Icon-Key",
+      "info": "Unterstützt aktuell: ph:clock-counter-clockwise-thin, ph:lightning-thin, ph:barbell-thin, ph:user-focus-thin"
+    },
+    {
+      "type": "text",
+      "id": "quiz_option_2_label",
+      "label": "Quiz-Option 2 — Label"
+    },
+    {
+      "type": "text",
+      "id": "quiz_option_2_icon",
+      "label": "Quiz-Option 2 — Icon-Key",
+      "info": "Unterstützt aktuell: ph:clock-counter-clockwise-thin, ph:lightning-thin, ph:barbell-thin, ph:user-focus-thin"
+    },
+    {
+      "type": "text",
+      "id": "quiz_option_3_label",
+      "label": "Quiz-Option 3 — Label"
+    },
+    {
+      "type": "text",
+      "id": "quiz_option_3_icon",
+      "label": "Quiz-Option 3 — Icon-Key",
+      "info": "Unterstützt aktuell: ph:clock-counter-clockwise-thin, ph:lightning-thin, ph:barbell-thin, ph:user-focus-thin"
+    },
+    {
+      "type": "text",
+      "id": "quiz_option_4_label",
+      "label": "Quiz-Option 4 — Label"
+    },
+    {
+      "type": "text",
+      "id": "quiz_option_4_icon",
+      "label": "Quiz-Option 4 — Icon-Key",
+      "info": "Unterstützt aktuell: ph:clock-counter-clockwise-thin, ph:lightning-thin, ph:barbell-thin, ph:user-focus-thin"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Primärer CTA — Label"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Primärer CTA — URL (optional, dokumentarisch für Landing Pages)"
     },
     {
       "type": "header",

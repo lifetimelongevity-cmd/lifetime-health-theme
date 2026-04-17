@@ -189,53 +189,51 @@
             {%- for block in section.blocks -%}
               {%- if block.type == 'press_logo' -%}
                 {%- liquid
-                  assign sp_logo_raw = block.settings.logo_image_url | strip
-                  assign sp_logo_image_src = blank
-                  if sp_logo_raw == blank
-                    case block.settings.logo_alt
+                  assign sp_logo_alt = block.settings.logo_alt | strip
+                  assign sp_logo_fallback_file = ''
+
+                  if block.settings.logo_image_url == blank
+                    case sp_logo_alt
                       when 'RTL'
-                        assign sp_logo_raw = '1_b5d8bee0-0588-4cab-8e38-b3eee8285532.png'
-                      when 'Kölner Stadt Anzeiger'
-                        assign sp_logo_raw = 'ksta-logo-grau-nobg.png'
+                        assign sp_logo_fallback_file = '1_b5d8bee0-0588-4cab-8e38-b3eee8285532.png'
+                      when 'Kölner Stadt Anzeiger', 'KStA'
+                        assign sp_logo_fallback_file = 'ksta-logo-grau-nobg.png'
                       when 'SWR1'
-                        assign sp_logo_raw = 'swr1-logo.png'
+                        assign sp_logo_fallback_file = 'swr1-logo.png'
                       when 'SAT.1'
-                        assign sp_logo_raw = 'Kein_Titel_600_x_400_px_2.png'
+                        assign sp_logo_fallback_file = 'Kein_Titel_600_x_400_px_2.png'
                       when 'Spiegel Bestseller'
-                        assign sp_logo_raw = '3_9df4d585-1a85-4c48-80bb-c8585a85cce7.png'
+                        assign sp_logo_fallback_file = '3_9df4d585-1a85-4c48-80bb-c8585a85cce7.png'
                     endcase
-                  endif
-
-                  if sp_logo_raw != blank
-                    assign sp_logo_image_src = block.settings.logo_image_url | image_url: width: 240
-                    if sp_logo_image_src == blank
-                      assign sp_logo_image_src = sp_logo_raw
-                    endif
-                  endif
-
-                  if sp_logo_image_src contains 'shopify://shop_images/'
-                    assign sp_logo_image_src = sp_logo_image_src | remove: 'shopify://shop_images/' | file_url
-                  elsif sp_logo_image_src != blank
-                    unless sp_logo_image_src contains '://'
-                      assign sp_logo_image_src = sp_logo_image_src | file_url
-                    endunless
                   endif
                 -%}
                 <li class="sp__press-item" {{ block.shopify_attributes }}>
                   {%- if block.settings.logo_link_url != blank -%}
-                    <a href="{{ block.settings.logo_link_url }}" class="sp__press-link" target="_blank" rel="noopener noreferrer" aria-label="{{ block.settings.logo_alt | escape }}">
+                    <a href="{{ block.settings.logo_link_url }}" class="sp__press-link" target="_blank" rel="noopener noreferrer" aria-label="{{ sp_logo_alt | escape }}">
                   {%- endif -%}
-                  {%- if sp_logo_image_src != blank -%}
+                  {%- if block.settings.logo_image_url != blank -%}
+                    {{
+                      block.settings.logo_image_url
+                      | image_url: width: 240
+                      | image_tag:
+                        loading: 'lazy',
+                        class: 'sp__press-logo',
+                        alt: sp_logo_alt,
+                        widths: '120, 180, 240',
+                        width: 120,
+                        height: 40
+                    }}
+                  {%- elsif sp_logo_fallback_file != blank -%}
                     <img
-                      src="{{ sp_logo_image_src | escape }}"
-                      alt="{{ block.settings.logo_alt | escape }}"
+                      src="{{ sp_logo_fallback_file | file_url }}"
+                      alt="{{ sp_logo_alt | escape }}"
                       class="sp__press-logo"
                       loading="lazy"
                       width="120"
                       height="40"
                     >
                   {%- else -%}
-                    <span class="sp__press-logo-text">{{ block.settings.logo_alt | escape }}</span>
+                    <span class="sp__press-logo-text">{{ sp_logo_alt | escape }}</span>
                   {%- endif -%}
                   {%- if block.settings.logo_link_url != blank -%}
                     </a>
