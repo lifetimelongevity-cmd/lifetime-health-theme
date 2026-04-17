@@ -47,12 +47,12 @@
       stepLabel: 'Ziel',
       icon: ICONS.target,
       question: 'Was ist aktuell dein wichtigstes Gesundheitsziel?',
-      hint: 'Dein Hauptziel gewichtet die Empfehlung am stärksten. So priorisieren wir zuerst deinen größten Hebel und erst danach die Feinabstimmung.',
+      hint: 'Je nach Ziel priorisieren wir den Hebel, der dein biologisches Alter am ehesten beeinflussen dürfte, und justieren erst danach die Routine im Detail.',
       answers: [
-        { text: 'Mehr Energie im Alltag', scores: { energie: 4 } },
-        { text: 'Besser schlafen & erholen', scores: { schlaf: 4 } },
-        { text: 'Mehr Fokus & mentale Klarheit', scores: { fokus: 4 } },
-        { text: 'Gesund altern & vorbeugen', scores: { langlebigkeit: 4 } },
+        { text: 'Mehr Energie im Alltag', icon: ICONS.battery, scores: { energie: 4 } },
+        { text: 'Besser schlafen & erholen', icon: ICONS.moon, scores: { schlaf: 4 } },
+        { text: 'Mehr Fokus & mentale Klarheit', icon: ICONS.brain, scores: { fokus: 4 } },
+        { text: 'Gesund altern & vorbeugen', icon: ICONS.scope, scores: { langlebigkeit: 4 } },
       ],
     },
     {
@@ -61,7 +61,7 @@
       stepLabel: 'Zustand',
       icon: ICONS.personStep,
       question: 'Wie würdest du deinen aktuellen Gesundheitszustand insgesamt beschreiben?',
-      hint: 'Das zeigt, ob wir eher auf akute Belastung reagieren oder eine schon gute Basis langfristig stabilisieren sollten.',
+      hint: 'Ein instabiler Alltag zeigt oft, dass Belastung und Regeneration bereits auf Systeme wirken, die sich später auch im biologischen Alter und in epigenetischen Mustern widerspiegeln.',
       minLabel: 'Ich funktioniere nur',
       maxLabel: 'Ich fühle mich sehr stabil',
       options: [
@@ -78,7 +78,7 @@
       stepLabel: 'Phase',
       icon: ICONS.clockStep,
       question: 'In welcher Lebensphase befindest du dich gerade?',
-      hint: 'Mit Alter und Lebensphase verschieben sich NAD⁺-Bedarf, Regeneration und Präventionspotenzial deutlich.',
+      hint: 'Mit der Lebensphase verändern sich NAD+-Bedarf, Regeneration und das Tempo epigenetischer Alterungsprozesse deutlich.',
       answers: [
         { text: 'Unter 30', scores: { energie: 1 } },
         { text: '30–39', scores: { energie: 1, fokus: 1 } },
@@ -92,7 +92,7 @@
       stepLabel: 'Training',
       icon: ICONS.runStep,
       question: 'Wie regelmäßig trainierst du aktuell?',
-      hint: 'Bewegung ist einer der stärksten Longevity-Hebel. Sie beeinflusst Energie, Insulinsensitivität, Schlaf und Regeneration gleichzeitig.',
+      hint: 'Regelmäßige Bewegung ist einer der stärksten Hebel für metabolische Gesundheit und Marker, die mit epigenetischem Altern zusammenhängen.',
       answers: [
         { text: 'Kaum oder unregelmäßig', scores: { energie: 2 } },
         { text: '1–2x pro Woche', scores: { energie: 1, schlaf: 1 } },
@@ -106,7 +106,7 @@
       stepLabel: 'Ernährung',
       icon: ICONS.forkKnife,
       question: 'Wie würdest du deine Ernährung im Alltag beschreiben?',
-      hint: 'Ernährungsqualität beeinflusst Entzündung, Blutzucker, kognitive Leistung und biologische Alterungsmarker direkt mit.',
+      hint: 'Ernährungsqualität beeinflusst Entzündung, Blutzuckerregulation und epigenetische Marker, die eng mit biologischem Alter verbunden sind.',
       answers: [
         { text: 'Eher unregelmäßig und spontan', scores: { energie: 2, fokus: 1 } },
         { text: 'Okay, aber mit spürbaren Lücken', scores: { energie: 1, fokus: 1 } },
@@ -120,7 +120,7 @@
       stepLabel: 'Stress',
       icon: ICONS.gauge,
       question: 'Wie hoch ist dein Stresslevel im Alltag?',
-      hint: 'Chronischer Stress senkt NAD⁺, stört den Schlaf und erhöht die Zellbelastung. Deshalb ist er für die Routine oft ein zentraler Filter.',
+      hint: 'Chronischer Stress erhöht Zellbelastung, stört Regeneration und ist in Studien mit beschleunigter epigenetischer Alterung assoziiert.',
       minLabel: 'Sehr niedrig',
       maxLabel: 'Sehr hoch',
       options: [
@@ -137,7 +137,7 @@
       stepLabel: 'Schlaf',
       icon: ICONS.moon,
       question: 'Wie erholsam ist dein Schlaf aktuell?',
-      hint: 'Schlafqualität entscheidet mit darüber, wie gut Zellreparatur, Hormonbalance und mentale Regeneration überhaupt stattfinden können.',
+      hint: 'Schlafqualität beeinflusst Zellreparatur, Hormonbalance und ist einer der konsistentesten Faktoren im Zusammenhang mit biologischem und epigenetischem Altern.',
       minLabel: 'Sehr schlecht',
       maxLabel: 'Sehr erholsam',
       options: [
@@ -154,7 +154,7 @@
       stepLabel: 'Kognition',
       icon: ICONS.brain,
       question: 'Wie klar und fokussiert fühlst du dich mental?',
-      hint: 'Kognitive Leistung reagiert früh auf Stress, Schlafdefizit, Energieverfügbarkeit und Nährstoffstatus. Deshalb ist sie ein starker Frühindikator.',
+      hint: 'Mentale Klarheit reagiert früh auf Schlaf, Stress und Entzündung und ist oft ein spürbarer Frühindikator dafür, wie gut dein System insgesamt reguliert ist.',
       minLabel: 'Starker Brain Fog',
       maxLabel: 'Sehr klar',
       options: [
@@ -287,12 +287,15 @@
 
     stepsEl.innerHTML = `
       <div class="lt-quiz__step" data-step="${index}">
+        <div class="lt-quiz__question-meta">
+          <span class="lt-quiz__question-meta-icon" aria-hidden="true">${q.icon}</span>
+          <p class="lt-quiz__question-step-label">${escapeHtml(q.stepLabel)}</p>
+        </div>
         <h3 class="lt-quiz__question">${escapeHtml(q.question)}</h3>
         ${renderQuestionInput(q, selectedIndex)}
         ${q.hint ? `
           <div class="lt-quiz__question-note" role="note">
-            <span class="lt-quiz__question-note-icon" aria-hidden="true">${ICONS.lightbulb}</span>
-            <p class="lt-quiz__question-hint">${escapeHtml(q.hint)}</p>
+            ${renderQuestionNote(q.hint)}
           </div>
         ` : ''}
       </div>
@@ -303,9 +306,24 @@
     });
 
     if (q.type === 'scale') {
-      stepsEl.querySelectorAll('.lt-quiz__scale-option').forEach((el) => {
-        el.addEventListener('keydown', (event) => handleScaleKeydown(event, index, parseInt(el.dataset.index, 10)));
-      });
+      const rangeEl = stepsEl.querySelector('.lt-quiz__scale-range');
+      if (rangeEl) {
+        const commitRangeValue = () => {
+          handleAnswer(index, parseInt(rangeEl.value, 10));
+        };
+
+        updateScalePreview(index, parseInt(rangeEl.value, 10), selectedIndex != null);
+        rangeEl.addEventListener('input', () => {
+          updateScalePreview(index, parseInt(rangeEl.value, 10), true);
+        });
+        rangeEl.addEventListener('change', commitRangeValue);
+        rangeEl.addEventListener('pointerup', commitRangeValue);
+        rangeEl.addEventListener('keyup', (event) => {
+          if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(event.key)) {
+            commitRangeValue();
+          }
+        });
+      }
     }
 
     isTransitioning = false;
@@ -327,8 +345,15 @@
               data-index="${index}"
               aria-pressed="${selectedIndex === index ? 'true' : 'false'}"
             >
+              <span class="lt-quiz__answer-visual" aria-hidden="true">
+                ${answer.icon
+                  ? `<span class="lt-quiz__answer-icon">${answer.icon}</span>`
+                  : `<span class="lt-quiz__answer-index">${String(index + 1).padStart(2, '0')}</span>`}
+              </span>
+              <span class="lt-quiz__answer-body">
+                <span class="lt-quiz__answer-text">${escapeHtml(answer.text)}</span>
+              </span>
               <span class="lt-quiz__answer-check" aria-hidden="true"></span>
-              <span class="lt-quiz__answer-text">${escapeHtml(answer.text)}</span>
             </button>
           </li>
         `).join('')}
@@ -336,60 +361,68 @@
     `;
   }
 
-  function renderScale(question, selectedIndex) {
-    const selectedOption = selectedIndex != null ? question.options[selectedIndex] : null;
+  function renderQuestionNote(hint) {
+    const advisor = window.LT_QUIZ_ADVISOR || {};
+    const advisorName = advisor.name || 'Prof. Dr. med. Volker Limmroth';
+    const advisorTitle = advisor.title || 'Chefarzt Neurologie · Chief Scientific Officer LIFETIME';
 
     return `
-      <div class="lt-quiz__scale-wrap">
-        <p class="lt-quiz__scale-current" aria-live="polite">
-          <span class="lt-quiz__scale-current-prefix">Deine Einschätzung</span>
-          <span class="lt-quiz__scale-current-value">${escapeHtml(selectedOption ? selectedOption.label : 'Noch keine Auswahl')}</span>
-        </p>
-        <div class="lt-quiz__scale" role="radiogroup" aria-label="${escapeHtml(question.question)}">
-          ${question.options.map((option, index) => `
-            <button
-              type="button"
-              class="lt-quiz__scale-option${selectedIndex === index ? ' lt-quiz__scale-option--selected' : ''}"
-              data-quiz-option="true"
-              data-index="${index}"
-              role="radio"
-              aria-checked="${selectedIndex === index ? 'true' : 'false'}"
-              tabindex="${selectedIndex == null ? (index === 0 ? '0' : '-1') : (selectedIndex === index ? '0' : '-1')}"
-              aria-label="${escapeHtml(option.label)}"
-            >
-              <span class="lt-quiz__scale-value" aria-hidden="true">${index + 1}</span>
-              <span class="lt-quiz__scale-text">${escapeHtml(option.shortLabel || option.label)}</span>
-            </button>
-          `).join('')}
-        </div>
-        <div class="lt-quiz__scale-legend" aria-hidden="true">
-          <span>${escapeHtml(question.minLabel)}</span>
-          <span>${escapeHtml(question.maxLabel)}</span>
+      <div class="lt-quiz__question-note-head">
+        ${advisor.image
+          ? `<img src="${escapeHtml(advisor.image)}" alt="${escapeHtml(advisorName)}" class="lt-quiz__question-note-avatar" loading="lazy" width="56" height="56">`
+          : `<span class="lt-quiz__question-note-icon" aria-hidden="true">${ICONS.lightbulb}</span>`}
+        <div class="lt-quiz__question-note-meta">
+          <p class="lt-quiz__question-note-kicker">Hinweis von</p>
+          <p class="lt-quiz__question-note-name">${escapeHtml(advisorName)}</p>
+          <p class="lt-quiz__question-note-title">${escapeHtml(advisorTitle)}</p>
         </div>
       </div>
+      <p class="lt-quiz__question-hint">${escapeHtml(hint)}</p>
     `;
   }
 
-  function handleScaleKeydown(event, questionIndex, answerIndex) {
-    const question = QUESTIONS[questionIndex];
-    if (!question || question.type !== 'scale') return;
+  function renderScale(question, selectedIndex) {
+    const previewIndex = selectedIndex != null ? selectedIndex : getDefaultScaleIndex(question);
+    const previewOption = question.options[previewIndex];
+    const progress = getScaleProgress(previewIndex, question.options.length);
 
-    let nextIndex = answerIndex;
-
-    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
-      nextIndex = Math.min(question.options.length - 1, answerIndex + 1);
-    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
-      nextIndex = Math.max(0, answerIndex - 1);
-    } else if (event.key === 'Home') {
-      nextIndex = 0;
-    } else if (event.key === 'End') {
-      nextIndex = question.options.length - 1;
-    } else {
-      return;
-    }
-
-    event.preventDefault();
-    handleAnswer(questionIndex, nextIndex);
+    return `
+      <div class="lt-quiz__scale-wrap${selectedIndex != null ? ' lt-quiz__scale-wrap--active' : ''}" data-scale-wrap="true">
+        <p class="lt-quiz__scale-current" aria-live="polite">
+          <span class="lt-quiz__scale-current-prefix">${selectedIndex != null ? 'Deine Einschätzung' : 'Schiebe den Regler'}</span>
+          <span class="lt-quiz__scale-current-value">${escapeHtml(previewOption.label)}</span>
+        </p>
+        <div class="lt-quiz__scale-shell">
+          <div class="lt-quiz__scale-range-wrap" style="--lt-quiz-scale-progress: ${progress}%;">
+            <input
+              class="lt-quiz__scale-range"
+              type="range"
+              min="0"
+              max="${question.options.length - 1}"
+              step="1"
+              value="${previewIndex}"
+              aria-label="${escapeHtml(question.question)}"
+              aria-valuemin="0"
+              aria-valuemax="${question.options.length - 1}"
+              aria-valuenow="${previewIndex}"
+              aria-valuetext="${escapeHtml(previewOption.label)}"
+            >
+            <div class="lt-quiz__scale-stops" aria-hidden="true">
+              ${question.options.map((option, index) => `
+                <span
+                  class="lt-quiz__scale-stop${index < previewIndex ? ' lt-quiz__scale-stop--passed' : ''}${index === previewIndex ? ' lt-quiz__scale-stop--current' : ''}"
+                  data-scale-stop="${index}"
+                ></span>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+        <div class="lt-quiz__scale-ends" aria-hidden="true">
+          <span class="lt-quiz__scale-end lt-quiz__scale-end--min">${escapeHtml(question.minLabel)}</span>
+          <span class="lt-quiz__scale-end lt-quiz__scale-end--max">${escapeHtml(question.maxLabel)}</span>
+        </div>
+      </div>
+    `;
   }
 
   function getAnswerDefinition(question, answerIndex) {
@@ -398,9 +431,48 @@
     return question.answers[answerIndex] || null;
   }
 
-  function reflectSelection(questionIndex, answerIndex) {
+  function getDefaultScaleIndex(question) {
+    return Math.floor((question.options.length - 1) / 2);
+  }
+
+  function getScaleProgress(answerIndex, optionCount) {
+    const maxIndex = Math.max(optionCount - 1, 1);
+    return Math.round((answerIndex / maxIndex) * 100);
+  }
+
+  function updateScalePreview(questionIndex, answerIndex, isInteractive) {
     const question = QUESTIONS[questionIndex];
     const selectedOption = getAnswerDefinition(question, answerIndex);
+    const wrap = stepsEl.querySelector('[data-scale-wrap]');
+    const currentValueEl = stepsEl.querySelector('.lt-quiz__scale-current-value');
+    const currentPrefixEl = stepsEl.querySelector('.lt-quiz__scale-current-prefix');
+    const rangeEl = stepsEl.querySelector('.lt-quiz__scale-range');
+    const rangeWrapEl = stepsEl.querySelector('.lt-quiz__scale-range-wrap');
+    const progress = getScaleProgress(answerIndex, question.options.length);
+
+    if (currentValueEl) currentValueEl.textContent = selectedOption ? selectedOption.label : '';
+    if (currentPrefixEl) currentPrefixEl.textContent = isInteractive ? 'Deine Einschätzung' : 'Schiebe den Regler';
+    if (rangeEl) {
+      rangeEl.value = String(answerIndex);
+      rangeEl.setAttribute('aria-valuenow', String(answerIndex));
+      rangeEl.setAttribute('aria-valuetext', selectedOption ? selectedOption.label : '');
+    }
+    if (rangeWrapEl) {
+      rangeWrapEl.style.setProperty('--lt-quiz-scale-progress', `${progress}%`);
+    }
+    if (wrap) {
+      wrap.classList.toggle('lt-quiz__scale-wrap--active', isInteractive);
+    }
+
+    stepsEl.querySelectorAll('[data-scale-stop]').forEach((el) => {
+      const stopIndex = parseInt(el.getAttribute('data-scale-stop') || '-1', 10);
+      el.classList.toggle('lt-quiz__scale-stop--passed', stopIndex < answerIndex);
+      el.classList.toggle('lt-quiz__scale-stop--current', stopIndex === answerIndex);
+    });
+  }
+
+  function reflectSelection(questionIndex, answerIndex) {
+    const question = QUESTIONS[questionIndex];
 
     stepsEl.querySelectorAll('[data-quiz-option]').forEach((el) => {
       const isSelected = parseInt(el.dataset.index, 10) === answerIndex;
@@ -410,16 +482,10 @@
         el.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
       }
 
-      if (el.classList.contains('lt-quiz__scale-option')) {
-        el.classList.toggle('lt-quiz__scale-option--selected', isSelected);
-        el.setAttribute('aria-checked', isSelected ? 'true' : 'false');
-        el.setAttribute('tabindex', isSelected ? '0' : '-1');
-      }
     });
 
     if (question && question.type === 'scale') {
-      const currentValueEl = stepsEl.querySelector('.lt-quiz__scale-current-value');
-      if (currentValueEl) currentValueEl.textContent = selectedOption ? selectedOption.label : 'Noch keine Auswahl';
+      updateScalePreview(questionIndex, answerIndex, true);
     }
   }
 
