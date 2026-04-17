@@ -297,12 +297,12 @@
       <div class="lt-quiz__step" data-step="${index}">
         <h3 class="lt-quiz__question">${escapeHtml(q.question)}</h3>
         ${renderQuestionInput(q, selectedIndex)}
+        ${renderStepNavigation(index, isAnswered, q.type)}
         ${q.hint ? `
           <div class="lt-quiz__question-note" role="note">
             ${renderQuestionNote(q.hint)}
           </div>
         ` : ''}
-        ${renderStepNavigation(index, isAnswered)}
       </div>
     `;
 
@@ -322,6 +322,7 @@
 
     stepsEl.querySelector('[data-quiz-prev]')?.addEventListener('click', handlePrevious);
     stepsEl.querySelector('[data-quiz-next]')?.addEventListener('click', handleNext);
+    stepsEl.querySelector('[data-quiz-note-toggle]')?.addEventListener('click', handleNoteToggle);
 
     isTransitioning = false;
   }
@@ -356,41 +357,62 @@
   }
 
   function renderQuestionNote(hint) {
-    const advisor = window.LT_QUIZ_ADVISOR || {};
+    const noteId = `lt-quiz-note-${currentStep}`;
 
     return `
-      ${advisor.image
-        ? `<img src="${escapeHtml(advisor.image)}" alt="" class="lt-quiz__question-note-avatar" loading="lazy" width="56" height="56">`
-        : `<span class="lt-quiz__question-note-icon" aria-hidden="true">${ICONS.lightbulb}</span>`}
-      <div class="lt-quiz__question-note-copy">
-        <div class="lt-quiz__question-note-head">
-          <p class="lt-quiz__question-note-name">Warum fragen wir das?</p>
-        </div>
+      <button
+        type="button"
+        class="lt-quiz__question-note-toggle"
+        data-quiz-note-toggle="true"
+        aria-expanded="false"
+        aria-controls="${noteId}"
+      >
+        <span class="lt-quiz__question-note-name">Warum fragen wir das?</span>
+        <span class="lt-quiz__question-note-caret" aria-hidden="true">+</span>
+      </button>
+      <div class="lt-quiz__question-note-panel" id="${noteId}" hidden>
         <p class="lt-quiz__question-hint">${escapeHtml(hint)}</p>
       </div>
     `;
   }
 
-  function renderStepNavigation(index, isAnswered) {
+  function renderStepNavigation(index, isAnswered, questionType) {
     const isLastStep = index === QUESTIONS.length - 1;
+    const showBack = index > 0;
+
+    if (questionType !== 'scale') {
+      if (!showBack) return '';
+
+      return `
+        <div class="lt-quiz__step-actions lt-quiz__step-actions--cards">
+          <button
+            type="button"
+            class="lt-quiz__step-link"
+            data-quiz-prev="true"
+          >
+            &lt; Zurück
+          </button>
+        </div>
+      `;
+    }
 
     return `
       <div class="lt-quiz__step-actions">
         <button
           type="button"
-          class="lt-quiz__step-button lt-quiz__step-button--secondary"
+          class="lt-quiz__step-link"
           data-quiz-prev="true"
           ${index === 0 ? 'disabled aria-disabled="true"' : ''}
         >
-          Zurück
+          &lt; Zurück
         </button>
         <button
           type="button"
-          class="lt-quiz__step-button lt-quiz__step-button--primary"
+          class="lt-quiz__step-link"
           data-quiz-next="true"
           ${isAnswered ? '' : 'disabled aria-disabled="true"'}
         >
-          ${isLastStep ? 'Ergebnis ansehen' : 'Weiter'}
+          ${isLastStep ? 'Ergebnis >' : 'Weiter >'}
         </button>
       </div>
     `;
@@ -480,6 +502,26 @@
     const isAnswered = Boolean(answers[questionIndex]);
     nextButton.disabled = !isAnswered;
     nextButton.setAttribute('aria-disabled', String(!isAnswered));
+  }
+
+  function handleNoteToggle(event) {
+    const toggle = event.currentTarget;
+    const note = toggle.closest('.lt-quiz__question-note');
+    const panel = note ? note.querySelector('.lt-quiz__question-note-panel') : null;
+    const caret = toggle.querySelector('.lt-quiz__question-note-caret');
+    if (!panel) return;
+
+    const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.setAttribute('aria-expanded', String(!isExpanded));
+    panel.hidden = isExpanded;
+
+    if (caret) {
+      caret.textContent = isExpanded ? '+' : '−';
+    }
+
+    if (note) {
+      note.classList.toggle('lt-quiz__question-note--open', !isExpanded);
+    }
   }
 
   function reflectSelection(questionIndex, answerIndex) {
@@ -661,6 +703,28 @@
 
     answers[questionIndex] = { answerIndex, scores: answer.scores };
     reflectSelection(questionIndex, answerIndex, options.isInteractive);
+
+    if (question.type === 'cards') {
+      advanceFrom(questionIndex);
+    }
+  }
+
+  function advanceFrom(questionIndex) {
+    if (isTransitioning) return;
+
+    isTransitioning = true;
+
+    window.setTimeout(() => {
+      if (questionIndex < QUESTIONS.length - 1) {
+        currentStep = questionIndex + 1;
+        updateProgress();
+        renderStep(currentStep);
+        return;
+      }
+
+      renderResults(calculateOutcome());
+      isTransitioning = false;
+    }, 180);
   }
 
   function handlePrevious() {
@@ -674,14 +738,7 @@
   function handleNext() {
     if (isTransitioning || !answers[currentStep]) return;
 
-    if (currentStep < QUESTIONS.length - 1) {
-      currentStep += 1;
-      updateProgress();
-      renderStep(currentStep);
-      return;
-    }
-
-    renderResults(calculateOutcome());
+    advanceFrom(currentStep);
   }
 
   function calculateOutcome() {
