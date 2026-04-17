@@ -281,7 +281,17 @@
 
   function renderStep(index) {
     const q = QUESTIONS[index];
-    const selectedIndex = answers[index] ? answers[index].answerIndex : null;
+    let selectedIndex = answers[index] ? answers[index].answerIndex : null;
+
+    if (q.type === 'scale' && selectedIndex == null) {
+      selectedIndex = getDefaultScaleIndex(q);
+      const defaultAnswer = getAnswerDefinition(q, selectedIndex);
+      if (defaultAnswer) {
+        answers[index] = { answerIndex: selectedIndex, scores: defaultAnswer.scores };
+      }
+    }
+
+    const isAnswered = selectedIndex != null;
 
     stepsEl.innerHTML = `
       <div class="lt-quiz__step" data-step="${index}">
@@ -292,33 +302,26 @@
             ${renderQuestionNote(q.hint)}
           </div>
         ` : ''}
+        ${renderStepNavigation(index, isAnswered)}
       </div>
     `;
 
     stepsEl.querySelectorAll('[data-quiz-option]').forEach((el) => {
-      el.addEventListener('click', () => handleAnswer(index, parseInt(el.dataset.index, 10)));
+      el.addEventListener('click', () => selectAnswer(index, parseInt(el.dataset.index, 10)));
     });
 
     if (q.type === 'scale') {
       const rangeEl = stepsEl.querySelector('.lt-quiz__scale-range');
       if (rangeEl) {
-        const commitRangeValue = () => {
-          handleAnswer(index, parseInt(rangeEl.value, 10));
-        };
-
         updateScalePreview(index, parseInt(rangeEl.value, 10), selectedIndex != null);
         rangeEl.addEventListener('input', () => {
-          updateScalePreview(index, parseInt(rangeEl.value, 10), true);
-        });
-        rangeEl.addEventListener('change', commitRangeValue);
-        rangeEl.addEventListener('pointerup', commitRangeValue);
-        rangeEl.addEventListener('keyup', (event) => {
-          if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End', 'PageUp', 'PageDown'].includes(event.key)) {
-            commitRangeValue();
-          }
+          selectAnswer(index, parseInt(rangeEl.value, 10), { isInteractive: true });
         });
       }
     }
+
+    stepsEl.querySelector('[data-quiz-prev]')?.addEventListener('click', handlePrevious);
+    stepsEl.querySelector('[data-quiz-next]')?.addEventListener('click', handleNext);
 
     isTransitioning = false;
   }
@@ -364,6 +367,31 @@
           <p class="lt-quiz__question-note-name">Warum fragen wir das?</p>
         </div>
         <p class="lt-quiz__question-hint">${escapeHtml(hint)}</p>
+      </div>
+    `;
+  }
+
+  function renderStepNavigation(index, isAnswered) {
+    const isLastStep = index === QUESTIONS.length - 1;
+
+    return `
+      <div class="lt-quiz__step-actions">
+        <button
+          type="button"
+          class="lt-quiz__step-button lt-quiz__step-button--secondary"
+          data-quiz-prev="true"
+          ${index === 0 ? 'disabled aria-disabled="true"' : ''}
+        >
+          Zurück
+        </button>
+        <button
+          type="button"
+          class="lt-quiz__step-button lt-quiz__step-button--primary"
+          data-quiz-next="true"
+          ${isAnswered ? '' : 'disabled aria-disabled="true"'}
+        >
+          ${isLastStep ? 'Ergebnis ansehen' : 'Weiter'}
+        </button>
       </div>
     `;
   }
@@ -445,6 +473,15 @@
 
   }
 
+  function updateStepNavigationState(questionIndex) {
+    const nextButton = stepsEl.querySelector('[data-quiz-next]');
+    if (!nextButton) return;
+
+    const isAnswered = Boolean(answers[questionIndex]);
+    nextButton.disabled = !isAnswered;
+    nextButton.setAttribute('aria-disabled', String(!isAnswered));
+  }
+
   function reflectSelection(questionIndex, answerIndex) {
     const question = QUESTIONS[questionIndex];
 
@@ -461,6 +498,8 @@
     if (question && question.type === 'scale') {
       updateScalePreview(questionIndex, answerIndex, true);
     }
+
+    updateStepNavigationState(questionIndex);
   }
 
   function renderMilestones() {
@@ -600,38 +639,49 @@
             </li>
           `).join('')}
         </ul>
-        <p class="lt-quiz__lifestyle-dna-note">
-          ${ICONS.dna}
-          Dein AGE &amp; DNA-Test liefert dir eine noch präzisere Auswertung – auf Basis deiner individuellen Genetik und epigenetischen Uhr.
-          <a href="/products/lifetime-age-dna">Mit dem AGE &amp; DNA-Test starten</a>
-        </p>
+        <div class="lt-quiz__lifestyle-dna-note">
+          <span class="lt-quiz__lifestyle-dna-icon" aria-hidden="true">${ICONS.dna}</span>
+          <div class="lt-quiz__lifestyle-dna-copy">
+            <p class="lt-quiz__lifestyle-dna-text">Dein AGE &amp; DNA-Test liefert dir noch tiefere Einblicke – auf Basis deiner individuellen Genetik und epigenetischen Uhr.</p>
+            <a href="/products/lifetime-age-dna">Mit dem AGE &amp; DNA-Test starten</a>
+          </div>
+        </div>
       </div>
     `;
   }
 
   // ─── Logik ───────────────────────────────────────────────────────────────────
 
-  function handleAnswer(questionIndex, answerIndex) {
+  function selectAnswer(questionIndex, answerIndex, options = {}) {
     if (isTransitioning) return;
 
     const question = QUESTIONS[questionIndex];
     const answer = getAnswerDefinition(question, answerIndex);
     if (!answer) return;
 
-    isTransitioning = true;
     answers[questionIndex] = { answerIndex, scores: answer.scores };
-    reflectSelection(questionIndex, answerIndex);
+    reflectSelection(questionIndex, answerIndex, options.isInteractive);
+  }
 
-    setTimeout(() => {
-      if (questionIndex < QUESTIONS.length - 1) {
-        currentStep = questionIndex + 1;
-        updateProgress();
-        renderStep(currentStep);
-      } else {
-        renderResults(calculateOutcome());
-        isTransitioning = false;
-      }
-    }, 350);
+  function handlePrevious() {
+    if (isTransitioning || currentStep === 0) return;
+
+    currentStep -= 1;
+    updateProgress();
+    renderStep(currentStep);
+  }
+
+  function handleNext() {
+    if (isTransitioning || !answers[currentStep]) return;
+
+    if (currentStep < QUESTIONS.length - 1) {
+      currentStep += 1;
+      updateProgress();
+      renderStep(currentStep);
+      return;
+    }
+
+    renderResults(calculateOutcome());
   }
 
   function calculateOutcome() {
