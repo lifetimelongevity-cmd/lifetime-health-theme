@@ -2,24 +2,22 @@
   lt-hp-problem-v2 — Problem + Arzt-Block Flow (Section 4)
   ─────────────────────────────────────────────────────────
   §12 Build Spec:
-  - Surface:          --color-surface-primary (#f7f7f4 via settings) — warm neutral,
-                      sanfte Transition nach Trust-Ticker, vor Video Authority
-  - Dominant element: Section-Headline (--text-h2, 28px, Helvetica) — ein Satz pro Karte
-                      erklärt das Problem und die Systemlücke
-  - Heading size:     --text-h2 (28px) Section · --text-body (16px) Karten-Titel (Lato Medium)
-  - Content pattern:  Zwei card-info-Blöcke mit vertikalem Flow-Connector.
-                      Block 1: Problem-Framing + "Blinder Fleck"-Callout (Amber-Border).
-                      Block 2: System-vs-Longevity 2-col-Vergleich + "Kein Entweder-oder"-Note (Violet-Border).
+  - Surface:          --color-surface-primary / settings.color_bg — ruhige helle Fläche
+                      zwischen Social Proof / Logo-Beweis und dunklem Science-Bento
+  - Dominant element: Section-Headline — beide Karten bleiben bewusst sekundär
+                      und verhalten sich wie ein zusammengehöriges Informationspaar
+  - Heading size:     Shared homepage heading stack + card-info Typo
+                      (Heading-Font für Kartentitel, Body-Font für Erklärtext)
+  - Content pattern:  Zwei card-info-Karten im Homepage-Rhythmus.
+                      Block 1: Problem-Framing + Invest-Pills + kompakte Note.
+                      Block 2: System-vs-Longevity-Vergleich in zwei ruhigen Panels + Einordnungs-Note.
   - CTA:              Keiner — bewusst. Diese Sektion baut diagnostische Spannung auf.
                       Kein Kaufimpuls hier; das Problem muss atmen dürfen.
-  - Removed:          Blöcke 3 + 4 aus der HTML-Vorlage ("Was der Test leistet" / 15-Jahre-Statistik).
-                      Block 3 dupliziert product_hero; Statistik wandert in cta_close.
-  - Quality move:     Flow-Connector (1px vertikale Linie zwischen den Karten) kommuniziert
-                      Ursache-Wirkung ohne zusätzlichen Header-Text.
-                      Tag-Labels in Akzentfarben (Bordeaux / Violet) — per Block-Setting konfigurierbar.
-                      Invest-Pills (Sport, Ernährung, Supplemente, Schlaf) sind hardcoded:
-                      sie sind illustrativer Beweis für "Du investierst bereits" — kein
-                      konfigurierbarer Content, der in §11 gestrichen würde.
+  - Removed:          Vertikaler Flow-Connector, farbcodierte Warn-Callouts, eigenständige
+                      Sonderfarben-Logik — sie machten die Section lauter als ihre Nachbarn.
+  - Quality move:     Die Vergleichslogik lebt nun in zwei ruhigen Sub-Panels innerhalb
+                      einer einzigen Karte. Das erzeugt Klarheit, ohne wie ein Fremd-Widget
+                      oder Editorial-Sonderformat zu wirken.
 {% endcomment %}
 
 {% style %}
@@ -48,7 +46,9 @@
       {%- endif -%}
       <div class="crs-heading-stack__pair">
         {%- if section.settings.headline != blank -%}
-          <h2 class="crs-heading-stack__title">{{ section.settings.headline | escape }}</h2>
+          <h2 class="crs-heading-stack__title">
+            {{ section.settings.headline | escape | newline_to_br | replace: '&lt;br&gt;', '<br>' | replace: '&lt;br/&gt;', '<br>' | replace: '&lt;br /&gt;', '<br>' }}
+          </h2>
         {%- endif -%}
         {%- if section.settings.subheadline != blank -%}
           <p class="crs-heading-stack__subtitle">{{ section.settings.subheadline | escape }}</p>
@@ -56,39 +56,30 @@
       </div>
     </div>
 
-    {%- comment -%}=== Flow ==={%- endcomment -%}
-    <div class="prob2__flow">
-
-      {%- assign block_index = 0 -%}
-
+    {%- comment -%}=== Cards ==={%- endcomment -%}
+    <div class="prob2__grid">
       {%- for block in section.blocks -%}
-        {%- assign block_index = block_index | plus: 1 -%}
-
-        {%- comment -%}=== Connector (between blocks, not after last) ==={%- endcomment -%}
-        {%- if block_index > 1 -%}
-          <div class="prob2__connector" aria-hidden="true"></div>
-        {%- endif -%}
-
         {%- comment -%}=== Block: Das Problem ==={%- endcomment -%}
         {%- if block.type == 'problem_block' -%}
-          <div class="prob2__card" {{ block.shopify_attributes }}>
+          <article
+            class="prob2__card prob2__card--problem"
+            {% if block.settings.tag_color != blank %}style="--prob2-tag-color: {{ block.settings.tag_color }};"{% endif %}
+            {{ block.shopify_attributes }}
+          >
 
             {%- if block.settings.tag_label != blank -%}
-              <p
-                class="prob2__tag"
-                {%- if block.settings.tag_color != blank -%}
-                  style="color: {{ block.settings.tag_color }}"
-                {%- endif -%}
-              >{{ block.settings.tag_label | escape }}</p>
+              <p class="prob2__eyebrow">{{ block.settings.tag_label | escape }}</p>
             {%- endif -%}
 
-            {%- if block.settings.block_title != blank -%}
-              <p class="prob2__card-title">{{ block.settings.block_title | escape }}</p>
-            {%- endif -%}
+            <div class="prob2__card-copy">
+              {%- if block.settings.block_title != blank -%}
+                <h3 class="prob2__card-title">{{ block.settings.block_title | escape }}</h3>
+              {%- endif -%}
 
-            {%- if block.settings.block_body != blank -%}
-              <p class="prob2__card-body">{{ block.settings.block_body | escape }}</p>
-            {%- endif -%}
+              {%- if block.settings.block_body != blank -%}
+                <p class="prob2__card-body">{{ block.settings.block_body | escape }}</p>
+              {%- endif -%}
+            </div>
 
             {%- comment -%} Invest-Pills — hardcoded, illustrative {%- endcomment -%}
             <ul class="prob2__pills" role="list" aria-label="Bereits getätigte Investitionen">
@@ -119,93 +110,97 @@
             </ul>
 
             {%- if block.settings.callout_text != blank -%}
-              <div class="prob2__callout prob2__callout--amber">
+              <div class="prob2__note">
                 {%- if block.settings.callout_label != blank -%}
-                  <p class="prob2__callout-label">{{ block.settings.callout_label | escape }}</p>
+                  <p class="prob2__note-label">{{ block.settings.callout_label | escape }}</p>
                 {%- endif -%}
-                <p class="prob2__callout-body">{{ block.settings.callout_text | escape }}</p>
+                <p class="prob2__note-body">{{ block.settings.callout_text | escape }}</p>
               </div>
             {%- endif -%}
 
-          </div>
+          </article>
         {%- endif -%}
 
         {%- comment -%}=== Block: Und dein Arzt? ==={%- endcomment -%}
         {%- if block.type == 'arzt_block' -%}
-          <div class="prob2__card" {{ block.shopify_attributes }}>
+          <article
+            class="prob2__card prob2__card--arzt"
+            {% if block.settings.tag_color != blank %}style="--prob2-tag-color: {{ block.settings.tag_color }};"{% endif %}
+            {{ block.shopify_attributes }}
+          >
 
             {%- if block.settings.tag_label != blank -%}
-              <p
-                class="prob2__tag"
-                {%- if block.settings.tag_color != blank -%}
-                  style="color: {{ block.settings.tag_color }}"
-                {%- endif -%}
-              >{{ block.settings.tag_label | escape }}</p>
+              <p class="prob2__eyebrow">{{ block.settings.tag_label | escape }}</p>
             {%- endif -%}
 
-            {%- if block.settings.block_title != blank -%}
-              <p class="prob2__card-title">{{ block.settings.block_title | escape }}</p>
-            {%- endif -%}
+            <div class="prob2__card-copy">
+              {%- if block.settings.block_title != blank -%}
+                <h3 class="prob2__card-title">{{ block.settings.block_title | escape }}</h3>
+              {%- endif -%}
 
-            {%- if block.settings.block_body != blank -%}
-              <p class="prob2__card-body">{{ block.settings.block_body | escape }}</p>
-            {%- endif -%}
+              {%- if block.settings.block_body != blank -%}
+                <p class="prob2__card-body">{{ block.settings.block_body | escape }}</p>
+              {%- endif -%}
+            </div>
 
             {%- comment -%} 2-col system comparison {%- endcomment -%}
             <div class="prob2__compare">
 
-              <div class="prob2__compare-col">
+              <div class="prob2__compare-col prob2__compare-col--system">
                 {%- if block.settings.system_col_label != blank -%}
-                  <p class="prob2__compare-col-label prob2__compare-col-label--system">
+                  <p class="prob2__compare-col-label">
                     {{ block.settings.system_col_label | escape }}
                   </p>
                 {%- endif -%}
                 {%- assign system_keys = 'system_item_1,system_item_2,system_item_3,system_item_4' | split: ',' -%}
-                {%- for key in system_keys -%}
-                  {%- assign item_val = block.settings[key] -%}
-                  {%- if item_val != blank -%}
-                    <div class="prob2__compare-item">
-                      <span class="prob2__compare-dot prob2__compare-dot--muted" aria-hidden="true"></span>
-                      <span class="prob2__compare-text">{{ item_val | escape }}</span>
-                    </div>
-                  {%- endif -%}
-                {%- endfor -%}
+                <ul class="prob2__compare-list" role="list">
+                  {%- for key in system_keys -%}
+                    {%- assign item_val = block.settings[key] -%}
+                    {%- if item_val != blank -%}
+                      <li class="prob2__compare-item">
+                        <span class="prob2__compare-dot prob2__compare-dot--muted" aria-hidden="true"></span>
+                        <span class="prob2__compare-text">{{ item_val | escape }}</span>
+                      </li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
               </div>
 
-              <div class="prob2__compare-col">
+              <div class="prob2__compare-col prob2__compare-col--longevity">
                 {%- if block.settings.longevity_col_label != blank -%}
-                  <p class="prob2__compare-col-label prob2__compare-col-label--longevity">
+                  <p class="prob2__compare-col-label">
                     {{ block.settings.longevity_col_label | escape }}
                   </p>
                 {%- endif -%}
                 {%- assign longevity_keys = 'longevity_item_1,longevity_item_2,longevity_item_3,longevity_item_4' | split: ',' -%}
-                {%- for key in longevity_keys -%}
-                  {%- assign item_val = block.settings[key] -%}
-                  {%- if item_val != blank -%}
-                    <div class="prob2__compare-item">
-                      <span class="prob2__compare-dot prob2__compare-dot--teal" aria-hidden="true"></span>
-                      <span class="prob2__compare-text">{{ item_val | escape }}</span>
-                    </div>
-                  {%- endif -%}
-                {%- endfor -%}
+                <ul class="prob2__compare-list" role="list">
+                  {%- for key in longevity_keys -%}
+                    {%- assign item_val = block.settings[key] -%}
+                    {%- if item_val != blank -%}
+                      <li class="prob2__compare-item">
+                        <span class="prob2__compare-dot prob2__compare-dot--teal" aria-hidden="true"></span>
+                        <span class="prob2__compare-text">{{ item_val | escape }}</span>
+                      </li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
               </div>
 
             </div>
 
             {%- if block.settings.callout_text != blank -%}
-              <div class="prob2__callout prob2__callout--violet">
+              <div class="prob2__note">
                 {%- if block.settings.callout_label != blank -%}
-                  <p class="prob2__callout-label">{{ block.settings.callout_label | escape }}</p>
+                  <p class="prob2__note-label">{{ block.settings.callout_label | escape }}</p>
                 {%- endif -%}
-                <p class="prob2__callout-body">{{ block.settings.callout_text | escape }}</p>
+                <p class="prob2__note-body">{{ block.settings.callout_text | escape }}</p>
               </div>
             {%- endif -%}
 
-          </div>
+          </article>
         {%- endif -%}
 
       {%- endfor -%}
-
     </div>
 
   </div>
@@ -213,121 +208,85 @@
 
 {% stylesheet %}
 /* ================================================================
-   lt-hp-problem-v2 — Problem + Arzt-Block Flow
+   lt-hp-problem-v2 — Problem + Systemlücke
    Token refs: §3 (colors, spacing, type), §5 (card-info pattern)
-
-   Section-scoped accent tokens (no clean global mapping exists):
-   These extend the token system for semantic accent colors
-   specific to this component's callout pattern.
    ================================================================ */
 
 .prob2 {
   background: var(--color-surface-primary);
-
-  /* Amber accent — "Blinder Fleck" callout */
-  --prob2-amber-border:    #EF9F27;
-  --prob2-amber-label:     #854F0B;
-  --prob2-amber-body:      #633806;
-
-  /* Violet accent — "Kein Entweder-oder" callout */
-  --prob2-violet-border:   #AFA9EC;
-  --prob2-violet-label:    #534AB7;
-  --prob2-violet-body:     #3C3489;
-
-  /* Card background — one step darker than section surface */
-  --prob2-card-bg:         #f2f1ed;
 }
 
-/* — Outer wrapper (full section width, 1200px container) — */
 .prob2__outer {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 var(--space-5);
 }
 
-/* — Section header — */
 .prob2__header {
   max-width: 640px;
-  margin: 0 auto var(--space-6);   /* --space-6 (32px) per §6 header→content gap */
+  margin: 0 auto var(--space-8);
 }
 
-/* — Flow (narrow, centred — content focus not multi-column) — */
-.prob2__flow {
-  max-width: 680px;
-  margin: 0 auto;
+/* Desktop pair instead of bespoke editorial flow */
+.prob2__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  align-items: stretch;
+}
+
+.prob2__card {
   display: flex;
   flex-direction: column;
+  gap: var(--space-5);
+  height: 100%;
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
 }
 
-/* — Connector between cards — */
-.prob2__connector {
-  width: 1px;
-  height: var(--space-7);           /* 48px */
-  background: var(--color-border-default);
-  margin: 0 auto;
-  opacity: 0.5;
-}
-
-/* — Card (card-info pattern: warm bg, radius-md, space-5 padding) — */
-/*
-  DECISION: shadow suppressed per §6 "No shadow on warm backgrounds."
-  Section bg is #f7f7f4 (warm), card bg is #f2f1ed (warm) → no shadow.
-*/
-.prob2__card {
-  background: var(--prob2-card-bg);
-  border-radius: var(--radius-md);   /* 12px */
-  padding: var(--space-5);           /* 24px */
-}
-
-/* — Tag label (10px micro, uppercase, accent color via inline style) — */
-.prob2__tag {
+.prob2__eyebrow {
   font-family: var(--font-body);
-  font-size: var(--text-micro);      /* 12px */
+  font-size: var(--text-micro);
   font-weight: var(--weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  line-height: var(--leading-body);
-  margin: 0 0 var(--space-2);
-}
-
-/* — Card title (Lato medium — Helvetica not allowed below --text-h3) — */
-/*
-  DECISION: --font-body (Lato), --text-body (16px), --weight-medium.
-  Governance: "No Helvetica text smaller than --text-h3 (24px)."
-  At 16px these titles need Lato. The dominance within each card
-  comes from weight + contrast against the muted body text below.
-*/
-.prob2__card-title {
-  font-family: var(--font-body);
-  font-size: var(--text-body);       /* 16px */
-  font-weight: var(--weight-medium);
-  line-height: var(--leading-tight); /* 1.25 */
-  color: var(--crs-text);
-  margin: 0 0 var(--space-2);
-}
-
-/* — Card body text — */
-.prob2__card-body {
-  font-family: var(--font-body);
-  font-size: var(--text-body-sm);    /* 14px */
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-relaxed);
-  color: var(--crs-text-sec);
+  line-height: var(--leading-tight);
+  color: var(--prob2-tag-color, var(--color-text-muted));
   margin: 0;
 }
 
-/* — Invest Pills — */
-/*
-  DECISION: No shadow (warm background per §6 shadow rule).
-  Border uses --color-border-default.
-  Icons are inline 12px SVG — smaller than icon-pack.liquid (64px), which
-  is only for feature/trust sections, not micro-label contexts.
-*/
+.prob2__card-copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.prob2__card-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-heading);
+  color: var(--crs-text, var(--color-text-primary));
+  margin: 0;
+}
+
+.prob2__card-body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--crs-text-sec, var(--color-text-secondary));
+  margin: 0;
+}
+
 .prob2__pills {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2);              /* 8px — inline element gap per §6 */
-  margin: var(--space-4) 0 0;
+  gap: var(--space-2);
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -335,86 +294,67 @@
 .prob2__pill {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);              /* 4px */
-  background: var(--color-surface-primary);
+  gap: var(--space-1);
+  background: var(--color-surface-secondary);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-full);
-  padding: var(--space-1) var(--space-3); /* 4px 12px */
+  padding: var(--space-1) var(--space-3);
   font-family: var(--font-body);
-  font-size: var(--text-micro);     /* 12px */
+  font-size: var(--text-micro);
   font-weight: var(--weight-regular);
-  color: var(--crs-text-sec);
+  color: var(--crs-text-sec, var(--color-text-secondary));
   line-height: 1;
 }
 
-/* — Callout boxes — */
-/*
-  Left-border callout pattern — new component (§5 "new component logic"):
-  No existing component handles "left-border accent callout with label + body."
-  Closest: quote-block (centered, large text) → not appropriate.
-  This is a compact inline callout — distinct enough to justify a new sub-pattern.
-  Both variants (amber = warning/blind spot, violet = caveat/note) share one base class.
-*/
-.prob2__callout {
-  margin-top: var(--space-4);
-  background: var(--color-surface-primary);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  padding: var(--space-3) var(--space-4);
+.prob2__note {
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
 }
 
-.prob2__callout--amber {
-  border-left: 3px solid var(--prob2-amber-border);
-}
-
-.prob2__callout--amber .prob2__callout-label {
-  color: var(--prob2-amber-label);
-}
-
-.prob2__callout--amber .prob2__callout-body {
-  color: var(--prob2-amber-body);
-}
-
-.prob2__callout--violet {
-  border-left: 3px solid var(--prob2-violet-border);
-}
-
-.prob2__callout--violet .prob2__callout-label {
-  color: var(--prob2-violet-label);
-}
-
-.prob2__callout--violet .prob2__callout-body {
-  color: var(--prob2-violet-body);
-}
-
-.prob2__callout-label {
+.prob2__note-label {
   font-family: var(--font-body);
   font-size: var(--text-micro);
   font-weight: var(--weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin: 0 0 var(--space-1);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-2);
 }
 
-.prob2__callout-body {
+.prob2__note-body {
   font-family: var(--font-body);
-  font-size: var(--text-body-sm);    /* 14px */
+  font-size: var(--text-body);
   font-weight: var(--weight-regular);
   line-height: var(--leading-relaxed);
+  color: var(--crs-text-sec, var(--color-text-secondary));
   margin: 0;
 }
 
-/* — Arzt comparison grid — */
 .prob2__compare {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-3);
-  margin-top: var(--space-4);
 }
 
 .prob2__compare-col {
-  background: var(--color-surface-primary);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
   border-radius: var(--radius-sm);
   padding: var(--space-3) var(--space-4);
+  min-width: 0;
+}
+
+.prob2__compare-col--system {
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-default);
+}
+
+.prob2__compare-col--longevity {
+  background: var(--color-surface-benefit);
+  border: 1px solid var(--color-border-default);
 }
 
 .prob2__compare-col-label {
@@ -423,25 +363,32 @@
   font-weight: var(--weight-medium);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin: 0 0 var(--space-3);
+  margin: 0;
 }
 
-.prob2__compare-col-label--system   { color: var(--color-text-muted); }
-.prob2__compare-col-label--longevity { color: var(--color-teal-dark); }
+.prob2__compare-col--system .prob2__compare-col-label { color: var(--color-text-muted); }
+.prob2__compare-col--longevity .prob2__compare-col-label { color: var(--color-teal-dark); }
+
+.prob2__compare-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
 
 .prob2__compare-item {
   display: flex;
   align-items: flex-start;
   gap: var(--space-2);
-  margin-bottom: var(--space-2);
+  margin: 0;
 }
-
-.prob2__compare-item:last-child { margin-bottom: 0; }
 
 .prob2__compare-dot {
   display: block;
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
   border-radius: var(--radius-full);
   flex-shrink: 0;
   margin-top: 5px;
@@ -452,20 +399,31 @@
 
 .prob2__compare-text {
   font-family: var(--font-body);
-  font-size: var(--text-micro);
+  font-size: var(--text-body);
   font-weight: var(--weight-regular);
-  line-height: var(--leading-relaxed);
-  color: var(--crs-text-sec);
+  line-height: var(--leading-body);
+  color: var(--crs-text-sec, var(--color-text-secondary));
 }
 
-/* — Responsive — */
+@media screen and (max-width: 1024px) {
+  .prob2__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+}
+
 @media screen and (max-width: 768px) {
   .prob2__outer {
-    padding: 0 var(--space-4);     /* 16px mobile container padding per §4 */
+    padding: 0 var(--space-4);
+  }
+
+  .prob2__header {
+    margin-bottom: var(--space-7);
   }
 
   .prob2__compare {
     grid-template-columns: 1fr;
+    gap: var(--space-2);
   }
 
   .prob2__pills {
@@ -491,7 +449,7 @@
       "min": 0,
       "max": 200,
       "step": 8,
-      "default": 56,
+      "default": 80,
       "unit": "px"
     },
     {
@@ -501,7 +459,7 @@
       "min": 0,
       "max": 200,
       "step": 8,
-      "default": 56,
+      "default": 80,
       "unit": "px"
     },
     {
@@ -512,7 +470,7 @@
       "type": "color",
       "id": "color_bg",
       "label": "Hintergrundfarbe",
-      "default": "#f7f7f4"
+      "default": "#ffffff"
     },
     {
       "type": "color",
@@ -563,7 +521,7 @@
           "type": "color",
           "id": "tag_color",
           "label": "Tag-Farbe",
-          "default": "#A32D2D"
+          "default": "#525252"
         },
         {
           "type": "header",
@@ -618,7 +576,7 @@
           "type": "color",
           "id": "tag_color",
           "label": "Tag-Farbe",
-          "default": "#534AB7"
+          "default": "#4A8C85"
         },
         {
           "type": "header",
