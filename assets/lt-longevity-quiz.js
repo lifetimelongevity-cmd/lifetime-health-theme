@@ -12,7 +12,7 @@
 (function () {
   'use strict';
 
-  // ─── SVG Icon Library (Phosphor thin for quiz UI; legacy set remains for results) ─────────
+  // ─── SVG Icon Library ───────────────────────────────────────────────────────
 
   const ICONS = {
     target: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M218.26 84.89a100.16 100.16 0 1 1-22.44-30.37l25.35-25.35a4 4 0 1 1 5.66 5.66l-96 96a4 4 0 0 1-5.66-5.66l31-31a44 44 0 1 0 15.78 31.3a4 4 0 0 1 8-.46a52 52 0 1 1-18.1-36.51l28.34-28.33A92 92 0 0 0 63 193.05A92 92 0 0 0 211 88.33a4 4 0 1 1 7.22-3.44Z"/></svg>`,
@@ -24,8 +24,12 @@
     gauge:  `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M204.23 75.5A107.37 107.37 0 0 0 127.62 44C68.28 44.21 20 93.16 20 153.13V176a12 12 0 0 0 12 12h192a12 12 0 0 0 12-12v-24a107.25 107.25 0 0 0-31.77-76.5M228 176a4 4 0 0 1-4 4H111.85l59.38-81.65a4 4 0 1 0-6.46-4.7L102 180H32a4 4 0 0 1-4-4v-22.87a103 103 0 0 1 .84-13.13H56a4 4 0 0 0 0-8H30.21C39.59 87.66 77.84 53.93 124 52.09V80a4 4 0 0 0 8 0V52.08A100.08 100.08 0 0 1 226 132h-26a4 4 0 0 0 0 8h27.29a102 102 0 0 1 .71 12Z"/></svg>`,
     forkKnife:`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M76 88V40a4 4 0 0 1 8 0v48a4 4 0 0 1-8 0m136-48v184a4 4 0 0 1-8 0v-52h-52a4 4 0 0 1-4-4a264.3 264.3 0 0 1 7.11-55.94c9.47-39.22 27.21-65.41 51.31-75.74A4 4 0 0 1 212 40m-8 6.46c-41.75 23.87-47.19 99.29-47.9 117.54H204Zm-88-7.12a4 4 0 0 0-7.9 1.32l8 47.66a36 36 0 0 1-72 0l8-47.66a4 4 0 0 0-7.9-1.32l-8 48a5 5 0 0 0-.2.66a44.06 44.06 0 0 0 40 43.81V224a4 4 0 0 0 8 0v-92.19A44.06 44.06 0 0 0 124 88a5 5 0 0 0 0-.66Z"/></svg>`,
     lightbulb:`<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 256 256" aria-hidden="true"><path fill="currentColor" d="M172 232a4 4 0 0 1-4 4H88a4 4 0 0 1 0-8h80a4 4 0 0 1 4 4m40-128a83.59 83.59 0 0 1-32.11 66.06A20.2 20.2 0 0 0 172 186v6a12 12 0 0 1-12 12H96a12 12 0 0 1-12-12v-6a20 20 0 0 0-7.76-15.81A83.58 83.58 0 0 1 44 104.47C43.75 59 80.52 21.09 126 20a84 84 0 0 1 86 84m-8 0a76 76 0 0 0-77.83-76C85 29 51.77 63.27 52 104.43a75.62 75.62 0 0 0 29.17 59.43A28 28 0 0 1 92 186v6a4 4 0 0 0 4 4h64a4 4 0 0 0 4-4v-6a28.14 28.14 0 0 1 10.94-22.2A75.62 75.62 0 0 0 204 104m-67.34-51.94a4 4 0 0 0-1.32 7.88C153.53 63 169 78.45 172.06 96.67A4 4 0 0 0 176 100a4 4 0 0 0 .67-.06a4 4 0 0 0 3.27-4.61a53.51 53.51 0 0 0-43.28-43.27"/></svg>`,
+    personStep:`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21a5 5 0 0 0-10 0"/><circle cx="12" cy="9" r="3.5"/></svg>`,
+    clockStep:`<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8.5v4l2.5 1.5"/></svg>`,
+    runStep: `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="15.5" cy="4.5" r="1.5"/><path d="M7 18.5l2.5-3 2.5-1.5 2.5 2 1.5 4"/><path d="M9.5 15.5l-2-4L11 9l2.5 2"/><path d="M13 11l2 2.5 3 .5"/><path d="M8 21l2-2.5"/></svg>`,
     scope:  `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a2 2 0 0 1-2-2V6h6v4a2 2 0 0 1-2 2Z"/><path d="M12 6V3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3"/></svg>`,
     dna:    `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 15c6.667-6 13.333 0 20-6"/><path d="M9 22c1.798-1.998 2.518-3.995 2.807-5.993"/><path d="M15 2c-1.798 1.998-2.518 3.995-2.807 5.993"/><path d="m17 6-2.5-2.5"/><path d="m14 8-1-1"/><path d="m7 18 2.5 2.5"/><path d="m3.5 14.5.5.5"/><path d="m10 16 1 1"/><path d="m17 7 3-3"/><path d="m14 14 3 3"/></svg>`,
+    wind:   `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h10a2.5 2.5 0 1 0-2.5-2.5"/><path d="M3 14h14a3 3 0 1 1-3 3"/><path d="M5 18h8"/></svg>`,
     run:    `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13" cy="4" r="1"/><path d="M6 20v-6l2-2 4-2 4 4 2 6"/><path d="m6 20 2-2"/><path d="M18 14v4l-4-2"/><path d="M8 12 6 8l4-1 3 3-2 4-1-2"/></svg>`,
     apple:  `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20.94c1.5 0 2.75-.15 4-.52 1.95-.52 3-1.48 3-2.42V6c0-.94-1.05-1.9-3-2.42C14.75 3.15 13.5 3 12 3s-2.75.15-4 .52C6.05 4.1 5 5.06 5 6v12c0 .94 1.05 1.9 3 2.42 1.25.37 2.5.52 4 .52Z"/><path d="M12 3a4 4 0 0 0 4-4"/><path d="M8 3a4 4 0 0 1 4-4"/></svg>`,
     clock:  `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
@@ -39,80 +43,126 @@
   const QUESTIONS = [
     {
       id: 'ziel',
+      type: 'cards',
       stepLabel: 'Ziel',
       icon: ICONS.target,
-      question: 'Was ist dein wichtigstes Gesundheitsziel?',
-      hint: 'Dein Ziel bestimmt, welche biologischen Prozesse wir priorisieren – nicht jede Intervention wirkt auf denselben Hebel.',
+      question: 'Was ist aktuell dein wichtigstes Gesundheitsziel?',
+      hint: 'Dein Hauptziel gewichtet die Empfehlung am stärksten. So priorisieren wir zuerst deinen größten Hebel und erst danach die Feinabstimmung.',
       answers: [
-        { text: 'Mehr Energie & Vitalität im Alltag', scores: { energie: 3 } },
-        { text: 'Schärfer denken & mehr Fokus', scores: { fokus: 3 } },
-        { text: 'Besser schlafen & schneller erholen', scores: { schlaf: 3 } },
-        { text: 'Langfristig gesund & vital bleiben', scores: { langlebigkeit: 3 } },
+        { text: 'Mehr Energie im Alltag', scores: { energie: 4 } },
+        { text: 'Besser schlafen & erholen', scores: { schlaf: 4 } },
+        { text: 'Mehr Fokus & mentale Klarheit', scores: { fokus: 4 } },
+        { text: 'Gesund altern & vorbeugen', scores: { langlebigkeit: 4 } },
       ],
     },
     {
-      id: 'schlaf',
-      stepLabel: 'Schlaf',
-      icon: ICONS.moon,
-      question: 'Wie erholsam ist dein Schlaf?',
-      hint: 'Schlechter Schlaf erhöht messbar den inflammatorischen Stress und beschleunigt biologisches Altern – auch ohne subjektives Krankheitsgefühl.',
-      answers: [
-        { text: 'Tief und erholt – ich fühle mich morgens fit', scores: { langlebigkeit: 1 } },
-        { text: 'Meistens ok, manchmal unruhige Nächte', scores: { energie: 1 } },
-        { text: 'Ich wache oft erschöpft auf', scores: { schlaf: 2, energie: 1 } },
-        { text: 'Schlechter Schlaf ist mein tägliches Problem', scores: { schlaf: 3 } },
+      id: 'zustand',
+      type: 'scale',
+      stepLabel: 'Zustand',
+      icon: ICONS.personStep,
+      question: 'Wie würdest du deinen aktuellen Gesundheitszustand insgesamt beschreiben?',
+      hint: 'Das zeigt, ob wir eher auf akute Belastung reagieren oder eine schon gute Basis langfristig stabilisieren sollten.',
+      minLabel: 'Ich funktioniere nur',
+      maxLabel: 'Ich fühle mich sehr stabil',
+      options: [
+        { label: 'Ich funktioniere gerade nur', shortLabel: 'nur funktionieren', scores: { energie: 3, schlaf: 1 } },
+        { label: 'Eher instabil und oft ausgelaugt', shortLabel: 'eher instabil', scores: { energie: 2, schlaf: 1, fokus: 1 } },
+        { label: 'Durchwachsen, mal so mal so', shortLabel: 'durchwachsen', scores: { energie: 1, fokus: 1 } },
+        { label: 'Meist stabil und belastbar', shortLabel: 'meist stabil', scores: { langlebigkeit: 1 } },
+        { label: 'Sehr stabil und insgesamt gut aufgestellt', shortLabel: 'sehr stabil', scores: { langlebigkeit: 2 } },
       ],
     },
     {
-      id: 'energie',
-      stepLabel: 'Energie',
-      icon: ICONS.battery,
-      question: 'Wie ist dein Energieniveau tagsüber?',
-      hint: 'Energieeinbrüche sind oft ein frühes Signal für sinkende NAD⁺-Spiegel oder mitochondriale Dysfunktion – beides verändert sich mit dem Alter.',
+      id: 'lebensphase',
+      type: 'cards',
+      stepLabel: 'Phase',
+      icon: ICONS.clockStep,
+      question: 'In welcher Lebensphase befindest du dich gerade?',
+      hint: 'Mit Alter und Lebensphase verschieben sich NAD⁺-Bedarf, Regeneration und Präventionspotenzial deutlich.',
       answers: [
-        { text: 'Konstant hoch – keine Einbrüche', scores: { langlebigkeit: 1 } },
-        { text: 'Nachmittagstief, aber insgesamt ok', scores: { energie: 2 } },
-        { text: 'Ich fühle mich häufig erschöpft', scores: { energie: 3 } },
-        { text: 'Ich bin chronisch müde und antriebslos', scores: { energie: 2, schlaf: 1 } },
+        { text: 'Unter 30', scores: { energie: 1 } },
+        { text: '30–39', scores: { energie: 1, fokus: 1 } },
+        { text: '40–49', scores: { langlebigkeit: 1, fokus: 1 } },
+        { text: '50+', scores: { langlebigkeit: 2, schlaf: 1 } },
       ],
     },
     {
-      id: 'fokus',
-      stepLabel: 'Fokus',
-      icon: ICONS.brain,
-      question: 'Wie ist deine mentale Schärfe & Konzentration?',
-      hint: 'Kognitive Leistung ist einer der sensitivsten Frühindikatoren für zelluläre Gesundheit – Brain Fog ist selten zufällig.',
+      id: 'training',
+      type: 'cards',
+      stepLabel: 'Training',
+      icon: ICONS.runStep,
+      question: 'Wie regelmäßig trainierst du aktuell?',
+      hint: 'Bewegung ist einer der stärksten Longevity-Hebel. Sie beeinflusst Energie, Insulinsensitivität, Schlaf und Regeneration gleichzeitig.',
       answers: [
-        { text: 'Ich bin den ganzen Tag fokussiert und klar', scores: { langlebigkeit: 1 } },
-        { text: 'Manchmal verliere ich den Faden', scores: { fokus: 1 } },
-        { text: 'Konzentration fällt mir oft schwer', scores: { fokus: 2 } },
-        { text: 'Brain Fog ist mein ständiger Begleiter', scores: { fokus: 3 } },
+        { text: 'Kaum oder unregelmäßig', scores: { energie: 2 } },
+        { text: '1–2x pro Woche', scores: { energie: 1, schlaf: 1 } },
+        { text: '3–4x pro Woche', scores: { fokus: 1, langlebigkeit: 1 } },
+        { text: 'Sehr regelmäßig & strukturiert', scores: { langlebigkeit: 2, fokus: 1 } },
       ],
     },
     {
       id: 'ernaehrung',
+      type: 'cards',
       stepLabel: 'Ernährung',
       icon: ICONS.forkKnife,
-      question: 'Wie würdest du deine Ernährung beschreiben?',
-      hint: 'Ernährungsqualität beeinflusst die epigenetische Uhr direkt – schlechte Ernährung beschleunigt biologisches Altern nachweislich um mehrere Jahre.',
+      question: 'Wie würdest du deine Ernährung im Alltag beschreiben?',
+      hint: 'Ernährungsqualität beeinflusst Entzündung, Blutzucker, kognitive Leistung und biologische Alterungsmarker direkt mit.',
       answers: [
-        { text: 'Sehr ausgewogen – viel Gemüse, gute Proteine', scores: { langlebigkeit: 2 } },
-        { text: 'Relativ gut, aber mit Lücken', scores: { langlebigkeit: 1, energie: 1 } },
-        { text: 'Unregelmäßig – mal gut, mal nicht', scores: { energie: 1, fokus: 1 } },
-        { text: 'Viel Fertigkost, wenig Zeit zum Kochen', scores: { energie: 2 } },
+        { text: 'Eher unregelmäßig und spontan', scores: { energie: 2, fokus: 1 } },
+        { text: 'Okay, aber mit spürbaren Lücken', scores: { energie: 1, fokus: 1 } },
+        { text: 'Überwiegend bewusst und ausgewogen', scores: { langlebigkeit: 1, energie: 1 } },
+        { text: 'Sehr strukturiert und hochwertig', scores: { langlebigkeit: 2 } },
       ],
     },
     {
       id: 'stress',
+      type: 'scale',
       stepLabel: 'Stress',
       icon: ICONS.gauge,
       question: 'Wie hoch ist dein Stresslevel im Alltag?',
-      hint: 'Chronischer Stress senkt NAD⁺-Spiegel, stört den Schlafzyklus und beeinträchtigt die Zellreparatur – ein unterschätzter Treiber biologischen Alterns.',
-      answers: [
-        { text: 'Niedrig – ich fühle mich ausgeglichen', scores: { langlebigkeit: 1 } },
-        { text: 'Moderat – gelegentlich stressige Phasen', scores: { energie: 1 } },
-        { text: 'Hoch – ich stehe oft unter Druck', scores: { schlaf: 2, fokus: 1 } },
-        { text: 'Sehr hoch – Dauerstress ist mein Alltag', scores: { schlaf: 3 } },
+      hint: 'Chronischer Stress senkt NAD⁺, stört den Schlaf und erhöht die Zellbelastung. Deshalb ist er für die Routine oft ein zentraler Filter.',
+      minLabel: 'Sehr niedrig',
+      maxLabel: 'Sehr hoch',
+      options: [
+        { label: 'Sehr niedrig und gut reguliert', shortLabel: 'sehr niedrig', scores: { langlebigkeit: 1 } },
+        { label: 'Eher niedrig', shortLabel: 'eher niedrig', scores: { energie: 1 } },
+        { label: 'Mittel', shortLabel: 'mittel', scores: { fokus: 1 } },
+        { label: 'Eher hoch', shortLabel: 'eher hoch', scores: { schlaf: 2, fokus: 1 } },
+        { label: 'Sehr hoch und fast dauerhaft', shortLabel: 'sehr hoch', scores: { schlaf: 3, fokus: 1 } },
+      ],
+    },
+    {
+      id: 'schlaf',
+      type: 'scale',
+      stepLabel: 'Schlaf',
+      icon: ICONS.moon,
+      question: 'Wie erholsam ist dein Schlaf aktuell?',
+      hint: 'Schlafqualität entscheidet mit darüber, wie gut Zellreparatur, Hormonbalance und mentale Regeneration überhaupt stattfinden können.',
+      minLabel: 'Sehr schlecht',
+      maxLabel: 'Sehr erholsam',
+      options: [
+        { label: 'Sehr schlecht und kaum erholsam', shortLabel: 'sehr schlecht', scores: { schlaf: 3, energie: 1 } },
+        { label: 'Eher schlecht', shortLabel: 'eher schlecht', scores: { schlaf: 2, energie: 1 } },
+        { label: 'Mittelmäßig', shortLabel: 'mittel', scores: { schlaf: 1 } },
+        { label: 'Eher gut', shortLabel: 'eher gut', scores: { energie: 1, langlebigkeit: 1 } },
+        { label: 'Sehr erholsam und stabil', shortLabel: 'sehr erholsam', scores: { langlebigkeit: 2 } },
+      ],
+    },
+    {
+      id: 'kognition',
+      type: 'scale',
+      stepLabel: 'Kognition',
+      icon: ICONS.brain,
+      question: 'Wie klar und fokussiert fühlst du dich mental?',
+      hint: 'Kognitive Leistung reagiert früh auf Stress, Schlafdefizit, Energieverfügbarkeit und Nährstoffstatus. Deshalb ist sie ein starker Frühindikator.',
+      minLabel: 'Starker Brain Fog',
+      maxLabel: 'Sehr klar',
+      options: [
+        { label: 'Starker Brain Fog', shortLabel: 'Brain Fog', scores: { fokus: 3, energie: 1 } },
+        { label: 'Oft unklar und schwer fokussiert', shortLabel: 'oft unklar', scores: { fokus: 2, energie: 1 } },
+        { label: 'Teils klar, teils zerstreut', shortLabel: 'teils klar', scores: { fokus: 1 } },
+        { label: 'Meist klar und fokussiert', shortLabel: 'meist klar', scores: { fokus: 1, langlebigkeit: 1 } },
+        { label: 'Sehr klar und konstant leistungsfähig', shortLabel: 'sehr klar', scores: { langlebigkeit: 2 } },
       ],
     },
   ];
@@ -202,6 +252,7 @@
 
   let currentStep = 0;
   let answers = [];
+  let isTransitioning = false;
 
   // ─── DOM-Referenzen ──────────────────────────────────────────────────────────
 
@@ -232,25 +283,12 @@
 
   function renderStep(index) {
     const q = QUESTIONS[index];
+    const selectedIndex = answers[index] ? answers[index].answerIndex : null;
 
     stepsEl.innerHTML = `
       <div class="lt-quiz__step" data-step="${index}">
         <h3 class="lt-quiz__question">${escapeHtml(q.question)}</h3>
-        <ul class="lt-quiz__answers" role="list">
-          ${q.answers.map((a, i) => `
-            <li class="lt-quiz__answer-item">
-              <button
-                type="button"
-                class="lt-quiz__answer${answers[index] && answers[index].answerIndex === i ? ' lt-quiz__answer--selected' : ''}"
-                data-index="${i}"
-                aria-pressed="${answers[index] && answers[index].answerIndex === i ? 'true' : 'false'}"
-              >
-                <span class="lt-quiz__answer-check" aria-hidden="true"></span>
-                <span class="lt-quiz__answer-text">${escapeHtml(a.text)}</span>
-              </button>
-            </li>
-          `).join('')}
-        </ul>
+        ${renderQuestionInput(q, selectedIndex)}
         ${q.hint ? `
           <div class="lt-quiz__question-note" role="note">
             <span class="lt-quiz__question-note-icon" aria-hidden="true">${ICONS.lightbulb}</span>
@@ -260,15 +298,129 @@
       </div>
     `;
 
-    stepsEl.querySelectorAll('.lt-quiz__answer').forEach((el) => {
-      el.addEventListener('click', () => handleAnswer(index, parseInt(el.dataset.index)));
-      el.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handleAnswer(index, parseInt(el.dataset.index));
-        }
-      });
+    stepsEl.querySelectorAll('[data-quiz-option]').forEach((el) => {
+      el.addEventListener('click', () => handleAnswer(index, parseInt(el.dataset.index, 10)));
     });
+
+    if (q.type === 'scale') {
+      stepsEl.querySelectorAll('.lt-quiz__scale-option').forEach((el) => {
+        el.addEventListener('keydown', (event) => handleScaleKeydown(event, index, parseInt(el.dataset.index, 10)));
+      });
+    }
+
+    isTransitioning = false;
+  }
+
+  function renderQuestionInput(question, selectedIndex) {
+    if (question.type === 'scale') {
+      return renderScale(question, selectedIndex);
+    }
+
+    return `
+      <ul class="lt-quiz__answers" role="list">
+        ${question.answers.map((answer, index) => `
+          <li class="lt-quiz__answer-item">
+            <button
+              type="button"
+              class="lt-quiz__answer${selectedIndex === index ? ' lt-quiz__answer--selected' : ''}"
+              data-quiz-option="true"
+              data-index="${index}"
+              aria-pressed="${selectedIndex === index ? 'true' : 'false'}"
+            >
+              <span class="lt-quiz__answer-check" aria-hidden="true"></span>
+              <span class="lt-quiz__answer-text">${escapeHtml(answer.text)}</span>
+            </button>
+          </li>
+        `).join('')}
+      </ul>
+    `;
+  }
+
+  function renderScale(question, selectedIndex) {
+    const selectedOption = selectedIndex != null ? question.options[selectedIndex] : null;
+
+    return `
+      <div class="lt-quiz__scale-wrap">
+        <p class="lt-quiz__scale-current" aria-live="polite">
+          <span class="lt-quiz__scale-current-prefix">Deine Einschätzung</span>
+          <span class="lt-quiz__scale-current-value">${escapeHtml(selectedOption ? selectedOption.label : 'Noch keine Auswahl')}</span>
+        </p>
+        <div class="lt-quiz__scale" role="radiogroup" aria-label="${escapeHtml(question.question)}">
+          ${question.options.map((option, index) => `
+            <button
+              type="button"
+              class="lt-quiz__scale-option${selectedIndex === index ? ' lt-quiz__scale-option--selected' : ''}"
+              data-quiz-option="true"
+              data-index="${index}"
+              role="radio"
+              aria-checked="${selectedIndex === index ? 'true' : 'false'}"
+              tabindex="${selectedIndex == null ? (index === 0 ? '0' : '-1') : (selectedIndex === index ? '0' : '-1')}"
+              aria-label="${escapeHtml(option.label)}"
+            >
+              <span class="lt-quiz__scale-value" aria-hidden="true">${index + 1}</span>
+              <span class="lt-quiz__scale-text">${escapeHtml(option.shortLabel || option.label)}</span>
+            </button>
+          `).join('')}
+        </div>
+        <div class="lt-quiz__scale-legend" aria-hidden="true">
+          <span>${escapeHtml(question.minLabel)}</span>
+          <span>${escapeHtml(question.maxLabel)}</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function handleScaleKeydown(event, questionIndex, answerIndex) {
+    const question = QUESTIONS[questionIndex];
+    if (!question || question.type !== 'scale') return;
+
+    let nextIndex = answerIndex;
+
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      nextIndex = Math.min(question.options.length - 1, answerIndex + 1);
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      nextIndex = Math.max(0, answerIndex - 1);
+    } else if (event.key === 'Home') {
+      nextIndex = 0;
+    } else if (event.key === 'End') {
+      nextIndex = question.options.length - 1;
+    } else {
+      return;
+    }
+
+    event.preventDefault();
+    handleAnswer(questionIndex, nextIndex);
+  }
+
+  function getAnswerDefinition(question, answerIndex) {
+    if (!question) return null;
+    if (question.type === 'scale') return question.options[answerIndex] || null;
+    return question.answers[answerIndex] || null;
+  }
+
+  function reflectSelection(questionIndex, answerIndex) {
+    const question = QUESTIONS[questionIndex];
+    const selectedOption = getAnswerDefinition(question, answerIndex);
+
+    stepsEl.querySelectorAll('[data-quiz-option]').forEach((el) => {
+      const isSelected = parseInt(el.dataset.index, 10) === answerIndex;
+
+      if (el.classList.contains('lt-quiz__answer')) {
+        el.classList.toggle('lt-quiz__answer--selected', isSelected);
+        el.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+      }
+
+      if (el.classList.contains('lt-quiz__scale-option')) {
+        el.classList.toggle('lt-quiz__scale-option--selected', isSelected);
+        el.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+        el.setAttribute('tabindex', isSelected ? '0' : '-1');
+      }
+    });
+
+    if (question && question.type === 'scale') {
+      const currentValueEl = stepsEl.querySelector('.lt-quiz__scale-current-value');
+      if (currentValueEl) currentValueEl.textContent = selectedOption ? selectedOption.label : 'Noch keine Auswahl';
+    }
   }
 
   function renderMilestones() {
@@ -288,8 +440,8 @@
     }).join('');
   }
 
-  function renderResults(profileKey) {
-    const profile = PROFILES[profileKey];
+  function renderResults(outcome) {
+    const profile = PROFILES[outcome.profileKey];
     const products = window.LT_QUIZ_PRODUCTS || {};
 
     stepsEl.hidden = true;
@@ -308,6 +460,7 @@
             <p class="lt-quiz__profile-headline">${escapeHtml(profile.headline)}</p>
           </div>
           <p class="lt-quiz__profile-description">${escapeHtml(profile.description)}</p>
+          ${renderConfidenceNote(outcome)}
         </div>
 
         <div class="lt-quiz__plan-section">
@@ -333,6 +486,19 @@
     `;
 
     document.getElementById('lt-quiz-restart')?.addEventListener('click', resetQuiz);
+  }
+
+  function renderConfidenceNote(outcome) {
+    if (!outcome || outcome.confidence === 'high' || !outcome.secondaryKey) return '';
+
+    const secondary = PROFILES[outcome.secondaryKey];
+    if (!secondary) return '';
+
+    const note = outcome.confidence === 'mixed'
+      ? `Dein Profil ist gemischt: ${secondary.title} liegt fast gleichauf. Wir priorisieren deshalb den aktuell stärksten Hebel zuerst.`
+      : `${secondary.title} bleibt als zweiter Hebel nah dran. Dein Plan startet mit dem Bereich, der jetzt den größten Unterschied machen dürfte.`;
+
+    return `<p class="lt-quiz__profile-confidence">${escapeHtml(note)}</p>`;
   }
 
   function renderPrimaryCard(product, reason) {
@@ -407,14 +573,15 @@
   // ─── Logik ───────────────────────────────────────────────────────────────────
 
   function handleAnswer(questionIndex, answerIndex) {
-    const answer = QUESTIONS[questionIndex].answers[answerIndex];
-    answers[questionIndex] = { answerIndex, scores: answer.scores };
+    if (isTransitioning) return;
 
-    stepsEl.querySelectorAll('.lt-quiz__answer').forEach((el, i) => {
-      const sel = i === answerIndex;
-      el.classList.toggle('lt-quiz__answer--selected', sel);
-      el.setAttribute('aria-pressed', sel ? 'true' : 'false');
-    });
+    const question = QUESTIONS[questionIndex];
+    const answer = getAnswerDefinition(question, answerIndex);
+    if (!answer) return;
+
+    isTransitioning = true;
+    answers[questionIndex] = { answerIndex, scores: answer.scores };
+    reflectSelection(questionIndex, answerIndex);
 
     setTimeout(() => {
       if (questionIndex < QUESTIONS.length - 1) {
@@ -422,18 +589,37 @@
         updateProgress();
         renderStep(currentStep);
       } else {
-        renderResults(calculateProfile());
+        renderResults(calculateOutcome());
+        isTransitioning = false;
       }
     }, 350);
   }
 
-  function calculateProfile() {
+  function calculateOutcome() {
     const scores = { energie: 0, fokus: 0, schlaf: 0, langlebigkeit: 0 };
     answers.forEach((a) => {
       if (!a) return;
       Object.entries(a.scores).forEach(([k, v]) => { scores[k] = (scores[k] || 0) + v; });
     });
-    return Object.entries(scores).reduce((best, [k, v]) => v > scores[best] ? k : best, 'langlebigkeit');
+
+    const rankedProfiles = Object.entries(scores).sort((left, right) => right[1] - left[1]);
+    const [profileKey, topScore] = rankedProfiles[0];
+    const [secondaryKey, secondScore] = rankedProfiles[1] || ['langlebigkeit', 0];
+    const difference = topScore - secondScore;
+
+    let confidence = 'high';
+    if (topScore <= 4 || difference <= 1) {
+      confidence = 'mixed';
+    } else if (difference === 2) {
+      confidence = 'medium';
+    }
+
+    return {
+      profileKey,
+      secondaryKey,
+      confidence,
+      scores,
+    };
   }
 
   function updateProgress() {
@@ -451,6 +637,7 @@
   function resetQuiz() {
     currentStep = 0;
     answers = [];
+    isTransitioning = false;
     stepsEl.hidden = false;
     if (progressEl) progressEl.hidden = false;
     stepCounterEl.hidden = false;
