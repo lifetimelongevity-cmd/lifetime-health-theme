@@ -1,0 +1,619 @@
+{% comment %}
+  lt-hp-problem-v2 — Problem + Arzt-Block Flow
+  ─────────────────────────────────────────────
+  Zwei Flow-Blöcke verbunden durch eine Connector-Linie:
+  1. problem_block — "Das Problem" mit Blinder-Fleck-Callout
+  2. arzt_block    — "Und dein Arzt?" mit 2-Spalten-Vergleich + Hinweis-Note
+
+  Basiert auf hp_problem_v3_arzt_block.html — Block 3 + 4 entfernt
+  (Block 3 dupliziert product_hero; Statistik wandert in cta_close).
+{% endcomment %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    {%- if section.settings.color_bg != blank -%}
+    background: {{ section.settings.color_bg }};
+    {%- endif -%}
+    {%- if section.settings.color_text != blank -%}
+    color: {{ section.settings.color_text }};
+    --crs-text:     {{ section.settings.color_text }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    {%- endif -%}
+    padding-top:    {{ section.settings.padding_top | default: 52 }}px;
+    padding-bottom: {{ section.settings.padding_bottom | default: 56 }}px;
+  }
+{% endstyle %}
+
+<section id="shopify-section-{{ section.id }}" class="prob2">
+  <div class="prob2__container">
+
+    {%- comment -%}=== Section Header ==={%- endcomment -%}
+    <div class="prob2__header crs-heading-stack crs-heading-stack--align-center">
+      {%- if section.settings.kicker != blank -%}
+        <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      <div class="crs-heading-stack__pair">
+        {%- if section.settings.headline != blank -%}
+          <h2 class="crs-heading-stack__title">{{ section.settings.headline }}</h2>
+        {%- endif -%}
+        {%- if section.settings.subheadline != blank -%}
+          <p class="crs-heading-stack__subtitle">{{ section.settings.subheadline | escape }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+
+    {%- comment -%}=== Flow ==={%- endcomment -%}
+    <div class="prob2__flow">
+
+      {%- assign block_index = 0 -%}
+      {%- assign total_blocks = section.blocks.size -%}
+
+      {%- for block in section.blocks -%}
+        {%- assign block_index = block_index | plus: 1 -%}
+
+        {%- comment -%}=== problem_block ==={%- endcomment -%}
+        {%- if block.type == 'problem_block' -%}
+          <div class="prob2__block" {{ block.shopify_attributes }}>
+
+            {%- if block.settings.tag != blank -%}
+              <p class="prob2__flow-tag prob2__flow-tag--problem">{{ block.settings.tag | escape }}</p>
+            {%- endif -%}
+
+            {%- if block.settings.title != blank -%}
+              <h3 class="prob2__flow-title">{{ block.settings.title | escape }}</h3>
+            {%- endif -%}
+
+            {%- if block.settings.body != blank -%}
+              <p class="prob2__flow-body">{{ block.settings.body | escape }}</p>
+            {%- endif -%}
+
+            <div class="prob2__invest-row" aria-hidden="true">
+              <span class="prob2__invest-pill">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><circle cx="6" cy="6" r="4.5" stroke="currentColor" stroke-width="1"/><path d="M6 3.5v2.5l1.5 1" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                Sport
+              </span>
+              <span class="prob2__invest-pill">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 9c1-2 3-3 4-6 1 3 3 4 4 6H2Z" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/></svg>
+                Ernährung
+              </span>
+              <span class="prob2__invest-pill">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><rect x="3" y="2" width="6" height="8" rx="1.5" stroke="currentColor" stroke-width="1"/><path d="M5 5h2M5 7h2" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                Supplemente
+              </span>
+              <span class="prob2__invest-pill">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M2 8c0-3 2-5 4-5s4 2 4 5" stroke="currentColor" stroke-width="1" stroke-linecap="round"/><path d="M6 3V2" stroke="currentColor" stroke-width="1" stroke-linecap="round"/></svg>
+                Schlaf
+              </span>
+            </div>
+
+            {%- if block.settings.blind_spot_text != blank -%}
+              <div class="prob2__blind-spot">
+                {%- if block.settings.blind_spot_label != blank -%}
+                  <p class="prob2__blind-label">{{ block.settings.blind_spot_label | escape }}</p>
+                {%- endif -%}
+                <p class="prob2__blind-text">{{ block.settings.blind_spot_text | escape }}</p>
+              </div>
+            {%- endif -%}
+
+          </div>
+        {%- endif -%}
+
+        {%- comment -%}=== arzt_block ==={%- endcomment -%}
+        {%- if block.type == 'arzt_block' -%}
+          <div class="prob2__block" {{ block.shopify_attributes }}>
+
+            {%- if block.settings.tag != blank -%}
+              <p class="prob2__flow-tag prob2__flow-tag--arzt">{{ block.settings.tag | escape }}</p>
+            {%- endif -%}
+
+            {%- if block.settings.title != blank -%}
+              <h3 class="prob2__flow-title">{{ block.settings.title | escape }}</h3>
+            {%- endif -%}
+
+            {%- if block.settings.body != blank -%}
+              <p class="prob2__flow-body">{{ block.settings.body | escape }}</p>
+            {%- endif -%}
+
+            <div class="prob2__arzt-compare">
+
+              <div class="prob2__arzt-col">
+                {%- if block.settings.system_col_label != blank -%}
+                  <p class="prob2__arzt-col-label prob2__arzt-col-label--system">{{ block.settings.system_col_label | escape }}</p>
+                {%- endif -%}
+                {%- assign system_items = 'system_item_1,system_item_2,system_item_3,system_item_4' | split: ',' -%}
+                {%- for key in system_items -%}
+                  {%- assign val = block.settings[key] -%}
+                  {%- if val != blank -%}
+                    <div class="prob2__arzt-item">
+                      <span class="prob2__arzt-dot prob2__arzt-dot--gray" aria-hidden="true"></span>
+                      <span class="prob2__arzt-item-text">{{ val | escape }}</span>
+                    </div>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+
+              <div class="prob2__arzt-col">
+                {%- if block.settings.longevity_col_label != blank -%}
+                  <p class="prob2__arzt-col-label prob2__arzt-col-label--longevity">{{ block.settings.longevity_col_label | escape }}</p>
+                {%- endif -%}
+                {%- assign longevity_items = 'longevity_item_1,longevity_item_2,longevity_item_3,longevity_item_4' | split: ',' -%}
+                {%- for key in longevity_items -%}
+                  {%- assign val = block.settings[key] -%}
+                  {%- if val != blank -%}
+                    <div class="prob2__arzt-item">
+                      <span class="prob2__arzt-dot prob2__arzt-dot--teal" aria-hidden="true"></span>
+                      <span class="prob2__arzt-item-text">{{ val | escape }}</span>
+                    </div>
+                  {%- endif -%}
+                {%- endfor -%}
+              </div>
+
+            </div>
+
+            {%- if block.settings.note_text != blank -%}
+              <div class="prob2__arzt-note">
+                {%- if block.settings.note_label != blank -%}
+                  <p class="prob2__arzt-note-label">{{ block.settings.note_label | escape }}</p>
+                {%- endif -%}
+                <p class="prob2__arzt-note-text">{{ block.settings.note_text | escape }}</p>
+              </div>
+            {%- endif -%}
+
+          </div>
+        {%- endif -%}
+
+        {%- comment -%}=== Connector between blocks ==={%- endcomment -%}
+        {%- if block_index < total_blocks -%}
+          <div class="prob2__connector" aria-hidden="true">
+            <span class="prob2__connector-line"></span>
+          </div>
+        {%- endif -%}
+
+      {%- endfor -%}
+
+    </div>
+
+  </div>
+</section>
+
+{% stylesheet %}
+/* ================================================================
+   lt-hp-problem-v2 — Problem + Arzt-Block Flow
+   ================================================================ */
+
+.prob2 {
+  background: var(--color-surface-primary);
+}
+
+.prob2__container {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+/* — Header — */
+.prob2__header {
+  margin-bottom: var(--space-8);
+}
+
+/* — Flow — */
+.prob2__flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* — Connector — */
+.prob2__connector {
+  display: flex;
+  justify-content: center;
+  height: 32px;
+  align-items: center;
+}
+
+.prob2__connector-line {
+  display: block;
+  width: 1px;
+  height: 100%;
+  background: rgba(38, 37, 30, 0.15);
+}
+
+/* — Block card — */
+.prob2__block {
+  background: #f2f1ed;
+  border-radius: 12px;
+  padding: 22px 22px 20px;
+}
+
+/* — Tag — */
+.prob2__flow-tag {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  margin-top: 0;
+}
+
+.prob2__flow-tag--problem { color: #A32D2D; }
+.prob2__flow-tag--arzt    { color: #534AB7; }
+
+/* — Title + body — */
+.prob2__flow-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: #26251e;
+  margin: 0 0 6px;
+  line-height: 1.35;
+}
+
+.prob2__flow-body {
+  font-size: 13px;
+  color: #5F5E5A;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* — Invest pills (decorative, Block 1) — */
+.prob2__invest-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.prob2__invest-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #f7f7f4;
+  border: 0.5px solid rgba(38, 37, 30, 0.12);
+  border-radius: 99px;
+  padding: 5px 11px;
+  font-size: 12px;
+  color: #5F5E5A;
+}
+
+/* — Blind-spot callout — */
+.prob2__blind-spot {
+  margin-top: 16px;
+  background: #f7f7f4;
+  border-radius: 0 8px 8px 0;
+  padding: 14px 16px;
+  border-left: 3px solid #EF9F27;
+}
+
+.prob2__blind-label {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #854F0B;
+  margin: 0 0 5px;
+}
+
+.prob2__blind-text {
+  font-size: 13px;
+  color: #633806;
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* — Arzt compare (Block 2) — */
+.prob2__arzt-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.prob2__arzt-col {
+  background: #f7f7f4;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.prob2__arzt-col-label {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin: 0 0 10px;
+}
+
+.prob2__arzt-col-label--system   { color: #888780; }
+.prob2__arzt-col-label--longevity { color: #0F6E56; }
+
+.prob2__arzt-item {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.prob2__arzt-item:last-child { margin-bottom: 0; }
+
+.prob2__arzt-dot {
+  display: block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 5px;
+}
+
+.prob2__arzt-dot--gray { background: #B4B2A9; }
+.prob2__arzt-dot--teal { background: #1D9E75; }
+
+.prob2__arzt-item-text {
+  font-size: 12px;
+  color: #5F5E5A;
+  line-height: 1.5;
+}
+
+/* — Arzt note — */
+.prob2__arzt-note {
+  margin-top: 14px;
+  background: #f7f7f4;
+  border-radius: 0 8px 8px 0;
+  padding: 12px 14px;
+  border-left: 3px solid #AFA9EC;
+}
+
+.prob2__arzt-note-label {
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #534AB7;
+  margin: 0 0 5px;
+}
+
+.prob2__arzt-note-text {
+  font-size: 12px;
+  color: #3C3489;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* — Responsive — */
+@media screen and (max-width: 768px) {
+  .prob2__container {
+    padding: 0 var(--space-4);
+  }
+
+  .prob2__arzt-compare {
+    grid-template-columns: 1fr;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "HP Problem v2",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 56,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "default": 56,
+      "unit": "px"
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrundfarbe",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Warum Messen vor Optimieren kommt"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "Du investierst bereits.<br>Aber in welche Richtung?"
+    },
+    {
+      "type": "textarea",
+      "id": "subheadline",
+      "label": "Subheadline",
+      "default": "Die meisten Menschen tun einiges für ihre Gesundheit. Was fehlt, ist Orientierung — nicht Disziplin."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "problem_block",
+      "name": "Block: Das Problem",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Tag-Label",
+          "default": "Das Problem"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel",
+          "default": "Gesundheit ohne Ausgangspunkt ist Optimieren ins Unbekannte."
+        },
+        {
+          "type": "textarea",
+          "id": "body",
+          "label": "Text",
+          "default": "Ernährung, Sport, Schlaf, Supplemente — all das wirkt. Aber wie es bei dir wirkt, hängt von deiner individuellen Biologie ab. Ohne Messung weißt du nicht, ob du in die richtige Richtung gehst."
+        },
+        {
+          "type": "text",
+          "id": "blind_spot_label",
+          "label": "Callout-Label",
+          "default": "Blinder Fleck"
+        },
+        {
+          "type": "textarea",
+          "id": "blind_spot_text",
+          "label": "Callout-Text",
+          "default": "Du weißt nicht, wie schnell dein Körper biologisch altert — und welche genetischen Faktoren dabei eine Rolle spielen. Du optimierst gegen einen Durchschnittsmenschen, der nicht du bist."
+        }
+      ]
+    },
+    {
+      "type": "arzt_block",
+      "name": "Block: Und dein Arzt?",
+      "limit": 1,
+      "settings": [
+        {
+          "type": "text",
+          "id": "tag",
+          "label": "Tag-Label",
+          "default": "Und dein Arzt?"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel",
+          "default": "Das Gesundheitssystem misst, ob du krank bist — nicht, wie gut du alterst."
+        },
+        {
+          "type": "textarea",
+          "id": "body",
+          "label": "Text",
+          "default": "Dein Hausarzt hat einen anderen Nordstern: Krankheiten erkennen und behandeln. Das ist wichtig — aber es ist nicht dasselbe wie biologisches Altern aktiv zu verstehen."
+        },
+        {
+          "type": "header",
+          "content": "Spalte links — Medizinisches System"
+        },
+        {
+          "type": "text",
+          "id": "system_col_label",
+          "label": "Spalten-Label",
+          "default": "Medizinisches System"
+        },
+        {
+          "type": "text",
+          "id": "system_item_1",
+          "label": "Punkt 1",
+          "default": "Sagt, ob du krank bist"
+        },
+        {
+          "type": "text",
+          "id": "system_item_2",
+          "label": "Punkt 2",
+          "default": "Aktueller Status, kein Verlauf"
+        },
+        {
+          "type": "text",
+          "id": "system_item_3",
+          "label": "Punkt 3",
+          "default": "Ziel: Krankheit behandeln"
+        },
+        {
+          "type": "text",
+          "id": "system_item_4",
+          "label": "Punkt 4",
+          "default": "Handelt, wenn etwas auffällt"
+        },
+        {
+          "type": "header",
+          "content": "Spalte rechts — Longevity-Diagnostik"
+        },
+        {
+          "type": "text",
+          "id": "longevity_col_label",
+          "label": "Spalten-Label",
+          "default": "Longevity-Diagnostik"
+        },
+        {
+          "type": "text",
+          "id": "longevity_item_1",
+          "label": "Punkt 1",
+          "default": "Zeigt, wie schnell du alterst"
+        },
+        {
+          "type": "text",
+          "id": "longevity_item_2",
+          "label": "Punkt 2",
+          "default": "Epigenetik zeigt deinen Verlauf"
+        },
+        {
+          "type": "text",
+          "id": "longevity_item_3",
+          "label": "Punkt 3",
+          "default": "Ziel: aktiv gesund altern"
+        },
+        {
+          "type": "text",
+          "id": "longevity_item_4",
+          "label": "Punkt 4",
+          "default": "Ausgangspunkt, bevor Diagnosen nötig werden"
+        },
+        {
+          "type": "header",
+          "content": "Hinweis-Note"
+        },
+        {
+          "type": "text",
+          "id": "note_label",
+          "label": "Note-Label",
+          "default": "Kein Entweder-oder"
+        },
+        {
+          "type": "textarea",
+          "id": "note_text",
+          "label": "Note-Text",
+          "default": "LIFETIME ersetzt keinen Arzt. Es ergänzt das, was das Gesundheitssystem nicht leistet: einen Nordstern für aktive Prävention — bevor Diagnosen nötig werden."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "HP Problem v2",
+      "blocks": [
+        { "type": "problem_block" },
+        { "type": "arzt_block" }
+      ]
+    }
+  ]
+}
+{% endschema %}
