@@ -28,13 +28,10 @@
   assign p_lang_sec1       = all_products[section.settings.product_lang_sec1]
   assign p_lang_sec2       = all_products[section.settings.product_lang_sec2]
 
-  assign quiz_advisor_image_src = section.settings.advisor_image | strip
-  if quiz_advisor_image_src contains 'shopify://shop_images/'
-    assign quiz_advisor_image_src = quiz_advisor_image_src | remove: 'shopify://shop_images/' | file_url
-  elsif quiz_advisor_image_src != blank
-    unless quiz_advisor_image_src contains '://'
-      assign quiz_advisor_image_src = quiz_advisor_image_src | file_url
-    endunless
+  assign quiz_advisor_image = section.settings.advisor_image
+  assign quiz_advisor_image_src = ''
+  if quiz_advisor_image != blank
+    assign quiz_advisor_image_src = quiz_advisor_image | image_url: width: 112
   endif
 -%}
 
