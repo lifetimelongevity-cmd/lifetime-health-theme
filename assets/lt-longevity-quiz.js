@@ -256,7 +256,7 @@
 
   // ─── DOM-Referenzen ──────────────────────────────────────────────────────────
 
-  let quizEl, stepsEl, resultsEl, progressEl, progressBarEl, milestonesEl, stepCounterEl;
+  let quizEl, stepsEl, resultsEl, progressEl, progressBarEl, milestonesEl;
 
   // ─── Init ────────────────────────────────────────────────────────────────────
 
@@ -269,8 +269,6 @@
     progressEl = quizEl.querySelector('.lt-quiz__progress');
     progressBarEl = document.getElementById('lt-quiz-progress-bar');
     milestonesEl = document.getElementById('lt-quiz-milestones');
-    stepCounterEl = document.getElementById('lt-quiz-step-counter');
-
     if (progressEl) {
       progressEl.style.setProperty('--lt-quiz-step-count', String(QUESTIONS.length));
     }
@@ -287,10 +285,6 @@
 
     stepsEl.innerHTML = `
       <div class="lt-quiz__step" data-step="${index}">
-        <div class="lt-quiz__question-meta">
-          <span class="lt-quiz__question-meta-icon" aria-hidden="true">${q.icon}</span>
-          <p class="lt-quiz__question-step-label">${escapeHtml(q.stepLabel)}</p>
-        </div>
         <h3 class="lt-quiz__question">${escapeHtml(q.question)}</h3>
         ${renderQuestionInput(q, selectedIndex)}
         ${q.hint ? `
@@ -345,15 +339,12 @@
               data-index="${index}"
               aria-pressed="${selectedIndex === index ? 'true' : 'false'}"
             >
-              <span class="lt-quiz__answer-visual" aria-hidden="true">
-                ${answer.icon
-                  ? `<span class="lt-quiz__answer-icon">${answer.icon}</span>`
-                  : `<span class="lt-quiz__answer-index">${String(index + 1).padStart(2, '0')}</span>`}
-              </span>
+              ${answer.icon
+                ? `<span class="lt-quiz__answer-visual" aria-hidden="true"><span class="lt-quiz__answer-icon">${answer.icon}</span></span>`
+                : ''}
               <span class="lt-quiz__answer-body">
                 <span class="lt-quiz__answer-text">${escapeHtml(answer.text)}</span>
               </span>
-              <span class="lt-quiz__answer-check" aria-hidden="true"></span>
             </button>
           </li>
         `).join('')}
@@ -363,21 +354,17 @@
 
   function renderQuestionNote(hint) {
     const advisor = window.LT_QUIZ_ADVISOR || {};
-    const advisorName = advisor.name || 'Prof. Dr. med. Volker Limmroth';
-    const advisorTitle = advisor.title || 'Chefarzt Neurologie · Chief Scientific Officer LIFETIME';
 
     return `
-      <div class="lt-quiz__question-note-head">
-        ${advisor.image
-          ? `<img src="${escapeHtml(advisor.image)}" alt="${escapeHtml(advisorName)}" class="lt-quiz__question-note-avatar" loading="lazy" width="56" height="56">`
-          : `<span class="lt-quiz__question-note-icon" aria-hidden="true">${ICONS.lightbulb}</span>`}
-        <div class="lt-quiz__question-note-meta">
-          <p class="lt-quiz__question-note-kicker">Hinweis von</p>
-          <p class="lt-quiz__question-note-name">${escapeHtml(advisorName)}</p>
-          <p class="lt-quiz__question-note-title">${escapeHtml(advisorTitle)}</p>
+      ${advisor.image
+        ? `<img src="${escapeHtml(advisor.image)}" alt="" class="lt-quiz__question-note-avatar" loading="lazy" width="56" height="56">`
+        : `<span class="lt-quiz__question-note-icon" aria-hidden="true">${ICONS.lightbulb}</span>`}
+      <div class="lt-quiz__question-note-copy">
+        <div class="lt-quiz__question-note-head">
+          <p class="lt-quiz__question-note-name">Warum fragen wir das?</p>
         </div>
+        <p class="lt-quiz__question-hint">${escapeHtml(hint)}</p>
       </div>
-      <p class="lt-quiz__question-hint">${escapeHtml(hint)}</p>
     `;
   }
 
@@ -407,14 +394,6 @@
               aria-valuenow="${previewIndex}"
               aria-valuetext="${escapeHtml(previewOption.label)}"
             >
-            <div class="lt-quiz__scale-stops" aria-hidden="true">
-              ${question.options.map((option, index) => `
-                <span
-                  class="lt-quiz__scale-stop${index < previewIndex ? ' lt-quiz__scale-stop--passed' : ''}${index === previewIndex ? ' lt-quiz__scale-stop--current' : ''}"
-                  data-scale-stop="${index}"
-                ></span>
-              `).join('')}
-            </div>
           </div>
         </div>
         <div class="lt-quiz__scale-ends" aria-hidden="true">
@@ -464,11 +443,6 @@
       wrap.classList.toggle('lt-quiz__scale-wrap--active', isInteractive);
     }
 
-    stepsEl.querySelectorAll('[data-scale-stop]').forEach((el) => {
-      const stopIndex = parseInt(el.getAttribute('data-scale-stop') || '-1', 10);
-      el.classList.toggle('lt-quiz__scale-stop--passed', stopIndex < answerIndex);
-      el.classList.toggle('lt-quiz__scale-stop--current', stopIndex === answerIndex);
-    });
   }
 
   function reflectSelection(questionIndex, answerIndex) {
@@ -512,7 +486,6 @@
 
     stepsEl.hidden = true;
     if (progressEl) progressEl.hidden = true;
-    stepCounterEl.hidden = true;
 
     resultsEl.hidden = false;
     resultsEl.innerHTML = `
@@ -697,7 +670,6 @@
       progressEl.setAttribute('aria-valuetext', `Frage ${currentStep + 1} von ${QUESTIONS.length}`);
     }
     renderMilestones();
-    if (stepCounterEl) stepCounterEl.textContent = `Frage ${currentStep + 1} von ${QUESTIONS.length}`;
   }
 
   function resetQuiz() {
@@ -706,7 +678,6 @@
     isTransitioning = false;
     stepsEl.hidden = false;
     if (progressEl) progressEl.hidden = false;
-    stepCounterEl.hidden = false;
     resultsEl.hidden = true;
     resultsEl.innerHTML = '';
     updateProgress();
