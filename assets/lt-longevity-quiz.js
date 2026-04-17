@@ -285,10 +285,6 @@
 
     if (q.type === 'scale' && selectedIndex == null) {
       selectedIndex = getDefaultScaleIndex(q);
-      const defaultAnswer = getAnswerDefinition(q, selectedIndex);
-      if (defaultAnswer) {
-        answers[index] = { answerIndex: selectedIndex, scores: defaultAnswer.scores };
-      }
     }
 
     const isAnswered = selectedIndex != null;
@@ -297,7 +293,7 @@
       <div class="lt-quiz__step" data-step="${index}">
         <h3 class="lt-quiz__question">${escapeHtml(q.question)}</h3>
         ${renderQuestionInput(q, selectedIndex)}
-        ${renderStepNavigation(index, isAnswered, q.type)}
+        ${renderStepNavigation(index, Boolean(answers[index]), q.type)}
         ${q.hint ? `
           <div class="lt-quiz__question-note" role="note">
             ${renderQuestionNote(q.hint)}
@@ -408,9 +404,9 @@
         </button>
         <button
           type="button"
-          class="lt-quiz__step-link"
+          class="lt-quiz__step-link lt-quiz__step-link--next${isAnswered ? ' lt-quiz__step-link--next-visible' : ''}"
           data-quiz-next="true"
-          ${isAnswered ? '' : 'disabled aria-disabled="true"'}
+          ${isAnswered ? '' : 'disabled aria-disabled="true" hidden'}
         >
           ${isLastStep ? 'Ergebnis >' : 'Weiter >'}
         </button>
@@ -425,10 +421,6 @@
 
     return `
       <div class="lt-quiz__scale-wrap${selectedIndex != null ? ' lt-quiz__scale-wrap--active' : ''}" data-scale-wrap="true">
-        <p class="lt-quiz__scale-current" aria-live="polite">
-          <span class="lt-quiz__scale-current-prefix">${selectedIndex != null ? 'Deine Einschätzung' : 'Schiebe den Regler'}</span>
-          <span class="lt-quiz__scale-current-value">${escapeHtml(previewOption.label)}</span>
-        </p>
         <div class="lt-quiz__scale-shell">
           <div class="lt-quiz__scale-range-wrap" style="--lt-quiz-scale-progress: ${progress}%;">
             <input
@@ -450,6 +442,10 @@
           <span class="lt-quiz__scale-end lt-quiz__scale-end--min">${escapeHtml(question.minLabel)}</span>
           <span class="lt-quiz__scale-end lt-quiz__scale-end--max">${escapeHtml(question.maxLabel)}</span>
         </div>
+        <p class="lt-quiz__scale-current" aria-live="polite">
+          <span class="lt-quiz__scale-current-prefix">Deine Einschätzung</span>
+          <span class="lt-quiz__scale-current-value">${escapeHtml(previewOption.label)}</span>
+        </p>
       </div>
     `;
   }
@@ -480,7 +476,7 @@
     const progress = getScaleProgress(answerIndex, question.options.length);
 
     if (currentValueEl) currentValueEl.textContent = selectedOption ? selectedOption.label : '';
-    if (currentPrefixEl) currentPrefixEl.textContent = isInteractive ? 'Deine Einschätzung' : 'Schiebe den Regler';
+    if (currentPrefixEl) currentPrefixEl.textContent = 'Deine Einschätzung';
     if (rangeEl) {
       rangeEl.value = String(answerIndex);
       rangeEl.setAttribute('aria-valuenow', String(answerIndex));
@@ -502,6 +498,8 @@
     const isAnswered = Boolean(answers[questionIndex]);
     nextButton.disabled = !isAnswered;
     nextButton.setAttribute('aria-disabled', String(!isAnswered));
+    nextButton.hidden = !isAnswered;
+    nextButton.classList.toggle('lt-quiz__step-link--next-visible', isAnswered);
   }
 
   function handleNoteToggle(event) {
