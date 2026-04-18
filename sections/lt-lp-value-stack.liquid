@@ -1,9 +1,9 @@
 {% comment %}
   lt-lp-value-stack
   Surface: white value clarification
-  Dominant element: the final value comparison
+  Dominant element: the included-value list and the single investment row
   CTA: none
-  Quality move: itemized value makes the price feel grounded without turning into a sales box
+  Quality move: the section reads like a completeness manifest, not a discount comparison
 {% endcomment %}
 
 {% style %}
@@ -29,36 +29,35 @@
       {%- endif -%}
     </div>
 
-    <div class="lt-lp-stack__layout">
-      <div class="lt-lp-stack__list">
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'stack_item' -%}
-            <div class="lt-lp-stack__item" {{ block.shopify_attributes }}>
-              <div class="lt-lp-stack__item-copy">
+    <div class="lt-lp-stack__list">
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'stack_item' -%}
+          <div class="lt-lp-stack__item" {{ block.shopify_attributes }}>
+            <div class="lt-lp-stack__item-copy">
+              <div class="lt-lp-stack__item-header">
                 <p class="lt-lp-stack__item-title">{{ block.settings.item_title | escape }}</p>
                 {%- if block.settings.item_label != blank -%}
-                  <p class="lt-lp-stack__item-label">{{ block.settings.item_label | escape }}</p>
+                  <span class="lt-lp-stack__item-pill">{{ block.settings.item_label | escape }}</span>
                 {%- endif -%}
               </div>
-              {%- if block.settings.item_value != blank -%}
-                <p class="lt-lp-stack__item-value">{{ block.settings.item_value | escape }}</p>
+              {%- if block.settings.item_description != blank -%}
+                <p class="lt-lp-stack__item-description">{{ block.settings.item_description | escape }}</p>
               {%- endif -%}
             </div>
-          {%- endif -%}
-        {%- endfor -%}
-      </div>
-
-      <aside class="lt-lp-stack__summary">
-        <div class="lt-lp-stack__summary-row">
-          <p class="lt-lp-stack__summary-label">{{ section.settings.stack_total_label | escape }}</p>
-          <p class="lt-lp-stack__summary-value">{{ section.settings.stack_total_value | escape }}</p>
-        </div>
-        <div class="lt-lp-stack__summary-row lt-lp-stack__summary-row--final">
-          <p class="lt-lp-stack__summary-label">{{ section.settings.stack_final_label | escape }}</p>
-          <p class="lt-lp-stack__summary-value">{{ section.settings.stack_final_value | escape }}</p>
-        </div>
-      </aside>
+          </div>
+        {%- endif -%}
+      {%- endfor -%}
     </div>
+
+    <aside class="lt-lp-stack__summary">
+      <div class="lt-lp-stack__summary-row">
+        <p class="lt-lp-stack__summary-label">{{ section.settings.stack_final_label | escape }}</p>
+        <p class="lt-lp-stack__summary-value">{{ section.settings.stack_final_value | escape }}</p>
+      </div>
+      {%- if section.settings.stack_final_meta != blank -%}
+        <p class="lt-lp-stack__summary-meta">{{ section.settings.stack_final_meta | escape }}</p>
+      {%- endif -%}
+    </aside>
 
     {%- if section.settings.stack_footnote != blank -%}
       <p class="lt-lp-stack__footnote">{{ section.settings.stack_footnote | escape }}</p>
@@ -103,11 +102,6 @@
   color: var(--lt-lp-stack-muted);
 }
 
-.lt-lp-stack__layout {
-  display: grid;
-  gap: var(--space-5);
-}
-
 .lt-lp-stack__list,
 .lt-lp-stack__summary {
   background: var(--lt-lp-stack-surface);
@@ -120,10 +114,6 @@
 }
 
 .lt-lp-stack__item {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--space-3);
-  align-items: end;
   padding-block: var(--space-4);
   border-bottom: 1px solid var(--lt-lp-stack-border);
 }
@@ -137,10 +127,18 @@
   border-bottom: 0;
 }
 
+.lt-lp-stack__item-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+}
+
 .lt-lp-stack__item-title,
-.lt-lp-stack__item-value,
+.lt-lp-stack__item-description,
 .lt-lp-stack__summary-label,
-.lt-lp-stack__summary-value {
+.lt-lp-stack__summary-value,
+.lt-lp-stack__summary-meta {
   margin: 0;
 }
 
@@ -152,24 +150,31 @@
   color: var(--lt-lp-stack-text);
 }
 
-.lt-lp-stack__item-label {
-  margin: var(--space-1) 0 0;
+.lt-lp-stack__item-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--lt-lp-stack-border);
+  border-radius: var(--radius-full);
   font-family: var(--font-body);
-  font-size: var(--text-body-sm);
-  line-height: var(--leading-body);
-  color: var(--lt-lp-stack-muted);
-}
-
-.lt-lp-stack__item-value {
-  font-family: var(--font-heading);
-  font-size: var(--text-section);
-  font-weight: var(--weight-bold);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
   line-height: var(--leading-tight);
   color: var(--lt-lp-stack-text);
   white-space: nowrap;
 }
 
+.lt-lp-stack__item-description {
+  margin-top: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--lt-lp-stack-muted);
+}
+
 .lt-lp-stack__summary {
+  margin-top: var(--space-5);
   padding: var(--space-5);
 }
 
@@ -180,18 +185,12 @@
   align-items: end;
 }
 
-.lt-lp-stack__summary-row + .lt-lp-stack__summary-row {
-  margin-top: var(--space-5);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--lt-lp-stack-border);
-}
-
 .lt-lp-stack__summary-label {
   font-family: var(--font-body);
   font-size: var(--text-body-sm);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-body);
-  color: var(--lt-lp-stack-muted);
+  color: var(--lt-lp-stack-text);
 }
 
 .lt-lp-stack__summary-value {
@@ -203,9 +202,12 @@
   text-align: end;
 }
 
-.lt-lp-stack__summary-row--final .lt-lp-stack__summary-label,
-.lt-lp-stack__summary-row--final .lt-lp-stack__summary-value {
-  color: var(--lt-lp-stack-text);
+.lt-lp-stack__summary-meta {
+  margin-top: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--lt-lp-stack-muted);
 }
 
 .lt-lp-stack__footnote {
@@ -213,30 +215,18 @@
   color: var(--lt-lp-stack-muted);
 }
 
-@media screen and (min-width: 990px) {
-  .lt-lp-stack__layout {
-    grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.8fr);
-  }
-}
-
 @media screen and (max-width: 749px) {
   .lt-lp-stack__subheading {
     font-size: var(--text-body);
   }
 
-  .lt-lp-stack__item {
-    grid-template-columns: 1fr;
-  }
-
-  .lt-lp-stack__item-value,
-  .lt-lp-stack__summary-value {
-    white-space: normal;
-    text-align: start;
-  }
-
   .lt-lp-stack__summary-row {
     flex-direction: column;
     align-items: start;
+  }
+
+  .lt-lp-stack__summary-value {
+    text-align: start;
   }
 }
 {% endstylesheet %}
@@ -289,31 +279,19 @@
       "type": "text",
       "id": "stack_heading",
       "label": "Heading",
-      "default": "Was du einzeln dafür zahlen würdest."
+      "default": "Was im Preis enthalten ist."
     },
     {
       "type": "text",
       "id": "stack_subheading",
       "label": "Subheading",
-      "default": "Bei vergleichbaren Anbietern. Transparent aufgeschlüsselt."
-    },
-    {
-      "type": "text",
-      "id": "stack_total_label",
-      "label": "Total label",
-      "default": "Zusammen einzeln gekauft"
-    },
-    {
-      "type": "text",
-      "id": "stack_total_value",
-      "label": "Total value",
-      "default": "~537 €"
+      "default": "Kein Abo. Keine Upsells. Kein Kleingedrucktes."
     },
     {
       "type": "text",
       "id": "stack_final_label",
       "label": "Final label",
-      "default": "Bei LIFETIME einmalig"
+      "default": "Einmalige Investition"
     },
     {
       "type": "text",
@@ -322,10 +300,16 @@
       "default": "349 €"
     },
     {
+      "type": "text",
+      "id": "stack_final_meta",
+      "label": "Final meta",
+      "default": "kein Abo · versandkostenfrei · DSGVO"
+    },
+    {
       "type": "textarea",
       "id": "stack_footnote",
       "label": "Footnote",
-      "default": "Vergleichswerte basieren auf durchschnittlichen Marktpreisen vergleichbarer Anbieter (Stand 2026). Der AGE & DNA-Test ersetzt keine medizinische Diagnostik."
+      "default": "Lebenslanger Zugang zur LIFETIME App · Neue Analyse-Bereiche werden automatisch verfügbar, sobald wir sie hinzufügen · Kein Upgrade-Zwang."
     }
   ],
   "blocks": [
@@ -338,18 +322,19 @@
           "type": "text",
           "id": "item_title",
           "label": "Title",
-          "default": "DNA-Analyse (187 Marker, 16 Kategorien)"
-        },
-        {
-          "type": "text",
-          "id": "item_value",
-          "label": "Value",
-          "default": "~199 €"
+          "default": "DNA-Analyse mit 187 Reports"
         },
         {
           "type": "text",
           "id": "item_label",
-          "label": "Label"
+          "label": "Label",
+          "default": "Enthalten"
+        },
+        {
+          "type": "text",
+          "id": "item_description",
+          "label": "Description",
+          "default": "16 Kategorien von Fitness bis Sensitivitäten"
         }
       ]
     }
@@ -361,38 +346,49 @@
         {
           "type": "stack_item",
           "settings": {
-            "item_title": "DNA-Analyse (187 Marker, 16 Kategorien)",
-            "item_value": "~199 €"
+            "item_title": "DNA-Analyse mit 187 Reports",
+            "item_label": "Enthalten",
+            "item_description": "16 Kategorien von Fitness bis Sensitivitäten"
           }
         },
         {
           "type": "stack_item",
           "settings": {
-            "item_title": "Epigenetische Analyse (6 Bereiche, MethylPace-Score)",
-            "item_value": "~249 €"
+            "item_title": "Epigenetische Analyse (MethylPace-Score)",
+            "item_label": "Enthalten",
+            "item_description": "6 Bereiche, darunter biologisches Alter und Zell-Vitalität"
           }
         },
         {
           "type": "stack_item",
           "settings": {
-            "item_title": "Longevity-Beratung (Erstgespräch, 30 Min)",
-            "item_value": "~89 €"
+            "item_title": "Longevity-Erstberatung (30 Min)",
+            "item_label": "Enthalten",
+            "item_description": "Mit einem unserer Longevity-Experten, optional per Video"
           }
         },
         {
           "type": "stack_item",
           "settings": {
-            "item_title": "LIFETIME App + AI Health Coach (lebenslang)",
-            "item_value": "—",
-            "item_label": "Inklusive"
+            "item_title": "LIFETIME App mit AI Health Coach",
+            "item_label": "Lebenslang",
+            "item_description": "Ergebnisse, Einordnung, konkrete Empfehlungen"
           }
         },
         {
           "type": "stack_item",
           "settings": {
             "item_title": "Face Scan Hautanalyse",
-            "item_value": "—",
-            "item_label": "Inklusive"
+            "item_label": "Enthalten",
+            "item_description": "Visuelle Altersindikatoren und Hautgesundheit"
+          }
+        },
+        {
+          "type": "stack_item",
+          "settings": {
+            "item_title": "Eurofins Laboranalyse",
+            "item_label": "ISO-zertifiziert",
+            "item_description": "Dieselben Standards wie klinische Diagnostik"
           }
         }
       ]

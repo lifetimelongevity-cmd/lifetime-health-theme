@@ -3,7 +3,7 @@
   Surface: warm editorial answer block
   Dominant element: the personalized headline and dense checklist
   CTA: none
-  Quality move: relevant items stay compact and textual, so the section reads like an answer not a feature grid
+  Quality move: the relevant categories stay tight while the remaining scope is grouped into calm thematic clusters
 {% endcomment %}
 
 {% style %}
@@ -47,7 +47,7 @@
 
           <div class="lt-lp-pa__rest">
             <p class="lt-lp-pa__rest-label">{{ section.settings.rest_categories_label | escape }}</p>
-            <p class="lt-lp-pa__rest-list" data-pa-rest></p>
+            <div class="lt-lp-pa__rest-clusters" data-pa-rest></div>
           </div>
 
           {%- if section.settings.transition_cta_text != blank -%}
@@ -59,6 +59,7 @@
   </div>
 
   <div hidden data-all-categories="{{ section.settings.all_categories_list | escape }}"></div>
+  <div hidden data-category-clusters="{{ section.settings.category_clusters_json | escape }}"></div>
 </section>
 
 <script>
@@ -72,6 +73,7 @@
       var placeholder = section.querySelector('[data-pa-placeholder]');
       var states = Array.prototype.slice.call(section.querySelectorAll('[data-goal-id]'));
       var allCategoriesEl = section.querySelector('[data-all-categories]');
+      var categoryClustersEl = section.querySelector('[data-category-clusters]');
       var allCategories = (allCategoriesEl && allCategoriesEl.dataset ? allCategoriesEl.dataset.allCategories : '')
         .split(',')
         .map(function(item) { return item.trim(); })
@@ -85,6 +87,62 @@
         var div = document.createElement('div');
         div.textContent = value;
         return div.innerHTML;
+      }
+
+      function parseClusterConfig() {
+        var parsed = {};
+
+        try {
+          parsed = JSON.parse(categoryClustersEl && categoryClustersEl.dataset ? categoryClustersEl.dataset.categoryClusters : '{}');
+        } catch (error) {
+          parsed = {};
+        }
+
+        return parsed;
+      }
+
+      function buildRestClusters(highlighted) {
+        var clusterConfig = parseClusterConfig();
+        var highlightedLookup = highlighted.map(normalize);
+        var clusterEntries = [];
+        var seen = {};
+
+        Object.keys(clusterConfig).forEach(function(label) {
+          var items = clusterConfig[label];
+          if (!Array.isArray(items)) return;
+
+          var filteredItems = items.filter(function(item) {
+            var normalizedItem = normalize(item);
+
+            if (!normalizedItem || highlightedLookup.indexOf(normalizedItem) !== -1) {
+              return false;
+            }
+
+            seen[normalizedItem] = true;
+            return true;
+          });
+
+          if (filteredItems.length > 0) {
+            clusterEntries.push({
+              label: label,
+              items: filteredItems
+            });
+          }
+        });
+
+        var uncategorized = allCategories.filter(function(item) {
+          var normalizedItem = normalize(item);
+          return normalizedItem && highlightedLookup.indexOf(normalizedItem) === -1 && !seen[normalizedItem];
+        });
+
+        if (uncategorized.length > 0) {
+          clusterEntries.push({
+            label: 'Weitere Bereiche',
+            items: uncategorized
+          });
+        }
+
+        return clusterEntries;
       }
 
       function setGoal(goalId, shouldScroll) {
@@ -133,11 +191,13 @@
 
           var restEl = activeState.querySelector('[data-pa-rest]');
           if (restEl) {
-            var highlightedLower = highlighted.map(normalize);
-            var restList = allCategories.filter(function(category) {
-              return highlightedLower.indexOf(normalize(category)) === -1;
-            });
-            restEl.textContent = restList.join(' · ');
+            var clusters = buildRestClusters(highlighted);
+            restEl.innerHTML = clusters.map(function(cluster) {
+              return '<div class="lt-lp-pa__rest-cluster">' +
+                '<p class="lt-lp-pa__rest-cluster-title">' + escapeHtml(cluster.label) + '</p>' +
+                '<p class="lt-lp-pa__rest-cluster-list">' + escapeHtml(cluster.items.join(' · ')) + '</p>' +
+              '</div>';
+            }).join('');
           }
         }
 
@@ -238,8 +298,8 @@
 .lt-lp-pa__check-row {
   display: grid;
   grid-template-columns: calc(var(--space-6) - var(--space-2)) minmax(11rem, 24%) 1fr;
-  align-items: baseline;
   gap: var(--space-4);
+  align-items: baseline;
   padding-block: var(--space-2);
   font-size: var(--text-body);
   line-height: var(--leading-relaxed);
@@ -247,10 +307,10 @@
 
 .lt-lp-pa__check-icon {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
   width: calc(var(--space-6) - var(--space-2));
   height: calc(var(--space-6) - var(--space-2));
+  align-items: center;
+  justify-content: center;
   color: var(--lt-lp-pa-accent);
 }
 
@@ -279,7 +339,7 @@
 }
 
 .lt-lp-pa__rest-label {
-  margin: 0 0 var(--space-2);
+  margin: 0 0 var(--space-3);
   font-family: var(--font-body);
   font-size: var(--text-body-sm);
   font-weight: var(--weight-semibold);
@@ -287,7 +347,27 @@
   color: var(--lt-lp-pa-text);
 }
 
-.lt-lp-pa__rest-list {
+.lt-lp-pa__rest-clusters {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.lt-lp-pa__rest-cluster {
+  min-width: 0;
+}
+
+.lt-lp-pa__rest-cluster-title {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lt-lp-pa-text);
+}
+
+.lt-lp-pa__rest-cluster-list {
   margin: 0;
   font-family: var(--font-body);
   font-size: var(--text-body-sm);
@@ -302,6 +382,12 @@
   font-size: var(--text-body);
   line-height: var(--leading-body);
   color: var(--lt-lp-pa-muted);
+}
+
+@media screen and (min-width: 990px) {
+  .lt-lp-pa__rest-clusters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
 }
 
 @media screen and (max-width: 749px) {
@@ -414,13 +500,19 @@
       "type": "text",
       "id": "rest_categories_label",
       "label": "Rest categories label",
-      "default": "Plus 16 weitere Bereiche, die wir gleichzeitig analysieren:"
+      "default": "Plus diese Bereiche, die dein Test gleichzeitig analysiert:"
     },
     {
       "type": "textarea",
       "id": "all_categories_list",
       "label": "All categories list",
       "default": "Körperalter, Biologisches Alter, EpiVitality, Immunscore, Entzündung, Muskelschwund, Gesunde Alterung, Supplements, Vitamine, Sensitivitäten, Stoffwechsel, Fitness, Verletzung & Regeneration, Mental Health, Psychologisch, Schlaf, Stress, Herz, Atemwege, Augen, Haare, Niere"
+    },
+    {
+      "type": "textarea",
+      "id": "category_clusters_json",
+      "label": "Category clusters JSON",
+      "default": "{\"Deine individuelle Genetik\":[\"Supplements\",\"Vitamine\",\"Sensitivitäten\",\"Psychologisch\"],\"Deine körperliche Basis\":[\"Stoffwechsel\",\"Fitness\",\"Verletzung & Regeneration\",\"Muskelschwund\",\"Herz\",\"Atemwege\",\"Niere\"],\"Dein mentaler und sensorischer Raum\":[\"Mental Health\",\"Schlaf\",\"Stress\",\"Immunscore\",\"EpiVitality\",\"Körperalter\",\"Biologisches Alter\",\"Gesunde Alterung\",\"Augen\",\"Haare\"]}"
     },
     {
       "type": "text",
@@ -463,7 +555,7 @@
           "type": "textarea",
           "id": "micro_texts_json",
           "label": "Micro texts JSON",
-          "default": "{\"Biologisches Alter\":\"Dein MethylPace-Score zeigt, wie schnell deine Zellen tatsächlich altern.\",\"EpiVitality\":\"Misst, wie vital deine Zellen gerade arbeiten — ein zentraler Alterungsmarker.\",\"Entzündung\":\"Chronische Zellentzündung ist ein Haupttreiber des Alterns — hier siehst du deinen Status.\",\"Körperalter\":\"Höralter, Sehalter, Gedächtnisalter — wie alt deine Sinne und Kognition biologisch sind.\",\"Gesunde Alterung\":\"Langlebigkeit, Kognition, Knochen — deine genetische Ausgangslage für gesundes Altern.\",\"Herz\":\"Cholesterin, Herzrisiko, Blutdruck — die genetischen Faktoren, die deine Lebensjahre prägen.\"}"
+          "default": "{\"Biologisches Alter\":\"Wie schnell deine Zellen altern — ein Wert, den dein Hausarzt nicht messen kann. Wir nennen ihn MethylPace-Score.\",\"EpiVitality\":\"Wie vital deine Zellen gerade arbeiten — der wichtigste Indikator für zelluläre Gesundheit.\",\"Entzündung\":\"Wie hoch deine stille Zellentzündung ist — einer der Haupttreiber des Alterns.\",\"Körperalter\":\"Wie alt deine Sinne und dein Gedächtnis biologisch sind — Höralter, Sehalter, kognitive Alterung.\",\"Gesunde Alterung\":\"Deine genetische Grundlage für Langlebigkeit — Knochen, Muskeln, Kognition im Alter.\",\"Herz\":\"Deine genetischen Faktoren für Herz-Kreislauf — Blutdruck, Cholesterin, Herzinfarkt-Risiko.\"}"
         }
       ]
     }
@@ -479,17 +571,17 @@
             "result_headline": "Du willst wissen, wie du alterst.",
             "result_subheadline": "Dann ist das hier dein Test.",
             "highlighted_categories": "Biologisches Alter, EpiVitality, Entzündung, Körperalter, Gesunde Alterung, Herz",
-            "micro_texts_json": "{\"Biologisches Alter\":\"Dein MethylPace-Score zeigt, wie schnell deine Zellen tatsächlich altern.\",\"EpiVitality\":\"Misst, wie vital deine Zellen gerade arbeiten — ein zentraler Alterungsmarker.\",\"Entzündung\":\"Chronische Zellentzündung ist ein Haupttreiber des Alterns — hier siehst du deinen Status.\",\"Körperalter\":\"Höralter, Sehalter, Gedächtnisalter — wie alt deine Sinne und Kognition biologisch sind.\",\"Gesunde Alterung\":\"Langlebigkeit, Kognition, Knochen — deine genetische Ausgangslage für gesundes Altern.\",\"Herz\":\"Cholesterin, Herzrisiko, Blutdruck — die genetischen Faktoren, die deine Lebensjahre prägen.\"}"
+            "micro_texts_json": "{\"Biologisches Alter\":\"Wie schnell deine Zellen altern — ein Wert, den dein Hausarzt nicht messen kann. Wir nennen ihn MethylPace-Score.\",\"EpiVitality\":\"Wie vital deine Zellen gerade arbeiten — der wichtigste Indikator für zelluläre Gesundheit.\",\"Entzündung\":\"Wie hoch deine stille Zellentzündung ist — einer der Haupttreiber des Alterns.\",\"Körperalter\":\"Wie alt deine Sinne und dein Gedächtnis biologisch sind — Höralter, Sehalter, kognitive Alterung.\",\"Gesunde Alterung\":\"Deine genetische Grundlage für Langlebigkeit — Knochen, Muskeln, Kognition im Alter.\",\"Herz\":\"Deine genetischen Faktoren für Herz-Kreislauf — Blutdruck, Cholesterin, Herzinfarkt-Risiko.\"}"
           }
         },
         {
           "type": "goal_answer",
           "settings": {
             "goal_id": "goal_2",
-            "result_headline": "Du willst wissen, warum du müde bist.",
-            "result_subheadline": "Hier findest du die Antworten.",
+            "result_headline": "Du willst deine Energie zurückgewinnen.",
+            "result_subheadline": "Hier findest du, woran es wirklich liegt.",
             "highlighted_categories": "Entzündung, Muskelschwund, Schlaf, Stress, Mental Health, Stoffwechsel",
-            "micro_texts_json": "{\"Entzündung\":\"Niedrige Zellentzündung = mehr verfügbare Energie für den Alltag.\",\"Muskelschwund\":\"Wie schnell deine Muskelzellen altern — hat Einfluss auf dein Energielevel.\",\"Schlaf\":\"Schlafdauer, Tiefschlaf-Tendenz, Chronotyp — die genetische Basis deiner Regeneration.\",\"Stress\":\"Wie dein Körper Stress verarbeitet — und wo Erschöpfung genetisch bedingt ist.\",\"Mental Health\":\"Aufmerksamkeit, Stress-Resilienz, Warrior/Worrier-Profil — deine mentale Energie-Signatur.\",\"Stoffwechsel\":\"Wie effizient dein Körper Energie produziert — und wo Stoffwechsel-Leaks möglich sind.\"}"
+            "micro_texts_json": "{\"Entzündung\":\"Je niedriger deine Zellentzündung, desto mehr Energie bleibt deinem Körper für den Alltag.\",\"Muskelschwund\":\"Wie schnell deine Muskelzellen altern — direkt verbunden mit deinem Energielevel.\",\"Schlaf\":\"Deine genetische Schlaftypologie — Chronotyp, Tiefschlaf-Neigung, Regenerationsfähigkeit.\",\"Stress\":\"Wie dein Körper Stress verarbeitet — und wo deine Erschöpfung genetisch bedingt ist.\",\"Mental Health\":\"Stress-Resilienz, Konzentration, Warrior/Worrier-Profil — deine mentale Energie-Signatur.\",\"Stoffwechsel\":\"Wie effizient dein Körper Energie produziert — und wo Stoffwechsel-Verluste passieren.\"}"
           }
         },
         {
@@ -499,7 +591,7 @@
             "result_headline": "Du willst körperlich fit bleiben.",
             "result_subheadline": "Das ist die Grundlage dafür.",
             "highlighted_categories": "Muskelschwund, EpiVitality, Fitness, Verletzung & Regeneration, Gesunde Alterung",
-            "micro_texts_json": "{\"Muskelschwund\":\"Wie schnell deine Muskeln biologisch altern — kritisch für lebenslange Fitness.\",\"EpiVitality\":\"Zell-Vitalität als Grundlage für Trainingsreize und Regeneration.\",\"Fitness\":\"Muskelkraft, VO₂max, anaerobe Schwelle — dein genetisches Fitness-Profil.\",\"Verletzung & Regeneration\":\"LWS, Achillessehne, Arthrose-Bezug — wo dein Körper Schutz braucht.\",\"Gesunde Alterung\":\"Langfristige Gelenk- und Knochen-Gesundheit als Basis für lebenslange Bewegung.\"}"
+            "micro_texts_json": "{\"Muskelschwund\":\"Wie schnell deine Muskeln biologisch altern — der kritischste Marker für Fitness ab 50.\",\"EpiVitality\":\"Zell-Vitalität als Grundlage für Trainingsreize und Regeneration.\",\"Fitness\":\"Deine genetische Sport-Signatur — VO₂max, Muskelkraft, anaerobe Schwelle.\",\"Verletzung & Regeneration\":\"Wo dein Körper genetisch anfällig ist — Achillessehne, LWS, Arthrose-Risiko.\",\"Gesunde Alterung\":\"Deine Basis für lebenslange Bewegung — Gelenke, Knochen, Muskulatur.\"}"
           }
         },
         {
@@ -509,7 +601,7 @@
             "result_headline": "Du willst verstehen, was dich einzigartig macht.",
             "result_subheadline": "Hier ist dein individuelles Körperbild.",
             "highlighted_categories": "Immunscore, Biologisches Alter, Sensitivitäten, Vitamine, Supplements, Psychologisch",
-            "micro_texts_json": "{\"Immunscore\":\"Wie dein Immunsystem epigenetisch reagiert — individuell, nicht pauschal.\",\"Biologisches Alter\":\"Dein biologisches Alter als zentrale Kennzahl deiner körperlichen Identität.\",\"Sensitivitäten\":\"Gluten, Laktose, Fruktose, Fett — worauf dein Körper genetisch reagiert.\",\"Vitamine\":\"Vitamin D, B12, Omega-3 — welche Nährstoffe dein Körper besser verwerten kann.\",\"Supplements\":\"Welche Supplement-Wirkstoffe dein Körper genetisch besser verwertet.\",\"Psychologisch\":\"COMT, MAOA, Emotionsregulation — die genetische Prägung deiner Persönlichkeit.\"}"
+            "micro_texts_json": "{\"Immunscore\":\"Wie dein Immunsystem individuell reagiert — nicht pauschal, sondern epigenetisch gemessen.\",\"Biologisches Alter\":\"Wie schnell deine Zellen altern — die zentrale Kennzahl deiner körperlichen Identität.\",\"Sensitivitäten\":\"Wie dein Körper auf Lebensmittel reagiert — Gluten, Laktose, Fruktose, bestimmte Fette.\",\"Vitamine\":\"Welche Nährstoffe dein Körper besser oder schlechter verwertet — Vitamin D, B12, Omega-3.\",\"Supplements\":\"Welche Supplement-Wirkstoffe zu deiner Genetik passen — und welche nicht.\",\"Psychologisch\":\"Die genetische Prägung deiner Persönlichkeit — Emotionsregulation, Belohnungssystem.\"}"
           }
         }
       ]

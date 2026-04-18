@@ -8,12 +8,18 @@
 
 {%- liquid
   assign hero_focal_point = 'center center'
+  assign hero_has_split_media = false
+
   case section.settings.hero_image_focal_point
     when 'top'
       assign hero_focal_point = 'center top'
     when 'bottom'
       assign hero_focal_point = 'center bottom'
   endcase
+
+  if section.settings.hero_image_variant_mode == 'split_diptych' and section.settings.hero_image != blank and section.settings.hero_image_secondary != blank
+    assign hero_has_split_media = true
+  endif
 -%}
 
 {% style %}
@@ -32,8 +38,37 @@
 
 <section id="lt-lp-hero-quiz-{{ section.id }}" class="lt-lp-hero-quiz">
   <div class="lt-lp-hero-quiz__inner page-width">
-    <div class="lt-lp-hero-quiz__media">
-      {%- if section.settings.hero_image != blank -%}
+    <div class="lt-lp-hero-quiz__media{% if hero_has_split_media %} lt-lp-hero-quiz__media--split{% endif %}">
+      {%- if hero_has_split_media -%}
+        <div class="lt-lp-hero-quiz__media-grid">
+          <div class="lt-lp-hero-quiz__media-panel">
+            {{
+              section.settings.hero_image
+              | image_url: width: 1600
+              | image_tag:
+                loading: 'eager',
+                fetchpriority: 'high',
+                alt: section.settings.hero_image_alt,
+                class: 'lt-lp-hero-quiz__image',
+                widths: '600, 900, 1200, 1600',
+                sizes: '(min-width: 990px) 27vw, 100vw'
+            }}
+          </div>
+          <div class="lt-lp-hero-quiz__media-panel">
+            {{
+              section.settings.hero_image_secondary
+              | image_url: width: 1600
+              | image_tag:
+                loading: 'eager',
+                fetchpriority: 'high',
+                alt: '',
+                class: 'lt-lp-hero-quiz__image',
+                widths: '600, 900, 1200, 1600',
+                sizes: '(min-width: 990px) 27vw, 100vw'
+            }}
+          </div>
+        </div>
+      {%- elsif section.settings.hero_image != blank -%}
         {{
           section.settings.hero_image
           | image_url: width: 1600
@@ -190,6 +225,15 @@
   border-radius: var(--radius-xl);
   overflow: hidden;
   background: var(--lt-lp-hero-accent-soft);
+}
+
+.lt-lp-hero-quiz__media-grid {
+  display: grid;
+  gap: 1px; /* intentional: hairline split keeps diptych feeling editorial, not card-based */
+}
+
+.lt-lp-hero-quiz__media-panel {
+  min-width: 0;
 }
 
 .lt-lp-hero-quiz__image,
@@ -349,6 +393,10 @@
     grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
     gap: var(--space-7);
   }
+
+  .lt-lp-hero-quiz__media--split .lt-lp-hero-quiz__media-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media screen and (max-width: 749px) {
@@ -365,6 +413,10 @@
 
   .lt-lp-hero-quiz__helper {
     font-size: var(--text-body);
+  }
+
+  .lt-lp-hero-quiz__media--split .lt-lp-hero-quiz__media-grid {
+    grid-template-columns: 1fr;
   }
 }
 {% endstylesheet %}
@@ -419,6 +471,11 @@
       "label": "Hero image"
     },
     {
+      "type": "image_picker",
+      "id": "hero_image_secondary",
+      "label": "Hero image secondary"
+    },
+    {
       "type": "text",
       "id": "hero_image_alt",
       "label": "Hero image alt",
@@ -434,6 +491,16 @@
         { "value": "bottom", "label": "Bottom" }
       ],
       "default": "center"
+    },
+    {
+      "type": "select",
+      "id": "hero_image_variant_mode",
+      "label": "Hero image mode",
+      "options": [
+        { "value": "single", "label": "Single" },
+        { "value": "split_diptych", "label": "Split diptych" }
+      ],
+      "default": "single"
     },
     {
       "type": "checkbox",
@@ -475,7 +542,7 @@
       "type": "text",
       "id": "quiz_option_2_label",
       "label": "Option 2",
-      "default": "Warum ich müde bin"
+      "default": "Wie ich meine Energie zurückgewinne"
     },
     {
       "type": "text",

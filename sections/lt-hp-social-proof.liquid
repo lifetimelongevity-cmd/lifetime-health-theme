@@ -90,8 +90,8 @@
                 </div>
                 <div class="sp__author-meta">
                   <span class="sp__author-name">{{ block.settings.name | escape }}</span>
-                  {%- if block.settings.verified -%}
-                    <span class="sp__verified-badge">Begleitprogramm</span>
+                  {%- if block.settings.role != blank -%}
+                    <span class="sp__author-role">{{ block.settings.role | escape }}</span>
                   {%- endif -%}
                 </div>
               </div>
@@ -107,16 +107,16 @@
               {%- if block.settings.result_metric != blank -%}
                 <div class="sp__before-after" aria-label="Vorher-Nachher Ergebnis">
                   <div class="sp__ba-col sp__ba-col--before">
-                    <span class="sp__ba-label">Vorher</span>
-                    {%- if block.settings.age != blank -%}
+                    <span class="sp__ba-label">{{ block.settings.before_label | default: 'Vorher' | escape }}</span>
+                    {%- if block.settings.before_label == blank and block.settings.age != blank -%}
                       <span class="sp__ba-chron">Chron. {{ block.settings.age }} J.</span>
                     {%- endif -%}
                     <span class="sp__ba-value">{{ block.settings.result_metric | escape }}</span>
                   </div>
                   {%- if block.settings.retest_result != blank -%}
                     <div class="sp__ba-col sp__ba-col--after">
-                      <span class="sp__ba-label">Nachher</span>
-                      {%- if block.settings.retest_duration != blank -%}
+                      <span class="sp__ba-label">{{ block.settings.after_label | default: 'Nachher' | escape }}</span>
+                      {%- if block.settings.after_label == blank and block.settings.retest_duration != blank -%}
                         <span class="sp__ba-chron">{{ block.settings.retest_duration | escape }}</span>
                       {%- else -%}
                         <span class="sp__ba-chron">&nbsp;</span>
@@ -368,21 +368,13 @@
   color: var(--color-text-primary);
 }
 
-.sp__verified-badge {
-  display: inline-flex;
-  align-items: center;
+.sp__author-role {
   margin-left: var(--space-2);
-  margin-top: 0;
-  padding: 2px var(--space-2);
-  border-radius: var(--radius-pill);
-  border: 1px solid var(--color-border-default);
-  background: var(--color-surface-primary);
   color: var(--color-text-secondary);
   font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-medium);
-  line-height: var(--leading-tight);
-  white-space: nowrap;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
 }
 
 /* — Testimonial context note — */
@@ -683,7 +675,7 @@
     flex-direction: column;
   }
 
-  .sp__verified-badge {
+  .sp__author-role {
     margin-left: 0;
     margin-top: var(--space-1);
   }
@@ -851,6 +843,12 @@
         },
         {
           "type": "text",
+          "id": "role",
+          "label": "Rolle / Kontext",
+          "info": "z. B. «Unternehmerin, 54»"
+        },
+        {
+          "type": "text",
           "id": "age",
           "label": "Chronologisches Alter",
           "info": "Nur Zahl, z.B. 44 — wird als Kontext im Vorher/Nachher-Feld angezeigt"
@@ -872,6 +870,18 @@
           "id": "retest_duration",
           "label": "Zeitraum Retest",
           "info": "z. B. «nach 16 Monaten». Erscheint als Label über dem Nachher-Wert."
+        },
+        {
+          "type": "text",
+          "id": "before_label",
+          "label": "Vorher Label",
+          "info": "Optional. Überschreibt «Vorher» und die Chron.-Zeile."
+        },
+        {
+          "type": "text",
+          "id": "after_label",
+          "label": "Nachher Label",
+          "info": "Optional. Überschreibt «Nachher» und die Dauer-Zeile."
         },
         {
           "type": "text",
@@ -920,6 +930,7 @@
           "settings": {
             "quote": "Mein biologisches Alter lag 7 Jahre unter meinem chronologischen. Ich dachte, ich mache bereits alles richtig – jetzt weiß ich, warum.",
             "name": "Markus T.",
+            "role": "Unternehmer, 44",
             "age": "44",
             "result_metric": "Biologisches Alter: 37 · Chronologisch: 44",
             "verified": true
@@ -930,6 +941,7 @@
           "settings": {
             "quote": "Die Speichelprobe war in drei Minuten erledigt. Wie verständlich die App alles erklärt – ich habe keine Biologie studiert, aber ich verstehe jetzt meine Werte.",
             "name": "Sophie K.",
+            "role": "Kundin, 38",
             "age": "38",
             "result_metric": "",
             "verified": true
@@ -940,6 +952,7 @@
           "settings": {
             "quote": "Als Arzt war ich skeptisch. Aber Eurofins, ISO 17025 und die Methodik hinter dem MethylPace-Score haben mich überzeugt. Das ist kein Consumer-Gadget.",
             "name": "Dr. med. Andreas F.",
+            "role": "Arzt",
             "age": "",
             "result_metric": "",
             "verified": true
