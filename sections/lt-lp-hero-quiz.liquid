@@ -1,0 +1,529 @@
+{% comment %}
+  lt-lp-hero-quiz
+  Surface: warm editorial split hero
+  Dominant element: the quiz question
+  CTA: none
+  Quality move: radio-style answers keep the opening conversational instead of transactional
+{% endcomment %}
+
+{%- liquid
+  assign hero_focal_point = 'center center'
+  case section.settings.hero_image_focal_point
+    when 'top'
+      assign hero_focal_point = 'center top'
+    when 'bottom'
+      assign hero_focal_point = 'center bottom'
+  endcase
+-%}
+
+{% style %}
+  #lt-lp-hero-quiz-{{ section.id }} {
+    --lt-lp-hero-bg: {{ section.settings.color_bg }};
+    --lt-lp-hero-text: {{ section.settings.color_text }};
+    --lt-lp-hero-muted: {{ section.settings.color_text | color_modify: 'alpha', 0.64 }};
+    --lt-lp-hero-border: {{ section.settings.color_text | color_modify: 'alpha', 0.14 }};
+    --lt-lp-hero-accent: {{ section.settings.color_accent }};
+    --lt-lp-hero-accent-soft: {{ section.settings.color_accent | color_modify: 'alpha', 0.08 }};
+    --lt-lp-hero-padding-top: {{ section.settings.padding_top }}px;
+    --lt-lp-hero-padding-bottom: {{ section.settings.padding_bottom }}px;
+    --lt-lp-hero-object-position: {{ hero_focal_point }};
+  }
+{% endstyle %}
+
+<section id="lt-lp-hero-quiz-{{ section.id }}" class="lt-lp-hero-quiz">
+  <div class="lt-lp-hero-quiz__inner page-width">
+    <div class="lt-lp-hero-quiz__media">
+      {%- if section.settings.hero_image != blank -%}
+        {{
+          section.settings.hero_image
+          | image_url: width: 1600
+          | image_tag:
+            loading: 'eager',
+            fetchpriority: 'high',
+            alt: section.settings.hero_image_alt,
+            class: 'lt-lp-hero-quiz__image',
+            widths: '600, 900, 1200, 1600',
+            sizes: '(min-width: 990px) 55vw, 100vw'
+        }}
+      {%- else -%}
+        <div class="lt-lp-hero-quiz__image-placeholder" aria-hidden="true"></div>
+      {%- endif -%}
+    </div>
+
+    <div class="lt-lp-hero-quiz__content">
+      {%- if section.settings.show_badge and section.settings.badge_text != blank -%}
+        <span class="lt-lp-hero-quiz__badge">{{ section.settings.badge_text | escape }}</span>
+      {%- endif -%}
+
+      {%- if section.settings.eyebrow != blank -%}
+        <p class="lt-lp-hero-quiz__eyebrow">{{ section.settings.eyebrow | escape }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.quiz_question != blank -%}
+        <h1 class="lt-lp-hero-quiz__question">{{ section.settings.quiz_question | escape }}</h1>
+      {%- endif -%}
+
+      {%- if section.settings.quiz_helper_text != blank -%}
+        <p class="lt-lp-hero-quiz__helper">{{ section.settings.quiz_helper_text | escape }}</p>
+      {%- endif -%}
+
+      <div class="lt-lp-hero-quiz__options" role="group" aria-label="{{ section.settings.quiz_question | escape }}">
+        {%- if section.settings.quiz_option_1_label != blank -%}
+          <button type="button" class="lt-lp-hero-quiz__option" data-lt-quiz-goal="goal_1" aria-pressed="false">
+            <span class="lt-lp-hero-quiz__option-marker" aria-hidden="true"></span>
+            <span class="lt-lp-hero-quiz__option-label">{{ section.settings.quiz_option_1_label | escape }}</span>
+          </button>
+        {%- endif -%}
+        {%- if section.settings.quiz_option_2_label != blank -%}
+          <button type="button" class="lt-lp-hero-quiz__option" data-lt-quiz-goal="goal_2" aria-pressed="false">
+            <span class="lt-lp-hero-quiz__option-marker" aria-hidden="true"></span>
+            <span class="lt-lp-hero-quiz__option-label">{{ section.settings.quiz_option_2_label | escape }}</span>
+          </button>
+        {%- endif -%}
+        {%- if section.settings.quiz_option_3_label != blank -%}
+          <button type="button" class="lt-lp-hero-quiz__option" data-lt-quiz-goal="goal_3" aria-pressed="false">
+            <span class="lt-lp-hero-quiz__option-marker" aria-hidden="true"></span>
+            <span class="lt-lp-hero-quiz__option-label">{{ section.settings.quiz_option_3_label | escape }}</span>
+          </button>
+        {%- endif -%}
+        {%- if section.settings.quiz_option_4_label != blank -%}
+          <button type="button" class="lt-lp-hero-quiz__option" data-lt-quiz-goal="goal_4" aria-pressed="false">
+            <span class="lt-lp-hero-quiz__option-marker" aria-hidden="true"></span>
+            <span class="lt-lp-hero-quiz__option-label">{{ section.settings.quiz_option_4_label | escape }}</span>
+          </button>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.trust_ticker_show -%}
+        {%- liquid
+          assign has_trust_item = false
+          if section.settings.trust_1 != blank or section.settings.trust_2 != blank or section.settings.trust_3 != blank or section.settings.trust_4 != blank
+            assign has_trust_item = true
+          endif
+        -%}
+        {%- if has_trust_item -%}
+          <ul class="lt-lp-hero-quiz__trust" aria-label="Vertrauens-Merkmale">
+            {%- if section.settings.trust_1 != blank -%}<li>{{ section.settings.trust_1 | escape }}</li>{%- endif -%}
+            {%- if section.settings.trust_2 != blank -%}<li>{{ section.settings.trust_2 | escape }}</li>{%- endif -%}
+            {%- if section.settings.trust_3 != blank -%}<li>{{ section.settings.trust_3 | escape }}</li>{%- endif -%}
+            {%- if section.settings.trust_4 != blank -%}<li>{{ section.settings.trust_4 | escape }}</li>{%- endif -%}
+          </ul>
+        {%- endif -%}
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+<script>
+  (function() {
+    var sectionId = '{{ section.id }}';
+
+    function initHeroQuizSection() {
+      var section = document.getElementById('lt-lp-hero-quiz-' + sectionId);
+      if (!section || section.dataset.initialized === 'true') return;
+
+      var options = section.querySelectorAll('[data-lt-quiz-goal]');
+
+      options.forEach(function(button) {
+        button.addEventListener('click', function() {
+          var goalId = button.dataset.ltQuizGoal;
+
+          options.forEach(function(other) {
+            var isActive = other === button;
+            other.classList.toggle('is-active', isActive);
+            other.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+          });
+
+          window.dispatchEvent(new CustomEvent('quiz-goal-selected', {
+            detail: { goalId: goalId, shouldScroll: true }
+          }));
+        });
+      });
+
+      window.addEventListener('quiz-goal-selected', function(event) {
+        if (!event.detail || !event.detail.goalId) return;
+
+        options.forEach(function(button) {
+          var isActive = button.dataset.ltQuizGoal === event.detail.goalId;
+          button.classList.toggle('is-active', isActive);
+          button.setAttribute('aria-pressed', isActive ? 'true' : 'false');
+        });
+      });
+
+      section.dataset.initialized = 'true';
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initHeroQuizSection, { once: true });
+    } else {
+      initHeroQuizSection();
+    }
+
+    document.addEventListener('shopify:section:load', function(event) {
+      if (event.target && event.target.id === 'shopify-section-' + sectionId) {
+        initHeroQuizSection();
+      }
+    });
+  })();
+</script>
+
+{% stylesheet %}
+.lt-lp-hero-quiz {
+  background: var(--lt-lp-hero-bg);
+  color: var(--lt-lp-hero-text);
+}
+
+.lt-lp-hero-quiz__inner {
+  display: grid;
+  gap: var(--space-6);
+  align-items: center;
+  padding-top: var(--lt-lp-hero-padding-top);
+  padding-bottom: var(--lt-lp-hero-padding-bottom);
+}
+
+.lt-lp-hero-quiz__media,
+.lt-lp-hero-quiz__content {
+  min-width: 0;
+}
+
+.lt-lp-hero-quiz__media {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--lt-lp-hero-accent-soft);
+}
+
+.lt-lp-hero-quiz__image,
+.lt-lp-hero-quiz__image-placeholder {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 22rem;
+}
+
+.lt-lp-hero-quiz__image {
+  object-fit: cover;
+  object-position: var(--lt-lp-hero-object-position);
+}
+
+.lt-lp-hero-quiz__image-placeholder {
+  background:
+    linear-gradient(135deg, var(--lt-lp-hero-accent-soft), transparent),
+    var(--lt-lp-hero-bg);
+}
+
+.lt-lp-hero-quiz__content {
+  max-width: 34rem;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.lt-lp-hero-quiz__badge {
+  display: inline-flex;
+  justify-self: start;
+  align-items: center;
+  min-height: 2rem;
+  padding-inline: var(--space-4);
+  border: 1px solid var(--lt-lp-hero-border);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  color: var(--lt-lp-hero-text);
+}
+
+.lt-lp-hero-quiz__eyebrow {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lt-lp-hero-muted);
+}
+
+.lt-lp-hero-quiz__question {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(var(--text-h2), 4vw, var(--text-display));
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--lt-lp-hero-text);
+}
+
+.lt-lp-hero-quiz__helper {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--lt-lp-hero-muted);
+}
+
+.lt-lp-hero-quiz__options {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+
+.lt-lp-hero-quiz__option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: 48px;
+  padding: var(--space-4) var(--space-5);
+  background: transparent;
+  border: 1px solid var(--lt-lp-hero-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--ease-default), background var(--ease-default);
+}
+
+.lt-lp-hero-quiz__option-marker {
+  flex-shrink: 0;
+  width: var(--space-5);
+  height: var(--space-5);
+  border: 1px solid var(--lt-lp-hero-border);
+  border-radius: 50%;
+  transition: border-color var(--ease-default), background var(--ease-default), box-shadow var(--ease-default);
+}
+
+.lt-lp-hero-quiz__option-label {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-body);
+  color: var(--lt-lp-hero-text);
+}
+
+.lt-lp-hero-quiz__option:hover,
+.lt-lp-hero-quiz__option:focus-visible {
+  border-color: var(--lt-lp-hero-accent);
+  outline: none;
+}
+
+.lt-lp-hero-quiz__option:hover .lt-lp-hero-quiz__option-marker,
+.lt-lp-hero-quiz__option:focus-visible .lt-lp-hero-quiz__option-marker {
+  border-color: var(--lt-lp-hero-accent);
+}
+
+.lt-lp-hero-quiz__option.is-active {
+  border-color: var(--lt-lp-hero-accent);
+  background: var(--lt-lp-hero-accent-soft);
+}
+
+.lt-lp-hero-quiz__option.is-active .lt-lp-hero-quiz__option-marker {
+  border-color: var(--lt-lp-hero-accent);
+  background: var(--lt-lp-hero-accent);
+  box-shadow: inset 0 0 0 var(--space-1) var(--lt-lp-hero-bg);
+}
+
+.lt-lp-hero-quiz__trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-body);
+  color: var(--lt-lp-hero-muted);
+}
+
+.lt-lp-hero-quiz__trust li {
+  position: relative;
+  padding-inline-end: var(--space-3);
+}
+
+.lt-lp-hero-quiz__trust li:not(:last-child)::after {
+  content: "·";
+  position: absolute;
+  inset-inline-end: calc(var(--space-1) * -0.5);
+}
+
+@media screen and (min-width: 990px) {
+  .lt-lp-hero-quiz__inner {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+    gap: var(--space-7);
+  }
+}
+
+@media screen and (max-width: 749px) {
+  .lt-lp-hero-quiz__image,
+  .lt-lp-hero-quiz__image-placeholder {
+    min-height: auto;
+    max-height: 50vh;
+    aspect-ratio: 5 / 4;
+  }
+
+  .lt-lp-hero-quiz__content {
+    gap: var(--space-3);
+  }
+
+  .lt-lp-hero-quiz__helper {
+    font-size: var(--text-body);
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LP Hero Quiz",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Background",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Text",
+      "default": "#26251e"
+    },
+    {
+      "type": "color",
+      "id": "color_accent",
+      "label": "Accent",
+      "default": "#2a6b5c"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero image"
+    },
+    {
+      "type": "text",
+      "id": "hero_image_alt",
+      "label": "Hero image alt",
+      "default": "Mensch in Bewegung"
+    },
+    {
+      "type": "select",
+      "id": "hero_image_focal_point",
+      "label": "Mobile focal point",
+      "options": [
+        { "value": "center", "label": "Center" },
+        { "value": "top", "label": "Top" },
+        { "value": "bottom", "label": "Bottom" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_badge",
+      "label": "Show badge",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge text",
+      "default": "Für Menschen, die messen statt raten"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow",
+      "default": "Dein Einstieg."
+    },
+    {
+      "type": "text",
+      "id": "quiz_question",
+      "label": "Question",
+      "default": "Was willst du über deinen Körper verstehen?"
+    },
+    {
+      "type": "textarea",
+      "id": "quiz_helper_text",
+      "label": "Helper text",
+      "default": "Wähle deinen Fokus — dein personalisiertes Ergebnis erscheint direkt darunter."
+    },
+    {
+      "type": "text",
+      "id": "quiz_option_1_label",
+      "label": "Option 1",
+      "default": "Wie ich altere"
+    },
+    {
+      "type": "text",
+      "id": "quiz_option_2_label",
+      "label": "Option 2",
+      "default": "Warum ich müde bin"
+    },
+    {
+      "type": "text",
+      "id": "quiz_option_3_label",
+      "label": "Option 3",
+      "default": "Wie ich fit bleibe"
+    },
+    {
+      "type": "text",
+      "id": "quiz_option_4_label",
+      "label": "Option 4",
+      "default": "Was mich einzigartig macht"
+    },
+    {
+      "type": "checkbox",
+      "id": "trust_ticker_show",
+      "label": "Show trust ticker",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "trust_1",
+      "label": "Trust 1",
+      "default": "Eurofins Laboranalyse"
+    },
+    {
+      "type": "text",
+      "id": "trust_2",
+      "label": "Trust 2",
+      "default": "187 DNA-Reports"
+    },
+    {
+      "type": "text",
+      "id": "trust_3",
+      "label": "Trust 3",
+      "default": "Ärztlich entwickelt"
+    },
+    {
+      "type": "text",
+      "id": "trust_4",
+      "label": "Trust 4",
+      "default": "Berlin, Deutschland"
+    }
+  ],
+  "presets": [
+    {
+      "name": "LP Hero Quiz"
+    }
+  ]
+}
+{% endschema %}

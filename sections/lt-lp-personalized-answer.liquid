@@ -1,0 +1,519 @@
+{% comment %}
+  lt-lp-personalized-answer
+  Surface: warm editorial answer block
+  Dominant element: the personalized headline and dense checklist
+  CTA: none
+  Quality move: relevant items stay compact and textual, so the section reads like an answer not a feature grid
+{% endcomment %}
+
+{% style %}
+  #lt-lp-personalized-answer-{{ section.id }} {
+    --lt-lp-pa-bg: {{ section.settings.color_bg }};
+    --lt-lp-pa-surface: {{ section.settings.color_surface }};
+    --lt-lp-pa-text: {{ section.settings.color_text }};
+    --lt-lp-pa-muted: {{ section.settings.color_text | color_modify: 'alpha', 0.64 }};
+    --lt-lp-pa-border: {{ section.settings.color_text | color_modify: 'alpha', 0.12 }};
+    --lt-lp-pa-accent: {{ section.settings.color_accent }};
+    --lt-lp-pa-padding-top: {{ section.settings.padding_top }}px;
+    --lt-lp-pa-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<section id="lt-lp-personalized-answer-{{ section.id }}" class="lt-lp-pa" data-active-goal="">
+  <div class="lt-lp-pa__inner page-width">
+    <div class="lt-lp-pa__placeholder" data-pa-placeholder>
+      <p class="lt-lp-pa__eyebrow">{{ section.settings.placeholder_eyebrow | escape }}</p>
+      <h2 class="lt-lp-pa__headline">{{ section.settings.placeholder_headline | escape }}</h2>
+      <p class="lt-lp-pa__body">{{ section.settings.placeholder_body | escape }}</p>
+    </div>
+
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'goal_answer' -%}
+        <article
+          class="lt-lp-pa__state"
+          data-goal-id="{{ block.settings.goal_id | escape }}"
+          data-highlighted-categories="{{ block.settings.highlighted_categories | escape }}"
+          data-micro-texts="{{ block.settings.micro_texts_json | escape }}"
+          hidden
+          {{ block.shopify_attributes }}
+        >
+          <p class="lt-lp-pa__eyebrow">Dein Fokus</p>
+          <h2 class="lt-lp-pa__headline">{{ block.settings.result_headline | escape }}</h2>
+          {%- if block.settings.result_subheadline != blank -%}
+            <p class="lt-lp-pa__subheadline">{{ block.settings.result_subheadline | escape }}</p>
+          {%- endif -%}
+
+          <div class="lt-lp-pa__checklist" data-pa-checklist></div>
+
+          <div class="lt-lp-pa__rest">
+            <p class="lt-lp-pa__rest-label">{{ section.settings.rest_categories_label | escape }}</p>
+            <p class="lt-lp-pa__rest-list" data-pa-rest></p>
+          </div>
+
+          {%- if section.settings.transition_cta_text != blank -%}
+            <p class="lt-lp-pa__transition">{{ section.settings.transition_cta_text | escape }}</p>
+          {%- endif -%}
+        </article>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+  <div hidden data-all-categories="{{ section.settings.all_categories_list | escape }}"></div>
+</section>
+
+<script>
+  (function() {
+    var sectionId = '{{ section.id }}';
+
+    function initPersonalizedAnswerSection() {
+      var section = document.getElementById('lt-lp-personalized-answer-' + sectionId);
+      if (!section || section.dataset.initialized === 'true') return;
+
+      var placeholder = section.querySelector('[data-pa-placeholder]');
+      var states = Array.prototype.slice.call(section.querySelectorAll('[data-goal-id]'));
+      var allCategoriesEl = section.querySelector('[data-all-categories]');
+      var allCategories = (allCategoriesEl && allCategoriesEl.dataset ? allCategoriesEl.dataset.allCategories : '')
+        .split(',')
+        .map(function(item) { return item.trim(); })
+        .filter(Boolean);
+
+      function normalize(value) {
+        return String(value || '').trim().toLowerCase();
+      }
+
+      function escapeHtml(value) {
+        var div = document.createElement('div');
+        div.textContent = value;
+        return div.innerHTML;
+      }
+
+      function setGoal(goalId, shouldScroll) {
+        var normalizedGoalId = normalize(goalId);
+        var activeState = null;
+
+        states.forEach(function(state) {
+          var isActive = normalize(state.dataset.goalId) === normalizedGoalId;
+          state.hidden = !isActive;
+          if (isActive) activeState = state;
+        });
+
+        if (placeholder) {
+          placeholder.hidden = Boolean(activeState);
+        }
+
+        if (activeState) {
+          var highlighted = (activeState.dataset.highlightedCategories || '')
+            .split(',')
+            .map(function(item) { return item.trim(); })
+            .filter(Boolean);
+
+          var microTexts = {};
+          try {
+            microTexts = JSON.parse(activeState.dataset.microTexts || '{}');
+          } catch (error) {
+            microTexts = {};
+          }
+
+          var checklistEl = activeState.querySelector('[data-pa-checklist]');
+          if (checklistEl) {
+            checklistEl.innerHTML = highlighted.map(function(title) {
+              var micro = microTexts[title] || '';
+
+              return '<div class="lt-lp-pa__check-row">' +
+                '<span class="lt-lp-pa__check-icon" aria-hidden="true">' +
+                  '<svg viewBox="0 0 24 24" fill="none">' +
+                    '<path d="M5 12l5 5 9-11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>' +
+                  '</svg>' +
+                '</span>' +
+                '<span class="lt-lp-pa__check-title">' + escapeHtml(title) + '</span>' +
+                '<span class="lt-lp-pa__check-micro">' + escapeHtml(micro) + '</span>' +
+              '</div>';
+            }).join('');
+          }
+
+          var restEl = activeState.querySelector('[data-pa-rest]');
+          if (restEl) {
+            var highlightedLower = highlighted.map(normalize);
+            var restList = allCategories.filter(function(category) {
+              return highlightedLower.indexOf(normalize(category)) === -1;
+            });
+            restEl.textContent = restList.join(' · ');
+          }
+        }
+
+        section.dataset.activeGoal = activeState ? normalizedGoalId : '';
+
+        if (activeState && shouldScroll) {
+          section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
+
+      window.addEventListener('quiz-goal-selected', function(event) {
+        if (!event.detail || !event.detail.goalId) return;
+        setGoal(event.detail.goalId, Boolean(event.detail.shouldScroll));
+      });
+
+      setGoal('', false);
+      section.dataset.initialized = 'true';
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initPersonalizedAnswerSection, { once: true });
+    } else {
+      initPersonalizedAnswerSection();
+    }
+
+    document.addEventListener('shopify:section:load', function(event) {
+      if (event.target && event.target.id === 'shopify-section-' + sectionId) {
+        initPersonalizedAnswerSection();
+      }
+    });
+  })();
+</script>
+
+{% stylesheet %}
+.lt-lp-pa {
+  background: var(--lt-lp-pa-bg);
+  color: var(--lt-lp-pa-text);
+}
+
+.lt-lp-pa__inner {
+  padding-top: var(--lt-lp-pa-padding-top);
+  padding-bottom: var(--lt-lp-pa-padding-bottom);
+}
+
+.lt-lp-pa__placeholder,
+.lt-lp-pa__state {
+  max-width: 64rem;
+  margin-inline: auto;
+  padding: var(--space-7);
+  background: var(--lt-lp-pa-surface);
+  border: 1px solid var(--lt-lp-pa-border);
+  border-radius: var(--radius-lg);
+}
+
+.lt-lp-pa__placeholder[hidden],
+.lt-lp-pa__state[hidden] {
+  display: none;
+}
+
+.lt-lp-pa__eyebrow {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lt-lp-pa-muted);
+}
+
+.lt-lp-pa__headline {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-heading);
+  font-size: clamp(var(--text-h2), 4vw, var(--text-display));
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--lt-lp-pa-text);
+}
+
+.lt-lp-pa__body,
+.lt-lp-pa__subheadline {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--lt-lp-pa-muted);
+}
+
+.lt-lp-pa__checklist {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+  padding-block: var(--space-5);
+  border-top: 1px solid var(--lt-lp-pa-border);
+  border-bottom: 1px solid var(--lt-lp-pa-border);
+}
+
+.lt-lp-pa__check-row {
+  display: grid;
+  grid-template-columns: calc(var(--space-6) - var(--space-2)) minmax(11rem, 24%) 1fr;
+  align-items: baseline;
+  gap: var(--space-4);
+  padding-block: var(--space-2);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+}
+
+.lt-lp-pa__check-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--space-6) - var(--space-2));
+  height: calc(var(--space-6) - var(--space-2));
+  color: var(--lt-lp-pa-accent);
+}
+
+.lt-lp-pa__check-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.lt-lp-pa__check-title {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+  color: var(--lt-lp-pa-text);
+}
+
+.lt-lp-pa__check-micro {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--lt-lp-pa-muted);
+}
+
+.lt-lp-pa__rest {
+  margin-top: var(--space-5);
+}
+
+.lt-lp-pa__rest-label {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+  color: var(--lt-lp-pa-text);
+}
+
+.lt-lp-pa__rest-list {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--lt-lp-pa-muted);
+}
+
+.lt-lp-pa__transition {
+  margin: var(--space-7) 0 0;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--lt-lp-pa-muted);
+}
+
+@media screen and (max-width: 749px) {
+  .lt-lp-pa__placeholder,
+  .lt-lp-pa__state {
+    padding: var(--space-5);
+  }
+
+  .lt-lp-pa__body,
+  .lt-lp-pa__subheadline {
+    font-size: var(--text-body);
+  }
+
+  .lt-lp-pa__check-row {
+    grid-template-columns: calc(var(--space-5) - var(--space-1)) 1fr;
+    grid-template-areas:
+      "icon title"
+      ". micro";
+    gap: var(--space-1) var(--space-3);
+  }
+
+  .lt-lp-pa__check-icon {
+    grid-area: icon;
+    width: calc(var(--space-5) - var(--space-1));
+    height: calc(var(--space-5) - var(--space-1));
+    align-self: start;
+    margin-top: 2px; /* intentional: optical alignment with the first text baseline */
+  }
+
+  .lt-lp-pa__check-title {
+    grid-area: title;
+  }
+
+  .lt-lp-pa__check-micro {
+    grid-area: micro;
+    font-size: var(--text-body-sm);
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LP Personalized",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Background",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_surface",
+      "label": "Surface",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Text",
+      "default": "#26251e"
+    },
+    {
+      "type": "color",
+      "id": "color_accent",
+      "label": "Accent",
+      "default": "#2a6b5c"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "text",
+      "id": "placeholder_eyebrow",
+      "label": "Placeholder eyebrow",
+      "default": "Dein Einstieg"
+    },
+    {
+      "type": "text",
+      "id": "placeholder_headline",
+      "label": "Placeholder headline",
+      "default": "Wähle oben deinen Fokus."
+    },
+    {
+      "type": "textarea",
+      "id": "placeholder_body",
+      "label": "Placeholder body",
+      "default": "Sobald du oben ein Ziel wählst, zeigen wir dir hier genau, was dein Test für dieses Thema misst."
+    },
+    {
+      "type": "text",
+      "id": "rest_categories_label",
+      "label": "Rest categories label",
+      "default": "Plus 16 weitere Bereiche, die wir gleichzeitig analysieren:"
+    },
+    {
+      "type": "textarea",
+      "id": "all_categories_list",
+      "label": "All categories list",
+      "default": "Körperalter, Biologisches Alter, EpiVitality, Immunscore, Entzündung, Muskelschwund, Gesunde Alterung, Supplements, Vitamine, Sensitivitäten, Stoffwechsel, Fitness, Verletzung & Regeneration, Mental Health, Psychologisch, Schlaf, Stress, Herz, Atemwege, Augen, Haare, Niere"
+    },
+    {
+      "type": "text",
+      "id": "transition_cta_text",
+      "label": "Transition text",
+      "default": "Lass uns dir zeigen, wie das funktioniert ↓"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "goal_answer",
+      "name": "Goal Answer",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "text",
+          "id": "goal_id",
+          "label": "Goal ID",
+          "default": "goal_1"
+        },
+        {
+          "type": "text",
+          "id": "result_headline",
+          "label": "Headline",
+          "default": "Du willst wissen, wie du alterst."
+        },
+        {
+          "type": "text",
+          "id": "result_subheadline",
+          "label": "Subheadline",
+          "default": "Dann ist das hier dein Test."
+        },
+        {
+          "type": "textarea",
+          "id": "highlighted_categories",
+          "label": "Highlighted categories",
+          "default": "Biologisches Alter, EpiVitality, Entzündung, Körperalter, Gesunde Alterung, Herz"
+        },
+        {
+          "type": "textarea",
+          "id": "micro_texts_json",
+          "label": "Micro texts JSON",
+          "default": "{\"Biologisches Alter\":\"Dein MethylPace-Score zeigt, wie schnell deine Zellen tatsächlich altern.\",\"EpiVitality\":\"Misst, wie vital deine Zellen gerade arbeiten — ein zentraler Alterungsmarker.\",\"Entzündung\":\"Chronische Zellentzündung ist ein Haupttreiber des Alterns — hier siehst du deinen Status.\",\"Körperalter\":\"Höralter, Sehalter, Gedächtnisalter — wie alt deine Sinne und Kognition biologisch sind.\",\"Gesunde Alterung\":\"Langlebigkeit, Kognition, Knochen — deine genetische Ausgangslage für gesundes Altern.\",\"Herz\":\"Cholesterin, Herzrisiko, Blutdruck — die genetischen Faktoren, die deine Lebensjahre prägen.\"}"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LP Personalized",
+      "blocks": [
+        {
+          "type": "goal_answer",
+          "settings": {
+            "goal_id": "goal_1",
+            "result_headline": "Du willst wissen, wie du alterst.",
+            "result_subheadline": "Dann ist das hier dein Test.",
+            "highlighted_categories": "Biologisches Alter, EpiVitality, Entzündung, Körperalter, Gesunde Alterung, Herz",
+            "micro_texts_json": "{\"Biologisches Alter\":\"Dein MethylPace-Score zeigt, wie schnell deine Zellen tatsächlich altern.\",\"EpiVitality\":\"Misst, wie vital deine Zellen gerade arbeiten — ein zentraler Alterungsmarker.\",\"Entzündung\":\"Chronische Zellentzündung ist ein Haupttreiber des Alterns — hier siehst du deinen Status.\",\"Körperalter\":\"Höralter, Sehalter, Gedächtnisalter — wie alt deine Sinne und Kognition biologisch sind.\",\"Gesunde Alterung\":\"Langlebigkeit, Kognition, Knochen — deine genetische Ausgangslage für gesundes Altern.\",\"Herz\":\"Cholesterin, Herzrisiko, Blutdruck — die genetischen Faktoren, die deine Lebensjahre prägen.\"}"
+          }
+        },
+        {
+          "type": "goal_answer",
+          "settings": {
+            "goal_id": "goal_2",
+            "result_headline": "Du willst wissen, warum du müde bist.",
+            "result_subheadline": "Hier findest du die Antworten.",
+            "highlighted_categories": "Entzündung, Muskelschwund, Schlaf, Stress, Mental Health, Stoffwechsel",
+            "micro_texts_json": "{\"Entzündung\":\"Niedrige Zellentzündung = mehr verfügbare Energie für den Alltag.\",\"Muskelschwund\":\"Wie schnell deine Muskelzellen altern — hat Einfluss auf dein Energielevel.\",\"Schlaf\":\"Schlafdauer, Tiefschlaf-Tendenz, Chronotyp — die genetische Basis deiner Regeneration.\",\"Stress\":\"Wie dein Körper Stress verarbeitet — und wo Erschöpfung genetisch bedingt ist.\",\"Mental Health\":\"Aufmerksamkeit, Stress-Resilienz, Warrior/Worrier-Profil — deine mentale Energie-Signatur.\",\"Stoffwechsel\":\"Wie effizient dein Körper Energie produziert — und wo Stoffwechsel-Leaks möglich sind.\"}"
+          }
+        },
+        {
+          "type": "goal_answer",
+          "settings": {
+            "goal_id": "goal_3",
+            "result_headline": "Du willst körperlich fit bleiben.",
+            "result_subheadline": "Das ist die Grundlage dafür.",
+            "highlighted_categories": "Muskelschwund, EpiVitality, Fitness, Verletzung & Regeneration, Gesunde Alterung",
+            "micro_texts_json": "{\"Muskelschwund\":\"Wie schnell deine Muskeln biologisch altern — kritisch für lebenslange Fitness.\",\"EpiVitality\":\"Zell-Vitalität als Grundlage für Trainingsreize und Regeneration.\",\"Fitness\":\"Muskelkraft, VO₂max, anaerobe Schwelle — dein genetisches Fitness-Profil.\",\"Verletzung & Regeneration\":\"LWS, Achillessehne, Arthrose-Bezug — wo dein Körper Schutz braucht.\",\"Gesunde Alterung\":\"Langfristige Gelenk- und Knochen-Gesundheit als Basis für lebenslange Bewegung.\"}"
+          }
+        },
+        {
+          "type": "goal_answer",
+          "settings": {
+            "goal_id": "goal_4",
+            "result_headline": "Du willst verstehen, was dich einzigartig macht.",
+            "result_subheadline": "Hier ist dein individuelles Körperbild.",
+            "highlighted_categories": "Immunscore, Biologisches Alter, Sensitivitäten, Vitamine, Supplements, Psychologisch",
+            "micro_texts_json": "{\"Immunscore\":\"Wie dein Immunsystem epigenetisch reagiert — individuell, nicht pauschal.\",\"Biologisches Alter\":\"Dein biologisches Alter als zentrale Kennzahl deiner körperlichen Identität.\",\"Sensitivitäten\":\"Gluten, Laktose, Fruktose, Fett — worauf dein Körper genetisch reagiert.\",\"Vitamine\":\"Vitamin D, B12, Omega-3 — welche Nährstoffe dein Körper besser verwerten kann.\",\"Supplements\":\"Welche Supplement-Wirkstoffe dein Körper genetisch besser verwertet.\",\"Psychologisch\":\"COMT, MAOA, Emotionsregulation — die genetische Prägung deiner Persönlichkeit.\"}"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

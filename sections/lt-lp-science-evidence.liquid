@@ -1,0 +1,330 @@
+{% comment %}
+  lt-lp-science-evidence
+  Surface: dark trust break
+  Dominant element: the headline and three study cards
+  CTA: outbound study links only
+  Quality move: restrained dark cards make the citations feel like evidence, not promo tiles
+{% endcomment %}
+
+{% style %}
+  #lt-lp-science-evidence-{{ section.id }} {
+    --lt-lp-science-bg: {{ section.settings.color_bg }};
+    --lt-lp-science-text: {{ section.settings.color_text }};
+    --lt-lp-science-muted: {{ section.settings.color_muted }};
+    --lt-lp-science-accent: {{ section.settings.color_accent }};
+    --lt-lp-science-border: {{ section.settings.color_text | color_modify: 'alpha', 0.14 }};
+    --lt-lp-science-card-bg: {{ section.settings.color_text | color_modify: 'alpha', 0.03 }};
+    --lt-lp-science-padding-top: {{ section.settings.padding_top }}px;
+    --lt-lp-science-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<section id="lt-lp-science-evidence-{{ section.id }}" class="lt-lp-science">
+  <div class="lt-lp-science__inner page-width">
+    <div class="lt-lp-science__header">
+      {%- if section.settings.kicker != blank -%}
+        <p class="lt-lp-science__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.headline != blank -%}
+        <h2 class="lt-lp-science__headline">{{ section.settings.headline | escape }}</h2>
+      {%- endif -%}
+      {%- if section.settings.subheadline != blank -%}
+        <p class="lt-lp-science__subheadline">{{ section.settings.subheadline | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="lt-lp-science__grid">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'study_item' -%}
+            <article class="lt-lp-science__card" {{ block.shopify_attributes }}>
+              {%- if block.settings.study_title != blank -%}
+                <h3 class="lt-lp-science__card-title">{{ block.settings.study_title | escape }}</h3>
+              {%- endif -%}
+              {%- if block.settings.study_citation != blank -%}
+                <p class="lt-lp-science__citation">{{ block.settings.study_citation | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.study_abstract != blank -%}
+                <p class="lt-lp-science__abstract">{{ block.settings.study_abstract | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.study_link != blank -%}
+                <a href="{{ block.settings.study_link }}" class="lt-lp-science__link" target="_blank" rel="noopener noreferrer">
+                  Studie lesen →
+                </a>
+              {%- endif -%}
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.footnote != blank -%}
+      <p class="lt-lp-science__footnote">{{ section.settings.footnote | escape }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+.lt-lp-science {
+  background: var(--lt-lp-science-bg);
+  color: var(--lt-lp-science-text);
+}
+
+.lt-lp-science__inner {
+  padding-top: var(--lt-lp-science-padding-top);
+  padding-bottom: var(--lt-lp-science-padding-bottom);
+}
+
+.lt-lp-science__header {
+  max-width: 44rem;
+  margin: 0 auto var(--space-7);
+  text-align: center;
+}
+
+.lt-lp-science__kicker {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lt-lp-science-accent);
+}
+
+.lt-lp-science__headline {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-heading);
+  font-size: clamp(var(--text-h2), 4vw, var(--text-display));
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--lt-lp-science-text);
+}
+
+.lt-lp-science__subheadline,
+.lt-lp-science__footnote {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  line-height: var(--leading-relaxed);
+}
+
+.lt-lp-science__subheadline {
+  font-size: var(--text-body-lg);
+  color: var(--lt-lp-science-muted);
+}
+
+.lt-lp-science__grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.lt-lp-science__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--lt-lp-science-card-bg);
+  border: 1px solid var(--lt-lp-science-border);
+  border-radius: var(--radius-lg);
+}
+
+.lt-lp-science__card-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--lt-lp-science-text);
+}
+
+.lt-lp-science__citation {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-style: italic;
+  line-height: var(--leading-relaxed);
+  color: var(--lt-lp-science-muted);
+}
+
+.lt-lp-science__abstract {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--lt-lp-science-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.lt-lp-science__link {
+  margin-top: auto;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+  color: var(--lt-lp-science-accent);
+  text-decoration: none;
+}
+
+.lt-lp-science__link:hover,
+.lt-lp-science__link:focus-visible {
+  text-decoration: underline;
+}
+
+.lt-lp-science__footnote {
+  max-width: 52rem;
+  color: var(--lt-lp-science-muted);
+}
+
+@media screen and (min-width: 990px) {
+  .lt-lp-science__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LP Science Evidence",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Background",
+      "default": "#364f56"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Text",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_muted",
+      "label": "Muted text",
+      "default": "#a9bac0"
+    },
+    {
+      "type": "color",
+      "id": "color_accent",
+      "label": "Accent",
+      "default": "#e8d8a8"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Die wissenschaftliche Grundlage"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "Epigenetische Uhren sind keine Erfindung. Sie sind etabliert."
+    },
+    {
+      "type": "textarea",
+      "id": "subheadline",
+      "label": "Subheadline",
+      "default": "Die Methode hinter dem AGE & DNA-Test basiert auf über 10 Jahren peer-reviewter Forschung. Hier die drei wichtigsten Studien."
+    },
+    {
+      "type": "textarea",
+      "id": "footnote",
+      "label": "Footnote",
+      "default": "Die LIFETIME-Methodik basiert auf einer 10-CpG-Uhr, die konzeptionell auf diesen Arbeiten aufbaut und von Eurofins Genomics unter ISO-zertifizierten Bedingungen durchgeführt wird."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "study_item",
+      "name": "Study",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "study_title",
+          "label": "Title",
+          "default": "Horvath-Clock (2013)"
+        },
+        {
+          "type": "textarea",
+          "id": "study_citation",
+          "label": "Citation",
+          "default": "Horvath, S. (2013). DNA methylation age of human tissues and cell types. Genome Biology, 14(10), R115."
+        },
+        {
+          "type": "textarea",
+          "id": "study_abstract",
+          "label": "Abstract",
+          "default": "Die erste epigenetische Uhr, die biologisches Alter über DNA-Methylierung misst. Über 8.000 Zitationen. Grundlage moderner Longevity-Diagnostik."
+        },
+        {
+          "type": "url",
+          "id": "study_link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LP Science Evidence",
+      "blocks": [
+        {
+          "type": "study_item",
+          "settings": {
+            "study_title": "Horvath-Clock (2013)",
+            "study_citation": "Horvath, S. (2013). DNA methylation age of human tissues and cell types. Genome Biology, 14(10), R115.",
+            "study_abstract": "Die erste epigenetische Uhr, die biologisches Alter über DNA-Methylierung misst. Über 8.000 Zitationen. Grundlage moderner Longevity-Diagnostik.",
+            "study_link": "https://pubmed.ncbi.nlm.nih.gov/24138928/"
+          }
+        },
+        {
+          "type": "study_item",
+          "settings": {
+            "study_title": "DunedinPACE (2022)",
+            "study_citation": "Belsky, D. W., et al. (2022). DunedinPACE, a DNA methylation biomarker of the pace of aging. eLife, 11, e73420.",
+            "study_abstract": "Misst nicht nur das aktuelle biologische Alter, sondern die Geschwindigkeit des Alterns. Wegweisend für präventive Longevity-Strategien.",
+            "study_link": "https://elifesciences.org/articles/73420"
+          }
+        },
+        {
+          "type": "study_item",
+          "settings": {
+            "study_title": "GrimAge (2019)",
+            "study_citation": "Lu, A. T., et al. (2019). DNA methylation GrimAge strongly predicts lifespan and healthspan. Aging, 11(2), 303–327.",
+            "study_abstract": "Epigenetisches Alter als Prädiktor für Lebenserwartung und gesunde Jahre. Robusteste Validierung gegen klinische Outcomes.",
+            "study_link": "https://pubmed.ncbi.nlm.nih.gov/30669119/"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

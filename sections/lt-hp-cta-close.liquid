@@ -1,19 +1,9 @@
 {% comment %}
-  lt-hp-cta-close — Abschluss-CTA (Section 10)
-  ──────────────────────────────────────────────
-  §12 Build Spec:
-  - Surface:          --color-surface-dark — maximaler Kontrast, Kapitelwechsel-Signal
-  - Dominant element: Conviction-Headline — letzter und schwerster Text der gesamten Homepage
-  - Heading size:     --text-display (48px) — größer als jede andere Section außer Hero
-  - Content pattern:  Zentrierter Textblock · Preis · 2×2 Trust-Grid · primäre + sekundäre CTA
-  - CTA:              Primär: weiße Fläche auf Dunkel (maximaler Kontrast, nicht Dark-Button)
-                      Sekundär: outline-inverted, kleiner, weniger Gewicht
-  - Removed:          Produktbild (kein Split-Layout — Conviction kommt aus Text, nicht Bild),
-                      JS-Subscription-Price-Sync (Homepage = statischer Preis, kein Abo),
-                      CTA-Scroll-Verhalten (Direktlink zur PDP)
-  - Quality move:     "90-Tage Geld-zurück-Garantie"-Badge als Pill direkt unter dem primären CTA —
-                      der letzte Einwand ("Und wenn es nicht klappt?") wird im selben visuellen
-                      Moment wie der Klick gelöst. Timing ist der eigentliche Conversion-Hebel hier.
+  lt-hp-cta-close
+  Surface: dark close
+  Dominant element: conviction headline followed by the buy row
+  CTA: primary product CTA
+  Quality move: the CTA sits in the same horizontal decision row as the final price, so the section reads like a calm buy box instead of a promo banner
 {% endcomment %}
 
 {%- liquid
@@ -21,30 +11,34 @@
   if section.settings.heading_size == 'product_title'
     assign hp_headline_lg = true
   endif
+
+  assign has_setting_trust = false
+  if section.settings.trust_1 != blank or section.settings.trust_2 != blank or section.settings.trust_3 != blank or section.settings.trust_4 != blank
+    assign has_setting_trust = true
+  endif
+
+  assign has_block_trust = false
+  if section.blocks.size > 0
+    assign has_block_trust = true
+  endif
 -%}
 
 {% style %}
   #shopify-section-{{ section.id }} {
-    {%- if section.settings.color_bg != blank -%}
-    background: {{ section.settings.color_bg }};
-    {%- else -%}
-    background: var(--color-surface-dark);
-    {%- endif -%}
-    {%- if section.settings.color_text != blank -%}
-    color: {{ section.settings.color_text }};
-    --crs-text:     {{ section.settings.color_text }};
-    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
-    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
-    {%- endif -%}
-    padding-top:    {{ section.settings.padding_top | default: 80 }}px;
+    --ctac-bg: {{ section.settings.color_bg | default: '#26251e' }};
+    --ctac-text: {{ section.settings.color_text | default: '#f7f7f4' }};
+    --ctac-text-muted: {{ section.settings.color_text | default: '#f7f7f4' | color_modify: 'alpha', 0.68 }};
+    --ctac-border: {{ section.settings.color_text | default: '#f7f7f4' | color_modify: 'alpha', 0.12 }};
+    --ctac-accent: {{ section.settings.color_accent | default: '#2a6b5c' }};
+    background: var(--ctac-bg);
+    color: var(--ctac-text);
+    padding-top: {{ section.settings.padding_top | default: 80 }}px;
     padding-bottom: {{ section.settings.padding_bottom | default: 80 }}px;
   }
 {% endstyle %}
 
-<section id="shopify-section-{{ section.id }}" class="ctac ctac--dark">
+<section id="lt-hp-cta-close-{{ section.id }}" class="ctac">
   <div class="ctac__container">
-
-    {%- comment -%}=== Heading stack ==={%- endcomment -%}
     <div class="ctac__header crs-heading-stack crs-heading-stack--align-center{% if hp_headline_lg %} crs-heading-stack--headline-lg{% endif %} crs-heading-stack--on-dark crs-heading-stack--homepage-truth">
       {%- if section.settings.kicker != blank and section.settings.kicker != '__none__' -%}
         <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
@@ -59,257 +53,230 @@
       </div>
     </div>
 
-    {%- comment -%}=== Price ==={%- endcomment -%}
-    {%- if section.settings.price_fallback != blank -%}
-      <p class="ctac__price">{{ section.settings.price_fallback | escape }}</p>
-    {%- endif -%}
+    {%- if section.settings.price_display != blank or section.settings.cta_label != blank or section.settings.price_fallback != blank -%}
+      <div class="ctac__buybox">
+        {%- if section.settings.price_display != blank or section.settings.cta_label != blank -%}
+          <div class="ctac__buybox-row">
+            <div class="ctac__price-group">
+              {%- if section.settings.price_display != blank -%}
+                <p class="ctac__price-display">{{ section.settings.price_display | escape }}</p>
+              {%- elsif section.settings.price_fallback != blank -%}
+                <p class="ctac__price-display">{{ section.settings.price_fallback | escape }}</p>
+              {%- endif -%}
 
-    {%- comment -%}=== Trust List (2×2 grid) ==={%- endcomment -%}
-    {%- if section.blocks.size > 0 -%}
-      <ul class="ctac__trust-grid" role="list">
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'trust_line' and block.settings.text != blank -%}
-            <li class="ctac__trust-item" {{ block.shopify_attributes }}>
-              <span class="ctac__trust-icon" aria-hidden="true">
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                  <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.5"/>
-                  <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </span>
-              {{ block.settings.text | escape }}
-            </li>
+              {%- if section.settings.price_subline != blank -%}
+                <p class="ctac__price-subline ctac__price-subline--mobile">{{ section.settings.price_subline | escape }}</p>
+              {%- endif -%}
+            </div>
+
+            {%- if section.settings.cta_label != blank -%}
+              <a href="{{ section.settings.cta_url | default: '/products/lifetime-age-dna' }}" class="ctac__cta-primary">
+                {{ section.settings.cta_label | escape }}
+              </a>
+            {%- endif -%}
+          </div>
+
+          {%- if section.settings.price_subline != blank -%}
+            <p class="ctac__price-subline ctac__price-subline--desktop">{{ section.settings.price_subline | escape }}</p>
           {%- endif -%}
-        {%- endfor -%}
-      </ul>
+        {%- elsif section.settings.price_fallback != blank -%}
+          <p class="ctac__price-fallback">{{ section.settings.price_fallback | escape }}</p>
+        {%- endif -%}
+      </div>
     {%- endif -%}
 
-    {%- comment -%}=== CTAs ==={%- endcomment -%}
-    <div class="ctac__cta-group">
+    {%- if section.settings.badge_text != blank -%}
+      <p class="ctac__badge">{{ section.settings.badge_text | escape }}</p>
+    {%- endif -%}
 
-      {%- comment -%} Primary CTA — white on dark, maximum contrast {%- endcomment -%}
-      {%- if section.settings.cta_label != blank -%}
-        <a
-          href="{{ section.settings.cta_url | default: '/products/age-dna-test' }}"
-          class="ctac__cta-primary"
-        >
-          {{ section.settings.cta_label | escape }}
-        </a>
+    {%- if section.settings.cta_secondary_label != blank and section.settings.cta_secondary_url != blank -%}
+      <a href="{{ section.settings.cta_secondary_url }}" class="ctac__cta-secondary">
+        {{ section.settings.cta_secondary_label | escape }}
+      </a>
+    {%- endif -%}
+
+    {%- if section.settings.show_trust_row -%}
+      {%- if has_setting_trust -%}
+        <ul class="ctac__trust-row" aria-label="Vertrauens-Merkmale">
+          {%- if section.settings.trust_1 != blank -%}<li>{{ section.settings.trust_1 | escape }}</li>{%- endif -%}
+          {%- if section.settings.trust_2 != blank -%}<li>{{ section.settings.trust_2 | escape }}</li>{%- endif -%}
+          {%- if section.settings.trust_3 != blank -%}<li>{{ section.settings.trust_3 | escape }}</li>{%- endif -%}
+          {%- if section.settings.trust_4 != blank -%}<li>{{ section.settings.trust_4 | escape }}</li>{%- endif -%}
+        </ul>
+      {%- elsif has_block_trust -%}
+        <ul class="ctac__trust-row" aria-label="Vertrauens-Merkmale">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'trust_line' and block.settings.text != blank -%}
+              <li {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
       {%- endif -%}
-
-      {%- comment -%} Guarantee badge — directly below primary CTA {%- endcomment -%}
-      {%- if section.settings.badge_text != blank -%}
-        <div class="ctac__badge">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            <polyline points="9 12 11 14 15 10"/>
-          </svg>
-          {{ section.settings.badge_text | escape }}
-        </div>
-      {%- endif -%}
-
-      {%- comment -%} Secondary CTA — ghost/outline-inverted {%- endcomment -%}
-      {%- if section.settings.cta_secondary_label != blank and section.settings.cta_secondary_url != blank -%}
-        <a
-          href="{{ section.settings.cta_secondary_url }}"
-          class="ctac__cta-secondary"
-        >
-          {{ section.settings.cta_secondary_label | escape }}
-        </a>
-      {%- endif -%}
-
-    </div>
-
+    {%- endif -%}
   </div>
 </section>
 
 {% stylesheet %}
-/* ================================================================
-   lt-hp-cta-close — Abschluss-CTA (Dark Surface, Conviction Close)
-   Token refs: §3 (colors, type), §5 (Buttons), §12 Build Spec
-   ================================================================ */
-
-/* — Section shell — */
-.ctac--dark {
-  background: var(--color-surface-dark);
-  color: var(--color-text-on-dark);
+.ctac {
+  background: var(--ctac-bg);
+  color: var(--ctac-text);
 }
 
-/* — Container: centered, narrower than standard for conviction focus — */
-/*
-  DECISION: max-width 600px (not 1200px).
-  Conviction close works best when the eye has nowhere to wander.
-  Tighter column = faster reading = faster decision.
-*/
 .ctac__container {
-  max-width: 600px;
+  max-width: 52rem;
   margin: 0 auto;
   padding: 0 var(--space-5);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  text-align: center;
   gap: var(--space-5);
+  text-align: center;
 }
 
-
-/* — Price line — */
-/*
-  DECISION: --text-body (16px) — not large.
-  Price is already known from Section 4. Here it's a reminder, not a reveal.
-  Making it large would compete with the headline.
-  Medium weight, muted on dark.
-*/
-.ctac__price {
-  font-family: var(--font-body);
-  font-size: var(--text-body);
-  font-weight: var(--weight-medium);
-  color: var(--color-text-on-dark-muted);
-  margin: 0;
-  letter-spacing: 0.01em;
-}
-
-/* — Trust grid (2×2) — */
-/*
-  DECISION: 2-col grid so all 4 trust lines fit in a compact block.
-  Left-aligned text (despite centered container) — readability.
-  gap: --space-3 (12px) — tight, these are quick confirmations not detailed content.
-*/
-.ctac__trust-grid {
+.ctac__buybox {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3) var(--space-6);  /* 12px vertical, 32px horizontal */
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  width: 100%;
-  text-align: left;
+  gap: var(--space-3);
+  padding-block: var(--space-5);
+  border-top: 1px solid var(--ctac-border);
+  border-bottom: 1px solid var(--ctac-border);
 }
 
-.ctac__trust-item {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-body);
-  font-size: var(--text-body-sm);    /* 14px */
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-body);
-  color: var(--color-text-on-dark-muted);
-}
-
-.ctac__trust-icon {
-  display: inline-flex;
-  align-items: center;
-  color: var(--color-text-on-dark-muted);
-  flex-shrink: 0;
-}
-
-/* — CTA group — */
-.ctac__cta-group {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+.ctac__buybox-row {
+  display: grid;
   gap: var(--space-4);
-  width: 100%;
-  margin-top: var(--space-3);      /* extra breathing before CTAs */
+  align-items: center;
 }
 
-/* — Primary CTA: white on dark (maximum contrast inversion) — */
-/*
-  DECISION: White fill, dark text — NOT the standard dark button.
-  On a dark surface, a white button creates stronger visual contrast
-  than a dark-on-dark or outline button. The eye goes here immediately.
-  This is the highest-contrast possible CTA on this surface.
-*/
-.ctac__cta-primary {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  min-height: 48px;
-  padding: 0 var(--space-7);
-  border-radius: var(--radius-full);
-  background: var(--color-white);
-  color: var(--color-dark);
+.ctac__price-group {
+  min-width: 0;
+}
+
+.ctac__price-display,
+.ctac__price-fallback,
+.ctac__price-subline,
+.ctac__badge {
+  margin: 0;
+}
+
+.ctac__price-display {
+  font-family: var(--font-heading);
+  font-size: clamp(var(--text-h2), 5vw, var(--text-display));
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--ctac-text);
+}
+
+.ctac__price-fallback {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-body);
+  color: var(--ctac-text);
+}
+
+.ctac__price-subline {
   font-family: var(--font-body);
   font-size: var(--text-body-sm);
-  font-weight: var(--weight-bold);
-  text-decoration: none;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  transition: opacity var(--ease-default);
+  line-height: var(--leading-body);
+  color: var(--ctac-text-muted);
 }
 
-.ctac__cta-primary:hover {
-  opacity: 0.88;
+.ctac__price-subline--mobile {
+  margin-top: var(--space-2);
 }
 
-/* — Guarantee badge — */
-/*
-  DECISION: Directly under the primary CTA.
-  Timing: the eye moves from CTA button → badge.
-  This is where "Und wenn es nicht klappt?" gets answered.
-  Without JS, this is the most effective placement.
-*/
-.ctac__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-medium);
-  color: var(--color-text-on-dark-muted);
-  letter-spacing: 0.02em;
+.ctac__price-subline--desktop {
+  display: none;
 }
 
-.ctac__badge svg {
-  color: var(--color-text-on-dark-muted);
-  flex-shrink: 0;
-}
-
-/* — Secondary CTA: outline-inverted — */
-/*
-  DECISION: Clearly smaller visual weight than primary.
-  Width: auto (not full-width) — the secondary is a soft option, not a main path.
-  This gives visitors who don't want the test a non-abandonment exit.
-*/
+.ctac__cta-primary,
 .ctac__cta-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  padding: 10px var(--space-6);
+  min-height: 48px;
+  padding: 0.875rem var(--space-7);
   border-radius: var(--radius-full);
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: var(--color-text-on-dark-muted);
   font-family: var(--font-body);
   font-size: var(--text-body-sm);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
   text-decoration: none;
-  letter-spacing: 0.01em;
-  transition: border-color var(--ease-default), color var(--ease-default);
+  transition: opacity var(--ease-default), border-color var(--ease-default), color var(--ease-default);
 }
 
-.ctac__cta-secondary:hover {
-  border-color: rgba(255, 255, 255, 0.55);
-  color: var(--color-text-on-dark);
+.ctac__cta-primary {
+  width: 100%;
+  background: var(--ctac-accent);
+  border: 1px solid var(--ctac-accent);
+  color: var(--color-white);
 }
 
-/* — Responsive — */
-@media screen and (max-width: 768px) {
-  .ctac__container {
-    padding: 0 var(--space-4);
-    gap: var(--space-5);
+.ctac__cta-primary:hover,
+.ctac__cta-primary:focus-visible {
+  opacity: 0.9;
+}
+
+.ctac__cta-secondary {
+  align-self: center;
+  border: 1px solid var(--ctac-border);
+  color: var(--ctac-text);
+}
+
+.ctac__cta-secondary:hover,
+.ctac__cta-secondary:focus-visible {
+  border-color: var(--ctac-text);
+}
+
+.ctac__badge {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--ctac-text-muted);
+}
+
+.ctac__trust-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-body);
+  color: var(--ctac-text-muted);
+}
+
+.ctac__trust-row li {
+  position: relative;
+  padding-inline-end: var(--space-3);
+}
+
+.ctac__trust-row li:not(:last-child)::after {
+  content: "·";
+  position: absolute;
+  inset-inline-end: calc(var(--space-1) * -0.5);
+}
+
+@media screen and (min-width: 750px) {
+  .ctac__buybox-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    text-align: start;
   }
 
-  .ctac__trust-grid {
-    grid-template-columns: 1fr;   /* single column on mobile */
-    gap: var(--space-3);
-    text-align: center;
+  .ctac__cta-primary {
+    width: auto;
+    min-width: 14rem;
   }
 
-  .ctac__trust-item {
-    justify-content: center;
+  .ctac__price-subline--mobile {
+    display: none;
+  }
+
+  .ctac__price-subline--desktop {
+    display: block;
+    text-align: start;
   }
 }
 {% endstylesheet %}
@@ -352,17 +319,24 @@
       "type": "color",
       "id": "color_bg",
       "label": "Hintergrundfarbe",
-      "info": "Standard: dunkelgrün (#364F56)"
+      "default": "#26251e"
     },
     {
       "type": "color",
       "id": "color_card_bg",
-      "label": "Karten-Hintergrund (ungenutzt — Schema-Kompatibilität)"
+      "label": "Karten-Hintergrund"
     },
     {
       "type": "color",
       "id": "color_text",
-      "label": "Textfarbe"
+      "label": "Textfarbe",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_accent",
+      "label": "CTA-Akzent",
+      "default": "#2a6b5c"
     },
     {
       "type": "header",
@@ -382,25 +356,40 @@
       "type": "text",
       "id": "kicker",
       "label": "Kicker",
-      "info": "__none__ = ausblenden"
+      "info": "__none__ = ausblenden",
+      "default": "Eine Entscheidung. Ein Körper. Ein Leben."
     },
     {
       "type": "textarea",
       "id": "headline",
       "label": "Headline",
-      "info": "Enter für Zeilenumbruch"
+      "info": "Enter für Zeilenumbruch",
+      "default": "Du kannst weiter schätzen. Oder anfangen zu messen."
     },
     {
       "type": "textarea",
       "id": "subheading",
       "label": "Subheading",
-      "info": "__none__ = ausblenden"
+      "info": "__none__ = ausblenden",
+      "default": "349 € einmalig. Kein Abo. Lebenslang in der App. Plus: 30-Min-Beratung, falls gewünscht."
+    },
+    {
+      "type": "text",
+      "id": "price_display",
+      "label": "Preis groß",
+      "default": "349,00 €"
+    },
+    {
+      "type": "text",
+      "id": "price_subline",
+      "label": "Preis Subline",
+      "default": "einmalig · kein Abo · versandkostenfrei"
     },
     {
       "type": "text",
       "id": "price_fallback",
-      "label": "Preis",
-      "info": "Als Text angezeigt, z.B. 349,00 € · einmalig · lebenslang in der App"
+      "label": "Legacy Preis",
+      "info": "Fallback für ältere Verwendungen"
     },
     {
       "type": "header",
@@ -409,19 +398,53 @@
     {
       "type": "text",
       "id": "cta_label",
-      "label": "CTA Text"
+      "label": "CTA Text",
+      "default": "Jetzt starten →"
     },
     {
       "type": "url",
       "id": "cta_url",
       "label": "CTA Link",
-      "info": "Standard: /products/age-dna-test"
+      "info": "Standard: /products/lifetime-age-dna"
     },
     {
       "type": "text",
       "id": "badge_text",
-      "label": "Badge unter CTA",
-      "info": "z.B. 90-Tage Geld-zurück-Garantie"
+      "label": "Badge unter CTA"
+    },
+    {
+      "type": "header",
+      "content": "Trust Row"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_trust_row",
+      "label": "Trust-Row anzeigen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "trust_1",
+      "label": "Trust 1",
+      "default": "Eurofins ISO-zertifiziert"
+    },
+    {
+      "type": "text",
+      "id": "trust_2",
+      "label": "Trust 2",
+      "default": "Ergebnisse in 6 Wochen"
+    },
+    {
+      "type": "text",
+      "id": "trust_3",
+      "label": "Trust 3",
+      "default": "DSGVO-konform"
+    },
+    {
+      "type": "text",
+      "id": "trust_4",
+      "label": "Trust 4",
+      "default": "Kit-Ersatz-Garantie"
     },
     {
       "type": "header",
@@ -456,10 +479,10 @@
     {
       "name": "HP CTA Close",
       "blocks": [
-        { "type": "trust_line", "settings": { "text": "Eurofins Genomics · ISO 9001/17025/13485" } },
-        { "type": "trust_line", "settings": { "text": "Ergebnisse in 6 Wochen in der App" } },
-        { "type": "trust_line", "settings": { "text": "DSGVO-konform · nur du hast Zugriff" } },
-        { "type": "trust_line", "settings": { "text": "Kostenfreier Laborversand inklusive" } }
+        { "type": "trust_line", "settings": { "text": "Eurofins ISO-zertifiziert" } },
+        { "type": "trust_line", "settings": { "text": "Ergebnisse in 6 Wochen" } },
+        { "type": "trust_line", "settings": { "text": "DSGVO-konform" } },
+        { "type": "trust_line", "settings": { "text": "Kit-Ersatz-Garantie" } }
       ]
     }
   ]

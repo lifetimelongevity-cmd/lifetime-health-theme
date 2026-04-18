@@ -1,0 +1,353 @@
+{% comment %}
+  lt-lp-scarcity-risk
+  Surface: warm reassurance grid
+  Dominant element: the three operational trust cards
+  CTA: consultation only
+  Quality move: real operational constraints are framed as service standards, not urgency gimmicks
+{% endcomment %}
+
+{% style %}
+  #lt-lp-scarcity-risk-{{ section.id }} {
+    --lt-lp-risk-bg: {{ section.settings.color_bg }};
+    --lt-lp-risk-card-bg: {{ section.settings.color_card_bg }};
+    --lt-lp-risk-text: {{ section.settings.color_text | default: '#26251e' }};
+    --lt-lp-risk-muted: {{ section.settings.color_text | default: '#26251e' | color_modify: 'alpha', 0.64 }};
+    --lt-lp-risk-border: {{ section.settings.color_text | default: '#26251e' | color_modify: 'alpha', 0.12 }};
+    --lt-lp-risk-padding-top: {{ section.settings.padding_top }}px;
+    --lt-lp-risk-padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<section id="lt-lp-scarcity-risk-{{ section.id }}" class="lt-lp-risk">
+  <div class="lt-lp-risk__inner page-width">
+    <div class="lt-lp-risk__header">
+      {%- if section.settings.kicker != blank -%}
+        <p class="lt-lp-risk__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.headline != blank -%}
+        <h2 class="lt-lp-risk__headline">{{ section.settings.headline | escape }}</h2>
+      {%- endif -%}
+    </div>
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="lt-lp-risk__grid">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'reassurance_item' -%}
+            <article class="lt-lp-risk__card" {{ block.shopify_attributes }}>
+              <div class="lt-lp-risk__icon" aria-hidden="true">
+                {%- case block.settings.icon -%}
+                  {%- when 'ph:flask-thin' -%}
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M10 2v5.172L4.586 16.2A3 3 0 0 0 7.172 21h9.656a3 3 0 0 0 2.586-4.8L14 7.172V2" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path>
+                      <path d="M8 11h8" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                  {%- when 'ph:shield-check-thin' -%}
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M12 3 5 6.5v5C5 16 8 20 12 21c4-1 7-5 7-9.5v-5L12 3Z" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path>
+                      <path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                  {%- when 'ph:calendar-check-thin' -%}
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <path d="M7 2v4M17 2v4M4 8h16M5 5h14a1 1 0 0 1 1 1v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path>
+                      <path d="m9 14 2 2 4-4" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                  {%- else -%}
+                    <svg viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="1"></circle>
+                    </svg>
+                {%- endcase -%}
+              </div>
+
+              {%- if block.settings.label != blank -%}
+                <p class="lt-lp-risk__label">{{ block.settings.label | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.title != blank -%}
+                <h3 class="lt-lp-risk__title">{{ block.settings.title | escape }}</h3>
+              {%- endif -%}
+              {%- if block.settings.body != blank -%}
+                <p class="lt-lp-risk__body">{{ block.settings.body | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.cta_label != blank and block.settings.cta_url != blank -%}
+                <a href="{{ block.settings.cta_url }}" class="lt-lp-risk__link">
+                  {{ block.settings.cta_label | escape }}
+                </a>
+              {%- endif -%}
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.footnote != blank -%}
+      <p class="lt-lp-risk__footnote">{{ section.settings.footnote | escape }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+.lt-lp-risk {
+  background: var(--lt-lp-risk-bg);
+  color: var(--lt-lp-risk-text);
+}
+
+.lt-lp-risk__inner {
+  padding-top: var(--lt-lp-risk-padding-top);
+  padding-bottom: var(--lt-lp-risk-padding-bottom);
+}
+
+.lt-lp-risk__header {
+  max-width: 40rem;
+  margin-bottom: var(--space-6);
+}
+
+.lt-lp-risk__kicker {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lt-lp-risk-muted);
+}
+
+.lt-lp-risk__headline {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-heading);
+  font-size: clamp(var(--text-h2), 4vw, var(--text-display));
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--lt-lp-risk-text);
+}
+
+.lt-lp-risk__grid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.lt-lp-risk__card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-5);
+  background: var(--lt-lp-risk-card-bg);
+  border: 1px solid var(--lt-lp-risk-border);
+  border-radius: var(--radius-lg);
+}
+
+.lt-lp-risk__icon {
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--lt-lp-risk-text);
+}
+
+.lt-lp-risk__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.lt-lp-risk__label {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--lt-lp-risk-muted);
+}
+
+.lt-lp-risk__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--lt-lp-risk-text);
+}
+
+.lt-lp-risk__body,
+.lt-lp-risk__footnote {
+  margin: 0;
+  font-family: var(--font-body);
+  line-height: var(--leading-relaxed);
+}
+
+.lt-lp-risk__body {
+  font-size: var(--text-body);
+  color: var(--lt-lp-risk-muted);
+}
+
+.lt-lp-risk__link {
+  margin-top: auto;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+  color: var(--lt-lp-risk-text);
+  text-decoration: none;
+}
+
+.lt-lp-risk__link:hover,
+.lt-lp-risk__link:focus-visible {
+  text-decoration: underline;
+}
+
+.lt-lp-risk__footnote {
+  margin-top: var(--space-5);
+  font-size: var(--text-body-sm);
+  color: var(--lt-lp-risk-muted);
+}
+
+@media screen and (min-width: 990px) {
+  .lt-lp-risk__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LP Scarcity Risk",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Background",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Card background",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Text",
+      "default": "#26251e"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Bevor du bestellst"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "Drei Dinge, die du wissen solltest."
+    },
+    {
+      "type": "textarea",
+      "id": "footnote",
+      "label": "Footnote",
+      "default": "Die 50-Kits-Woche bezieht sich auf verfügbare Eurofins-Kapazität. Bei ausverkaufter Woche liefern wir in der Folgewoche."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "reassurance_item",
+      "name": "Reassurance",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon",
+          "label": "Icon",
+          "default": "ph:flask-thin"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Limitiertes Volumen"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "50 Kits pro Woche"
+        },
+        {
+          "type": "textarea",
+          "id": "body",
+          "label": "Body",
+          "default": "Eurofins Genomics analysiert Proben manuell unter klinischen Bedingungen. Das limitiert die Kapazität. Wir bieten 50 Kits pro Woche an, damit jede Probe mit derselben Sorgfalt verarbeitet wird."
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA label"
+        },
+        {
+          "type": "url",
+          "id": "cta_url",
+          "label": "CTA URL"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LP Scarcity Risk",
+      "blocks": [
+        {
+          "type": "reassurance_item",
+          "settings": {
+            "icon": "ph:flask-thin",
+            "label": "Limitiertes Volumen",
+            "title": "50 Kits pro Woche",
+            "body": "Eurofins Genomics analysiert Proben manuell unter klinischen Bedingungen. Das limitiert die Kapazität. Wir bieten 50 Kits pro Woche an, damit jede Probe mit derselben Sorgfalt verarbeitet wird."
+          }
+        },
+        {
+          "type": "reassurance_item",
+          "settings": {
+            "icon": "ph:shield-check-thin",
+            "label": "Falls etwas schiefgeht",
+            "title": "Kostenloser Kit-Ersatz",
+            "body": "Wenn dein Kit beschädigt ankommt oder die Probe im Labor nicht auswertbar ist, bekommst du kostenlos Ersatz — keine Rückfragen, keine Zusatzkosten."
+          }
+        },
+        {
+          "type": "reassurance_item",
+          "settings": {
+            "icon": "ph:calendar-check-thin",
+            "label": "Unsicher?",
+            "title": "Kostenfreie Pre-Purchase-Beratung",
+            "body": "Du willst vorher reden, ob der Test für dich sinnvoll ist? Buche ein 15-Minuten-Gespräch mit einem unserer Longevity-Experten. Diese Woche noch 4 Slots verfügbar.",
+            "cta_label": "Beratungstermin buchen →",
+            "cta_url": "/pages/longevity-coach"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

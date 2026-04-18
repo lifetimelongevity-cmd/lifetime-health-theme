@@ -29,6 +29,7 @@
     --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
     --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
     --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
+    --crs-callout-bg: {{ section.settings.color_card_bg | default: section.settings.color_bg }};
     padding-top:    {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
     background:     var(--crs-bg);
@@ -91,6 +92,12 @@
 
             </div>
           {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.footer_callout != blank -%}
+        <div class="ps-footer-callout" role="note">
+          {{ section.settings.footer_callout | escape }}
         </div>
       {%- endif -%}
 
@@ -202,6 +209,19 @@
 
 .ps-actions {
   margin-top: var(--space-6, 32px);
+}
+
+.ps-footer-callout {
+  box-sizing: border-box;
+  margin-top: var(--space-5, 24px);
+  padding: var(--space-5, 24px);
+  background: var(--crs-callout-bg, #f7f7f4);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  border-radius: var(--radius-md, 12px);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm, 14px);
+  line-height: var(--leading-relaxed, 1.6);
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
 }
 
 .ps-cta {
@@ -374,6 +394,12 @@
       "type": "text",
       "id": "cta_label",
       "label": "CTA Label"
+    },
+    {
+      "type": "textarea",
+      "id": "footer_callout",
+      "label": "Footer-Callout",
+      "default": "Warum dauern 6 Wochen? Weil Epigenetik-Analysen nicht automatisiert sind. Jede Probe wird manuell bei Eurofins Genomics verarbeitet — unter denselben Standards wie klinische Diagnostik. Wer schneller liefert, macht weniger."
     },
     {
       "type": "url",
