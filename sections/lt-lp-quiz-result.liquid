@@ -9,16 +9,22 @@
     --lt-lp-quiz-text: {{ section.settings.color_text }};
     --lt-lp-quiz-border: {{ section.settings.color_text | color_modify: 'alpha', 0.12 }};
     --lt-lp-quiz-muted: {{ section.settings.color_text | color_modify: 'alpha', 0.64 }};
-    --lt-lp-quiz-soft: {{ section.settings.color_text | color_modify: 'alpha', 0.06 }};
-    --lt-lp-quiz-soft-strong: {{ section.settings.color_text | color_modify: 'alpha', 0.1 }};
+    --lt-lp-quiz-accent: {{ section.settings.color_accent }};
+    --lt-lp-quiz-accent-soft: {{ section.settings.color_accent | color_modify: 'alpha', 0.08 }};
+    --lt-lp-quiz-accent-shadow: {{ section.settings.color_accent | color_modify: 'alpha', 0.12 }};
     --lt-lp-quiz-padding-top: {{ section.settings.padding_top }}px;
     --lt-lp-quiz-padding-bottom: {{ section.settings.padding_bottom }}px;
     --lt-lp-quiz-radius: 24px;
-    --lt-lp-quiz-chip-radius: 999px;
+    --lt-lp-quiz-card-radius: 16px;
+    --lt-lp-quiz-card-gap: 12px;
   }
 {% endstyle %}
 
-<section id="lt-lp-quiz-result-{{ section.id }}" class="lt-lp-quiz-result-section" data-active-goal="">
+<section
+  id="lt-lp-quiz-result-{{ section.id }}"
+  class="lt-lp-quiz-result-section"
+  data-active-goal=""
+>
   <div class="lt-lp-quiz-result page-width">
     <div class="lt-lp-quiz-result__intro">
       <div class="lt-lp-quiz-result__placeholder" data-quiz-placeholder>
@@ -35,11 +41,10 @@
 
       {%- for block in section.blocks -%}
         {%- if block.type == 'goal_state' -%}
-          {%- assign lt_highlights = block.settings.highlighted_categories | split: ',' -%}
           <article
             class="lt-lp-quiz-result__state"
             data-goal-id="{{ block.settings.goal_id | escape }}"
-            data-highlighted-categories="{{ block.settings.highlighted_categories | escape }}"
+            data-micro-texts-json="{{ block.settings.micro_texts_json | escape }}"
             hidden
             {{ block.shopify_attributes }}
           >
@@ -52,76 +57,55 @@
             {%- if block.settings.result_subline != blank -%}
               <p class="lt-lp-quiz-result__body">{{ block.settings.result_subline | escape }}</p>
             {%- endif -%}
-            <div class="lt-lp-quiz-result__highlight-list" aria-label="Hervorgehobene Kategorien">
-              {%- for item in lt_highlights -%}
-                {%- assign title = item | strip -%}
-                {%- if title != blank -%}
-                  <span class="lt-lp-quiz-result__highlight-chip">{{ title | escape }}</span>
-                {%- endif -%}
-              {%- endfor -%}
-            </div>
           </article>
         {%- endif -%}
       {%- endfor -%}
     </div>
 
-    <details class="lt-lp-quiz-result__categories" data-quiz-categories>
-      <summary class="lt-lp-quiz-result__summary">
-        <span>{{ section.settings.expand_all_label | default: 'Alle Kategorien ansehen' | escape }}</span>
-        <span class="lt-lp-quiz-result__summary-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path d="m6 9 6 6 6-6" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"></path>
-          </svg>
-        </span>
-      </summary>
-      {%- if section.settings.expand_all_helper != blank -%}
-        <p class="lt-lp-quiz-result__helper">{{ section.settings.expand_all_helper | escape }}</p>
-      {%- endif -%}
-
-      <div class="lt-lp-quiz-result__category-groups">
-        <div class="lt-lp-quiz-result__category-group">
-          <p class="lt-lp-quiz-result__group-label">Epigenetik</p>
-          <div class="lt-lp-quiz-result__category-grid">
-            {%- for block in section.blocks -%}
-              {%- if block.type == 'category_item' and block.settings.category_type == 'epigenetic' -%}
-                <article
-                  class="lt-lp-quiz-result__category-item"
-                  data-category-title="{{ block.settings.title | strip | escape }}"
-                  {{ block.shopify_attributes }}
-                >
-                  <span class="lt-lp-quiz-result__category-type">Epigenetik</span>
-                  <h3 class="lt-lp-quiz-result__category-title">{{ block.settings.title | escape }}</h3>
-                  <p class="lt-lp-quiz-result__category-examples">{{ block.settings.examples | escape }}</p>
-                </article>
-              {%- endif -%}
-            {%- endfor -%}
-          </div>
-        </div>
-
-        <div class="lt-lp-quiz-result__category-group">
-          <p class="lt-lp-quiz-result__group-label">DNA</p>
-          <div class="lt-lp-quiz-result__category-grid">
-            {%- for block in section.blocks -%}
-              {%- if block.type == 'category_item' and block.settings.category_type == 'dna' -%}
-                <article
-                  class="lt-lp-quiz-result__category-item"
-                  data-category-title="{{ block.settings.title | strip | escape }}"
-                  {{ block.shopify_attributes }}
-                >
-                  <span class="lt-lp-quiz-result__category-type">DNA</span>
-                  <h3 class="lt-lp-quiz-result__category-title">{{ block.settings.title | escape }}</h3>
-                  <p class="lt-lp-quiz-result__category-examples">{{ block.settings.examples | escape }}</p>
-                </article>
-              {%- endif -%}
-            {%- endfor -%}
-          </div>
-        </div>
+    <div class="lt-lp-quiz-result__matrix lt-lp-quiz-result__matrix--epigenetic">
+      <p class="lt-lp-quiz-result__group-label">Epigenetik · 6 Bereiche</p>
+      <div class="lt-lp-quiz-result__grid lt-lp-quiz-result__grid--3col">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'category_item' and block.settings.category_type == 'epigenetic' -%}
+            <article
+              class="lt-lp-quiz-result__card"
+              data-category-title="{{ block.settings.title | strip | escape }}"
+              data-category-type="{{ block.settings.category_type | escape }}"
+              {{ block.shopify_attributes }}
+            >
+              <h3 class="lt-lp-quiz-result__card-title">{{ block.settings.title | escape }}</h3>
+              <p class="lt-lp-quiz-result__card-micro" data-goal-micro hidden></p>
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
       </div>
-    </details>
+    </div>
+
+    <div class="lt-lp-quiz-result__matrix lt-lp-quiz-result__matrix--dna">
+      <p class="lt-lp-quiz-result__group-label">DNA · 16 Kategorien</p>
+      <div class="lt-lp-quiz-result__grid lt-lp-quiz-result__grid--4col">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'category_item' and block.settings.category_type == 'dna' -%}
+            <article
+              class="lt-lp-quiz-result__card"
+              data-category-title="{{ block.settings.title | strip | escape }}"
+              data-category-type="{{ block.settings.category_type | escape }}"
+              {{ block.shopify_attributes }}
+            >
+              <h3 class="lt-lp-quiz-result__card-title">{{ block.settings.title | escape }}</h3>
+              <p class="lt-lp-quiz-result__card-micro" data-goal-micro hidden></p>
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
 
     {%- if cta_block != blank -%}
       <div class="lt-lp-quiz-result__cta" {{ cta_block.shopify_attributes }}>
-        <a href="{{ cta_block.settings.cta_url | default: '/products/lifetime-age-dna' }}" class="button button--solid button--move lt-lp-quiz-result__button">
+        <a
+          href="{{ cta_block.settings.cta_url | default: '/products/lifetime-age-dna' }}"
+          class="button button--solid button--move lt-lp-quiz-result__button"
+        >
           {{ cta_block.settings.cta_label | default: 'Jetzt für 349€ bestellen →' | escape }}
         </a>
         {%- if cta_block.settings.cta_subline != blank -%}
@@ -139,19 +123,10 @@
 
     const placeholder = section.querySelector('[data-quiz-placeholder]');
     const states = Array.prototype.slice.call(section.querySelectorAll('[data-goal-id]'));
-    const categoryItems = Array.prototype.slice.call(section.querySelectorAll('[data-category-title]'));
+    const cards = Array.prototype.slice.call(section.querySelectorAll('[data-category-title]'));
 
     function normalizeValue(value) {
       return String(value || '').trim().toLowerCase();
-    }
-
-    function parseHighlights(value) {
-      return String(value || '')
-        .split(',')
-        .map(function(item) {
-          return normalizeValue(item);
-        })
-        .filter(Boolean);
     }
 
     function setGoal(goalId, shouldScroll) {
@@ -168,10 +143,42 @@
         placeholder.hidden = Boolean(activeState);
       }
 
-      const activeHighlights = activeState ? parseHighlights(activeState.dataset.highlightedCategories) : [];
-      categoryItems.forEach(function(item) {
-        const isHighlighted = activeHighlights.indexOf(normalizeValue(item.dataset.categoryTitle)) !== -1;
-        item.classList.toggle('is-highlighted', isHighlighted);
+      let microMap = {};
+      if (activeState) {
+        try {
+          microMap = JSON.parse(activeState.dataset.microTextsJson || '{}');
+        } catch (err) {
+          microMap = {};
+        }
+      }
+
+      cards.forEach(function(card) {
+        const title = card.dataset.categoryTitle;
+        const microText = microMap[title];
+        const microEl = card.querySelector('[data-goal-micro]');
+
+        if (microText) {
+          card.classList.add('is-highlighted');
+          card.classList.remove('is-dimmed');
+          if (microEl) {
+            microEl.textContent = microText;
+            microEl.hidden = false;
+          }
+        } else if (activeState) {
+          card.classList.remove('is-highlighted');
+          card.classList.add('is-dimmed');
+          if (microEl) {
+            microEl.textContent = '';
+            microEl.hidden = true;
+          }
+        } else {
+          card.classList.remove('is-highlighted');
+          card.classList.remove('is-dimmed');
+          if (microEl) {
+            microEl.textContent = '';
+            microEl.hidden = true;
+          }
+        }
       });
 
       section.dataset.activeGoal = activeState ? normalizedGoalId : '';
@@ -185,6 +192,8 @@
       if (!event.detail || !event.detail.goalId) return;
       setGoal(event.detail.goalId, Boolean(event.detail.shouldScroll));
     });
+
+    setGoal('', false);
   })();
 </script>
 
@@ -200,7 +209,7 @@
 }
 
 .lt-lp-quiz-result__intro,
-.lt-lp-quiz-result__categories,
+.lt-lp-quiz-result__matrix,
 .lt-lp-quiz-result__cta {
   border-radius: var(--lt-lp-quiz-radius);
   background: var(--lt-lp-quiz-surface);
@@ -209,6 +218,15 @@
 
 .lt-lp-quiz-result__intro {
   padding: 28px 24px;
+}
+
+.lt-lp-quiz-result__matrix,
+.lt-lp-quiz-result__cta {
+  margin-top: 20px;
+}
+
+.lt-lp-quiz-result__matrix {
+  padding: 24px;
 }
 
 .lt-lp-quiz-result__placeholder,
@@ -223,8 +241,7 @@
 }
 
 .lt-lp-quiz-result__kicker,
-.lt-lp-quiz-result__group-label,
-.lt-lp-quiz-result__category-type {
+.lt-lp-quiz-result__group-label {
   margin: 0;
   font-size: 0.78rem;
   font-weight: 600;
@@ -234,7 +251,7 @@
 }
 
 .lt-lp-quiz-result__headline,
-.lt-lp-quiz-result__category-title {
+.lt-lp-quiz-result__card-title {
   margin: 0;
   color: var(--lt-lp-quiz-text);
 }
@@ -246,8 +263,6 @@
 }
 
 .lt-lp-quiz-result__body,
-.lt-lp-quiz-result__helper,
-.lt-lp-quiz-result__category-examples,
 .lt-lp-quiz-result__cta-subline {
   margin: 0;
   font-size: 1rem;
@@ -255,101 +270,58 @@
   color: var(--lt-lp-quiz-muted);
 }
 
-.lt-lp-quiz-result__highlight-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+.lt-lp-quiz-result__grid--3col,
+.lt-lp-quiz-result__grid--4col {
+  display: grid;
+  gap: var(--lt-lp-quiz-card-gap);
+  margin-top: 14px;
 }
 
-.lt-lp-quiz-result__highlight-chip {
-  display: inline-flex;
-  align-items: center;
-  min-height: 38px;
-  padding: 0 16px;
-  border-radius: var(--lt-lp-quiz-chip-radius);
-  background: var(--lt-lp-quiz-soft);
+.lt-lp-quiz-result__grid--3col {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.lt-lp-quiz-result__grid--4col {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.lt-lp-quiz-result__card {
+  background: var(--lt-lp-quiz-surface);
   border: 1px solid var(--lt-lp-quiz-border);
-  font-size: 0.92rem;
-  line-height: 1.3;
+  border-radius: var(--lt-lp-quiz-card-radius);
+  padding: 16px;
+  min-height: 120px;
+  transition: opacity 0.2s ease, border-color 0.2s ease, transform 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
 
-.lt-lp-quiz-result__categories {
-  margin-top: 20px;
-  padding: 0;
-  overflow: hidden;
+.lt-lp-quiz-result__card.is-highlighted {
+  border-color: var(--lt-lp-quiz-accent);
+  background: var(--lt-lp-quiz-accent-soft);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px var(--lt-lp-quiz-accent-shadow);
 }
 
-.lt-lp-quiz-result__summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 22px 24px;
-  cursor: pointer;
+.lt-lp-quiz-result__card.is-dimmed {
+  opacity: 0.5;
+}
+
+.lt-lp-quiz-result__card-title {
   font-size: 1rem;
-  font-weight: 600;
-  list-style: none;
+  line-height: 1.25;
 }
 
-.lt-lp-quiz-result__summary::-webkit-details-marker {
+.lt-lp-quiz-result__card-micro {
+  margin: 8px 0 0;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--lt-lp-quiz-text);
+}
+
+.lt-lp-quiz-result__card-micro[hidden] {
   display: none;
 }
 
-.lt-lp-quiz-result__summary-icon {
-  display: inline-flex;
-  width: 20px;
-  height: 20px;
-  transition: transform 0.2s ease;
-}
-
-.lt-lp-quiz-result__summary-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.lt-lp-quiz-result__categories[open] .lt-lp-quiz-result__summary-icon {
-  transform: rotate(180deg);
-}
-
-.lt-lp-quiz-result__helper {
-  padding: 0 24px 20px;
-}
-
-.lt-lp-quiz-result__category-groups {
-  display: grid;
-  gap: 24px;
-  padding: 0 24px 24px;
-}
-
-.lt-lp-quiz-result__category-grid {
-  display: grid;
-  gap: 14px;
-  margin-top: 12px;
-}
-
-.lt-lp-quiz-result__category-item {
-  display: grid;
-  gap: 10px;
-  padding: 18px;
-  border-radius: 20px;
-  background: var(--lt-lp-quiz-bg);
-  border: 1px solid var(--lt-lp-quiz-border);
-  transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
-}
-
-.lt-lp-quiz-result__category-item.is-highlighted {
-  border-color: var(--lt-lp-quiz-text);
-  background: var(--lt-lp-quiz-soft-strong);
-  transform: translateY(-1px);
-}
-
-.lt-lp-quiz-result__category-title {
-  font-size: 1.08rem;
-  line-height: 1.2;
-}
-
 .lt-lp-quiz-result__cta {
-  margin-top: 20px;
   padding: 24px;
   display: grid;
   gap: 12px;
@@ -360,30 +332,47 @@
   border-radius: 999px;
 }
 
-@media screen and (min-width: 750px) {
-  .lt-lp-quiz-result__intro {
-    padding: 36px;
-  }
-
-  .lt-lp-quiz-result__category-grid {
+@media screen and (max-width: 749px) {
+  .lt-lp-quiz-result__grid--3col,
+  .lt-lp-quiz-result__grid--4col {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .lt-lp-quiz-result__cta {
-    padding: 28px 36px;
   }
 }
 
-@media screen and (min-width: 990px) {
-  .lt-lp-quiz-result__category-grid {
+@media screen and (min-width: 750px) and (max-width: 989px) {
+  .lt-lp-quiz-result__grid--4col {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media screen and (min-width: 750px) {
+  .lt-lp-quiz-result__intro,
+  .lt-lp-quiz-result__matrix,
+  .lt-lp-quiz-result__cta {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .lt-lp-quiz-result__intro {
+    padding-top: 32px;
+    padding-bottom: 32px;
+  }
+
+  .lt-lp-quiz-result__matrix {
+    padding-top: 28px;
+    padding-bottom: 28px;
+  }
+
+  .lt-lp-quiz-result__cta {
+    padding-top: 28px;
+    padding-bottom: 28px;
   }
 }
 {% endstylesheet %}
 
 {% schema %}
 {
-  "name": "LT — LP Quiz Result",
+  "name": "LT — LP Quiz Result v2",
   "settings": [
     {
       "type": "color",
@@ -402,6 +391,12 @@
       "id": "color_text",
       "label": "Textfarbe",
       "default": "#26251e"
+    },
+    {
+      "type": "color",
+      "id": "color_accent",
+      "label": "Akzentfarbe",
+      "default": "#2a6b5c"
     },
     {
       "type": "range",
@@ -439,25 +434,14 @@
       "type": "textarea",
       "id": "placeholder_body",
       "label": "Placeholder — Body",
-      "default": "Sobald du oben auf ein Ziel klickst, zeigen wir dir hier die Kategorien, die für dich am relevantesten sind — und wo du mit deinen 187 Reports am besten einsteigst."
-    },
-    {
-      "type": "text",
-      "id": "expand_all_label",
-      "label": "Expand-All Label",
-      "default": "Alle Kategorien ansehen"
-    },
-    {
-      "type": "textarea",
-      "id": "expand_all_helper",
-      "label": "Expand-All Hilfstext",
-      "default": "Dein Test enthält alle 22 Bereiche (16 DNA + 6 Epigenetik) — unabhängig von deinem gewählten Einstiegsthema."
+      "default": "Sobald du oben auf ein Ziel klickst, sortieren wir hier die 22 Bereiche für dein Einstiegsthema — und zeigen dir, warum sie für dich besonders relevant sind."
     }
   ],
   "blocks": [
     {
       "type": "goal_state",
       "name": "Goal State",
+      "limit": 4,
       "settings": [
         {
           "type": "text",
@@ -481,14 +465,16 @@
         },
         {
           "type": "textarea",
-          "id": "highlighted_categories",
-          "label": "Highlighted Categories"
+          "id": "micro_texts_json",
+          "label": "Mikrotexte pro Kategorie (JSON)",
+          "info": "JSON-Objekt mit Kategorie-Titel als Key und Mikrotext als Value. Wird clientseitig geparst."
         }
       ]
     },
     {
       "type": "category_item",
       "name": "Category Item",
+      "limit": 22,
       "settings": [
         {
           "type": "select",
@@ -512,9 +498,9 @@
           "label": "Titel"
         },
         {
-          "type": "text",
-          "id": "examples",
-          "label": "Beispiele"
+          "type": "textarea",
+          "id": "base_description",
+          "label": "Basisbeschreibung"
         }
       ]
     },
@@ -545,7 +531,233 @@
   ],
   "presets": [
     {
-      "name": "LT — LP Quiz Result"
+      "name": "LT — LP Quiz Result v2",
+      "blocks": [
+        {
+          "type": "goal_state",
+          "settings": {
+            "goal_id": "goal_1",
+            "result_kicker": "Dein Fokus",
+            "result_headline": "Du willst wissen, wie du alterst.",
+            "result_subline": "Du bekommst den vollen Blick auf dein biologisches Alter — inklusive MethylPace-Score, Entzündungsprofil und den genetischen Faktoren für gesunde Alterung.",
+            "micro_texts_json": "{\"Biologisches Alter\":\"Dein MethylPace-Score zeigt, wie schnell deine Zellen tatsächlich altern.\",\"EpiVitality\":\"Misst, wie vital deine Zellen gerade arbeiten — ein zentraler Alterungsmarker.\",\"Entzündung\":\"Chronische Zellentzündung ist ein Haupttreiber des Alterns — hier siehst du deinen Status.\",\"Körperalter\":\"Höralter, Sehalter, Gedächtnisalter — wie alt deine Sinne und Kognition biologisch sind.\",\"Gesunde Alterung\":\"Langlebigkeit, Kognition, Knochen — deine genetische Ausgangslage für gesundes Altern.\",\"Herz\":\"Cholesterin, Herzrisiko, Blutdruck — die genetischen Faktoren, die deine Lebensjahre prägen.\"}"
+          }
+        },
+        {
+          "type": "goal_state",
+          "settings": {
+            "goal_id": "goal_2",
+            "result_kicker": "Dein Fokus",
+            "result_headline": "Du willst mehr Energie im Alltag.",
+            "result_subline": "Hier findest du, was deine Energie, deinen Schlaf und deine mentale Klarheit beeinflusst — von Chronotyp bis Stress-Resilienz.",
+            "micro_texts_json": "{\"Entzündung\":\"Niedrige Zellentzündung = mehr verfügbare Energie für den Alltag.\",\"Muskelschwund\":\"Wie schnell deine Muskelzellen altern — hat Einfluss auf dein Energielevel.\",\"Schlaf\":\"Schlafdauer, Tiefschlaf-Tendenz, Chronotyp — die genetische Basis deiner Regeneration.\",\"Stress\":\"Wie dein Körper Stress verarbeitet — und wo Erschöpfung genetisch bedingt ist.\",\"Mental Health\":\"Aufmerksamkeit, Stress-Resilienz, Warrior/Worrier-Profil — deine mentale Energie-Signatur.\",\"Stoffwechsel\":\"Wie effizient dein Körper Energie produziert — und wo Stoffwechsel-Leaks möglich sind.\"}"
+          }
+        },
+        {
+          "type": "goal_state",
+          "settings": {
+            "goal_id": "goal_3",
+            "result_kicker": "Dein Fokus",
+            "result_headline": "Du willst körperlich fit bleiben.",
+            "result_subline": "Du bekommst genetische Einblicke in deine Fitness, Regeneration und Muskelalterung — VO₂max, Verletzungsanfälligkeit, Erholungstyp und mehr.",
+            "micro_texts_json": "{\"Muskelschwund\":\"Wie schnell deine Muskeln biologisch altern — kritisch für lebenslange Fitness.\",\"EpiVitality\":\"Zell-Vitalität als Grundlage für Trainingsreize und Regeneration.\",\"Fitness\":\"Muskelkraft, VO₂max, anaerobe Schwelle — dein genetisches Fitness-Profil.\",\"Verletzung & Regeneration\":\"LWS, Achillessehne, Arthrose-Bezug — wo dein Körper Schutz braucht.\",\"Gesunde Alterung\":\"Langfristige Gelenk- und Knochen-Gesundheit als Basis für lebenslange Bewegung.\"}"
+          }
+        },
+        {
+          "type": "goal_state",
+          "settings": {
+            "goal_id": "goal_4",
+            "result_kicker": "Dein Fokus",
+            "result_headline": "Du willst deinen Körper individuell verstehen.",
+            "result_subline": "Du bekommst die individuelle Perspektive — wie dein Körper auf Nährstoffe, Lebensmittel und Substanzen reagiert, und was deine Persönlichkeit genetisch prägt.",
+            "micro_texts_json": "{\"Immunscore\":\"Wie dein Immunsystem epigenetisch reagiert — individuell, nicht pauschal.\",\"Biologisches Alter\":\"Dein biologisches Alter als zentrale Kennzahl deiner körperlichen Identität.\",\"Sensitivitäten\":\"Gluten, Laktose, Fruktose, Fett — worauf dein Körper genetisch reagiert.\",\"Vitamine\":\"Vitamin D, B12, Omega-3 — welche Nährstoffe dein Körper besser verwerten kann.\",\"Supplements\":\"Welche Supplement-Wirkstoffe dein Körper genetisch besser verwertet.\",\"Psychologisch\":\"COMT, MAOA, Emotionsregulation — die genetische Prägung deiner Persönlichkeit.\"}"
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "epigenetic",
+            "title": "Körperalter",
+            "base_description": "Höralter, Gedächtnisalter und Sehalter auf epigenetischer Ebene."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "epigenetic",
+            "title": "Biologisches Alter",
+            "base_description": "Dein biologisches Alter anhand des MethylPace-Scores."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "epigenetic",
+            "title": "EpiVitality",
+            "base_description": "Zellvitalität als epigenetischer Marker."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "epigenetic",
+            "title": "Immunscore",
+            "base_description": "Immunzell-Regulation und immunologisches Gedächtnis."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "epigenetic",
+            "title": "Entzündung",
+            "base_description": "Pro-, Anti- und Gesamt-Entzündungs-Score."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "epigenetic",
+            "title": "Muskelschwund",
+            "base_description": "Muskelalterung auf epigenetischer Ebene."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Gesunde Alterung",
+            "base_description": "Langlebigkeit, Stoffwechsel & Alter, Muskelabbau."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Supplements",
+            "base_description": "Kreatin, Curcumin, NMN und weitere Wirkstoffe."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Vitamine",
+            "base_description": "Vitamin D, Vitamin B12, Omega-3 und mehr."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Sensitivitäten",
+            "base_description": "Gluten, Laktose, Zucker und Fruktose."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Stoffwechsel",
+            "base_description": "Adipositas-Risiko, Typ-2-Diabetes, Salz & Blutdruck."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Fitness",
+            "base_description": "Muskelkraft, VO₂max und anaerobe Schwelle."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Verletzung & Regeneration",
+            "base_description": "LWS-Bandscheiben, Achillessehne, Reha- und Erholungstyp."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Mental Health",
+            "base_description": "Aufmerksamkeit, Stress-Resilienz und Gedächtnis."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Psychologisch",
+            "base_description": "COMT, Belohnungssensitivität und Emotionsregulation."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Schlaf",
+            "base_description": "Schlafdauer, Schlafqualität und Chronotyp."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Stress",
+            "base_description": "Stress & Gedächtnis, Stress & Herz, Stressbewältigung."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Herz",
+            "base_description": "Cholesterin, Herzkrankheits-Risiko und Vorhofflimmern."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Atemwege",
+            "base_description": "Asthma-Bezug, Atemwegsinfekte und Lungenfunktion."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Augen",
+            "base_description": "Makuladegeneration, Katarakt und Offenwinkelglaukom."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Haare",
+            "base_description": "Androgenetischer Haarausfall, frühes Ergrauen und trockenes Haar."
+          }
+        },
+        {
+          "type": "category_item",
+          "settings": {
+            "category_type": "dna",
+            "title": "Niere",
+            "base_description": "Entgiftung, Nierenfunktion und Nierensteine."
+          }
+        },
+        {
+          "type": "cta_block",
+          "settings": {
+            "cta_label": "Jetzt für 349€ bestellen →",
+            "cta_url": "/products/lifetime-age-dna",
+            "cta_subline": "Einmaliger Kauf · kein Abo · Ergebnisse in 6 Wochen"
+          }
+        }
+      ]
     }
   ]
 }
