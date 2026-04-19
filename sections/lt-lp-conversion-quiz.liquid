@@ -1,0 +1,1040 @@
+{% comment %}
+  lt-lp-conversion-quiz
+  Replaces: lt-lp-hero-quiz + lt-lp-personalized-answer on AGE & DNA landing.
+  5-step mobile-first quiz → personalized result, hot/cool intent split, no page-scroll lock.
+{% endcomment %}
+
+{%- liquid
+  assign archetype_count = 0
+  for block in section.blocks
+    if block.type == 'archetype'
+      assign archetype_count = archetype_count | plus: 1
+    endif
+  endfor
+-%}
+
+{% style %}
+  #lt-lp-conversion-quiz-{{ section.id }} {
+    --quiz-bg: {{ section.settings.color_bg }};
+    --quiz-text: {{ section.settings.color_text }};
+    --quiz-accent: {{ section.settings.color_accent }};
+    --quiz-card: {{ section.settings.color_card_bg }};
+    --quiz-muted: {{ section.settings.color_text | color_modify: 'alpha', 0.64 }};
+    --quiz-border: {{ section.settings.color_text | color_modify: 'alpha', 0.14 }};
+    --quiz-accent-soft: {{ section.settings.color_accent | color_modify: 'alpha', 0.08 }};
+    --quiz-accent-border: {{ section.settings.color_accent | color_modify: 'alpha', 0.35 }};
+    --quiz-pad-top: {{ section.settings.padding_top }}px;
+    --quiz-pad-bottom: {{ section.settings.padding_bottom }}px;
+    background: var(--quiz-bg);
+    color: var(--quiz-text);
+    padding: var(--quiz-pad-top) var(--space-4) var(--quiz-pad-bottom);
+    font-family: var(--font-body);
+  }
+
+  #lt-lp-conversion-quiz-{{ section.id }} *,
+  #lt-lp-conversion-quiz-{{ section.id }} *::before,
+  #lt-lp-conversion-quiz-{{ section.id }} *::after { box-sizing: border-box; }
+
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__frame {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    background: var(--quiz-card);
+    border: 1px solid var(--quiz-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5) var(--space-4);
+    min-height: clamp(520px, 70vh, 780px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 750px) {
+    #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__frame {
+      padding: var(--space-6) var(--space-6);
+    }
+  }
+
+  @media (min-width: 990px) {
+    #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__frame {
+      max-width: min(720px, 56rem);
+      padding: var(--space-7) var(--space-7);
+    }
+  }
+
+  /* Progress */
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__progress {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__progress[hidden] { display: none; }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__progress-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--space-2);
+    flex: 1;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__progress-list li {
+    height: 4px;
+    background: var(--quiz-border);
+    border-radius: var(--radius-full);
+    transition: background var(--ease-default);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__progress-list li.is-done,
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__progress-list li[aria-current='step'] {
+    background: var(--quiz-accent);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__back {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--quiz-muted);
+    font: inherit;
+    font-size: var(--text-body-sm);
+    cursor: pointer;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    min-height: 44px;
+    transition: color var(--ease-default), background var(--ease-default);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__back:hover,
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__back:focus-visible {
+    color: var(--quiz-text);
+    background: var(--quiz-accent-soft);
+    outline: none;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__back[hidden] { display: none; }
+
+  /* Screens */
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__screen {
+    display: none;
+    flex-direction: column;
+    gap: var(--space-5);
+    flex: 1;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__screen.is-active {
+    display: flex;
+    animation: ltQuizFade var(--ease-smooth);
+  }
+  @keyframes ltQuizFade {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__screen h2 {
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    line-height: var(--leading-heading);
+    font-weight: var(--weight-semibold);
+    margin: 0;
+    letter-spacing: -0.01em;
+    outline: none;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__eyebrow {
+    font-size: var(--text-micro);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--quiz-muted);
+    margin: 0;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__subhead,
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__helper {
+    margin: 0;
+    color: var(--quiz-muted);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__intro-headline {
+    font-family: var(--font-heading);
+    font-size: clamp(28px, 4.2vw, var(--text-h1));
+    line-height: var(--leading-heading);
+    font-weight: var(--weight-semibold);
+    margin: 0;
+    letter-spacing: -0.01em;
+    outline: none;
+  }
+
+  /* Fieldsets & options (radio/checkbox) */
+  #lt-lp-conversion-quiz-{{ section.id }} fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} legend { padding: 0; }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__option {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid var(--quiz-border);
+    border-radius: var(--radius-md);
+    background: var(--quiz-bg);
+    cursor: pointer;
+    min-height: 56px;
+    transition: border-color var(--ease-default), background var(--ease-default), transform var(--ease-default);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__option:hover {
+    border-color: var(--quiz-accent-border);
+    background: var(--quiz-accent-soft);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__marker {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--quiz-border);
+    margin-top: 2px;
+    transition: border-color var(--ease-default), background var(--ease-default);
+    position: relative;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__option--checkbox .lt-lp-quiz__marker {
+    border-radius: var(--radius-sm);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__option input:checked ~ .lt-lp-quiz__marker {
+    border-color: var(--quiz-accent);
+    background: var(--quiz-accent);
+    box-shadow: inset 0 0 0 3px var(--quiz-card);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__option--checkbox input:checked ~ .lt-lp-quiz__marker {
+    box-shadow: inset 0 0 0 2px var(--quiz-card);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__option:has(input:checked),
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__option.is-active {
+    border-color: var(--quiz-accent);
+    background: var(--quiz-accent-soft);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__option input:focus-visible ~ .lt-lp-quiz__marker {
+    outline: 2px solid var(--quiz-accent);
+    outline-offset: 2px;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__option-label {
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-body);
+    color: var(--quiz-text);
+  }
+
+  /* Sliders */
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__slider {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__slider-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-3);
+    font-size: var(--text-body-sm);
+    color: var(--quiz-muted);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__slider-value {
+    font-family: var(--font-heading);
+    font-size: var(--text-h3);
+    color: var(--quiz-text);
+    font-weight: var(--weight-semibold);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} input[type='range'] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: var(--quiz-border);
+    border-radius: var(--radius-full);
+    outline: none;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    background: var(--quiz-accent);
+    cursor: pointer;
+    border: 3px solid var(--quiz-card);
+    box-shadow: var(--shadow-sm);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} input[type='range']::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    background: var(--quiz-accent);
+    cursor: pointer;
+    border: 3px solid var(--quiz-card);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} input[type='range']:focus-visible {
+    outline: 2px solid var(--quiz-accent);
+    outline-offset: 4px;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__slider-hint {
+    background: var(--quiz-accent-soft);
+    border-left: 3px solid var(--quiz-accent);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    color: var(--quiz-text);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+  }
+
+  /* CTAs */
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__cta-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-top: auto;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__cta {
+    appearance: none;
+    border: 0;
+    font: inherit;
+    font-family: var(--font-body);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-body-lg);
+    min-height: 56px;
+    padding: var(--space-3) var(--space-5);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    transition: background var(--ease-default), transform var(--ease-default), box-shadow var(--ease-default);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__cta--primary {
+    background: var(--quiz-accent);
+    color: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__cta--primary:hover,
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__cta--primary:focus-visible {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+    outline: none;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__cta--secondary {
+    background: transparent;
+    color: var(--quiz-text);
+    border: 1px solid var(--quiz-border);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__cta--secondary:hover,
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__cta--secondary:focus-visible {
+    border-color: var(--quiz-accent);
+    background: var(--quiz-accent-soft);
+    outline: none;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__cta:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Intro trust ticker */
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    font-size: var(--text-body-sm);
+    color: var(--quiz-muted);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__trust span { white-space: nowrap; }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__trust span + span::before {
+    content: '·';
+    margin-right: var(--space-4);
+    color: var(--quiz-border);
+  }
+
+  /* Result screen */
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__anchor {
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    line-height: var(--leading-heading);
+    font-weight: var(--weight-semibold);
+    margin: 0;
+    color: var(--quiz-text);
+    letter-spacing: -0.01em;
+    outline: none;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__empathy {
+    margin: 0;
+    color: var(--quiz-text);
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-body);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__hypotheses {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__hypothesis {
+    background: var(--quiz-bg);
+    border: 1px solid var(--quiz-border);
+    border-left: 3px solid var(--quiz-accent);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    color: var(--quiz-text);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__zone-heading {
+    font-family: var(--font-heading);
+    font-size: var(--text-section);
+    line-height: var(--leading-tight);
+    font-weight: var(--weight-semibold);
+    margin: 0;
+    color: var(--quiz-text);
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__zone3 {
+    font-size: var(--text-body);
+    color: var(--quiz-muted);
+    line-height: var(--leading-body);
+    margin: 0;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__result-trust {
+    font-size: var(--text-body-sm);
+    color: var(--quiz-muted);
+    margin: 0;
+  }
+  #lt-lp-conversion-quiz-{{ section.id }} .lt-lp-quiz__scroll-invite {
+    font-size: var(--text-body-sm);
+    color: var(--quiz-muted);
+    text-align: center;
+    margin: 0;
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--quiz-border);
+  }
+
+  #lt-lp-conversion-quiz-{{ section.id }} .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+{% endstyle %}
+
+<section id="lt-lp-conversion-quiz-{{ section.id }}" class="lt-lp-quiz" data-section-id="{{ section.id }}">
+  <div class="lt-lp-quiz__frame">
+
+    {%- comment -%} Progress bar (shown from q1 onward, hidden on intro + result) {%- endcomment -%}
+    <div class="lt-lp-quiz__progress" data-progress hidden>
+      <button type="button" class="lt-lp-quiz__back" data-back hidden aria-label="Eine Frage zurück">← zurück</button>
+      <ol class="lt-lp-quiz__progress-list" aria-label="Fortschritt">
+        <li data-step="1"></li>
+        <li data-step="2"></li>
+        <li data-step="3"></li>
+        <li data-step="4"></li>
+        <li data-step="5"></li>
+      </ol>
+    </div>
+
+    {%- comment -%} Intro {%- endcomment -%}
+    <div class="lt-lp-quiz__screen is-active" data-screen="intro">
+      <p class="lt-lp-quiz__eyebrow">{{ section.settings.intro_eyebrow }}</p>
+      <h2 class="lt-lp-quiz__intro-headline" tabindex="-1">{{ section.settings.intro_headline }}</h2>
+      <p class="lt-lp-quiz__subhead">{{ section.settings.intro_subhead }}</p>
+      <div class="lt-lp-quiz__cta-row">
+        <button type="button" class="lt-lp-quiz__cta lt-lp-quiz__cta--primary" data-next="q1">
+          {{ section.settings.intro_cta }}
+        </button>
+      </div>
+      {%- if section.settings.trust_ticker != blank -%}
+        <div class="lt-lp-quiz__trust">
+          {%- assign trust_parts = section.settings.trust_ticker | split: '·' -%}
+          {%- for part in trust_parts -%}
+            <span>{{ part | strip }}</span>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Q1 — Archetype routing {%- endcomment -%}
+    <div class="lt-lp-quiz__screen" data-screen="q1">
+      <fieldset>
+        <legend>
+          <h2 tabindex="-1">{{ section.settings.q1_question }}</h2>
+          {%- if section.settings.q1_helper != blank -%}
+            <p class="lt-lp-quiz__helper">{{ section.settings.q1_helper }}</p>
+          {%- endif -%}
+        </legend>
+        <div class="lt-lp-quiz__options" role="radiogroup">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'archetype' -%}
+              <label class="lt-lp-quiz__option" {{ block.shopify_attributes }}>
+                <input type="radio" name="q1_{{ section.id }}" value="{{ block.settings.archetype_id }}" data-q1-input>
+                <span class="lt-lp-quiz__marker" aria-hidden="true"></span>
+                <span class="lt-lp-quiz__option-label">{{ block.settings.q1_option_label }}</span>
+              </label>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </fieldset>
+    </div>
+
+    {%- comment -%} Q2 — Age anchors {%- endcomment -%}
+    <div class="lt-lp-quiz__screen" data-screen="q2">
+      <h2 tabindex="-1">{{ section.settings.q2_question }}</h2>
+      {%- if section.settings.q2_helper != blank -%}
+        <p class="lt-lp-quiz__helper">{{ section.settings.q2_helper }}</p>
+      {%- endif -%}
+      <div class="lt-lp-quiz__slider-group">
+        <div class="lt-lp-quiz__slider">
+          <label class="lt-lp-quiz__slider-label" for="q2-chrono-{{ section.id }}">
+            <span>{{ section.settings.q2_slider1_label }}</span>
+            <span class="lt-lp-quiz__slider-value" data-chrono-display>45</span>
+          </label>
+          <input
+            type="range"
+            id="q2-chrono-{{ section.id }}"
+            min="25"
+            max="75"
+            value="45"
+            step="1"
+            data-chrono>
+        </div>
+        <div class="lt-lp-quiz__slider">
+          <label class="lt-lp-quiz__slider-label" for="q2-felt-{{ section.id }}">
+            <span>{{ section.settings.q2_slider2_label }}</span>
+            <span class="lt-lp-quiz__slider-value" data-felt-display>45</span>
+          </label>
+          <input
+            type="range"
+            id="q2-felt-{{ section.id }}"
+            min="-10"
+            max="10"
+            value="0"
+            step="1"
+            data-felt-delta
+            aria-describedby="q2-hint-{{ section.id }}">
+        </div>
+        <p class="lt-lp-quiz__slider-hint" id="q2-hint-{{ section.id }}" aria-live="polite" data-slider-hint>
+          {{ section.settings.q2_hint_delta_zero }}
+        </p>
+      </div>
+      <div class="lt-lp-quiz__cta-row">
+        <button type="button" class="lt-lp-quiz__cta lt-lp-quiz__cta--primary" data-next="q3">Weiter →</button>
+      </div>
+    </div>
+
+    {%- comment -%} Q3 — Archetype-specific pain (rebuilt on enter by JS) {%- endcomment -%}
+    <div class="lt-lp-quiz__screen" data-screen="q3">
+      <fieldset>
+        <legend>
+          <h2 tabindex="-1" data-q3-question>{{ section.settings.q3_fallback_question | default: 'Wo merkst du es am stärksten?' }}</h2>
+        </legend>
+        <div class="lt-lp-quiz__options" role="radiogroup" data-q3-options></div>
+      </fieldset>
+    </div>
+
+    {%- comment -%} Q4 — Tried (multi) {%- endcomment -%}
+    <div class="lt-lp-quiz__screen" data-screen="q4">
+      <fieldset>
+        <legend>
+          <h2 tabindex="-1">{{ section.settings.q4_question }}</h2>
+          {%- if section.settings.q4_helper != blank -%}
+            <p class="lt-lp-quiz__helper">{{ section.settings.q4_helper }}</p>
+          {%- endif -%}
+        </legend>
+        <div class="lt-lp-quiz__options" data-q4-options></div>
+      </fieldset>
+      <div class="lt-lp-quiz__cta-row">
+        <button type="button" class="lt-lp-quiz__cta lt-lp-quiz__cta--primary" data-next="q5">Weiter →</button>
+      </div>
+    </div>
+
+    {%- comment -%} Q5 — Intent {%- endcomment -%}
+    <div class="lt-lp-quiz__screen" data-screen="q5">
+      <fieldset>
+        <legend>
+          <h2 tabindex="-1">{{ section.settings.q5_question }}</h2>
+        </legend>
+        <div class="lt-lp-quiz__options" role="radiogroup">
+          <label class="lt-lp-quiz__option">
+            <input type="radio" name="q5_{{ section.id }}" value="0" data-q5-input data-intent="hot">
+            <span class="lt-lp-quiz__marker" aria-hidden="true"></span>
+            <span class="lt-lp-quiz__option-label">{{ section.settings.q5_opt_1 }}</span>
+          </label>
+          <label class="lt-lp-quiz__option">
+            <input type="radio" name="q5_{{ section.id }}" value="1" data-q5-input data-intent="hot">
+            <span class="lt-lp-quiz__marker" aria-hidden="true"></span>
+            <span class="lt-lp-quiz__option-label">{{ section.settings.q5_opt_2 }}</span>
+          </label>
+          <label class="lt-lp-quiz__option">
+            <input type="radio" name="q5_{{ section.id }}" value="2" data-q5-input data-intent="hot">
+            <span class="lt-lp-quiz__marker" aria-hidden="true"></span>
+            <span class="lt-lp-quiz__option-label">{{ section.settings.q5_opt_3 }}</span>
+          </label>
+          <label class="lt-lp-quiz__option">
+            <input type="radio" name="q5_{{ section.id }}" value="3" data-q5-input data-intent="cool">
+            <span class="lt-lp-quiz__marker" aria-hidden="true"></span>
+            <span class="lt-lp-quiz__option-label">{{ section.settings.q5_opt_4 }}</span>
+          </label>
+        </div>
+      </fieldset>
+    </div>
+
+    {%- comment -%} Result {%- endcomment -%}
+    <div class="lt-lp-quiz__screen" data-screen="result">
+      <h2 class="lt-lp-quiz__anchor" tabindex="-1" data-anchor>&nbsp;</h2>
+      <p class="lt-lp-quiz__empathy" data-empathy>&nbsp;</p>
+
+      <div>
+        <p class="lt-lp-quiz__zone-heading">{{ section.settings.result_zone2_heading }}</p>
+        <ul class="lt-lp-quiz__hypotheses" data-hypotheses></ul>
+      </div>
+
+      <p class="lt-lp-quiz__zone3">{{ section.settings.result_zone3_text }}</p>
+
+      <div class="lt-lp-quiz__cta-row" data-cta-row>
+        <a href="{{ section.settings.cta_hot_primary_url }}" class="lt-lp-quiz__cta lt-lp-quiz__cta--primary" data-cta-primary data-cta-type="buy">
+          <span data-cta-primary-label>{{ section.settings.cta_hot_primary_label }}</span>
+        </a>
+        <a href="{{ section.settings.cta_hot_secondary_url }}" class="lt-lp-quiz__cta lt-lp-quiz__cta--secondary" data-cta-secondary data-cta-type="consult">
+          <span data-cta-secondary-label>{{ section.settings.cta_hot_secondary_label }}</span>
+        </a>
+      </div>
+
+      <p class="lt-lp-quiz__result-trust">{{ section.settings.result_trust_line }}</p>
+      <p class="lt-lp-quiz__scroll-invite">{{ section.settings.result_zone5_invite }}</p>
+    </div>
+
+  </div>
+
+  {%- comment -%} Data payload for archetypes {%- endcomment -%}
+  <script type="application/json" data-archetypes>
+    {
+      {%- assign first_arch = true -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'archetype' -%}
+          {%- if first_arch == false -%},{%- endif -%}
+          {%- assign first_arch = false -%}
+          {{ block.settings.archetype_id | json }}: {
+            "q3_question": {{ block.settings.q3_question | json }},
+            "q3_options": {{ block.settings.q3_options_json | default: '[]' }},
+            "empathy_line": {{ block.settings.empathy_line | json }},
+            "hypothesis_primary": {{ block.settings.result_hypothesis_primary | json }},
+            "hypothesis_secondary": {{ block.settings.result_hypothesis_secondary | json }},
+            "hypothesis_tertiary": {{ block.settings.result_hypothesis_tertiary | json }}
+          }
+        {%- endif -%}
+      {%- endfor -%}
+    }
+  </script>
+  <script type="application/json" data-config>
+    {
+      "q4_options": {{ section.settings.q4_options_json | default: '[]' }},
+      "anchor_pos": {{ section.settings.result_anchor_pos | json }},
+      "anchor_neg": {{ section.settings.result_anchor_neg | json }},
+      "anchor_zero": {{ section.settings.result_anchor_zero | json }},
+      "hint_pos": {{ section.settings.q2_hint_delta_pos | json }},
+      "hint_neg": {{ section.settings.q2_hint_delta_neg | json }},
+      "hint_zero": {{ section.settings.q2_hint_delta_zero | json }},
+      "cta_hot_primary_label": {{ section.settings.cta_hot_primary_label | json }},
+      "cta_hot_primary_url": {{ section.settings.cta_hot_primary_url | json }},
+      "cta_hot_secondary_label": {{ section.settings.cta_hot_secondary_label | json }},
+      "cta_hot_secondary_url": {{ section.settings.cta_hot_secondary_url | json }},
+      "cta_cool_primary_label": {{ section.settings.cta_cool_primary_label | json }},
+      "cta_cool_primary_url": {{ section.settings.cta_cool_primary_url | json }},
+      "cta_cool_secondary_label": {{ section.settings.cta_cool_secondary_label | json }},
+      "cta_cool_secondary_url": {{ section.settings.cta_cool_secondary_url | json }}
+    }
+  </script>
+</section>
+
+<script>
+  (function () {
+    var root = document.getElementById('lt-lp-conversion-quiz-{{ section.id }}');
+    if (!root) return;
+
+    var archetypes = {};
+    var config = {};
+    try { archetypes = JSON.parse(root.querySelector('[data-archetypes]').textContent); } catch (e) {}
+    try { config = JSON.parse(root.querySelector('[data-config]').textContent); } catch (e) {}
+
+    var screens = {};
+    root.querySelectorAll('[data-screen]').forEach(function (el) {
+      screens[el.getAttribute('data-screen')] = el;
+    });
+
+    var state = {
+      archetype: null,
+      age_chrono: 45,
+      age_felt_delta: 0,
+      pain_selection: null,
+      tried: [],
+      intent: null
+    };
+    var history = [];
+    var current = 'intro';
+    var order = ['intro', 'q1', 'q2', 'q3', 'q4', 'q5', 'result'];
+    var progressEl = root.querySelector('[data-progress]');
+    var progressItems = root.querySelectorAll('.lt-lp-quiz__progress-list li');
+    var backBtn = root.querySelector('[data-back]');
+
+    function pushDL(payload) {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push(payload);
+    }
+
+    function updateProgress(screen) {
+      var idx = order.indexOf(screen);
+      var isQuestion = idx >= 1 && idx <= 5;
+      var isResult = screen === 'result';
+      if (isQuestion) {
+        progressEl.hidden = false;
+        progressItems.forEach(function (li, i) {
+          li.classList.remove('is-done');
+          li.removeAttribute('aria-current');
+          if (i < idx - 1) li.classList.add('is-done');
+          if (i === idx - 1) li.setAttribute('aria-current', 'step');
+        });
+      } else if (isResult) {
+        progressEl.hidden = false;
+        progressItems.forEach(function (li) {
+          li.classList.add('is-done');
+          li.removeAttribute('aria-current');
+        });
+      } else {
+        progressEl.hidden = true;
+      }
+      if (backBtn) backBtn.hidden = !(isQuestion && idx >= 2);
+    }
+
+    function focusHeading(screen) {
+      var h = screens[screen].querySelector('h2');
+      if (h) {
+        setTimeout(function () { try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); } }, 60);
+      }
+    }
+
+    function go(screen, opts) {
+      opts = opts || {};
+      if (!screens[screen]) return;
+      if (!opts.back && current !== screen) history.push(current);
+      Object.keys(screens).forEach(function (k) { screens[k].classList.remove('is-active'); });
+      screens[screen].classList.add('is-active');
+      current = screen;
+      updateProgress(screen);
+      focusHeading(screen);
+      pushDL({ event: 'lt_quiz_step', step: screen, archetype: state.archetype, intent: state.intent });
+      if (screen === 'q3') renderQ3();
+      if (screen === 'result') renderResult();
+    }
+
+    function goBack() {
+      if (!history.length) return;
+      var prev = history.pop();
+      go(prev, { back: true });
+    }
+
+    // Intro & generic "next" buttons
+    root.querySelectorAll('[data-next]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        go(btn.getAttribute('data-next'));
+      });
+    });
+
+    if (backBtn) backBtn.addEventListener('click', goBack);
+
+    // Q1 — archetype
+    root.querySelectorAll('[data-q1-input]').forEach(function (input) {
+      input.addEventListener('change', function () {
+        if (!input.checked) return;
+        state.archetype = input.value;
+        go('q2');
+      });
+    });
+
+    // Q2 — sliders
+    var chronoInput = root.querySelector('[data-chrono]');
+    var feltInput = root.querySelector('[data-felt-delta]');
+    var chronoDisplay = root.querySelector('[data-chrono-display]');
+    var feltDisplay = root.querySelector('[data-felt-display]');
+    var hintEl = root.querySelector('[data-slider-hint]');
+
+    function updateSliderDisplays() {
+      state.age_chrono = parseInt(chronoInput.value, 10);
+      state.age_felt_delta = parseInt(feltInput.value, 10);
+      var felt = state.age_chrono + state.age_felt_delta;
+      chronoDisplay.textContent = state.age_chrono;
+      feltDisplay.textContent = felt;
+      var hint;
+      if (state.age_felt_delta > 0) hint = config.hint_pos;
+      else if (state.age_felt_delta < 0) hint = config.hint_neg;
+      else hint = config.hint_zero;
+      hintEl.textContent = hint || '';
+    }
+    if (chronoInput && feltInput) {
+      chronoInput.addEventListener('input', updateSliderDisplays);
+      feltInput.addEventListener('input', updateSliderDisplays);
+      updateSliderDisplays();
+    }
+
+    // Q3 — rebuild options per archetype
+    function renderQ3() {
+      var key = state.archetype;
+      var data = archetypes[key];
+      if (!data) return;
+      var qEl = screens.q3.querySelector('[data-q3-question]');
+      var opts = screens.q3.querySelector('[data-q3-options]');
+      if (qEl) qEl.textContent = data.q3_question || '';
+      opts.innerHTML = '';
+      (data.q3_options || []).forEach(function (label, i) {
+        var wrap = document.createElement('label');
+        wrap.className = 'lt-lp-quiz__option';
+        wrap.innerHTML =
+          '<input type="radio" name="q3_{{ section.id }}" value="' + i + '" data-q3-input>' +
+          '<span class="lt-lp-quiz__marker" aria-hidden="true"></span>' +
+          '<span class="lt-lp-quiz__option-label"></span>';
+        wrap.querySelector('.lt-lp-quiz__option-label').textContent = label;
+        var input = wrap.querySelector('input');
+        if (state.pain_selection === i) input.checked = true;
+        input.addEventListener('change', function () {
+          if (!input.checked) return;
+          state.pain_selection = i;
+          go('q4');
+        });
+        opts.appendChild(wrap);
+      });
+    }
+
+    // Q4 — build tried list
+    var q4Opts = screens.q4.querySelector('[data-q4-options]');
+    function renderQ4() {
+      if (!q4Opts) return;
+      if (q4Opts.childElementCount) return; // build once
+      (config.q4_options || []).forEach(function (label, i) {
+        var wrap = document.createElement('label');
+        wrap.className = 'lt-lp-quiz__option lt-lp-quiz__option--checkbox';
+        wrap.innerHTML =
+          '<input type="checkbox" value="' + i + '" data-q4-input>' +
+          '<span class="lt-lp-quiz__marker" aria-hidden="true"></span>' +
+          '<span class="lt-lp-quiz__option-label"></span>';
+        wrap.querySelector('.lt-lp-quiz__option-label').textContent = label;
+        wrap.querySelector('input').addEventListener('change', readQ4);
+        q4Opts.appendChild(wrap);
+      });
+    }
+    function readQ4() {
+      state.tried = Array.prototype.map.call(
+        q4Opts.querySelectorAll('input:checked'),
+        function (el) {
+          return (config.q4_options || [])[parseInt(el.value, 10)] || '';
+        }
+      ).filter(Boolean);
+    }
+    renderQ4();
+
+    // Q5 — intent
+    root.querySelectorAll('[data-q5-input]').forEach(function (input) {
+      input.addEventListener('change', function () {
+        if (!input.checked) return;
+        state.intent = input.getAttribute('data-intent');
+        go('result');
+      });
+    });
+
+    // Result rendering
+    function renderResult() {
+      var data = archetypes[state.archetype] || {};
+      var felt = state.age_chrono + state.age_felt_delta;
+      var tpl;
+      if (state.age_felt_delta > 0) tpl = config.anchor_pos;
+      else if (state.age_felt_delta < 0) tpl = config.anchor_neg;
+      else tpl = config.anchor_zero;
+      var anchorText = (tpl || '')
+        .replace(/\{chrono\}/g, state.age_chrono)
+        .replace(/\{felt\}/g, felt);
+      root.querySelector('[data-anchor]').textContent = anchorText;
+      root.querySelector('[data-empathy]').textContent = data.empathy_line || '';
+
+      var list = root.querySelector('[data-hypotheses]');
+      list.innerHTML = '';
+      [data.hypothesis_primary, data.hypothesis_secondary, data.hypothesis_tertiary].forEach(function (text) {
+        if (!text) return;
+        var li = document.createElement('li');
+        li.className = 'lt-lp-quiz__hypothesis';
+        li.textContent = text;
+        list.appendChild(li);
+      });
+
+      // CTA swap by intent (both paths go to PDP; copy differs)
+      var isCool = state.intent === 'cool';
+      var primary = root.querySelector('[data-cta-primary]');
+      var secondary = root.querySelector('[data-cta-secondary]');
+      primary.href = isCool ? config.cta_cool_primary_url : config.cta_hot_primary_url;
+      primary.querySelector('[data-cta-primary-label]').textContent = isCool
+        ? config.cta_cool_primary_label
+        : config.cta_hot_primary_label;
+      secondary.href = isCool ? config.cta_cool_secondary_url : config.cta_hot_secondary_url;
+      secondary.querySelector('[data-cta-secondary-label]').textContent = isCool
+        ? config.cta_cool_secondary_label
+        : config.cta_hot_secondary_label;
+
+      pushDL({
+        event: 'lt_quiz_result_shown',
+        archetype: state.archetype,
+        age_chrono: state.age_chrono,
+        age_felt_delta: state.age_felt_delta,
+        pain_selection: state.pain_selection,
+        tried: state.tried,
+        intent: state.intent
+      });
+    }
+
+    // CTA click analytics
+    root.querySelectorAll('[data-cta-type]').forEach(function (el) {
+      el.addEventListener('click', function () {
+        pushDL({
+          event: 'lt_quiz_cta_click',
+          cta_type: el.getAttribute('data-cta-type'),
+          archetype: state.archetype,
+          intent: state.intent
+        });
+      });
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "LP Conversion Quiz",
+  "tag": "section",
+  "class": "shopify-section-lt-lp-conversion-quiz",
+  "settings": [
+    { "type": "header", "content": "Farben & Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#f7f7f4" },
+    { "type": "color", "id": "color_text", "label": "Text", "default": "#26251e" },
+    { "type": "color", "id": "color_accent", "label": "Akzent", "default": "#2a6b5c" },
+    { "type": "color", "id": "color_card_bg", "label": "Karten-Hintergrund", "default": "#f2f1ed" },
+    { "type": "range", "id": "padding_top", "label": "Padding oben", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding unten", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+
+    { "type": "header", "content": "Intro" },
+    { "type": "text", "id": "intro_eyebrow", "label": "Eyebrow", "default": "60 Sekunden · 5 Fragen · dein personalisiertes Ergebnis" },
+    { "type": "text", "id": "intro_headline", "label": "Headline", "default": "Wie schnell dein Körper wirklich altert, lässt sich messen." },
+    { "type": "textarea", "id": "intro_subhead", "label": "Subhead", "default": "In einer Minute zeigen wir dir, welche Marker der AGE & DNA-Test bei dir in den Fokus rückt — und ob er zu deiner Frage passt." },
+    { "type": "text", "id": "intro_cta", "label": "CTA", "default": "Quiz starten →" },
+    { "type": "text", "id": "trust_ticker", "label": "Trust-Ticker (Werte mit · getrennt)", "default": "Eurofins · 187 Reports · Ärztlich entwickelt" },
+
+    { "type": "header", "content": "Frage 1 — Archetyp" },
+    { "type": "text", "id": "q1_question", "label": "Frage", "default": "Was hat dich hergebracht?" },
+    { "type": "text", "id": "q1_helper", "label": "Helper", "default": "Eine Antwort reicht — wir passen alles weitere daran an." },
+
+    { "type": "header", "content": "Frage 2 — Alters-Anker" },
+    { "type": "text", "id": "q2_question", "label": "Frage", "default": "Wie alt bist du — und wie alt fühlst du dich?" },
+    { "type": "text", "id": "q2_helper", "label": "Helper", "default": "Bewege beide Slider. Die Lücke ist oft das Interessante." },
+    { "type": "text", "id": "q2_slider1_label", "label": "Label Slider 1", "default": "Chronologisches Alter" },
+    { "type": "text", "id": "q2_slider2_label", "label": "Label Slider 2", "default": "Gefühltes Alter" },
+    { "type": "textarea", "id": "q2_hint_delta_pos", "label": "Hinweis (fühlt sich älter)", "default": "Die Differenz zwischen Gefühl und Ausweis-Alter ist oft ein erster Hinweis. Der Test misst, wie nah deine Zellen an dem sind, was du fühlst." },
+    { "type": "textarea", "id": "q2_hint_delta_neg", "label": "Hinweis (fühlt sich jünger)", "default": "Du fühlst dich jünger, als dein Pass sagt. Der Test zeigt, ob dein Körper das bestätigt." },
+    { "type": "textarea", "id": "q2_hint_delta_zero", "label": "Hinweis (stimmt überein)", "default": "Dein Gefühl und dein Ausweis-Alter stimmen überein. Der Test zeigt, ob deine Zellen das bestätigen." },
+
+    { "type": "header", "content": "Frage 3 — Fallback" },
+    { "type": "text", "id": "q3_fallback_question", "label": "Fallback-Frage", "default": "Wo merkst du es am stärksten?" },
+
+    { "type": "header", "content": "Frage 4 — Versuchtes" },
+    { "type": "text", "id": "q4_question", "label": "Frage", "default": "Was hast du bisher versucht? Mehrfachauswahl erlaubt." },
+    { "type": "text", "id": "q4_helper", "label": "Helper", "default": "Mehrere Antworten möglich." },
+    { "type": "textarea", "id": "q4_options_json", "label": "Optionen (JSON-Array)", "default": "[\"Bluttests beim Hausarzt\",\"Fitness-Tracker (Oura, Whoop, Apple Watch)\",\"Supplements und Nahrungsergänzung\",\"Ernährungsumstellung\",\"Sport und regelmäßige Bewegung\",\"Ehrlich gesagt: nichts Strukturiertes bisher\"]" },
+
+    { "type": "header", "content": "Frage 5 — Intent" },
+    { "type": "text", "id": "q5_question", "label": "Frage", "default": "Wenn du dein Ergebnis in 6 Wochen öffnest — was willst du darin finden?" },
+    { "type": "text", "id": "q5_opt_1", "label": "Option 1 (hot)", "default": "Eine Zahl: wie alt mein Körper biologisch wirklich ist" },
+    { "type": "text", "id": "q5_opt_2", "label": "Option 2 (hot)", "default": "Einen konkreten Plan: was ich ändern soll, und warum" },
+    { "type": "text", "id": "q5_opt_3", "label": "Option 3 (hot)", "default": "Eine Baseline, die ich in 6–12 Monaten erneut messen kann" },
+    { "type": "text", "id": "q5_opt_4", "label": "Option 4 (cool)", "default": "Ich will das grundsätzlich verstehen, bevor ich entscheide" },
+
+    { "type": "header", "content": "Result — Anker" },
+    { "type": "textarea", "id": "result_anchor_pos", "label": "Anker (fühlt sich älter)", "default": "Du bist {chrono}. Du fühlst dich wie {felt}. Und niemand sagt dir, ob dein Körper dir recht gibt." },
+    { "type": "textarea", "id": "result_anchor_neg", "label": "Anker (fühlt sich jünger)", "default": "Du bist {chrono}. Du fühlst dich wie {felt} — jünger. Der Test zeigt dir, ob dein Körper das bestätigt." },
+    { "type": "textarea", "id": "result_anchor_zero", "label": "Anker (stimmt überein)", "default": "Du bist {chrono}. Du fühlst dich genauso. Aber „gesund fühlen\" und „gesund altern\" sind zwei verschiedene Dinge." },
+
+    { "type": "header", "content": "Result — Zonen" },
+    { "type": "text", "id": "result_zone2_heading", "label": "Heading Zone 2", "default": "Was dein Test wahrscheinlich zeigen wird" },
+    { "type": "textarea", "id": "result_zone3_text", "label": "Text Zone 3", "default": "Dein Test analysiert gleichzeitig 187 DNA-Reports aus 16 Kategorien. Du bekommst das Ganze, nicht nur den Ausschnitt." },
+    { "type": "textarea", "id": "result_zone5_invite", "label": "Scroll-Einladung Zone 5", "default": "Wie der Test entstanden ist, was ihn von anderen unterscheidet und was andere Kund:innen erlebt haben ↓" },
+    { "type": "text", "id": "result_trust_line", "label": "Trust-Zeile", "default": "Eurofins · 50 Kits/Woche · DSGVO · Kit-Ersatz-Garantie" },
+
+    { "type": "header", "content": "CTAs — Hot-Pfad" },
+    { "type": "text", "id": "cta_hot_primary_label", "label": "Hot Primary Label", "default": "AGE & DNA-Test starten → 349 €" },
+    { "type": "url", "id": "cta_hot_primary_url", "label": "Hot Primary URL", "default": "/products/age-dna-test" },
+    { "type": "text", "id": "cta_hot_secondary_label", "label": "Hot Secondary Label", "default": "Oder: 15-Min-Beratung zuerst" },
+    { "type": "url", "id": "cta_hot_secondary_url", "label": "Hot Secondary URL", "default": "/pages/longevity-coach" },
+
+    { "type": "header", "content": "CTAs — Cool-Pfad" },
+    { "type": "text", "id": "cta_cool_primary_label", "label": "Cool Primary Label", "default": "Ich will meinen Test — mit Kit-Ersatz-Garantie" },
+    { "type": "url", "id": "cta_cool_primary_url", "label": "Cool Primary URL", "default": "/products/age-dna-test" },
+    { "type": "text", "id": "cta_cool_secondary_label", "label": "Cool Secondary Label", "default": "Oder: 15 Min mit einem Longevity-Experten sprechen" },
+    { "type": "url", "id": "cta_cool_secondary_url", "label": "Cool Secondary URL", "default": "/pages/longevity-coach" }
+  ],
+  "blocks": [
+    {
+      "type": "archetype",
+      "name": "Archetyp",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "select",
+          "id": "archetype_id",
+          "label": "Archetyp-ID",
+          "default": "tired",
+          "options": [
+            { "value": "tired", "label": "Müder Hochleister" },
+            { "value": "measurer", "label": "Der Messende" },
+            { "value": "vigilant", "label": "Der Wachsame" },
+            { "value": "optimizer", "label": "Der Optimierer" }
+          ]
+        },
+        { "type": "text", "id": "q1_option_label", "label": "Q1 Option-Label", "default": "Ich fühle mich älter, als ich sein müsste — Energie, Regeneration, Fokus" },
+        { "type": "text", "id": "q3_question", "label": "Q3 Frage (Kopf)", "default": "Wo merkst du es am stärksten?" },
+        { "type": "textarea", "id": "q3_options_json", "label": "Q3 Optionen (JSON-Array, 5 Strings)", "default": "[\"Energielevel — der Nachmittag fällt mir schwerer als früher\",\"Sport & Regeneration — Erholung dauert länger als sie sollte\",\"Kopf — Fokus, Klarheit, Stimmung\",\"Schlaf — kürzer, unruhiger oder weniger erholsam\",\"Aussehen — Haut, Haare, Gesicht\"]" },
+        { "type": "textarea", "id": "empathy_line", "label": "Empathie-Satz (Result Zone 1)", "default": "Du merkst Dinge, die im Standard-Check nicht auftauchen. Das ist keine Einbildung — es ist das, was Bluttests nicht messen." },
+        { "type": "textarea", "id": "result_hypothesis_primary", "label": "Hypothese 1", "default": "Biologisches Alter (MethylPace-Score): Menschen mit deinem Profil liegen typisch +2 bis +4 Jahre über ihrem chronologischen Alter. Der Test zeigt deinen echten Wert." },
+        { "type": "textarea", "id": "result_hypothesis_secondary", "label": "Hypothese 2", "default": "EpiVitality + Entzündungs-Profil: Das sind die zwei Marker, die erklären, warum du dich älter fühlst, obwohl deine Standard-Labs okay aussehen." },
+        { "type": "textarea", "id": "result_hypothesis_tertiary", "label": "Hypothese 3", "default": "Supplement-Verträglichkeit + Schlaf-Genetik: Warum dein bisheriger Stack nicht greift und was bei dir wirkt." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LP Conversion Quiz",
+      "blocks": [
+        { "type": "archetype", "settings": { "archetype_id": "tired", "q1_option_label": "Ich fühle mich älter, als ich sein müsste — Energie, Regeneration, Fokus", "q3_question": "Wo merkst du es am stärksten?", "q3_options_json": "[\"Energielevel — der Nachmittag fällt mir schwerer als früher\",\"Sport & Regeneration — Erholung dauert länger als sie sollte\",\"Kopf — Fokus, Klarheit, Stimmung\",\"Schlaf — kürzer, unruhiger oder weniger erholsam\",\"Aussehen — Haut, Haare, Gesicht\"]", "empathy_line": "Du merkst Dinge, die im Standard-Check nicht auftauchen. Das ist keine Einbildung — es ist das, was Bluttests nicht messen." } },
+        { "type": "archetype", "settings": { "archetype_id": "measurer", "q1_option_label": "Ich will wissen, wie gesund ich wirklich altere — nicht nur, was der Hausarzt sagt", "q3_question": "Welche Kennzahl fehlt dir bisher?", "q3_options_json": "[\"Wie schnell ich biologisch altere\",\"Wie stark meine stille Zellentzündung ist\",\"Wie mein Immunsystem und meine Vitalität jetzt stehen\",\"Meine genetischen Risiken für Herz, Muskeln, Kognition\",\"Wie ich auf Supplements und Ernährung individuell reagiere\"]", "empathy_line": "Standardwerte zeigen, ob du krank bist. Sie zeigen nicht, wie gesund du alterst. Genau dafür ist der Test gebaut." } },
+        { "type": "archetype", "settings": { "archetype_id": "vigilant", "q1_option_label": "Bei jemandem in meiner Familie ist etwas passiert — ich will vorbeugen", "q3_question": "Worum geht es konkret?", "q3_options_json": "[\"Herz-Kreislauf (Infarkt, Blutdruck, Cholesterin)\",\"Kognition & Demenz\",\"Krebsrisiken und Entzündungstendenz\",\"Muskelabbau im Alter (Sarkopenie)\",\"Knochen & Gelenke\"]", "empathy_line": "Familiengeschichte ist ein Signal, keine Diagnose. Der Test zeigt, welche Signale in deinen Genen tatsächlich angelegt sind — und welche nicht." } },
+        { "type": "archetype", "settings": { "archetype_id": "optimizer", "q1_option_label": "Ich bin fit und wissenschaftsaffin — ich will optimieren auf Basis von Daten", "q3_question": "Was ist die Baseline, die du willst?", "q3_options_json": "[\"Biologisches Alter als Ausgangspunkt für dein Protokoll\",\"Genetische Sport- und Ernährungs-Signatur\",\"Supplement-Verträglichkeit (was wirkt bei dir)\",\"Stress-Resilienz und Recovery-Profil\",\"Alles zusammen — ich mag keine halben Antworten\"]", "empathy_line": "Protokolle aus Podcasts sind Durchschnittswerte. Der Test zeigt dir, welche bei dir wirken — und welche du ignorieren kannst." } }
+      ]
+    }
+  ]
+}
+{% endschema %}
