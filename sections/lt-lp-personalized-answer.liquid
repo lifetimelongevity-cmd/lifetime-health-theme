@@ -1,9 +1,12 @@
 {% comment %}
   lt-lp-personalized-answer
   Surface: warm editorial answer block
-  Dominant element: the personalized headline and dense checklist
+  Dominant element: hero-card metric + personalized headline
   CTA: none
-  Quality move: the relevant categories stay tight while the remaining scope is grouped into calm thematic clusters
+  Quality moves:
+    - dark hero-card creates visual magnet on light bg
+    - secondary question builds commitment without pressure
+    - compact rest avoids scope overwhelm; expandable for curious readers
 {% endcomment %}
 
 {% style %}
@@ -14,6 +17,10 @@
     --lt-lp-pa-muted: {{ section.settings.color_text | color_modify: 'alpha', 0.64 }};
     --lt-lp-pa-border: {{ section.settings.color_text | color_modify: 'alpha', 0.12 }};
     --lt-lp-pa-accent: {{ section.settings.color_accent }};
+    --lt-lp-pa-accent-soft: {{ section.settings.color_accent | color_modify: 'alpha', 0.08 }};
+    --lt-lp-pa-hero-card-bg: {{ section.settings.hero_card_bg }};
+    --lt-lp-pa-hero-card-text: {{ section.settings.hero_card_text }};
+    --lt-lp-pa-hero-card-muted: {{ section.settings.hero_card_text | color_modify: 'alpha', 0.56 }};
     --lt-lp-pa-padding-top: {{ section.settings.padding_top }}px;
     --lt-lp-pa-padding-bottom: {{ section.settings.padding_bottom }}px;
   }
@@ -34,6 +41,9 @@
           data-goal-id="{{ block.settings.goal_id | escape }}"
           data-highlighted-categories="{{ block.settings.highlighted_categories | escape }}"
           data-micro-texts="{{ block.settings.micro_texts_json | escape }}"
+          data-hero-category="{{ block.settings.hero_category | escape }}"
+          data-secondary-options="{{ block.settings.secondary_options_json | escape }}"
+          data-confirmation-texts="{{ block.settings.confirmation_texts_json | escape }}"
           hidden
           {{ block.shopify_attributes }}
         >
@@ -43,11 +53,51 @@
             <p class="lt-lp-pa__subheadline">{{ block.settings.result_subheadline | escape }}</p>
           {%- endif -%}
 
+          {%- if block.settings.hero_category != blank -%}
+            <div class="lt-lp-pa__hero-card" data-pa-hero-card>
+              {%- if section.settings.hero_card_label != blank -%}
+                <p class="lt-lp-pa__hero-card-kicker">{{ section.settings.hero_card_label | escape }}</p>
+              {%- endif -%}
+              <p class="lt-lp-pa__hero-card-title">{{ block.settings.hero_category | escape }}</p>
+              {%- if block.settings.hero_category_subtitle != blank -%}
+                <p class="lt-lp-pa__hero-card-sub">{{ block.settings.hero_category_subtitle | escape }}</p>
+              {%- endif -%}
+              <p class="lt-lp-pa__hero-card-micro" data-pa-hero-micro></p>
+            </div>
+          {%- endif -%}
+
           <div class="lt-lp-pa__checklist" data-pa-checklist></div>
 
+          {%- if block.settings.secondary_question != blank -%}
+            <div class="lt-lp-pa__secondary" data-pa-secondary>
+              <p class="lt-lp-pa__secondary-question">{{ block.settings.secondary_question | escape }}</p>
+              <div
+                class="lt-lp-pa__secondary-options"
+                role="group"
+                aria-label="{{ block.settings.secondary_question | escape }}"
+                data-pa-secondary-options
+              ></div>
+              <p class="lt-lp-pa__secondary-confirmation" data-pa-confirmation></p>
+            </div>
+          {%- endif -%}
+
           <div class="lt-lp-pa__rest">
-            <p class="lt-lp-pa__rest-label">{{ section.settings.rest_categories_label | escape }}</p>
-            <div class="lt-lp-pa__rest-clusters" data-pa-rest></div>
+            {%- if section.settings.rest_compact_text != blank -%}
+              <p class="lt-lp-pa__rest-compact">{{ section.settings.rest_compact_text | escape }}</p>
+              {%- if section.settings.rest_expand_label != blank -%}
+                <button
+                  class="lt-lp-pa__rest-expand-btn"
+                  data-pa-expand-btn
+                  data-expand-label="{{ section.settings.rest_expand_label | escape }}"
+                  data-collapse-label="{{ section.settings.rest_collapse_label | escape }}"
+                  type="button"
+                  aria-expanded="false"
+                >{{ section.settings.rest_expand_label | escape }}</button>
+              {%- endif -%}
+            {%- else -%}
+              <p class="lt-lp-pa__rest-label">{{ section.settings.rest_categories_label | escape }}</p>
+            {%- endif -%}
+            <div class="lt-lp-pa__rest-clusters" data-pa-rest hidden></div>
           </div>
 
           {%- if section.settings.transition_cta_text != blank -%}
@@ -91,13 +141,11 @@
 
       function parseClusterConfig() {
         var parsed = {};
-
         try {
           parsed = JSON.parse(categoryClustersEl && categoryClustersEl.dataset ? categoryClustersEl.dataset.categoryClusters : '{}');
         } catch (error) {
           parsed = {};
         }
-
         return parsed;
       }
 
@@ -113,20 +161,13 @@
 
           var filteredItems = items.filter(function(item) {
             var normalizedItem = normalize(item);
-
-            if (!normalizedItem || highlightedLookup.indexOf(normalizedItem) !== -1) {
-              return false;
-            }
-
+            if (!normalizedItem || highlightedLookup.indexOf(normalizedItem) !== -1) return false;
             seen[normalizedItem] = true;
             return true;
           });
 
           if (filteredItems.length > 0) {
-            clusterEntries.push({
-              label: label,
-              items: filteredItems
-            });
+            clusterEntries.push({ label: label, items: filteredItems });
           }
         });
 
@@ -136,13 +177,77 @@
         });
 
         if (uncategorized.length > 0) {
-          clusterEntries.push({
-            label: 'Weitere Bereiche',
-            items: uncategorized
-          });
+          clusterEntries.push({ label: 'Weitere Bereiche', items: uncategorized });
         }
 
         return clusterEntries;
+      }
+
+      function renderSecondaryQuestion(activeState) {
+        var secondaryEl = activeState.querySelector('[data-pa-secondary]');
+        if (!secondaryEl) return;
+
+        var optionsEl = secondaryEl.querySelector('[data-pa-secondary-options]');
+        var confirmationEl = secondaryEl.querySelector('[data-pa-confirmation]');
+
+        var options = [];
+        var confirmationTexts = {};
+
+        try { options = JSON.parse(activeState.dataset.secondaryOptions || '[]'); } catch(e) { options = []; }
+        try { confirmationTexts = JSON.parse(activeState.dataset.confirmationTexts || '{}'); } catch(e) { confirmationTexts = {}; }
+
+        if (confirmationEl) {
+          confirmationEl.textContent = '';
+          confirmationEl.classList.remove('is-visible');
+        }
+
+        if (!optionsEl || !options.length) return;
+
+        optionsEl.innerHTML = options.map(function(option) {
+          return '<button type="button" class="lt-lp-pa__secondary-option" data-option="' + escapeHtml(option) + '" aria-pressed="false">' +
+            '<span class="lt-lp-pa__secondary-option-marker" aria-hidden="true"></span>' +
+            '<span class="lt-lp-pa__secondary-option-label">' + escapeHtml(option) + '</span>' +
+          '</button>';
+        }).join('');
+
+        Array.prototype.slice.call(optionsEl.querySelectorAll('[data-option]')).forEach(function(btn) {
+          btn.addEventListener('click', function() {
+            Array.prototype.slice.call(optionsEl.querySelectorAll('[data-option]')).forEach(function(b) {
+              b.classList.remove('is-active');
+              b.setAttribute('aria-pressed', 'false');
+            });
+            btn.classList.add('is-active');
+            btn.setAttribute('aria-pressed', 'true');
+
+            var confirmation = confirmationTexts[btn.dataset.option] || '';
+            if (confirmationEl) {
+              confirmationEl.textContent = confirmation;
+              confirmationEl.classList.toggle('is-visible', Boolean(confirmation));
+            }
+          });
+        });
+      }
+
+      function initRestExpand(activeState) {
+        var expandBtn = activeState.querySelector('[data-pa-expand-btn]');
+        var restEl = activeState.querySelector('[data-pa-rest]');
+        if (!expandBtn || !restEl) return;
+
+        /* clone removes stale listeners from previous goal activations */
+        var freshBtn = expandBtn.cloneNode(true);
+        expandBtn.parentNode.replaceChild(freshBtn, expandBtn);
+
+        freshBtn.setAttribute('aria-expanded', 'false');
+        restEl.hidden = true;
+
+        freshBtn.addEventListener('click', function() {
+          var isExpanded = freshBtn.getAttribute('aria-expanded') === 'true';
+          freshBtn.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+          restEl.hidden = isExpanded;
+          freshBtn.textContent = isExpanded
+            ? (freshBtn.dataset.expandLabel || '')
+            : (freshBtn.dataset.collapseLabel || '');
+        });
       }
 
       function setGoal(goalId, shouldScroll) {
@@ -166,17 +271,25 @@
             .filter(Boolean);
 
           var microTexts = {};
-          try {
-            microTexts = JSON.parse(activeState.dataset.microTexts || '{}');
-          } catch (error) {
-            microTexts = {};
+          try { microTexts = JSON.parse(activeState.dataset.microTexts || '{}'); } catch (error) { microTexts = {}; }
+
+          var heroCategory = (activeState.dataset.heroCategory || '').trim();
+
+          /* fill hero card micro-text from micro_texts_json */
+          var heroMicroEl = activeState.querySelector('[data-pa-hero-micro]');
+          if (heroMicroEl) {
+            heroMicroEl.textContent = (heroCategory && microTexts[heroCategory]) ? microTexts[heroCategory] : '';
           }
 
+          /* checklist: skip hero category — it's already shown in the card */
           var checklistEl = activeState.querySelector('[data-pa-checklist]');
           if (checklistEl) {
-            checklistEl.innerHTML = highlighted.map(function(title) {
-              var micro = microTexts[title] || '';
+            var checklistCategories = highlighted.filter(function(cat) {
+              return normalize(cat) !== normalize(heroCategory);
+            });
 
+            checklistEl.innerHTML = checklistCategories.map(function(title) {
+              var micro = microTexts[title] || '';
               return '<div class="lt-lp-pa__check-row">' +
                 '<span class="lt-lp-pa__check-icon" aria-hidden="true">' +
                   '<svg viewBox="0 0 24 24" fill="none">' +
@@ -189,6 +302,10 @@
             }).join('');
           }
 
+          /* secondary question */
+          renderSecondaryQuestion(activeState);
+
+          /* rest clusters + expand/collapse init */
           var restEl = activeState.querySelector('[data-pa-rest]');
           if (restEl) {
             var clusters = buildRestClusters(highlighted);
@@ -199,6 +316,8 @@
               '</div>';
             }).join('');
           }
+
+          initRestExpand(activeState);
         }
 
         section.dataset.activeGoal = activeState ? normalizedGoalId : '';
@@ -286,6 +405,56 @@
   color: var(--lt-lp-pa-muted);
 }
 
+/* ─── Hero card ─────────────────────────────────── */
+.lt-lp-pa__hero-card {
+  margin-top: var(--space-6);
+  padding: var(--space-6);
+  background: var(--lt-lp-pa-hero-card-bg);
+  border-radius: var(--radius-lg);
+}
+
+.lt-lp-pa__hero-card-kicker {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lt-lp-pa-accent);
+}
+
+.lt-lp-pa__hero-card-title {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--lt-lp-pa-hero-card-text);
+}
+
+.lt-lp-pa__hero-card-sub {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-body);
+  color: var(--lt-lp-pa-hero-card-muted);
+}
+
+.lt-lp-pa__hero-card-micro {
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--lt-lp-pa-hero-card-muted);
+}
+
+.lt-lp-pa__hero-card-micro:empty {
+  display: none;
+}
+
+/* ─── Checklist ─────────────────────────────────── */
 .lt-lp-pa__checklist {
   display: grid;
   gap: var(--space-2);
@@ -334,8 +503,133 @@
   color: var(--lt-lp-pa-muted);
 }
 
+/* ─── Secondary question ────────────────────────── */
+.lt-lp-pa__secondary {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--lt-lp-pa-border);
+}
+
+.lt-lp-pa__secondary-question {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+  color: var(--lt-lp-pa-text);
+}
+
+.lt-lp-pa__secondary-options {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+.lt-lp-pa__secondary-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--space-3) var(--space-4);
+  background: transparent;
+  border: 1px solid var(--lt-lp-pa-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color var(--ease-default), background var(--ease-default);
+}
+
+.lt-lp-pa__secondary-option-marker {
+  flex-shrink: 0;
+  width: var(--space-5);
+  height: var(--space-5);
+  border: 1px solid var(--lt-lp-pa-border);
+  border-radius: 50%;
+  transition: border-color var(--ease-default), background var(--ease-default), box-shadow var(--ease-default);
+}
+
+.lt-lp-pa__secondary-option-label {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-body);
+  color: var(--lt-lp-pa-text);
+}
+
+.lt-lp-pa__secondary-option:hover,
+.lt-lp-pa__secondary-option:focus-visible {
+  border-color: var(--lt-lp-pa-accent);
+  outline: none;
+}
+
+.lt-lp-pa__secondary-option:hover .lt-lp-pa__secondary-option-marker,
+.lt-lp-pa__secondary-option:focus-visible .lt-lp-pa__secondary-option-marker {
+  border-color: var(--lt-lp-pa-accent);
+}
+
+.lt-lp-pa__secondary-option.is-active {
+  border-color: var(--lt-lp-pa-accent);
+  background: var(--lt-lp-pa-accent-soft);
+}
+
+.lt-lp-pa__secondary-option.is-active .lt-lp-pa__secondary-option-marker {
+  border-color: var(--lt-lp-pa-accent);
+  background: var(--lt-lp-pa-accent);
+  box-shadow: inset 0 0 0 var(--space-1) var(--lt-lp-pa-surface);
+}
+
+.lt-lp-pa__secondary-confirmation {
+  display: none;
+  margin-top: var(--space-4);
+  padding: var(--space-4);
+  border-left: 2px solid var(--lt-lp-pa-accent);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  background: var(--lt-lp-pa-accent-soft);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--lt-lp-pa-text);
+}
+
+.lt-lp-pa__secondary-confirmation.is-visible {
+  display: block;
+}
+
+/* ─── Rest / scope ──────────────────────────────── */
 .lt-lp-pa__rest {
   margin-top: var(--space-5);
+}
+
+.lt-lp-pa__rest-compact {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--lt-lp-pa-muted);
+}
+
+.lt-lp-pa__rest-expand-btn {
+  display: inline-flex;
+  align-items: center;
+  margin-top: var(--space-2);
+  padding: 0;
+  background: none;
+  border: none;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-body);
+  color: var(--lt-lp-pa-accent);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.lt-lp-pa__rest-expand-btn:hover,
+.lt-lp-pa__rest-expand-btn:focus-visible {
+  opacity: 0.8;
+  outline: none;
 }
 
 .lt-lp-pa__rest-label {
@@ -350,6 +644,11 @@
 .lt-lp-pa__rest-clusters {
   display: grid;
   gap: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.lt-lp-pa__rest-clusters[hidden] {
+  display: none;
 }
 
 .lt-lp-pa__rest-cluster {
@@ -399,6 +698,10 @@
   .lt-lp-pa__body,
   .lt-lp-pa__subheadline {
     font-size: var(--text-body);
+  }
+
+  .lt-lp-pa__hero-card {
+    padding: var(--space-5);
   }
 
   .lt-lp-pa__check-row {
@@ -459,6 +762,24 @@
       "default": "#2a6b5c"
     },
     {
+      "type": "color",
+      "id": "hero_card_bg",
+      "label": "Hero card background",
+      "default": "#26251e"
+    },
+    {
+      "type": "color",
+      "id": "hero_card_text",
+      "label": "Hero card text",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "text",
+      "id": "hero_card_label",
+      "label": "Hero card kicker",
+      "default": "Schlüsselmarker"
+    },
+    {
       "type": "range",
       "id": "padding_top",
       "label": "Padding top",
@@ -498,8 +819,26 @@
     },
     {
       "type": "text",
+      "id": "rest_compact_text",
+      "label": "Rest compact text",
+      "default": "Plus 16 weitere Bereiche — dein Test ist immer vollständig."
+    },
+    {
+      "type": "text",
+      "id": "rest_expand_label",
+      "label": "Expand button label",
+      "default": "alle 22 Bereiche anzeigen →"
+    },
+    {
+      "type": "text",
+      "id": "rest_collapse_label",
+      "label": "Collapse button label",
+      "default": "Weniger anzeigen ↑"
+    },
+    {
+      "type": "text",
       "id": "rest_categories_label",
-      "label": "Rest categories label",
+      "label": "Rest categories label (fallback)",
       "default": "Plus diese Bereiche, die dein Test gleichzeitig analysiert:"
     },
     {
@@ -546,6 +885,36 @@
           "default": "Dann ist das hier dein Test."
         },
         {
+          "type": "text",
+          "id": "hero_category",
+          "label": "Hero category (primary metric)",
+          "default": "Biologisches Alter"
+        },
+        {
+          "type": "text",
+          "id": "hero_category_subtitle",
+          "label": "Hero category subtitle",
+          "default": "MethylPace-Score"
+        },
+        {
+          "type": "text",
+          "id": "secondary_question",
+          "label": "Secondary question",
+          "default": "Wie gehst du bisher vor?"
+        },
+        {
+          "type": "textarea",
+          "id": "secondary_options_json",
+          "label": "Secondary options JSON",
+          "default": "[\"Ich lebe gesund und hoffe auf das Beste\",\"Ich nutze Wearables und Bluttests\",\"Ich vermute es aus Körpergefühl\",\"Ich habe noch nicht gemessen\"]"
+        },
+        {
+          "type": "textarea",
+          "id": "confirmation_texts_json",
+          "label": "Confirmation texts JSON",
+          "default": "{\"Ich lebe gesund und hoffe auf das Beste\":\"Gute Basis. LIFETIME gibt dir den Ausgangspunkt, den Hoffnung nicht ersetzen kann.\",\"Ich nutze Wearables und Bluttests\":\"Wearables messen Verhalten. LIFETIME misst, was in deinen Zellen passiert.\",\"Ich vermute es aus Körpergefühl\":\"Körpergefühl ist wertvoll — aber nicht messbar. Genau dafür haben wir LIFETIME gebaut.\",\"Ich habe noch nicht gemessen\":\"Dann ist das hier der Ausgangspunkt. Alles andere baut darauf auf.\"}"
+        },
+        {
           "type": "textarea",
           "id": "highlighted_categories",
           "label": "Highlighted categories",
@@ -562,49 +931,7 @@
   ],
   "presets": [
     {
-      "name": "LP Personalized",
-      "blocks": [
-        {
-          "type": "goal_answer",
-          "settings": {
-            "goal_id": "goal_1",
-            "result_headline": "Du willst wissen, wie du alterst.",
-            "result_subheadline": "Dann ist das hier dein Test.",
-            "highlighted_categories": "Biologisches Alter, EpiVitality, Entzündung, Körperalter, Gesunde Alterung, Herz",
-            "micro_texts_json": "{\"Biologisches Alter\":\"Wie schnell deine Zellen altern — ein Wert, den dein Hausarzt nicht messen kann. Wir nennen ihn MethylPace-Score.\",\"EpiVitality\":\"Wie vital deine Zellen gerade arbeiten — der wichtigste Indikator für zelluläre Gesundheit.\",\"Entzündung\":\"Wie hoch deine stille Zellentzündung ist — einer der Haupttreiber des Alterns.\",\"Körperalter\":\"Wie alt deine Sinne und dein Gedächtnis biologisch sind — Höralter, Sehalter, kognitive Alterung.\",\"Gesunde Alterung\":\"Deine genetische Grundlage für Langlebigkeit — Knochen, Muskeln, Kognition im Alter.\",\"Herz\":\"Deine genetischen Faktoren für Herz-Kreislauf — Blutdruck, Cholesterin, Herzinfarkt-Risiko.\"}"
-          }
-        },
-        {
-          "type": "goal_answer",
-          "settings": {
-            "goal_id": "goal_2",
-            "result_headline": "Du willst deine Energie zurückgewinnen.",
-            "result_subheadline": "Hier findest du, woran es wirklich liegt.",
-            "highlighted_categories": "Entzündung, Muskelschwund, Schlaf, Stress, Mental Health, Stoffwechsel",
-            "micro_texts_json": "{\"Entzündung\":\"Je niedriger deine Zellentzündung, desto mehr Energie bleibt deinem Körper für den Alltag.\",\"Muskelschwund\":\"Wie schnell deine Muskelzellen altern — direkt verbunden mit deinem Energielevel.\",\"Schlaf\":\"Deine genetische Schlaftypologie — Chronotyp, Tiefschlaf-Neigung, Regenerationsfähigkeit.\",\"Stress\":\"Wie dein Körper Stress verarbeitet — und wo deine Erschöpfung genetisch bedingt ist.\",\"Mental Health\":\"Stress-Resilienz, Konzentration, Warrior/Worrier-Profil — deine mentale Energie-Signatur.\",\"Stoffwechsel\":\"Wie effizient dein Körper Energie produziert — und wo Stoffwechsel-Verluste passieren.\"}"
-          }
-        },
-        {
-          "type": "goal_answer",
-          "settings": {
-            "goal_id": "goal_3",
-            "result_headline": "Du willst körperlich fit bleiben.",
-            "result_subheadline": "Das ist die Grundlage dafür.",
-            "highlighted_categories": "Muskelschwund, EpiVitality, Fitness, Verletzung & Regeneration, Gesunde Alterung",
-            "micro_texts_json": "{\"Muskelschwund\":\"Wie schnell deine Muskeln biologisch altern — der kritischste Marker für Fitness ab 50.\",\"EpiVitality\":\"Zell-Vitalität als Grundlage für Trainingsreize und Regeneration.\",\"Fitness\":\"Deine genetische Sport-Signatur — VO₂max, Muskelkraft, anaerobe Schwelle.\",\"Verletzung & Regeneration\":\"Wo dein Körper genetisch anfällig ist — Achillessehne, LWS, Arthrose-Risiko.\",\"Gesunde Alterung\":\"Deine Basis für lebenslange Bewegung — Gelenke, Knochen, Muskulatur.\"}"
-          }
-        },
-        {
-          "type": "goal_answer",
-          "settings": {
-            "goal_id": "goal_4",
-            "result_headline": "Du willst verstehen, was dich einzigartig macht.",
-            "result_subheadline": "Hier ist dein individuelles Körperbild.",
-            "highlighted_categories": "Immunscore, Biologisches Alter, Sensitivitäten, Vitamine, Supplements, Psychologisch",
-            "micro_texts_json": "{\"Immunscore\":\"Wie dein Immunsystem individuell reagiert — nicht pauschal, sondern epigenetisch gemessen.\",\"Biologisches Alter\":\"Wie schnell deine Zellen altern — die zentrale Kennzahl deiner körperlichen Identität.\",\"Sensitivitäten\":\"Wie dein Körper auf Lebensmittel reagiert — Gluten, Laktose, Fruktose, bestimmte Fette.\",\"Vitamine\":\"Welche Nährstoffe dein Körper besser oder schlechter verwertet — Vitamin D, B12, Omega-3.\",\"Supplements\":\"Welche Supplement-Wirkstoffe zu deiner Genetik passen — und welche nicht.\",\"Psychologisch\":\"Die genetische Prägung deiner Persönlichkeit — Emotionsregulation, Belohnungssystem.\"}"
-          }
-        }
-      ]
+      "name": "LP Personalized"
     }
   ]
 }
