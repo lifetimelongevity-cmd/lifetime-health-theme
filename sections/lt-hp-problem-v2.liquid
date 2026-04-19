@@ -1,23 +1,8 @@
 {% comment %}
-  lt-hp-problem-v2 — Problem + Arzt-Block Flow (Section 4)
+  lt-hp-problem-v2 — Problem & Systemlücke (Option A: editorial manifest)
   ─────────────────────────────────────────────────────────
-  §12 Build Spec:
-  - Surface:          --color-surface-primary / settings.color_bg — ruhige helle Fläche
-                      zwischen Social Proof / Logo-Beweis und dunklem Science-Bento
-  - Dominant element: Section-Headline — beide Karten bleiben bewusst sekundär
-                      und verhalten sich wie ein zusammengehöriges Informationspaar
-  - Heading size:     Shared homepage heading stack + card-info Typo
-                      (Heading-Font für Kartentitel, Body-Font für Erklärtext)
-  - Content pattern:  Zwei card-info-Karten im Homepage-Rhythmus.
-                      Block 1: Problem-Framing + Invest-Pills + kompakte Note.
-                      Block 2: System-vs-Longevity-Vergleich in zwei ruhigen Panels + Einordnungs-Note.
-  - CTA:              Keiner — bewusst. Diese Sektion baut diagnostische Spannung auf.
-                      Kein Kaufimpuls hier; das Problem muss atmen dürfen.
-  - Removed:          Vertikaler Flow-Connector, farbcodierte Warn-Callouts, eigenständige
-                      Sonderfarben-Logik — sie machten die Section lauter als ihre Nachbarn.
-  - Quality move:     Die Vergleichslogik lebt nun in zwei ruhigen Sub-Panels innerhalb
-                      einer einzigen Karte. Das erzeugt Klarheit, ohne wie ein Fremd-Widget
-                      oder Editorial-Sonderformat zu wirken.
+  Zentrierte Heading-Stack + horizontale System-vs-Longevity-Vergleichsleiste.
+  Keine Karten, keine Pills, keine Callout-Boxen. Typografisch geführt.
 {% endcomment %}
 
 {% style %}
@@ -27,11 +12,12 @@
     {%- endif -%}
     {%- if section.settings.color_text != blank -%}
     color: {{ section.settings.color_text }};
-    --crs-text:     {{ section.settings.color_text }};
-    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
-    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --prob2-text: {{ section.settings.color_text }};
+    --prob2-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
+    --prob2-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --prob2-divider: {{ section.settings.color_text | color_modify: 'alpha', 0.12 }};
     {%- endif -%}
-    padding-top:    {{ section.settings.padding_top | default: 80 }}px;
+    padding-top: {{ section.settings.padding_top | default: 80 }}px;
     padding-bottom: {{ section.settings.padding_bottom | default: 80 }}px;
   }
 {% endstyle %}
@@ -39,7 +25,6 @@
 <section id="shopify-section-{{ section.id }}" class="prob2">
   <div class="prob2__outer">
 
-    {%- comment -%}=== Section Header ==={%- endcomment -%}
     <div class="prob2__header crs-heading-stack crs-heading-stack--align-center crs-heading-stack--homepage-truth">
       {%- if section.settings.kicker != blank -%}
         <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
@@ -56,360 +41,152 @@
       </div>
     </div>
 
-    {%- comment -%}=== Cards ==={%- endcomment -%}
-    <div class="prob2__grid">
-      {%- for block in section.blocks -%}
-        {%- comment -%}=== Block: Das Problem ==={%- endcomment -%}
-        {%- if block.type == 'problem_block' -%}
-          <article
-            class="prob2__card prob2__card--problem"
-            {% if block.settings.tag_color != blank %}style="--prob2-tag-color: {{ block.settings.tag_color }};"{% endif %}
-            {{ block.shopify_attributes }}
-          >
+    {%- if section.blocks.size > 0 -%}
+      <div class="prob2__contrast" role="list" aria-label="System-Vergleich">
 
-            {%- if block.settings.tag_label != blank -%}
-              <p class="prob2__eyebrow">{{ block.settings.tag_label | escape }}</p>
-            {%- endif -%}
+        <div class="prob2__contrast-labels" aria-hidden="true">
+          {%- if section.settings.col_system_label != blank -%}
+            <span class="prob2__contrast-col-label prob2__contrast-col-label--system">{{ section.settings.col_system_label | escape }}</span>
+          {%- endif -%}
+          <span class="prob2__contrast-arrow">→</span>
+          {%- if section.settings.col_longevity_label != blank -%}
+            <span class="prob2__contrast-col-label prob2__contrast-col-label--longevity">{{ section.settings.col_longevity_label | escape }}</span>
+          {%- endif -%}
+        </div>
 
-            <div class="prob2__card-copy">
-              {%- if block.settings.block_title != blank -%}
-                <h3 class="prob2__card-title">{{ block.settings.block_title | escape }}</h3>
-              {%- endif -%}
-
-              {%- if block.settings.block_body != blank -%}
-                <p class="prob2__card-body">{{ block.settings.block_body | escape }}</p>
-              {%- endif -%}
-            </div>
-
-            {%- comment -%} Invest-Pills — hardcoded, illustrative {%- endcomment -%}
-            <ul class="prob2__pills" role="list" aria-label="Bereits getätigte Investitionen">
-              <li class="prob2__pill">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
-                </svg>
-                Sport
+        <ul class="prob2__contrast-list" role="list">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'comparison_row' -%}
+              <li class="prob2__contrast-row" role="listitem" {{ block.shopify_attributes }}>
+                <span class="prob2__contrast-cell prob2__contrast-cell--system">{{ block.settings.system_text | escape }}</span>
+                <span class="prob2__contrast-cell prob2__contrast-cell--longevity">{{ block.settings.longevity_text | escape }}</span>
               </li>
-              <li class="prob2__pill">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M12 3c0 8-6 9-6 14a6 6 0 0 0 12 0c0-5-6-6-6-14z"/>
-                </svg>
-                Ernährung
-              </li>
-              <li class="prob2__pill">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <rect x="7" y="3" width="10" height="18" rx="3"/><path d="M10 9h4M10 13h4"/>
-                </svg>
-                Supplemente
-              </li>
-              <li class="prob2__pill">
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <path d="M3 18c0-7 4-13 9-13s9 6 9 13"/><path d="M12 5V3"/>
-                </svg>
-                Schlaf
-              </li>
-            </ul>
-
-            {%- if block.settings.callout_text != blank -%}
-              <div class="prob2__note">
-                {%- if block.settings.callout_label != blank -%}
-                  <p class="prob2__note-label">{{ block.settings.callout_label | escape }}</p>
-                {%- endif -%}
-                <p class="prob2__note-body">{{ block.settings.callout_text | escape }}</p>
-              </div>
             {%- endif -%}
+          {%- endfor -%}
+        </ul>
 
-          </article>
-        {%- endif -%}
+      </div>
+    {%- endif -%}
 
-        {%- comment -%}=== Block: Und dein Arzt? ==={%- endcomment -%}
-        {%- if block.type == 'arzt_block' -%}
-          <article
-            class="prob2__card prob2__card--arzt"
-            {% if block.settings.tag_color != blank %}style="--prob2-tag-color: {{ block.settings.tag_color }};"{% endif %}
-            {{ block.shopify_attributes }}
-          >
-
-            {%- if block.settings.tag_label != blank -%}
-              <p class="prob2__eyebrow">{{ block.settings.tag_label | escape }}</p>
-            {%- endif -%}
-
-            <div class="prob2__card-copy">
-              {%- if block.settings.block_title != blank -%}
-                <h3 class="prob2__card-title">{{ block.settings.block_title | escape }}</h3>
-              {%- endif -%}
-
-              {%- if block.settings.block_body != blank -%}
-                <p class="prob2__card-body">{{ block.settings.block_body | escape }}</p>
-              {%- endif -%}
-            </div>
-
-            {%- comment -%} 2-col system comparison {%- endcomment -%}
-            <div class="prob2__compare">
-
-              <div class="prob2__compare-col prob2__compare-col--system">
-                {%- if block.settings.system_col_label != blank -%}
-                  <p class="prob2__compare-col-label">
-                    {{ block.settings.system_col_label | escape }}
-                  </p>
-                {%- endif -%}
-                {%- assign system_keys = 'system_item_1,system_item_2,system_item_3,system_item_4' | split: ',' -%}
-                <ul class="prob2__compare-list" role="list">
-                  {%- for key in system_keys -%}
-                    {%- assign item_val = block.settings[key] -%}
-                    {%- if item_val != blank -%}
-                      <li class="prob2__compare-item">
-                        <span class="prob2__compare-dot prob2__compare-dot--muted" aria-hidden="true"></span>
-                        <span class="prob2__compare-text">{{ item_val | escape }}</span>
-                      </li>
-                    {%- endif -%}
-                  {%- endfor -%}
-                </ul>
-              </div>
-
-              <div class="prob2__compare-col prob2__compare-col--longevity">
-                {%- if block.settings.longevity_col_label != blank -%}
-                  <p class="prob2__compare-col-label">
-                    {{ block.settings.longevity_col_label | escape }}
-                  </p>
-                {%- endif -%}
-                {%- assign longevity_keys = 'longevity_item_1,longevity_item_2,longevity_item_3,longevity_item_4' | split: ',' -%}
-                <ul class="prob2__compare-list" role="list">
-                  {%- for key in longevity_keys -%}
-                    {%- assign item_val = block.settings[key] -%}
-                    {%- if item_val != blank -%}
-                      <li class="prob2__compare-item">
-                        <span class="prob2__compare-dot prob2__compare-dot--teal" aria-hidden="true"></span>
-                        <span class="prob2__compare-text">{{ item_val | escape }}</span>
-                      </li>
-                    {%- endif -%}
-                  {%- endfor -%}
-                </ul>
-              </div>
-
-            </div>
-
-            {%- if block.settings.callout_text != blank -%}
-              <div class="prob2__note">
-                {%- if block.settings.callout_label != blank -%}
-                  <p class="prob2__note-label">{{ block.settings.callout_label | escape }}</p>
-                {%- endif -%}
-                <p class="prob2__note-body">{{ block.settings.callout_text | escape }}</p>
-              </div>
-            {%- endif -%}
-
-          </article>
-        {%- endif -%}
-
-      {%- endfor -%}
-    </div>
+    {%- if section.settings.closing_note != blank -%}
+      <p class="prob2__closing">{{ section.settings.closing_note | escape }}</p>
+    {%- endif -%}
 
   </div>
 </section>
 
 {% stylesheet %}
-/* ================================================================
-   lt-hp-problem-v2 — Problem + Systemlücke
-   Token refs: §3 (colors, spacing, type), §5 (card-info pattern)
-   ================================================================ */
-
 .prob2 {
   background: var(--color-surface-primary);
 }
 
 .prob2__outer {
-  max-width: 1200px;
+  max-width: 720px;
   margin: 0 auto;
   padding: 0 var(--space-5);
 }
 
 .prob2__header {
-  max-width: 640px;
   margin: 0 auto var(--space-8);
 }
 
-/* Desktop pair instead of bespoke editorial flow */
-.prob2__grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-4);
-  align-items: stretch;
-}
-
-.prob2__card {
+.prob2__contrast {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  height: 100%;
-  background: var(--color-surface-primary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-sm);
-  padding: var(--space-5);
+  padding: var(--space-6) 0;
+  border-top: 1px solid var(--prob2-divider, var(--color-border-default));
+  border-bottom: 1px solid var(--prob2-divider, var(--color-border-default));
 }
 
-.prob2__eyebrow {
+.prob2__contrast-labels {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.prob2__contrast-col-label {
   font-family: var(--font-body);
   font-size: var(--text-micro);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.12em;
   line-height: var(--leading-tight);
-  color: var(--prob2-tag-color, var(--color-text-muted));
-  margin: 0;
 }
 
-.prob2__card-copy {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
+.prob2__contrast-col-label--system {
+  color: var(--prob2-text-ter, var(--color-text-muted));
 }
 
-.prob2__card-title {
-  font-family: var(--font-heading);
-  font-size: var(--text-section);
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-heading);
-  color: var(--crs-text, var(--color-text-primary));
-  margin: 0;
+.prob2__contrast-col-label--longevity {
+  color: var(--color-teal-dark);
+  text-align: right;
 }
 
-.prob2__card-body {
+.prob2__contrast-arrow {
   font-family: var(--font-body);
   font-size: var(--text-body);
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-relaxed);
-  color: var(--crs-text-sec, var(--color-text-secondary));
-  margin: 0;
-}
-
-.prob2__pills {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.prob2__pill {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1);
-  background: var(--color-surface-secondary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-full);
-  padding: var(--space-1) var(--space-3);
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-regular);
-  color: var(--crs-text-sec, var(--color-text-secondary));
+  color: var(--prob2-text-ter, var(--color-text-muted));
   line-height: 1;
 }
 
-.prob2__note {
-  background: var(--color-surface-secondary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-sm);
-  padding: var(--space-4);
-}
-
-.prob2__note-label {
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-medium);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--color-text-muted);
-  margin: 0 0 var(--space-2);
-}
-
-.prob2__note-body {
-  font-family: var(--font-body);
-  font-size: var(--text-body);
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-relaxed);
-  color: var(--crs-text-sec, var(--color-text-secondary));
-  margin: 0;
-}
-
-.prob2__compare {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-}
-
-.prob2__compare-col {
+.prob2__contrast-list {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
-  border-radius: var(--radius-sm);
-  padding: var(--space-3) var(--space-4);
-  min-width: 0;
-}
-
-.prob2__compare-col--system {
-  background: var(--color-surface-secondary);
-  border: 1px solid var(--color-border-default);
-}
-
-.prob2__compare-col--longevity {
-  background: var(--color-surface-benefit);
-  border: 1px solid var(--color-border-default);
-}
-
-.prob2__compare-col-label {
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-medium);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin: 0;
-}
-
-.prob2__compare-col--system .prob2__compare-col-label { color: var(--color-text-muted); }
-.prob2__compare-col--longevity .prob2__compare-col-label { color: var(--color-teal-dark); }
-
-.prob2__compare-list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
   list-style: none;
   margin: 0;
   padding: 0;
 }
 
-.prob2__compare-item {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  margin: 0;
+.prob2__contrast-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: baseline;
+  gap: var(--space-4);
 }
 
-.prob2__compare-dot {
-  display: block;
-  width: 6px;
-  height: 6px;
-  border-radius: var(--radius-full);
-  flex-shrink: 0;
-  margin-top: 5px;
+.prob2__contrast-row::before {
+  content: "→";
+  grid-column: 2;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--prob2-text-ter, var(--color-text-muted));
+  line-height: var(--leading-body);
 }
 
-.prob2__compare-dot--muted { background: var(--color-text-muted); }
-.prob2__compare-dot--teal  { background: var(--color-teal-dark); }
-
-.prob2__compare-text {
+.prob2__contrast-cell {
   font-family: var(--font-body);
   font-size: var(--text-body);
   font-weight: var(--weight-regular);
   line-height: var(--leading-body);
-  color: var(--crs-text-sec, var(--color-text-secondary));
 }
 
-@media screen and (max-width: 1024px) {
-  .prob2__grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-5);
-  }
+.prob2__contrast-cell--system {
+  grid-column: 1;
+  color: var(--prob2-text-sec, var(--color-text-secondary));
+  text-decoration: line-through;
+  text-decoration-color: var(--prob2-text-ter, var(--color-text-muted));
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+.prob2__contrast-cell--longevity {
+  grid-column: 3;
+  color: var(--prob2-text, var(--color-text-primary));
+  font-weight: var(--weight-medium);
+}
+
+.prob2__closing {
+  margin: var(--space-6) auto 0;
+  max-width: 52ch;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-style: italic;
+  line-height: var(--leading-relaxed);
+  color: var(--prob2-text-sec, var(--color-text-secondary));
 }
 
 @media screen and (max-width: 768px) {
@@ -421,13 +198,32 @@
     margin-bottom: var(--space-7);
   }
 
-  .prob2__compare {
-    grid-template-columns: 1fr;
-    gap: var(--space-2);
+  .prob2__contrast {
+    padding: var(--space-5) 0;
+    gap: var(--space-4);
   }
 
-  .prob2__pills {
+  .prob2__contrast-labels {
+    display: none;
+  }
+
+  .prob2__contrast-row {
+    grid-template-columns: 1fr;
     gap: var(--space-1);
+  }
+
+  .prob2__contrast-row::before {
+    display: none;
+  }
+
+  .prob2__contrast-cell--system,
+  .prob2__contrast-cell--longevity {
+    grid-column: 1;
+    text-align: left;
+  }
+
+  .prob2__contrast-cell--system {
+    font-size: var(--text-body-sm);
   }
 }
 {% endstylesheet %}
@@ -438,255 +234,44 @@
   "tag": "section",
   "class": "section",
   "settings": [
-    {
-      "type": "header",
-      "content": "Abstände"
-    },
-    {
-      "type": "range",
-      "id": "padding_top",
-      "label": "Abstand oben",
-      "min": 0,
-      "max": 200,
-      "step": 8,
-      "default": 80,
-      "unit": "px"
-    },
-    {
-      "type": "range",
-      "id": "padding_bottom",
-      "label": "Abstand unten",
-      "min": 0,
-      "max": 200,
-      "step": 8,
-      "default": 80,
-      "unit": "px"
-    },
-    {
-      "type": "header",
-      "content": "Farben"
-    },
-    {
-      "type": "color",
-      "id": "color_bg",
-      "label": "Hintergrundfarbe",
-      "default": "#ffffff"
-    },
-    {
-      "type": "color",
-      "id": "color_text",
-      "label": "Textfarbe",
-      "default": "#26251e"
-    },
-    {
-      "type": "header",
-      "content": "Inhalt"
-    },
-    {
-      "type": "text",
-      "id": "kicker",
-      "label": "Kicker",
-      "default": "Warum Messen vor Optimieren kommt"
-    },
-    {
-      "type": "text",
-      "id": "headline",
-      "label": "Headline",
-      "default": "Du investierst bereits. Aber in welche Richtung?"
-    },
-    {
-      "type": "textarea",
-      "id": "subheadline",
-      "label": "Subheadline",
-      "default": "Die meisten Menschen tun einiges für ihre Gesundheit. Was fehlt, ist Orientierung — nicht Disziplin."
-    }
+    { "type": "header", "content": "Abstände" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
+
+    { "type": "header", "content": "Farben" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrundfarbe", "default": "#ffffff" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
+
+    { "type": "header", "content": "Kopf" },
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Warum Messen vor Optimieren kommt" },
+    { "type": "text", "id": "headline", "label": "Headline", "default": "Du investierst bereits. Die Frage ist nur: in welche Richtung." },
+    { "type": "textarea", "id": "subheadline", "label": "Subheadline", "default": "Krankheitsmedizin wartet auf Diagnosen. Longevity-Diagnostik zeigt dir deinen Verlauf — bevor er einer wird." },
+
+    { "type": "header", "content": "Vergleichsleiste" },
+    { "type": "text", "id": "col_system_label", "label": "Linke Spalte", "default": "Krankheitsmedizin" },
+    { "type": "text", "id": "col_longevity_label", "label": "Rechte Spalte", "default": "Longevity-Diagnostik" },
+
+    { "type": "header", "content": "Schluss-Note" },
+    { "type": "textarea", "id": "closing_note", "label": "Note", "default": "Kein Ersatz für deinen Arzt. Ein Ausgangspunkt, bevor er nötig wird." }
   ],
   "blocks": [
     {
-      "type": "problem_block",
-      "name": "Block: Das Problem",
-      "limit": 1,
+      "type": "comparison_row",
+      "name": "Vergleichs-Zeile",
+      "limit": 6,
       "settings": [
-        {
-          "type": "header",
-          "content": "Tag"
-        },
-        {
-          "type": "text",
-          "id": "tag_label",
-          "label": "Tag-Text",
-          "default": "Das Problem"
-        },
-        {
-          "type": "color",
-          "id": "tag_color",
-          "label": "Tag-Farbe",
-          "default": "#525252"
-        },
-        {
-          "type": "header",
-          "content": "Inhalt"
-        },
-        {
-          "type": "text",
-          "id": "block_title",
-          "label": "Titel",
-          "default": "Gesundheit ohne Ausgangspunkt ist Optimieren ins Unbekannte."
-        },
-        {
-          "type": "textarea",
-          "id": "block_body",
-          "label": "Text",
-          "default": "Ernährung, Sport, Schlaf, Supplemente — all das wirkt. Aber wie es bei dir wirkt, hängt von deiner individuellen Biologie ab. Ohne Messung weißt du nicht, ob du in die richtige Richtung gehst."
-        },
-        {
-          "type": "header",
-          "content": "Callout"
-        },
-        {
-          "type": "text",
-          "id": "callout_label",
-          "label": "Callout-Label",
-          "default": "Blinder Fleck"
-        },
-        {
-          "type": "textarea",
-          "id": "callout_text",
-          "label": "Callout-Text",
-          "default": "Du weißt nicht, wie schnell dein Körper biologisch altert — und welche genetischen Faktoren dabei eine Rolle spielen. Du optimierst gegen einen Durchschnittsmenschen, der nicht du bist."
-        }
-      ]
-    },
-    {
-      "type": "arzt_block",
-      "name": "Block: Und dein Arzt?",
-      "limit": 1,
-      "settings": [
-        {
-          "type": "header",
-          "content": "Tag"
-        },
-        {
-          "type": "text",
-          "id": "tag_label",
-          "label": "Tag-Text",
-          "default": "Und dein Arzt?"
-        },
-        {
-          "type": "color",
-          "id": "tag_color",
-          "label": "Tag-Farbe",
-          "default": "#4A8C85"
-        },
-        {
-          "type": "header",
-          "content": "Inhalt"
-        },
-        {
-          "type": "text",
-          "id": "block_title",
-          "label": "Titel",
-          "default": "Das Gesundheitssystem misst, ob du krank bist — nicht, wie gut du alterst."
-        },
-        {
-          "type": "textarea",
-          "id": "block_body",
-          "label": "Text",
-          "default": "Dein Hausarzt hat einen anderen Nordstern: Krankheiten erkennen und behandeln. Das ist wichtig — aber es ist nicht dasselbe wie biologisches Altern aktiv zu verstehen."
-        },
-        {
-          "type": "header",
-          "content": "Linke Spalte — Medizinisches System"
-        },
-        {
-          "type": "text",
-          "id": "system_col_label",
-          "label": "Spalten-Label",
-          "default": "Medizinisches System"
-        },
-        {
-          "type": "text",
-          "id": "system_item_1",
-          "label": "Punkt 1",
-          "default": "Sagt, ob du krank bist"
-        },
-        {
-          "type": "text",
-          "id": "system_item_2",
-          "label": "Punkt 2",
-          "default": "Aktueller Status, kein Verlauf"
-        },
-        {
-          "type": "text",
-          "id": "system_item_3",
-          "label": "Punkt 3",
-          "default": "Ziel: Krankheit behandeln"
-        },
-        {
-          "type": "text",
-          "id": "system_item_4",
-          "label": "Punkt 4",
-          "default": "Handelt, wenn etwas auffällt"
-        },
-        {
-          "type": "header",
-          "content": "Rechte Spalte — Longevity-Diagnostik"
-        },
-        {
-          "type": "text",
-          "id": "longevity_col_label",
-          "label": "Spalten-Label",
-          "default": "Longevity-Diagnostik"
-        },
-        {
-          "type": "text",
-          "id": "longevity_item_1",
-          "label": "Punkt 1",
-          "default": "Zeigt, wie schnell du alterst"
-        },
-        {
-          "type": "text",
-          "id": "longevity_item_2",
-          "label": "Punkt 2",
-          "default": "Epigenetik zeigt deinen Verlauf"
-        },
-        {
-          "type": "text",
-          "id": "longevity_item_3",
-          "label": "Punkt 3",
-          "default": "Ziel: aktiv gesund altern"
-        },
-        {
-          "type": "text",
-          "id": "longevity_item_4",
-          "label": "Punkt 4",
-          "default": "Ausgangspunkt, bevor Diagnosen nötig werden"
-        },
-        {
-          "type": "header",
-          "content": "Hinweis-Note"
-        },
-        {
-          "type": "text",
-          "id": "callout_label",
-          "label": "Note-Label",
-          "default": "Kein Entweder-oder"
-        },
-        {
-          "type": "textarea",
-          "id": "callout_text",
-          "label": "Note-Text",
-          "default": "LIFETIME ersetzt keinen Arzt. Es ergänzt das, was das Gesundheitssystem nicht leistet: einen Nordstern für aktive Prävention — bevor Diagnosen nötig werden."
-        }
+        { "type": "text", "id": "system_text", "label": "Links (System)", "default": "Wartet auf Diagnose" },
+        { "type": "text", "id": "longevity_text", "label": "Rechts (Longevity)", "default": "Zeigt Verlauf" }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Problem & Arzt",
+      "name": "Problem & Systemlücke",
       "blocks": [
-        { "type": "problem_block" },
-        { "type": "arzt_block" }
+        { "type": "comparison_row", "settings": { "system_text": "Wartet auf Diagnose", "longevity_text": "Zeigt Verlauf, bevor eine nötig ist" } },
+        { "type": "comparison_row", "settings": { "system_text": "Aktueller Status", "longevity_text": "Altersgeschwindigkeit" } },
+        { "type": "comparison_row", "settings": { "system_text": "Behandelt Symptome", "longevity_text": "Ermöglicht Prävention" } }
       ]
     }
   ]
