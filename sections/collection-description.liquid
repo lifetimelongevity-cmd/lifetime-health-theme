@@ -1,19 +1,93 @@
-<div class="container--large container--vertical-space{% if section.settings.gutter_decrease %}-small{% endif %} {% if section.settings.section_background_color != "rgba(0,0,0,0)" or section.settings.section_background_gradient != blank %} container--has-background {% endif %} {% if section.settings.remove_bottom_margin %} container--negative-margin {% endif %} remove-empty-space">
-  {%- render 'section-heading',
-    heading: section.settings.heading,
-    subheading: section.settings.subheading,
-    heading_size: section.settings.section_heading_size,
-    section_layout: section.settings.section_heading_layout,
-    button: section.settings.cta_label,
-    button_label: section.settings.cta_label,
-    link: section.settings.cta_url,
-    seo_h_tag: section.settings.seo_h_tag
-  -%}
+{%- liquid
+  assign align_class = 'crs-heading-stack--align-left'
+  if section.settings.section_heading_layout contains 'center'
+    assign align_class = 'crs-heading-stack--align-center'
+  endif
 
-  <div class="rte">{{ collection.description }}</div>
+  assign size_class = ''
+  if section.settings.section_heading_size == 'text-size--large'
+    assign size_class = 'crs-heading-stack--headline-lg'
+  endif
+
+  assign wrapper_align = 'cdesc--align-left'
+  if section.settings.section_heading_layout contains 'center'
+    assign wrapper_align = 'cdesc--align-center'
+  endif
+-%}
+
+<div class="container--large container--vertical-space{% if section.settings.gutter_decrease %}-small{% endif %} {% if section.settings.section_background_color != "rgba(0,0,0,0)" or section.settings.section_background_gradient != blank %} container--has-background {% endif %} {% if section.settings.remove_bottom_margin %} container--negative-margin {% endif %} remove-empty-space cdesc {{ wrapper_align }} section-{{ section.id }}-cdesc">
+
+  {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+    <div class="crs-heading-stack {{ align_class }} {{ size_class }} cdesc-heading-stack">
+      {%- if section.settings.heading != blank -%}
+        <div class="crs-heading-stack__pair">
+          <{{ section.settings.seo_h_tag }} class="crs-heading-stack__title">{{ section.settings.heading | escape }}</{{ section.settings.seo_h_tag }}>
+          {%- if section.settings.subheading != blank -%}
+            <p class="crs-heading-stack__subtitle">{{ section.settings.subheading }}</p>
+          {%- endif -%}
+        </div>
+      {%- elsif section.settings.subheading != blank -%}
+        <p class="crs-heading-stack__subtitle">{{ section.settings.subheading }}</p>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  {%- if collection.description != blank -%}
+    <div class="cdesc-body rte">{{ collection.description }}</div>
+  {%- endif -%}
 </div>
 
 <style>
+  /* Bold titles for the collection hero (base crs title is regular weight) */
+  .section-{{ section.id }}-cdesc .crs-heading-stack__title {
+    font-weight: var(--weight-bold);
+  }
+
+  /* Regular-size variant: bump from base --text-section (20px) to --text-h2 (28px) */
+  .section-{{ section.id }}-cdesc .cdesc-heading-stack:not(.crs-heading-stack--headline-lg) .crs-heading-stack__title {
+    font-size: var(--text-h2);
+  }
+
+  /* Mobile scale-down for large heading */
+  @media (max-width: 749px) {
+    .section-{{ section.id }}-cdesc .cdesc-heading-stack.crs-heading-stack--headline-lg .crs-heading-stack__title {
+      font-size: var(--text-h2);
+    }
+  }
+
+  /* Subtitle spacing + token-aligned typography */
+  .section-{{ section.id }}-cdesc .crs-heading-stack__subtitle {
+    margin-top: var(--space-3);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-body, 1.5);
+    color: var(--color-text-muted, rgba(38, 37, 30, 0.72));
+    max-width: 60ch;
+  }
+
+  /* Collection description body */
+  .section-{{ section.id }}-cdesc .cdesc-body {
+    margin-top: var(--space-5);
+    max-width: 72ch;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-body, 1.5);
+    color: var(--color-text-main);
+  }
+
+  /* Center-aligned layout: center the body and constrain-center the subtitle */
+  .section-{{ section.id }}-cdesc.cdesc--align-center .cdesc-body {
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+  }
+
+  .section-{{ section.id }}-cdesc.cdesc--align-center .crs-heading-stack__subtitle {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
   {%- if section.settings.section_background_color != "rgba(0,0,0,0)" -%}
     #shopify-section-{{ section.id }} {
       background-color: {{ section.settings.section_background_color }};
@@ -30,6 +104,9 @@
       --color-secondary-text-main: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.6 }};
       --color-borders-forms-primary: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.3 }};
       --color-borders-main: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.1 }};
+      --crs-text: {{ section.settings.section_heading_color }};
+      --crs-text-ter: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.4 }};
+      --crs-text-sec: {{ section.settings.section_heading_color | color_modify: 'alpha', 0.6 }};
     }
   {%- endif -%}
 </style>
