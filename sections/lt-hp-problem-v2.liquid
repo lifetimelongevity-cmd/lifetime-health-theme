@@ -1,8 +1,7 @@
 {% comment %}
-  lt-hp-problem-v2 — Problem & Systemlücke (Option A: editorial manifest)
-  ─────────────────────────────────────────────────────────
-  Zentrierte Heading-Stack + horizontale System-vs-Longevity-Vergleichsleiste.
-  Keine Karten, keine Pills, keine Callout-Boxen. Typografisch geführt.
+  lt-hp-problem-v2 — Warum Messen Vergleich (V5 Light Panes)
+  Two side-by-side panes on warm surface: Krankheitsmedizin (muted, left)
+  vs Longevity-Diagnostik (emphasis, right). Numbered rows, Helvetica titles.
 {% endcomment %}
 
 {% style %}
@@ -13,8 +12,7 @@
     {%- if section.settings.color_text != blank -%}
     color: {{ section.settings.color_text }};
     --prob2-text: {{ section.settings.color_text }};
-    --prob2-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
-    --prob2-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --prob2-text-muted: {{ section.settings.color_text | color_modify: 'alpha', 0.45 }};
     --prob2-divider: {{ section.settings.color_text | color_modify: 'alpha', 0.12 }};
     {%- endif -%}
     padding-top: {{ section.settings.padding_top | default: 80 }}px;
@@ -25,44 +23,60 @@
 <section id="shopify-section-{{ section.id }}" class="prob2">
   <div class="prob2__outer">
 
-    <div class="prob2__header crs-heading-stack crs-heading-stack--align-center crs-heading-stack--homepage-truth">
+    <div class="prob2__header">
       {%- if section.settings.kicker != blank -%}
-        <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
+        <p class="prob2__kicker"><span class="prob2__kicker-tick" aria-hidden="true"></span>{{ section.settings.kicker | escape }}</p>
       {%- endif -%}
-      <div class="crs-heading-stack__pair">
+      <div class="prob2__title-block">
         {%- if section.settings.headline != blank -%}
-          <h2 class="crs-heading-stack__title">
-            {{ section.settings.headline | escape | newline_to_br | replace: '&lt;br&gt;', '<br>' | replace: '&lt;br/&gt;', '<br>' | replace: '&lt;br /&gt;', '<br>' }}
-          </h2>
+          <h2 class="prob2__title-head">{{ section.settings.headline | escape }}</h2>
         {%- endif -%}
         {%- if section.settings.subheadline != blank -%}
-          <p class="crs-heading-stack__subtitle">{{ section.settings.subheadline | escape }}</p>
+          <p class="prob2__title-sub">{{ section.settings.subheadline | escape }}</p>
         {%- endif -%}
       </div>
     </div>
 
     {%- if section.blocks.size > 0 -%}
-      <div class="prob2__contrast" role="list" aria-label="System-Vergleich">
+      <div class="prob2__panes">
 
-        <div class="prob2__contrast-labels" aria-hidden="true">
-          {%- if section.settings.col_system_label != blank -%}
-            <span class="prob2__contrast-col-label prob2__contrast-col-label--system">{{ section.settings.col_system_label | escape }}</span>
-          {%- endif -%}
-          {%- if section.settings.col_longevity_label != blank -%}
-            <span class="prob2__contrast-col-label prob2__contrast-col-label--longevity">{{ section.settings.col_longevity_label | escape }}</span>
-          {%- endif -%}
+        <div class="prob2__pane prob2__pane--system">
+          <div class="prob2__pane-hd">
+            <span class="prob2__pane-name">{{ section.settings.col_system_label | escape }}</span>
+            {%- if section.settings.system_tag != blank -%}
+              <span class="prob2__pane-tag">{{ section.settings.system_tag | escape }}</span>
+            {%- endif -%}
+          </div>
+          <ul class="prob2__pane-list">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'comparison_row' -%}
+                <li class="prob2__pane-item" {{ block.shopify_attributes }}>
+                  <span class="prob2__item-num">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+                  <span class="prob2__item-line">{{ block.settings.system_text | escape }}</span>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
         </div>
 
-        <ul class="prob2__contrast-list" role="list">
-          {%- for block in section.blocks -%}
-            {%- if block.type == 'comparison_row' -%}
-              <li class="prob2__contrast-row" role="listitem" {{ block.shopify_attributes }}>
-                <span class="prob2__contrast-cell prob2__contrast-cell--system">{{ block.settings.system_text | escape }}</span>
-                <span class="prob2__contrast-cell prob2__contrast-cell--longevity">{{ block.settings.longevity_text | escape }}</span>
-              </li>
+        <div class="prob2__pane prob2__pane--longevity">
+          <div class="prob2__pane-hd">
+            <span class="prob2__pane-name">{{ section.settings.col_longevity_label | escape }}</span>
+            {%- if section.settings.longevity_tag != blank -%}
+              <span class="prob2__pane-tag">{{ section.settings.longevity_tag | escape }}</span>
             {%- endif -%}
-          {%- endfor -%}
-        </ul>
+          </div>
+          <ul class="prob2__pane-list">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'comparison_row' -%}
+                <li class="prob2__pane-item" {{ block.shopify_attributes }}>
+                  <span class="prob2__item-num">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+                  <span class="prob2__item-line">{{ block.settings.longevity_text | escape }}</span>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </div>
 
       </div>
     {%- endif -%}
@@ -75,107 +89,192 @@
 </section>
 
 {% stylesheet %}
-.prob2 {
-  background: var(--color-surface-primary);
-}
-
 .prob2__outer {
-  max-width: 760px;
+  max-width: 840px;
   margin: 0 auto;
   padding: 0 var(--space-5);
 }
 
 .prob2__header {
-  margin: 0 auto var(--space-7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-4);
+  margin-bottom: var(--space-7);
 }
 
-.prob2__contrast {
-  display: grid;
-  grid-template-columns: 1fr 1px 1fr;
-  column-gap: var(--space-6);
-  row-gap: var(--space-3);
-  padding: var(--space-5) 0;
-  border-top: 1px solid var(--prob2-divider, var(--color-border-default));
-  border-bottom: 1px solid var(--prob2-divider, var(--color-border-default));
-}
-
-.prob2__contrast-labels {
-  display: contents;
-}
-
-.prob2__contrast-col-label {
+.prob2__kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   font-family: var(--font-body);
+  font-weight: 500;
   font-size: var(--text-micro);
-  font-weight: var(--weight-semibold);
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  line-height: var(--leading-tight);
-  padding-bottom: var(--space-2);
-  margin-bottom: var(--space-1);
+  color: var(--prob2-text-muted, var(--color-text-muted));
+  margin: 0;
+}
+
+.prob2__kicker-tick {
+  display: inline-block;
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  flex: 0 0 auto;
+}
+
+.prob2__title-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 32ch;
+  text-wrap: balance;
+}
+
+.prob2__title-head,
+.prob2__title-sub {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: var(--text-h2);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--prob2-text, var(--color-text-primary));
+  margin: 0;
+}
+
+.prob2__title-sub {
+  opacity: 0.4;
+}
+
+/* Panes */
+.prob2__panes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-5);
+}
+
+.prob2__pane {
+  padding: var(--space-6);
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.prob2__pane--system {
+  background: transparent;
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-muted);
+}
+
+.prob2__pane--longevity {
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-subtle, var(--color-border-default));
+  color: var(--prob2-text, var(--color-text-primary));
+}
+
+.prob2__pane-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
   border-bottom: 1px solid var(--prob2-divider, var(--color-border-default));
 }
 
-.prob2__contrast-col-label--system {
-  grid-column: 1;
-  color: var(--prob2-text-ter, var(--color-text-muted));
-  text-align: right;
+.prob2__pane--longevity .prob2__pane-hd {
+  border-bottom-color: rgba(74, 140, 133, 0.35);
 }
 
-.prob2__contrast-col-label--longevity {
-  grid-column: 3;
+.prob2__pane-name {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: var(--text-micro);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.prob2__pane--system .prob2__pane-name {
+  color: var(--color-text-muted);
+}
+
+.prob2__pane--longevity .prob2__pane-name {
+  color: var(--prob2-text, var(--color-text-primary));
+}
+
+.prob2__pane-tag {
+  font-family: var(--font-heading);
+  font-weight: 500;
+  font-size: var(--text-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.prob2__pane--system .prob2__pane-tag {
+  color: var(--color-text-muted);
+}
+
+.prob2__pane--longevity .prob2__pane-tag {
   color: var(--color-teal-dark);
-  text-align: left;
+  opacity: 1;
 }
 
-.prob2__contrast-list {
-  display: contents;
+.prob2__pane-list {
   list-style: none;
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
 }
 
-.prob2__contrast-row {
-  display: contents;
+.prob2__pane-item {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: baseline;
 }
 
-.prob2__contrast-row::before {
-  content: "";
-  grid-column: 2;
-  background: var(--prob2-divider, var(--color-border-default));
-  width: 1px;
-  justify-self: center;
+.prob2__item-num {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: currentColor;
+  opacity: 0.55;
+  padding-top: 3px;
 }
 
-.prob2__contrast-cell {
-  font-family: var(--font-body);
-  font-size: var(--text-body);
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-body);
+.prob2__item-line {
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: var(--text-section, 20px);
+  line-height: 1.3;
+  letter-spacing: -0.005em;
 }
 
-.prob2__contrast-cell--system {
-  grid-column: 1;
-  color: var(--prob2-text-ter, var(--color-text-muted));
-  text-align: right;
+.prob2__pane--system .prob2__item-line {
+  color: var(--color-text-muted);
 }
 
-.prob2__contrast-cell--longevity {
-  grid-column: 3;
+.prob2__pane--longevity .prob2__item-line {
   color: var(--prob2-text, var(--color-text-primary));
-  text-align: left;
 }
 
 .prob2__closing {
-  margin: var(--space-5) auto 0;
+  margin: var(--space-6) auto 0;
   max-width: 52ch;
   text-align: center;
   font-family: var(--font-body);
   font-size: var(--text-body-sm);
   line-height: var(--leading-relaxed);
-  color: var(--prob2-text-sec, var(--color-text-secondary));
+  color: var(--prob2-text-muted, var(--color-text-muted));
 }
 
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 820px) {
   .prob2__outer {
     padding: 0 var(--space-4);
   }
@@ -184,39 +283,8 @@
     margin-bottom: var(--space-6);
   }
 
-  .prob2__contrast {
+  .prob2__panes {
     grid-template-columns: 1fr;
-    column-gap: 0;
-    row-gap: var(--space-1);
-    padding: var(--space-5) 0;
-  }
-
-  .prob2__contrast-col-label {
-    display: none;
-  }
-
-  .prob2__contrast-row {
-    display: block;
-    padding: var(--space-3) 0;
-    border-bottom: 1px solid var(--prob2-divider, var(--color-border-default));
-  }
-
-  .prob2__contrast-row:last-child {
-    border-bottom: none;
-  }
-
-  .prob2__contrast-row::before {
-    display: none;
-  }
-
-  .prob2__contrast-cell {
-    display: block;
-    text-align: left;
-  }
-
-  .prob2__contrast-cell--system {
-    font-size: var(--text-body-sm);
-    margin-bottom: var(--space-1);
   }
 }
 {% endstylesheet %}
@@ -232,7 +300,7 @@
     { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 200, "step": 8, "default": 80, "unit": "px" },
 
     { "type": "header", "content": "Farben" },
-    { "type": "color", "id": "color_bg", "label": "Hintergrundfarbe", "default": "#ffffff" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrundfarbe", "default": "#f7f7f4" },
     { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
 
     { "type": "header", "content": "Kopf" },
@@ -240,9 +308,11 @@
     { "type": "text", "id": "headline", "label": "Headline", "default": "Du investierst bereits. Die Frage ist nur: in welche Richtung." },
     { "type": "textarea", "id": "subheadline", "label": "Subheadline", "default": "Krankheitsmedizin wartet auf Diagnosen. Longevity-Diagnostik zeigt dir deinen Verlauf — bevor er einer wird." },
 
-    { "type": "header", "content": "Vergleichsleiste" },
-    { "type": "text", "id": "col_system_label", "label": "Linke Spalte", "default": "Krankheitsmedizin" },
-    { "type": "text", "id": "col_longevity_label", "label": "Rechte Spalte", "default": "Longevity-Diagnostik" },
+    { "type": "header", "content": "Panes" },
+    { "type": "text", "id": "col_system_label", "label": "Linke Spalte – Name", "default": "Krankheitsmedizin" },
+    { "type": "text", "id": "system_tag", "label": "Linke Spalte – Tag", "default": "reaktiv" },
+    { "type": "text", "id": "col_longevity_label", "label": "Rechte Spalte – Name", "default": "Longevity-Diagnostik" },
+    { "type": "text", "id": "longevity_tag", "label": "Rechte Spalte – Tag", "default": "proaktiv" },
 
     { "type": "header", "content": "Schluss-Note" },
     { "type": "textarea", "id": "closing_note", "label": "Note", "default": "Kein Ersatz für deinen Arzt. Ein Ausgangspunkt, bevor er nötig wird." }
@@ -263,8 +333,8 @@
       "name": "Problem & Systemlücke",
       "blocks": [
         { "type": "comparison_row", "settings": { "system_text": "Wartet auf Diagnose", "longevity_text": "Zeigt Verlauf, bevor eine nötig ist" } },
-        { "type": "comparison_row", "settings": { "system_text": "Aktueller Status", "longevity_text": "Altersgeschwindigkeit" } },
-        { "type": "comparison_row", "settings": { "system_text": "Behandelt Symptome", "longevity_text": "Ermöglicht Prävention" } }
+        { "type": "comparison_row", "settings": { "system_text": "Aktueller Status", "longevity_text": "Altersgeschwindigkeit im Zeitverlauf" } },
+        { "type": "comparison_row", "settings": { "system_text": "Behandelt Symptome", "longevity_text": "Ermöglicht aktive Prävention" } }
       ]
     }
   ]
