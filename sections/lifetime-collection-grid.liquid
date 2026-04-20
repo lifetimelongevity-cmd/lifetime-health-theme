@@ -91,6 +91,13 @@
             {%- elsif block.settings.custom_title != blank -%}
               {{ block.settings.custom_title | escape }}
             {%- endif -%}
+            {%- comment -%}
+              Decorative arrow on feature cards (image-as-background).
+              aria-hidden so screen readers don't announce "right arrow".
+            {%- endcomment -%}
+            {%- if use_bg_img -%}
+              <span class="cg-card__arrow" aria-hidden="true">&nbsp;→</span>
+            {%- endif -%}
           </h3>
 
           {%- assign subline = block.settings.subline -%}
@@ -99,6 +106,38 @@
           {%- endif -%}
           {%- if subline != blank -%}
             <p class="cg-card__subline" style="color: {{ text_color }};">{{ subline }}</p>
+          {%- endif -%}
+
+          {%- comment -%}
+            Rating: prefer live product metafield values (Shopify Reviews / Judge.me
+            all write to reviews.rating + reviews.rating_count). Fall back to the
+            manual block settings. Rating = 0 means "don't show".
+          {%- endcomment -%}
+          {%- assign rating_value = 0 -%}
+          {%- assign rating_count = block.settings.rating_count -%}
+          {%- if block.settings.rating_value and block.settings.rating_value > 0 -%}
+            {%- assign rating_value = block.settings.rating_value -%}
+          {%- endif -%}
+          {%- if product != blank -%}
+            {%- if product.metafields.reviews.rating.value != blank -%}
+              {%- assign rating_value = product.metafields.reviews.rating.value | times: 1 -%}
+            {%- endif -%}
+            {%- if product.metafields.reviews.rating_count != blank -%}
+              {%- assign rating_count = product.metafields.reviews.rating_count -%}
+            {%- endif -%}
+          {%- endif -%}
+          {%- if rating_value > 0 -%}
+            {%- assign rating_fill = rating_value | times: 20 -%}
+            <div
+              class="cg-card__rating"
+              style="color: {{ text_color }};"
+              aria-label="{{ rating_value }} von 5 Sternen{% if rating_count != blank %}, {{ rating_count }} Bewertungen{% endif %}"
+            >
+              <span class="cg-card__stars" style="--rating-fill: {{ rating_fill }}%;" aria-hidden="true"></span>
+              {%- if rating_count != blank -%}
+                <span class="cg-card__rating-count" aria-hidden="true">({{ rating_count }})</span>
+              {%- endif -%}
+            </div>
           {%- endif -%}
 
           {%- if product != blank -%}
@@ -158,6 +197,15 @@
     padding-bottom: {{ section.settings.padding_bottom }}px;
   }
 
+  /* Scale section padding down on mobile (~0.8x, token-aligned:
+     e.g. 80px desktop → 64px mobile, 64px → 48px). */
+  @media (max-width: 749px) {
+    .section-{{ section.id }}-cg {
+      padding-top: calc({{ section.settings.padding_top }}px * 0.8);
+      padding-bottom: calc({{ section.settings.padding_bottom }}px * 0.8);
+    }
+  }
+
   /* ---- Header ---- */
   .section-{{ section.id }}-cg .cg-header {
     border-top: 1px solid var(--color-border-default);
@@ -175,6 +223,8 @@
   .section-{{ section.id }}-cg .cg-heading {
     margin: 0;
     font-size: {{ section.settings.heading_size }}px;
+    font-weight: var(--weight-bold, 700);
+    line-height: var(--leading-heading, 1.15);
   }
 
   /* Equalize row heights for all cards */
@@ -294,6 +344,15 @@
     letter-spacing: var(--letter-spacing-heading, 0);
   }
 
+  .section-{{ section.id }}-cg .cg-card__arrow {
+    display: inline-block;
+    transition: transform var(--ease-default, 0.2s ease);
+  }
+
+  .section-{{ section.id }}-cg .cg-card:hover .cg-card__arrow {
+    transform: translateX(4px);
+  }
+
   @media (max-width: 749px) {
     .section-{{ section.id }}-cg .cg-card__title {
       font-size: calc(var(--font-body-size, 1rem) * 1.05);
@@ -320,6 +379,54 @@
       font-size: calc(var(--font-body-size, 1rem) * 0.82);
       margin-bottom: var(--space-1);
     }
+  }
+
+  /* ---- Rating / social proof ---- */
+  .section-{{ section.id }}-cg .cg-card__rating {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-2);
+    font-family: var(--font-body-family);
+    font-size: calc(var(--font-body-size, 1rem) * 0.82);
+    line-height: 1;
+    justify-content: center;
+  }
+
+  .section-{{ section.id }}-cg .cg-card__stars {
+    --rating-fill: 0%;
+    position: relative;
+    display: inline-block;
+    width: 5.4em;
+    height: 1em;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    font-family: Helvetica, Arial, sans-serif;
+  }
+
+  .section-{{ section.id }}-cg .cg-card__stars::before,
+  .section-{{ section.id }}-cg .cg-card__stars::after {
+    content: "★★★★★";
+    position: absolute;
+    top: 0;
+    left: 0;
+    line-height: 1;
+  }
+
+  .section-{{ section.id }}-cg .cg-card__stars::before {
+    color: var(--color-gray-200, #E5E5E5);
+  }
+
+  .section-{{ section.id }}-cg .cg-card__stars::after {
+    color: var(--color-star, #F4B740);
+    width: var(--rating-fill);
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .section-{{ section.id }}-cg .cg-card__rating-count {
+    opacity: 0.7;
+    font-size: 0.92em;
   }
 
   .section-{{ section.id }}-cg .cg-card__price {
@@ -577,6 +684,26 @@
           "id": "badge",
           "label": "Badge text",
           "info": "e.g. NEW, SALE, LIMITED TIME ONLY"
+        },
+        {
+          "type": "header",
+          "content": "Rating"
+        },
+        {
+          "type": "range",
+          "id": "rating_value",
+          "label": "Star rating",
+          "min": 0,
+          "max": 5,
+          "step": 0.1,
+          "default": 0,
+          "info": "Leave at 0 to hide. Overridden by product metafield reviews.rating when the product is linked."
+        },
+        {
+          "type": "text",
+          "id": "rating_count",
+          "label": "Review count",
+          "info": "Shown in parentheses next to the stars, e.g. 128."
         },
         {
           "type": "header",
