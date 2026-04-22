@@ -44,6 +44,8 @@
   endif
 -%}
 
+{{ 'section-lt-longevity-quiz.css' | asset_url | stylesheet_tag }}
+
 {% style %}
   #lt-routine-quiz-{{ section.id }} {
     --rq-bg: {{ section.settings.color_bg }};
@@ -997,6 +999,46 @@
       }
     }
   </script>
+
+  {%- comment -%} ═══════ Original Supplement-Quiz (lt-longevity-quiz) — nur aktiv auf Route 3 ═══════ {%- endcomment -%}
+  <div class="lt-quiz-embed" data-supp-embed hidden>
+    <section class="lt-quiz" id="lt-longevity-quiz">
+      <div class="lt-quiz__container">
+        <div class="lt-quiz__progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Frage 1 von 8">
+          <div class="lt-quiz__progress-line" aria-hidden="true">
+            <div class="lt-quiz__progress-line-track"></div>
+            <div class="lt-quiz__progress-bar" id="lt-quiz-progress-bar"></div>
+          </div>
+          <ol class="lt-quiz__milestones" id="lt-quiz-milestones"></ol>
+        </div>
+        <div class="lt-quiz__steps" id="lt-quiz-steps"></div>
+        <div class="lt-quiz__results" id="lt-quiz-results" hidden></div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    window.LT_QUIZ_PRODUCTS = {
+      energie_primary: { title: {{ p_energie_primary.title | default: '' | json }}, url: {{ p_energie_primary.url | default: '' | json }}, price: {{ p_energie_primary.price | money | default: '' | json }}, image: {{ p_energie_primary.featured_image | image_url: width: 600 | default: '' | json }} },
+      energie_sec1:    { title: {{ p_energie_sec1.title    | default: '' | json }}, url: {{ p_energie_sec1.url    | default: '' | json }}, price: {{ p_energie_sec1.price    | money | default: '' | json }}, image: {{ p_energie_sec1.featured_image    | image_url: width: 400 | default: '' | json }} },
+      energie_sec2:    { title: {{ p_energie_sec2.title    | default: '' | json }}, url: {{ p_energie_sec2.url    | default: '' | json }}, price: {{ p_energie_sec2.price    | money | default: '' | json }}, image: {{ p_energie_sec2.featured_image    | image_url: width: 400 | default: '' | json }} },
+      fokus_primary:   { title: {{ p_fokus_primary.title   | default: '' | json }}, url: {{ p_fokus_primary.url   | default: '' | json }}, price: {{ p_fokus_primary.price   | money | default: '' | json }}, image: {{ p_fokus_primary.featured_image   | image_url: width: 600 | default: '' | json }} },
+      fokus_sec1:      { title: {{ p_fokus_sec1.title      | default: '' | json }}, url: {{ p_fokus_sec1.url      | default: '' | json }}, price: {{ p_fokus_sec1.price      | money | default: '' | json }}, image: {{ p_fokus_sec1.featured_image      | image_url: width: 400 | default: '' | json }} },
+      fokus_sec2:      { title: {{ p_fokus_sec2.title      | default: '' | json }}, url: {{ p_fokus_sec2.url      | default: '' | json }}, price: {{ p_fokus_sec2.price      | money | default: '' | json }}, image: {{ p_fokus_sec2.featured_image      | image_url: width: 400 | default: '' | json }} },
+      schlaf_primary:  { title: {{ p_schlaf_primary.title  | default: '' | json }}, url: {{ p_schlaf_primary.url  | default: '' | json }}, price: {{ p_schlaf_primary.price  | money | default: '' | json }}, image: {{ p_schlaf_primary.featured_image  | image_url: width: 600 | default: '' | json }} },
+      schlaf_sec1:     { title: {{ p_schlaf_sec1.title     | default: '' | json }}, url: {{ p_schlaf_sec1.url     | default: '' | json }}, price: {{ p_schlaf_sec1.price     | money | default: '' | json }}, image: {{ p_schlaf_sec1.featured_image     | image_url: width: 400 | default: '' | json }} },
+      schlaf_sec2:     { title: {{ p_schlaf_sec2.title     | default: '' | json }}, url: {{ p_schlaf_sec2.url     | default: '' | json }}, price: {{ p_schlaf_sec2.price     | money | default: '' | json }}, image: {{ p_schlaf_sec2.featured_image     | image_url: width: 400 | default: '' | json }} },
+      lang_primary:    { title: {{ p_lang_primary.title    | default: '' | json }}, url: {{ p_lang_primary.url    | default: '' | json }}, price: {{ p_lang_primary.price    | money | default: '' | json }}, image: {{ p_lang_primary.featured_image    | image_url: width: 600 | default: '' | json }} },
+      lang_sec1:       { title: {{ p_lang_sec1.title       | default: '' | json }}, url: {{ p_lang_sec1.url       | default: '' | json }}, price: {{ p_lang_sec1.price       | money | default: '' | json }}, image: {{ p_lang_sec1.featured_image       | image_url: width: 400 | default: '' | json }} },
+      lang_sec2:       { title: {{ p_lang_sec2.title       | default: '' | json }}, url: {{ p_lang_sec2.url       | default: '' | json }}, price: {{ p_lang_sec2.price       | money | default: '' | json }}, image: {{ p_lang_sec2.featured_image       | image_url: width: 400 | default: '' | json }} }
+    };
+    window.LT_QUIZ_ADVISOR = {
+      name:  {{ section.settings.advisor_name  | default: 'Prof. Dr. med. Volker Limmroth' | json }},
+      title: {{ section.settings.advisor_title | default: 'Chefarzt Neurologie · Chief Scientific Officer LIFETIME' | json }},
+      image: {{ advisor_image_src | default: '' | json }}
+    };
+  </script>
+  <script src="{{ 'lt-longevity-quiz.js' | asset_url }}" defer></script>
 </section>
 
 <script>
@@ -1163,8 +1205,18 @@
           archetype: state.archetype
         });
 
-        if (state.path === 'supplement') go('supp_focus');
-        else go('diag_age');
+        if (state.path === 'supplement') {
+          var frame = root.querySelector('.rq-frame');
+          var embed = root.querySelector('[data-supp-embed]');
+          if (frame) frame.hidden = true;
+          if (embed) embed.hidden = false;
+          var embedQuiz = document.getElementById('lt-longevity-quiz');
+          if (embedQuiz && embedQuiz.scrollIntoView) {
+            embedQuiz.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        } else {
+          go('diag_age');
+        }
       });
     });
 
