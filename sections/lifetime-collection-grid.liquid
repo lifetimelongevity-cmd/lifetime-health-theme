@@ -30,11 +30,34 @@
   <div class="grid grid--layout {{ grid_class }}">
 
     {%- for block in section.blocks -%}
-      {%- assign product    = block.settings.product -%}
+      {%- assign product_picker = block.settings.product -%}
+      {%- assign product = blank -%}
+      {%- assign product_handle = blank -%}
+      {%- if product_picker != blank -%}
+        {%- assign product = product_picker -%}
+        {%- assign product_handle = product_picker.handle | default: product_picker -%}
+        {%- if product_handle != blank -%}
+          {%- comment -%}
+            Rehydrate picker products through all_products so app-backed metafields
+            like Loox are available consistently, matching the PDP sections.
+          {%- endcomment -%}
+          {%- assign hydrated_product = all_products[product_handle] -%}
+          {%- if hydrated_product != blank -%}
+            {%- assign product = hydrated_product -%}
+          {%- endif -%}
+        {%- endif -%}
+      {%- endif -%}
       {%- assign card_bg    = block.settings.card_bg_color -%}
       {%- assign text_color = block.settings.text_color -%}
-      {%- assign cmp_color  = block.settings.compare_price_color -%}
       {%- assign use_bg_img = block.settings.image_as_background -%}
+      {%- assign price_pill = blank -%}
+      {%- if product != blank -%}
+        {%- if product.price_varies -%}
+          {%- capture price_pill -%}Ab {{ product.price | money_without_trailing_zeros }}{%- endcapture -%}
+        {%- else -%}
+          {%- capture price_pill -%}{{ product.price | money_without_trailing_zeros }}{%- endcapture -%}
+        {%- endif -%}
+      {%- endif -%}
 
       {%- assign card_href = '#' -%}
       {%- if product != blank -%}
@@ -78,10 +101,19 @@
           <span class="cg-card__overlay" aria-hidden="true"></span>
         {%- endif -%}
 
-        {%- if block.settings.badge != blank -%}
-          <span class="cg-badge" style="color: {{ card_bg }};">
-            {{ block.settings.badge | escape }}
-          </span>
+        {%- if block.settings.badge != blank or price_pill != blank -%}
+          <div class="cg-card__badges">
+            {%- if block.settings.badge != blank -%}
+              <span class="cg-badge" style="color: {{ card_bg }};">
+                {{ block.settings.badge | escape }}
+              </span>
+            {%- endif -%}
+            {%- if price_pill != blank -%}
+              <span class="cg-badge cg-badge--price" style="color: {{ text_color }};">
+                {{ price_pill | strip }}
+              </span>
+            {%- endif -%}
+          </div>
         {%- endif -%}
 
         <div class="cg-card__body">
@@ -109,21 +141,29 @@
           {%- endif -%}
 
           {%- comment -%}
-            Rating: prefer live product metafield values (Shopify Reviews / Judge.me
-            all write to reviews.rating + reviews.rating_count). Fall back to the
-            manual block settings. Rating = 0 means "don't show".
+            Rating priority: 1) Loox metafields, 2) Shopify Reviews metafields,
+            3) manual block setting. Rating = 0 means "don't show".
           {%- endcomment -%}
           {%- assign rating_value = 0 -%}
           {%- assign rating_count = block.settings.rating_count -%}
           {%- if block.settings.rating_value and block.settings.rating_value > 0 -%}
             {%- assign rating_value = block.settings.rating_value -%}
           {%- endif -%}
+          {%- assign loox_avg = 0 -%}
+          {%- assign loox_count = 0 -%}
+          {%- assign rating_product = product -%}
+          {%- if product_handle == 'lifetime-age-folgetest' -%}
+            {%- assign rating_product = all_products['lifetime-age-dna'] | default: product -%}
+          {%- endif -%}
           {%- if product != blank -%}
-            {%- if product.metafields.reviews.rating.value != blank -%}
-              {%- assign rating_value = product.metafields.reviews.rating.value | times: 1 -%}
-            {%- endif -%}
-            {%- if product.metafields.reviews.rating_count != blank -%}
-              {%- assign rating_count = product.metafields.reviews.rating_count -%}
+            {%- assign loox_avg = rating_product.metafields.loox.avg_rating | default: 0 | plus: 0 -%}
+            {%- assign loox_count = rating_product.metafields.loox.num_reviews | default: 0 | plus: 0 -%}
+            {%- if loox_avg > 0 -%}
+              {%- assign rating_value = loox_avg -%}
+              {%- assign rating_count = loox_count -%}
+            {%- elsif rating_product.metafields.reviews.rating.value != blank -%}
+              {%- assign rating_value = rating_product.metafields.reviews.rating.value | times: 1 -%}
+              {%- assign rating_count = rating_product.metafields.reviews.rating_count -%}
             {%- endif -%}
           {%- endif -%}
           {%- if rating_value > 0 -%}
@@ -138,17 +178,6 @@
                 <span class="cg-card__rating-count" aria-hidden="true">({{ rating_count }})</span>
               {%- endif -%}
             </div>
-          {%- endif -%}
-
-          {%- if product != blank -%}
-            <p class="cg-card__price" style="color: {{ text_color }};">
-              {%- if product.compare_at_price > product.price -%}
-                From {{ product.price | money_without_trailing_zeros }}
-                <s style="color: {{ cmp_color }};">{{ product.compare_at_price | money_without_trailing_zeros }}</s>
-              {%- else -%}
-                {{ product.price | money_without_trailing_zeros }}
-              {%- endif -%}
-            </p>
           {%- endif -%}
 
           {%- if block.settings.button_label != blank -%}
@@ -222,9 +251,9 @@
 
   .section-{{ section.id }}-cg .cg-heading {
     margin: 0;
-    font-size: {{ section.settings.heading_size }}px;
-    font-weight: var(--weight-bold, 700);
-    line-height: var(--leading-heading, 1.15);
+    font-size: var(--text-h2);
+    font-weight: var(--weight-regular);
+    line-height: var(--leading-heading);
   }
 
   /* Equalize row heights for all cards */
@@ -292,11 +321,19 @@
   }
 
   /* ---- Badge ---- */
-  .section-{{ section.id }}-cg .cg-badge {
+  .section-{{ section.id }}-cg .cg-card__badges {
     position: absolute;
     top: var(--space-2);
     right: var(--space-2);
     z-index: 2;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: var(--space-1);
+    max-width: calc(100% - var(--space-4));
+  }
+
+  .section-{{ section.id }}-cg .cg-badge {
     background: var(--color-surface-primary);
     padding: 0.25rem var(--space-2);
     font-family: var(--font-body);
@@ -309,11 +346,20 @@
     border-radius: var(--radius-full);
   }
 
+  .section-{{ section.id }}-cg .cg-badge--price {
+    background: rgba(255,255,255,0.92);
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+
   @media (min-width: 750px) {
-    .section-{{ section.id }}-cg .cg-badge {
-      padding: var(--space-1) var(--space-2);
+    .section-{{ section.id }}-cg .cg-card__badges {
       top: var(--space-3);
       right: var(--space-3);
+    }
+
+    .section-{{ section.id }}-cg .cg-badge {
+      padding: var(--space-1) var(--space-2);
     }
   }
 
@@ -417,19 +463,6 @@
   .section-{{ section.id }}-cg .cg-card__rating-count {
     opacity: 0.7;
     font-size: 0.92em;
-  }
-
-  .section-{{ section.id }}-cg .cg-card__price {
-    margin: 0;
-    font-family: var(--font-body);
-    font-weight: var(--weight-medium);
-    font-size: var(--text-body);
-    line-height: 1.2;
-  }
-
-  .section-{{ section.id }}-cg .cg-card__price s {
-    text-decoration: line-through;
-    margin-left: var(--space-1);
   }
 
   /* ---- CTA Button ---- */
