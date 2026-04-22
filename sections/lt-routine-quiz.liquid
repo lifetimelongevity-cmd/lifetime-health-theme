@@ -742,21 +742,28 @@
     flex-direction: column;
     gap: var(--space-3);
   }
+  #lt-routine-quiz-{{ section.id }} .rq-empathy {
+    margin: 0;
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--rq-accent-soft);
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--rq-text);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-hypotheses-intro {
+    font-size: 11px;
+    font-weight: var(--weight-semibold);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--rq-muted);
+    margin: var(--space-3) 0 0;
+  }
   #lt-routine-quiz-{{ section.id }} .rq-hypothesis {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
     padding: var(--space-4);
     border: 1px solid var(--rq-border);
     border-radius: var(--radius-md);
     background: var(--rq-bg);
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-hypothesis-role {
-    font-size: 10px;
-    font-weight: var(--weight-semibold);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--rq-accent);
   }
   #lt-routine-quiz-{{ section.id }} .rq-hypothesis-text {
     font-size: 15px;
@@ -846,6 +853,7 @@
     }
   }
   #lt-routine-quiz-{{ section.id }} .rq-cat-item {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -853,13 +861,36 @@
     border-radius: var(--radius-sm);
     background: var(--rq-bg);
     border: 1px solid var(--rq-border);
-    opacity: 0.58;
-    transition: opacity 0.2s ease;
+    opacity: 0.55;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cat-item .rq-cat-desc {
+    display: none;
   }
   #lt-routine-quiz-{{ section.id }} .rq-cat-item.is-focus {
     opacity: 1;
     background: var(--rq-accent-soft);
     border-color: var(--rq-accent-border);
+    padding-right: var(--space-6);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cat-item.is-focus .rq-cat-desc {
+    display: block;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cat-item.is-focus::after {
+    content: '✓';
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    background: var(--rq-accent);
+    color: var(--rq-cta-text);
+    font-size: 11px;
+    font-weight: var(--weight-semibold);
+    line-height: 1;
   }
   #lt-routine-quiz-{{ section.id }} .rq-cat-title {
     font-size: 13px;
@@ -867,13 +898,11 @@
     color: var(--rq-text);
     line-height: 1.25;
   }
-  #lt-routine-quiz-{{ section.id }} .rq-cat-item.is-focus .rq-cat-title {
-    color: var(--rq-accent);
-  }
   #lt-routine-quiz-{{ section.id }} .rq-cat-desc {
     font-size: 11px;
     line-height: 1.4;
     color: var(--rq-muted);
+    margin-top: 2px;
   }
 
   /* Zone 4 — CTA */
@@ -918,6 +947,35 @@
     color: var(--rq-accent);
     font-weight: var(--weight-semibold);
   }
+
+  /* Embedded supplement quiz — visuelle Konsistenz mit Routine-Quiz */
+  #lt-routine-quiz-{{ section.id }} [data-supp-embed] .lt-quiz__header {
+    display: none;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-embed-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: var(--space-4);
+    padding: 6px 10px;
+    background: transparent;
+    border: 0;
+    color: var(--rq-muted);
+    font-size: 13px;
+    cursor: pointer;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-embed-back:hover {
+    color: var(--rq-text);
+  }
+
+  /* Question counter under milestones */
+  #lt-routine-quiz-{{ section.id }} .rq-progress-counter {
+    margin: 6px 0 0;
+    font-size: 11px;
+    color: var(--rq-muted);
+    text-align: center;
+    letter-spacing: 0.04em;
+  }
 {% endstyle %}
 
 <section id="lt-routine-quiz-{{ section.id }}" class="lt-routine-quiz" data-section-id="{{ section.id }}" data-section-type="lt-routine-quiz">
@@ -927,6 +985,7 @@
     <div class="rq-progress" data-progress hidden>
       <button type="button" class="rq-back" data-back hidden aria-label="Eine Frage zurück">← zurück</button>
       <ol class="rq-progress-list" data-progress-list aria-label="Fortschritt"></ol>
+      <p class="rq-progress-counter" data-progress-counter></p>
     </div>
 
     {%- comment -%} Q1 — Routing (3 Bild-Karten) {%- endcomment -%}
@@ -1065,7 +1124,8 @@
       <section class="rq-zone rq-zone--anchor">
         <h2 class="rq-anchor" tabindex="-1" data-anchor>&nbsp;</h2>
         <p class="rq-anchor-felt" data-anchor-felt hidden></p>
-        <p class="rq-empathy" data-empathy>&nbsp;</p>
+        <blockquote class="rq-empathy" data-empathy>&nbsp;</blockquote>
+        <p class="rq-hypotheses-intro">Was dein Test voraussichtlich zeigt</p>
         <ul class="rq-hypotheses" data-hypotheses aria-label="Was der Test voraussichtlich zeigt"></ul>
       </section>
 
@@ -1095,7 +1155,6 @@
         <h3 class="rq-cta-headline">Das ist, was dein Test zeigen wird. Bereit, es wirklich zu wissen?</h3>
         <div class="rq-cta-row">
           <a href="/products/age-dna-test" class="rq-cta rq-cta--primary">AGE &amp; DNA-Test starten → 349 €</a>
-          <a href="/pages/longevity-coach" class="rq-cta rq-cta--secondary">Oder: 15-Min-Beratung zuerst</a>
         </div>
         <ul class="rq-trust-row" role="list">
           <li>Eurofins</li>
@@ -1273,6 +1332,7 @@
 
   {%- comment -%} ═══════ Original Supplement-Quiz (lt-longevity-quiz) — nur aktiv auf Route 3 ═══════ {%- endcomment -%}
   <div class="lt-quiz-embed" data-supp-embed hidden>
+    <button type="button" class="rq-embed-back" data-supp-back>← Andere Antwort wählen</button>
     <section class="lt-quiz" id="lt-longevity-quiz">
       <div class="lt-quiz__container">
         <div class="lt-quiz__progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="Frage 1 von 8">
@@ -1420,6 +1480,18 @@
 
       var isResult = current === 'diag_result' || current === 'supp_result';
       if (backBtn) backBtn.hidden = !(idx >= 1 && !isResult);
+
+      var counterEl = progressEl.querySelector('[data-progress-counter]');
+      if (counterEl) {
+        if (activeIdx >= 0 && !isResult) {
+          var questionSteps = steps.filter(function (s) { return s.id !== 'diag_result' && s.id !== 'supp_result'; });
+          counterEl.textContent = 'Frage ' + (activeIdx + 1) + ' von ' + questionSteps.length;
+          counterEl.hidden = false;
+        } else {
+          counterEl.textContent = '';
+          counterEl.hidden = true;
+        }
+      }
     }
 
     function focusHeading(screen) {
@@ -1458,6 +1530,20 @@
     }
 
     if (backBtn) backBtn.addEventListener('click', goBack);
+
+    var suppBackBtn = root.querySelector('[data-supp-back]');
+    if (suppBackBtn) {
+      suppBackBtn.addEventListener('click', function () {
+        var frame = root.querySelector('.rq-frame');
+        var embed = root.querySelector('[data-supp-embed]');
+        if (frame) frame.hidden = false;
+        if (embed) embed.hidden = true;
+        state.path = null;
+        state.archetype = null;
+        root.querySelectorAll('[data-route-card]').forEach(function (c) { c.classList.remove('is-selected'); });
+        if (root.scrollIntoView) root.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
 
     // ───── Q1 — Routing cards ─────
     root.querySelectorAll('[data-route-card]').forEach(function (btn) {
@@ -1669,19 +1755,12 @@
       // Zone 1 — Hypothesen
       var list = root.querySelector('[data-hypotheses]');
       list.innerHTML = '';
-      var hyps = [
-        { role: 'Primär',   text: data.hypothesis_primary },
-        { role: 'Sekundär', text: data.hypothesis_secondary },
-        { role: 'Tertiär',  text: data.hypothesis_tertiary }
-      ];
-      hyps.forEach(function (h) {
-        if (!h.text) return;
+      [data.hypothesis_primary, data.hypothesis_secondary, data.hypothesis_tertiary].forEach(function (text) {
+        if (!text) return;
         var li = document.createElement('li');
         li.className = 'rq-hypothesis';
-        li.innerHTML =
-          '<span class="rq-hypothesis-role">' + h.role + '</span>' +
-          '<p class="rq-hypothesis-text"></p>';
-        li.querySelector('.rq-hypothesis-text').textContent = h.text;
+        li.innerHTML = '<p class="rq-hypothesis-text"></p>';
+        li.querySelector('.rq-hypothesis-text').textContent = text;
         list.appendChild(li);
       });
 
