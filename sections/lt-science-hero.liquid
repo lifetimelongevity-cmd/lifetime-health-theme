@@ -1,0 +1,193 @@
+{% comment %} Image: human skin texture natural light minimal — Photo by Olga Thelavart on Unsplash {% endcomment %}
+
+{% style %}
+  #section-{{ section.id }} {
+    --lsh-bg:       {{ section.settings.color_bg | default: '#f7f7f4' }};
+    --lsh-text:     {{ section.settings.color_text | default: '#26251e' }};
+    --lsh-text-sec: {{ section.settings.color_text | default: '#26251e' | color_modify: 'alpha', 0.55 }};
+    background:     var(--lsh-bg);
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+{%- liquid
+  assign lsh_alt = section.settings.image_alt
+  if lsh_alt == blank
+    assign lsh_alt = section.settings.image.alt
+  endif
+-%}
+
+<section id="section-{{ section.id }}" class="lsh">
+  <div class="lsh__container">
+
+    {%- comment -%} Text — left column {%- endcomment -%}
+    <div class="lsh__content">
+      {%- if section.settings.kicker != blank -%}
+        <p class="lsh__kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.headline != blank -%}
+        <h1 class="lsh__heading">{{ section.settings.headline | escape }}</h1>
+      {%- endif -%}
+
+      {%- if section.settings.subheading != blank -%}
+        <p class="lsh__subheading">{{ section.settings.subheading | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    {%- comment -%} Image — right column {%- endcomment -%}
+    <div class="lsh__visual">
+      {%- if section.settings.image != blank -%}
+        {{
+          section.settings.image
+          | image_url: width: 1200
+          | image_tag:
+            loading: 'eager',
+            class: 'lsh__img',
+            alt: lsh_alt
+        }}
+      {%- else -%}
+        <div class="lsh__placeholder">{{ 'image' | placeholder_svg_tag: 'lsh__placeholder-svg' }}</div>
+      {%- endif -%}
+    </div>
+
+  </div>
+</section>
+
+{% stylesheet %}
+/* ================================================================
+   lt-science-hero — Science Page Hero
+   §3 tokens, §4 layout (split 60/40), §6 typography
+   Dominant element: H1 headline
+   No CTA — sets editorial tone only
+   ================================================================ */
+
+.lsh {
+  background: var(--lsh-bg, #f7f7f4);
+  overflow: hidden;
+}
+
+.lsh__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: var(--space-8);
+  align-items: center;
+}
+
+/* — Text column — */
+.lsh__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.lsh__kicker {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lsh-text-sec, rgba(38, 37, 30, 0.55));
+  margin: 0;
+}
+
+.lsh__heading {
+  font-family: var(--font-heading);
+  font-size: var(--text-display);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-display);
+  color: var(--lsh-text, #26251e);
+  margin: 0;
+}
+
+.lsh__subheading {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--lsh-text-sec, rgba(38, 37, 30, 0.55));
+  margin: 0;
+  max-width: 52ch;
+}
+
+/* — Image column — */
+.lsh__visual {
+  display: flex;
+  align-items: stretch;
+}
+
+.lsh__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  display: block;
+  aspect-ratio: 4 / 5;
+}
+
+.lsh__placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  background: #f2f1ed;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(38, 37, 30, 0.08);
+}
+
+.lsh__placeholder-svg {
+  width: 60px;
+  height: 60px;
+  opacity: 0.25;
+}
+
+/* — Responsive — */
+@media (max-width: 1024px) {
+  .lsh__container {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-7);
+  }
+}
+
+@media (max-width: 768px) {
+  .lsh__container {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+    padding: 0 var(--space-4);
+  }
+
+  .lsh__heading {
+    font-size: var(--text-h1);
+  }
+
+  .lsh__img,
+  .lsh__placeholder {
+    aspect-ratio: 3 / 2;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Science Hero",
+  "tag": "section",
+  "class": "lt-science-hero",
+  "settings": [
+    { "type": "text",         "id": "kicker",         "label": "Kicker",          "default": "Wissenschaft" },
+    { "type": "textarea",     "id": "headline",       "label": "Headline",        "default": "Altern ist unvermeidlich. Wie wir altern, ist beeinflussbar." },
+    { "type": "textarea",     "id": "subheading",     "label": "Subheading",      "default": "Langlebigkeit beginnt nicht mit Trends, sondern mit Biologie. Wer versteht, was im Körper mit dem Alter passiert, kann gezielter entscheiden, was wirklich sinnvoll ist — und was nicht." },
+    { "type": "image_picker", "id": "image",          "label": "Bild rechts" },
+    { "type": "text",         "id": "image_alt",      "label": "Bild Alt-Text" },
+    { "type": "color",        "id": "color_bg",       "label": "Hintergrund",     "default": "#f7f7f4" },
+    { "type": "color",        "id": "color_text",     "label": "Textfarbe",       "default": "#26251e" },
+    { "type": "range",        "id": "padding_top",    "label": "Abstand oben",    "min": 0, "max": 160, "step": 8, "default": 80 },
+    { "type": "range",        "id": "padding_bottom", "label": "Abstand unten",   "min": 0, "max": 160, "step": 8, "default": 80 }
+  ],
+  "presets": [{ "name": "Science Hero" }]
+}
+{% endschema %}

@@ -1,0 +1,321 @@
+{% comment %} Image: laboratory glassware minimal light — Photo by Egor Myznik on Unsplash {% endcomment %}
+
+{% style %}
+  #section-{{ section.id }} {
+    --lim-bg:        {{ section.settings.color_bg | default: '#364f56' }};
+    --lim-text:      {{ section.settings.color_text | default: '#f7f7f4' }};
+    --lim-text-muted: {{ section.settings.color_text | default: '#f7f7f4' | color_modify: 'alpha', 0.6 }};
+    background:      var(--lim-bg);
+    color:           var(--lim-text);
+    padding-top:     {{ section.settings.padding_top }}px;
+    padding-bottom:  {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<section id="section-{{ section.id }}" class="lim">
+  <div class="lim__container">
+    <div class="lim__grid">
+
+      {%- comment -%} Image — left column {%- endcomment -%}
+      <div class="lim__visual">
+        {%- if section.settings.expert_image != blank -%}
+          {{
+            section.settings.expert_image
+            | image_url: width: 800
+            | image_tag:
+              loading: 'lazy',
+              class: 'lim__img',
+              alt: section.settings.expert_name | escape
+          }}
+        {%- else -%}
+          <div class="lim__img-placeholder" aria-hidden="true">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- comment -%} Content — right column {%- endcomment -%}
+      <div class="lim__content">
+
+        {%- if section.settings.kicker != blank -%}
+          <p class="lim__kicker">{{ section.settings.kicker | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.expert_name != blank -%}
+          <h2 class="lim__name">{{ section.settings.expert_name | escape }}</h2>
+        {%- endif -%}
+
+        {%- if section.settings.expert_credentials != blank -%}
+          <p class="lim__credentials">{{ section.settings.expert_credentials | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.expert_body != blank -%}
+          <p class="lim__body">{{ section.settings.expert_body | escape }}</p>
+        {%- endif -%}
+
+        {%- comment -%} Book block {%- endcomment -%}
+        {%- if section.settings.book_title != blank -%}
+          <div class="lim__book">
+            {%- if section.settings.book_cover != blank -%}
+              {{
+                section.settings.book_cover
+                | image_url: width: 120
+                | image_tag:
+                  loading: 'lazy',
+                  class: 'lim__book-cover',
+                  alt: section.settings.book_title | escape
+              }}
+            {%- endif -%}
+            <div class="lim__book-meta">
+              <p class="lim__book-title">{{ section.settings.book_title | escape }}</p>
+              {%- if section.settings.book_subtitle != blank -%}
+                <p class="lim__book-subtitle">{{ section.settings.book_subtitle | escape }}</p>
+              {%- endif -%}
+              {%- if section.settings.book_url != blank and section.settings.book_link_label != blank -%}
+                <a
+                  href="{{ section.settings.book_url }}"
+                  class="lim__link"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {{ section.settings.book_link_label | escape }}
+                </a>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endif -%}
+
+        {%- comment -%} PubMed link {%- endcomment -%}
+        {%- if section.settings.pubmed_url != blank and section.settings.pubmed_label != blank -%}
+          <a
+            href="{{ section.settings.pubmed_url }}"
+            class="lim__link"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {{ section.settings.pubmed_label | escape }}
+          </a>
+        {%- endif -%}
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+/* ================================================================
+   lt-science-limmroth — Prof. Limmroth Trust Anchor
+   §3 tokens, §4 layout (split 40/60), §6 dark surface rules
+   Surface: --color-surface-dark (#364f56) — deliberate rhythm break
+   Dominant element: Expert name (h2, --text-h1)
+   ================================================================ */
+
+.lim {
+  background: var(--lim-bg, #364f56);
+  color: var(--lim-text, #f7f7f4);
+}
+
+.lim__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.lim__grid {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: var(--space-8);
+  align-items: center;
+}
+
+/* — Image column — */
+.lim__visual {
+  display: flex;
+  align-items: stretch;
+}
+
+.lim__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  display: block;
+  aspect-ratio: 3 / 4;
+}
+
+.lim__img-placeholder {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(247, 247, 244, 0.35);
+}
+
+/* — Content column — */
+.lim__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.lim__kicker {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--lim-text-muted, rgba(247, 247, 244, 0.6));
+  margin: 0;
+}
+
+.lim__name {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--lim-text, #f7f7f4);
+  margin: 0;
+}
+
+.lim__credentials {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  color: var(--lim-text-muted, rgba(247, 247, 244, 0.6));
+  margin: 0;
+}
+
+.lim__body {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--lim-text, #f7f7f4);
+  margin: 0;
+}
+
+/* — Book block — */
+.lim__book {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-md);
+}
+
+.lim__book-cover {
+  width: 40px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  display: block;
+}
+
+.lim__book-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.lim__book-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  color: var(--lim-text, #f7f7f4);
+  margin: 0;
+  line-height: var(--leading-tight);
+}
+
+.lim__book-subtitle {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  color: var(--lim-text-muted, rgba(247, 247, 244, 0.6));
+  margin: 0;
+}
+
+/* — Text links (book + PubMed) — */
+.lim__link {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  color: var(--lim-text, #f7f7f4);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(247, 247, 244, 0.3);
+  padding-bottom: 1px;
+  transition: border-color var(--ease-default);
+}
+
+.lim__link:hover {
+  border-color: rgba(247, 247, 244, 0.7);
+}
+
+/* — Responsive — */
+@media (max-width: 1024px) {
+  .lim__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-7);
+  }
+}
+
+@media (max-width: 768px) {
+  .lim__container {
+    padding: 0 var(--space-4);
+  }
+
+  .lim__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  .lim__img,
+  .lim__img-placeholder {
+    aspect-ratio: 3 / 2;
+    max-height: 280px;
+  }
+
+  .lim__name {
+    font-size: var(--text-h2);
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Science Limmroth",
+  "tag": "section",
+  "class": "lt-science-limmroth",
+  "settings": [
+    { "type": "text",         "id": "kicker",            "label": "Kicker",           "default": "Chief Scientific Officer \u00b7 LIFETIME" },
+    { "type": "text",         "id": "expert_name",       "label": "Name",             "default": "Prof. Dr. med. Volker Limmroth" },
+    { "type": "text",         "id": "expert_credentials","label": "Credentials",      "default": "Chefarzt f\u00fcr Neurologie \u00b7 Harvard Medical School \u00b7 Autor von 200+ peer-reviewed Publikationen" },
+    { "type": "textarea",     "id": "expert_body",       "label": "Flie\u00dftext",        "default": "Als Chefarzt und Forscher bringt er das mit, was kein Marketingteam ersetzen kann: jahrzehntelange klinische Praxis und 200+ publizierte Studien. Er stellt sicher, dass LIFETIME nie mehr behauptet als die Wissenschaft tr\u00e4gt." },
+    { "type": "image_picker", "id": "expert_image",      "label": "Foto" },
+    { "type": "image_picker", "id": "book_cover",        "label": "Buchcover" },
+    { "type": "text",         "id": "book_title",        "label": "Buchtitel",        "default": "Der Longevity-Kompass" },
+    { "type": "text",         "id": "book_subtitle",     "label": "Buch-Untertitel",  "default": "Bestseller \u00b7 Heyne Verlag" },
+    { "type": "url",          "id": "book_url",          "label": "Buch-Link (optional)" },
+    { "type": "text",         "id": "book_link_label",   "label": "Buch-Link-Label",  "default": "Auf Amazon ansehen \u2192" },
+    { "type": "url",          "id": "pubmed_url",        "label": "PubMed-Link" },
+    { "type": "text",         "id": "pubmed_label",      "label": "PubMed-Label",     "default": "Publikationen auf PubMed ansehen \u2192" },
+    { "type": "color",        "id": "color_bg",          "label": "Hintergrund",      "default": "#364f56" },
+    { "type": "color",        "id": "color_text",        "label": "Textfarbe",        "default": "#f7f7f4" },
+    { "type": "range",        "id": "padding_top",       "label": "Abstand oben",     "min": 0, "max": 160, "step": 8, "default": 80 },
+    { "type": "range",        "id": "padding_bottom",    "label": "Abstand unten",    "min": 0, "max": 160, "step": 8, "default": 80 }
+  ],
+  "presets": [{ "name": "Science Limmroth" }]
+}
+{% endschema %}
