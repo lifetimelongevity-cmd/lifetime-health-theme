@@ -1,11 +1,1513 @@
-<div id="lt-routine-quiz" data-section-id="{{ section.id }}" data-section-type="lt-routine-quiz"></div>
+{% comment %}
+  lt-routine-quiz
+  ────────────────────────────────────────────────────────────
+  Adaptives Quiz für /pages/meine-routine.
+
+  Q1 (Routing) stellt 3 Bild-Karten. Die Auswahl entscheidet intern,
+  welchen Pfad der Nutzer durchläuft — ohne sichtbare Weichenstellung:
+
+    Karte 1 "Ich fühle den Unterschied" → Diagnostik, archetype = tired
+    Karte 2 "Ich will verstehen"        → Diagnostik, archetype = measurer
+    Karte 3 "Ich will loslegen"         → Supplement
+
+  Diagnostik-Pfad  (Karten 1 + 2):
+    Q2 Alter-Slider
+    Q3 archetype-spezifische Folgefrage
+    Q4 Was hast du bisher versucht?
+    Q5 Intent (hot / cool)
+    → Result: Archetype-Hypothesen + CTA zum AGE & DNA-Test
+
+  Supplement-Pfad (Karte 3):
+    Q2 Wo merkst du es am stärksten?   (Energie / Fokus / Schlaf / Langlebigkeit)
+    → Result: Personalisiertes Bundle (primary + 2 secondaries)
+
+  Advisor-Zeile (Prof. Limmroth) erscheint unter dem Quiz auf beiden Pfaden.
+{% endcomment %}
+
+{%- liquid
+  assign p_energie_primary = all_products[section.settings.product_energie_primary]
+  assign p_energie_sec1    = all_products[section.settings.product_energie_sec1]
+  assign p_energie_sec2    = all_products[section.settings.product_energie_sec2]
+  assign p_fokus_primary   = all_products[section.settings.product_fokus_primary]
+  assign p_fokus_sec1      = all_products[section.settings.product_fokus_sec1]
+  assign p_fokus_sec2      = all_products[section.settings.product_fokus_sec2]
+  assign p_schlaf_primary  = all_products[section.settings.product_schlaf_primary]
+  assign p_schlaf_sec1     = all_products[section.settings.product_schlaf_sec1]
+  assign p_schlaf_sec2     = all_products[section.settings.product_schlaf_sec2]
+  assign p_lang_primary    = all_products[section.settings.product_lang_primary]
+  assign p_lang_sec1       = all_products[section.settings.product_lang_sec1]
+  assign p_lang_sec2       = all_products[section.settings.product_lang_sec2]
+
+  assign advisor_image_src = ''
+  if section.settings.advisor_image != blank
+    assign advisor_image_src = section.settings.advisor_image | image_url: width: 112
+  endif
+-%}
+
+{% style %}
+  #lt-routine-quiz-{{ section.id }} {
+    --rq-bg: {{ section.settings.color_bg }};
+    --rq-text: {{ section.settings.color_text }};
+    --rq-accent: {{ section.settings.color_accent }};
+    --rq-card: {{ section.settings.color_card_bg }};
+    --rq-cta-bg: {{ section.settings.color_cta_bg }};
+    --rq-cta-text: {{ section.settings.color_cta_text }};
+    --rq-muted: {{ section.settings.color_text | color_modify: 'alpha', 0.62 }};
+    --rq-border: {{ section.settings.color_text | color_modify: 'alpha', 0.12 }};
+    --rq-accent-soft: {{ section.settings.color_accent | color_modify: 'alpha', 0.1 }};
+    --rq-accent-border: {{ section.settings.color_accent | color_modify: 'alpha', 0.4 }};
+    --rq-pad-top: {{ section.settings.padding_top }}px;
+    --rq-pad-bottom: {{ section.settings.padding_bottom }}px;
+    background: var(--rq-bg);
+    color: var(--rq-text);
+    padding: var(--rq-pad-top) var(--space-4) var(--rq-pad-bottom);
+    font-family: var(--font-body);
+  }
+
+  #lt-routine-quiz-{{ section.id }} *,
+  #lt-routine-quiz-{{ section.id }} *::before,
+  #lt-routine-quiz-{{ section.id }} *::after { box-sizing: border-box; }
+
+  #lt-routine-quiz-{{ section.id }} .rq-frame {
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    background: var(--rq-card);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6) var(--space-5);
+    min-height: clamp(520px, 64vh, 760px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+  }
+  @media (min-width: 750px) {
+    #lt-routine-quiz-{{ section.id }} .rq-frame {
+      padding: var(--space-7) var(--space-6);
+      gap: var(--space-7);
+    }
+  }
+  @media (min-width: 990px) {
+    #lt-routine-quiz-{{ section.id }} .rq-frame {
+      max-width: min(860px, 64rem);
+      padding: var(--space-7);
+    }
+  }
+
+  /* Progress */
+  #lt-routine-quiz-{{ section.id }} .rq-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-progress[hidden] { display: none; }
+  #lt-routine-quiz-{{ section.id }} .rq-progress-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+    flex: 1;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-progress-list li {
+    height: 4px;
+    background: var(--rq-border);
+    border-radius: var(--radius-full);
+    transition: background 240ms var(--ease-default, ease);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-progress-list li.is-done,
+  #lt-routine-quiz-{{ section.id }} .rq-progress-list li[aria-current='step'] {
+    background: var(--rq-accent);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-back {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: var(--rq-muted);
+    font: inherit;
+    font-size: var(--text-body-sm);
+    cursor: pointer;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    min-height: 44px;
+    transition: color 180ms ease, background 180ms ease;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-back:hover,
+  #lt-routine-quiz-{{ section.id }} .rq-back:focus-visible {
+    color: var(--rq-text);
+    background: var(--rq-accent-soft);
+    outline: none;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-back[hidden] { display: none; }
+
+  /* Screens */
+  #lt-routine-quiz-{{ section.id }} .rq-screen {
+    display: none;
+    flex-direction: column;
+    gap: var(--space-6);
+    flex: 1;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-screen.is-active {
+    display: flex;
+    animation: rqFade 260ms var(--ease-smooth, ease);
+  }
+  @keyframes rqFade {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-screen h2 {
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    line-height: var(--leading-heading);
+    font-weight: var(--weight-semibold);
+    margin: 0;
+    letter-spacing: -0.01em;
+    outline: none;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-eyebrow {
+    font-size: var(--text-micro);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--rq-muted);
+    margin: 0;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-helper,
+  #lt-routine-quiz-{{ section.id }} .rq-subhead {
+    margin: 0;
+    color: var(--rq-muted);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+  }
+  #lt-routine-quiz-{{ section.id }} fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+  #lt-routine-quiz-{{ section.id }} legend {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  /* Image cards (Q1 routing + Q2 supplement focus) */
+  #lt-routine-quiz-{{ section.id }} .rq-cards {
+    display: grid;
+    gap: var(--space-4);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cards--route {
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 750px) {
+    #lt-routine-quiz-{{ section.id }} .rq-cards--route {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cards--focus {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (min-width: 750px) {
+    #lt-routine-quiz-{{ section.id }} .rq-cards--focus {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  #lt-routine-quiz-{{ section.id }} .rq-card {
+    appearance: none;
+    border: 1px solid var(--rq-border);
+    background: var(--rq-bg);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    padding: 0;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 200ms ease, transform 200ms ease, box-shadow 200ms ease;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-card:hover,
+  #lt-routine-quiz-{{ section.id }} .rq-card:focus-visible {
+    border-color: var(--rq-accent-border);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md, 0 6px 18px rgba(0,0,0,.08));
+    outline: none;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-card.is-selected {
+    border-color: var(--rq-accent);
+    box-shadow: 0 0 0 2px var(--rq-accent-soft);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-card__media {
+    aspect-ratio: 1 / 1;
+    background: var(--rq-accent-soft);
+    overflow: hidden;
+    position: relative;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-card__media--icon {
+    display: grid;
+    place-items: center;
+    color: var(--rq-accent);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-card__media--icon svg {
+    width: 40%;
+    height: 40%;
+    stroke-width: 1.25;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-card__body {
+    padding: var(--space-4) var(--space-4) var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-card__label {
+    font-family: var(--font-heading);
+    font-size: var(--text-body-lg);
+    font-weight: var(--weight-semibold);
+    line-height: 1.3;
+    color: var(--rq-text);
+    letter-spacing: -0.01em;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-card__sub {
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-body);
+    color: var(--rq-muted);
+  }
+
+  /* Radio-style options (Q3 / Q4 / Q5) */
+  #lt-routine-quiz-{{ section.id }} .rq-options {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-option {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    border: 1px solid var(--rq-border);
+    border-radius: var(--radius-md);
+    background: var(--rq-bg);
+    cursor: pointer;
+    min-height: 56px;
+    transition: border-color 180ms ease, background 180ms ease;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-option:hover {
+    border-color: var(--rq-accent-border);
+    background: var(--rq-accent-soft);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-option input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-marker {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--rq-border);
+    margin-top: 2px;
+    transition: border-color 160ms ease, background 160ms ease;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-option--checkbox .rq-marker {
+    border-radius: var(--radius-sm);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-option input:checked ~ .rq-marker {
+    border-color: var(--rq-accent);
+    background: var(--rq-accent);
+    box-shadow: inset 0 0 0 3px var(--rq-card);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-option--checkbox input:checked ~ .rq-marker {
+    box-shadow: inset 0 0 0 2px var(--rq-card);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-option:has(input:checked) {
+    border-color: var(--rq-accent);
+    background: var(--rq-accent-soft);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-option-label {
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-body);
+    color: var(--rq-text);
+  }
+
+  /* Sliders (Q2 diagnostic) */
+  #lt-routine-quiz-{{ section.id }} .rq-slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-slider {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-slider-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: var(--space-3);
+    font-size: var(--text-body-sm);
+    color: var(--rq-muted);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-slider-value {
+    font-family: var(--font-heading);
+    font-size: var(--text-h3);
+    color: var(--rq-text);
+    font-weight: var(--weight-semibold);
+  }
+  #lt-routine-quiz-{{ section.id }} input[type='range'] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    background: var(--rq-border);
+    border-radius: var(--radius-full);
+    outline: none;
+  }
+  #lt-routine-quiz-{{ section.id }} input[type='range']::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    background: var(--rq-accent);
+    cursor: pointer;
+    border: 3px solid var(--rq-card);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,.1));
+  }
+  #lt-routine-quiz-{{ section.id }} input[type='range']::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    background: var(--rq-accent);
+    cursor: pointer;
+    border: 3px solid var(--rq-card);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-slider-hint {
+    background: var(--rq-accent-soft);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    color: var(--rq-text);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    margin-top: var(--space-2);
+  }
+
+  /* CTAs */
+  #lt-routine-quiz-{{ section.id }} .rq-cta-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cta {
+    appearance: none;
+    border: 0;
+    font: inherit;
+    font-family: var(--font-body);
+    font-weight: var(--weight-semibold);
+    font-size: var(--text-body-sm);
+    letter-spacing: 0.01em;
+    min-height: 48px;
+    padding: 14px 32px;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    transition: background 180ms ease, transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cta--primary {
+    background: var(--rq-cta-bg);
+    color: var(--rq-cta-text);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cta--primary:hover,
+  #lt-routine-quiz-{{ section.id }} .rq-cta--primary:focus-visible {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md, 0 6px 16px rgba(0,0,0,.12));
+    outline: none;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cta--secondary {
+    background: transparent;
+    color: var(--rq-text);
+    border: 1px solid var(--rq-border);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cta--secondary:hover,
+  #lt-routine-quiz-{{ section.id }} .rq-cta--secondary:focus-visible {
+    border-color: var(--rq-text);
+    outline: none;
+  }
+
+  /* Diagnostic result */
+  #lt-routine-quiz-{{ section.id }} .rq-anchor {
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    line-height: var(--leading-heading);
+    font-weight: var(--weight-semibold);
+    margin: 0;
+    color: var(--rq-text);
+    letter-spacing: -0.01em;
+    outline: none;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-empathy {
+    margin: 0;
+    color: var(--rq-text);
+    font-size: var(--text-body-lg);
+    line-height: var(--leading-body);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-zone-heading {
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: var(--weight-medium);
+    margin: 0;
+    color: var(--rq-muted);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-hypotheses {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-hypothesis {
+    background: var(--rq-bg);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+  }
+
+  /* Supplement result bundle */
+  #lt-routine-quiz-{{ section.id }} .rq-bundle {
+    display: grid;
+    gap: var(--space-4);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 750px) {
+    #lt-routine-quiz-{{ section.id }} .rq-bundle {
+      grid-template-columns: 1.2fr 1fr 1fr;
+      align-items: stretch;
+    }
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-product {
+    background: var(--rq-bg);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    border: 1px solid var(--rq-border);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-product--primary {
+    border-color: var(--rq-accent);
+    box-shadow: 0 0 0 2px var(--rq-accent-soft);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-product__media {
+    aspect-ratio: 1 / 1;
+    background: var(--rq-accent-soft);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-product__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-product__tag {
+    font-size: var(--text-micro);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--rq-accent);
+    font-weight: var(--weight-semibold);
+    margin: 0;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-product__title {
+    font-family: var(--font-heading);
+    font-size: var(--text-body-lg);
+    font-weight: var(--weight-semibold);
+    margin: 0;
+    line-height: 1.3;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-product__price {
+    font-size: var(--text-body-sm);
+    color: var(--rq-muted);
+    margin: 0;
+  }
+
+  /* Advisor line */
+  #lt-routine-quiz-{{ section.id }} .rq-advisor {
+    max-width: min(860px, 64rem);
+    margin: var(--space-5) auto 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    color: var(--rq-muted);
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-body);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-advisor img {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-full);
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-advisor strong {
+    color: var(--rq-text);
+    font-weight: var(--weight-semibold);
+    display: block;
+  }
+
+  #lt-routine-quiz-{{ section.id }} .rq-sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+{% endstyle %}
+
+<section id="lt-routine-quiz-{{ section.id }}" class="lt-routine-quiz" data-section-id="{{ section.id }}" data-section-type="lt-routine-quiz">
+  <div class="rq-frame">
+
+    {%- comment -%} Progress bar (hidden on route + result, shown during questions) {%- endcomment -%}
+    <div class="rq-progress" data-progress hidden>
+      <button type="button" class="rq-back" data-back hidden aria-label="Eine Frage zurück">← zurück</button>
+      <ol class="rq-progress-list" data-progress-list aria-label="Fortschritt"></ol>
+    </div>
+
+    {%- comment -%} Q1 — Routing (3 Bild-Karten) {%- endcomment -%}
+    <div class="rq-screen is-active" data-screen="route">
+      <p class="rq-eyebrow">{{ section.settings.route_eyebrow }}</p>
+      <h2 tabindex="-1">{{ section.settings.route_question }}</h2>
+      {%- if section.settings.route_helper != blank -%}
+        <p class="rq-helper">{{ section.settings.route_helper }}</p>
+      {%- endif -%}
+      <ul class="rq-cards rq-cards--route" role="list">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'route_card' -%}
+            <li {{ block.shopify_attributes }}>
+              <button
+                type="button"
+                class="rq-card"
+                data-route-card
+                data-target-path="{{ block.settings.target_path }}"
+                data-target-archetype="{{ block.settings.target_archetype }}"
+              >
+                <div class="rq-card__media">
+                  {%- if block.settings.image != blank -%}
+                    {{ block.settings.image | image_url: width: 640 | image_tag:
+                        loading: 'lazy',
+                        alt: block.settings.image_alt,
+                        widths: '320,480,640',
+                        sizes: '(min-width: 750px) 32vw, 92vw' }}
+                  {%- endif -%}
+                </div>
+                <div class="rq-card__body">
+                  <span class="rq-card__label">{{ block.settings.label }}</span>
+                  {%- if block.settings.sub != blank -%}
+                    <span class="rq-card__sub">{{ block.settings.sub }}</span>
+                  {%- endif -%}
+                </div>
+              </button>
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+
+    {%- comment -%} ═══════ DIAGNOSTIK-PFAD ═══════ {%- endcomment -%}
+
+    {%- comment -%} Q2 — Alter-Slider {%- endcomment -%}
+    <div class="rq-screen" data-screen="diag_age">
+      <h2 tabindex="-1">{{ section.settings.diag_q2_question }}</h2>
+      {%- if section.settings.diag_q2_helper != blank -%}
+        <p class="rq-helper">{{ section.settings.diag_q2_helper }}</p>
+      {%- endif -%}
+      <div class="rq-slider-group">
+        <div class="rq-slider">
+          <label class="rq-slider-label" for="rq-chrono-{{ section.id }}">
+            <span>{{ section.settings.diag_q2_slider1_label }}</span>
+            <span class="rq-slider-value" data-chrono-display>45</span>
+          </label>
+          <input type="range" id="rq-chrono-{{ section.id }}" min="25" max="75" value="45" step="1" data-chrono>
+        </div>
+        <div class="rq-slider">
+          <label class="rq-slider-label" for="rq-felt-{{ section.id }}">
+            <span>{{ section.settings.diag_q2_slider2_label }}</span>
+            <span class="rq-slider-value" data-felt-display>45</span>
+          </label>
+          <input type="range" id="rq-felt-{{ section.id }}" min="-10" max="10" value="0" step="1" data-felt-delta aria-describedby="rq-hint-{{ section.id }}">
+        </div>
+        <p class="rq-slider-hint" id="rq-hint-{{ section.id }}" aria-live="polite" data-slider-hint>
+          {{ section.settings.diag_q2_hint_delta_zero }}
+        </p>
+      </div>
+      <div class="rq-cta-row">
+        <button type="button" class="rq-cta rq-cta--primary" data-next="diag_q3">Weiter →</button>
+      </div>
+    </div>
+
+    {%- comment -%} Q3 — Archetype-spezifische Frage (dynamisch per JS gerendert) {%- endcomment -%}
+    <div class="rq-screen" data-screen="diag_q3">
+      <fieldset>
+        <legend>
+          <h2 tabindex="-1" data-q3-question>&nbsp;</h2>
+        </legend>
+        <div class="rq-options" role="radiogroup" data-q3-options></div>
+      </fieldset>
+    </div>
+
+    {%- comment -%} Q4 — Was hast du versucht (multi) {%- endcomment -%}
+    <div class="rq-screen" data-screen="diag_q4">
+      <fieldset>
+        <legend>
+          <h2 tabindex="-1">{{ section.settings.diag_q4_question }}</h2>
+          {%- if section.settings.diag_q4_helper != blank -%}
+            <p class="rq-helper">{{ section.settings.diag_q4_helper }}</p>
+          {%- endif -%}
+        </legend>
+        <div class="rq-options" data-q4-options></div>
+      </fieldset>
+      <div class="rq-cta-row">
+        <button type="button" class="rq-cta rq-cta--primary" data-next="diag_q5">Weiter →</button>
+      </div>
+    </div>
+
+    {%- comment -%} Q5 — Intent {%- endcomment -%}
+    <div class="rq-screen" data-screen="diag_q5">
+      <fieldset>
+        <legend>
+          <h2 tabindex="-1">{{ section.settings.diag_q5_question }}</h2>
+        </legend>
+        <div class="rq-options" role="radiogroup">
+          <label class="rq-option">
+            <input type="radio" name="rq-q5-{{ section.id }}" value="0" data-q5-input data-intent="hot">
+            <span class="rq-marker" aria-hidden="true"></span>
+            <span class="rq-option-label">{{ section.settings.diag_q5_opt_1 }}</span>
+          </label>
+          <label class="rq-option">
+            <input type="radio" name="rq-q5-{{ section.id }}" value="1" data-q5-input data-intent="hot">
+            <span class="rq-marker" aria-hidden="true"></span>
+            <span class="rq-option-label">{{ section.settings.diag_q5_opt_2 }}</span>
+          </label>
+          <label class="rq-option">
+            <input type="radio" name="rq-q5-{{ section.id }}" value="2" data-q5-input data-intent="hot">
+            <span class="rq-marker" aria-hidden="true"></span>
+            <span class="rq-option-label">{{ section.settings.diag_q5_opt_3 }}</span>
+          </label>
+          <label class="rq-option">
+            <input type="radio" name="rq-q5-{{ section.id }}" value="3" data-q5-input data-intent="cool">
+            <span class="rq-marker" aria-hidden="true"></span>
+            <span class="rq-option-label">{{ section.settings.diag_q5_opt_4 }}</span>
+          </label>
+        </div>
+      </fieldset>
+    </div>
+
+    {%- comment -%} Diagnostic Result {%- endcomment -%}
+    <div class="rq-screen" data-screen="diag_result">
+      <h2 class="rq-anchor" tabindex="-1" data-anchor>&nbsp;</h2>
+      <p class="rq-empathy" data-empathy>&nbsp;</p>
+      <p class="rq-zone-heading">{{ section.settings.diag_result_zone_heading }}</p>
+      <ul class="rq-hypotheses" data-hypotheses></ul>
+      <div class="rq-cta-row">
+        <a href="{{ section.settings.diag_cta_primary_url }}" class="rq-cta rq-cta--primary" data-diag-cta-primary>
+          <span data-diag-cta-primary-label>{{ section.settings.diag_cta_hot_primary_label }}</span>
+        </a>
+        <a href="{{ section.settings.diag_cta_secondary_url }}" class="rq-cta rq-cta--secondary" data-diag-cta-secondary>
+          <span data-diag-cta-secondary-label>{{ section.settings.diag_cta_hot_secondary_label }}</span>
+        </a>
+      </div>
+    </div>
+
+    {%- comment -%} ═══════ SUPPLEMENT-PFAD ═══════ {%- endcomment -%}
+
+    {%- comment -%} Q2 — Fokus-Auswahl (Energie / Fokus / Schlaf / Langlebigkeit) {%- endcomment -%}
+    <div class="rq-screen" data-screen="supp_focus">
+      <h2 tabindex="-1">{{ section.settings.supp_focus_question }}</h2>
+      {%- if section.settings.supp_focus_helper != blank -%}
+        <p class="rq-helper">{{ section.settings.supp_focus_helper }}</p>
+      {%- endif -%}
+      <ul class="rq-cards rq-cards--focus" role="list">
+        {%- assign focus_keys = 'energie,fokus,schlaf,lang' | split: ',' -%}
+        {%- for key in focus_keys -%}
+          {%- liquid
+            case key
+              when 'energie'
+                assign f_img   = section.settings.focus_energie_image
+                assign f_alt   = section.settings.focus_energie_alt
+                assign f_label = section.settings.focus_energie_label
+              when 'fokus'
+                assign f_img   = section.settings.focus_fokus_image
+                assign f_alt   = section.settings.focus_fokus_alt
+                assign f_label = section.settings.focus_fokus_label
+              when 'schlaf'
+                assign f_img   = section.settings.focus_schlaf_image
+                assign f_alt   = section.settings.focus_schlaf_alt
+                assign f_label = section.settings.focus_schlaf_label
+              when 'lang'
+                assign f_img   = section.settings.focus_lang_image
+                assign f_alt   = section.settings.focus_lang_alt
+                assign f_label = section.settings.focus_lang_label
+            endcase
+          -%}
+          <li>
+            <button type="button" class="rq-card" data-focus-card data-focus="{{ key }}">
+              <div class="rq-card__media{% if f_img == blank %} rq-card__media--icon{% endif %}">
+                {%- if f_img != blank -%}
+                  {{ f_img | image_url: width: 480 | image_tag:
+                      loading: 'lazy',
+                      alt: f_alt,
+                      widths: '240,360,480',
+                      sizes: '(min-width: 750px) 22vw, 45vw' }}
+                {%- else -%}
+                  {%- case key -%}
+                    {%- when 'energie' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>
+                    {%- when 'fokus' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg>
+                    {%- when 'schlaf' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+                    {%- when 'lang' -%}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                  {%- endcase -%}
+                {%- endif -%}
+              </div>
+              <div class="rq-card__body">
+                <span class="rq-card__label">{{ f_label }}</span>
+              </div>
+            </button>
+          </li>
+        {%- endfor -%}
+      </ul>
+    </div>
+
+    {%- comment -%} Supplement Result {%- endcomment -%}
+    <div class="rq-screen" data-screen="supp_result">
+      <p class="rq-eyebrow" data-supp-eyebrow>{{ section.settings.supp_result_eyebrow }}</p>
+      <h2 class="rq-anchor" tabindex="-1" data-supp-headline>&nbsp;</h2>
+      <p class="rq-empathy" data-supp-sub>&nbsp;</p>
+
+      <div class="rq-bundle" data-bundle></div>
+
+      <div class="rq-cta-row">
+        <a href="#" class="rq-cta rq-cta--primary" data-supp-cta-primary>
+          <span>{{ section.settings.supp_cta_primary_label }}</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
+  {%- comment -%} Advisor line — both paths {%- endcomment -%}
+  <div class="rq-advisor" data-advisor>
+    {%- if advisor_image_src != blank -%}
+      <img src="{{ advisor_image_src }}" alt="{{ section.settings.advisor_name | escape }}" loading="lazy" width="40" height="40">
+    {%- endif -%}
+    <div>
+      <strong>{{ section.settings.advisor_name }}</strong>
+      <span>{{ section.settings.advisor_title }}</span>
+    </div>
+  </div>
+
+  {%- comment -%} ═══════ Data payloads ═══════ {%- endcomment -%}
+  <script type="application/json" data-archetypes>
+    {
+      {%- assign first_arch = true -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'archetype' -%}
+          {%- if first_arch == false -%},{%- endif -%}
+          {%- assign first_arch = false -%}
+          {{ block.settings.archetype_id | json }}: {
+            "q3_question": {{ block.settings.q3_question | json }},
+            "q3_options": {{ block.settings.q3_options_json | default: '[]' }},
+            "empathy_line": {{ block.settings.empathy_line | json }},
+            "hypothesis_primary": {{ block.settings.result_hypothesis_primary | json }},
+            "hypothesis_secondary": {{ block.settings.result_hypothesis_secondary | json }},
+            "hypothesis_tertiary": {{ block.settings.result_hypothesis_tertiary | json }}
+          }
+        {%- endif -%}
+      {%- endfor -%}
+    }
+  </script>
+
+  <script type="application/json" data-config>
+    {
+      "diag_q4_options": {{ section.settings.diag_q4_options_json | default: '[]' }},
+      "anchor_pos": {{ section.settings.diag_result_anchor_pos | json }},
+      "anchor_neg": {{ section.settings.diag_result_anchor_neg | json }},
+      "anchor_zero": {{ section.settings.diag_result_anchor_zero | json }},
+      "hint_pos": {{ section.settings.diag_q2_hint_delta_pos | json }},
+      "hint_neg": {{ section.settings.diag_q2_hint_delta_neg | json }},
+      "hint_zero": {{ section.settings.diag_q2_hint_delta_zero | json }},
+      "diag_cta_hot_primary_label": {{ section.settings.diag_cta_hot_primary_label | json }},
+      "diag_cta_hot_secondary_label": {{ section.settings.diag_cta_hot_secondary_label | json }},
+      "diag_cta_cool_primary_label": {{ section.settings.diag_cta_cool_primary_label | json }},
+      "diag_cta_cool_secondary_label": {{ section.settings.diag_cta_cool_secondary_label | json }},
+      "diag_cta_primary_url": {{ section.settings.diag_cta_primary_url | json }},
+      "diag_cta_secondary_url": {{ section.settings.diag_cta_secondary_url | json }},
+      "supp_primary_tag": {{ section.settings.supp_primary_tag | json }},
+      "supp_secondary_tag": {{ section.settings.supp_secondary_tag | json }},
+      "supp_result_headline_energie": {{ section.settings.supp_result_headline_energie | json }},
+      "supp_result_headline_fokus":   {{ section.settings.supp_result_headline_fokus | json }},
+      "supp_result_headline_schlaf":  {{ section.settings.supp_result_headline_schlaf | json }},
+      "supp_result_headline_lang":    {{ section.settings.supp_result_headline_lang | json }},
+      "supp_result_sub_energie": {{ section.settings.supp_result_sub_energie | json }},
+      "supp_result_sub_fokus":   {{ section.settings.supp_result_sub_fokus | json }},
+      "supp_result_sub_schlaf":  {{ section.settings.supp_result_sub_schlaf | json }},
+      "supp_result_sub_lang":    {{ section.settings.supp_result_sub_lang | json }}
+    }
+  </script>
+
+  <script type="application/json" data-products>
+    {
+      "energie": {
+        "primary": { "title": {{ p_energie_primary.title | default: '' | json }}, "url": {{ p_energie_primary.url | default: '' | json }}, "price": {{ p_energie_primary.price | money | default: '' | json }}, "image": {{ p_energie_primary.featured_image | image_url: width: 480 | default: '' | json }} },
+        "sec1":    { "title": {{ p_energie_sec1.title    | default: '' | json }}, "url": {{ p_energie_sec1.url    | default: '' | json }}, "price": {{ p_energie_sec1.price    | money | default: '' | json }}, "image": {{ p_energie_sec1.featured_image    | image_url: width: 360 | default: '' | json }} },
+        "sec2":    { "title": {{ p_energie_sec2.title    | default: '' | json }}, "url": {{ p_energie_sec2.url    | default: '' | json }}, "price": {{ p_energie_sec2.price    | money | default: '' | json }}, "image": {{ p_energie_sec2.featured_image    | image_url: width: 360 | default: '' | json }} }
+      },
+      "fokus": {
+        "primary": { "title": {{ p_fokus_primary.title | default: '' | json }}, "url": {{ p_fokus_primary.url | default: '' | json }}, "price": {{ p_fokus_primary.price | money | default: '' | json }}, "image": {{ p_fokus_primary.featured_image | image_url: width: 480 | default: '' | json }} },
+        "sec1":    { "title": {{ p_fokus_sec1.title    | default: '' | json }}, "url": {{ p_fokus_sec1.url    | default: '' | json }}, "price": {{ p_fokus_sec1.price    | money | default: '' | json }}, "image": {{ p_fokus_sec1.featured_image    | image_url: width: 360 | default: '' | json }} },
+        "sec2":    { "title": {{ p_fokus_sec2.title    | default: '' | json }}, "url": {{ p_fokus_sec2.url    | default: '' | json }}, "price": {{ p_fokus_sec2.price    | money | default: '' | json }}, "image": {{ p_fokus_sec2.featured_image    | image_url: width: 360 | default: '' | json }} }
+      },
+      "schlaf": {
+        "primary": { "title": {{ p_schlaf_primary.title | default: '' | json }}, "url": {{ p_schlaf_primary.url | default: '' | json }}, "price": {{ p_schlaf_primary.price | money | default: '' | json }}, "image": {{ p_schlaf_primary.featured_image | image_url: width: 480 | default: '' | json }} },
+        "sec1":    { "title": {{ p_schlaf_sec1.title    | default: '' | json }}, "url": {{ p_schlaf_sec1.url    | default: '' | json }}, "price": {{ p_schlaf_sec1.price    | money | default: '' | json }}, "image": {{ p_schlaf_sec1.featured_image    | image_url: width: 360 | default: '' | json }} },
+        "sec2":    { "title": {{ p_schlaf_sec2.title    | default: '' | json }}, "url": {{ p_schlaf_sec2.url    | default: '' | json }}, "price": {{ p_schlaf_sec2.price    | money | default: '' | json }}, "image": {{ p_schlaf_sec2.featured_image    | image_url: width: 360 | default: '' | json }} }
+      },
+      "lang": {
+        "primary": { "title": {{ p_lang_primary.title | default: '' | json }}, "url": {{ p_lang_primary.url | default: '' | json }}, "price": {{ p_lang_primary.price | money | default: '' | json }}, "image": {{ p_lang_primary.featured_image | image_url: width: 480 | default: '' | json }} },
+        "sec1":    { "title": {{ p_lang_sec1.title    | default: '' | json }}, "url": {{ p_lang_sec1.url    | default: '' | json }}, "price": {{ p_lang_sec1.price    | money | default: '' | json }}, "image": {{ p_lang_sec1.featured_image    | image_url: width: 360 | default: '' | json }} },
+        "sec2":    { "title": {{ p_lang_sec2.title    | default: '' | json }}, "url": {{ p_lang_sec2.url    | default: '' | json }}, "price": {{ p_lang_sec2.price    | money | default: '' | json }}, "image": {{ p_lang_sec2.featured_image    | image_url: width: 360 | default: '' | json }} }
+      }
+    }
+  </script>
+</section>
+
+<script>
+  (function () {
+    var root = document.getElementById('lt-routine-quiz-{{ section.id }}');
+    if (!root) return;
+
+    var archetypes = {}, config = {}, products = {};
+    try { archetypes = JSON.parse(root.querySelector('[data-archetypes]').textContent); } catch (e) {}
+    try { config     = JSON.parse(root.querySelector('[data-config]').textContent); }     catch (e) {}
+    try { products   = JSON.parse(root.querySelector('[data-products]').textContent); }   catch (e) {}
+
+    var screens = {};
+    root.querySelectorAll('[data-screen]').forEach(function (el) {
+      screens[el.getAttribute('data-screen')] = el;
+    });
+
+    var DIAG_FLOW = ['route', 'diag_age', 'diag_q3', 'diag_q4', 'diag_q5', 'diag_result'];
+    var SUPP_FLOW = ['route', 'supp_focus', 'supp_result'];
+
+    var state = {
+      path: null,              // 'diagnostics' | 'supplement'
+      archetype: null,         // for diagnostics
+      age_chrono: 45,
+      age_felt_delta: 0,
+      pain_selection: null,
+      tried: [],
+      intent: null,
+      focus: null              // for supplement: energie/fokus/schlaf/lang
+    };
+    var history = [];
+    var current = 'route';
+
+    var progressEl   = root.querySelector('[data-progress]');
+    var progressList = root.querySelector('[data-progress-list]');
+    var backBtn      = root.querySelector('[data-back]');
+    var advisorEl    = root.querySelector('[data-advisor]');
+
+    function pushDL(payload) {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push(payload);
+    }
+
+    function currentFlow() {
+      return state.path === 'supplement' ? SUPP_FLOW : DIAG_FLOW;
+    }
+
+    function renderProgress() {
+      var flow = currentFlow();
+      var idx = flow.indexOf(current);
+      var isRoute  = current === 'route';
+      var isResult = current === 'diag_result' || current === 'supp_result';
+
+      if (isRoute || !state.path) {
+        progressEl.hidden = true;
+        return;
+      }
+      progressEl.hidden = false;
+
+      // Build dots — one per question screen (excluding route + result)
+      var questionCount = flow.length - 2; // minus route + result
+      if (progressList.childElementCount !== questionCount) {
+        progressList.innerHTML = '';
+        progressList.style.gridTemplateColumns = 'repeat(' + Math.max(questionCount, 1) + ', 1fr)';
+        for (var i = 0; i < questionCount; i++) {
+          var li = document.createElement('li');
+          li.setAttribute('data-step', String(i + 1));
+          progressList.appendChild(li);
+        }
+      }
+      progressList.querySelectorAll('li').forEach(function (li, i) {
+        li.classList.remove('is-done');
+        li.removeAttribute('aria-current');
+        if (isResult) {
+          li.classList.add('is-done');
+          return;
+        }
+        // question screens start at index 1 in flow (after 'route')
+        var stepIndex = idx - 1;
+        if (i < stepIndex) li.classList.add('is-done');
+        if (i === stepIndex) li.setAttribute('aria-current', 'step');
+      });
+
+      if (backBtn) backBtn.hidden = !(idx >= 1 && !isResult);
+    }
+
+    function focusHeading(screen) {
+      var h = screens[screen].querySelector('h2');
+      if (h) setTimeout(function () { try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); } }, 60);
+    }
+
+    function go(screen, opts) {
+      opts = opts || {};
+      if (!screens[screen]) return;
+      if (!opts.back && current !== screen) history.push(current);
+      Object.keys(screens).forEach(function (k) { screens[k].classList.remove('is-active'); });
+      screens[screen].classList.add('is-active');
+      current = screen;
+      renderProgress();
+      focusHeading(screen);
+      pushDL({
+        event: 'lt_routine_quiz_step',
+        step: screen,
+        path: state.path,
+        archetype: state.archetype,
+        focus: state.focus
+      });
+      if (screen === 'diag_q3') renderQ3();
+      if (screen === 'diag_q4') renderQ4();
+      if (screen === 'diag_result') renderDiagnosticResult();
+      if (screen === 'supp_result') renderSupplementResult();
+    }
+
+    function goBack() {
+      if (!history.length) return;
+      var prev = history.pop();
+      // If going back to route, reset path so progress hides
+      if (prev === 'route') state.path = null;
+      go(prev, { back: true });
+    }
+
+    if (backBtn) backBtn.addEventListener('click', goBack);
+
+    // ───── Q1 — Routing cards ─────
+    root.querySelectorAll('[data-route-card]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var path = btn.getAttribute('data-target-path');
+        var arch = btn.getAttribute('data-target-archetype');
+        state.path = path === 'supplement' ? 'supplement' : 'diagnostics';
+        state.archetype = (state.path === 'diagnostics') ? (arch || 'tired') : null;
+
+        root.querySelectorAll('[data-route-card]').forEach(function (c) { c.classList.remove('is-selected'); });
+        btn.classList.add('is-selected');
+
+        pushDL({
+          event: 'lt_routine_quiz_route',
+          path: state.path,
+          archetype: state.archetype
+        });
+
+        if (state.path === 'supplement') go('supp_focus');
+        else go('diag_age');
+      });
+    });
+
+    // ───── Q2 diagnostic — age sliders ─────
+    var chronoInput   = root.querySelector('[data-chrono]');
+    var feltInput     = root.querySelector('[data-felt-delta]');
+    var chronoDisplay = root.querySelector('[data-chrono-display]');
+    var feltDisplay   = root.querySelector('[data-felt-display]');
+    var hintEl        = root.querySelector('[data-slider-hint]');
+
+    function updateSliderDisplays() {
+      state.age_chrono     = parseInt(chronoInput.value, 10);
+      state.age_felt_delta = parseInt(feltInput.value, 10);
+      var felt = state.age_chrono + state.age_felt_delta;
+      chronoDisplay.textContent = state.age_chrono;
+      feltDisplay.textContent   = felt;
+      var hint;
+      if (state.age_felt_delta > 0) hint = config.hint_pos;
+      else if (state.age_felt_delta < 0) hint = config.hint_neg;
+      else hint = config.hint_zero;
+      hintEl.textContent = hint || '';
+    }
+    if (chronoInput && feltInput) {
+      chronoInput.addEventListener('input', updateSliderDisplays);
+      feltInput.addEventListener('input', updateSliderDisplays);
+      updateSliderDisplays();
+    }
+
+    // Generic "Weiter" buttons
+    root.querySelectorAll('[data-next]').forEach(function (btn) {
+      btn.addEventListener('click', function () { go(btn.getAttribute('data-next')); });
+    });
+
+    // ───── Q3 — archetype-specific, built on entry ─────
+    function renderQ3() {
+      var data = archetypes[state.archetype];
+      if (!data) return;
+      var qEl  = screens.diag_q3.querySelector('[data-q3-question]');
+      var opts = screens.diag_q3.querySelector('[data-q3-options]');
+      if (qEl) qEl.textContent = data.q3_question || '';
+      opts.innerHTML = '';
+      (data.q3_options || []).forEach(function (label, i) {
+        var wrap = document.createElement('label');
+        wrap.className = 'rq-option';
+        wrap.innerHTML =
+          '<input type="radio" name="rq-q3-{{ section.id }}" value="' + i + '" data-q3-input>' +
+          '<span class="rq-marker" aria-hidden="true"></span>' +
+          '<span class="rq-option-label"></span>';
+        wrap.querySelector('.rq-option-label').textContent = label;
+        var input = wrap.querySelector('input');
+        if (state.pain_selection === i) input.checked = true;
+        input.addEventListener('change', function () {
+          if (!input.checked) return;
+          state.pain_selection = i;
+          go('diag_q4');
+        });
+        opts.appendChild(wrap);
+      });
+    }
+
+    // ───── Q4 — tried multi-select ─────
+    var q4Opts = screens.diag_q4.querySelector('[data-q4-options]');
+    function renderQ4() {
+      if (!q4Opts || q4Opts.childElementCount) return;
+      (config.diag_q4_options || []).forEach(function (label, i) {
+        var wrap = document.createElement('label');
+        wrap.className = 'rq-option rq-option--checkbox';
+        wrap.innerHTML =
+          '<input type="checkbox" value="' + i + '" data-q4-input>' +
+          '<span class="rq-marker" aria-hidden="true"></span>' +
+          '<span class="rq-option-label"></span>';
+        wrap.querySelector('.rq-option-label').textContent = label;
+        wrap.querySelector('input').addEventListener('change', function () {
+          state.tried = Array.prototype.map.call(
+            q4Opts.querySelectorAll('input:checked'),
+            function (el) { return (config.diag_q4_options || [])[parseInt(el.value, 10)] || ''; }
+          ).filter(Boolean);
+        });
+        q4Opts.appendChild(wrap);
+      });
+    }
+
+    // ───── Q5 — intent ─────
+    root.querySelectorAll('[data-q5-input]').forEach(function (input) {
+      input.addEventListener('change', function () {
+        if (!input.checked) return;
+        state.intent = input.getAttribute('data-intent');
+        go('diag_result');
+      });
+    });
+
+    // ───── Diagnostic result ─────
+    function renderDiagnosticResult() {
+      var data = archetypes[state.archetype] || {};
+      var felt = state.age_chrono + state.age_felt_delta;
+      var tpl;
+      if (state.age_felt_delta > 0) tpl = config.anchor_pos;
+      else if (state.age_felt_delta < 0) tpl = config.anchor_neg;
+      else tpl = config.anchor_zero;
+      var anchorText = (tpl || '')
+        .replace(/\{chrono\}/g, state.age_chrono)
+        .replace(/\{felt\}/g, felt);
+      root.querySelector('[data-anchor]').textContent = anchorText;
+      root.querySelector('[data-empathy]').textContent = data.empathy_line || '';
+
+      var list = root.querySelector('[data-hypotheses]');
+      list.innerHTML = '';
+      [data.hypothesis_primary, data.hypothesis_secondary, data.hypothesis_tertiary].forEach(function (text) {
+        if (!text) return;
+        var li = document.createElement('li');
+        li.className = 'rq-hypothesis';
+        li.textContent = text;
+        list.appendChild(li);
+      });
+
+      var isCool    = state.intent === 'cool';
+      var primaryEl   = root.querySelector('[data-diag-cta-primary]');
+      var secondaryEl = root.querySelector('[data-diag-cta-secondary]');
+      primaryEl.href = config.diag_cta_primary_url || '#';
+      primaryEl.querySelector('[data-diag-cta-primary-label]').textContent =
+        isCool ? config.diag_cta_cool_primary_label : config.diag_cta_hot_primary_label;
+      secondaryEl.href = config.diag_cta_secondary_url || '#';
+      secondaryEl.querySelector('[data-diag-cta-secondary-label]').textContent =
+        isCool ? config.diag_cta_cool_secondary_label : config.diag_cta_hot_secondary_label;
+
+      pushDL({
+        event: 'lt_routine_quiz_result_shown',
+        path: 'diagnostics',
+        archetype: state.archetype,
+        age_chrono: state.age_chrono,
+        age_felt_delta: state.age_felt_delta,
+        pain_selection: state.pain_selection,
+        tried: state.tried,
+        intent: state.intent
+      });
+    }
+
+    // ───── Supplement focus cards ─────
+    root.querySelectorAll('[data-focus-card]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        state.focus = btn.getAttribute('data-focus');
+        root.querySelectorAll('[data-focus-card]').forEach(function (c) { c.classList.remove('is-selected'); });
+        btn.classList.add('is-selected');
+        go('supp_result');
+      });
+    });
+
+    // ───── Supplement result ─────
+    function productCard(p, tag, isPrimary) {
+      if (!p || !p.title) return null;
+      var wrap = document.createElement('article');
+      wrap.className = 'rq-product' + (isPrimary ? ' rq-product--primary' : '');
+      var inner = '';
+      inner += '<div class="rq-product__media">';
+      if (p.image) inner += '<img src="' + p.image + '" alt="" loading="lazy">';
+      inner += '</div>';
+      if (tag) inner += '<p class="rq-product__tag">' + tag + '</p>';
+      inner += '<h3 class="rq-product__title"></h3>';
+      if (p.price) inner += '<p class="rq-product__price">' + p.price + '</p>';
+      inner += '<a class="rq-cta rq-cta--secondary" href="' + (p.url || '#') + '">Ansehen →</a>';
+      wrap.innerHTML = inner;
+      wrap.querySelector('.rq-product__title').textContent = p.title;
+      return wrap;
+    }
+
+    function renderSupplementResult() {
+      var focus = state.focus || 'energie';
+      var set = products[focus] || {};
+
+      root.querySelector('[data-supp-headline]').textContent =
+        config['supp_result_headline_' + focus] || '';
+      root.querySelector('[data-supp-sub]').textContent =
+        config['supp_result_sub_' + focus] || '';
+
+      var bundle = root.querySelector('[data-bundle]');
+      bundle.innerHTML = '';
+      var primaryCard = productCard(set.primary, config.supp_primary_tag, true);
+      var sec1Card    = productCard(set.sec1,    config.supp_secondary_tag, false);
+      var sec2Card    = productCard(set.sec2,    config.supp_secondary_tag, false);
+      if (primaryCard) bundle.appendChild(primaryCard);
+      if (sec1Card)    bundle.appendChild(sec1Card);
+      if (sec2Card)    bundle.appendChild(sec2Card);
+
+      var cta = root.querySelector('[data-supp-cta-primary]');
+      if (set.primary && set.primary.url) {
+        cta.href = set.primary.url;
+        cta.style.display = '';
+      } else {
+        cta.style.display = 'none';
+      }
+
+      pushDL({
+        event: 'lt_routine_quiz_result_shown',
+        path: 'supplement',
+        focus: state.focus
+      });
+    }
+  })();
+</script>
 
 {% schema %}
 {
   "name": "Routine Quiz",
   "tag": "section",
-  "class": "section",
-  "settings": [],
-  "presets": [{ "name": "Routine Quiz" }]
+  "class": "shopify-section-lt-routine-quiz",
+  "settings": [
+    { "type": "header", "content": "Farben & Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#f7f7f4" },
+    { "type": "color", "id": "color_text", "label": "Text", "default": "#26251e" },
+    { "type": "color", "id": "color_accent", "label": "Akzent", "default": "#65c0b6" },
+    { "type": "color", "id": "color_card_bg", "label": "Karten-Hintergrund", "default": "#f2f1ed" },
+    { "type": "color", "id": "color_cta_bg", "label": "CTA Hintergrund", "default": "#364f56" },
+    { "type": "color", "id": "color_cta_text", "label": "CTA Text", "default": "#ffffff" },
+    { "type": "range", "id": "padding_top", "label": "Padding oben", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "label": "Padding unten", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
+
+    { "type": "header", "content": "Frage 1 — Routing" },
+    { "type": "text", "id": "route_eyebrow", "label": "Eyebrow", "default": "Zwei Minuten über dich" },
+    { "type": "text", "id": "route_question", "label": "Frage", "default": "Was bringt dich hierher?" },
+    { "type": "text", "id": "route_helper", "label": "Helper", "default": "Eine Antwort reicht — wir passen alles weitere daran an." },
+
+    { "type": "header", "content": "Diagnostik-Pfad · Q2 Alter-Slider" },
+    { "type": "text", "id": "diag_q2_question", "label": "Frage", "default": "Wie alt bist du — und wie alt fühlst du dich?" },
+    { "type": "text", "id": "diag_q2_helper", "label": "Helper", "default": "Bewege beide Slider. Die Lücke ist oft das Interessante." },
+    { "type": "text", "id": "diag_q2_slider1_label", "label": "Label Slider 1", "default": "Chronologisches Alter" },
+    { "type": "text", "id": "diag_q2_slider2_label", "label": "Label Slider 2", "default": "Gefühltes Alter" },
+    { "type": "textarea", "id": "diag_q2_hint_delta_pos", "label": "Hinweis (fühlt sich älter)", "default": "Die Differenz zwischen Gefühl und Ausweis-Alter ist oft ein erster Hinweis. Der Test misst, wie nah deine Zellen an dem sind, was du fühlst." },
+    { "type": "textarea", "id": "diag_q2_hint_delta_neg", "label": "Hinweis (fühlt sich jünger)", "default": "Du fühlst dich jünger, als dein Pass sagt. Der Test zeigt, ob dein Körper das bestätigt." },
+    { "type": "textarea", "id": "diag_q2_hint_delta_zero", "label": "Hinweis (stimmt überein)", "default": "Dein Gefühl und dein Ausweis-Alter stimmen überein. Der Test zeigt, ob deine Zellen das bestätigen." },
+
+    { "type": "header", "content": "Diagnostik-Pfad · Q4 Versuchtes" },
+    { "type": "text", "id": "diag_q4_question", "label": "Frage", "default": "Was hast du bisher versucht?" },
+    { "type": "text", "id": "diag_q4_helper", "label": "Helper", "default": "Mehrere Antworten möglich." },
+    { "type": "textarea", "id": "diag_q4_options_json", "label": "Optionen (JSON-Array)", "default": "[\"Bluttests beim Hausarzt\",\"Fitness-Tracker (Oura, Whoop, Apple Watch)\",\"Supplements\",\"Ernährungsumstellung\",\"Regelmäßiger Sport\",\"Ehrlich gesagt: nichts Strukturiertes bisher\"]" },
+
+    { "type": "header", "content": "Diagnostik-Pfad · Q5 Intent" },
+    { "type": "text", "id": "diag_q5_question", "label": "Frage", "default": "Wenn du dein Ergebnis in 6 Wochen öffnest: Was willst du darin finden?" },
+    { "type": "text", "id": "diag_q5_opt_1", "label": "Option 1 (hot)", "default": "Eine Zahl: wie alt mein Körper biologisch wirklich ist" },
+    { "type": "text", "id": "diag_q5_opt_2", "label": "Option 2 (hot)", "default": "Einen konkreten Plan: was ich ändern soll, und warum" },
+    { "type": "text", "id": "diag_q5_opt_3", "label": "Option 3 (hot)", "default": "Eine Baseline, die ich in 6–12 Monaten erneut messen kann" },
+    { "type": "text", "id": "diag_q5_opt_4", "label": "Option 4 (cool)", "default": "Ich will das grundsätzlich verstehen, bevor ich entscheide" },
+
+    { "type": "header", "content": "Diagnostik-Pfad · Ergebnis" },
+    { "type": "textarea", "id": "diag_result_anchor_pos", "label": "Anker (fühlt sich älter)", "default": "Du bist {chrono}. Du fühlst dich wie {felt}. Und niemand sagt dir, ob dein Körper dir recht gibt." },
+    { "type": "textarea", "id": "diag_result_anchor_neg", "label": "Anker (fühlt sich jünger)", "default": "Du bist {chrono}. Du fühlst dich wie {felt}. Jünger. Der Test zeigt dir, ob dein Körper das bestätigt." },
+    { "type": "textarea", "id": "diag_result_anchor_zero", "label": "Anker (stimmt überein)", "default": "Du bist {chrono}. Du fühlst dich genauso. Aber „gesund fühlen\" und „gesund altern\" sind zwei verschiedene Dinge." },
+    { "type": "text", "id": "diag_result_zone_heading", "label": "Heading Zone 2", "default": "Was dein Test wahrscheinlich zeigen wird" },
+
+    { "type": "header", "content": "Diagnostik-Pfad · CTAs" },
+    { "type": "text", "id": "diag_cta_primary_url", "label": "Primary URL", "default": "/products/age-dna-test" },
+    { "type": "text", "id": "diag_cta_secondary_url", "label": "Secondary URL", "default": "/pages/longevity-coach" },
+    { "type": "text", "id": "diag_cta_hot_primary_label", "label": "Hot Primary Label", "default": "AGE & DNA-Test starten → 349 €" },
+    { "type": "text", "id": "diag_cta_hot_secondary_label", "label": "Hot Secondary Label", "default": "Oder: 15-Min-Beratung zuerst" },
+    { "type": "text", "id": "diag_cta_cool_primary_label", "label": "Cool Primary Label", "default": "Ich will meinen Test. Mit Kit-Ersatz-Garantie" },
+    { "type": "text", "id": "diag_cta_cool_secondary_label", "label": "Cool Secondary Label", "default": "Oder: 15 Min mit einem Longevity-Experten sprechen" },
+
+    { "type": "header", "content": "Supplement-Pfad · Fokus-Frage" },
+    { "type": "text", "id": "supp_focus_question", "label": "Frage", "default": "Wo merkst du es am stärksten?" },
+    { "type": "text", "id": "supp_focus_helper", "label": "Helper", "default": "Wähle den Bereich, der dir am meisten fehlt." },
+
+    { "type": "header", "content": "Fokus · Energie" },
+    { "type": "text", "id": "focus_energie_label", "label": "Label", "default": "Energie" },
+    { "type": "image_picker", "id": "focus_energie_image", "label": "Bild" },
+    { "type": "text", "id": "focus_energie_alt", "label": "Bild Alt-Text", "default": "Morgensonne, Fenster, Wachheit" },
+
+    { "type": "header", "content": "Fokus · Fokus & Kopf" },
+    { "type": "text", "id": "focus_fokus_label", "label": "Label", "default": "Fokus & Kopf" },
+    { "type": "image_picker", "id": "focus_fokus_image", "label": "Bild" },
+    { "type": "text", "id": "focus_fokus_alt", "label": "Bild Alt-Text", "default": "Ruhige Konzentration am Schreibtisch" },
+
+    { "type": "header", "content": "Fokus · Schlaf" },
+    { "type": "text", "id": "focus_schlaf_label", "label": "Label", "default": "Schlaf" },
+    { "type": "image_picker", "id": "focus_schlaf_image", "label": "Bild" },
+    { "type": "text", "id": "focus_schlaf_alt", "label": "Bild Alt-Text", "default": "Abendstimmung, gedimmtes Licht" },
+
+    { "type": "header", "content": "Fokus · Langlebigkeit" },
+    { "type": "text", "id": "focus_lang_label", "label": "Label", "default": "Langlebigkeit" },
+    { "type": "image_picker", "id": "focus_lang_image", "label": "Bild" },
+    { "type": "text", "id": "focus_lang_alt", "label": "Bild Alt-Text", "default": "Ruhige Landschaft, Bestand über Zeit" },
+
+    { "type": "header", "content": "Supplement-Pfad · Ergebnis Texte" },
+    { "type": "text", "id": "supp_result_eyebrow", "label": "Eyebrow", "default": "Deine Routine" },
+    { "type": "text", "id": "supp_result_headline_energie", "label": "Headline Energie", "default": "Deine Routine für stabile Energie." },
+    { "type": "textarea", "id": "supp_result_sub_energie", "label": "Sub Energie", "default": "NMN als Basis. Kreatin und TMG ergänzen die Methylierung und halten dich tragfähig." },
+    { "type": "text", "id": "supp_result_headline_fokus", "label": "Headline Fokus", "default": "Deine Routine für klaren Kopf." },
+    { "type": "textarea", "id": "supp_result_sub_fokus", "label": "Sub Fokus", "default": "Kreatin trägt zur kognitiven Leistungsfähigkeit bei. Fisetin und Resveratrol stabilisieren die Zell-Umgebung." },
+    { "type": "text", "id": "supp_result_headline_schlaf", "label": "Headline Schlaf", "default": "Deine Routine für tieferen Schlaf." },
+    { "type": "textarea", "id": "supp_result_sub_schlaf", "label": "Sub Schlaf", "default": "Schlafspray mit Melatonin für den Einstieg. Spermidin und Kreatin unterstützen Regeneration über Nacht." },
+    { "type": "text", "id": "supp_result_headline_lang", "label": "Headline Langlebigkeit", "default": "Deine Routine für Zellgesundheit." },
+    { "type": "textarea", "id": "supp_result_sub_lang", "label": "Sub Langlebigkeit", "default": "NMN, Resveratrol und CaAKG adressieren die Signalwege, die mit biologischem Altern verbunden sind." },
+    { "type": "text", "id": "supp_primary_tag", "label": "Primary Tag", "default": "Deine Basis" },
+    { "type": "text", "id": "supp_secondary_tag", "label": "Secondary Tag", "default": "Ergänzung" },
+    { "type": "text", "id": "supp_cta_primary_label", "label": "Primary CTA Label", "default": "Basis ansehen →" },
+
+    { "type": "header", "content": "Produkt-Mapping · Energie" },
+    { "type": "paragraph", "content": "NMN (primär) · Kreatin · TMG" },
+    { "type": "product", "id": "product_energie_primary", "label": "Primär (NMN)" },
+    { "type": "product", "id": "product_energie_sec1", "label": "Sekundär 1 (Kreatin)" },
+    { "type": "product", "id": "product_energie_sec2", "label": "Sekundär 2 (TMG)" },
+
+    { "type": "header", "content": "Produkt-Mapping · Fokus" },
+    { "type": "paragraph", "content": "Kreatin (primär) · Fisetin · Trans-Resveratrol" },
+    { "type": "product", "id": "product_fokus_primary", "label": "Primär (Kreatin)" },
+    { "type": "product", "id": "product_fokus_sec1", "label": "Sekundär 1 (Fisetin)" },
+    { "type": "product", "id": "product_fokus_sec2", "label": "Sekundär 2 (Resveratrol)" },
+
+    { "type": "header", "content": "Produkt-Mapping · Schlaf" },
+    { "type": "paragraph", "content": "Schlafspray (primär) · Spermidin · Kreatin" },
+    { "type": "product", "id": "product_schlaf_primary", "label": "Primär (Schlafspray)" },
+    { "type": "product", "id": "product_schlaf_sec1", "label": "Sekundär 1 (Spermidin)" },
+    { "type": "product", "id": "product_schlaf_sec2", "label": "Sekundär 2 (Kreatin)" },
+
+    { "type": "header", "content": "Produkt-Mapping · Langlebigkeit" },
+    { "type": "paragraph", "content": "NMN (primär) · Trans-Resveratrol · CaAKG" },
+    { "type": "product", "id": "product_lang_primary", "label": "Primär (NMN)" },
+    { "type": "product", "id": "product_lang_sec1", "label": "Sekundär 1 (Resveratrol)" },
+    { "type": "product", "id": "product_lang_sec2", "label": "Sekundär 2 (CaAKG)" },
+
+    { "type": "header", "content": "Advisor-Zeile" },
+    { "type": "text", "id": "advisor_name", "label": "Name", "default": "Prof. Dr. med. Volker Limmroth" },
+    { "type": "text", "id": "advisor_title", "label": "Titel", "default": "Chefarzt Neurologie · Chief Scientific Officer LIFETIME · Spiegel-Bestseller-Autor" },
+    { "type": "image_picker", "id": "advisor_image", "label": "Avatar" }
+  ],
+  "blocks": [
+    {
+      "type": "route_card",
+      "name": "Routing-Karte",
+      "limit": 3,
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Bild (quadratisch)" },
+        { "type": "text", "id": "image_alt", "label": "Bild Alt-Text", "default": "Routing-Motiv" },
+        { "type": "text", "id": "label", "label": "Label", "default": "Label" },
+        { "type": "textarea", "id": "sub", "label": "Subzeile (optional)", "default": "" },
+        {
+          "type": "select",
+          "id": "target_path",
+          "label": "Pfad",
+          "default": "diagnostics",
+          "options": [
+            { "value": "diagnostics", "label": "Diagnostik (AGE & DNA-Test)" },
+            { "value": "supplement",  "label": "Supplement (Routine)" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "target_archetype",
+          "label": "Archetype (nur Diagnostik-Pfad)",
+          "default": "tired",
+          "info": "Bei Supplement-Pfad ignoriert.",
+          "options": [
+            { "value": "tired", "label": "Tired (Ich fühle den Unterschied)" },
+            { "value": "measurer", "label": "Measurer (Ich will verstehen)" },
+            { "value": "vigilant", "label": "Vigilant (Familiengeschichte)" },
+            { "value": "optimizer", "label": "Optimizer (Daten-getrieben)" }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "archetype",
+      "name": "Archetype-Daten",
+      "limit": 4,
+      "settings": [
+        {
+          "type": "select",
+          "id": "archetype_id",
+          "label": "Archetype-ID",
+          "default": "tired",
+          "options": [
+            { "value": "tired", "label": "Tired" },
+            { "value": "measurer", "label": "Measurer" },
+            { "value": "vigilant", "label": "Vigilant" },
+            { "value": "optimizer", "label": "Optimizer" }
+          ]
+        },
+        { "type": "text", "id": "q3_question", "label": "Q3 Frage", "default": "Wo merkst du es am stärksten?" },
+        { "type": "textarea", "id": "q3_options_json", "label": "Q3 Optionen (JSON-Array)", "default": "[\"Energielevel\",\"Regeneration\",\"Kopf und Fokus\",\"Schlaf\",\"Aussehen\"]" },
+        { "type": "textarea", "id": "empathy_line", "label": "Empathie-Satz", "default": "Du merkst Dinge, die im Standard-Check nicht auftauchen." },
+        { "type": "textarea", "id": "result_hypothesis_primary", "label": "Hypothese 1", "default": "Primäre Hypothese" },
+        { "type": "textarea", "id": "result_hypothesis_secondary", "label": "Hypothese 2", "default": "Sekundäre Hypothese" },
+        { "type": "textarea", "id": "result_hypothesis_tertiary", "label": "Hypothese 3", "default": "Tertiäre Hypothese" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Routine Quiz",
+      "blocks": [
+        {
+          "type": "route_card",
+          "settings": {
+            "label": "Ich fühle den Unterschied",
+            "sub": "Energie, Schlaf, Fokus — irgendetwas stimmt nicht",
+            "target_path": "diagnostics",
+            "target_archetype": "tired",
+            "image_alt": "Person Mitte 40, stille Müdigkeit am Morgen"
+          }
+        },
+        {
+          "type": "route_card",
+          "settings": {
+            "label": "Ich will verstehen",
+            "sub": "Wie altere ich wirklich — nicht nur was der Arzt sagt",
+            "target_path": "diagnostics",
+            "target_archetype": "measurer",
+            "image_alt": "Konzentrierter Blick, Klarheit, Tiefe"
+          }
+        },
+        {
+          "type": "route_card",
+          "settings": {
+            "label": "Ich will loslegen",
+            "sub": "Die richtigen Nährstoffe, klar und alltagstauglich",
+            "target_path": "supplement",
+            "target_archetype": "tired",
+            "image_alt": "Aufgeräumte Morgenroutine, klares Licht"
+          }
+        },
+        {
+          "type": "archetype",
+          "settings": {
+            "archetype_id": "tired",
+            "q3_question": "Wo merkst du es am stärksten?",
+            "q3_options_json": "[\"Energielevel: der Nachmittag fällt mir schwerer als früher\",\"Sport & Regeneration: Erholung dauert länger als sie sollte\",\"Kopf: Fokus, Klarheit, Stimmung\",\"Schlaf: kürzer, unruhiger oder weniger erholsam\",\"Aussehen: Haut, Haare, Gesicht\"]",
+            "empathy_line": "Du merkst Dinge, die im Standard-Check nicht auftauchen. Das ist keine Einbildung. Es ist das, was Bluttests nicht messen.",
+            "result_hypothesis_primary": "Biologisches Alter (MethylPace-Score): Menschen mit deinem Profil liegen oft deutlich über ihrem chronologischen Alter. Der Test zeigt deinen echten Wert.",
+            "result_hypothesis_secondary": "EpiVitality + Entzündungs-Profil: Die zwei Marker, die erklären, warum du dich älter fühlst, obwohl Standard-Laborwerte okay aussehen.",
+            "result_hypothesis_tertiary": "Supplement-Verträglichkeit + Schlaf-Genetik: Warum dein bisheriger Stack nicht greift und was bei dir wirkt."
+          }
+        },
+        {
+          "type": "archetype",
+          "settings": {
+            "archetype_id": "measurer",
+            "q3_question": "Welche Kennzahl fehlt dir bisher?",
+            "q3_options_json": "[\"Wie schnell ich biologisch altere\",\"Wie stark meine stille Zellentzündung ist\",\"Wie mein Immunsystem und meine Vitalität jetzt stehen\",\"Meine genetischen Risiken für Herz, Muskeln, Kognition\",\"Wie ich auf Supplements und Ernährung individuell reagiere\"]",
+            "empathy_line": "Standardwerte zeigen, ob du krank bist. Sie zeigen nicht, wie gesund du alterst. Genau dafür ist der Test gebaut.",
+            "result_hypothesis_primary": "MethylPace-Score: Dein biologischer Alterungs-Tempomesser. Die eine Zahl, die dein Hausarzt nicht bestimmen kann.",
+            "result_hypothesis_secondary": "Entzündung + Immunscore: Wie stark arbeitet die stille Entzündung in dir gerade? Beide Werte zeigen, wo Prävention ansetzen muss.",
+            "result_hypothesis_tertiary": "Genetische Risiko-Signatur: Herz, Muskeln, Kognition. Was in dir angelegt ist, was du beeinflussen kannst."
+          }
+        },
+        {
+          "type": "archetype",
+          "settings": {
+            "archetype_id": "vigilant",
+            "q3_question": "Worum geht es konkret?",
+            "q3_options_json": "[\"Herz-Kreislauf (Infarkt, Blutdruck, Cholesterin)\",\"Kognition & Demenz\",\"Krebsrisiken und Entzündungstendenz\",\"Muskelabbau im Alter (Sarkopenie)\",\"Knochen & Gelenke\"]",
+            "empathy_line": "Familiengeschichte ist ein Signal, keine Diagnose. Der Test zeigt, welche Signale in deinen Genen tatsächlich angelegt sind. Und welche nicht.",
+            "result_hypothesis_primary": "Genetische Prädispositionen: Welche Risiken aus deiner Familie tatsächlich in deinen Genen angelegt sind. Und welche nicht.",
+            "result_hypothesis_secondary": "Entzündung + Gefäß-Profil: Zwei Treiber, die oft schon Jahre vor Symptomen messbar werden.",
+            "result_hypothesis_tertiary": "Biologisches Alter: Ob dein Körper schneller oder langsamer altert, als die Familiengeschichte vermuten lässt."
+          }
+        }
+      ]
+    }
+  ]
 }
 {% endschema %}
