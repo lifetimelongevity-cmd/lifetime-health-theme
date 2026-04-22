@@ -1750,17 +1750,19 @@
 
       root.querySelector('[data-empathy]').textContent = data.empathy_line || '';
 
-      // Zone 1 — Hypothesen
+      // Zone 1 — Hypothesen (optional; DOM kann entfernt sein)
       var list = root.querySelector('[data-hypotheses]');
-      list.innerHTML = '';
-      [data.hypothesis_primary, data.hypothesis_secondary, data.hypothesis_tertiary].forEach(function (text) {
-        if (!text) return;
-        var li = document.createElement('li');
-        li.className = 'rq-hypothesis';
-        li.innerHTML = '<p class="rq-hypothesis-text"></p>';
-        li.querySelector('.rq-hypothesis-text').textContent = text;
-        list.appendChild(li);
-      });
+      if (list) {
+        list.innerHTML = '';
+        [data.hypothesis_primary, data.hypothesis_secondary, data.hypothesis_tertiary].forEach(function (text) {
+          if (!text) return;
+          var li = document.createElement('li');
+          li.className = 'rq-hypothesis';
+          li.innerHTML = '<p class="rq-hypothesis-text"></p>';
+          li.querySelector('.rq-hypothesis-text').textContent = text;
+          list.appendChild(li);
+        });
+      }
 
       // Zone 2 — Fokus-Karten
       var focusList = root.querySelector('[data-focus-grid]');
