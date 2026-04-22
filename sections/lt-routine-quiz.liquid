@@ -147,6 +147,10 @@
   @media (prefers-reduced-motion: reduce) {
     #lt-routine-quiz-{{ section.id }} .rq-screen.is-active { animation: none; }
   }
+  /* Platz für sticky Header beim In-View-Scrollen der Frage */
+  #lt-routine-quiz-{{ section.id }} .rq-screen h2 {
+    scroll-margin-top: 96px;
+  }
   #lt-routine-quiz-{{ section.id }} .rq-screen h2 {
     font-family: var(--font-heading);
     font-size: clamp(20px, 4.4vw, 24px);
@@ -968,9 +972,6 @@
     {%- comment -%} Q2 — Alter-Slider {%- endcomment -%}
     <div class="rq-screen" data-screen="diag_age">
       <h2 tabindex="-1">{{ section.settings.diag_q2_question }}</h2>
-      {%- if section.settings.diag_q2_helper != blank -%}
-        <p class="rq-helper">{{ section.settings.diag_q2_helper }}</p>
-      {%- endif -%}
       <div class="rq-slider-group">
         <div class="rq-slider">
           <label class="rq-slider-label" for="rq-chrono-{{ section.id }}">
@@ -1405,7 +1406,18 @@
 
     function focusHeading(screen) {
       var h = screens[screen].querySelector('h2');
-      if (h) setTimeout(function () { try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); } }, 60);
+      if (!h) return;
+      setTimeout(function () {
+        try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); }
+        // Frage mit Versatz unter die sticky Navigation scrollen
+        if (screen !== 'route' && h.getBoundingClientRect) {
+          var rect = h.getBoundingClientRect();
+          if (rect.top < 96 || rect.top > window.innerHeight * 0.5) {
+            try { h.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            catch (e) { h.scrollIntoView(); }
+          }
+        }
+      }, 60);
     }
 
     function go(screen, opts) {
