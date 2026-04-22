@@ -5,6 +5,9 @@
     --lsh-bg:       {{ section.settings.color_bg | default: '#f7f7f4' }};
     --lsh-text:     {{ section.settings.color_text | default: '#26251e' }};
     --lsh-text-sec: {{ section.settings.color_text | default: '#26251e' | color_modify: 'alpha', 0.55 }};
+    --crs-text:     var(--lsh-text);
+    --crs-text-sec: var(--lsh-text-sec);
+    --crs-text-ter: var(--lsh-text-sec);
     background:     var(--lsh-bg);
     padding-top:    {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
@@ -22,18 +25,18 @@
   <div class="lsh__container">
 
     {%- comment -%} Text — left column {%- endcomment -%}
-    <div class="lsh__content">
+    <div class="lsh__content crs-heading-stack crs-heading-stack--align-left crs-heading-stack--hero-display">
       {%- if section.settings.kicker != blank -%}
-        <p class="lsh__kicker">{{ section.settings.kicker | escape }}</p>
+        <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
       {%- endif -%}
-
-      {%- if section.settings.headline != blank -%}
-        <h1 class="lsh__heading">{{ section.settings.headline | escape }}</h1>
-      {%- endif -%}
-
-      {%- if section.settings.subheading != blank -%}
-        <p class="lsh__subheading">{{ section.settings.subheading | escape }}</p>
-      {%- endif -%}
+      <div class="crs-heading-stack__pair">
+        {%- if section.settings.headline != blank -%}
+          <h1 class="crs-heading-stack__title">{{ section.settings.headline | escape }}</h1>
+        {%- endif -%}
+        {%- if section.settings.subheading != blank -%}
+          <p class="crs-heading-stack__subtitle">{{ section.settings.subheading | escape }}</p>
+        {%- endif -%}
+      </div>
     </div>
 
     {%- comment -%} Image — right column {%- endcomment -%}
@@ -80,37 +83,10 @@
 
 /* — Text column — */
 .lsh__content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+  min-width: 0;
 }
 
-.lsh__kicker {
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-medium);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--lsh-text-sec, rgba(38, 37, 30, 0.55));
-  margin: 0;
-}
-
-.lsh__heading {
-  font-family: var(--font-heading);
-  font-size: var(--text-display);
-  font-weight: var(--weight-bold);
-  line-height: var(--leading-display);
-  color: var(--lsh-text, #26251e);
-  margin: 0;
-}
-
-.lsh__subheading {
-  font-family: var(--font-body);
-  font-size: var(--text-body-lg);
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-relaxed);
-  color: var(--lsh-text-sec, rgba(38, 37, 30, 0.55));
-  margin: 0;
+.lsh__content .crs-heading-stack__subtitle {
   max-width: 52ch;
 }
 
@@ -160,11 +136,6 @@
     gap: var(--space-6);
     padding: 0 var(--space-4);
   }
-
-  .lsh__heading {
-    font-size: var(--text-h1);
-  }
-
   .lsh__img,
   .lsh__placeholder {
     aspect-ratio: 3 / 2;
