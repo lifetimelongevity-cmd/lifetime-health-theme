@@ -77,7 +77,7 @@
     background: var(--rq-card);
     border-radius: var(--radius-lg);
     padding: var(--space-6) var(--space-5);
-    min-height: clamp(520px, 64vh, 760px);
+    min-height: clamp(580px, 68vh, 780px);
     display: flex;
     flex-direction: column;
     gap: var(--space-6);
@@ -95,86 +95,18 @@
     }
   }
 
-  /* Progress */
+  /* Progress — schlanke Zeile: Zurück (links) + Frage X von Y (rechts) */
   #lt-routine-quiz-{{ section.id }} .rq-progress {
     display: flex;
     align-items: center;
+    justify-content: space-between;
     gap: var(--space-3);
+    min-height: 36px;
   }
-  #lt-routine-quiz-{{ section.id }} .rq-progress[hidden] { display: none; }
-  #lt-routine-quiz-{{ section.id }} .rq-progress-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: var(--space-2);
-    flex: 1;
-    position: relative;
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-progress-list::before {
-    content: '';
-    position: absolute;
-    top: 14px;
-    left: calc(100% / var(--rq-steps, 1) / 2);
-    right: calc(100% / var(--rq-steps, 1) / 2);
-    height: 2px;
-    background: var(--rq-border);
-    border-radius: var(--radius-full);
-    z-index: 0;
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-progress-list li {
-    position: relative;
-    z-index: 1;
+  /* Reserviert Platz auch auf Route-Screen, damit keine Sprünge beim Wechsel */
+  #lt-routine-quiz-{{ section.id }} .rq-progress[hidden] {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    color: var(--rq-muted);
-    transition: color 240ms var(--ease-default, ease);
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-progress-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: var(--radius-full);
-    background: var(--rq-card);
-    border: 2px solid var(--rq-border);
-    display: grid;
-    place-items: center;
-    transition: background 240ms ease, border-color 240ms ease, color 240ms ease;
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-progress-icon svg {
-    width: 14px;
-    height: 14px;
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-progress-label {
-    font-size: 10px;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    font-weight: var(--weight-medium);
-    line-height: 1;
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-progress-list li.is-done {
-    color: var(--rq-accent);
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-progress-list li.is-done .rq-progress-icon {
-    background: var(--rq-accent);
-    border-color: var(--rq-accent);
-    color: var(--rq-cta-text);
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-progress-list li[aria-current='step'] {
-    color: var(--rq-text);
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-progress-list li[aria-current='step'] .rq-progress-icon {
-    background: var(--rq-card);
-    border-color: var(--rq-accent);
-    color: var(--rq-accent);
-    box-shadow: 0 0 0 3px var(--rq-accent-soft);
-  }
-  @media (max-width: 540px) {
-    #lt-routine-quiz-{{ section.id }} .rq-progress-label { font-size: 9px; }
-    #lt-routine-quiz-{{ section.id }} .rq-progress-icon { width: 24px; height: 24px; }
-    #lt-routine-quiz-{{ section.id }} .rq-progress-icon svg { width: 12px; height: 12px; }
-    #lt-routine-quiz-{{ section.id }} .rq-progress-list::before { top: 12px; }
+    visibility: hidden;
   }
   #lt-routine-quiz-{{ section.id }} .rq-back {
     appearance: none;
@@ -209,8 +141,11 @@
     animation: rqFade 260ms var(--ease-smooth, ease);
   }
   @keyframes rqFade {
-    from { opacity: 0; transform: translateY(6px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #lt-routine-quiz-{{ section.id }} .rq-screen.is-active { animation: none; }
   }
   #lt-routine-quiz-{{ section.id }} .rq-screen h2 {
     font-family: var(--font-heading);
@@ -968,14 +903,15 @@
     color: var(--rq-text);
   }
 
-  /* Question counter under milestones */
+  /* Question counter in progress row */
   #lt-routine-quiz-{{ section.id }} .rq-progress-counter {
-    margin: 6px 0 0;
-    font-size: 11px;
+    margin: 0;
+    font-size: 12px;
     color: var(--rq-muted);
-    text-align: center;
     letter-spacing: 0.04em;
+    font-variant-numeric: tabular-nums;
   }
+  #lt-routine-quiz-{{ section.id }} .rq-progress-counter[hidden] { display: none; }
 {% endstyle %}
 
 <section id="lt-routine-quiz-{{ section.id }}" class="lt-routine-quiz" data-section-id="{{ section.id }}" data-section-type="lt-routine-quiz">
@@ -984,7 +920,6 @@
     {%- comment -%} Progress bar (hidden on route + result, shown during questions) {%- endcomment -%}
     <div class="rq-progress" data-progress hidden>
       <button type="button" class="rq-back" data-back hidden aria-label="Eine Frage zurück">← zurück</button>
-      <ol class="rq-progress-list" data-progress-list aria-label="Fortschritt"></ol>
       <p class="rq-progress-counter" data-progress-counter></p>
     </div>
 
@@ -1422,7 +1357,6 @@
     var current = 'route';
 
     var progressEl   = root.querySelector('[data-progress]');
-    var progressList = root.querySelector('[data-progress-list]');
     var backBtn      = root.querySelector('[data-back]');
     var advisorEl    = root.querySelector('[data-advisor]');
 
@@ -1451,31 +1385,8 @@
       }
       progressEl.hidden = false;
 
-      // Build milestones — skip 'route', keep question screens + result
       var steps = flow.slice(1);
       var activeIdx = idx - 1;
-
-      if (progressList.childElementCount !== steps.length) {
-        progressList.innerHTML = '';
-        progressList.style.setProperty('--rq-steps', String(steps.length));
-        progressList.style.gridTemplateColumns = 'repeat(' + steps.length + ', 1fr)';
-        steps.forEach(function (step, i) {
-          var li = document.createElement('li');
-          li.setAttribute('data-step', step.id);
-          li.innerHTML =
-            '<span class="rq-progress-icon" aria-hidden="true">' + step.icon + '</span>' +
-            '<span class="rq-progress-label">' + step.label + '</span>';
-          progressList.appendChild(li);
-        });
-      }
-
-      progressList.querySelectorAll('li').forEach(function (li, i) {
-        li.classList.remove('is-done');
-        li.removeAttribute('aria-current');
-        if (i < activeIdx) li.classList.add('is-done');
-        if (i === activeIdx) li.setAttribute('aria-current', 'step');
-      });
-
       var isResult = current === 'diag_result' || current === 'supp_result';
       if (backBtn) backBtn.hidden = !(idx >= 1 && !isResult);
 
