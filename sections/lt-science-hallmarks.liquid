@@ -14,6 +14,47 @@
   if section.settings.heading_size == 'product_title'
     assign hallmarks_heading_lg = true
   endif
+
+  comment
+    Pre-compute per-category tile data from blocks.
+    Supports up to 3 category_header blocks (Primär / Antagonistisch / Integrativ).
+  endcomment
+  assign shm_cat_index = -1
+  assign shm_cat0_name  = '' | append: ''
+  assign shm_cat0_desc  = '' | append: ''
+  assign shm_cat0_count = 0
+  assign shm_cat1_name  = '' | append: ''
+  assign shm_cat1_desc  = '' | append: ''
+  assign shm_cat1_count = 0
+  assign shm_cat2_name  = '' | append: ''
+  assign shm_cat2_desc  = '' | append: ''
+  assign shm_cat2_count = 0
+
+  for block in section.blocks
+    if block.type == 'category_header'
+      assign shm_cat_index = shm_cat_index | plus: 1
+      if shm_cat_index == 0
+        assign shm_cat0_name = block.settings.category_name
+        assign shm_cat0_desc = block.settings.category_desc
+      elsif shm_cat_index == 1
+        assign shm_cat1_name = block.settings.category_name
+        assign shm_cat1_desc = block.settings.category_desc
+      elsif shm_cat_index == 2
+        assign shm_cat2_name = block.settings.category_name
+        assign shm_cat2_desc = block.settings.category_desc
+      endif
+    elsif block.type == 'hallmark'
+      if shm_cat_index == 0
+        assign shm_cat0_count = shm_cat0_count | plus: 1
+      elsif shm_cat_index == 1
+        assign shm_cat1_count = shm_cat1_count | plus: 1
+      elsif shm_cat_index == 2
+        assign shm_cat2_count = shm_cat2_count | plus: 1
+      endif
+    endif
+  endfor
+
+  assign shm_is_expanded = section.settings.show_expanded_default | default: false
 -%}
 
 {% style %}
@@ -32,6 +73,7 @@
 <section class="science-hallmarks" id="section-{{ section.id }}">
   <div class="science-hallmarks__container">
 
+    {%- comment -%} Section header — unchanged {%- endcomment -%}
     {%- if hallmarks_kicker != blank or hallmarks_heading != blank or hallmarks_subheading != blank -%}
       <header class="science-hallmarks__header crs-heading-stack crs-heading-stack--align-{{ hallmarks_align }}{% if hallmarks_heading_lg %} crs-heading-stack--headline-lg{% endif %}">
         {%- if hallmarks_kicker != blank -%}
@@ -48,66 +90,175 @@
       </header>
     {%- endif -%}
 
-    <div class="science-hallmarks__body-wrap">
-      {%- assign in_group = false -%}
-      {%- for block in section.blocks -%}
+    {%- comment -%} Category tiles — derived from category_header blocks {%- endcomment -%}
+    {%- if shm_cat_index >= 0 -%}
+      <div class="science-hallmarks__tiles">
 
-        {%- if block.type == 'category_header' -%}
-          {%- if in_group -%}
-            </ol>
+        {%- if shm_cat0_name != blank -%}
+          {%- capture shm_count0_str -%}{%- if shm_cat0_count < 10 -%}0{{ shm_cat0_count }}{%- else -%}{{ shm_cat0_count }}{%- endif -%}{%- endcapture -%}
+          <div class="science-hallmarks__tile">
+            <span class="science-hallmarks__tile-count" aria-hidden="true">{{ shm_count0_str }}</span>
+            <h3 class="science-hallmarks__tile-name">{{ shm_cat0_name | escape }}</h3>
+            {%- if shm_cat0_desc != blank -%}
+              <p class="science-hallmarks__tile-desc">{{ shm_cat0_desc | escape }}</p>
+            {%- endif -%}
           </div>
-          {%- endif -%}
-          <div class="science-hallmarks__category" {{ block.shopify_attributes }}>
-            <div class="science-hallmarks__cat-row">
-              {%- if block.settings.category_name != blank -%}
-                <span class="science-hallmarks__cat-label">{{ block.settings.category_name | escape }}</span>
-              {%- endif -%}
-              {%- if block.settings.category_desc != blank -%}
-                <span class="science-hallmarks__cat-desc">{{ block.settings.category_desc | escape }}</span>
-              {%- endif -%}
-            </div>
-            <ol class="science-hallmarks__grid" role="list">
-          {%- assign in_group = true -%}
-
-        {%- elsif block.type == 'hallmark' -%}
-          {%- unless in_group -%}
-            <div class="science-hallmarks__category">
-              <ol class="science-hallmarks__grid" role="list">
-            {%- assign in_group = true -%}
-          {%- endunless -%}
-          {%- assign hallmark_number = block.settings.number | strip -%}
-          <li class="science-hallmarks__card" {{ block.shopify_attributes }}>
-            <div class="science-hallmarks__card-inner">
-              {%- if block.settings.name != blank -%}
-                <h3 class="science-hallmarks__name">
-                  {%- if hallmark_number != blank -%}
-                    <span class="science-hallmarks__num" aria-hidden="true">{{ hallmark_number | escape }}</span>
-                  {%- endif -%}
-                  {{ block.settings.name | escape }}
-                </h3>
-              {%- endif -%}
-              {%- if block.settings.body != blank -%}
-                <p class="science-hallmarks__desc">{{ block.settings.body | escape }}</p>
-              {%- endif -%}
-            </div>
-          </li>
-
         {%- endif -%}
-      {%- endfor -%}
-      {%- if in_group -%}
-          </ol>
-        </div>
-      {%- endif -%}
-    </div>
 
-    {%- if hallmarks_source != blank -%}
-      <div class="science-hallmarks__source">
-        <p class="science-hallmarks__source-text">{{ hallmarks_source | escape }}</p>
+        {%- if shm_cat1_name != blank -%}
+          {%- capture shm_count1_str -%}{%- if shm_cat1_count < 10 -%}0{{ shm_cat1_count }}{%- else -%}{{ shm_cat1_count }}{%- endif -%}{%- endcapture -%}
+          <div class="science-hallmarks__tile">
+            <span class="science-hallmarks__tile-count" aria-hidden="true">{{ shm_count1_str }}</span>
+            <h3 class="science-hallmarks__tile-name">{{ shm_cat1_name | escape }}</h3>
+            {%- if shm_cat1_desc != blank -%}
+              <p class="science-hallmarks__tile-desc">{{ shm_cat1_desc | escape }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- if shm_cat2_name != blank -%}
+          {%- capture shm_count2_str -%}{%- if shm_cat2_count < 10 -%}0{{ shm_cat2_count }}{%- else -%}{{ shm_cat2_count }}{%- endif -%}{%- endcapture -%}
+          <div class="science-hallmarks__tile">
+            <span class="science-hallmarks__tile-count" aria-hidden="true">{{ shm_count2_str }}</span>
+            <h3 class="science-hallmarks__tile-name">{{ shm_cat2_name | escape }}</h3>
+            {%- if shm_cat2_desc != blank -%}
+              <p class="science-hallmarks__tile-desc">{{ shm_cat2_desc | escape }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
       </div>
     {%- endif -%}
 
+    {%- comment -%} Toggle button {%- endcomment -%}
+    <div class="science-hallmarks__toggle-wrap">
+      <button
+        type="button"
+        class="science-hallmarks__toggle ltw-btn ltw-btn--ghost"
+        data-hallmarks-toggle
+        aria-expanded="{{ shm_is_expanded }}"
+        aria-controls="hallmarks-drawer-{{ section.id }}"
+      >
+        {%- if shm_is_expanded -%}
+          Weniger anzeigen ↑
+        {%- else -%}
+          Alle 12 Mechanismen ansehen ↓
+        {%- endif -%}
+      </button>
+    </div>
+
+    {%- comment -%} Expandable drawer {%- endcomment -%}
+    <div
+      id="hallmarks-drawer-{{ section.id }}"
+      class="science-hallmarks__drawer"
+      data-hallmarks-drawer
+      data-expanded="{{ shm_is_expanded }}"
+      {% if shm_is_expanded %}style="max-height: none"{% endif %}
+    >
+
+      <div class="science-hallmarks__body-wrap">
+        {%- assign in_group = false -%}
+        {%- for block in section.blocks -%}
+
+          {%- if block.type == 'category_header' -%}
+            {%- if in_group -%}
+              </ol>
+            </div>
+            {%- endif -%}
+            <div class="science-hallmarks__category" {{ block.shopify_attributes }}>
+              <div class="science-hallmarks__cat-row">
+                {%- if block.settings.category_name != blank -%}
+                  <span class="science-hallmarks__cat-label">{{ block.settings.category_name | escape }}</span>
+                {%- endif -%}
+                {%- if block.settings.category_desc != blank -%}
+                  <span class="science-hallmarks__cat-desc">{{ block.settings.category_desc | escape }}</span>
+                {%- endif -%}
+              </div>
+              <ol class="science-hallmarks__grid" role="list">
+            {%- assign in_group = true -%}
+
+          {%- elsif block.type == 'hallmark' -%}
+            {%- unless in_group -%}
+              <div class="science-hallmarks__category">
+                <ol class="science-hallmarks__grid" role="list">
+              {%- assign in_group = true -%}
+            {%- endunless -%}
+            {%- assign hallmark_number = block.settings.number | strip -%}
+            <li class="science-hallmarks__card" {{ block.shopify_attributes }}>
+              <div class="science-hallmarks__card-inner">
+                {%- if block.settings.name != blank -%}
+                  <h3 class="science-hallmarks__name">
+                    {%- if hallmark_number != blank -%}
+                      <span class="science-hallmarks__num" aria-hidden="true">{{ hallmark_number | escape }}</span>
+                    {%- endif -%}
+                    {{ block.settings.name | escape }}
+                  </h3>
+                {%- endif -%}
+                {%- if block.settings.body != blank -%}
+                  <p class="science-hallmarks__desc">{{ block.settings.body | escape }}</p>
+                {%- endif -%}
+              </div>
+            </li>
+
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if in_group -%}
+            </ol>
+          </div>
+        {%- endif -%}
+      </div>
+
+      {%- if hallmarks_source != blank -%}
+        <div class="science-hallmarks__source">
+          <p class="science-hallmarks__source-text">{{ hallmarks_source | escape }}</p>
+        </div>
+      {%- endif -%}
+
+    </div>{%- comment -%} /drawer {%- endcomment -%}
+
   </div>
 </section>
+
+<script>
+(function () {
+  var section = document.getElementById('section-{{ section.id }}');
+  if (!section) return;
+
+  var toggle = section.querySelector('[data-hallmarks-toggle]');
+  var drawer = section.querySelector('[data-hallmarks-drawer]');
+  if (!toggle || !drawer) return;
+
+  var expanded = drawer.dataset.expanded === 'true';
+
+  function update(open) {
+    expanded = open;
+    if (open) {
+      drawer.style.maxHeight = drawer.scrollHeight + 'px';
+      toggle.setAttribute('aria-expanded', 'true');
+      toggle.textContent = 'Weniger anzeigen ↑';
+    } else {
+      drawer.style.maxHeight = '0px';
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.textContent = 'Alle 12 Mechanismen ansehen ↓';
+    }
+  }
+
+  /* Set initial px height without animation */
+  drawer.style.transition = 'none';
+  update(expanded);
+
+  /* Enable transition after first paint */
+  requestAnimationFrame(function () {
+    requestAnimationFrame(function () {
+      drawer.style.transition = 'max-height 0.4s ease';
+    });
+  });
+
+  toggle.addEventListener('click', function () {
+    update(!expanded);
+  });
+})();
+</script>
 
 {% stylesheet %}
   .science-hallmarks {
@@ -129,11 +280,99 @@
     margin-inline: auto;
   }
 
+  /* ─── CATEGORY TILES ─── */
+  .science-hallmarks__tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-5);
+    margin-bottom: var(--space-6);
+  }
+
+  .science-hallmarks__tile {
+    padding: var(--space-6);
+    background: var(--science-hallmarks-card-bg, #f2f1ed);
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  /* Large number — dominant visual, subordinate color */
+  .science-hallmarks__tile-count {
+    font-family: var(--font-heading);
+    font-size: var(--text-stat);
+    font-weight: var(--weight-bold);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--science-hallmarks-text-muted, rgba(38, 37, 30, 0.35));
+    margin: 0;
+  }
+
+  .science-hallmarks__tile-name {
+    font-family: var(--font-heading);
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-tight);
+    color: var(--science-hallmarks-text, #26251e);
+    margin: 0;
+  }
+
+  .science-hallmarks__tile-desc {
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-body);
+    color: var(--science-hallmarks-text-secondary, rgba(38, 37, 30, 0.6));
+    margin: 0;
+  }
+
+  /* ─── TOGGLE BUTTON ─── */
+  .science-hallmarks__toggle-wrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0;
+  }
+
+  /* Ghost button styles scoped to this section */
+  .science-hallmarks__toggle-wrap .ltw-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-medium);
+    line-height: 1;
+    padding: 14px 22px;
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.15s ease;
+    -webkit-appearance: none;
+  }
+
+  .science-hallmarks__toggle-wrap .ltw-btn--ghost {
+    background: transparent;
+    color: var(--science-hallmarks-text, #26251e);
+    border: 1.5px solid currentColor;
+    opacity: 0.55;
+  }
+
+  .science-hallmarks__toggle-wrap .ltw-btn--ghost:hover {
+    opacity: 0.9;
+  }
+
+  /* ─── EXPANDABLE DRAWER ─── */
+  .science-hallmarks__drawer {
+    max-height: 0;
+    overflow: hidden;
+    /* transition managed by JS to avoid flash on page load */
+  }
+
   /* ─── CATEGORY GROUPS ─── */
   .science-hallmarks__body-wrap {
     display: flex;
     flex-direction: column;
     gap: var(--space-7);
+    padding-top: var(--space-7);
   }
 
   .science-hallmarks__category {
@@ -237,6 +476,11 @@
 
   /* ─── RESPONSIVE ─── */
   @media screen and (max-width: 1024px) {
+    .science-hallmarks__tiles {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--space-4);
+    }
+
     .science-hallmarks__grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -250,6 +494,15 @@
   @media screen and (max-width: 767px) {
     .science-hallmarks__container {
       padding-inline: var(--space-4);
+    }
+
+    .science-hallmarks__tiles {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+
+    .science-hallmarks__tile-count {
+      font-size: var(--text-h1);
     }
 
     .science-hallmarks__grid {
@@ -368,6 +621,12 @@
       "id": "source_text",
       "label": "Quellenzeile",
       "default": "Quelle: Lopez-Otin et al., Cell 2023"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_expanded_default",
+      "label": "Ausgeklappt starten (Theme-Editor-Vorschau)",
+      "default": false
     }
   ],
   "blocks": [
