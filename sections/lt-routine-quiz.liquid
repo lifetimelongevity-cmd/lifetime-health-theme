@@ -107,16 +107,72 @@
     display: grid;
     gap: var(--space-2);
     flex: 1;
+    position: relative;
   }
-  #lt-routine-quiz-{{ section.id }} .rq-progress-list li {
-    height: 4px;
+  #lt-routine-quiz-{{ section.id }} .rq-progress-list::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: calc(100% / var(--rq-steps, 1) / 2);
+    right: calc(100% / var(--rq-steps, 1) / 2);
+    height: 2px;
     background: var(--rq-border);
     border-radius: var(--radius-full);
-    transition: background 240ms var(--ease-default, ease);
+    z-index: 0;
   }
-  #lt-routine-quiz-{{ section.id }} .rq-progress-list li.is-done,
-  #lt-routine-quiz-{{ section.id }} .rq-progress-list li[aria-current='step'] {
+  #lt-routine-quiz-{{ section.id }} .rq-progress-list li {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: var(--rq-muted);
+    transition: color 240ms var(--ease-default, ease);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-progress-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full);
+    background: var(--rq-card);
+    border: 2px solid var(--rq-border);
+    display: grid;
+    place-items: center;
+    transition: background 240ms ease, border-color 240ms ease, color 240ms ease;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-progress-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-progress-label {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: var(--weight-medium);
+    line-height: 1;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-progress-list li.is-done {
+    color: var(--rq-accent);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-progress-list li.is-done .rq-progress-icon {
     background: var(--rq-accent);
+    border-color: var(--rq-accent);
+    color: var(--rq-cta-text);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-progress-list li[aria-current='step'] {
+    color: var(--rq-text);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-progress-list li[aria-current='step'] .rq-progress-icon {
+    background: var(--rq-card);
+    border-color: var(--rq-accent);
+    color: var(--rq-accent);
+    box-shadow: 0 0 0 3px var(--rq-accent-soft);
+  }
+  @media (max-width: 540px) {
+    #lt-routine-quiz-{{ section.id }} .rq-progress-label { font-size: 9px; }
+    #lt-routine-quiz-{{ section.id }} .rq-progress-icon { width: 24px; height: 24px; }
+    #lt-routine-quiz-{{ section.id }} .rq-progress-icon svg { width: 12px; height: 12px; }
+    #lt-routine-quiz-{{ section.id }} .rq-progress-list::before { top: 12px; }
   }
   #lt-routine-quiz-{{ section.id }} .rq-back {
     appearance: none;
@@ -958,8 +1014,28 @@
       screens[el.getAttribute('data-screen')] = el;
     });
 
-    var DIAG_FLOW = ['route', 'diag_age', 'diag_q3', 'diag_q4', 'diag_q5', 'diag_result'];
-    var SUPP_FLOW = ['route', 'supp_focus', 'supp_result'];
+    var ICONS = {
+      person:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>',
+      clock:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+      target:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg>',
+      history:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>',
+      compass:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m15 9-4 2-2 4 4-2z"/></svg>',
+      spark:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8z"/></svg>'
+    };
+
+    var DIAG_FLOW = [
+      { id: 'route',       label: 'Start',     icon: ICONS.person  },
+      { id: 'diag_age',    label: 'Alter',     icon: ICONS.clock   },
+      { id: 'diag_q3',     label: 'Signal',    icon: ICONS.target  },
+      { id: 'diag_q4',     label: 'Versucht',  icon: ICONS.history },
+      { id: 'diag_q5',     label: 'Ziel',      icon: ICONS.compass },
+      { id: 'diag_result', label: 'Ergebnis',  icon: ICONS.spark   }
+    ];
+    var SUPP_FLOW = [
+      { id: 'route',       label: 'Start',     icon: ICONS.person },
+      { id: 'supp_focus',  label: 'Fokus',     icon: ICONS.target },
+      { id: 'supp_result', label: 'Routine',   icon: ICONS.spark  }
+    ];
 
     var state = {
       path: null,              // 'diagnostics' | 'supplement'
@@ -988,11 +1064,15 @@
       return state.path === 'supplement' ? SUPP_FLOW : DIAG_FLOW;
     }
 
+    function flowIndex(flow, id) {
+      for (var i = 0; i < flow.length; i++) if (flow[i].id === id) return i;
+      return -1;
+    }
+
     function renderProgress() {
       var flow = currentFlow();
-      var idx = flow.indexOf(current);
+      var idx = flowIndex(flow, current);
       var isRoute  = current === 'route';
-      var isResult = current === 'diag_result' || current === 'supp_result';
 
       if (isRoute || !state.path) {
         progressEl.hidden = true;
@@ -1000,30 +1080,32 @@
       }
       progressEl.hidden = false;
 
-      // Build dots — one per question screen (excluding route + result)
-      var questionCount = flow.length - 2; // minus route + result
-      if (progressList.childElementCount !== questionCount) {
+      // Build milestones — skip 'route', keep question screens + result
+      var steps = flow.slice(1);
+      var activeIdx = idx - 1;
+
+      if (progressList.childElementCount !== steps.length) {
         progressList.innerHTML = '';
-        progressList.style.gridTemplateColumns = 'repeat(' + Math.max(questionCount, 1) + ', 1fr)';
-        for (var i = 0; i < questionCount; i++) {
+        progressList.style.setProperty('--rq-steps', String(steps.length));
+        progressList.style.gridTemplateColumns = 'repeat(' + steps.length + ', 1fr)';
+        steps.forEach(function (step, i) {
           var li = document.createElement('li');
-          li.setAttribute('data-step', String(i + 1));
+          li.setAttribute('data-step', step.id);
+          li.innerHTML =
+            '<span class="rq-progress-icon" aria-hidden="true">' + step.icon + '</span>' +
+            '<span class="rq-progress-label">' + step.label + '</span>';
           progressList.appendChild(li);
-        }
+        });
       }
+
       progressList.querySelectorAll('li').forEach(function (li, i) {
         li.classList.remove('is-done');
         li.removeAttribute('aria-current');
-        if (isResult) {
-          li.classList.add('is-done');
-          return;
-        }
-        // question screens start at index 1 in flow (after 'route')
-        var stepIndex = idx - 1;
-        if (i < stepIndex) li.classList.add('is-done');
-        if (i === stepIndex) li.setAttribute('aria-current', 'step');
+        if (i < activeIdx) li.classList.add('is-done');
+        if (i === activeIdx) li.setAttribute('aria-current', 'step');
       });
 
+      var isResult = current === 'diag_result' || current === 'supp_result';
       if (backBtn) backBtn.hidden = !(idx >= 1 && !isResult);
     }
 
