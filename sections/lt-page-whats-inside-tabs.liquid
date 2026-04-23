@@ -399,34 +399,56 @@
 
   .lt-page-whats-inside-tabs__tablist {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-3);
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: var(--space-2);
     margin-bottom: var(--space-7);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .lt-page-whats-inside-tabs__tablist::-webkit-scrollbar {
+    display: none;
   }
 
   .lt-page-whats-inside-tabs__tab {
-    padding: 0.85rem 1.25rem;
-    border: 1px solid var(--color-border-default);
+    flex: 0 0 auto;
+    padding: var(--space-3) var(--space-5);
+    border: none;
     border-radius: var(--radius-full);
-    background: rgba(255, 255, 255, 0.72);
+    background: var(--color-light-warm, #F6F4F1);
     font-family: var(--font-body);
     font-size: var(--text-body-sm);
     font-weight: var(--weight-medium);
-    color: var(--color-text-primary);
-    line-height: var(--leading-tight);
+    color: var(--color-dark);
+    line-height: 1;
     cursor: pointer;
-    transition: background var(--ease-default), border-color var(--ease-default), color var(--ease-default);
+    white-space: nowrap;
+    transition: background var(--ease-default), color var(--ease-default), transform var(--ease-default);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .lt-page-whats-inside-tabs__tab:hover {
+    background: var(--color-dark);
+    color: var(--color-text-on-dark);
+    transform: translateY(-1px);
   }
 
   .lt-page-whats-inside-tabs__tab.is-active {
-    background: var(--color-text-primary);
-    border-color: var(--color-text-primary);
-    color: var(--color-surface-primary);
+    background: var(--color-dark);
+    color: var(--color-text-on-dark);
+    font-weight: var(--weight-semibold);
+  }
+
+  .lt-page-whats-inside-tabs__tab.is-active:hover {
+    transform: none;
+    cursor: default;
   }
 
   .lt-page-whats-inside-tabs__tab:focus-visible {
-    outline: 2px solid var(--color-text-primary);
+    outline: 2px solid var(--color-dark);
     outline-offset: 3px;
   }
 
@@ -446,6 +468,18 @@
   }
 
   @media screen and (min-width: 980px) {
+    .lt-page-whats-inside-tabs__tablist {
+      justify-content: center;
+      flex-wrap: wrap;
+      overflow-x: visible;
+      gap: var(--space-3);
+    }
+
+    .lt-page-whats-inside-tabs__tab {
+      padding: var(--space-4) var(--space-6);
+      font-size: var(--text-body);
+    }
+
     .lt-page-whats-inside-tabs__split {
       grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
     }
@@ -633,6 +667,7 @@
 
     .lt-page-whats-inside-tabs__tablist {
       margin-bottom: var(--space-6);
+      justify-content: flex-start;
     }
 
     .lt-page-whats-inside-tabs__image {
