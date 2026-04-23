@@ -112,7 +112,7 @@
 
               {%- comment -%} Author row {%- endcomment -%}
               <div class="cr-author">
-                <div class="cr-author-left">
+                <div class="cr-author-top">
                   {%- if block.settings.avatar != blank -%}
                     {%- assign cr_avatar_alt = block.settings.name | escape -%}
                     <div class="cr-avatar" aria-hidden="true">
@@ -126,22 +126,22 @@
                       }}
                     </div>
                   {%- endif -%}
-                  <div class="cr-meta">
-                    <span class="cr-name">{{ block.settings.name | escape }}</span>
-                    {%- if block.settings.verified -%}
-                      <span class="cr-verified" aria-label="Verifizierter Kauf">
-                        <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                          <circle cx="5.5" cy="5.5" r="5.5" fill="var(--color-teal)"/>
-                          <path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Verifiziert
-                      </span>
-                    {%- endif -%}
-                  </div>
+                  <span class="cr-name">{{ block.settings.name | escape }}</span>
                 </div>
-                {%- if block.settings.date != blank -%}
-                  <time class="cr-date">{{ block.settings.date | escape }}</time>
-                {%- endif -%}
+                <div class="cr-author-bottom">
+                  {%- if block.settings.verified -%}
+                    <span class="cr-verified" aria-label="Verifizierter Kauf">
+                      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+                        <circle cx="5.5" cy="5.5" r="5.5" fill="var(--color-teal)"/>
+                        <path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                      Verifiziert
+                    </span>
+                  {%- endif -%}
+                  {%- if block.settings.date != blank -%}
+                    <time class="cr-date">{{ block.settings.date | escape }}</time>
+                  {%- endif -%}
+                </div>
               </div>
 
             </li>
@@ -295,18 +295,24 @@
 /* ── Author row ───────────────────────────────────────────── */
 .cr-author {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--space-2);
+  flex-direction: column;
+  gap: 4px;
   margin-top: auto;
   flex-shrink: 0;
 }
 
-.cr-author-left {
+.cr-author-top {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
+}
+
+.cr-author-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
 }
 
 /* Avatar — 40px circle, only rendered when image set */
@@ -327,22 +333,13 @@
   display: block;
 }
 
-.cr-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px; /* intentional: between --space-1 (4px) — very tight meta stack */
-  min-width: 0;
-}
-
 .cr-name {
   font-family: var(--font-body);
   font-size: var(--text-body-sm);
   font-weight: var(--weight-semibold);
   line-height: var(--leading-tight);
   color: var(--cr-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .cr-verified {
