@@ -521,6 +521,52 @@
     width: auto;
     max-width: 60%;
   }
+
+  /* ============================================================
+     Mobile horizontal scroll carousel
+     ------------------------------------------------------------
+     Bei ≤749px wird das 2-Spalten-Grid in eine horizontale
+     Scroll-Reihe umgewandelt. Ziele:
+     - Weniger vertikaler Scroll (~60%)
+     - Cards à ~72% Viewport → Text hat Atem, Bild wirkt
+     - Peek-In der nächsten Card als Affordanz-Signal
+     - Scroll-Snap für premiumiges Wischgefühl
+     ============================================================ */
+  @media (max-width: 749px) {
+    .section-{{ section.id }}-cg .grid.grid--layout {
+      display: flex !important;
+      grid-template-columns: none !important;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      overflow-y: visible;
+      -webkit-overflow-scrolling: touch;
+      scroll-snap-type: x mandatory;
+      gap: var(--space-3, 12px);
+      /* kleiner Bottom-Pad, damit hover-scale der Cards nicht geclippt wird */
+      padding-bottom: var(--space-2);
+      /* Scrollbar visuell verstecken (Funktion bleibt) */
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .section-{{ section.id }}-cg .grid.grid--layout::-webkit-scrollbar {
+      display: none;
+    }
+
+    .section-{{ section.id }}-cg .grid.grid--layout > .cg-card {
+      flex: 0 0 72%;
+      max-width: 280px;
+      min-width: 220px;
+      scroll-snap-align: start;
+    }
+
+    /* Background-Image-Cards ("Hero"-Cards der Kategorie) im Carousel:
+       fixe Mindesthöhe, damit sie nicht zusammenklappen — ohne die
+       aspect-ratio-Logik aus dem Desktop zu stören. */
+    .section-{{ section.id }}-cg .grid.grid--layout > .cg-card--bg {
+      min-height: 280px;
+    }
+  }
 </style>
 
 {% schema %}
