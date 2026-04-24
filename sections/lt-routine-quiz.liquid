@@ -424,14 +424,111 @@
     cursor: pointer;
     border: 3px solid var(--rq-card);
   }
-  #lt-routine-quiz-{{ section.id }} .rq-slider-hint {
+  /* Delta visualization — Q2 visual centerpiece (shared axis + big delta) */
+  #lt-routine-quiz-{{ section.id }} .rq-delta {
     background: var(--rq-accent-soft);
-    padding: var(--space-3) var(--space-4);
     border-radius: var(--radius-md);
-    color: var(--rq-text);
+    padding: var(--space-4) var(--space-5);
+    margin-bottom: var(--space-4);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-delta-header {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-4);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-delta-big {
+    font-family: var(--font-heading);
+    font-weight: var(--weight-semibold);
+    font-size: clamp(26px, 4vw, 32px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--rq-accent);
+    font-variant-numeric: tabular-nums;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-delta-msg {
     font-size: var(--text-body-sm);
-    line-height: 1.45;
-    margin-top: var(--space-2);
+    line-height: var(--leading-body);
+    color: var(--rq-text);
+    flex: 1;
+    min-width: 0;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-delta-bar {
+    position: relative;
+    height: 4px;
+    background: var(--rq-border);
+    border-radius: 2px;
+    margin: 0 7px var(--space-3);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-delta-gap {
+    position: absolute;
+    top: 0;
+    height: 4px;
+    background: var(--rq-accent);
+    opacity: 0.35;
+    border-radius: 2px;
+    transition: left 0.25s ease, width 0.25s ease;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-delta-dot {
+    position: absolute;
+    top: 50%;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border: 2px solid;
+    transition: left 0.25s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-delta-dot--chron {
+    border-color: var(--rq-text);
+    z-index: 2;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-delta-dot--felt {
+    border-color: var(--rq-accent);
+    z-index: 3;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-delta-dot--felt::after {
+    content: "";
+    position: absolute;
+    inset: 2px;
+    background: var(--rq-accent);
+    border-radius: 50%;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-delta-legend {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 10px;
+    color: var(--rq-muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: var(--weight-semibold);
+    padding: 0 7px;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-delta-legend .sw {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-delta-legend .sw--chron {
+    background: #fff;
+    border: 2px solid var(--rq-text);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-delta-legend .sw--felt {
+    background: var(--rq-accent);
+    border: 2px solid var(--rq-accent);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-delta-legend-range {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    font-weight: var(--weight-medium);
   }
 
   /* CTAs */
@@ -971,27 +1068,43 @@
 
     {%- comment -%} ═══════ DIAGNOSTIK-PFAD ═══════ {%- endcomment -%}
 
-    {%- comment -%} Q2 — Alter-Slider {%- endcomment -%}
+    {%- comment -%} Q2 — Alter-Slider mit Delta-Visualization {%- endcomment -%}
     <div class="rq-screen" data-screen="diag_age">
       <h2 tabindex="-1">{{ section.settings.diag_q2_question }}</h2>
+
+      {%- comment -%} Delta visualization — shared axis + big delta number + dynamic message {%- endcomment -%}
+      <div class="rq-delta">
+        <div class="rq-delta-header">
+          <div class="rq-delta-big" data-delta-big>&#8710; 0</div>
+          <div class="rq-delta-msg" id="rq-delta-msg-{{ section.id }}" aria-live="polite" data-delta-msg>Pass-Alter und Gefühl auf einer Linie.</div>
+        </div>
+        <div class="rq-delta-bar">
+          <div class="rq-delta-gap" data-delta-gap style="left:36.36%;width:0%"></div>
+          <div class="rq-delta-dot rq-delta-dot--chron" data-delta-dot-chron style="left:36.36%"></div>
+          <div class="rq-delta-dot rq-delta-dot--felt"  data-delta-dot-felt  style="left:36.36%"></div>
+        </div>
+        <div class="rq-delta-legend">
+          <span><span class="sw sw--chron"></span>Pass-Alter</span>
+          <span class="rq-delta-legend-range">25 — 80 J.</span>
+          <span><span class="sw sw--felt"></span>Gefühlt</span>
+        </div>
+      </div>
+
       <div class="rq-slider-group">
         <div class="rq-slider">
           <label class="rq-slider-label" for="rq-chrono-{{ section.id }}">
             <span>{{ section.settings.diag_q2_slider1_label }}</span>
             <span class="rq-slider-value" data-chrono-display>45</span>
           </label>
-          <input type="range" id="rq-chrono-{{ section.id }}" min="25" max="75" value="45" step="1" data-chrono>
+          <input type="range" id="rq-chrono-{{ section.id }}" min="25" max="80" value="45" step="1" data-chrono aria-describedby="rq-delta-msg-{{ section.id }}">
         </div>
         <div class="rq-slider">
           <label class="rq-slider-label" for="rq-felt-{{ section.id }}">
             <span>{{ section.settings.diag_q2_slider2_label }}</span>
             <span class="rq-slider-value" data-felt-display>45</span>
           </label>
-          <input type="range" id="rq-felt-{{ section.id }}" min="-10" max="10" value="0" step="1" data-felt-delta aria-describedby="rq-hint-{{ section.id }}">
+          <input type="range" id="rq-felt-{{ section.id }}" min="25" max="80" value="45" step="1" data-felt aria-describedby="rq-delta-msg-{{ section.id }}">
         </div>
-        <p class="rq-slider-hint" id="rq-hint-{{ section.id }}" aria-live="polite" data-slider-hint>
-          {{ section.settings.diag_q2_hint_delta_zero }}
-        </p>
       </div>
       <div class="rq-cta-row">
         <button type="button" class="rq-cta rq-cta--primary" data-next="diag_q3">Weiter →</button>
@@ -1500,24 +1613,53 @@
       });
     });
 
-    // ───── Q2 diagnostic — age sliders ─────
+    // ───── Q2 diagnostic — age sliders + delta visualization ─────
     var chronoInput   = root.querySelector('[data-chrono]');
-    var feltInput     = root.querySelector('[data-felt-delta]');
+    var feltInput     = root.querySelector('[data-felt]');
     var chronoDisplay = root.querySelector('[data-chrono-display]');
     var feltDisplay   = root.querySelector('[data-felt-display]');
-    var hintEl        = root.querySelector('[data-slider-hint]');
+    var deltaBigEl    = root.querySelector('[data-delta-big]');
+    var deltaMsgEl    = root.querySelector('[data-delta-msg]');
+    var deltaGapEl    = root.querySelector('[data-delta-gap]');
+    var dotChronEl    = root.querySelector('[data-delta-dot-chron]');
+    var dotFeltEl     = root.querySelector('[data-delta-dot-felt]');
+
+    var AGE_MIN = 25;
+    var AGE_MAX = 80;
+    function ageToPct(v) { return ((v - AGE_MIN) / (AGE_MAX - AGE_MIN)) * 100; }
 
     function updateSliderDisplays() {
-      state.age_chrono     = parseInt(chronoInput.value, 10);
-      state.age_felt_delta = parseInt(feltInput.value, 10);
-      var felt = state.age_chrono + state.age_felt_delta;
-      chronoDisplay.textContent = state.age_chrono;
-      feltDisplay.textContent   = felt;
-      var hint;
-      if (state.age_felt_delta > 0) hint = config.hint_pos;
-      else if (state.age_felt_delta < 0) hint = config.hint_neg;
-      else hint = config.hint_zero;
-      hintEl.textContent = hint || '';
+      var c = parseInt(chronoInput.value, 10);
+      var f = parseInt(feltInput.value, 10);
+      state.age_chrono     = c;
+      state.age_felt_delta = f - c; // downstream (result + dataLayer) keep using delta
+
+      if (chronoDisplay) chronoDisplay.textContent = c;
+      if (feltDisplay)   feltDisplay.textContent   = f;
+
+      var d    = f - c;
+      var sign = d > 0 ? '+' : (d < 0 ? '\u2212' : '');
+      var abs  = Math.abs(d);
+      if (deltaBigEl) deltaBigEl.innerHTML = '\u2206 ' + sign + abs;
+
+      var msg;
+      if (abs === 0) {
+        msg = 'Pass-Alter und Gefühl auf einer Linie.';
+      } else if (d < 0) {
+        msg = 'Du fühlst dich ' + abs + (abs === 1 ? ' Jahr jünger.' : ' Jahre jünger.');
+      } else {
+        msg = 'Du fühlst dich ' + abs + (abs === 1 ? ' Jahr älter — ein Signal.' : ' Jahre älter — ein Signal.');
+      }
+      if (deltaMsgEl) deltaMsgEl.textContent = msg;
+
+      var pc = ageToPct(c);
+      var pf = ageToPct(f);
+      if (dotChronEl) dotChronEl.style.left = pc + '%';
+      if (dotFeltEl)  dotFeltEl.style.left  = pf + '%';
+      if (deltaGapEl) {
+        deltaGapEl.style.left  = Math.min(pc, pf) + '%';
+        deltaGapEl.style.width = Math.abs(pf - pc) + '%';
+      }
     }
     if (chronoInput && feltInput) {
       chronoInput.addEventListener('input', updateSliderDisplays);
