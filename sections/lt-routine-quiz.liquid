@@ -37,11 +37,6 @@
   assign p_lang_primary    = all_products[section.settings.product_lang_primary]
   assign p_lang_sec1       = all_products[section.settings.product_lang_sec1]
   assign p_lang_sec2       = all_products[section.settings.product_lang_sec2]
-
-  assign advisor_image_src = ''
-  if section.settings.advisor_image != blank
-    assign advisor_image_src = section.settings.advisor_image | image_url: width: 112
-  endif
 -%}
 
 {{ 'section-lt-longevity-quiz.css' | asset_url | stylesheet_tag }}
@@ -603,31 +598,6 @@
     font-size: var(--text-body);
     line-height: 1.5;
   }
-  #lt-routine-quiz-{{ section.id }} .rq-zone-heading {
-    font-family: var(--font-body);
-    font-size: var(--text-micro);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    font-weight: var(--weight-medium);
-    margin: 0;
-    color: var(--rq-muted);
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-hypotheses {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-hypothesis {
-    background: var(--rq-bg);
-    border-radius: var(--radius-md);
-    padding: var(--space-4);
-    font-size: 15px;
-    line-height: 1.45;
-  }
-
   /* Supplement result bundle */
   #lt-routine-quiz-{{ section.id }} .rq-bundle {
     display: grid;
@@ -686,31 +656,6 @@
     margin: 0;
   }
 
-  /* Advisor line */
-  #lt-routine-quiz-{{ section.id }} .rq-advisor {
-    max-width: min(860px, 64rem);
-    margin: var(--space-5) auto 0;
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
-    color: var(--rq-muted);
-    font-size: var(--text-body-sm);
-    line-height: var(--leading-body);
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-advisor img {
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-full);
-    object-fit: cover;
-    flex-shrink: 0;
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-advisor strong {
-    color: var(--rq-text);
-    font-weight: var(--weight-semibold);
-    display: block;
-  }
-
   #lt-routine-quiz-{{ section.id }} .rq-sr-only {
     position: absolute;
     width: 1px;
@@ -739,23 +684,6 @@
     padding-top: var(--space-6);
     border-top: 1px solid var(--rq-border);
   }
-  #lt-routine-quiz-{{ section.id }} .rq-zone-kicker {
-    font-size: 11px;
-    font-weight: var(--weight-semibold);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--rq-muted);
-    margin: 0;
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-zone-title {
-    font-size: clamp(18px, 3.6vw, 22px);
-    line-height: 1.25;
-    font-weight: var(--weight-semibold);
-    color: var(--rq-text);
-    margin: 0;
-    text-wrap: balance;
-  }
-
   /* Zone 1 — Anchor */
   #lt-routine-quiz-{{ section.id }} .rq-anchor {
     font-size: clamp(22px, 5vw, 28px);
@@ -765,25 +693,6 @@
     margin: 0;
     text-wrap: balance;
   }
-  #lt-routine-quiz-{{ section.id }} .rq-anchor-felt {
-    font-size: 14px;
-    color: var(--rq-muted);
-    margin: 0;
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-empathy {
-    font-size: 16px;
-    line-height: 1.55;
-    color: var(--rq-text);
-    margin: 0;
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-hypotheses {
-    list-style: none;
-    margin: var(--space-2) 0 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-  }
   #lt-routine-quiz-{{ section.id }} .rq-empathy {
     margin: 0;
     padding: var(--space-4);
@@ -793,28 +702,17 @@
     line-height: 1.55;
     color: var(--rq-text);
   }
-  #lt-routine-quiz-{{ section.id }} .rq-hypotheses-intro {
-    font-size: 11px;
-    font-weight: var(--weight-semibold);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+
+  /* Zone 2 — Focus grid */
+  /* Anchor transition line */
+  #lt-routine-quiz-{{ section.id }} .rq-anchor-transition {
+    font-size: var(--text-body-sm);
+    line-height: 1.4;
     color: var(--rq-muted);
     margin: var(--space-3) 0 0;
   }
-  #lt-routine-quiz-{{ section.id }} .rq-hypothesis {
-    padding: var(--space-4);
-    border: 1px solid var(--rq-border);
-    border-radius: var(--radius-md);
-    background: var(--rq-bg);
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-hypothesis-text {
-    font-size: 15px;
-    line-height: 1.5;
-    color: var(--rq-text);
-    margin: 0;
-  }
 
-  /* Zone 2 — Focus grid */
+  /* Zone 2 — Fokus-Grid 2×2, kompakter */
   #lt-routine-quiz-{{ section.id }} .rq-focus-grid {
     list-style: none;
     margin: 0;
@@ -823,24 +721,19 @@
     grid-template-columns: 1fr 1fr;
     gap: var(--space-3);
   }
-  @media (min-width: 750px) {
-    #lt-routine-quiz-{{ section.id }} .rq-focus-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
   #lt-routine-quiz-{{ section.id }} .rq-focus-card {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    padding: var(--space-4);
+    gap: 8px;
+    padding: var(--space-3) var(--space-4);
     border-radius: var(--radius-md);
     background: var(--rq-accent-soft);
     border: 1px solid var(--rq-accent-border);
     color: var(--rq-text);
   }
   #lt-routine-quiz-{{ section.id }} .rq-focus-icon {
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -851,133 +744,161 @@
     height: 100%;
   }
   #lt-routine-quiz-{{ section.id }} .rq-focus-title {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: var(--weight-semibold);
     margin: 0;
     line-height: 1.25;
   }
-  #lt-routine-quiz-{{ section.id }} .rq-focus-measures {
-    font-size: 13px;
-    line-height: 1.45;
-    color: var(--rq-text);
-    margin: 0;
-  }
   #lt-routine-quiz-{{ section.id }} .rq-focus-why {
     font-size: 12px;
-    line-height: 1.45;
+    line-height: 1.4;
     color: var(--rq-muted);
     margin: 0;
   }
 
-  /* Zone 3 — All categories */
-  #lt-routine-quiz-{{ section.id }} .rq-cat-group + .rq-cat-group {
-    margin-top: var(--space-5);
+  /* Zone 3 — Ausklappbare Pill-Liste "Was ist noch im Test enthalten?" */
+  #lt-routine-quiz-{{ section.id }} .rq-cat-details {
+    border-top: 1px solid var(--rq-border);
+    padding-top: var(--space-4);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cat-summary {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+    cursor: pointer;
+    list-style: none;
+    color: var(--rq-text);
+    padding: var(--space-2) 0;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cat-summary::-webkit-details-marker {
+    display: none;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cat-summary-label {
+    font-size: 14px;
+    font-weight: var(--weight-semibold);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cat-summary-label::before {
+    content: '+';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--rq-border);
+    border-radius: var(--radius-full);
+    font-size: 14px;
+    line-height: 1;
+    color: var(--rq-muted);
+    transition: transform 0.2s ease;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cat-details[open] .rq-cat-summary-label::before {
+    content: '−';
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cat-summary-hint {
+    font-size: 12px;
+    color: var(--rq-muted);
+    letter-spacing: 0.02em;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cat-details[open] {
+    padding-bottom: var(--space-2);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cat-group {
+    margin-top: var(--space-4);
   }
   #lt-routine-quiz-{{ section.id }} .rq-cat-group-label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: var(--weight-semibold);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--rq-muted);
-    margin: 0 0 var(--space-3);
+    margin: 0 0 var(--space-2);
   }
-  #lt-routine-quiz-{{ section.id }} .rq-cat-grid {
+  #lt-routine-quiz-{{ section.id }} .rq-pill-grid {
     list-style: none;
     margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--space-2);
-  }
-  @media (min-width: 750px) {
-    #lt-routine-quiz-{{ section.id }} .rq-cat-grid {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-cat-item {
-    position: relative;
     display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: var(--space-3);
-    border-radius: var(--radius-sm);
-    background: var(--rq-bg);
-    border: 1px solid var(--rq-border);
-    opacity: 0.55;
+    flex-wrap: wrap;
+    gap: 6px;
   }
-  #lt-routine-quiz-{{ section.id }} .rq-cat-item .rq-cat-desc {
-    display: none;
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-cat-item.is-focus {
-    opacity: 1;
-    background: var(--rq-accent-soft);
-    border-color: var(--rq-accent-border);
-    padding-right: var(--space-6);
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-cat-item.is-focus .rq-cat-desc {
-    display: block;
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-cat-item.is-focus::after {
-    content: '✓';
-    position: absolute;
-    top: var(--space-3);
-    right: var(--space-3);
-    width: 18px;
-    height: 18px;
+  #lt-routine-quiz-{{ section.id }} .rq-pill {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
+    padding: 4px 10px;
     border-radius: var(--radius-full);
-    background: var(--rq-accent);
-    color: var(--rq-cta-text);
-    font-size: 11px;
-    font-weight: var(--weight-semibold);
-    line-height: 1;
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-cat-title {
-    font-size: 13px;
-    font-weight: var(--weight-semibold);
+    background: var(--rq-bg);
+    border: 1px solid var(--rq-border);
+    font-size: 12px;
     color: var(--rq-text);
-    line-height: 1.25;
-  }
-  #lt-routine-quiz-{{ section.id }} .rq-cat-desc {
-    font-size: 11px;
     line-height: 1.4;
-    color: var(--rq-muted);
-    margin-top: 2px;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-pill.is-focus {
+    background: var(--rq-accent-soft);
+    border-color: var(--rq-accent-border);
+    color: var(--rq-text);
   }
 
-  /* Zone 4 — CTA */
-  #lt-routine-quiz-{{ section.id }} .rq-cta-headline {
-    font-size: clamp(20px, 4.4vw, 26px);
-    line-height: 1.22;
+  /* Zone 4 — CTA: Preis-Block, Primary, Secondary, Trust */
+  #lt-routine-quiz-{{ section.id }} .rq-price {
+    text-align: center;
+    margin: 0 0 var(--space-3);
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-price-line {
+    font-family: var(--font-heading);
+    font-size: clamp(26px, 4.4vw, 32px);
     font-weight: var(--weight-semibold);
-    margin: 0;
-    text-wrap: balance;
+    letter-spacing: -0.01em;
     color: var(--rq-text);
+    line-height: 1;
+    margin: 0 0 6px;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-price-sub {
+    font-size: 12px;
+    color: var(--rq-muted);
+    letter-spacing: 0.02em;
+    line-height: 1.4;
   }
   #lt-routine-quiz-{{ section.id }} .rq-zone--cta .rq-cta-row {
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
-    margin-top: var(--space-3);
+    margin-top: var(--space-2);
   }
-  @media (min-width: 540px) {
-    #lt-routine-quiz-{{ section.id }} .rq-zone--cta .rq-cta-row {
-      flex-direction: row;
-      flex-wrap: wrap;
-      align-items: center;
-    }
+  #lt-routine-quiz-{{ section.id }} .rq-zone--cta .rq-cta-row .rq-cta {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cta-secondary {
+    text-align: center;
+    margin: var(--space-3) 0 0;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cta-secondary a {
+    color: var(--rq-accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-cta-secondary a:hover {
+    text-decoration-thickness: 2px;
   }
   #lt-routine-quiz-{{ section.id }} .rq-trust-row {
     list-style: none;
-    margin: var(--space-3) 0 0;
-    padding: 0;
+    margin: var(--space-5) 0 0;
+    padding: var(--space-4) 0 0;
+    border-top: 1px solid var(--rq-border);
     display: flex;
     flex-wrap: wrap;
+    justify-content: center;
     gap: var(--space-2) var(--space-4);
-    font-size: 12px;
+    font-size: 11px;
     color: var(--rq-muted);
+    letter-spacing: 0.02em;
   }
   #lt-routine-quiz-{{ section.id }} .rq-trust-row li {
     display: inline-flex;
@@ -1032,13 +953,7 @@
 
     {%- comment -%} Q1 — Routing (3 Bild-Karten) {%- endcomment -%}
     <div class="rq-screen is-active" data-screen="route">
-      {%- if section.settings.route_kicker != blank -%}
-        <p class="rq-kicker">{{ section.settings.route_kicker }}</p>
-      {%- endif -%}
-      <h2 tabindex="-1">{{ section.settings.route_question }}</h2>
-      {%- if section.settings.route_helper != blank -%}
-        <p class="rq-helper">{{ section.settings.route_helper }}</p>
-      {%- endif -%}
+      <h2 tabindex="-1">Was bringt dich hierher?</h2>
       <ul class="rq-cards rq-cards--route" role="list">
         {%- for block in section.blocks -%}
           {%- if block.type == 'route_card' -%}
@@ -1076,7 +991,7 @@
 
     {%- comment -%} Q2 — Alter-Slider mit Delta-Visualization {%- endcomment -%}
     <div class="rq-screen" data-screen="diag_age">
-      <h2 tabindex="-1">{{ section.settings.diag_q2_question }}</h2>
+      <h2 tabindex="-1">Wie alt bist du — und wie alt fühlst du dich?</h2>
 
       {%- comment -%} Delta visualization — shared axis + big delta number + dynamic message {%- endcomment -%}
       <div class="rq-delta">
@@ -1099,14 +1014,14 @@
       <div class="rq-slider-group">
         <div class="rq-slider">
           <label class="rq-slider-label" for="rq-chrono-{{ section.id }}">
-            <span>{{ section.settings.diag_q2_slider1_label }}</span>
+            <span>Pass-Alter</span>
             <span class="rq-slider-value" data-chrono-display>45</span>
           </label>
           <input type="range" id="rq-chrono-{{ section.id }}" min="25" max="80" value="45" step="1" data-chrono aria-describedby="rq-delta-msg-{{ section.id }}">
         </div>
         <div class="rq-slider">
           <label class="rq-slider-label" for="rq-felt-{{ section.id }}">
-            <span>{{ section.settings.diag_q2_slider2_label }}</span>
+            <span>Gefühltes Alter</span>
             <span class="rq-slider-value" data-felt-display>45</span>
           </label>
           <input type="range" id="rq-felt-{{ section.id }}" min="25" max="80" value="45" step="1" data-felt aria-describedby="rq-delta-msg-{{ section.id }}">
@@ -1132,10 +1047,8 @@
     <div class="rq-screen" data-screen="diag_q4">
       <fieldset>
         <legend>
-          <h2 tabindex="-1">{{ section.settings.diag_q4_question }}</h2>
-          {%- if section.settings.diag_q4_helper != blank -%}
-            <p class="rq-helper">{{ section.settings.diag_q4_helper }}</p>
-          {%- endif -%}
+          <h2 tabindex="-1">Was hast du bisher versucht?</h2>
+          <p class="rq-helper">Mehrere möglich.</p>
         </legend>
         <div class="rq-options" data-q4-options></div>
       </fieldset>
@@ -1148,74 +1061,85 @@
     <div class="rq-screen" data-screen="diag_q5">
       <fieldset>
         <legend>
-          <h2 tabindex="-1">{{ section.settings.diag_q5_question }}</h2>
+          <h2 tabindex="-1">Was willst du in deinem Ergebnis finden?</h2>
           <p class="rq-helper">Eine Antwort reicht.</p>
         </legend>
         <div class="rq-options" role="radiogroup">
           <label class="rq-option">
             <input type="radio" name="rq-q5-{{ section.id }}" value="0" data-q5-input data-intent="hot">
             <span class="rq-marker" aria-hidden="true"></span>
-            <span class="rq-option-label">{{ section.settings.diag_q5_opt_1 }}</span>
+            <span class="rq-option-label">Eine Zahl: wie alt mein Körper biologisch wirklich ist</span>
           </label>
           <label class="rq-option">
             <input type="radio" name="rq-q5-{{ section.id }}" value="1" data-q5-input data-intent="hot">
             <span class="rq-marker" aria-hidden="true"></span>
-            <span class="rq-option-label">{{ section.settings.diag_q5_opt_2 }}</span>
+            <span class="rq-option-label">Einen konkreten Plan: was ich ändern soll, und warum</span>
           </label>
           <label class="rq-option">
             <input type="radio" name="rq-q5-{{ section.id }}" value="2" data-q5-input data-intent="hot">
             <span class="rq-marker" aria-hidden="true"></span>
-            <span class="rq-option-label">{{ section.settings.diag_q5_opt_3 }}</span>
+            <span class="rq-option-label">Eine Baseline, die ich in 6–12 Monaten erneut messen kann</span>
           </label>
           <label class="rq-option">
             <input type="radio" name="rq-q5-{{ section.id }}" value="3" data-q5-input data-intent="cool">
             <span class="rq-marker" aria-hidden="true"></span>
-            <span class="rq-option-label">{{ section.settings.diag_q5_opt_4 }}</span>
+            <span class="rq-option-label">Ich will das grundsätzlich verstehen, bevor ich entscheide</span>
           </label>
         </div>
       </fieldset>
     </div>
 
-    {%- comment -%} Diagnostic Result — 4-Zonen finale Ansicht {%- endcomment -%}
+    {%- comment -%} Diagnostic Result — Anchor + 2×2 Fokus + Pills + CTA-Zone {%- endcomment -%}
     <div class="rq-screen rq-result" data-screen="diag_result">
 
-      {%- comment -%} ZONE 1 · Persönlicher Anker + 3 Hypothesen {%- endcomment -%}
+      {%- comment -%} ZONE 1 · Anchor + Transition {%- endcomment -%}
       <section class="rq-zone rq-zone--anchor">
         <h2 class="rq-anchor" tabindex="-1" data-anchor>&nbsp;</h2>
-        <p class="rq-anchor-felt" data-anchor-felt hidden></p>
-        <blockquote class="rq-empathy" data-empathy>&nbsp;</blockquote>
+        <p class="rq-anchor-transition">Diese Ergebnisse des Tests sind daher besonders relevant für dich:</p>
       </section>
 
-      {%- comment -%} ZONE 2 · Fokus-Bereiche (archetype-spezifisch) {%- endcomment -%}
+      {%- comment -%} ZONE 2 · Fokus-Bereiche — 2×2 kompakter {%- endcomment -%}
       <section class="rq-zone rq-zone--focus">
-        <p class="rq-zone-kicker">Deine Fokus-Bereiche</p>
-        <h3 class="rq-zone-title">Hier liegt für dich der größte Hebel.</h3>
         <ul class="rq-focus-grid" data-focus-grid role="list"></ul>
       </section>
 
-      {%- comment -%} ZONE 3 · Alle 22 Kategorien, Fokus hervorgehoben {%- endcomment -%}
+      {%- comment -%} ZONE 3 · Alle Kategorien — ausklappbar, als Pills {%- endcomment -%}
       <section class="rq-zone rq-zone--all">
-        <p class="rq-zone-kicker">Im Test enthalten</p>
-        <h3 class="rq-zone-title">187 Reports aus 22 Bereichen — die markierten sind für dein Profil am relevantesten.</h3>
-        <div class="rq-cat-group">
-          <p class="rq-cat-group-label">Epigenetik · 6 Bereiche</p>
-          <ul class="rq-cat-grid" data-cat-epi role="list"></ul>
-        </div>
-        <div class="rq-cat-group">
-          <p class="rq-cat-group-label">Genetik · 16 Bereiche</p>
-          <ul class="rq-cat-grid" data-cat-dna role="list"></ul>
-        </div>
+        <details class="rq-cat-details">
+          <summary class="rq-cat-summary">
+            <span class="rq-cat-summary-label">Was ist noch im Test enthalten?</span>
+            <span class="rq-cat-summary-hint">187 Reports · 22 Bereiche</span>
+          </summary>
+          <div class="rq-cat-group">
+            <p class="rq-cat-group-label">Epigenetik · 6</p>
+            <ul class="rq-pill-grid" data-cat-epi role="list"></ul>
+          </div>
+          <div class="rq-cat-group">
+            <p class="rq-cat-group-label">Genetik · 16</p>
+            <ul class="rq-pill-grid" data-cat-dna role="list"></ul>
+          </div>
+        </details>
       </section>
 
-      {%- comment -%} ZONE 4 · Einziger CTA + Trust {%- endcomment -%}
+      {%- comment -%} ZONE 4 · Preis-Block + Primary + Secondary + Trust {%- endcomment -%}
       <section class="rq-zone rq-zone--cta">
-        <h3 class="rq-cta-headline">Das ist, was dein Test zeigen wird. Bereit, es wirklich zu wissen?</h3>
-        <div class="rq-cta-row">
-          <a href="/products/age-dna-test" class="rq-cta rq-cta--primary">AGE &amp; DNA-Test starten → 349 €</a>
+        <div class="rq-price">
+          <div class="rq-price-line">349 €</div>
+          <div class="rq-price-sub">einmalig · kein Abo · versandkostenfrei · lebenslang in der App</div>
         </div>
+        <div class="rq-cta-row">
+          <a href="{{ section.settings.diag_cta_primary_url | default: '/products/age-dna-test' }}" class="rq-cta rq-cta--primary" data-cta-primary>
+            <span data-cta-primary-label>AGE &amp; DNA-Test starten →</span>
+          </a>
+        </div>
+        <p class="rq-cta-secondary">
+          <a href="{{ section.settings.diag_cta_secondary_url | default: '/pages/longevity-coach' }}" data-cta-secondary>
+            <span data-cta-secondary-label>Oder: 15 Min kostenfrei mit einem Longevity-Experten sprechen</span>
+          </a>
+        </p>
         <ul class="rq-trust-row" role="list">
-          <li>Eurofins</li>
-          <li>DSGVO</li>
+          <li>Eurofins ISO-zertifiziert</li>
+          <li>DSGVO-konform</li>
           <li>Kit-Ersatz-Garantie</li>
           <li>Lebenslang in der App</li>
         </ul>
@@ -1227,10 +1151,8 @@
 
     {%- comment -%} Q2 — Fokus-Auswahl (Energie / Fokus / Schlaf / Langlebigkeit) {%- endcomment -%}
     <div class="rq-screen" data-screen="supp_focus">
-      <h2 tabindex="-1">{{ section.settings.supp_focus_question }}</h2>
-      {%- if section.settings.supp_focus_helper != blank -%}
-        <p class="rq-helper">{{ section.settings.supp_focus_helper }}</p>
-      {%- endif -%}
+      <h2 tabindex="-1">Wo merkst du es am stärksten?</h2>
+      <p class="rq-helper">Eine Antwort reicht.</p>
       <ul class="rq-cards rq-cards--focus" role="list">
         {%- assign focus_keys = 'energie,fokus,schlaf,lang' | split: ',' -%}
         {%- for key in focus_keys -%}
@@ -1239,19 +1161,19 @@
               when 'energie'
                 assign f_img   = section.settings.focus_energie_image
                 assign f_alt   = section.settings.focus_energie_alt
-                assign f_label = section.settings.focus_energie_label
+                assign f_label = 'Energie'
               when 'fokus'
                 assign f_img   = section.settings.focus_fokus_image
                 assign f_alt   = section.settings.focus_fokus_alt
-                assign f_label = section.settings.focus_fokus_label
+                assign f_label = 'Fokus & Kopf'
               when 'schlaf'
                 assign f_img   = section.settings.focus_schlaf_image
                 assign f_alt   = section.settings.focus_schlaf_alt
-                assign f_label = section.settings.focus_schlaf_label
+                assign f_label = 'Schlaf'
               when 'lang'
                 assign f_img   = section.settings.focus_lang_image
                 assign f_alt   = section.settings.focus_lang_alt
-                assign f_label = section.settings.focus_lang_label
+                assign f_label = 'Langlebigkeit'
             endcase
           -%}
           <li>
@@ -1287,7 +1209,7 @@
 
     {%- comment -%} Supplement Result {%- endcomment -%}
     <div class="rq-screen" data-screen="supp_result">
-      <p class="rq-kicker" data-supp-kicker>{{ section.settings.supp_result_kicker }}</p>
+      <p class="rq-kicker" data-supp-kicker>Deine Routine</p>
       <h2 class="rq-anchor" tabindex="-1" data-supp-headline>&nbsp;</h2>
       <p class="rq-empathy" data-supp-sub>&nbsp;</p>
 
@@ -1295,22 +1217,11 @@
 
       <div class="rq-cta-row">
         <a href="#" class="rq-cta rq-cta--primary" data-supp-cta-primary>
-          <span>{{ section.settings.supp_cta_primary_label }}</span>
+          <span>Basis ansehen →</span>
         </a>
       </div>
     </div>
 
-  </div>
-
-  {%- comment -%} Advisor line — both paths {%- endcomment -%}
-  <div class="rq-advisor" data-advisor>
-    {%- if advisor_image_src != blank -%}
-      <img src="{{ advisor_image_src }}" alt="{{ section.settings.advisor_name | escape }}" loading="lazy" width="40" height="40">
-    {%- endif -%}
-    <div>
-      <strong>{{ section.settings.advisor_name }}</strong>
-      <span>{{ section.settings.advisor_title }}</span>
-    </div>
   </div>
 
   {%- comment -%} ═══════ Data payloads ═══════ {%- endcomment -%}
@@ -1323,11 +1234,7 @@
           {%- assign first_arch = false -%}
           {{ block.settings.archetype_id | json }}: {
             "q3_question": {{ block.settings.q3_question | json }},
-            "q3_options": {{ block.settings.q3_options_json | default: '[]' }},
-            "empathy_line": {{ block.settings.empathy_line | json }},
-            "hypothesis_primary": {{ block.settings.result_hypothesis_primary | json }},
-            "hypothesis_secondary": {{ block.settings.result_hypothesis_secondary | json }},
-            "hypothesis_tertiary": {{ block.settings.result_hypothesis_tertiary | json }}
+            "q3_options": {{ block.settings.q3_options_json | default: '[]' }}
           }
         {%- endif -%}
       {%- endfor -%}
@@ -1336,29 +1243,21 @@
 
   <script type="application/json" data-config>
     {
-      "diag_q4_options": {{ section.settings.diag_q4_options_json | default: '[]' }},
-      "anchor_pos": {{ section.settings.diag_result_anchor_pos | json }},
-      "anchor_neg": {{ section.settings.diag_result_anchor_neg | json }},
-      "anchor_zero": {{ section.settings.diag_result_anchor_zero | json }},
-      "hint_pos": {{ section.settings.diag_q2_hint_delta_pos | json }},
-      "hint_neg": {{ section.settings.diag_q2_hint_delta_neg | json }},
-      "hint_zero": {{ section.settings.diag_q2_hint_delta_zero | json }},
-      "diag_cta_hot_primary_label": {{ section.settings.diag_cta_hot_primary_label | json }},
-      "diag_cta_hot_secondary_label": {{ section.settings.diag_cta_hot_secondary_label | json }},
-      "diag_cta_cool_primary_label": {{ section.settings.diag_cta_cool_primary_label | json }},
-      "diag_cta_cool_secondary_label": {{ section.settings.diag_cta_cool_secondary_label | json }},
-      "diag_cta_primary_url": {{ section.settings.diag_cta_primary_url | json }},
-      "diag_cta_secondary_url": {{ section.settings.diag_cta_secondary_url | json }},
-      "supp_primary_tag": {{ section.settings.supp_primary_tag | json }},
-      "supp_secondary_tag": {{ section.settings.supp_secondary_tag | json }},
-      "supp_result_headline_energie": {{ section.settings.supp_result_headline_energie | json }},
-      "supp_result_headline_fokus":   {{ section.settings.supp_result_headline_fokus | json }},
-      "supp_result_headline_schlaf":  {{ section.settings.supp_result_headline_schlaf | json }},
-      "supp_result_headline_lang":    {{ section.settings.supp_result_headline_lang | json }},
-      "supp_result_sub_energie": {{ section.settings.supp_result_sub_energie | json }},
-      "supp_result_sub_fokus":   {{ section.settings.supp_result_sub_fokus | json }},
-      "supp_result_sub_schlaf":  {{ section.settings.supp_result_sub_schlaf | json }},
-      "supp_result_sub_lang":    {{ section.settings.supp_result_sub_lang | json }}
+      "diag_q4_options": ["Bluttests beim Hausarzt","Fitness-Tracker (Oura, Whoop, Apple Watch)","Supplements","Ernährungsumstellung","Regelmäßiger Sport","Ehrlich gesagt: nichts Strukturiertes bisher"],
+      "diag_cta_hot_primary_label": "AGE & DNA-Test starten →",
+      "diag_cta_hot_secondary_label": "Oder: 15 Min kostenfrei mit einem Longevity-Experten sprechen",
+      "diag_cta_cool_primary_label": "Meinen Test starten →",
+      "diag_cta_cool_secondary_label": "Oder: 15 Min kostenfrei mit einem Longevity-Experten sprechen",
+      "supp_primary_tag": "Deine Basis",
+      "supp_secondary_tag": "Ergänzung",
+      "supp_result_headline_energie": "Deine Routine für stabile Energie.",
+      "supp_result_headline_fokus":   "Deine Routine für klaren Kopf.",
+      "supp_result_headline_schlaf":  "Deine Routine für tieferen Schlaf.",
+      "supp_result_headline_lang":    "Deine Routine für Zellgesundheit.",
+      "supp_result_sub_energie": "NMN als Basis. Kreatin und TMG ergänzen die Methylierung und halten dich tragfähig.",
+      "supp_result_sub_fokus":   "Kreatin trägt zur kognitiven Leistungsfähigkeit bei. Fisetin und Resveratrol stabilisieren die Zell-Umgebung.",
+      "supp_result_sub_schlaf":  "Schlafspray mit Melatonin für den Einstieg. Spermidin und Kreatin unterstützen Regeneration über Nacht.",
+      "supp_result_sub_lang":    "NMN, Resveratrol und CaAKG adressieren die Signalwege, die mit biologischem Altern verbunden sind."
     }
   </script>
 
@@ -1421,9 +1320,9 @@
       lang_sec2:       { title: {{ p_lang_sec2.title       | default: '' | json }}, url: {{ p_lang_sec2.url       | default: '' | json }}, price: {{ p_lang_sec2.price       | money | default: '' | json }}, image: {{ p_lang_sec2.featured_image       | image_url: width: 400 | default: '' | json }} }
     };
     window.LT_QUIZ_ADVISOR = {
-      name:  {{ section.settings.advisor_name  | default: 'Prof. Dr. med. Volker Limmroth' | json }},
-      title: {{ section.settings.advisor_title | default: 'Chefarzt Neurologie · Chief Scientific Officer LIFETIME' | json }},
-      image: {{ advisor_image_src | default: '' | json }}
+      name:  'Prof. Dr. med. Volker Limmroth',
+      title: 'Chefarzt Neurologie · Chief Scientific Officer LIFETIME',
+      image: ''
     };
   </script>
   <script src="{{ 'lt-longevity-quiz.js' | asset_url }}" defer></script>
@@ -1809,40 +1708,33 @@
       'mental':        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a7 7 0 0 0-5 12v3a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-3a7 7 0 0 0-5-12z"/><path d="M9 20h6"/></svg>'
     };
 
+    // Label für das Hauptthema/Kernfrage pro Archetyp —
+    // measurer hat kein "Problem" sondern will wissen.
+    var ARCH_PAIN_LABEL = {
+      tired:    'Dein Hauptproblem ist',
+      measurer: 'Deine Kernfrage ist',
+      vigilant: 'Dein Hauptthema ist'
+    };
+
     function renderDiagnosticResult() {
       var data = archetypes[state.archetype] || {};
       var chrono = state.age_chrono;
       var felt   = chrono + state.age_felt_delta;
-      var statement = ARCH_STATEMENT[state.archetype] || '';
+      var delta  = state.age_felt_delta;
+
+      // Anchor: Alter-Paar + archetyp-spezifisches Hauptthema (aus Q3-Auswahl)
+      var painOptions = data.q3_options || [];
+      var pain = (state.pain_selection !== null && painOptions[state.pain_selection]) || '';
+      var painLabel = ARCH_PAIN_LABEL[state.archetype] || 'Dein Fokus ist';
+
+      var parts = ['Du bist ' + chrono + '.'];
+      if (delta !== 0) parts.push('Du fühlst dich wie ' + felt + '.');
+      if (pain)        parts.push(painLabel + ' ' + pain + '.');
 
       var anchorEl = root.querySelector('[data-anchor]');
-      anchorEl.textContent = 'Du bist ' + chrono + '. Du hast angegeben, ' + statement + '. Das wird dein Test wahrscheinlich zeigen.';
+      anchorEl.textContent = parts.join(' ');
 
-      var feltEl = root.querySelector('[data-anchor-felt]');
-      if (state.age_felt_delta !== 0) {
-        feltEl.textContent = 'Gefühlt eher: ' + felt + '.';
-        feltEl.hidden = false;
-      } else {
-        feltEl.hidden = true;
-      }
-
-      root.querySelector('[data-empathy]').textContent = data.empathy_line || '';
-
-      // Zone 1 — Hypothesen (optional; DOM kann entfernt sein)
-      var list = root.querySelector('[data-hypotheses]');
-      if (list) {
-        list.innerHTML = '';
-        [data.hypothesis_primary, data.hypothesis_secondary, data.hypothesis_tertiary].forEach(function (text) {
-          if (!text) return;
-          var li = document.createElement('li');
-          li.className = 'rq-hypothesis';
-          li.innerHTML = '<p class="rq-hypothesis-text"></p>';
-          li.querySelector('.rq-hypothesis-text').textContent = text;
-          list.appendChild(li);
-        });
-      }
-
-      // Zone 2 — Fokus-Karten
+      // Zone 2 — Fokus-Karten (kompakt: Icon + Titel + Why)
       var focusList = root.querySelector('[data-focus-grid]');
       focusList.innerHTML = '';
       var focusCats = FOCUS_BY_ARCHETYPE[state.archetype] || [];
@@ -1853,30 +1745,33 @@
         li.innerHTML =
           '<span class="rq-focus-icon" aria-hidden="true">' + (FOCUS_ICONS[cat.id] || '') + '</span>' +
           '<h4 class="rq-focus-title"></h4>' +
-          '<p class="rq-focus-measures"></p>' +
           '<p class="rq-focus-why"></p>';
-        li.querySelector('.rq-focus-title').textContent    = cat.title;
-        li.querySelector('.rq-focus-measures').textContent = cat.measures;
-        li.querySelector('.rq-focus-why').textContent      = cat.why;
+        li.querySelector('.rq-focus-title').textContent = cat.title;
+        li.querySelector('.rq-focus-why').textContent   = cat.why;
         focusList.appendChild(li);
       });
 
-      // Zone 3 — alle Kategorien
-      function renderCatGrid(container, items) {
+      // Zone 3 — Alle Kategorien als Pills (Fokus-IDs subtil hervorgehoben)
+      function renderPillGrid(container, items) {
         container.innerHTML = '';
         items.forEach(function (cat) {
           var li = document.createElement('li');
-          li.className = 'rq-cat-item' + (focusIds.indexOf(cat.id) !== -1 ? ' is-focus' : '');
-          li.innerHTML =
-            '<span class="rq-cat-title"></span>' +
-            '<span class="rq-cat-desc"></span>';
-          li.querySelector('.rq-cat-title').textContent = cat.title;
-          li.querySelector('.rq-cat-desc').textContent  = cat.desc;
+          li.className = 'rq-pill' + (focusIds.indexOf(cat.id) !== -1 ? ' is-focus' : '');
+          li.textContent = cat.title;
           container.appendChild(li);
         });
       }
-      renderCatGrid(root.querySelector('[data-cat-epi]'), EPI_CATS);
-      renderCatGrid(root.querySelector('[data-cat-dna]'), DNA_CATS);
+      renderPillGrid(root.querySelector('[data-cat-epi]'), EPI_CATS);
+      renderPillGrid(root.querySelector('[data-cat-dna]'), DNA_CATS);
+
+      // Zone 4 — CTA-Labels je nach Intent (hot vs. cool)
+      var isHot = state.intent === 'hot';
+      var primaryLabel = isHot ? (config.diag_cta_hot_primary_label || '') : (config.diag_cta_cool_primary_label || '');
+      var secondaryLabel = isHot ? (config.diag_cta_hot_secondary_label || '') : (config.diag_cta_cool_secondary_label || '');
+      var primaryLabelEl   = root.querySelector('[data-cta-primary-label]');
+      var secondaryLabelEl = root.querySelector('[data-cta-secondary-label]');
+      if (primaryLabelEl && primaryLabel)     primaryLabelEl.textContent = primaryLabel;
+      if (secondaryLabelEl && secondaryLabel) secondaryLabelEl.textContent = secondaryLabel;
 
       pushDL({
         event: 'lt_routine_quiz_result_shown',
@@ -1969,83 +1864,19 @@
     { "type": "range", "id": "padding_top", "label": "Padding oben", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 48 },
     { "type": "range", "id": "padding_bottom", "label": "Padding unten", "min": 0, "max": 160, "step": 4, "unit": "px", "default": 64 },
 
-    { "type": "header", "content": "Frage 1 — Routing" },
-    { "type": "text", "id": "route_kicker", "label": "Kicker", "default": "Zwei Minuten über dich" },
-    { "type": "text", "id": "route_question", "label": "Frage", "default": "Was bringt dich hierher?" },
-    { "type": "text", "id": "route_helper", "label": "Helper", "default": "Eine Antwort reicht — wir passen alles weitere daran an." },
-
-    { "type": "header", "content": "Diagnostik-Pfad · Q2 Alter-Slider" },
-    { "type": "text", "id": "diag_q2_question", "label": "Frage", "default": "Wie alt bist du — und wie alt fühlst du dich?" },
-    { "type": "text", "id": "diag_q2_helper", "label": "Helper", "default": "Bewege beide Slider. Die Lücke ist oft das Interessante." },
-    { "type": "text", "id": "diag_q2_slider1_label", "label": "Label Slider 1", "default": "Chronologisches Alter" },
-    { "type": "text", "id": "diag_q2_slider2_label", "label": "Label Slider 2", "default": "Gefühltes Alter" },
-    { "type": "textarea", "id": "diag_q2_hint_delta_pos", "label": "Hinweis (fühlt sich älter)", "default": "Die Differenz zwischen Gefühl und Ausweis-Alter ist oft ein erster Hinweis. Der Test misst, wie nah deine Zellen an dem sind, was du fühlst." },
-    { "type": "textarea", "id": "diag_q2_hint_delta_neg", "label": "Hinweis (fühlt sich jünger)", "default": "Du fühlst dich jünger, als dein Pass sagt. Der Test zeigt, ob dein Körper das bestätigt." },
-    { "type": "textarea", "id": "diag_q2_hint_delta_zero", "label": "Hinweis (stimmt überein)", "default": "Dein Gefühl und dein Ausweis-Alter stimmen überein. Der Test zeigt, ob deine Zellen das bestätigen." },
-
-    { "type": "header", "content": "Diagnostik-Pfad · Q4 Versuchtes" },
-    { "type": "text", "id": "diag_q4_question", "label": "Frage", "default": "Was hast du bisher versucht?" },
-    { "type": "text", "id": "diag_q4_helper", "label": "Helper", "default": "Mehrere Antworten möglich." },
-    { "type": "textarea", "id": "diag_q4_options_json", "label": "Optionen (JSON-Array)", "default": "[\"Bluttests beim Hausarzt\",\"Fitness-Tracker (Oura, Whoop, Apple Watch)\",\"Supplements\",\"Ernährungsumstellung\",\"Regelmäßiger Sport\",\"Ehrlich gesagt: nichts Strukturiertes bisher\"]" },
-
-    { "type": "header", "content": "Diagnostik-Pfad · Q5 Intent" },
-    { "type": "text", "id": "diag_q5_question", "label": "Frage", "default": "Wenn du dein Ergebnis in 6 Wochen öffnest: Was willst du darin finden?" },
-    { "type": "text", "id": "diag_q5_opt_1", "label": "Option 1 (hot)", "default": "Eine Zahl: wie alt mein Körper biologisch wirklich ist" },
-    { "type": "text", "id": "diag_q5_opt_2", "label": "Option 2 (hot)", "default": "Einen konkreten Plan: was ich ändern soll, und warum" },
-    { "type": "text", "id": "diag_q5_opt_3", "label": "Option 3 (hot)", "default": "Eine Baseline, die ich in 6–12 Monaten erneut messen kann" },
-    { "type": "text", "id": "diag_q5_opt_4", "label": "Option 4 (cool)", "default": "Ich will das grundsätzlich verstehen, bevor ich entscheide" },
-
-    { "type": "header", "content": "Diagnostik-Pfad · Ergebnis" },
-    { "type": "textarea", "id": "diag_result_anchor_pos", "label": "Anker (fühlt sich älter)", "default": "Du bist {chrono}. Du fühlst dich wie {felt}. Und niemand sagt dir, ob dein Körper dir recht gibt." },
-    { "type": "textarea", "id": "diag_result_anchor_neg", "label": "Anker (fühlt sich jünger)", "default": "Du bist {chrono}. Du fühlst dich wie {felt}. Jünger. Der Test zeigt dir, ob dein Körper das bestätigt." },
-    { "type": "textarea", "id": "diag_result_anchor_zero", "label": "Anker (stimmt überein)", "default": "Du bist {chrono}. Du fühlst dich genauso. Aber „gesund fühlen\" und „gesund altern\" sind zwei verschiedene Dinge." },
-    { "type": "text", "id": "diag_result_zone_heading", "label": "Heading Zone 2", "default": "Was dein Test wahrscheinlich zeigen wird" },
-
-    { "type": "header", "content": "Diagnostik-Pfad · CTAs" },
+    { "type": "header", "content": "Diagnostik-Pfad · CTA-URLs" },
     { "type": "text", "id": "diag_cta_primary_url", "label": "Primary URL", "default": "/products/age-dna-test" },
     { "type": "text", "id": "diag_cta_secondary_url", "label": "Secondary URL", "default": "/pages/longevity-coach" },
-    { "type": "text", "id": "diag_cta_hot_primary_label", "label": "Hot Primary Label", "default": "AGE & DNA-Test starten → 349 €" },
-    { "type": "text", "id": "diag_cta_hot_secondary_label", "label": "Hot Secondary Label", "default": "Oder: 15-Min-Beratung zuerst" },
-    { "type": "text", "id": "diag_cta_cool_primary_label", "label": "Cool Primary Label", "default": "Ich will meinen Test. Mit Kit-Ersatz-Garantie" },
-    { "type": "text", "id": "diag_cta_cool_secondary_label", "label": "Cool Secondary Label", "default": "Oder: 15 Min mit einem Longevity-Experten sprechen" },
 
-    { "type": "header", "content": "Supplement-Pfad · Fokus-Frage" },
-    { "type": "text", "id": "supp_focus_question", "label": "Frage", "default": "Wo merkst du es am stärksten?" },
-    { "type": "text", "id": "supp_focus_helper", "label": "Helper", "default": "Wähle den Bereich, der dir am meisten fehlt." },
-
-    { "type": "header", "content": "Fokus · Energie" },
-    { "type": "text", "id": "focus_energie_label", "label": "Label", "default": "Energie" },
-    { "type": "image_picker", "id": "focus_energie_image", "label": "Bild" },
-    { "type": "text", "id": "focus_energie_alt", "label": "Bild Alt-Text", "default": "Morgensonne, Fenster, Wachheit" },
-
-    { "type": "header", "content": "Fokus · Fokus & Kopf" },
-    { "type": "text", "id": "focus_fokus_label", "label": "Label", "default": "Fokus & Kopf" },
-    { "type": "image_picker", "id": "focus_fokus_image", "label": "Bild" },
-    { "type": "text", "id": "focus_fokus_alt", "label": "Bild Alt-Text", "default": "Ruhige Konzentration am Schreibtisch" },
-
-    { "type": "header", "content": "Fokus · Schlaf" },
-    { "type": "text", "id": "focus_schlaf_label", "label": "Label", "default": "Schlaf" },
-    { "type": "image_picker", "id": "focus_schlaf_image", "label": "Bild" },
-    { "type": "text", "id": "focus_schlaf_alt", "label": "Bild Alt-Text", "default": "Abendstimmung, gedimmtes Licht" },
-
-    { "type": "header", "content": "Fokus · Langlebigkeit" },
-    { "type": "text", "id": "focus_lang_label", "label": "Label", "default": "Langlebigkeit" },
-    { "type": "image_picker", "id": "focus_lang_image", "label": "Bild" },
-    { "type": "text", "id": "focus_lang_alt", "label": "Bild Alt-Text", "default": "Ruhige Landschaft, Bestand über Zeit" },
-
-    { "type": "header", "content": "Supplement-Pfad · Ergebnis Texte" },
-    { "type": "text", "id": "supp_result_kicker", "label": "Kicker", "default": "Deine Routine" },
-    { "type": "text", "id": "supp_result_headline_energie", "label": "Headline Energie", "default": "Deine Routine für stabile Energie." },
-    { "type": "textarea", "id": "supp_result_sub_energie", "label": "Sub Energie", "default": "NMN als Basis. Kreatin und TMG ergänzen die Methylierung und halten dich tragfähig." },
-    { "type": "text", "id": "supp_result_headline_fokus", "label": "Headline Fokus", "default": "Deine Routine für klaren Kopf." },
-    { "type": "textarea", "id": "supp_result_sub_fokus", "label": "Sub Fokus", "default": "Kreatin trägt zur kognitiven Leistungsfähigkeit bei. Fisetin und Resveratrol stabilisieren die Zell-Umgebung." },
-    { "type": "text", "id": "supp_result_headline_schlaf", "label": "Headline Schlaf", "default": "Deine Routine für tieferen Schlaf." },
-    { "type": "textarea", "id": "supp_result_sub_schlaf", "label": "Sub Schlaf", "default": "Schlafspray mit Melatonin für den Einstieg. Spermidin und Kreatin unterstützen Regeneration über Nacht." },
-    { "type": "text", "id": "supp_result_headline_lang", "label": "Headline Langlebigkeit", "default": "Deine Routine für Zellgesundheit." },
-    { "type": "textarea", "id": "supp_result_sub_lang", "label": "Sub Langlebigkeit", "default": "NMN, Resveratrol und CaAKG adressieren die Signalwege, die mit biologischem Altern verbunden sind." },
-    { "type": "text", "id": "supp_primary_tag", "label": "Primary Tag", "default": "Deine Basis" },
-    { "type": "text", "id": "supp_secondary_tag", "label": "Secondary Tag", "default": "Ergänzung" },
-    { "type": "text", "id": "supp_cta_primary_label", "label": "Primary CTA Label", "default": "Basis ansehen →" },
+    { "type": "header", "content": "Supplement-Pfad · Fokus-Bilder" },
+    { "type": "image_picker", "id": "focus_energie_image", "label": "Energie · Bild" },
+    { "type": "text", "id": "focus_energie_alt", "label": "Energie · Alt-Text", "default": "Morgensonne, Fenster, Wachheit" },
+    { "type": "image_picker", "id": "focus_fokus_image", "label": "Fokus · Bild" },
+    { "type": "text", "id": "focus_fokus_alt", "label": "Fokus · Alt-Text", "default": "Ruhige Konzentration am Schreibtisch" },
+    { "type": "image_picker", "id": "focus_schlaf_image", "label": "Schlaf · Bild" },
+    { "type": "text", "id": "focus_schlaf_alt", "label": "Schlaf · Alt-Text", "default": "Abendstimmung, gedimmtes Licht" },
+    { "type": "image_picker", "id": "focus_lang_image", "label": "Langlebigkeit · Bild" },
+    { "type": "text", "id": "focus_lang_alt", "label": "Langlebigkeit · Alt-Text", "default": "Ruhige Landschaft, Bestand über Zeit" },
 
     { "type": "header", "content": "Produkt-Mapping · Energie" },
     { "type": "paragraph", "content": "NMN (primär) · Kreatin · TMG" },
@@ -2069,12 +1900,7 @@
     { "type": "paragraph", "content": "NMN (primär) · Trans-Resveratrol · CaAKG" },
     { "type": "product", "id": "product_lang_primary", "label": "Primär (NMN)" },
     { "type": "product", "id": "product_lang_sec1", "label": "Sekundär 1 (Resveratrol)" },
-    { "type": "product", "id": "product_lang_sec2", "label": "Sekundär 2 (CaAKG)" },
-
-    { "type": "header", "content": "Advisor-Zeile" },
-    { "type": "text", "id": "advisor_name", "label": "Name", "default": "Prof. Dr. med. Volker Limmroth" },
-    { "type": "text", "id": "advisor_title", "label": "Titel", "default": "Chefarzt Neurologie · Chief Scientific Officer LIFETIME · Spiegel-Bestseller-Autor" },
-    { "type": "image_picker", "id": "advisor_image", "label": "Avatar" }
+    { "type": "product", "id": "product_lang_sec2", "label": "Sekundär 2 (CaAKG)" }
   ],
   "blocks": [
     {
@@ -2129,11 +1955,7 @@
           ]
         },
         { "type": "text", "id": "q3_question", "label": "Q3 Frage", "default": "Wo merkst du es am stärksten?" },
-        { "type": "textarea", "id": "q3_options_json", "label": "Q3 Optionen (JSON-Array)", "default": "[\"Energielevel\",\"Regeneration\",\"Kopf und Fokus\",\"Schlaf\",\"Aussehen\"]" },
-        { "type": "textarea", "id": "empathy_line", "label": "Empathie-Satz", "default": "Du merkst Dinge, die im Standard-Check nicht auftauchen." },
-        { "type": "textarea", "id": "result_hypothesis_primary", "label": "Hypothese 1", "default": "Primäre Hypothese" },
-        { "type": "textarea", "id": "result_hypothesis_secondary", "label": "Hypothese 2", "default": "Sekundäre Hypothese" },
-        { "type": "textarea", "id": "result_hypothesis_tertiary", "label": "Hypothese 3", "default": "Tertiäre Hypothese" }
+        { "type": "textarea", "id": "q3_options_json", "label": "Q3 Optionen (JSON-Array)", "default": "[\"Energielevel\",\"Regeneration\",\"Kopf und Fokus\",\"Schlaf\",\"Aussehen\"]" }
       ]
     }
   ],
@@ -2176,11 +1998,7 @@
           "settings": {
             "archetype_id": "tired",
             "q3_question": "Wo merkst du es am stärksten?",
-            "q3_options_json": "[\"Energielevel: der Nachmittag fällt mir schwerer als früher\",\"Sport & Regeneration: Erholung dauert länger als sie sollte\",\"Kopf: Fokus, Klarheit, Stimmung\",\"Schlaf: kürzer, unruhiger oder weniger erholsam\",\"Aussehen: Haut, Haare, Gesicht\"]",
-            "empathy_line": "Du merkst Dinge, die im Standard-Check nicht auftauchen. Das ist keine Einbildung. Es ist das, was Bluttests nicht messen.",
-            "result_hypothesis_primary": "Biologisches Alter (MethylPace-Score): Menschen mit deinem Profil liegen oft deutlich über ihrem chronologischen Alter. Der Test zeigt deinen echten Wert.",
-            "result_hypothesis_secondary": "EpiVitality + Entzündungs-Profil: Die zwei Marker, die erklären, warum du dich älter fühlst, obwohl Standard-Laborwerte okay aussehen.",
-            "result_hypothesis_tertiary": "Supplement-Verträglichkeit + Schlaf-Genetik: Warum dein bisheriger Stack nicht greift und was bei dir wirkt."
+            "q3_options_json": "[\"Nachmittags-Energie\",\"Regeneration nach Sport\",\"Fokus & Stimmung\",\"Schlaf\",\"Haut & Haare\"]"
           }
         },
         {
@@ -2188,11 +2006,7 @@
           "settings": {
             "archetype_id": "measurer",
             "q3_question": "Welche Kennzahl fehlt dir bisher?",
-            "q3_options_json": "[\"Wie schnell ich biologisch altere\",\"Wie stark meine stille Zellentzündung ist\",\"Wie mein Immunsystem und meine Vitalität jetzt stehen\",\"Meine genetischen Risiken für Herz, Muskeln, Kognition\",\"Wie ich auf Supplements und Ernährung individuell reagiere\"]",
-            "empathy_line": "Standardwerte zeigen, ob du krank bist. Sie zeigen nicht, wie gesund du alterst. Genau dafür ist der Test gebaut.",
-            "result_hypothesis_primary": "MethylPace-Score: Dein biologischer Alterungs-Tempomesser. Die eine Zahl, die dein Hausarzt nicht bestimmen kann.",
-            "result_hypothesis_secondary": "Entzündung + Immunscore: Wie stark arbeitet die stille Entzündung in dir gerade? Beide Werte zeigen, wo Prävention ansetzen muss.",
-            "result_hypothesis_tertiary": "Genetische Risiko-Signatur: Herz, Muskeln, Kognition. Was in dir angelegt ist, was du beeinflussen kannst."
+            "q3_options_json": "[\"Biologisches Alter\",\"Stille Entzündung\",\"Immunsystem & Vitalität\",\"Genetische Risiken\",\"Supplement-Reaktion\"]"
           }
         },
         {
@@ -2200,11 +2014,7 @@
           "settings": {
             "archetype_id": "vigilant",
             "q3_question": "Worum geht es konkret?",
-            "q3_options_json": "[\"Herz-Kreislauf (Infarkt, Blutdruck, Cholesterin)\",\"Kognition & Demenz\",\"Krebsrisiken und Entzündungstendenz\",\"Muskelabbau im Alter (Sarkopenie)\",\"Knochen & Gelenke\"]",
-            "empathy_line": "Familiengeschichte ist ein Signal, keine Diagnose. Der Test zeigt, welche Signale in deinen Genen tatsächlich angelegt sind. Und welche nicht.",
-            "result_hypothesis_primary": "Genetische Prädispositionen: Welche Risiken aus deiner Familie tatsächlich in deinen Genen angelegt sind. Und welche nicht.",
-            "result_hypothesis_secondary": "Entzündung + Gefäß-Profil: Zwei Treiber, die oft schon Jahre vor Symptomen messbar werden.",
-            "result_hypothesis_tertiary": "Biologisches Alter: Ob dein Körper schneller oder langsamer altert, als die Familiengeschichte vermuten lässt."
+            "q3_options_json": "[\"Herz-Kreislauf\",\"Kognition & Demenz\",\"Krebsrisiko\",\"Muskelabbau (Sarkopenie)\",\"Knochen & Gelenke\"]"
           }
         }
       ]
