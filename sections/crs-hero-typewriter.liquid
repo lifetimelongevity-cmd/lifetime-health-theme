@@ -138,15 +138,41 @@
   var root = document.getElementById('section-{{ section.id }}');
   if (!root) return;
 
-  function animateAgeNumber() {
-    var ageNumber = root.querySelector('[data-ltw-age-number]');
-    if (!ageNumber) return;
+  var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* ---- Timing-Konstanten (zentral, einfach tunbar) ---- */
+  var INTRO_DELAY_MS   = 600;  /* Pause nach Sichtbarwerden, bevor die Animation startet */
+  var AGE_DURATION_MS  = 2800; /* Countdown 60 -> 56 */
+  var BAR_DURATION_MS  = 1400; /* Füll-Dauer pro Balken */
+  var BAR_STAGGER_MS   = 280;  /* Verzögerung zwischen den Balken */
+  var BAR_POST_DELAY   = 200;  /* Kurze Atempause zwischen Countdown-Ende und Balken-Start */
+
+  function animateBars() {
+    var fills = root.querySelectorAll('.ltw-bar__fill');
+    if (!fills.length) return;
+
+    fills.forEach(function(el, index) {
+      var target = el.style.getPropertyValue('--w') || el.dataset.w || '0';
+      if (reducedMotion) {
+        el.style.width = target;
+        return;
+      }
+      el.style.width = '0';
+      setTimeout(function() {
+        el.style.transition = 'width ' + BAR_DURATION_MS + 'ms ease-out';
+        el.style.width = target;
+      }, index * BAR_STAGGER_MS);
+    });
+  }
+
+  function animateAgeNumber(onComplete) {
+    var ageNumber = root.querySelector('[data-ltw-age-number]');
+    if (!ageNumber) { if (onComplete) onComplete(); return; }
+
     var target = parseFloat(ageNumber.dataset.ageTarget);
     var startCandidate = parseFloat(ageNumber.dataset.ageStart);
 
-    if (Number.isNaN(target)) return;
+    if (Number.isNaN(target)) { if (onComplete) onComplete(); return; }
 
     var start = Number.isNaN(startCandidate) ? target + 6 : startCandidate;
     if (start <= target) {
@@ -160,21 +186,23 @@
 
     if (reducedMotion) {
       render(target);
+      if (onComplete) onComplete();
       return;
     }
 
-    var duration = 1600;
     var startTime = null;
 
     function step(timestamp) {
       if (startTime === null) startTime = timestamp;
-      var progress = Math.min((timestamp - startTime) / duration, 1);
+      var progress = Math.min((timestamp - startTime) / AGE_DURATION_MS, 1);
       var eased = 1 - Math.pow(1 - progress, 3);
       var current = start + (target - start) * eased;
       render(current);
 
       if (progress < 1) {
         window.requestAnimationFrame(step);
+      } else if (onComplete) {
+        onComplete();
       }
     }
 
@@ -186,21 +214,27 @@
     var ageNumber = root.querySelector('[data-ltw-age-number]');
     if (!ageNumber || ageNumber.dataset.ageAnimated === 'true') return;
 
-    function startAnimation() {
+    function startSequence() {
       if (ageNumber.dataset.ageAnimated === 'true') return;
       ageNumber.dataset.ageAnimated = 'true';
-      animateAgeNumber();
+
+      /* Sequenz: kurze Einstiegspause -> Alter-Countdown -> Balken füllen */
+      setTimeout(function() {
+        animateAgeNumber(function onAgeDone() {
+          setTimeout(animateBars, BAR_POST_DELAY);
+        });
+      }, INTRO_DELAY_MS);
     }
 
     if (!('IntersectionObserver' in window)) {
-      startAnimation();
+      startSequence();
       return;
     }
 
     var observer = new IntersectionObserver(function(entries) {
       entries.forEach(function(entry) {
         if (!entry.isIntersecting) return;
-        startAnimation();
+        startSequence();
         observer.disconnect();
       });
     }, { threshold: 0.45 });
@@ -208,13 +242,10 @@
     observer.observe(ageNumber);
   }
 
-  /* Animate dashboard bars on load with a light stagger */
-  root.querySelectorAll('.ltw-bar__fill').forEach(function(el, index) {
-    el.style.width = '0';
-    setTimeout(function() {
-      el.style.transition = 'width 800ms ease-out';
-      el.style.width = el.style.getPropertyValue('--w') || el.dataset.w;
-    }, index * 150);
+  /* Balken zuerst auf 0 setzen (vermeidet, dass sie in voller Länge aufblitzen,
+     bevor die Animation gestartet wird) */
+  root.querySelectorAll('.ltw-bar__fill').forEach(function(el) {
+    if (!reducedMotion) el.style.width = '0';
   });
 
   var metricRows = root.querySelectorAll('.ltw-metric-row');
