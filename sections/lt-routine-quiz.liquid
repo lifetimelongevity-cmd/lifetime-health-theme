@@ -47,6 +47,12 @@
 {{ 'section-lt-longevity-quiz.css' | asset_url | stylesheet_tag }}
 
 {% style %}
+  /* Sticky-Header auf der Quiz-Seite unterdrücken — kein Overlap mit scroll-to-quiz */
+  body.template-page-meine-routine .sticky-header,
+  body.template-page-meine-routine .sticky-header.show {
+    display: none !important;
+  }
+
   #lt-routine-quiz-{{ section.id }} {
     --rq-bg: {{ section.settings.color_bg }};
     --rq-text: {{ section.settings.color_text }};
@@ -1116,6 +1122,7 @@
       <fieldset>
         <legend>
           <h2 tabindex="-1" data-q3-question>&nbsp;</h2>
+          <p class="rq-helper">Eine Antwort reicht.</p>
         </legend>
         <div class="rq-options" role="radiogroup" data-q3-options></div>
       </fieldset>
@@ -1142,6 +1149,7 @@
       <fieldset>
         <legend>
           <h2 tabindex="-1">{{ section.settings.diag_q5_question }}</h2>
+          <p class="rq-helper">Eine Antwort reicht.</p>
         </legend>
         <div class="rq-options" role="radiogroup">
           <label class="rq-option">
@@ -1522,16 +1530,11 @@
     function focusHeading(screen) {
       var h = screens[screen].querySelector('h2');
       if (!h) return;
+      // Fokus für Screenreader/Keyboard — NIEMALS scrollen, damit das Sichtfeld
+      // während des Quiz stabil bleibt. Das einmalige Scroll-to-Quiz passiert
+      // im Route-Card-Klick-Handler.
       setTimeout(function () {
         try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); }
-        // Frage mit Versatz unter die sticky Navigation scrollen
-        if (screen !== 'route' && h.getBoundingClientRect) {
-          var rect = h.getBoundingClientRect();
-          if (rect.top < 96 || rect.top > window.innerHeight * 0.5) {
-            try { h.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-            catch (e) { h.scrollIntoView(); }
-          }
-        }
       }, 60);
     }
 
@@ -1608,6 +1611,14 @@
             embedQuiz.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
         } else {
+          // Einmaliges Scroll-Anchor: Quiz ins Sichtfeld bringen, bevor der
+          // Diagnostik-Pfad beginnt. Danach bleibt das Sichtfeld stabil —
+          // go() scrollt nicht mehr (siehe focusHeading).
+          var rqFrame = root.querySelector('.rq-frame');
+          if (rqFrame && rqFrame.scrollIntoView) {
+            try { rqFrame.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+            catch (e) { rqFrame.scrollIntoView(); }
+          }
           go('diag_age');
         }
       });
