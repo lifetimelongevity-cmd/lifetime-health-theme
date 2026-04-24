@@ -81,12 +81,12 @@
     min-height: clamp(580px, 68vh, 780px);
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-5);
   }
   @media (min-width: 750px) {
     #lt-routine-quiz-{{ section.id }} .rq-frame {
       padding: var(--space-7) var(--space-6);
-      gap: var(--space-7);
+      gap: var(--space-6);
     }
   }
   @media (min-width: 990px) {
@@ -102,12 +102,16 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    min-height: 36px;
+    min-height: 24px;
   }
-  /* Reserviert Platz auch auf Route-Screen, damit keine Sprünge beim Wechsel */
+  /* Reserviert Platz auf Route-Screen, damit Q1→Q2 nicht springt */
   #lt-routine-quiz-{{ section.id }} .rq-progress[hidden] {
     display: flex;
     visibility: hidden;
+  }
+  /* Auf Result-Screens komplett kollabieren — kein Progress-Kontext mehr nötig */
+  #lt-routine-quiz-{{ section.id }} .rq-progress.rq-progress--gone {
+    display: none;
   }
   #lt-routine-quiz-{{ section.id }} .rq-back {
     appearance: none;
@@ -117,9 +121,9 @@
     font: inherit;
     font-size: var(--text-body-sm);
     cursor: pointer;
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-1) var(--space-2);
     border-radius: var(--radius-sm);
-    min-height: 44px;
+    min-height: 32px;
     transition: color 180ms ease, background 180ms ease;
   }
   #lt-routine-quiz-{{ section.id }} .rq-back:hover,
@@ -317,7 +321,7 @@
   #lt-routine-quiz-{{ section.id }} .rq-options {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--space-2);
     margin-top: var(--space-2);
   }
   #lt-routine-quiz-{{ section.id }} .rq-option {
@@ -325,12 +329,12 @@
     display: flex;
     align-items: flex-start;
     gap: var(--space-3);
-    padding: var(--space-4);
+    padding: var(--space-3) var(--space-4);
     border: 1px solid var(--rq-border);
     border-radius: var(--radius-md);
     background: var(--rq-bg);
     cursor: pointer;
-    min-height: 56px;
+    min-height: 48px;
     transition: border-color 180ms ease, background 180ms ease;
   }
   #lt-routine-quiz-{{ section.id }} .rq-option:hover {
@@ -927,6 +931,25 @@
     font-weight: var(--weight-semibold);
   }
 
+  /* Reset-Button — leiser Text-Link unter dem Result */
+  #lt-routine-quiz-{{ section.id }} .rq-reset {
+    display: block;
+    margin: var(--space-5) auto 0;
+    padding: var(--space-2) var(--space-3);
+    background: transparent;
+    border: 0;
+    font: inherit;
+    font-size: 12px;
+    color: var(--rq-muted);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  #lt-routine-quiz-{{ section.id }} .rq-reset:hover {
+    color: var(--rq-text);
+  }
+
   /* Embedded supplement quiz — visuelle Konsistenz mit Routine-Quiz */
   #lt-routine-quiz-{{ section.id }} [data-supp-embed] .lt-quiz__header {
     display: none;
@@ -1163,6 +1186,7 @@
           <li>Kit-Ersatz-Garantie</li>
           <li>Lebenslang in der App</li>
         </ul>
+        <button type="button" class="rq-reset" data-reset>↻ Quiz neu starten</button>
       </section>
 
     </div>
@@ -1240,6 +1264,7 @@
           <span>Basis ansehen →</span>
         </a>
       </div>
+      <button type="button" class="rq-reset" data-reset>↻ Quiz neu starten</button>
     </div>
 
   </div>
@@ -1421,7 +1446,16 @@
       var flow = currentFlow();
       var idx = flowIndex(flow, current);
       var isRoute  = current === 'route';
+      var isResult = current === 'diag_result' || current === 'supp_result';
 
+      // Auf Result-Screens Progress komplett kollabieren — Raum ganz zurück.
+      progressEl.classList.toggle('rq-progress--gone', isResult);
+      if (isResult) {
+        progressEl.hidden = true;
+        return;
+      }
+
+      // Auf Route Platz reservieren (visibility:hidden), damit Q1→Q2 nicht springt.
       if (isRoute || !state.path) {
         progressEl.hidden = true;
         return;
@@ -1430,7 +1464,6 @@
 
       var steps = flow.slice(1);
       var activeIdx = idx - 1;
-      var isResult = current === 'diag_result' || current === 'supp_result';
       if (backBtn) backBtn.hidden = !(idx >= 1 && !isResult);
 
       var counterEl = progressEl.querySelector('[data-progress-counter]');
@@ -1488,6 +1521,45 @@
     }
 
     if (backBtn) backBtn.addEventListener('click', goBack);
+
+    // ───── Reset — Quiz neu starten ─────
+    function resetQuiz() {
+      // State zurück auf Defaults
+      state.path = null;
+      state.archetype = null;
+      state.age_chrono = 45;
+      state.age_felt_delta = 0;
+      state.pain_selection = null;
+      state.tried = [];
+      state.intent = null;
+      state.focus = null;
+
+      // Route-Karten + Focus-Karten Selektion zurücksetzen
+      root.querySelectorAll('[data-route-card].is-selected, [data-focus-card].is-selected')
+          .forEach(function (c) { c.classList.remove('is-selected'); });
+
+      // Q3 Radio-Buttons, Q4 Checkboxes, Q5 Radio-Buttons clearen
+      root.querySelectorAll('[data-q3-input], [data-q4-input], [data-q5-input]')
+          .forEach(function (input) { input.checked = false; });
+
+      // Slider zurück auf 45 (und Delta-Viz refreshen)
+      if (chronoInput) chronoInput.value = 45;
+      if (feltInput)   feltInput.value   = 45;
+      if (typeof updateSliderDisplays === 'function') updateSliderDisplays();
+
+      // Supplement-Embed ausblenden, Frame wieder sichtbar
+      var frame = root.querySelector('.rq-frame');
+      var embed = root.querySelector('[data-supp-embed]');
+      if (frame) frame.hidden = false;
+      if (embed) embed.hidden = true;
+
+      // History leeren und zurück zum Route-Screen
+      history.length = 0;
+      go('route');
+    }
+    root.querySelectorAll('[data-reset]').forEach(function (btn) {
+      btn.addEventListener('click', resetQuiz);
+    });
 
     var suppBackBtn = root.querySelector('[data-supp-back]');
     if (suppBackBtn) {
