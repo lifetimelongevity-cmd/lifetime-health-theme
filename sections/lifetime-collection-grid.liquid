@@ -59,12 +59,28 @@
         {%- endif -%}
       {%- endif -%}
 
+      {%- comment -%}
+        Link-Logik:
+        - section.settings.link_behavior == 'cart' → Karte fügt Variante direkt in den Warenkorb
+        - block.settings.force_product_link == true → Karte führt trotzdem zur PDP (Override)
+        - Existierende Priorität (product > custom_url) bleibt für Default-Fall erhalten.
+      {%- endcomment -%}
       {%- assign card_href = '#' -%}
-      {%- if product != blank -%}
-        {%- assign card_href = product.url -%}
-      {%- elsif block.settings.custom_url != blank -%}
-        {%- assign card_href = block.settings.custom_url -%}
+      {%- assign use_cart_link = false -%}
+      {%- if section.settings.link_behavior == 'cart' and block.settings.force_product_link != true and product != blank -%}
+        {%- assign cart_variant_id = product.variants.first.id -%}
+        {%- if cart_variant_id -%}
+          {%- assign card_href = '/cart/' | append: cart_variant_id | append: ':1' -%}
+          {%- assign use_cart_link = true -%}
+        {%- endif -%}
       {%- endif -%}
+      {%- unless use_cart_link -%}
+        {%- if product != blank -%}
+          {%- assign card_href = product.url -%}
+        {%- elsif block.settings.custom_url != blank -%}
+          {%- assign card_href = block.settings.custom_url -%}
+        {%- endif -%}
+      {%- endunless -%}
 
       {%- comment -%} Resolve the image object once for reuse {%- endcomment -%}
       {%- assign card_image = block.settings.custom_image -%}
@@ -668,6 +684,21 @@
       "step": 4,
       "unit": "px",
       "default": 36
+    },
+    {
+      "type": "header",
+      "content": "Klick-Verhalten"
+    },
+    {
+      "type": "select",
+      "id": "link_behavior",
+      "label": "Beim Klick auf eine Produktkarte",
+      "info": "Warenkorb-Modus fügt die erste Variante der ausgewählten Produkte direkt in den Warenkorb ein. Karten mit aktiviertem Override (siehe Block) führen trotzdem zur Produktseite.",
+      "options": [
+        { "value": "product", "label": "Zur Produktseite (Default)" },
+        { "value": "cart", "label": "Direkt in den Warenkorb" }
+      ],
+      "default": "product"
     }
   ],
   "blocks": [
@@ -689,6 +720,13 @@
           "id": "subline",
           "label": "Subline / tagline",
           "info": "Short descriptor below the title. Falls back to product description if blank."
+        },
+        {
+          "type": "checkbox",
+          "id": "force_product_link",
+          "label": "Immer zur Produktseite führen (Override)",
+          "info": "Greift nur im Warenkorb-Modus: Diese einzelne Karte führt trotzdem zur PDP, z. B. weil die Produktseite bereits fertig ist.",
+          "default": false
         },
         {
           "type": "header",
