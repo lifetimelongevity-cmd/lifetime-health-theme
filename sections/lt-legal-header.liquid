@@ -1,0 +1,199 @@
+{%- comment -%}
+  LT — Legal Header
+  -----------------
+  Minimaler, einheitlicher Seitenkopf für alle Rechts-/Info-Seiten
+  (Impressum, Datenschutz, AGB, Widerruf, Versand, Zahlungsarten).
+
+  Zusammensetzung:
+    - Breadcrumb (globales Snippet)
+    - Optionales Label (--text-micro, uppercase)
+    - H1 = page.title
+    - Optionaler Untertitel (Heading-Stack Subtitle, muted)
+    - Optional: "Zuletzt aktualisiert"-Zeile
+    - Dünner Divider als Übergang zum Body aus main-page.
+
+  Verwendung ausschließlich in templates/page.legal.json.
+  Die Section versteckt auch den zweiten H1 aus main-page auf Legal-Templates.
+{%- endcomment -%}
+
+{% style %}
+  /* Verhindert doppelten H1, wenn main-page im selben Template rendert */
+  .template-page-legal .main-page > h1.title.heading-size--page-title { display: none; }
+
+  /* Verhindert doppelten Breadcrumb (main-page rendert ebenfalls einen).
+     Default: alle .breadcrumb-main auf Legal-Template ausblenden ...
+     ... außer dem, den diese Section selbst rendert. 'revert' stellt die
+     Theme-Default-Display-Werte wieder her, ohne flex/block zu erzwingen. */
+  .template-page-legal .breadcrumb-main { display: none; }
+  .template-page-legal #section-{{ section.id }} .breadcrumb-main { display: revert; }
+
+  /* Container-Abstand zum Body-Wrapper vom main-page reduzieren, damit der Divider
+     optisch an den Body anschließt */
+  .template-page-legal .main-page { padding-top: 0; }
+
+  #section-{{ section.id }}.lt-legal-header {
+    background: var(--color-surface-primary, #ffffff);
+    padding-top: var(--space-9, 80px);
+    padding-bottom: var(--space-6, 32px);
+    color: var(--color-text-primary, #26251e);
+  }
+
+  #section-{{ section.id }} .lt-legal-header__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-inline: 24px;
+  }
+
+  #section-{{ section.id }} .lt-legal-header__stack {
+    max-width: 720px;
+  }
+
+  #section-{{ section.id }} .lt-legal-header__label {
+    font-family: var(--font-body, 'Lato', sans-serif);
+    font-size: var(--text-micro, 12px);
+    font-weight: var(--weight-medium, 500);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-text-muted, #A3A3A3);
+    margin: 0 0 var(--space-4, 16px);
+  }
+
+  #section-{{ section.id }} .lt-legal-header__title {
+    font-family: var(--font-heading, 'Helvetica Neue', Helvetica, Arial, sans-serif);
+    font-size: var(--text-h1, 36px);
+    line-height: var(--leading-heading, 1.15);
+    font-weight: var(--weight-bold, 700);
+    margin: 0;
+  }
+
+  #section-{{ section.id }} .lt-legal-header__subtitle {
+    font-family: var(--font-heading, 'Helvetica Neue', Helvetica, Arial, sans-serif);
+    font-size: var(--text-h1, 36px);
+    line-height: var(--leading-heading, 1.15);
+    font-weight: var(--weight-bold, 700);
+    color: var(--color-text-secondary, #525252);
+    opacity: 0.72;
+    margin: var(--space-2, 8px) 0 0;
+  }
+
+  #section-{{ section.id }} .lt-legal-header__meta {
+    font-family: var(--font-body, 'Lato', sans-serif);
+    font-size: var(--text-body-sm, 14px);
+    line-height: var(--leading-body, 1.4);
+    color: var(--color-text-muted, #A3A3A3);
+    margin: var(--space-5, 24px) 0 0;
+  }
+
+  #section-{{ section.id }} .lt-legal-header__divider {
+    border: 0;
+    border-top: 1px solid var(--color-border-default, #E5E5E5);
+    margin: var(--space-6, 32px) 0 0;
+  }
+
+  @media (max-width: 768px) {
+    #section-{{ section.id }}.lt-legal-header {
+      padding-top: var(--space-8, 64px);
+      padding-bottom: var(--space-5, 24px);
+    }
+    #section-{{ section.id }} .lt-legal-header__inner { padding-inline: 16px; }
+    #section-{{ section.id }} .lt-legal-header__title,
+    #section-{{ section.id }} .lt-legal-header__subtitle {
+      font-size: var(--text-h2, 28px);
+    }
+  }
+{% endstyle %}
+
+<section id="section-{{ section.id }}" class="lt-legal-header">
+
+  {%- render 'breadcrumb',
+    container: 'large',
+    vertical_space: 'vertical-space-xsmall',
+    style: 'breadcrumb-main--margin'
+  -%}
+
+  <div class="lt-legal-header__inner">
+    <div class="lt-legal-header__stack crs-heading-stack">
+
+      {%- if section.settings.label != blank -%}
+        <p class="lt-legal-header__label">{{ section.settings.label | escape }}</p>
+      {%- endif -%}
+
+      <div class="crs-heading-stack__pair">
+        <h1 class="lt-legal-header__title crs-heading-stack__title">{{ page.title | escape }}</h1>
+
+        {%- if section.settings.subtitle != blank -%}
+          <p class="lt-legal-header__subtitle crs-heading-stack__subtitle">{{ section.settings.subtitle | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.show_updated_at and section.settings.updated_at != blank -%}
+        <p class="lt-legal-header__meta">
+          {{ section.settings.updated_label | default: 'Zuletzt aktualisiert' }}: {{ section.settings.updated_at | escape }}
+        </p>
+      {%- endif -%}
+
+    </div>
+
+    <hr class="lt-legal-header__divider" aria-hidden="true" />
+  </div>
+
+</section>
+
+{% schema %}
+{
+  "name": "LT — Legal Header",
+  "tag": "section",
+  "class": "section--remove-bottom-margin-after",
+  "settings": [
+    {
+      "type": "paragraph",
+      "content": "Einheitlicher Seitenkopf für Rechts-/Info-Seiten (Impressum, Datenschutz, AGB, Widerruf, Versand, Zahlungsarten). Die H1 kommt automatisch aus dem Seitentitel."
+    },
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Label (Eyebrow)",
+      "info": "Kleine Kategorie oberhalb des Titels, z. B. „Rechtliches“ oder „Service“.",
+      "default": "Rechtliches"
+    },
+    {
+      "type": "text",
+      "id": "subtitle",
+      "label": "Untertitel (optional)",
+      "info": "Ein kurzer erklärender Satz. Leer lassen, um auszublenden."
+    },
+    {
+      "type": "header",
+      "content": "Zuletzt aktualisiert"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_updated_at",
+      "label": "„Zuletzt aktualisiert“ anzeigen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "updated_label",
+      "label": "Label-Text",
+      "default": "Zuletzt aktualisiert"
+    },
+    {
+      "type": "text",
+      "id": "updated_at",
+      "label": "Datum",
+      "info": "Frei formatierter Text, z. B. „24. April 2026“. Wird manuell gepflegt, damit Shopifys automatisches Update-Datum nicht durch jede kleine Edit-Aktion verändert wird.",
+      "default": "24. April 2026"
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT — Legal Header",
+      "category": "Seite"
+    }
+  ],
+  "enabled_on": {
+    "templates": ["page"]
+  }
+}
+{% endschema %}
