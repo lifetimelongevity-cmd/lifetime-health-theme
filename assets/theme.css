@@ -3933,13 +3933,25 @@ product-recommendations.sidebar-widget {
   pointer-events: none !important;
 }
 
-/* Sticky Warenkorb (z-index 999) über Shopify-Inbox-Launcher; Inbox nutzt oft Werte >> 1000 */
+/* Stack-Order:
+     999 = Sticky-ATC auf PDPs (Conversion-Priorität)
+     995 = Shopify Inbox Chat (unter Sticky-ATC, damit der nicht blockiert wird)
+     990 = Announcement-Bar (gibt das geöffnete Chat-Panel frei) */
 #shopify-chat,
 #ShopifyChat,
 shopify-chat,
 inbox-online-store-chat,
 iframe#dummy-chat-button-iframe {
-  z-index: 996 !important;
+  z-index: 995 !important;
+}
+
+/* Inbox-Launcher-Button kleiner skalieren (Default ~64px → ~48px).
+   WICHTIG: Nur das Button-iFrame scalen, nicht den Wrapper
+   (`inbox-online-store-chat`) — sonst wird auch das geöffnete Chat-Panel
+   mitskaliert und nimmt nur einen Teil des Screens ein. */
+iframe#dummy-chat-button-iframe {
+  transform: scale(0.75) !important;
+  transform-origin: bottom right !important;
 }
 
 /* Badges global ausblenden — deckt Produktseiten (main-product, quick-view)

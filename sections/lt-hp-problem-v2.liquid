@@ -38,44 +38,75 @@
     </div>
 
     {%- if section.blocks.size > 0 -%}
+      {%- assign image_ratio = section.settings.image_ratio | default: '4:5' -%}
+      {%- assign image_ratio_class = 'prob2__pane-image--ratio-' | append: image_ratio | replace: ':', 'x' -%}
+
       <div class="prob2__panes">
 
-        <div class="prob2__pane prob2__pane--system">
-          <div class="prob2__pane-hd">
-            <span class="prob2__pane-name">{{ section.settings.col_system_label | escape }}</span>
-            {%- if section.settings.system_tag != blank -%}
-              <span class="prob2__pane-tag">{{ section.settings.system_tag | escape }}</span>
-            {%- endif -%}
-          </div>
-          <ul class="prob2__pane-list">
-            {%- for block in section.blocks -%}
-              {%- if block.type == 'comparison_row' -%}
-                <li class="prob2__pane-item" {{ block.shopify_attributes }}>
-                  <span class="prob2__item-num">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
-                  <span class="prob2__item-line">{{ block.settings.system_text | escape }}</span>
-                </li>
+        {%- comment -%} LEFT COLUMN: Krankheitsmedizin Pane + optional Image {%- endcomment -%}
+        <div class="prob2__col">
+          <div class="prob2__pane prob2__pane--system">
+            <div class="prob2__pane-hd">
+              <span class="prob2__pane-name">{{ section.settings.col_system_label | escape }}</span>
+              {%- if section.settings.system_tag != blank -%}
+                <span class="prob2__pane-tag">{{ section.settings.system_tag | escape }}</span>
               {%- endif -%}
-            {%- endfor -%}
-          </ul>
+            </div>
+            <ul class="prob2__pane-list">
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'comparison_row' -%}
+                  <li class="prob2__pane-item" {{ block.shopify_attributes }}>
+                    <span class="prob2__item-num">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+                    <span class="prob2__item-line">{{ block.settings.system_text | escape }}</span>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          </div>
+          {%- if section.settings.image_system != blank -%}
+            <div class="prob2__pane-image {{ image_ratio_class }}">
+              {{
+                section.settings.image_system
+                | image_url: width: 1200
+                | image_tag:
+                  loading: 'lazy',
+                  alt: section.settings.image_system_alt | default: section.settings.col_system_label
+              }}
+            </div>
+          {%- endif -%}
         </div>
 
-        <div class="prob2__pane prob2__pane--longevity">
-          <div class="prob2__pane-hd">
-            <span class="prob2__pane-name">{{ section.settings.col_longevity_label | escape }}</span>
-            {%- if section.settings.longevity_tag != blank -%}
-              <span class="prob2__pane-tag">{{ section.settings.longevity_tag | escape }}</span>
-            {%- endif -%}
-          </div>
-          <ul class="prob2__pane-list">
-            {%- for block in section.blocks -%}
-              {%- if block.type == 'comparison_row' -%}
-                <li class="prob2__pane-item" {{ block.shopify_attributes }}>
-                  <span class="prob2__item-num">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
-                  <span class="prob2__item-line">{{ block.settings.longevity_text | escape }}</span>
-                </li>
+        {%- comment -%} RIGHT COLUMN: Longevity Pane + optional Image {%- endcomment -%}
+        <div class="prob2__col">
+          <div class="prob2__pane prob2__pane--longevity">
+            <div class="prob2__pane-hd">
+              <span class="prob2__pane-name">{{ section.settings.col_longevity_label | escape }}</span>
+              {%- if section.settings.longevity_tag != blank -%}
+                <span class="prob2__pane-tag">{{ section.settings.longevity_tag | escape }}</span>
               {%- endif -%}
-            {%- endfor -%}
-          </ul>
+            </div>
+            <ul class="prob2__pane-list">
+              {%- for block in section.blocks -%}
+                {%- if block.type == 'comparison_row' -%}
+                  <li class="prob2__pane-item" {{ block.shopify_attributes }}>
+                    <span class="prob2__item-num">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
+                    <span class="prob2__item-line">{{ block.settings.longevity_text | escape }}</span>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          </div>
+          {%- if section.settings.image_longevity != blank -%}
+            <div class="prob2__pane-image {{ image_ratio_class }}">
+              {{
+                section.settings.image_longevity
+                | image_url: width: 1200
+                | image_tag:
+                  loading: 'lazy',
+                  alt: section.settings.image_longevity_alt | default: section.settings.col_longevity_label
+              }}
+            </div>
+          {%- endif -%}
         </div>
 
       </div>
@@ -144,12 +175,40 @@
   gap: var(--space-5);
 }
 
+/* Each column wraps a pane + optional image, so on mobile pane and its
+   image stay paired when the grid collapses to one column. */
+.prob2__col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
 .prob2__pane {
   padding: var(--space-6);
   border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+/* Pane image (atmospheric closing per side) */
+.prob2__pane-image {
+  width: 100%;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  aspect-ratio: 4/5;
+  background: var(--color-surface-secondary, #f2f1ed);
+}
+
+.prob2__pane-image--ratio-1x1 { aspect-ratio: 1/1; }
+.prob2__pane-image--ratio-4x5 { aspect-ratio: 4/5; }
+.prob2__pane-image--ratio-3x2 { aspect-ratio: 3/2; }
+
+.prob2__pane-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .prob2__pane--system {
@@ -302,6 +361,24 @@
     { "type": "text", "id": "system_tag", "label": "Linke Spalte – Tag", "default": "reaktiv" },
     { "type": "text", "id": "col_longevity_label", "label": "Rechte Spalte – Name", "default": "Longevity-Diagnostik" },
     { "type": "text", "id": "longevity_tag", "label": "Rechte Spalte – Tag", "default": "proaktiv" },
+
+    { "type": "header", "content": "Bilder unter den Panes (optional)" },
+    { "type": "paragraph", "content": "Atmosphärische Bilder, die unter dem jeweiligen Pane erscheinen. Wenn keines hochgeladen ist, rendert die Section ohne Bild. Empfehlung: ähnliche Lichtsetzung und Tonalität für beide Bilder, damit die Section visuell zusammenhängt." },
+    { "type": "image_picker", "id": "image_system", "label": "Bild links (Krankheitsmedizin)" },
+    { "type": "text", "id": "image_system_alt", "label": "Alt-Text Bild links", "info": "Für Barrierefreiheit. Beschreibt, was im Bild zu sehen ist." },
+    { "type": "image_picker", "id": "image_longevity", "label": "Bild rechts (Longevity)" },
+    { "type": "text", "id": "image_longevity_alt", "label": "Alt-Text Bild rechts" },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Bildverhältnis",
+      "default": "4:5",
+      "options": [
+        { "value": "1:1", "label": "1:1 quadratisch" },
+        { "value": "4:5", "label": "4:5 portrait (empfohlen)" },
+        { "value": "3:2", "label": "3:2 landscape" }
+      ]
+    },
 
     { "type": "header", "content": "Schluss-Note" },
     { "type": "textarea", "id": "closing_note", "label": "Note", "default": "Kein Ersatz für deinen Arzt. Ein Ausgangspunkt, bevor er nötig wird." }

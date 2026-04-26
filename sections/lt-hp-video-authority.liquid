@@ -20,6 +20,8 @@
       assign hpva_youtube_id = hpva_video_url | split: 'youtu.be/' | last | split: '?' | first | split: '&' | first | split: '/' | first
     elsif hpva_video_url_downcase contains 'youtube.com/embed/'
       assign hpva_youtube_id = hpva_video_url | split: 'youtube.com/embed/' | last | split: '?' | first | split: '&' | first | split: '/' | first
+    elsif hpva_video_url_downcase contains 'youtube.com/shorts/'
+      assign hpva_youtube_id = hpva_video_url | split: 'youtube.com/shorts/' | last | split: '?' | first | split: '&' | first | split: '/' | first
     elsif hpva_video_url_downcase contains 'v='
       assign hpva_youtube_id = hpva_video_url | split: 'v=' | last | split: '&' | first
     endif
@@ -53,10 +55,12 @@
     assign hpva_media_image_src = hpva_media_image_src | image_url: width: 1400
   endif
 
+  # YouTube-Controls bleiben sichtbar (auch im Autoplay), damit Mobile-User
+  # den muted-Autoplay-Stream über das native YT-Speaker-Icon entmuten können.
+  # Vimeo nutzt Background-Mode für sauberen Loop ohne Controls.
   assign hpva_youtube_controls = '1'
   assign hpva_vimeo_background = '0'
   if section.settings.video_autoplay
-    assign hpva_youtube_controls = '0'
     assign hpva_vimeo_background = '1'
   endif
 -%}
@@ -148,7 +152,9 @@
                 {% if section.settings.video_loop %}loop{% endif %}
                 {% unless section.settings.video_autoplay %}controls{% endunless %}
                 playsinline
-                preload="metadata"
+                webkit-playsinline
+                disableremoteplayback
+                preload="auto"
                 src="{{ hpva_direct_video_src | escape }}"
               ></video>
             {%- elsif hpva_is_youtube and hpva_youtube_id != blank -%}
@@ -250,6 +256,34 @@
       showAvailableCaptions();
       video.addEventListener('loadedmetadata', showAvailableCaptions);
       video.addEventListener('volumechange', syncSoundToggleState);
+
+      /* iOS-Safari blockt Autoplay häufig still trotz muted+playsinline.
+         Wir versuchen .play() aktiv, sobald das Video im Viewport ist —
+         das ist die zuverlässigste Methode auf Mobile. */
+      function attemptPlay() {
+        if (!video.paused) return;
+        var playPromise = video.play();
+        if (playPromise && typeof playPromise.then === 'function') {
+          playPromise.catch(function() {
+            /* iOS hat den Play-Versuch geblockt — User muss tappen.
+               Native iOS-Play-Button bleibt sichtbar, das ist ok. */
+          });
+        }
+      }
+
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              attemptPlay();
+            }
+          });
+        }, { threshold: 0.25 });
+        io.observe(video);
+      } else {
+        /* Fallback ohne IntersectionObserver */
+        attemptPlay();
+      }
 
       if (soundToggle) {
         soundToggle.addEventListener('click', function() {
