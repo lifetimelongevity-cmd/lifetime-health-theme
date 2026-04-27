@@ -54,53 +54,79 @@
       </div>
     </div>
 
-    {%- comment -%}=== Steps ==={%- endcomment -%}
-    <div class="loop__steps">
-      {%- assign step_index = 0 -%}
-      {%- for block in section.blocks -%}
-        {%- if block.type == 'loop_step' -%}
-          {%- assign step_index = step_index | plus: 1 -%}
+    {%- comment -%}
+      === Steps ===
+      Falls ein Bild gesetzt ist: 2-Spalten-Layout mit Bild links und vertikalen
+      Steps rechts. Sonst: bisheriges horizontales Layout (3 Cards nebeneinander).
+    {%- endcomment -%}
+    {%- assign loop_has_image = false -%}
+    {%- if section.settings.side_image != blank -%}
+      {%- assign loop_has_image = true -%}
+    {%- endif -%}
 
-          {%- comment -%} Connector between steps {%- endcomment -%}
-          {%- if step_index > 1 and section.settings.show_connector_line -%}
-            <div class="loop__connector" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"/>
-                <polyline points="13 6 19 12 13 18"/>
-              </svg>
-            </div>
-          {%- endif -%}
+    <div class="loop__layout{% if loop_has_image %} loop__layout--with-image{% endif %}">
 
-          <div
-            class="loop__step{% if block.settings.step_is_primary %} loop__step--primary{% endif %}"
-            {{ block.shopify_attributes }}
-          >
-            <div class="loop__step-number-row">
-              <span class="loop__step-number">{{ block.settings.step_number | escape }}</span>
-              {%- if block.settings.step_label != blank -%}
-                <span class="loop__step-label">{{ block.settings.step_label | escape }}</span>
+      {%- if loop_has_image -%}
+        <div class="loop__visual">
+          {{
+            section.settings.side_image
+            | image_url: width: 1200
+            | image_tag:
+              loading: 'lazy',
+              class: 'loop__visual-img',
+              alt: section.settings.side_image_alt | default: 'LIFETIME Longevity'
+          }}
+        </div>
+      {%- endif -%}
+
+      <div class="loop__steps{% if loop_has_image %} loop__steps--vertical{% endif %}">
+        {%- assign step_index = 0 -%}
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'loop_step' -%}
+            {%- assign step_index = step_index | plus: 1 -%}
+
+            {%- comment -%} Connector between steps (nur im horizontalen Layout) {%- endcomment -%}
+            {%- if step_index > 1 and section.settings.show_connector_line and loop_has_image == false -%}
+              <div class="loop__connector" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"/>
+                  <polyline points="13 6 19 12 13 18"/>
+                </svg>
+              </div>
+            {%- endif -%}
+
+            <div
+              class="loop__step{% if block.settings.step_is_primary %} loop__step--primary{% endif %}"
+              {{ block.shopify_attributes }}
+            >
+              <div class="loop__step-number-row">
+                <span class="loop__step-number">{{ block.settings.step_number | escape }}</span>
+                {%- if block.settings.step_label != blank -%}
+                  <span class="loop__step-label">{{ block.settings.step_label | escape }}</span>
+                {%- endif -%}
+              </div>
+
+              <h3 class="loop__step-headline">{{ block.settings.step_headline | escape }}</h3>
+
+              {%- if block.settings.step_body != blank -%}
+                <p class="loop__step-body">{{ block.settings.step_body | escape }}</p>
+              {%- endif -%}
+
+              {%- if block.settings.step_product_url != blank and block.settings.step_product_name != blank -%}
+                <a href="{{ block.settings.step_product_url }}" class="loop__step-link">
+                  {{ block.settings.step_product_name | escape }}
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                    <polyline points="12 5 19 12 12 19"/>
+                  </svg>
+                </a>
               {%- endif -%}
             </div>
 
-            <h3 class="loop__step-headline">{{ block.settings.step_headline | escape }}</h3>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
 
-            {%- if block.settings.step_body != blank -%}
-              <p class="loop__step-body">{{ block.settings.step_body | escape }}</p>
-            {%- endif -%}
-
-            {%- if block.settings.step_product_url != blank and block.settings.step_product_name != blank -%}
-              <a href="{{ block.settings.step_product_url }}" class="loop__step-link">
-                {{ block.settings.step_product_name | escape }}
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <line x1="5" y1="12" x2="19" y2="12"/>
-                  <polyline points="12 5 19 12 12 19"/>
-                </svg>
-              </a>
-            {%- endif -%}
-          </div>
-
-        {%- endif -%}
-      {%- endfor -%}
     </div>
 
     {%- comment -%}=== Primary CTA — zweiter Kaufimpuls ==={%- endcomment -%}
@@ -139,6 +165,45 @@
 }
 
 
+/* — Layout wrapper — */
+/*
+  Default: enthält nur die Steps und entfaltet sich wie zuvor (Flex-Row).
+  Mit Bild: 2-Spalten-Grid, Bild links, Steps vertikal rechts.
+*/
+.loop__layout {
+  display: contents;
+}
+
+.loop__layout--with-image {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: var(--space-7);
+  margin-bottom: var(--space-7);
+  align-items: stretch;
+}
+
+/* — Image column — */
+.loop__visual {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: var(--color-surface-primary);
+}
+
+.loop__layout--with-image .loop__visual {
+  aspect-ratio: auto;
+  /* Damit das Bild die volle Höhe der Steps annimmt */
+  align-self: stretch;
+}
+
+.loop__visual-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 /* — Steps grid — */
 /*
   DECISION: flex row with connectors between cards.
@@ -150,6 +215,13 @@
   align-items: stretch;
   gap: 0;
   margin-bottom: var(--space-7);   /* 48px → CTA */
+}
+
+/* Mit Bild-Layout: Steps werden vertikal gestapelt */
+.loop__steps--vertical {
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-bottom: 0;
 }
 
 /* — Connector arrow between steps — */
@@ -322,6 +394,16 @@
     font-size: var(--text-h1);    /* 36px on mobile */
   }
 
+  /* Bild-Layout mobile: Bild oben, Steps darunter */
+  .loop__layout--with-image {
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+    margin-bottom: var(--space-7);
+  }
+
+  .loop__layout--with-image .loop__visual {
+    aspect-ratio: 4 / 5;
+  }
 }
 {% endstylesheet %}
 
@@ -403,6 +485,24 @@
       "id": "show_connector_line",
       "label": "Verbindungspfeile zwischen Steps anzeigen",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "Bild links (optional)"
+    },
+    {
+      "type": "paragraph",
+      "content": "Wenn ein Bild gesetzt ist, wechselt die Section auf 2-Spalten-Layout: Bild links, Steps vertikal rechts. Ohne Bild bleibt die horizontale 3-Card-Anordnung. Mobile stapelt das Bild über die Steps."
+    },
+    {
+      "type": "image_picker",
+      "id": "side_image",
+      "label": "Bild"
+    },
+    {
+      "type": "text",
+      "id": "side_image_alt",
+      "label": "Alt-Text (Barrierefreiheit)"
     },
     {
       "type": "header",
