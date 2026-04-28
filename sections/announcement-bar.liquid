@@ -48,8 +48,31 @@
             </button>
           {%- endif -%}
 
+          {%- comment -%}
+            Token-Substitution für dynamische Loox-Werte:
+            - {{rating}}  → shop.metafields.loox.avg_rating  (Fallback: 4,8)
+            - {{count}}   → shop.metafields.loox.num_reviews (Fallback: 431)
+            Falls Loox keine Shop-Aggregate exposed, greifen die Fallbacks
+            automatisch — Bar bleibt funktional.
+          {%- endcomment -%}
+          {%- assign ann_loox_rating_raw = shop.metafields.loox.avg_rating | plus: 0 -%}
+          {%- if ann_loox_rating_raw > 0 -%}
+            {%- assign ann_loox_rating = ann_loox_rating_raw | round: 1 | replace: '.', ',' -%}
+          {%- else -%}
+            {%- assign ann_loox_rating = '4,8' -%}
+          {%- endif -%}
+          {%- assign ann_loox_count_raw = shop.metafields.loox.num_reviews | plus: 0 -%}
+          {%- if ann_loox_count_raw > 0 -%}
+            {%- assign ann_loox_count = ann_loox_count_raw -%}
+          {%- else -%}
+            {%- assign ann_loox_count = '431' -%}
+          {%- endif -%}
+
           <div class="announcement-bar__slider" data-js-slider>
             {%- for block in section.blocks -%}
+              {%- assign ann_text = block.settings.text
+                  | replace: '{{rating}}', ann_loox_rating
+                  | replace: '{{count}}', ann_loox_count -%}
               <span class="announcement" {{ block.shopify_attributes }}>
                 {%- if block.settings.link != blank -%}
                   <a
@@ -59,7 +82,7 @@
                     {% endif %}
                   >
                 {%- endif -%}
-                {{ block.settings.text | escape }}
+                {{ ann_text | escape }}
                 {%- if block.settings.link != blank -%}</a>{%- endif -%}
               </span>
             {%- endfor -%}

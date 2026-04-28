@@ -141,11 +141,11 @@
   var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   /* ---- Timing-Konstanten (zentral, einfach tunbar) ---- */
-  var INTRO_DELAY_MS   = 600;  /* Pause nach Sichtbarwerden, bevor die Animation startet */
-  var AGE_DURATION_MS  = 2800; /* Countdown 60 -> 56 */
+  var INTRO_DELAY_MS   = 200;  /* Pause nach Sichtbarwerden, bevor die Animation startet */
+  var AGE_DURATION_MS  = 2200; /* Countdown 60 -> 56 */
   var BAR_DURATION_MS  = 1400; /* Füll-Dauer pro Balken */
-  var BAR_STAGGER_MS   = 280;  /* Verzögerung zwischen den Balken */
-  var BAR_POST_DELAY   = 200;  /* Kurze Atempause zwischen Countdown-Ende und Balken-Start */
+  var BAR_STAGGER_MS   = 240;  /* Verzögerung zwischen den Balken */
+  var BAR_START_OFFSET = 350;  /* Balken starten leicht versetzt zum Age-Countdown (parallel statt sequenziell) */
 
   function animateBars() {
     var fills = root.querySelectorAll('.ltw-bar__fill');
@@ -218,11 +218,11 @@
       if (ageNumber.dataset.ageAnimated === 'true') return;
       ageNumber.dataset.ageAnimated = 'true';
 
-      /* Sequenz: kurze Einstiegspause -> Alter-Countdown -> Balken füllen */
+      /* Sequenz: kurze Einstiegspause -> Alter-Countdown UND Balken füllen parallel
+         (Balken mit leichtem Versatz, damit der Age-Countdown initialen Fokus hat) */
       setTimeout(function() {
-        animateAgeNumber(function onAgeDone() {
-          setTimeout(animateBars, BAR_POST_DELAY);
-        });
+        animateAgeNumber();
+        setTimeout(animateBars, BAR_START_OFFSET);
       }, INTRO_DELAY_MS);
     }
 
