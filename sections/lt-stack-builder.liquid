@@ -1,0 +1,659 @@
+{%- comment -%}
+  Stack-Builder MVP
+  -----------------
+  Customer baut seinen eigenen Longevity-Stack aus stack-eligible Produkten.
+  Live-Total mit gestaffelten Bundle-Rabatten. Gestapelte Discount-Logik:
+  Code (15-33%) + bestehender 10%-Single-Abo-Selling-Plan ergibt effektiv
+  23/28/33/37/40 % vom Vollpreis (Tier 2..6).
+
+  Voraussetzungen:
+  - Collection (default `stack-eligible`) mit den Stack-Produkten
+  - Discount-Codes LT-STACK2..6 in Shopify Admin
+  - Existierende Single-Abo Selling Plans pro Produkt
+  - Kein eigener "Stack-Lieferung"-Selling-Plan nötig (Stacking-Modell)
+
+  Konfigurierbar im Theme-Editor:
+  - Heading / Subheading / Note
+  - Stack-Eligible Collection Handle
+{%- endcomment -%}
+
+<section class="lt-stack-builder section-{{ section.id }}-stack">
+  <div class="container--large container--vertical-space">
+
+    <header class="lt-stack-header">
+      {%- if section.settings.kicker != blank -%}
+        <p class="lt-stack-kicker">{{ section.settings.kicker | escape }}</p>
+      {%- endif -%}
+      <h1 class="lt-stack-title">{{ section.settings.heading | default: 'Stell dir deinen Stack zusammen' | escape }}</h1>
+      {%- if section.settings.subheading != blank -%}
+        <p class="lt-stack-sub">{{ section.settings.subheading }}</p>
+      {%- endif -%}
+    </header>
+
+    <div class="lt-stack-layout">
+      <div class="lt-stack-grid" id="lt-stack-grid-{{ section.id }}" data-stack-grid>
+        <p class="lt-stack-loading">Stack wird geladen…</p>
+      </div>
+
+      <aside class="lt-stack-sidebar" id="lt-stack-sidebar-{{ section.id }}" data-stack-sidebar></aside>
+    </div>
+
+  </div>
+</section>
+
+{%- assign stack_collection_handle = section.settings.product_collection | default: 'stack-eligible' -%}
+{%- assign stack_products = collections[stack_collection_handle].products -%}
+
+<script type="application/json" data-stack-products-{{ section.id }}>
+[
+  {%- for product in stack_products -%}
+    {%- assign variant = product.selected_or_first_available_variant -%}
+    {%- assign sp = product.selling_plan_groups.first.selling_plans.first -%}
+    {
+      "id": {{ product.id }},
+      "handle": {{ product.handle | json }},
+      "title": {{ product.title | json }},
+      "image": {{ product.featured_image | image_url: width: 400 | json }},
+      "variantId": {{ variant.id }},
+      "priceCents": {{ variant.price }},
+      "sellingPlanId": {%- if sp -%}{{ sp.id }}{%- else -%}null{%- endif -%},
+      "claim": {{ product.metafields.custom.product-benefit | default: '' | json }},
+      "portion": {{ product.metafields.custom.portion_label | default: '60 Kapseln · 1 Monat' | json }}
+    }{%- unless forloop.last -%},{%- endunless -%}
+  {%- endfor -%}
+]
+</script>
+
+<script>
+  (function() {
+    var sectionId = '{{ section.id }}';
+    var grid = document.querySelector('[data-stack-grid]');
+    var sidebar = document.querySelector('[data-stack-sidebar]');
+    var dataEl = document.querySelector('[data-stack-products-' + sectionId + ']');
+    if (!grid || !sidebar || !dataEl) return;
+
+    var products = [];
+    try { products = JSON.parse(dataEl.textContent); } catch (e) {}
+    if (!products.length) {
+      grid.innerHTML = '<p class="lt-stack-empty">Keine Stack-Produkte konfiguriert. Bitte Collection prüfen.</p>';
+      return;
+    }
+
+    /* Tier-Set: codePercent ist der reine Code-Wert in Shopify Admin.
+       Effektive Rabattrate ergibt sich aus Stacking mit dem 10%-Single-Abo-
+       Selling-Plan (≈ codePercent + 10pp − codePercent×10pp). */
+    var tiers = [
+      { min: 2, code: 'LT-STACK2', codePercent: 0.15, effectivePct: 23 },
+      { min: 3, code: 'LT-STACK3', codePercent: 0.20, effectivePct: 28 },
+      { min: 4, code: 'LT-STACK4', codePercent: 0.25, effectivePct: 33 },
+      { min: 5, code: 'LT-STACK5', codePercent: 0.30, effectivePct: 37 },
+      { min: 6, code: 'LT-STACK6', codePercent: 0.33, effectivePct: 40 }
+    ];
+
+    var selected = new Set();
+
+    /* Initial-State aus URL: ?stack=handle1,handle2,... */
+    (function readUrl() {
+      var params = new URLSearchParams(window.location.search);
+      var raw = params.get('stack');
+      if (!raw) return;
+      raw.split(',').forEach(function(handle) {
+        var p = products.find(function(x) { return x.handle === handle.trim(); });
+        if (p) selected.add(p.id);
+      });
+    })();
+
+    function findTier(count) {
+      var match = null;
+      for (var i = 0; i < tiers.length; i++) if (count >= tiers[i].min) match = tiers[i];
+      return match;
+    }
+    function findNextTier(count) {
+      for (var i = 0; i < tiers.length; i++) if (count < tiers[i].min) return tiers[i];
+      return null;
+    }
+    function fmt(cents) {
+      return (cents / 100).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+    }
+    function escape(s) {
+      var d = document.createElement('div');
+      d.textContent = s == null ? '' : String(s);
+      return d.innerHTML;
+    }
+
+    function calc() {
+      var items = [];
+      selected.forEach(function(id) {
+        var p = products.find(function(x) { return x.id === id; });
+        if (p) items.push(p);
+      });
+      var subtotalAbo = items.reduce(function(s, p) { return s + p.priceCents; }, 0);
+      var tier = findTier(items.length);
+      var nextTier = findNextTier(items.length);
+      var stackDiscount = tier ? Math.round(subtotalAbo * tier.codePercent) : 0;
+      var total = subtotalAbo - stackDiscount;
+      return { items: items, subtotalAbo: subtotalAbo, tier: tier, nextTier: nextTier, stackDiscount: stackDiscount, total: total };
+    }
+
+    function syncUrl() {
+      var handles = [];
+      selected.forEach(function(id) {
+        var p = products.find(function(x) { return x.id === id; });
+        if (p) handles.push(p.handle);
+      });
+      var url = new URL(window.location.href);
+      if (handles.length) url.searchParams.set('stack', handles.join(','));
+      else url.searchParams.delete('stack');
+      window.history.replaceState({}, '', url);
+    }
+
+    function renderGrid() {
+      grid.innerHTML = products.map(function(p) {
+        var isSel = selected.has(p.id);
+        return ''
+          + '<button class="lt-stack-card' + (isSel ? ' is-selected' : '') + '" data-id="' + p.id + '" type="button" aria-pressed="' + (isSel ? 'true' : 'false') + '">'
+          +   '<span class="lt-stack-card__check" aria-hidden="true">' + (isSel ? '✓' : '+') + '</span>'
+          +   '<div class="lt-stack-card__media"><img src="' + p.image + '" alt="' + escape(p.title) + '" loading="lazy"></div>'
+          +   '<div class="lt-stack-card__body">'
+          +     '<h3>' + escape(p.title) + '</h3>'
+          +     (p.claim ? '<p class="lt-stack-card__claim">' + escape(p.claim) + '</p>' : '')
+          +     '<p class="lt-stack-card__portion">' + escape(p.portion) + '</p>'
+          +     '<p class="lt-stack-card__price">' + fmt(p.priceCents) + '<small> /Monat im Abo</small></p>'
+          +   '</div>'
+          +   '<span class="lt-stack-card__cta">' + (isSel ? '✓ Im Stack' : 'Hinzufügen') + '</span>'
+          + '</button>';
+      }).join('');
+    }
+
+    function renderSidebar() {
+      var c = calc();
+
+      var html = '<div class="lt-stack-bar">';
+
+      /* Tier-Progress */
+      html += '<div class="lt-stack-progress">';
+      if (c.items.length === 0) {
+        html += '<p class="lt-stack-progress__hint">Wähle 2 + Produkte für deinen Stack-Bonus</p>';
+      } else if (c.nextTier) {
+        var pct = (c.items.length / c.nextTier.min) * 100;
+        html += '<div class="lt-stack-progress__bar"><span style="width:' + Math.min(pct, 100).toFixed(0) + '%"></span></div>';
+        var remaining = c.nextTier.min - c.items.length;
+        html += '<p class="lt-stack-progress__hint">'
+             + 'Noch ' + remaining + ' Produkt' + (remaining > 1 ? 'e' : '')
+             + ' für <strong>' + c.nextTier.effectivePct + ' % Stack-Bonus</strong>'
+             + '</p>';
+      } else if (c.tier) {
+        html += '<div class="lt-stack-progress__bar"><span style="width:100%"></span></div>';
+        html += '<p class="lt-stack-progress__hint">'
+             + 'Top-Tier erreicht — <strong>' + c.tier.effectivePct + ' % Stack-Bonus</strong> aktiv'
+             + '</p>';
+      }
+      html += '</div>';
+
+      /* Items-Liste */
+      html += '<div class="lt-stack-list">';
+      html += '<h3 class="lt-stack-list__heading">Dein Stack <span>(' + c.items.length + ')</span></h3>';
+      if (c.items.length === 0) {
+        html += '<p class="lt-stack-list__empty">Noch leer. Wähle deine Wirkstoffe links.</p>';
+      } else {
+        html += '<ul>';
+        c.items.forEach(function(p) {
+          html += '<li>'
+                + '<span class="lt-stack-list__title">' + escape(p.title) + '</span>'
+                + '<span class="lt-stack-list__price">' + fmt(p.priceCents) + '/Mo</span>'
+                + '<button class="lt-stack-list__remove" data-remove="' + p.id + '" aria-label="' + escape(p.title) + ' entfernen" type="button">×</button>'
+                + '</li>';
+        });
+        html += '</ul>';
+      }
+      html += '</div>';
+
+      /* Totals */
+      if (c.items.length > 0) {
+        html += '<div class="lt-stack-totals">';
+        html += '<div class="lt-stack-totals__row"><span>Zwischensumme (Abo)</span><span>' + fmt(c.subtotalAbo) + '</span></div>';
+        if (c.tier) {
+          html += '<div class="lt-stack-totals__row lt-stack-totals__discount"><span>Stack-Bonus (' + c.tier.code + ')</span><span>−' + fmt(c.stackDiscount) + '</span></div>';
+        }
+        html += '<div class="lt-stack-totals__row lt-stack-totals__total"><span>Monatlich</span><strong>' + fmt(c.total) + '</strong></div>';
+        html += '</div>';
+      }
+
+      /* CTA */
+      html += '<button class="lt-stack-cta" data-stack-submit type="button"' + (c.items.length < 2 ? ' disabled' : '') + '>';
+      if (c.items.length === 0)      html += 'Mindestens 2 Produkte wählen';
+      else if (c.items.length === 1) html += 'Noch 1 Produkt für Stack-Bonus';
+      else                            html += 'Stack abonnieren →';
+      html += '</button>';
+
+      html += '<p class="lt-stack-flex">Jederzeit pausierbar oder kündbar. Kostenloser Versand inklusive.</p>';
+
+      html += '</div>'; /* /.lt-stack-bar */
+
+      sidebar.innerHTML = html;
+    }
+
+    function rerender() {
+      renderGrid();
+      renderSidebar();
+      syncUrl();
+    }
+
+    grid.addEventListener('click', function(e) {
+      var card = e.target.closest('[data-id]');
+      if (!card) return;
+      e.preventDefault();
+      var id = parseInt(card.getAttribute('data-id'), 10);
+      if (selected.has(id)) selected.delete(id);
+      else selected.add(id);
+      rerender();
+    });
+
+    sidebar.addEventListener('click', function(e) {
+      var rem = e.target.closest('[data-remove]');
+      if (rem) {
+        var id = parseInt(rem.getAttribute('data-remove'), 10);
+        selected.delete(id);
+        rerender();
+        return;
+      }
+      var cta = e.target.closest('[data-stack-submit]');
+      if (cta && !cta.disabled) submitStack();
+    });
+
+    async function submitStack() {
+      var c = calc();
+      if (c.items.length < 2 || !c.tier) return;
+      var cta = sidebar.querySelector('[data-stack-submit]');
+      cta.disabled = true;
+      cta.textContent = 'Wird vorbereitet…';
+
+      try {
+        await fetch('/cart/clear.js', { method: 'POST' });
+        var items = c.items.map(function(p) {
+          var item = { id: p.variantId, quantity: 1 };
+          if (p.sellingPlanId) item.selling_plan = p.sellingPlanId;
+          return item;
+        });
+        var res = await fetch('/cart/add.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({ items: items })
+        });
+        if (!res.ok) {
+          var body = await res.text();
+          throw new Error('cart/add ' + res.status + ': ' + body);
+        }
+        window.location.href = '/discount/' + c.tier.code + '?redirect=/checkout';
+      } catch (err) {
+        cta.disabled = false;
+        cta.textContent = 'Erneut versuchen →';
+        console.error('[lt-stack-builder]', err);
+      }
+    }
+
+    rerender();
+  })();
+</script>
+
+<style>
+  .section-{{ section.id }}-stack {
+    background: var(--color-surface-secondary, #F6F4F1);
+  }
+
+  .section-{{ section.id }}-stack .lt-stack-header {
+    text-align: center;
+    max-width: 640px;
+    margin: 0 auto var(--space-8, 64px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-kicker {
+    font-family: var(--font-body, 'Lato');
+    font-size: var(--text-micro, 12px);
+    font-weight: var(--weight-medium, 500);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.65;
+    margin: 0 0 var(--space-3, 12px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-title {
+    font-family: var(--font-heading, Helvetica);
+    font-size: var(--text-h1, 36px);
+    font-weight: var(--weight-bold, 700);
+    line-height: var(--leading-heading, 1.15);
+    margin: 0 0 var(--space-4, 16px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-sub {
+    font-size: var(--text-body-lg, 18px);
+    line-height: var(--leading-body, 1.4);
+    color: var(--color-text-secondary, #525252);
+    margin: 0;
+  }
+
+  /* Layout: Desktop = Grid + Sidebar nebeneinander */
+  .section-{{ section.id }}-stack .lt-stack-layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: var(--space-6, 32px);
+    align-items: start;
+  }
+  @media (max-width: 1023px) {
+    .section-{{ section.id }}-stack .lt-stack-layout {
+      grid-template-columns: 1fr;
+      gap: var(--space-5, 24px);
+    }
+  }
+
+  /* Produktgrid */
+  .section-{{ section.id }}-stack .lt-stack-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4, 16px);
+  }
+  @media (max-width: 1023px) {
+    .section-{{ section.id }}-stack .lt-stack-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 480px) {
+    .section-{{ section.id }}-stack .lt-stack-grid { grid-template-columns: 1fr; }
+  }
+  .section-{{ section.id }}-stack .lt-stack-loading {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--color-text-muted, #A3A3A3);
+    padding: var(--space-7, 48px) 0;
+  }
+
+  /* Card */
+  .section-{{ section.id }}-stack .lt-stack-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    background: #fff;
+    border: 1px solid var(--color-border-default, #E5E5E5);
+    border-radius: var(--radius-md, 12px);
+    padding: var(--space-4, 16px);
+    cursor: pointer;
+    transition: border-color var(--ease-default, 0.2s ease), transform var(--ease-default, 0.2s ease), box-shadow var(--ease-default, 0.2s ease);
+  }
+  .section-{{ section.id }}-stack .lt-stack-card:hover {
+    border-color: var(--color-dark, #364F56);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+  }
+  .section-{{ section.id }}-stack .lt-stack-card.is-selected {
+    border-color: var(--color-dark, #364F56);
+    box-shadow: 0 0 0 2px var(--color-dark, #364F56);
+  }
+  .section-{{ section.id }}-stack .lt-stack-card__check {
+    position: absolute;
+    top: var(--space-3, 12px);
+    right: var(--space-3, 12px);
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-full, 999px);
+    border: 1px solid var(--color-border-default, #E5E5E5);
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: var(--weight-bold, 700);
+    color: var(--color-text-muted, #A3A3A3);
+    transition: all var(--ease-default, 0.2s ease);
+  }
+  .section-{{ section.id }}-stack .lt-stack-card.is-selected .lt-stack-card__check {
+    background: var(--color-dark, #364F56);
+    color: #fff;
+    border-color: var(--color-dark, #364F56);
+  }
+  .section-{{ section.id }}-stack .lt-stack-card__media {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-4, 16px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-card__media img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+  .section-{{ section.id }}-stack .lt-stack-card__body { flex: 1; }
+  .section-{{ section.id }}-stack .lt-stack-card h3 {
+    font-family: var(--font-heading, Helvetica);
+    font-size: var(--text-h3, 24px);
+    font-weight: var(--weight-bold, 700);
+    margin: 0 0 var(--space-2, 8px);
+    line-height: 1.2;
+  }
+  .section-{{ section.id }}-stack .lt-stack-card__claim {
+    font-size: var(--text-body-sm, 14px);
+    color: var(--color-text-secondary, #525252);
+    margin: 0 0 var(--space-2, 8px);
+    line-height: 1.4;
+  }
+  .section-{{ section.id }}-stack .lt-stack-card__portion {
+    font-size: var(--text-micro, 12px);
+    color: var(--color-text-muted, #A3A3A3);
+    margin: 0 0 var(--space-3, 12px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-card__price {
+    font-size: var(--text-body-lg, 18px);
+    font-weight: var(--weight-semibold, 600);
+    margin: 0 0 var(--space-4, 16px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-card__price small {
+    font-weight: var(--weight-regular, 400);
+    color: var(--color-text-muted, #A3A3A3);
+    font-size: var(--text-body-sm, 14px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-card__cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    border-radius: var(--radius-full, 999px);
+    border: 1px solid var(--color-dark, #364F56);
+    color: var(--color-dark, #364F56);
+    font-family: var(--font-body, 'Lato');
+    font-size: var(--text-body-sm, 14px);
+    font-weight: var(--weight-semibold, 600);
+    background: transparent;
+    transition: all var(--ease-default, 0.2s ease);
+  }
+  .section-{{ section.id }}-stack .lt-stack-card.is-selected .lt-stack-card__cta {
+    background: var(--color-dark, #364F56);
+    color: #fff;
+  }
+
+  /* Sidebar */
+  .section-{{ section.id }}-stack .lt-stack-sidebar {
+    position: sticky;
+    top: var(--space-7, 48px);
+  }
+  @media (max-width: 1023px) {
+    .section-{{ section.id }}-stack .lt-stack-sidebar {
+      position: sticky;
+      bottom: 0;
+      top: auto;
+      z-index: 5;
+    }
+  }
+  .section-{{ section.id }}-stack .lt-stack-bar {
+    background: #fff;
+    border: 1px solid var(--color-border-default, #E5E5E5);
+    border-radius: var(--radius-md, 12px);
+    padding: var(--space-5, 24px);
+    box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.08));
+  }
+
+  .section-{{ section.id }}-stack .lt-stack-progress { margin-bottom: var(--space-5, 24px); }
+  .section-{{ section.id }}-stack .lt-stack-progress__bar {
+    height: 6px;
+    background: var(--color-gray-200, #E5E5E5);
+    border-radius: var(--radius-full, 999px);
+    overflow: hidden;
+    margin-bottom: var(--space-2, 8px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-progress__bar span {
+    display: block;
+    height: 100%;
+    background: var(--color-dark, #364F56);
+    transition: width var(--ease-smooth, 0.4s ease);
+  }
+  .section-{{ section.id }}-stack .lt-stack-progress__hint {
+    font-size: var(--text-body-sm, 14px);
+    margin: 0;
+    color: var(--color-text-secondary, #525252);
+  }
+  .section-{{ section.id }}-stack .lt-stack-progress__hint strong {
+    color: var(--color-text-primary, #000);
+    font-weight: var(--weight-semibold, 600);
+  }
+
+  .section-{{ section.id }}-stack .lt-stack-list { margin-bottom: var(--space-5, 24px); }
+  .section-{{ section.id }}-stack .lt-stack-list__heading {
+    font-family: var(--font-heading, Helvetica);
+    font-size: var(--text-section, 20px);
+    font-weight: var(--weight-bold, 700);
+    margin: 0 0 var(--space-3, 12px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-list__heading span {
+    color: var(--color-text-muted, #A3A3A3);
+    font-weight: var(--weight-regular, 400);
+  }
+  .section-{{ section.id }}-stack .lt-stack-list__empty {
+    font-size: var(--text-body-sm, 14px);
+    color: var(--color-text-muted, #A3A3A3);
+    margin: 0;
+  }
+  .section-{{ section.id }}-stack .lt-stack-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2, 8px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-list li {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: var(--space-3, 12px);
+    font-size: var(--text-body-sm, 14px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-list__title { color: var(--color-text-primary, #000); }
+  .section-{{ section.id }}-stack .lt-stack-list__price { color: var(--color-text-muted, #A3A3A3); white-space: nowrap; }
+  .section-{{ section.id }}-stack .lt-stack-list__remove {
+    width: 22px; height: 22px; min-width: 22px;
+    border-radius: var(--radius-full, 999px);
+    border: none;
+    background: var(--color-gray-200, #E5E5E5);
+    color: var(--color-text-secondary, #525252);
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0;
+  }
+  .section-{{ section.id }}-stack .lt-stack-list__remove:hover { background: var(--color-text-secondary, #525252); color: #fff; }
+
+  .section-{{ section.id }}-stack .lt-stack-totals {
+    border-top: 1px solid var(--color-border-default, #E5E5E5);
+    padding-top: var(--space-4, 16px);
+    margin-bottom: var(--space-4, 16px);
+    font-size: var(--text-body-sm, 14px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2, 8px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-totals__row {
+    display: flex;
+    justify-content: space-between;
+  }
+  .section-{{ section.id }}-stack .lt-stack-totals__discount { color: var(--color-success, #22C55E); }
+  .section-{{ section.id }}-stack .lt-stack-totals__total {
+    border-top: 1px solid var(--color-border-default, #E5E5E5);
+    padding-top: var(--space-3, 12px);
+    margin-top: var(--space-2, 8px);
+    font-size: var(--text-body-lg, 18px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-totals__total strong {
+    font-weight: var(--weight-bold, 700);
+  }
+
+  .section-{{ section.id }}-stack .lt-stack-cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 48px;
+    border-radius: var(--radius-full, 999px);
+    border: none;
+    background: var(--color-dark, #364F56);
+    color: #fff;
+    font-family: var(--font-body, 'Lato');
+    font-size: var(--text-body-sm, 14px);
+    font-weight: var(--weight-semibold, 600);
+    cursor: pointer;
+    transition: opacity var(--ease-default, 0.2s ease);
+  }
+  .section-{{ section.id }}-stack .lt-stack-cta:hover:not([disabled]) { opacity: 0.92; }
+  .section-{{ section.id }}-stack .lt-stack-cta[disabled] {
+    background: var(--color-gray-200, #E5E5E5);
+    color: var(--color-text-muted, #A3A3A3);
+    cursor: not-allowed;
+  }
+
+  .section-{{ section.id }}-stack .lt-stack-flex {
+    text-align: center;
+    font-size: var(--text-micro, 12px);
+    color: var(--color-text-muted, #A3A3A3);
+    margin: var(--space-3, 12px) 0 0;
+  }
+</style>
+
+{% schema %}
+{
+  "name": "Stack Builder",
+  "tag": "section",
+  "class": "lt-stack-builder-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Inhalt"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (Label)",
+      "default": "Mein Longevity-Stack"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Stell dir deinen Stack zusammen"
+    },
+    {
+      "type": "richtext",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "<p>Du wählst die Wirkstoffe. Wir liefern monatlich. Bis zu 40 % Rabatt mit dem 6er-Stack — jederzeit pausierbar.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Datenquelle"
+    },
+    {
+      "type": "text",
+      "id": "product_collection",
+      "label": "Collection-Handle",
+      "info": "Handle der Collection mit den Stack-eligible Produkten. Default: stack-eligible.",
+      "default": "stack-eligible"
+    }
+  ],
+  "presets": [
+    { "name": "Stack Builder" }
+  ]
+}
+{% endschema %}
