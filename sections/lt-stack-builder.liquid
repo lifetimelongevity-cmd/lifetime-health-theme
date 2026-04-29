@@ -546,8 +546,9 @@
   /* Toggle-Header: Desktop hidden */
   .section-{{ section.id }}-stack .lt-stack-sheet-toggle { display: none; }
 
-  /* Backdrop: Desktop hidden */
+  /* Backdrop: immer hidden, sofern nicht vom JS via Attribut entfernt */
   .lt-stack-backdrop { display: none; }
+  .lt-stack-backdrop[hidden] { display: none !important; }
 
   /* ---- Mobile: Bottom-Sheet-Pattern ---- */
   @media (max-width: 1023px) {
@@ -646,8 +647,8 @@
       display: none;
     }
 
-    /* Backdrop sichtbar nur wenn expanded */
-    .lt-stack-backdrop {
+    /* Backdrop nur sichtbar, wenn JS [hidden] entfernt hat (d.h. expanded) */
+    .lt-stack-backdrop:not([hidden]) {
       display: block;
       position: fixed;
       inset: 0;
@@ -658,6 +659,12 @@
     @keyframes lt-stack-backdrop-in {
       from { opacity: 0; }
       to   { opacity: 1; }
+    }
+
+    /* Collapsed-Sheet ist ~180px hoch — Layout braucht Padding-Bottom,
+       damit das letzte Produkt nicht unter dem Sheet liegt */
+    .section-{{ section.id }}-stack .lt-stack-layout {
+      padding-bottom: 200px;
     }
   }
 
