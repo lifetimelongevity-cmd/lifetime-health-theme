@@ -1,0 +1,101 @@
+{%- comment -%}
+  Stack-Mailout Customer-Link
+  ---------------------------
+  Wird genutzt für 1:1-Mail-Antworten an Kunden, die einen kompletten
+  6-Produkte-Stack als Monats-Abo + LT-STACK6-Rabatt geschickt bekommen.
+
+  Ablauf beim Klick auf den Customer-Link (z. B. /pages/stack-mailout):
+    1. Vorhandener Session-Cart wird geleert
+    2. Alle 6 Produkte werden via /cart/add.js mit Selling-Plan zugefügt
+    3. Weiterleitung an /discount/LT-STACK6?redirect=/cart
+       → Shopify aktiviert den Code und landet im Warenkorb mit ~102,15 €/Mo
+
+  Hardcoded Variant- und Selling-Plan-IDs entstammen dem Mail-Customer-Cart
+  vom 2026-04-29. Wenn sich Varianten oder Selling Plans ändern, hier
+  aktualisieren.
+
+  Diese Section ist NICHT für die spätere Stack-Builder-Page gedacht —
+  dort generieren wir den Cart dynamisch aus User-Auswahl.
+{%- endcomment -%}
+
+<noscript>
+  <meta http-equiv="refresh" content="0; url=/discount/LT-STACK6?redirect=/cart">
+</noscript>
+
+<div class="container--large container--vertical-space" style="text-align: center; padding: 80px 20px; min-height: 50vh;">
+  <h1 id="lt-stack-status" style="font-family: var(--font-heading, Helvetica); font-size: 28px; margin-bottom: 16px;">
+    Ihr Stack wird vorbereitet…
+  </h1>
+  <p id="lt-stack-detail" style="opacity: 0.7; font-size: 16px;">
+    Einen Moment Geduld — wir leiten Sie automatisch zum Warenkorb weiter.
+  </p>
+  <div id="lt-stack-spinner" style="margin-top: 32px;">
+    <svg width="32" height="32" viewBox="0 0 50 50" style="animation: lt-spin 1s linear infinite;">
+      <circle cx="25" cy="25" r="20" fill="none" stroke="#364F56" stroke-width="4" stroke-dasharray="80 40"/>
+    </svg>
+  </div>
+</div>
+
+<style>
+  @keyframes lt-spin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+
+<script>
+  (async function() {
+    var status = document.getElementById('lt-stack-status');
+    var detail = document.getElementById('lt-stack-detail');
+    var spinner = document.getElementById('lt-stack-spinner');
+
+    // Items für den Mail-Customer (6 Produkte als Monats-Abo)
+    var items = [
+      { id: 44437010874468, quantity: 1, selling_plan: 710075023735 }, /* Resveratrol */
+      { id: 44456516026468, quantity: 1, selling_plan: 710075023735 }, /* Spermidin */
+      { id: 44456424570980, quantity: 1, selling_plan: 710075023735 }, /* Fisetin */
+      { id: 44432070934628, quantity: 1, selling_plan: 710075023735 }, /* TMG */
+      { id: 55864400707959, quantity: 1, selling_plan: 712286142839 }, /* NAD+ liposomal — anderer Plan! */
+      { id: 44456414150756, quantity: 1, selling_plan: 710075023735 }  /* CaAKG */
+    ];
+
+    function showError(msg, err) {
+      if (status)  status.textContent = 'Etwas ist schiefgelaufen';
+      if (detail)  detail.innerHTML = msg + ' Bitte kontaktieren Sie uns direkt — wir helfen Ihnen sofort weiter.';
+      if (spinner) spinner.style.display = 'none';
+      if (err) console.error('[lt-stack-mailout]', err);
+    }
+
+    try {
+      /* Vorhandenen Cart leeren, falls Session schon Items hatte */
+      await fetch('/cart/clear.js', { method: 'POST' });
+
+      /* Alle 6 Items in einem Request */
+      var res = await fetch('/cart/add.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ items: items })
+      });
+
+      if (!res.ok) {
+        var body = await res.text();
+        throw new Error('cart/add ' + res.status + ': ' + body);
+      }
+
+      /* Discount-Code aktivieren und in den Cart leiten */
+      window.location.href = '/discount/LT-STACK6?redirect=/cart';
+    } catch (err) {
+      showError('Wir konnten den Warenkorb nicht automatisch befüllen.', err);
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Stack Mailout",
+  "settings": [],
+  "presets": [
+    { "name": "Stack Mailout" }
+  ]
+}
+{% endschema %}
