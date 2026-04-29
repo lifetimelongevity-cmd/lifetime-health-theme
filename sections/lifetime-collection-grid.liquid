@@ -111,6 +111,42 @@
         {%- assign card_image_alt = product.featured_image.alt | escape -%}
       {%- endif -%}
 
+      {%- comment -%}
+        Button-Label-Resolution + HTML-Capture:
+        - Leeres button_label → Auto-Mode mit Token-konformem CTA (dark bg, white text)
+          - "In den Warenkorb" für ATC-Karten
+          - "Zum Produkt" für PDP-Karten (Ausnahmen wie AGE/DNA, NMN Pulver)
+        - Beide Auto-Varianten nutzen .cg-card__btn--cta (#364F56 + weiß)
+        - Manuelles button_label im Editor → Legacy-Inline-Style mit Editor-Farben
+      {%- endcomment -%}
+      {%- assign resolved_button_label = block.settings.button_label -%}
+      {%- assign button_auto_mode = false -%}
+      {%- if resolved_button_label == blank and product != blank -%}
+        {%- assign button_auto_mode = true -%}
+        {%- if use_atc_drawer -%}
+          {%- assign resolved_button_label = 'In den Warenkorb' -%}
+        {%- else -%}
+          {%- assign resolved_button_label = 'Zum Produkt' -%}
+        {%- endif -%}
+      {%- endif -%}
+
+      {%- capture button_html -%}
+        {%- if resolved_button_label != blank -%}
+          {%- if button_auto_mode -%}
+            <span class="cg-card__btn cg-card__btn--auto cg-card__btn--cta">
+              {{ resolved_button_label | escape }}
+            </span>
+          {%- else -%}
+            <span
+              class="cg-card__btn"
+              style="background-color: {{ block.settings.button_bg_color }}; color: {{ block.settings.button_text_color }};"
+            >
+              {{ resolved_button_label | escape }}
+            </span>
+          {%- endif -%}
+        {%- endif -%}
+      {%- endcapture -%}
+
       <a
         href="{{ card_href }}"
         class="cg-card{% if use_bg_img %} cg-card--bg{% endif %}{% if use_atc_drawer %} cg-card--atc{% endif %}"
@@ -217,42 +253,12 @@
           {%- endif -%}
 
           {%- comment -%}
-            Auto-Label, wenn block.settings.button_label leer ist:
-            - ATC-Drawer-Modus → "In den Warenkorb" (CTA-Variante: dark bg, white text)
-            - PDP-Modus (inkl. Ausnahmen wie AGE/DNA-Test, NMN Pulver) → "Zum Produkt"
-              (Outline-Variante: transparent bg, dark text + border)
-            Manuelles button_label im Editor übersteuert Label und Style (legacy color settings).
-            Im Auto-Modus folgt der Button den Design-Tokens aus design-governance.md
-            (radius-full, 48px Höhe, --color-dark/white, semibold).
+            Button-HTML wird in cg-card__footer am Karten-Boden gerendert
+            (siehe weiter unten). Innerhalb des Body bleibt der Button nur
+            für bg-image-Karten (Hero-Variante mit überlagertem Text).
           {%- endcomment -%}
-          {%- assign resolved_button_label = block.settings.button_label -%}
-          {%- assign button_auto_mode = false -%}
-          {%- if resolved_button_label == blank and product != blank -%}
-            {%- assign button_auto_mode = true -%}
-            {%- if use_atc_drawer -%}
-              {%- assign resolved_button_label = 'In den Warenkorb' -%}
-            {%- else -%}
-              {%- assign resolved_button_label = 'Zum Produkt' -%}
-            {%- endif -%}
-          {%- endif -%}
-
-          {%- if resolved_button_label != blank -%}
-            {%- if button_auto_mode -%}
-              {%- assign btn_variant_class = 'cg-card__btn--outline' -%}
-              {%- if use_atc_drawer -%}
-                {%- assign btn_variant_class = 'cg-card__btn--cta' -%}
-              {%- endif -%}
-              <span class="cg-card__btn cg-card__btn--auto {{ btn_variant_class }}">
-                {{ resolved_button_label | escape }}
-              </span>
-            {%- else -%}
-              <span
-                class="cg-card__btn"
-                style="background-color: {{ block.settings.button_bg_color }}; color: {{ block.settings.button_text_color }};"
-              >
-                {{ resolved_button_label | escape }}
-              </span>
-            {%- endif -%}
+          {%- if use_bg_img and resolved_button_label != blank -%}
+            {{ button_html }}
           {%- endif -%}
         </div>
 
@@ -277,6 +283,12 @@
               {{ 'product-1' | placeholder_svg_tag: 'cg-card__image cg-card__image--placeholder' }}
             {%- endif -%}
           </div>
+
+          {%- if resolved_button_label != blank -%}
+            <div class="cg-card__footer">
+              {{ button_html }}
+            </div>
+          {%- endif -%}
         {%- endunless -%}
 
       </a>
@@ -535,12 +547,38 @@
   }
 
   /* ============================================================
+     Card-Footer — verankert den CTA am Karten-Boden
+     ------------------------------------------------------------
+     Layout: .cg-card hat justify-content: space-between, mit
+     drei Kindern (body / image-wrap / footer) → body oben,
+     image mittig, footer unten.
+     ============================================================ */
+  .section-{{ section.id }}-cg .cg-card__footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: var(--space-5) var(--space-3) var(--space-6);
+    margin-top: auto; /* Defensive: zieht Footer auch dann ans Ende, wenn space-between durch Inhalt verschoben wäre */
+  }
+
+  @media (max-width: 749px) {
+    .section-{{ section.id }}-cg .cg-card__footer {
+      padding: var(--space-4) var(--space-3) var(--space-5);
+    }
+  }
+
+  /* ============================================================
      CTA Button — folgt design-governance.md §5 (Button-Specs)
      ------------------------------------------------------------
      Default: legacy mode mit Editor-Color-Settings (Inline-Styles)
      Auto-Mode: Token-konform (radius-full, 48px, semibold)
-       .cg-card__btn--cta     → revenue-driving (ATC)
-       .cg-card__btn--outline → secondary (zur PDP)
+       .cg-card__btn--cta     → primärer CTA (#364F56 + weiß).
+                                Wird sowohl für ATC als auch
+                                für PDP-Karten verwendet, damit
+                                visuell ein konsistenter Primary
+                                vorliegt.
+       .cg-card__btn--outline → reserviert für künftige Use-Cases,
+                                aktuell ungenutzt im Auto-Mode.
      ============================================================ */
   .section-{{ section.id }}-cg .cg-card__btn {
     /* display:flex statt inline-flex → eigene Zeile, nicht inline neben Rating */
@@ -548,8 +586,6 @@
     width: fit-content;
     align-items: center;
     justify-content: center;
-    /* --space-6 (32px) Atemraum vor dem CTA, per §6b Visual Weight */
-    margin: var(--space-6) auto 0;
     padding: 0 var(--space-6);
     min-height: 48px;
     font-family: var(--font-body);
@@ -563,14 +599,25 @@
     transition: opacity var(--ease-default), background-color var(--ease-default);
   }
 
-  /* CTA-Variante: ATC, revenue-driving */
+  /* Wenn der Button im body sitzt (bg-image-Karten), --space-6 Atemraum
+     zum darüberliegenden Element (Rating/Subline) per §6b Visual Weight. */
+  .section-{{ section.id }}-cg .cg-card__body .cg-card__btn {
+    margin: var(--space-6) auto 0;
+  }
+
+  /* Im Footer: Spacing kommt aus Footer-Padding, kein zusätzlicher Margin */
+  .section-{{ section.id }}-cg .cg-card__footer .cg-card__btn {
+    margin: 0 auto;
+  }
+
+  /* Primary-CTA-Variante (ATC + PDP-Ausnahmen) */
   .section-{{ section.id }}-cg .cg-card__btn--cta {
     background-color: var(--color-dark, #364F56);
     color: var(--color-text-on-dark, #FFFFFF);
     border-color: var(--color-dark, #364F56);
   }
 
-  /* Outline-Variante: PDP-Ausnahmen (AGE/DNA, NMN Pulver) */
+  /* Outline-Variante (reserviert; aktuell nicht im Auto-Mode genutzt) */
   .section-{{ section.id }}-cg .cg-card__btn--outline {
     background-color: transparent;
     color: var(--color-text-primary, #26251e);
@@ -588,6 +635,8 @@
   @media (max-width: 749px) {
     .section-{{ section.id }}-cg .cg-card__btn {
       padding: 0 var(--space-5);
+    }
+    .section-{{ section.id }}-cg .cg-card__body .cg-card__btn {
       margin-top: var(--space-5);
     }
   }
