@@ -61,20 +61,39 @@
 
       {%- comment -%}
         Link-Logik:
-        - section.settings.link_behavior == 'cart' → Karte fügt Variante direkt in den Warenkorb
-        - block.settings.force_product_link == true → Karte führt trotzdem zur PDP (Override)
-        - Existierende Priorität (product > custom_url) bleibt für Default-Fall erhalten.
+        - section.settings.link_behavior == 'cart' → Karten-Klick legt die Variante via /cart/add.js
+          in den Warenkorb. Drawer öffnet, User bleibt auf der Seite (kein Redirect).
+        - block.settings.force_product_link == true → Karte führt trotzdem zur PDP (Override).
+        - section.settings.pdp_exception_handles → komma-getrennte Handle-Liste, die immer zur
+          PDP führt (Backstop für AGE/DNA-Test und NMN Pulver, auch wenn force_product_link
+          versehentlich nicht gesetzt wäre).
+        - Fallback-href bei ATC-Modus = product.url, damit der Klick bei deaktiviertem
+          JavaScript nicht ins Leere geht (graceful degradation).
       {%- endcomment -%}
       {%- assign card_href = '#' -%}
-      {%- assign use_cart_link = false -%}
-      {%- if section.settings.link_behavior == 'cart' and block.settings.force_product_link != true and product != blank -%}
+      {%- assign use_atc_drawer = false -%}
+      {%- assign atc_variant_id = blank -%}
+
+      {%- assign pdp_exception_raw = section.settings.pdp_exception_handles | default: 'lifetime-age-dna,lifetime-nmn,nmn-pulver,age-dna-test' -%}
+      {%- assign pdp_exceptions = pdp_exception_raw | replace: ' ', '' | split: ',' -%}
+      {%- assign is_pdp_exception = false -%}
+      {%- if product_handle != blank and pdp_exceptions contains product_handle -%}
+        {%- assign is_pdp_exception = true -%}
+      {%- endif -%}
+
+      {%- if section.settings.link_behavior == 'cart'
+             and block.settings.force_product_link != true
+             and is_pdp_exception != true
+             and product != blank -%}
         {%- assign cart_variant_id = product.variants.first.id -%}
         {%- if cart_variant_id -%}
-          {%- assign card_href = '/cart/' | append: cart_variant_id | append: ':1' -%}
-          {%- assign use_cart_link = true -%}
+          {%- assign atc_variant_id = cart_variant_id -%}
+          {%- assign use_atc_drawer = true -%}
+          {%- comment -%} Fallback-Ziel ohne JS = PDP {%- endcomment -%}
+          {%- assign card_href = product.url -%}
         {%- endif -%}
       {%- endif -%}
-      {%- unless use_cart_link -%}
+      {%- unless use_atc_drawer -%}
         {%- if product != blank -%}
           {%- assign card_href = product.url -%}
         {%- elsif block.settings.custom_url != blank -%}
@@ -94,8 +113,12 @@
 
       <a
         href="{{ card_href }}"
-        class="cg-card{% if use_bg_img %} cg-card--bg{% endif %}"
+        class="cg-card{% if use_bg_img %} cg-card--bg{% endif %}{% if use_atc_drawer %} cg-card--atc{% endif %}"
         style="background-color: {{ card_bg }}; border-radius: {{ section.settings.card_border_radius }}px;"
+        {%- if use_atc_drawer -%}
+          data-lt-card-atc="{{ atc_variant_id }}"
+          aria-label="{{ product.title | escape }} in den Warenkorb legen"
+        {%- endif -%}
         {{ block.shopify_attributes }}
       >
 
@@ -193,12 +216,27 @@
             </div>
           {%- endif -%}
 
-          {%- if block.settings.button_label != blank -%}
+          {%- comment -%}
+            Auto-Label, wenn block.settings.button_label leer ist:
+            - ATC-Drawer-Modus → "In den Warenkorb"
+            - PDP-Modus (inkl. Ausnahmen wie AGE/DNA-Test, NMN Pulver) → "Zum Produkt"
+            Manuelles button_label im Editor übersteuert die Auto-Logik weiterhin.
+          {%- endcomment -%}
+          {%- assign resolved_button_label = block.settings.button_label -%}
+          {%- if resolved_button_label == blank and product != blank -%}
+            {%- if use_atc_drawer -%}
+              {%- assign resolved_button_label = 'In den Warenkorb' -%}
+            {%- else -%}
+              {%- assign resolved_button_label = 'Zum Produkt' -%}
+            {%- endif -%}
+          {%- endif -%}
+
+          {%- if resolved_button_label != blank -%}
             <span
               class="cg-card__btn"
               style="background-color: {{ block.settings.button_bg_color }}; color: {{ block.settings.button_text_color }};"
             >
-              {{ block.settings.button_label | escape }}
+              {{ resolved_button_label | escape }}
             </span>
           {%- endif -%}
         </div>
@@ -483,9 +521,13 @@
 
   /* ---- CTA Button ---- */
   .section-{{ section.id }}-cg .cg-card__btn {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     margin-top: var(--space-4);
     padding: 0.7em 1.2em;
+    /* Min-Höhe = 44px Touch-Target (Apple HIG / WCAG 2.5.5) */
+    min-height: 44px;
     font-family: var(--font-body);
     font-weight: var(--weight-medium);
     font-size: var(--text-body-sm);
@@ -497,6 +539,15 @@
 
   .section-{{ section.id }}-cg .cg-card:hover .cg-card__btn {
     opacity: 0.85;
+  }
+
+  /* ATC-Karten signalisieren Cursor + leichten Press-Effekt */
+  .section-{{ section.id }}-cg .cg-card--atc {
+    cursor: pointer;
+  }
+  .section-{{ section.id }}-cg .cg-card--atc.is-loading {
+    opacity: 0.6;
+    pointer-events: none;
   }
 
   /* ---- Image (default mode) ---- */
@@ -584,6 +635,49 @@
     }
   }
 </style>
+
+<script>
+  (function() {
+    var scope = document.querySelector('.section-{{ section.id }}-cg');
+    if (!scope) return;
+
+    function handleClick(e) {
+      var card = e.currentTarget;
+      var id = card.getAttribute('data-lt-card-atc');
+      if (!id) return;
+      e.preventDefault();
+      if (card.classList.contains('is-loading')) return;
+      card.classList.add('is-loading');
+
+      var payload = JSON.stringify({
+        items: [{ id: parseInt(id, 10), quantity: 1 }]
+      });
+      var headers = { 'Content-Type': 'application/json' };
+
+      function done() { card.classList.remove('is-loading'); }
+
+      // Theme-Helper bevorzugt — übernimmt Drawer-Open + Cart-Refresh
+      if (typeof window.handleAddToCart === 'function') {
+        try {
+          window.handleAddToCart(payload, 1, headers, done);
+        } catch (err) {
+          done();
+        }
+      } else {
+        // Vanilla-Fallback
+        fetch('/cart/add.js', { method: 'POST', headers: headers, body: payload })
+          .then(function() {
+            document.dispatchEvent(new CustomEvent('cart:refresh'));
+          })
+          .finally(done);
+      }
+    }
+
+    scope.querySelectorAll('[data-lt-card-atc]').forEach(function(card) {
+      card.addEventListener('click', handleClick);
+    });
+  })();
+</script>
 
 {% schema %}
 {
@@ -693,12 +787,19 @@
       "type": "select",
       "id": "link_behavior",
       "label": "Beim Klick auf eine Produktkarte",
-      "info": "Warenkorb-Modus fügt die erste Variante der ausgewählten Produkte direkt in den Warenkorb ein. Karten mit aktiviertem Override (siehe Block) führen trotzdem zur Produktseite.",
+      "info": "„In den Warenkorb (Drawer)“ legt die erste Variante per /cart/add.js in den Warenkorb und öffnet den Cart-Drawer — kein Seitenwechsel. Karten mit aktiviertem Override im Block oder Produkten in der Ausnahmen-Liste führen trotzdem zur Produktseite.",
       "options": [
         { "value": "product", "label": "Zur Produktseite (Default)" },
-        { "value": "cart", "label": "Direkt in den Warenkorb" }
+        { "value": "cart", "label": "In den Warenkorb (Drawer öffnet, bleibt auf Seite)" }
       ],
       "default": "product"
+    },
+    {
+      "type": "textarea",
+      "id": "pdp_exception_handles",
+      "label": "Ausnahmen: Produkt-Handles, die immer zur PDP führen",
+      "info": "Komma-getrennte Liste von Produkt-Handles. Diese Karten gehen IMMER zur Produktseite — auch im Warenkorb-Modus. Default deckt AGE & DNA-Test plus NMN Pulver ab.",
+      "default": "lifetime-age-dna,lifetime-nmn,nmn-pulver,age-dna-test"
     }
   ],
   "blocks": [
