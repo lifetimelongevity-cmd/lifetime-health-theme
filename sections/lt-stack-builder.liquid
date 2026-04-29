@@ -41,6 +41,8 @@
   </div>
 </section>
 
+<div class="lt-stack-backdrop" data-stack-backdrop hidden></div>
+
 {%- assign stack_collection_handle = section.settings.product_collection | default: 'stack-eligible' -%}
 {%- assign stack_products = collections[stack_collection_handle].products -%}
 
@@ -167,10 +169,28 @@
 
     function renderSidebar() {
       var c = calc();
+      var wasExpanded = sidebar.classList.contains('is-expanded');
 
-      var html = '<div class="lt-stack-bar">';
+      var html = '';
 
-      /* Tier-Progress */
+      /* Mobile-only: Sheet-Header (Toggle) — auf Desktop via CSS hidden */
+      var summaryCount = c.items.length === 0
+        ? 'Noch leer'
+        : c.items.length + ' Produkt' + (c.items.length > 1 ? 'e' : '');
+      html += '<button class="lt-stack-sheet-toggle" data-stack-toggle type="button" aria-expanded="' + (wasExpanded ? 'true' : 'false') + '" aria-controls="lt-stack-bar-' + sectionId + '">';
+      html +=   '<span class="lt-stack-sheet-toggle__handle" aria-hidden="true"></span>';
+      html +=   '<span class="lt-stack-sheet-toggle__summary">';
+      html +=     '<span class="lt-stack-sheet-toggle__count">' + escape(summaryCount) + '</span>';
+      if (c.items.length > 0) {
+        html +=   '<span class="lt-stack-sheet-toggle__total">' + fmt(c.total) + '/Mo</span>';
+      }
+      html +=   '</span>';
+      html +=   '<span class="lt-stack-sheet-toggle__chevron" aria-hidden="true">›</span>';
+      html += '</button>';
+
+      html += '<div class="lt-stack-bar" id="lt-stack-bar-' + sectionId + '">';
+
+      /* Tier-Progress (immer sichtbar, auch im Collapsed-State) */
       html += '<div class="lt-stack-progress">';
       if (c.items.length === 0) {
         html += '<p class="lt-stack-progress__hint">Wähle 2 + Produkte für deinen Stack-Bonus</p>';
@@ -190,11 +210,14 @@
       }
       html += '</div>';
 
+      /* Details-Wrapper (auf Mobile kollabierbar via .is-expanded) */
+      html += '<div class="lt-stack-bar__details">';
+
       /* Items-Liste */
       html += '<div class="lt-stack-list">';
       html += '<h3 class="lt-stack-list__heading">Dein Stack <span>(' + c.items.length + ')</span></h3>';
       if (c.items.length === 0) {
-        html += '<p class="lt-stack-list__empty">Noch leer. Wähle deine Wirkstoffe links.</p>';
+        html += '<p class="lt-stack-list__empty">Noch leer. Wähle deine Wirkstoffe oben.</p>';
       } else {
         html += '<ul>';
         c.items.forEach(function(p) {
@@ -219,7 +242,9 @@
         html += '</div>';
       }
 
-      /* CTA */
+      html += '</div>'; /* /.lt-stack-bar__details */
+
+      /* CTA (immer sichtbar, auch collapsed) */
       html += '<button class="lt-stack-cta" data-stack-submit type="button"' + (c.items.length < 2 ? ' disabled' : '') + '>';
       if (c.items.length === 0)      html += 'Mindestens 2 Produkte wählen';
       else if (c.items.length === 1) html += 'Noch 1 Produkt für Stack-Bonus';
@@ -257,8 +282,39 @@
         rerender();
         return;
       }
+      var toggle = e.target.closest('[data-stack-toggle]');
+      if (toggle) {
+        toggleSheet();
+        return;
+      }
       var cta = e.target.closest('[data-stack-submit]');
       if (cta && !cta.disabled) submitStack();
+    });
+
+    /* Mobile-Bottom-Sheet: expand / collapse */
+    function toggleSheet() {
+      var expanded = sidebar.classList.toggle('is-expanded');
+      var backdrop = document.querySelector('[data-stack-backdrop]');
+      var toggle = sidebar.querySelector('[data-stack-toggle]');
+      if (toggle) toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      if (backdrop) backdrop.hidden = !expanded;
+      /* Body-Scroll lock im Expanded-State */
+      document.body.style.overflow = expanded ? 'hidden' : '';
+    }
+    function collapseSheet() {
+      if (!sidebar.classList.contains('is-expanded')) return;
+      sidebar.classList.remove('is-expanded');
+      var backdrop = document.querySelector('[data-stack-backdrop]');
+      if (backdrop) backdrop.hidden = true;
+      var toggle = sidebar.querySelector('[data-stack-toggle]');
+      if (toggle) toggle.setAttribute('aria-expanded', 'false');
+      document.body.style.overflow = '';
+    }
+    var backdropEl = document.querySelector('[data-stack-backdrop]');
+    if (backdropEl) backdropEl.addEventListener('click', collapseSheet);
+    /* Escape-Taste schließt das Sheet */
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') collapseSheet();
     });
 
     async function submitStack() {
@@ -466,18 +522,18 @@
     color: #fff;
   }
 
-  /* Sidebar */
+  /* ============================================================
+     Sidebar / Bottom-Sheet
+     ------------------------------------------------------------
+     Desktop (≥1024px): klassische sticky Sidebar rechts.
+     Mobile (<1024px): fixed-bottom Sheet, kollabiert per Default,
+     expandiert via .is-expanded Klasse mit Backdrop.
+     ============================================================ */
+
+  /* Desktop-Default */
   .section-{{ section.id }}-stack .lt-stack-sidebar {
     position: sticky;
     top: var(--space-7, 48px);
-  }
-  @media (max-width: 1023px) {
-    .section-{{ section.id }}-stack .lt-stack-sidebar {
-      position: sticky;
-      bottom: 0;
-      top: auto;
-      z-index: 5;
-    }
   }
   .section-{{ section.id }}-stack .lt-stack-bar {
     background: #fff;
@@ -485,6 +541,124 @@
     border-radius: var(--radius-md, 12px);
     padding: var(--space-5, 24px);
     box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.08));
+  }
+
+  /* Toggle-Header: Desktop hidden */
+  .section-{{ section.id }}-stack .lt-stack-sheet-toggle { display: none; }
+
+  /* Backdrop: Desktop hidden */
+  .lt-stack-backdrop { display: none; }
+
+  /* ---- Mobile: Bottom-Sheet-Pattern ---- */
+  @media (max-width: 1023px) {
+    .section-{{ section.id }}-stack .lt-stack-sidebar {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      top: auto;
+      z-index: 50;
+      background: #fff;
+      border-radius: var(--radius-lg, 16px) var(--radius-lg, 16px) 0 0;
+      box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.12);
+      padding: 0;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      transition: transform var(--ease-smooth, 0.4s ease);
+    }
+    /* Toggle = Sheet-Header */
+    .section-{{ section.id }}-stack .lt-stack-sheet-toggle {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: var(--space-3, 12px);
+      width: 100%;
+      padding: 22px var(--space-5, 24px) var(--space-3, 12px);
+      border: none;
+      background: transparent;
+      text-align: left;
+      cursor: pointer;
+      position: relative;
+      flex-shrink: 0;
+    }
+    /* Drag-Handle visuell */
+    .section-{{ section.id }}-stack .lt-stack-sheet-toggle__handle {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 36px;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--color-gray-200, #E5E5E5);
+    }
+    .section-{{ section.id }}-stack .lt-stack-sheet-toggle__summary {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+    .section-{{ section.id }}-stack .lt-stack-sheet-toggle__count {
+      font-family: var(--font-body, 'Lato');
+      font-size: var(--text-micro, 12px);
+      font-weight: var(--weight-medium, 500);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--color-text-muted, #A3A3A3);
+    }
+    .section-{{ section.id }}-stack .lt-stack-sheet-toggle__total {
+      font-family: var(--font-body, 'Lato');
+      font-size: var(--text-body-lg, 18px);
+      font-weight: var(--weight-bold, 700);
+      color: var(--color-text-primary, #000);
+    }
+    .section-{{ section.id }}-stack .lt-stack-sheet-toggle__chevron {
+      width: 32px;
+      height: 32px;
+      border-radius: var(--radius-full, 999px);
+      background: var(--color-light-warm, #F6F4F1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--color-text-secondary, #525252);
+      transform: rotate(-90deg); /* zeigt nach oben — "expand" */
+      transition: transform var(--ease-default, 0.2s ease);
+    }
+    .section-{{ section.id }}-stack .lt-stack-sidebar.is-expanded .lt-stack-sheet-toggle__chevron {
+      transform: rotate(90deg); /* zeigt nach unten — "collapse" */
+    }
+
+    /* Bar-Wrapper: kein Border mehr (Sheet hat schon Radius/Shadow am Sidebar) */
+    .section-{{ section.id }}-stack .lt-stack-bar {
+      border: none;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 0 var(--space-5, 24px) max(var(--space-5, 24px), env(safe-area-inset-bottom, 0px));
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* Details (Items + Totals): collapsed = hidden, expanded = sichtbar */
+    .section-{{ section.id }}-stack .lt-stack-sidebar:not(.is-expanded) .lt-stack-bar__details {
+      display: none;
+    }
+
+    /* Backdrop sichtbar nur wenn expanded */
+    .lt-stack-backdrop {
+      display: block;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 49;
+      animation: lt-stack-backdrop-in 0.25s ease;
+    }
+    @keyframes lt-stack-backdrop-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
   }
 
   .section-{{ section.id }}-stack .lt-stack-progress { margin-bottom: var(--space-5, 24px); }
