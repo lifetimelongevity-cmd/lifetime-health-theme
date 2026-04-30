@@ -34,11 +34,11 @@
 
       <div class="lt-stack-main">
         <div class="lt-stack-tabs" role="tablist">
-          <button class="lt-stack-tab is-active" data-stack-tab="goals" role="tab" aria-selected="true" type="button">
-            Nach Ziel
+          <button class="lt-stack-tab is-active" data-stack-tab="hallmarks" role="tab" aria-selected="true" type="button">
+            Hallmarks of Aging
           </button>
           <button class="lt-stack-tab" data-stack-tab="products" role="tab" aria-selected="false" type="button">
-            Wirkstoffe wählen
+            Wirkstoffe direkt
           </button>
         </div>
 
@@ -60,12 +60,18 @@
   data-icon-Attribut und rendert sie in den Goal-Cards.
   Single Source of Truth bleibt snippets/icon-pack.liquid.
 {%- endcomment -%}
+<template data-stack-icon="genomic-instability">{% render 'icon-pack', icon: 'hallmark-genomic-instability' %}</template>
+<template data-stack-icon="telomere-attrition">{% render 'icon-pack', icon: 'hallmark-telomere-attrition' %}</template>
+<template data-stack-icon="epigenetic">{% render 'icon-pack', icon: 'hallmark-epigenetic' %}</template>
+<template data-stack-icon="proteostasis">{% render 'icon-pack', icon: 'hallmark-proteostasis' %}</template>
+<template data-stack-icon="autophagy">{% render 'icon-pack', icon: 'hallmark-autophagy' %}</template>
+<template data-stack-icon="nutrient-sensing">{% render 'icon-pack', icon: 'hallmark-nutrient-sensing' %}</template>
 <template data-stack-icon="mitochondrial">{% render 'icon-pack', icon: 'hallmark-mitochondrial' %}</template>
 <template data-stack-icon="senescence">{% render 'icon-pack', icon: 'hallmark-senescence' %}</template>
-<template data-stack-icon="autophagy">{% render 'icon-pack', icon: 'hallmark-autophagy' %}</template>
-<template data-stack-icon="epigenetic">{% render 'icon-pack', icon: 'hallmark-epigenetic' %}</template>
+<template data-stack-icon="stem-cell">{% render 'icon-pack', icon: 'hallmark-stem-cell' %}</template>
+<template data-stack-icon="intercellular">{% render 'icon-pack', icon: 'hallmark-intercellular' %}</template>
 <template data-stack-icon="inflammation">{% render 'icon-pack', icon: 'hallmark-inflammation' %}</template>
-<template data-stack-icon="complete">{% render 'icon-pack', icon: 'hallmark-complete' %}</template>
+<template data-stack-icon="dysbiosis">{% render 'icon-pack', icon: 'hallmark-dysbiosis' %}</template>
 
 {%- assign stack_collection_handle = section.settings.product_collection | default: 'stack-eligible' -%}
 {%- assign stack_products = collections[stack_collection_handle].products -%}
@@ -123,66 +129,138 @@
       return;
     }
 
-    /* Goal-Presets — adressieren die Hallmarks of Aging
-       (López-Otín et al. 2013/2023, der wissenschaftliche Standard-Frame
-       der Longevity-Forschung).
+    /* Alle 12 Hallmarks of Aging (López-Otín et al. 2023, Update von 2013).
+       Customer-Flow: Klick auf Hallmark-Card → Detail-Panel öffnet
+       darunter mit Beschreibung + verfügbaren Wirkstoffen. Wirkstoffe
+       können einzeln oder als Bundle zum Stack hinzugefügt werden.
 
-       Format pro Goal:
-         title       → plain-language Outcome (was Customer fühlt/will)
-         hallmark    → wissenschaftlicher Anker (zeigt Tiefe)
-         description → erklärt das WHY in 1-2 verständlichen Sätzen
-         productHandles → welche Wirkstoffe diesen Hallmark adressieren
+       Categories:
+         primary       → Schäden auf molekularer Ebene
+         antagonistic  → Antworten der Zelle auf die Schäden
+         integrative   → Folgen für Gewebe + Organismus
 
-       Customer klickt ein Goal → Produkte werden additiv zum Stack
-       hinzugefügt (Union, kein Reset). Mehrfach-Klicks auf verschiedene
-       Goals kombinieren mehrere Hallmarks → höhere Stack-Tier.
+       Coverage: 9 von 12 Hallmarks haben mindestens 1 Wirkstoff in
+       unserem Stack-Sortiment. Telomere, Zell-Kommunikation und
+       Mikrobiom haben keinen — Customer sieht das transparent.
     */
-    var goals = [
+    var hallmarks = [
+      /* PRIMARY HALLMARKS — Schäden auf molekularer Ebene */
+      {
+        id: 'genomic-instability',
+        title: 'Genomische Instabilität',
+        short: 'DNA-Schäden',
+        category: 'primary',
+        categoryLabel: 'Primärer Hallmark · Schäden',
+        description: 'Mit jedem Tag entstehen Tausende DNA-Schäden in deinen Zellen — durch oxidativen Stress, UV-Licht, Replikationsfehler. Mit dem Alter werden die Reparatur-Mechanismen langsamer, Mutationen häufen sich an. NAD⁺ ist zentral für die DNA-Reparatur via PARP-Enzyme.',
+        productHandles: ['nad-booster']
+      },
+      {
+        id: 'telomere-attrition',
+        title: 'Telomer-Verkürzung',
+        short: 'Telomere',
+        category: 'primary',
+        categoryLabel: 'Primärer Hallmark · Schäden',
+        description: 'Telomere sind die Schutzkappen an den Enden deiner Chromosomen. Mit jeder Zellteilung verkürzen sie sich. Sind sie zu kurz, kann die Zelle sich nicht mehr teilen — das sogenannte Hayflick-Limit. Aktuell kein Wirkstoff in unserem Sortiment der direkt hier ansetzt.',
+        productHandles: []
+      },
+      {
+        id: 'epigenetic',
+        title: 'Epigenetische Veränderungen',
+        short: 'Epigenetik',
+        category: 'primary',
+        categoryLabel: 'Primärer Hallmark · Schäden',
+        description: 'Methylierungs-Muster auf deiner DNA bestimmen, welche Gene aktiv sind. Mit dem Alter geraten diese Muster aus der Balance — die „epigenetische Uhr" tickt schneller. NAD⁺ als Sirtuin-Substrat und Methyl-Spender wie TMG stabilisieren sie.',
+        productHandles: ['nad-booster', 'betain-tmg-kapseln', 'caakg-kapseln']
+      },
+      {
+        id: 'proteostasis',
+        title: 'Verlust der Proteostase',
+        short: 'Proteostase',
+        category: 'primary',
+        categoryLabel: 'Primärer Hallmark · Schäden',
+        description: 'Proteine müssen sich richtig falten und am Ende abgebaut werden. Mit dem Alter versagen Falt-Helfer und Abbau-Maschinerie — fehlerhafte Proteine sammeln sich an (siehe Alzheimer, Parkinson). Spermidin aktiviert die Autophagie als Hauptabbau-Weg für defekte Proteine.',
+        productHandles: ['spermidin-kapseln']
+      },
+      {
+        id: 'autophagy',
+        title: 'Gestörte Autophagie',
+        short: 'Autophagie',
+        category: 'primary',
+        categoryLabel: 'Primärer Hallmark · Schäden',
+        description: 'Der zelluläre Müllabbau verlangsamt sich mit dem Alter. Geschädigte Mitochondrien, fehlerhafte Proteine, alte Organellen werden nicht mehr ausreichend recycelt. Spermidin und Resveratrol sind die zwei am besten erforschten Autophagie-Induktoren.',
+        productHandles: ['spermidin-kapseln', 'resveratrol-kapseln']
+      },
+      {
+        id: 'nutrient-sensing',
+        title: 'Dysregulierte Nährstoff-Sensoren',
+        short: 'Nährstoff-Sensoren',
+        category: 'primary',
+        categoryLabel: 'Primärer Hallmark · Schäden',
+        description: 'mTOR, IGF-1 und Insulin-Signalwege geben deinen Zellen das Signal „Wachstum" oder „Reparatur". Mit dem Alter geraten sie aus der Balance, oft Richtung chronisches Wachstumssignal. Spermidin und Resveratrol modulieren diese Sensoren in Richtung Reparatur-Modus.',
+        productHandles: ['spermidin-kapseln', 'resveratrol-kapseln']
+      },
+
+      /* ANTAGONISTIC HALLMARKS — Antworten der Zelle */
       {
         id: 'mitochondrial',
-        title: 'Mehr Energie',
-        hallmark: 'Mitochondrien-Funktion',
-        description: 'Mitochondrien sind die Energiekraftwerke deiner Zellen. Mit dem Alter werden sie ineffizienter — du fühlst dich müder, weniger leistungsfähig.',
+        title: 'Mitochondrien-Dysfunktion',
+        short: 'Mitochondrien',
+        category: 'antagonistic',
+        categoryLabel: 'Antagonistischer Hallmark · Antwort',
+        description: 'Mitochondrien sind die Energiekraftwerke deiner Zellen. Mit dem Alter werden sie ineffizienter, produzieren weniger ATP und mehr oxidativen Stress. NAD⁺, CaAKG und Resveratrol zielen direkt auf Mitochondrien-Funktion und -Biogenese.',
         productHandles: ['nad-booster', 'caakg-kapseln', 'resveratrol-kapseln']
       },
       {
         id: 'senescence',
-        title: 'Alte Zellen entfernen',
-        hallmark: 'Zellseneszenz',
-        description: 'Manche Zellen werden alt und teilen sich nicht mehr — sterben aber auch nicht ab. Diese „Zombie-Zellen" schaden dem umliegenden Gewebe.',
-        productHandles: ['fisetin-kapseln', 'spermidin-kapseln']
+        title: 'Zellseneszenz',
+        short: 'Zombie-Zellen',
+        category: 'antagonistic',
+        categoryLabel: 'Antagonistischer Hallmark · Antwort',
+        description: 'Manche Zellen werden alt und teilen sich nicht mehr — sterben aber auch nicht ab. Diese „Zombie-Zellen" sondern entzündungsfördernde Stoffe ab und schaden umliegendem Gewebe. Fisetin ist eines der am besten erforschten Senolytika.',
+        productHandles: ['fisetin-kapseln']
       },
       {
-        id: 'autophagy',
-        title: 'Zellen reinigen',
-        hallmark: 'Autophagie',
-        description: 'Dein Körper räumt geschädigte Zellbestandteile selbst auf — aber dieser Prozess verlangsamt sich mit dem Alter. Wieder anschalten lohnt sich.',
-        productHandles: ['spermidin-kapseln', 'resveratrol-kapseln']
+        id: 'stem-cell',
+        title: 'Stammzell-Erschöpfung',
+        short: 'Stammzellen',
+        category: 'antagonistic',
+        categoryLabel: 'Antagonistischer Hallmark · Antwort',
+        description: 'Deine Stammzellen erneuern Gewebe — Haut, Blut, Darm. Mit dem Alter nimmt ihre Anzahl und Aktivität ab. CaAKG zeigt in jüngerer Forschung Effekte auf Stammzell-Erhalt und Gewebe-Regeneration.',
+        productHandles: ['caakg-kapseln']
       },
+
+      /* INTEGRATIVE HALLMARKS — Folgen für den Organismus */
       {
-        id: 'epigenetic',
-        title: 'Epigenetik & DNA-Schutz',
-        hallmark: 'Epigenetische Veränderungen',
-        description: 'Methylierungs-Muster auf deiner DNA verändern sich mit dem Alter und beeinflussen, welche Gene aktiv sind. NAD⁺ und Methyl-Spender stabilisieren sie.',
-        productHandles: ['nad-booster', 'betain-tmg-kapseln']
+        id: 'intercellular',
+        title: 'Gestörte Zell-Kommunikation',
+        short: 'Zell-Kommunikation',
+        category: 'integrative',
+        categoryLabel: 'Integrativer Hallmark · Folge',
+        description: 'Hormone, Zytokine, neuronale Signale — alle Kommunikation zwischen Zellen wird mit dem Alter ungenauer. Aktuell kein Wirkstoff in unserem Sortiment der hier direkt ansetzt; Anti-Inflammation und Sirtuin-Aktivierung haben Sekundäreffekte.',
+        productHandles: []
       },
       {
         id: 'inflammation',
-        title: 'Stille Entzündungen senken',
-        hallmark: 'Inflammaging',
-        description: 'Chronische, oft unbemerkte Entzündungen sind ein zentraler Treiber des Alterungsprozesses und vieler altersbedingter Erkrankungen.',
+        title: 'Chronische Entzündungen',
+        short: 'Inflammaging',
+        category: 'integrative',
+        categoryLabel: 'Integrativer Hallmark · Folge',
+        description: 'Niedriggradige systemische Entzündungen — Inflammaging — sind ein zentraler Treiber des Alterungsprozesses und vieler altersbedingter Erkrankungen. Fisetin und Resveratrol haben starke entzündungshemmende Effekte.',
         productHandles: ['fisetin-kapseln', 'resveratrol-kapseln']
       },
       {
-        id: 'complete',
-        title: 'Mein kompletter Stack',
-        hallmark: 'Alle 5 Hallmarks gleichzeitig',
-        description: 'Alle 6 Wirkstoffe parallel aktiv — adressiert die fünf wichtigsten Hallmarks of Aging zur gleichen Zeit. Höchster Stack-Bonus (40 %).',
-        productHandles: ['spermidin-kapseln', 'resveratrol-kapseln', 'fisetin-kapseln', 'betain-tmg-kapseln', 'caakg-kapseln', 'nad-booster']
+        id: 'dysbiosis',
+        title: 'Mikrobiom-Dysbalance',
+        short: 'Mikrobiom',
+        category: 'integrative',
+        categoryLabel: 'Integrativer Hallmark · Folge',
+        description: 'Deine Darmflora wird mit dem Alter weniger divers, die Anzahl pathogener Bakterien steigt. Aktuell kein Wirkstoff in unserem Sortiment der hier direkt ansetzt — Probiotika sind hier der primäre Hebel.',
+        productHandles: []
       }
     ];
 
-    var activeTab = 'goals';
+    var activeHallmarkId = null;
+    var activeTab = 'hallmarks';
 
     /* Tier-Set: codePercent ist der reine Code-Wert in Shopify Admin.
        Effektive Rabattrate ergibt sich aus Stacking mit dem 10%-Single-Abo-
@@ -274,50 +352,125 @@
     /* Icon-Markup aus den hidden <template>-Tags ziehen.
        Cached, damit wir nicht bei jedem Re-Render querySelectors machen. */
     var iconCache = {};
-    function getGoalIcon(id) {
+    function getHallmarkIcon(id) {
       if (iconCache[id] !== undefined) return iconCache[id];
       var tpl = document.querySelector('template[data-stack-icon="' + id + '"]');
       iconCache[id] = tpl ? tpl.innerHTML.trim() : '';
       return iconCache[id];
     }
 
-    function renderGoals() {
-      pane.innerHTML = '<div class="lt-stack-goals">' + goals.map(function(g) {
-        /* Welche Goal-Produkte sind schon im aktuellen Stack? */
-        var includedTitles = g.productHandles.map(function(h) {
-          var p = products.find(function(x) { return x.handle === h; });
-          return p ? p.title : null;
-        }).filter(Boolean);
+    /* Welche Hallmark-Produkte sind schon im Stack? */
+    function hallmarkCoverageState(h) {
+      if (!h.productHandles.length) return 'none-available';
+      var inStack = h.productHandles.filter(function(handle) {
+        var p = products.find(function(x) { return x.handle === handle; });
+        return p && selected.has(p.id);
+      }).length;
+      if (inStack === 0) return 'available';
+      if (inStack === h.productHandles.length) return 'fully-added';
+      return 'partial';
+    }
 
-        var allInStack = g.productHandles.every(function(h) {
-          var p = products.find(function(x) { return x.handle === h; });
-          return p && selected.has(p.id);
-        });
+    function renderHallmarks() {
+      var html = '<div class="lt-stack-hallmarks-grid">';
 
-        var hallmarkLabel = g.hallmark
-          ? (g.id === 'complete' ? g.hallmark : 'Hallmark · ' + g.hallmark)
-          : '';
+      hallmarks.forEach(function(h) {
+        var state = hallmarkCoverageState(h);
+        var iconSvg = getHallmarkIcon(h.id);
+        var isActive = h.id === activeHallmarkId;
 
-        var iconSvg = getGoalIcon(g.id);
-
-        return ''
-          + '<button class="lt-stack-goal' + (allInStack ? ' is-active' : '') + '" data-goal="' + g.id + '" type="button">'
-          +   (iconSvg ? '<span class="lt-stack-goal__icon" aria-hidden="true">' + iconSvg + '</span>' : '')
-          +   (hallmarkLabel ? '<span class="lt-stack-goal__hallmark">' + escape(hallmarkLabel) + '</span>' : '')
-          +   '<h3 class="lt-stack-goal__title">' + escape(g.title) + '</h3>'
-          +   '<p class="lt-stack-goal__desc">' + escape(g.description) + '</p>'
-          +   '<ul class="lt-stack-goal__items">'
-          +     includedTitles.map(function(t) { return '<li>' + escape(t) + '</li>'; }).join('')
-          +   '</ul>'
-          +   '<span class="lt-stack-goal__cta">'
-          +     (allInStack ? '✓ Bereits im Stack' : '+ ' + g.productHandles.length + ' Wirkstoffe in den Stack')
-          +   '</span>'
+        html += '<button'
+          + ' class="lt-stack-hallmark-card'
+          +   ' lt-stack-hallmark-card--' + h.category
+          +   ' lt-stack-hallmark-card--state-' + state
+          +   (isActive ? ' is-active' : '')
+          + '"'
+          + ' data-hallmark="' + h.id + '"'
+          + ' type="button"'
+          + ' aria-expanded="' + (isActive ? 'true' : 'false') + '">'
+          +   (iconSvg ? '<span class="lt-stack-hallmark-card__icon" aria-hidden="true">' + iconSvg + '</span>' : '')
+          +   '<span class="lt-stack-hallmark-card__name">' + escape(h.short) + '</span>'
+          +   (state === 'fully-added' ? '<span class="lt-stack-hallmark-card__check" aria-label="Voll im Stack">✓</span>' : '')
+          +   (state === 'partial' ? '<span class="lt-stack-hallmark-card__dot" aria-label="Teilweise im Stack"></span>' : '')
           + '</button>';
-      }).join('') + '</div>';
+      });
+
+      html += '</div>';
+
+      /* Detail-Panel unter dem Grid */
+      html += '<div class="lt-stack-hallmark-detail" data-hallmark-detail>';
+      if (activeHallmarkId) {
+        var h = hallmarks.find(function(x) { return x.id === activeHallmarkId; });
+        if (h) html += renderHallmarkDetail(h);
+      } else {
+        html += ''
+          + '<div class="lt-stack-hallmark-detail__empty">'
+          +   '<p>Klick auf einen der 12 Hallmarks oben, um zu erfahren wie er den Alterungsprozess beeinflusst und welche Wirkstoffe ihn adressieren.</p>'
+          + '</div>';
+      }
+      html += '</div>';
+
+      pane.innerHTML = html;
+    }
+
+    function renderHallmarkDetail(h) {
+      var state = hallmarkCoverageState(h);
+      var hallmarkProducts = h.productHandles.map(function(handle) {
+        return products.find(function(x) { return x.handle === handle; });
+      }).filter(Boolean);
+
+      var html = '<div class="lt-stack-hallmark-detail__inner">';
+
+      /* Header */
+      html += '<div class="lt-stack-hallmark-detail__header">';
+      html += '<span class="lt-stack-hallmark-detail__category lt-stack-hallmark-detail__category--' + h.category + '">' + escape(h.categoryLabel) + '</span>';
+      html += '<h3 class="lt-stack-hallmark-detail__title">' + escape(h.title) + '</h3>';
+      html += '</div>';
+
+      /* Description */
+      html += '<p class="lt-stack-hallmark-detail__desc">' + escape(h.description) + '</p>';
+
+      /* Wirkstoffe */
+      html += '<div class="lt-stack-hallmark-detail__products">';
+      if (state === 'none-available') {
+        html += '<p class="lt-stack-hallmark-detail__no-products">'
+             +   '<strong>Aktuell kein Wirkstoff in unserem Sortiment</strong> der diesen Hallmark direkt adressiert. '
+             +   'Wir arbeiten daran, das Sortiment hier zu erweitern.'
+             + '</p>';
+      } else {
+        html += '<p class="lt-stack-hallmark-detail__label">'
+             +   'Wirkstoffe, die diesen Hallmark adressieren'
+             + ' <span>(' + hallmarkProducts.length + ')</span>'
+             + '</p>';
+
+        html += '<ul class="lt-stack-hallmark-detail__product-list">';
+        hallmarkProducts.forEach(function(p) {
+          var inStack = selected.has(p.id);
+          html += '<li>'
+                + '<button class="lt-stack-hallmark-product' + (inStack ? ' is-in-stack' : '') + '"'
+                +   ' data-product-toggle="' + p.id + '" type="button">'
+                +   '<span class="lt-stack-hallmark-product__icon" aria-hidden="true">' + (inStack ? '✓' : '+') + '</span>'
+                +   '<span class="lt-stack-hallmark-product__title">' + escape(p.title) + '</span>'
+                +   '<span class="lt-stack-hallmark-product__price">' + fmt(p.priceCents) + '/Mo</span>'
+                + '</button>'
+                + '</li>';
+        });
+        html += '</ul>';
+
+        if (hallmarkProducts.length > 1 && state !== 'fully-added') {
+          html += '<button class="lt-stack-hallmark-bulk" data-hallmark-bulk="' + h.id + '" type="button">'
+               +   '+ Alle ' + hallmarkProducts.length + ' Wirkstoffe in den Stack'
+               + '</button>';
+        }
+      }
+      html += '</div>';
+
+      html += '</div>';
+      return html;
     }
 
     function renderPane() {
-      if (activeTab === 'goals') renderGoals();
+      if (activeTab === 'hallmarks') renderHallmarks();
       else renderProducts();
     }
 
@@ -332,17 +485,35 @@
       renderPane();
     }
 
-    function applyGoal(goalId) {
-      var g = goals.find(function(x) { return x.id === goalId; });
-      if (!g) return;
-      g.productHandles.forEach(function(h) {
-        var p = products.find(function(x) { return x.handle === h; });
+    function setActiveHallmark(id) {
+      /* Toggle: Klick auf bereits aktiven Hallmark schließt das Detail */
+      activeHallmarkId = (activeHallmarkId === id) ? null : id;
+      renderHallmarks();
+      /* Nach Auswahl ins Detail scrollen — auf Mobile wichtig damit
+         Customer die Erklärung sofort sieht */
+      if (activeHallmarkId) {
+        var detail = pane.querySelector('[data-hallmark-detail]');
+        if (detail && detail.scrollIntoView) {
+          detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+      }
+    }
+
+    function addAllFromHallmark(hallmarkId) {
+      var h = hallmarks.find(function(x) { return x.id === hallmarkId; });
+      if (!h) return;
+      h.productHandles.forEach(function(handle) {
+        var p = products.find(function(x) { return x.handle === handle; });
         if (p) selected.add(p.id);
       });
-      /* Nach Goal-Klick: zum Wirkstoff-Tab wechseln, damit Customer die Auswahl sieht */
-      setTab('products');
-      renderSidebar();
-      syncUrl();
+      rerender();
+    }
+
+    function toggleProductFromHallmark(productId) {
+      var id = parseInt(productId, 10);
+      if (selected.has(id)) selected.delete(id);
+      else selected.add(id);
+      rerender();
     }
 
     function renderSidebar() {
@@ -449,9 +620,9 @@
       });
     });
 
-    /* Pane: Klicks auf Produkt-Cards UND Goal-Cards landen hier */
+    /* Pane: Klicks auf Produkt-Cards, Hallmark-Cards, Bulk-Buttons + Produkt-Toggles */
     pane.addEventListener('click', function(e) {
-      /* Produkt-Card → Toggle Selection */
+      /* Produkt-Card im Wirkstoffe-Tab → Toggle Selection */
       var card = e.target.closest('[data-id]');
       if (card) {
         e.preventDefault();
@@ -461,11 +632,25 @@
         rerender();
         return;
       }
-      /* Goal-Card → Bulk-Add der Goal-Produkte + Tab-Wechsel */
-      var goalCard = e.target.closest('[data-goal]');
-      if (goalCard) {
+      /* Hallmark-Card → aktivieren, Detail-Panel öffnen */
+      var hallmarkCard = e.target.closest('[data-hallmark]');
+      if (hallmarkCard) {
         e.preventDefault();
-        applyGoal(goalCard.getAttribute('data-goal'));
+        setActiveHallmark(hallmarkCard.getAttribute('data-hallmark'));
+        return;
+      }
+      /* Bulk-Button im Detail-Panel → alle Hallmark-Produkte auf einmal */
+      var bulkBtn = e.target.closest('[data-hallmark-bulk]');
+      if (bulkBtn) {
+        e.preventDefault();
+        addAllFromHallmark(bulkBtn.getAttribute('data-hallmark-bulk'));
+        return;
+      }
+      /* Einzel-Produkt-Toggle im Detail-Panel */
+      var productToggle = e.target.closest('[data-product-toggle]');
+      if (productToggle) {
+        e.preventDefault();
+        toggleProductFromHallmark(productToggle.getAttribute('data-product-toggle'));
         return;
       }
     });
@@ -738,6 +923,292 @@
   }
   .section-{{ section.id }}-stack .lt-stack-goal.is-active .lt-stack-goal__cta {
     color: var(--color-success, #22C55E);
+  }
+
+  /* ============================================================
+     Hallmarks-Grid + Detail-Panel
+     ------------------------------------------------------------
+     12 Hallmark-Cards (Icon + kurzer Name) im Grid. Click öffnet
+     Detail-Panel direkt darunter. Cards haben drei States:
+       state-none-available → kein Wirkstoff im Sortiment (gray)
+       state-available      → Wirkstoffe da, noch nicht im Stack
+       state-partial        → einige Wirkstoffe schon im Stack (Dot)
+       state-fully-added    → alle Wirkstoffe im Stack (Check)
+     ============================================================ */
+  .section-{{ section.id }}-stack .lt-stack-hallmarks-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-3, 12px);
+    margin-bottom: var(--space-5, 24px);
+  }
+  @media (max-width: 1023px) {
+    .section-{{ section.id }}-stack .lt-stack-hallmarks-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (max-width: 600px) {
+    .section-{{ section.id }}-stack .lt-stack-hallmarks-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2, 8px);
+    padding: var(--space-3, 12px);
+    aspect-ratio: 1 / 1;
+    background: #fff;
+    border: 1px solid var(--color-border-default, #E5E5E5);
+    border-radius: var(--radius-md, 12px);
+    cursor: pointer;
+    transition: border-color var(--ease-default, 0.2s ease),
+                box-shadow var(--ease-default, 0.2s ease),
+                transform var(--ease-default, 0.2s ease);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card:hover {
+    border-color: var(--color-dark, #364F56);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.08));
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card.is-active {
+    border-color: var(--color-dark, #364F56);
+    box-shadow: 0 0 0 2px var(--color-dark, #364F56);
+  }
+  /* State: no products available — desaturate */
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--state-none-available {
+    opacity: 0.55;
+  }
+  /* State: fully covered → green check + grünlicher Border */
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--state-fully-added {
+    border-color: var(--color-success, #22C55E);
+    box-shadow: 0 0 0 1px var(--color-success, #22C55E);
+  }
+
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card__icon {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-dark, #364F56);
+    flex-shrink: 0;
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card__icon svg {
+    width: 28px;
+    height: 28px;
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card__name {
+    font-family: var(--font-body, 'Lato');
+    font-size: var(--text-body-sm, 14px);
+    font-weight: var(--weight-semibold, 600);
+    text-align: center;
+    color: var(--color-text-primary, #000);
+    line-height: 1.2;
+  }
+  /* Status-Indikatoren oben rechts */
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card__check,
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card__dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 18px;
+    height: 18px;
+    border-radius: var(--radius-full, 999px);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: var(--weight-bold, 700);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card__check {
+    background: var(--color-success, #22C55E);
+    color: #fff;
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card__dot {
+    background: var(--color-dark, #364F56);
+  }
+
+  /* Subtile Kategorie-Akzente am linken Rand der Card */
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--primary::before,
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--antagonistic::before,
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--integrative::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 4px;
+    height: 4px;
+    border-radius: var(--radius-full, 999px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--primary::before {
+    background: var(--color-promo, #E85D5D);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--antagonistic::before {
+    background: var(--color-teal, #65C0B6);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--integrative::before {
+    background: var(--color-sand, #C7A39B);
+  }
+
+  /* ---- Detail-Panel ---- */
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail {
+    background: #fff;
+    border: 1px solid var(--color-border-default, #E5E5E5);
+    border-radius: var(--radius-md, 12px);
+    padding: var(--space-5, 24px);
+    min-height: 200px;
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__empty {
+    color: var(--color-text-muted, #A3A3A3);
+    font-size: var(--text-body, 16px);
+    line-height: var(--leading-body, 1.4);
+    text-align: center;
+    padding: var(--space-5, 24px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4, 16px);
+  }
+
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2, 8px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__category {
+    align-self: flex-start;
+    background: var(--color-light-warm, #F6F4F1);
+    color: var(--color-text-secondary, #525252);
+    font-size: var(--text-micro, 12px);
+    font-weight: var(--weight-semibold, 600);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    border-radius: var(--radius-full, 999px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__category--primary { color: var(--color-promo, #E85D5D); }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__category--antagonistic { color: var(--color-teal-dark, #4A8C85); }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__category--integrative { color: var(--color-sand, #C7A39B); }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__title {
+    font-family: var(--font-heading, Helvetica);
+    font-size: var(--text-h2, 28px);
+    font-weight: var(--weight-bold, 700);
+    line-height: var(--leading-heading, 1.15);
+    margin: 0;
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__desc {
+    font-size: var(--text-body, 16px);
+    color: var(--color-text-secondary, #525252);
+    line-height: var(--leading-body, 1.4);
+    margin: 0;
+  }
+
+  /* Wirkstoffe-Liste im Detail */
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__products {
+    border-top: 1px solid var(--color-border-default, #E5E5E5);
+    padding-top: var(--space-4, 16px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__label {
+    font-size: var(--text-body-sm, 14px);
+    font-weight: var(--weight-semibold, 600);
+    color: var(--color-text-secondary, #525252);
+    margin: 0 0 var(--space-3, 12px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__label span {
+    color: var(--color-text-muted, #A3A3A3);
+    font-weight: var(--weight-regular, 400);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__no-products {
+    font-size: var(--text-body-sm, 14px);
+    color: var(--color-text-muted, #A3A3A3);
+    line-height: 1.5;
+    margin: 0;
+    padding: var(--space-3, 12px);
+    background: var(--color-light-warm, #F6F4F1);
+    border-radius: var(--radius-sm, 8px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__product-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--space-3, 12px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2, 8px);
+  }
+
+  .section-{{ section.id }}-stack .lt-stack-hallmark-product {
+    display: grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items: center;
+    gap: var(--space-3, 12px);
+    width: 100%;
+    padding: 10px var(--space-3, 12px);
+    background: #fff;
+    border: 1px solid var(--color-border-default, #E5E5E5);
+    border-radius: var(--radius-sm, 8px);
+    cursor: pointer;
+    text-align: left;
+    transition: border-color var(--ease-default, 0.2s ease), background var(--ease-default, 0.2s ease);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-product:hover {
+    border-color: var(--color-dark, #364F56);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-product.is-in-stack {
+    border-color: var(--color-success, #22C55E);
+    background: rgba(34, 197, 94, 0.06);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-product__icon {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-full, 999px);
+    background: var(--color-light-warm, #F6F4F1);
+    color: var(--color-text-secondary, #525252);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: var(--weight-bold, 700);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-product.is-in-stack .lt-stack-hallmark-product__icon {
+    background: var(--color-success, #22C55E);
+    color: #fff;
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-product__title {
+    font-size: var(--text-body-sm, 14px);
+    font-weight: var(--weight-semibold, 600);
+    color: var(--color-text-primary, #000);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-product__price {
+    font-size: var(--text-body-sm, 14px);
+    color: var(--color-text-muted, #A3A3A3);
+    white-space: nowrap;
+  }
+
+  .section-{{ section.id }}-stack .lt-stack-hallmark-bulk {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 0 var(--space-5, 24px);
+    border: 1px solid var(--color-dark, #364F56);
+    background: transparent;
+    color: var(--color-dark, #364F56);
+    border-radius: var(--radius-full, 999px);
+    font-family: var(--font-body, 'Lato');
+    font-size: var(--text-body-sm, 14px);
+    font-weight: var(--weight-semibold, 600);
+    cursor: pointer;
+    transition: background var(--ease-default, 0.2s ease), color var(--ease-default, 0.2s ease);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-bulk:hover {
+    background: var(--color-dark, #364F56);
+    color: #fff;
   }
 
   /* Produktgrid */
