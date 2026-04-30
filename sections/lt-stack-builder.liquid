@@ -384,7 +384,26 @@
       var byCategory = { primary: [], antagonistic: [], integrative: [] };
       hallmarks.forEach(function(h) { byCategory[h.category].push(h); });
 
+      var stats = coverageStats();
+
       var html = '';
+
+      /* Coverage-Summary oben */
+      html += '<div class="lt-stack-coverage-summary">';
+      html +=   '<p class="lt-stack-coverage-summary__kicker">Dein Stack adressiert</p>';
+      html +=   '<p class="lt-stack-coverage-summary__metric">'
+            +     '<span class="lt-stack-coverage-summary__count">' + stats.covered + '</span>'
+            +     '<span class="lt-stack-coverage-summary__total"> von ' + stats.total + ' Hallmarks of Aging</span>'
+            +   '</p>';
+      html +=   '<div class="lt-stack-coverage-summary__bar">';
+      html +=     '<span style="width:' + stats.percent + '%"></span>';
+      html +=   '</div>';
+      html +=   '<p class="lt-stack-coverage-summary__breakdown">'
+            +     'Primär ' + stats.byCategory.primary.covered + '/' + stats.byCategory.primary.total
+            +     ' · Antagonistisch ' + stats.byCategory.antagonistic.covered + '/' + stats.byCategory.antagonistic.total
+            +     ' · Integrativ ' + stats.byCategory.integrative.covered + '/' + stats.byCategory.integrative.total
+            +   '</p>';
+      html += '</div>';
 
       groupOrder.forEach(function(cat) {
         html += '<div class="lt-stack-hallmarks-group lt-stack-hallmarks-group--' + cat + '">';
@@ -393,20 +412,24 @@
 
         byCategory[cat].forEach(function(h) {
           var iconSvg = getHallmarkIcon(h.id);
+          var state = hallmarkCoverageState(h);
           var isActive = h.id === activeHallmarkId;
           var hasProducts = h.productHandles.length > 0;
 
           html += '<button'
             + ' class="lt-stack-hallmark-card'
             +   ' lt-stack-hallmark-card--' + h.category
+            +   ' lt-stack-hallmark-card--state-' + state
             +   (hasProducts ? '' : ' lt-stack-hallmark-card--unavailable')
             +   (isActive ? ' is-active' : '')
             + '"'
             + ' data-hallmark="' + h.id + '"'
             + ' type="button"'
-            + ' aria-pressed="' + (isActive ? 'true' : 'false') + '">'
+            + ' aria-expanded="' + (isActive ? 'true' : 'false') + '">'
             +   (iconSvg ? '<span class="lt-stack-hallmark-card__icon" aria-hidden="true">' + iconSvg + '</span>' : '')
             +   '<span class="lt-stack-hallmark-card__name">' + escape(h.short) + '</span>'
+            +   (state === 'fully-added' ? '<span class="lt-stack-hallmark-card__check" aria-label="Voll abgedeckt">✓</span>' : '')
+            +   (state === 'partial' ? '<span class="lt-stack-hallmark-card__partial" aria-label="Teilweise abgedeckt"></span>' : '')
             + '</button>';
         });
 
@@ -422,8 +445,8 @@
       } else {
         html += ''
           + '<div class="lt-stack-hallmark-detail__empty">'
-          +   '<p><strong>Klick auf einen Hallmark</strong>, um die passenden Wirkstoffe in deinen Stack zu legen und zu erfahren, wie dieser Hallmark den Alterungsprozess beeinflusst.</p>'
-          +   '<p class="lt-stack-hallmark-detail__hint">Es ist immer nur ein Hallmark aktiv. Wer Wirkstoffe aus mehreren Pfaden kombinieren will, nutzt den Tab „Nährstoffe".</p>'
+          +   '<p><strong>Klick auf einen Hallmark</strong> für die wissenschaftliche Erklärung und um zu sehen, welche Wirkstoffe ihn adressieren.</p>'
+          +   '<p class="lt-stack-hallmark-detail__hint">Diese Übersicht zeigt was dein Stack biologisch leistet. Wirkstoffe ändern → Tab „Nährstoffe".</p>'
           + '</div>';
       }
       html += '</div>';
@@ -432,11 +455,11 @@
     }
 
     function renderHallmarkDetail(h) {
-      var state = hallmarkCoverageState(h);
       var hallmarkProducts = h.productHandles.map(function(handle) {
         return products.find(function(x) { return x.handle === handle; });
       }).filter(Boolean);
-      var inStackCount = hallmarkProducts.filter(function(p) { return selected.has(p.id); }).length;
+      var inStack = hallmarkProducts.filter(function(p) { return selected.has(p.id); });
+      var notInStack = hallmarkProducts.filter(function(p) { return !selected.has(p.id); });
 
       var html = '<div class="lt-stack-hallmark-detail__inner">';
 
@@ -449,24 +472,36 @@
       /* Description */
       html += '<p class="lt-stack-hallmark-detail__desc">' + escape(h.description) + '</p>';
 
-      /* Status / Wirkstoff-Info — rein informativ, keine Buttons */
+      /* Coverage-Status: zwei Listen — was im Stack ist + was den Hallmark
+         zusätzlich abdecken würde. Reine Information, keine Aktion. */
       html += '<div class="lt-stack-hallmark-detail__status">';
-      if (state === 'none-available') {
+      if (hallmarkProducts.length === 0) {
         html += '<p class="lt-stack-hallmark-detail__no-products">'
              +   '<strong>Aktuell kein Wirkstoff in unserem Sortiment</strong> der diesen Hallmark direkt adressiert.'
              + '</p>';
       } else {
-        var titles = hallmarkProducts.map(function(p) { return p.title; }).join(' · ');
-        var statusLabel;
-        if (h.id === activeHallmarkId) {
-          statusLabel = 'Im Stack. Erneuter Klick entfernt diesen Hallmark wieder.';
-        } else if (inStackCount > 0) {
-          statusLabel = inStackCount + ' von ' + hallmarkProducts.length + ' Wirkstoffen sind über den Nährstoffe-Tab im Stack. Klick aktiviert diesen Hallmark.';
-        } else {
-          statusLabel = 'Klick auf die Kachel, um diese Wirkstoffe in den Stack zu legen.';
+        if (inStack.length > 0) {
+          html += '<p class="lt-stack-hallmark-detail__list-label">'
+               +   'In deinem Stack <span>(' + inStack.length + ' von ' + hallmarkProducts.length + ')</span>'
+               + '</p>';
+          html += '<ul class="lt-stack-hallmark-detail__list lt-stack-hallmark-detail__list--in">';
+          inStack.forEach(function(p) {
+            html += '<li><span class="lt-stack-hallmark-detail__check">✓</span>' + escape(p.title) + '</li>';
+          });
+          html += '</ul>';
         }
-        html += '<p class="lt-stack-hallmark-detail__products-line"><strong>' + escape(titles) + '</strong></p>';
-        html += '<p class="lt-stack-hallmark-detail__products-meta">' + escape(statusLabel) + '</p>';
+        if (notInStack.length > 0) {
+          html += '<p class="lt-stack-hallmark-detail__list-label">'
+               +   (inStack.length > 0 ? 'Würden diesen Hallmark zusätzlich abdecken' : 'Würden diesen Hallmark abdecken')
+               +   ' <span>(' + notInStack.length + ')</span>'
+               + '</p>';
+          html += '<ul class="lt-stack-hallmark-detail__list lt-stack-hallmark-detail__list--out">';
+          notInStack.forEach(function(p) {
+            html += '<li><span class="lt-stack-hallmark-detail__dot">○</span>' + escape(p.title) + '</li>';
+          });
+          html += '</ul>';
+          html += '<p class="lt-stack-hallmark-detail__list-hint">Im Tab „Nährstoffe" kannst du Wirkstoffe in deinen Stack legen.</p>';
+        }
       }
       html += '</div>';
 
@@ -490,57 +525,51 @@
       renderPane();
     }
 
-    /* Single-Select: Es kann immer nur EIN Hallmark gleichzeitig aktiv sein.
-       - Click auf inaktiven Hallmark → vorherigen deaktivieren (Produkte raus),
-         neuen aktivieren (Produkte rein)
-       - Click auf bereits aktiven Hallmark → deaktivieren (Produkte raus)
-       - Hallmarks ohne Wirkstoffe sind nur informativ — Click zeigt nur das
-         Detail, kein Produkt-Update.
-
-       Wer mehrere Pathways kombinieren will, nutzt den Nährstoffe-Tab und
-       baut den Stack manuell zusammen. */
-    function removeHallmarkProductsFromStack(hallmarkId) {
-      var target = hallmarks.find(function(x) { return x.id === hallmarkId; });
-      if (!target) return;
-      target.productHandles.forEach(function(handle) {
-        var p = products.find(function(x) { return x.handle === handle; });
-        if (p) selected.delete(p.id);
-      });
-    }
-
-    function addHallmarkProductsToStack(hallmarkId) {
-      var target = hallmarks.find(function(x) { return x.id === hallmarkId; });
-      if (!target) return;
-      target.productHandles.forEach(function(handle) {
-        var p = products.find(function(x) { return x.handle === handle; });
-        if (p) selected.add(p.id);
-      });
-    }
-
+    /* Hallmark-Tab ist Read-Only-Coverage-View:
+       Click auf eine Hallmark-Tile öffnet/schließt nur das Detail-Panel.
+       Die Tile-Visuals (fully/partial/not-addressed) werden aus dem
+       aktuellen Stack-Zustand abgeleitet. Wer Wirkstoffe ändern will,
+       geht zum Nährstoffe-Tab — eindeutige Single-Source-of-Truth. */
     function handleHallmarkClick(id) {
       var h = hallmarks.find(function(x) { return x.id === id; });
       if (!h) return;
-
-      var isCurrentlyActive = (id === activeHallmarkId);
-      var hasProducts = h.productHandles.length > 0;
-
-      if (isCurrentlyActive) {
-        /* Click auf den aktiven Hallmark → deaktivieren */
-        if (hasProducts) removeHallmarkProductsFromStack(id);
-        activeHallmarkId = null;
-      } else {
-        /* Wechsel: vorherigen Hallmark abräumen, neuen aktivieren */
-        if (activeHallmarkId) {
-          var prev = hallmarks.find(function(x) { return x.id === activeHallmarkId; });
-          if (prev && prev.productHandles.length > 0) {
-            removeHallmarkProductsFromStack(activeHallmarkId);
-          }
+      /* Toggle-Detail: nochmal Click auf den aktiven Hallmark schließt es */
+      activeHallmarkId = (activeHallmarkId === id) ? null : id;
+      renderHallmarks();
+      /* Auf Mobile ins Detail scrollen */
+      if (activeHallmarkId) {
+        var detail = pane.querySelector('[data-hallmark-detail]');
+        if (detail && detail.scrollIntoView) {
+          detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
-        if (hasProducts) addHallmarkProductsToStack(id);
-        activeHallmarkId = id;
       }
+    }
 
-      rerender();
+    /* Aggregat-Coverage: wie viele Hallmarks adressiert der aktuelle Stack? */
+    function coverageStats() {
+      var coveredCount = 0;
+      var partialCount = 0;
+      var availableCount = 0;
+      var byCategory = { primary: { covered: 0, total: 0 }, antagonistic: { covered: 0, total: 0 }, integrative: { covered: 0, total: 0 } };
+      hallmarks.forEach(function(h) {
+        var state = hallmarkCoverageState(h);
+        byCategory[h.category].total += 1;
+        if (state === 'fully-added') {
+          coveredCount += 1;
+          byCategory[h.category].covered += 1;
+        } else if (state === 'partial') {
+          partialCount += 1;
+        }
+        if (state !== 'none-available') availableCount += 1;
+      });
+      return {
+        covered: coveredCount,
+        partial: partialCount,
+        total: 12,
+        availableTotal: availableCount,
+        percent: Math.round((coveredCount / 12) * 100),
+        byCategory: byCategory
+      };
     }
 
     function renderSidebar() {
@@ -565,6 +594,17 @@
       html += '</button>';
 
       html += '<div class="lt-stack-bar" id="lt-stack-bar-' + sectionId + '">';
+
+      /* Hallmark-Coverage-Indicator — zeigt im Sidebar mit, was der Stack
+         biologisch leistet, ohne dass Customer in den Hallmark-Tab muss */
+      var sbStats = coverageStats();
+      html += '<div class="lt-stack-coverage-mini">';
+      html +=   '<div class="lt-stack-coverage-mini__row">';
+      html +=     '<span class="lt-stack-coverage-mini__label">Hallmarks adressiert</span>';
+      html +=     '<span class="lt-stack-coverage-mini__value">' + sbStats.covered + ' / ' + sbStats.total + '</span>';
+      html +=   '</div>';
+      html +=   '<div class="lt-stack-coverage-mini__bar"><span style="width:' + sbStats.percent + '%"></span></div>';
+      html += '</div>';
 
       /* Tier-Progress (immer sichtbar, auch im Collapsed-State) */
       html += '<div class="lt-stack-progress">';
@@ -939,23 +979,79 @@
   }
 
   /* ============================================================
-     Hallmarks-Grid — Single-Select Tiles
+     Hallmarks-Tab — Coverage-View (Read-Only)
      ------------------------------------------------------------
-     12 Hallmark-Tiles als Icon + Kurzname. Es kann immer nur EIN
-     Hallmark gleichzeitig aktiv sein. Click toggelt diesen einen
-     Hallmark rein (legt Produkte in den Stack) oder raus (entfernt
-     sie), und zeigt Detail-Panel darunter.
+     Hallmark-Tab ist eine Visualisierung dessen, was der Stack
+     biologisch leistet. KEIN Auswahlmechanismus — Wirkstoffe
+     werden im Nährstoffe-Tab gewählt.
 
-     States:
-       default                   → weiß, dunkles Icon, dunkler Text
-       is-active                 → dunkel gefüllt, weißes Icon + Text
-       --unavailable             → gestrichelt, kein Wirkstoff (nur Detail)
-       --unavailable.is-active   → Outline-Highlight statt Dark-Fill
+     Visual-States (abgeleitet aus Stack):
+       state-fully-added → dunkel gefüllt, ✓ Badge
+       state-partial     → weiß mit kleinem Status-Dot
+       state-available   → weiß (noch nicht im Stack)
+       state-none-available → gestrichelt, gedämpft (kein Sortiment)
+       is-active (überlagernd) → Outline-Highlight (Detail-Panel offen)
 
      Layout:
        Desktop / Tablet → 4 Spalten
        Mobile ≤600     → 3 Spalten
      ============================================================ */
+
+  /* Coverage-Summary oben im Tab */
+  .section-{{ section.id }}-stack .lt-stack-coverage-summary {
+    background: var(--color-light-warm, #F6F4F1);
+    border-radius: var(--radius-md, 12px);
+    padding: var(--space-4, 16px) var(--space-5, 24px);
+    margin-bottom: var(--space-5, 24px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-coverage-summary__kicker {
+    font-family: var(--font-body, 'Lato');
+    font-size: var(--text-micro, 12px);
+    font-weight: var(--weight-medium, 500);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-secondary, #525252);
+    margin: 0 0 var(--space-1, 4px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-coverage-summary__metric {
+    margin: 0 0 var(--space-2, 8px);
+    line-height: 1.1;
+  }
+  .section-{{ section.id }}-stack .lt-stack-coverage-summary__count {
+    font-family: var(--font-heading, Helvetica);
+    font-size: var(--text-stat, 56px);
+    font-weight: var(--weight-bold, 700);
+    color: var(--color-text-primary, #000);
+  }
+  .section-{{ section.id }}-stack .lt-stack-coverage-summary__total {
+    font-family: var(--font-body, 'Lato');
+    font-size: var(--text-body-lg, 18px);
+    color: var(--color-text-secondary, #525252);
+    margin-left: var(--space-1, 4px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-coverage-summary__bar {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: var(--radius-full, 999px);
+    overflow: hidden;
+    margin-bottom: var(--space-2, 8px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-coverage-summary__bar span {
+    display: block;
+    height: 100%;
+    background: var(--color-dark, #364F56);
+    transition: width var(--ease-smooth, 0.4s ease);
+  }
+  .section-{{ section.id }}-stack .lt-stack-coverage-summary__breakdown {
+    margin: 0;
+    font-size: var(--text-body-sm, 14px);
+    color: var(--color-text-secondary, #525252);
+  }
+  @media (max-width: 600px) {
+    .section-{{ section.id }}-stack .lt-stack-coverage-summary__count {
+      font-size: var(--text-display, 48px);
+    }
+  }
   /* Gruppen-Container: jeweils ein Pill-Tag-Heading + dazugehöriger Grid */
   .section-{{ section.id }}-stack .lt-stack-hallmarks-group {
     margin-bottom: var(--space-5, 24px);
@@ -1023,34 +1119,65 @@
   .section-{{ section.id }}-stack .lt-stack-hallmark-card:hover {
     border-color: var(--color-dark, #364F56);
   }
-  /* Active (Single-Select): aktiver Hallmark bekommt Dark-Fill —
-     visualisiert gleichzeitig "im Stack" und "aktuell im Detail" */
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card.is-active {
+
+  /* State: fully-addressed → alle Wirkstoffe dieses Hallmarks im Stack */
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--state-fully-added {
     background: var(--color-dark, #364F56);
     border-color: var(--color-dark, #364F56);
     color: #fff;
   }
+  /* State: partial → manche Wirkstoffe im Stack */
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--state-partial {
+    background: #fff;
+    border-color: var(--color-dark, #364F56);
+  }
+
+  /* Active (Detail-Panel offen): unabhängig vom Stack-State, nur Outline */
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card.is-active {
+    box-shadow: 0 0 0 2px var(--color-dark, #364F56);
+  }
+
   /* Unavailable: kein Wirkstoff im Sortiment — dezent gestrichelt */
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card--unavailable {
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--unavailable,
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--state-none-available {
     border-style: dashed;
     color: var(--color-text-muted, #A3A3A3);
     opacity: 0.7;
   }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card--unavailable .lt-stack-hallmark-card__icon {
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--unavailable .lt-stack-hallmark-card__icon,
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--state-none-available .lt-stack-hallmark-card__icon {
     color: var(--color-text-muted, #A3A3A3);
   }
-  /* Unavailable + active: kein Dark-Fill (würde "im Stack" suggerieren),
-     nur Outline-Highlight zur Detail-Anzeige */
+  /* Unavailable + active: nur Outline, sonst unverändert */
   .section-{{ section.id }}-stack .lt-stack-hallmark-card--unavailable.is-active {
-    background: #fff;
-    color: var(--color-text-primary, #000);
-    border-color: var(--color-dark, #364F56);
-    border-style: solid;
-    box-shadow: 0 0 0 1px var(--color-dark, #364F56);
     opacity: 1;
   }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card--unavailable.is-active .lt-stack-hallmark-card__icon {
-    color: var(--color-dark, #364F56);
+
+  /* Status-Badges oben rechts auf der Card */
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card__check,
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card__partial {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full, 999px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card__check {
+    width: 18px;
+    height: 18px;
+    background: var(--color-success, #22C55E);
+    color: #fff;
+    font-size: 11px;
+    font-weight: var(--weight-bold, 700);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card__partial {
+    width: 10px;
+    height: 10px;
+    background: var(--color-dark, #364F56);
+    top: 8px;
+    right: 8px;
   }
 
   .section-{{ section.id }}-stack .lt-stack-hallmark-card__icon {
@@ -1063,7 +1190,7 @@
     flex-shrink: 0;
     transition: color var(--ease-default, 0.2s ease);
   }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card.is-active .lt-stack-hallmark-card__icon {
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--state-fully-added .lt-stack-hallmark-card__icon {
     color: #fff;
   }
   .section-{{ section.id }}-stack .lt-stack-hallmark-card__icon svg {
@@ -1151,20 +1278,58 @@
     margin: 0;
   }
 
-  /* Status-Zeile am Ende des Detail-Panels */
+  /* Status / Coverage-Listen am Ende des Detail-Panels */
   .section-{{ section.id }}-stack .lt-stack-hallmark-detail__status {
     border-top: 1px solid var(--color-border-default, #E5E5E5);
     padding-top: var(--space-3, 12px);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3, 12px);
   }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__products-line {
-    margin: 0 0 4px;
-    font-size: var(--text-body-sm, 14px);
-    color: var(--color-text-primary, #000);
-  }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__products-meta {
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__list-label {
     margin: 0;
     font-size: var(--text-body-sm, 14px);
+    font-weight: var(--weight-semibold, 600);
+    color: var(--color-text-primary, #000);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__list-label span {
     color: var(--color-text-muted, #A3A3A3);
+    font-weight: var(--weight-regular, 400);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__list li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: var(--text-body-sm, 14px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__list--in li {
+    color: var(--color-text-primary, #000);
+    font-weight: var(--weight-semibold, 600);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__list--out li {
+    color: var(--color-text-secondary, #525252);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__check {
+    color: var(--color-success, #22C55E);
+    font-weight: var(--weight-bold, 700);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__dot {
+    color: var(--color-text-muted, #A3A3A3);
+    font-size: 16px;
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__list-hint {
+    margin: 0;
+    font-size: var(--text-micro, 12px);
+    color: var(--color-text-muted, #A3A3A3);
+    font-style: italic;
   }
   .section-{{ section.id }}-stack .lt-stack-hallmark-detail__no-products {
     font-size: var(--text-body-sm, 14px);
@@ -1174,6 +1339,46 @@
   }
   .section-{{ section.id }}-stack .lt-stack-hallmark-detail__no-products strong {
     color: var(--color-text-primary, #000);
+  }
+
+  /* Sidebar-Coverage-Mini — kompakter Indicator in der Sticky-Sidebar */
+  .section-{{ section.id }}-stack .lt-stack-coverage-mini {
+    background: var(--color-light-warm, #F6F4F1);
+    border-radius: var(--radius-sm, 8px);
+    padding: 10px 12px;
+    margin-bottom: var(--space-4, 16px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-coverage-mini__row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 6px;
+  }
+  .section-{{ section.id }}-stack .lt-stack-coverage-mini__label {
+    font-family: var(--font-body, 'Lato');
+    font-size: var(--text-micro, 12px);
+    font-weight: var(--weight-medium, 500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary, #525252);
+  }
+  .section-{{ section.id }}-stack .lt-stack-coverage-mini__value {
+    font-family: var(--font-heading, Helvetica);
+    font-size: var(--text-body-lg, 18px);
+    font-weight: var(--weight-bold, 700);
+    color: var(--color-text-primary, #000);
+  }
+  .section-{{ section.id }}-stack .lt-stack-coverage-mini__bar {
+    height: 4px;
+    background: rgba(0, 0, 0, 0.08);
+    border-radius: var(--radius-full, 999px);
+    overflow: hidden;
+  }
+  .section-{{ section.id }}-stack .lt-stack-coverage-mini__bar span {
+    display: block;
+    height: 100%;
+    background: var(--color-dark, #364F56);
+    transition: width var(--ease-smooth, 0.4s ease);
   }
 
   /* Produktgrid */
