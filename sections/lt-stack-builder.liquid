@@ -377,27 +377,30 @@
       hallmarks.forEach(function(h) {
         var state = hallmarkCoverageState(h);
         var iconSvg = getHallmarkIcon(h.id);
+        /* is-toggled: alle Produkte dieses Hallmarks im Stack
+           is-active: gerade im Detail-Panel angezeigt (separater Visual-Hint) */
+        var isToggled = state === 'fully-added';
         var isActive = h.id === activeHallmarkId;
+        var hasProducts = h.productHandles.length > 0;
 
         html += '<button'
           + ' class="lt-stack-hallmark-card'
           +   ' lt-stack-hallmark-card--' + h.category
-          +   ' lt-stack-hallmark-card--state-' + state
+          +   (hasProducts ? '' : ' lt-stack-hallmark-card--unavailable')
+          +   (isToggled ? ' is-toggled' : '')
           +   (isActive ? ' is-active' : '')
           + '"'
           + ' data-hallmark="' + h.id + '"'
           + ' type="button"'
-          + ' aria-expanded="' + (isActive ? 'true' : 'false') + '">'
+          + ' aria-pressed="' + (isToggled ? 'true' : 'false') + '">'
           +   (iconSvg ? '<span class="lt-stack-hallmark-card__icon" aria-hidden="true">' + iconSvg + '</span>' : '')
           +   '<span class="lt-stack-hallmark-card__name">' + escape(h.short) + '</span>'
-          +   (state === 'fully-added' ? '<span class="lt-stack-hallmark-card__check" aria-label="Voll im Stack">✓</span>' : '')
-          +   (state === 'partial' ? '<span class="lt-stack-hallmark-card__dot" aria-label="Teilweise im Stack"></span>' : '')
           + '</button>';
       });
 
       html += '</div>';
 
-      /* Detail-Panel unter dem Grid */
+      /* Detail-Panel unter dem Grid — reine Information, keine Aktionen */
       html += '<div class="lt-stack-hallmark-detail" data-hallmark-detail>';
       if (activeHallmarkId) {
         var h = hallmarks.find(function(x) { return x.id === activeHallmarkId; });
@@ -405,7 +408,8 @@
       } else {
         html += ''
           + '<div class="lt-stack-hallmark-detail__empty">'
-          +   '<p>Klick auf einen der 12 Hallmarks oben, um zu erfahren wie er den Alterungsprozess beeinflusst und welche Wirkstoffe ihn adressieren.</p>'
+          +   '<p><strong>Klick auf einen der 12 Hallmarks</strong>, um die Wirkstoffe zu deinem Stack hinzuzufügen und zu erfahren, wie dieser Hallmark den Alterungsprozess beeinflusst.</p>'
+          +   '<p class="lt-stack-hallmark-detail__hint">Erneuter Klick entfernt den Hallmark wieder. Mehrere Hallmarks gleichzeitig kombinierbar.</p>'
           + '</div>';
       }
       html += '</div>';
@@ -418,6 +422,7 @@
       var hallmarkProducts = h.productHandles.map(function(handle) {
         return products.find(function(x) { return x.handle === handle; });
       }).filter(Boolean);
+      var inStackCount = hallmarkProducts.filter(function(p) { return selected.has(p.id); }).length;
 
       var html = '<div class="lt-stack-hallmark-detail__inner">';
 
@@ -430,38 +435,24 @@
       /* Description */
       html += '<p class="lt-stack-hallmark-detail__desc">' + escape(h.description) + '</p>';
 
-      /* Wirkstoffe */
-      html += '<div class="lt-stack-hallmark-detail__products">';
+      /* Status / Wirkstoff-Info — rein informativ, keine Buttons */
+      html += '<div class="lt-stack-hallmark-detail__status">';
       if (state === 'none-available') {
         html += '<p class="lt-stack-hallmark-detail__no-products">'
-             +   '<strong>Aktuell kein Wirkstoff in unserem Sortiment</strong> der diesen Hallmark direkt adressiert. '
-             +   'Wir arbeiten daran, das Sortiment hier zu erweitern.'
+             +   '<strong>Aktuell kein Wirkstoff in unserem Sortiment</strong> der diesen Hallmark direkt adressiert.'
              + '</p>';
       } else {
-        html += '<p class="lt-stack-hallmark-detail__label">'
-             +   'Wirkstoffe, die diesen Hallmark adressieren'
-             + ' <span>(' + hallmarkProducts.length + ')</span>'
-             + '</p>';
-
-        html += '<ul class="lt-stack-hallmark-detail__product-list">';
-        hallmarkProducts.forEach(function(p) {
-          var inStack = selected.has(p.id);
-          html += '<li>'
-                + '<button class="lt-stack-hallmark-product' + (inStack ? ' is-in-stack' : '') + '"'
-                +   ' data-product-toggle="' + p.id + '" type="button">'
-                +   '<span class="lt-stack-hallmark-product__icon" aria-hidden="true">' + (inStack ? '✓' : '+') + '</span>'
-                +   '<span class="lt-stack-hallmark-product__title">' + escape(p.title) + '</span>'
-                +   '<span class="lt-stack-hallmark-product__price">' + fmt(p.priceCents) + '/Mo</span>'
-                + '</button>'
-                + '</li>';
-        });
-        html += '</ul>';
-
-        if (hallmarkProducts.length > 1 && state !== 'fully-added') {
-          html += '<button class="lt-stack-hallmark-bulk" data-hallmark-bulk="' + h.id + '" type="button">'
-               +   '+ Alle ' + hallmarkProducts.length + ' Wirkstoffe in den Stack'
-               + '</button>';
+        var titles = hallmarkProducts.map(function(p) { return p.title; }).join(' · ');
+        var statusLabel;
+        if (inStackCount === 0) {
+          statusLabel = 'Klick auf die Kachel, um diese Wirkstoffe zu deinem Stack hinzuzufügen.';
+        } else if (inStackCount === hallmarkProducts.length) {
+          statusLabel = 'Im Stack aktiv. Erneuter Klick entfernt sie wieder.';
+        } else {
+          statusLabel = inStackCount + ' von ' + hallmarkProducts.length + ' Wirkstoffen in deinem Stack.';
         }
+        html += '<p class="lt-stack-hallmark-detail__products-line"><strong>' + escape(titles) + '</strong></p>';
+        html += '<p class="lt-stack-hallmark-detail__products-meta">' + escape(statusLabel) + '</p>';
       }
       html += '</div>';
 
@@ -485,34 +476,31 @@
       renderPane();
     }
 
-    function setActiveHallmark(id) {
-      /* Toggle: Klick auf bereits aktiven Hallmark schließt das Detail */
-      activeHallmarkId = (activeHallmarkId === id) ? null : id;
-      renderHallmarks();
-      /* Nach Auswahl ins Detail scrollen — auf Mobile wichtig damit
-         Customer die Erklärung sofort sieht */
-      if (activeHallmarkId) {
-        var detail = pane.querySelector('[data-hallmark-detail]');
-        if (detail && detail.scrollIntoView) {
-          detail.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-      }
-    }
-
-    function addAllFromHallmark(hallmarkId) {
-      var h = hallmarks.find(function(x) { return x.id === hallmarkId; });
+    /* Hallmark-Click ist primär eine Toggle-Aktion auf alle Produkte
+       dieses Hallmarks. Plus: Detail-Panel zeigt diesen Hallmark.
+       Hallmarks ohne Wirkstoffe sind nur informativ — Click zeigt nur
+       das Detail (kein Stack-Update). */
+    function handleHallmarkClick(id) {
+      var h = hallmarks.find(function(x) { return x.id === id; });
       if (!h) return;
-      h.productHandles.forEach(function(handle) {
-        var p = products.find(function(x) { return x.handle === handle; });
-        if (p) selected.add(p.id);
-      });
-      rerender();
-    }
 
-    function toggleProductFromHallmark(productId) {
-      var id = parseInt(productId, 10);
-      if (selected.has(id)) selected.delete(id);
-      else selected.add(id);
+      activeHallmarkId = id;
+
+      if (h.productHandles.length > 0) {
+        /* Sind alle Produkte schon im Stack → entfernen.
+           Sonst → alle hinzufügen. */
+        var allInStack = h.productHandles.every(function(handle) {
+          var p = products.find(function(x) { return x.handle === handle; });
+          return p && selected.has(p.id);
+        });
+        h.productHandles.forEach(function(handle) {
+          var p = products.find(function(x) { return x.handle === handle; });
+          if (!p) return;
+          if (allInStack) selected.delete(p.id);
+          else selected.add(p.id);
+        });
+      }
+
       rerender();
     }
 
@@ -620,7 +608,7 @@
       });
     });
 
-    /* Pane: Klicks auf Produkt-Cards, Hallmark-Cards, Bulk-Buttons + Produkt-Toggles */
+    /* Pane: Klicks auf Produkt-Cards (Wirkstoff-Tab) und Hallmark-Cards */
     pane.addEventListener('click', function(e) {
       /* Produkt-Card im Wirkstoffe-Tab → Toggle Selection */
       var card = e.target.closest('[data-id]');
@@ -632,25 +620,11 @@
         rerender();
         return;
       }
-      /* Hallmark-Card → aktivieren, Detail-Panel öffnen */
+      /* Hallmark-Card → toggelt Produkte direkt + zeigt Detail darunter */
       var hallmarkCard = e.target.closest('[data-hallmark]');
       if (hallmarkCard) {
         e.preventDefault();
-        setActiveHallmark(hallmarkCard.getAttribute('data-hallmark'));
-        return;
-      }
-      /* Bulk-Button im Detail-Panel → alle Hallmark-Produkte auf einmal */
-      var bulkBtn = e.target.closest('[data-hallmark-bulk]');
-      if (bulkBtn) {
-        e.preventDefault();
-        addAllFromHallmark(bulkBtn.getAttribute('data-hallmark-bulk'));
-        return;
-      }
-      /* Einzel-Produkt-Toggle im Detail-Panel */
-      var productToggle = e.target.closest('[data-product-toggle]');
-      if (productToggle) {
-        e.preventDefault();
-        toggleProductFromHallmark(productToggle.getAttribute('data-product-toggle'));
+        handleHallmarkClick(hallmarkCard.getAttribute('data-hallmark'));
         return;
       }
     });
@@ -926,29 +900,38 @@
   }
 
   /* ============================================================
-     Hallmarks-Grid + Detail-Panel
+     Hallmarks-Grid — kompakte Toggle-Chips
      ------------------------------------------------------------
-     12 Hallmark-Cards (Icon + kurzer Name) im Grid. Click öffnet
-     Detail-Panel direkt darunter. Cards haben drei States:
-       state-none-available → kein Wirkstoff im Sortiment (gray)
-       state-available      → Wirkstoffe da, noch nicht im Stack
-       state-partial        → einige Wirkstoffe schon im Stack (Dot)
-       state-fully-added    → alle Wirkstoffe im Stack (Check)
+     12 Hallmark-Tiles als Icon + Kurzname. Click toggelt alle
+     Produkte des Hallmarks rein/raus + zeigt Detail darunter.
+
+     States:
+       default                   → weiß, dunkles Icon, dunkler Text
+       is-toggled                → dunkel gefüllt, weißes Icon + Text
+       is-active                 → letztes geklickt (subtiler Outline)
+       is-toggled + is-active    → dunkel gefüllt + Outline
+       --unavailable             → kein Wirkstoff im Sortiment, nicht toggelnd
+
+     Layout:
+       Desktop ≥1024  → 6 Spalten
+       Tablet 600-1023 → 4 Spalten
+       Mobile ≤600    → 3 Spalten
      ============================================================ */
   .section-{{ section.id }}-stack .lt-stack-hallmarks-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: var(--space-3, 12px);
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--space-2, 8px);
     margin-bottom: var(--space-5, 24px);
   }
   @media (max-width: 1023px) {
     .section-{{ section.id }}-stack .lt-stack-hallmarks-grid {
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
     }
   }
   @media (max-width: 600px) {
     .section-{{ section.id }}-stack .lt-stack-hallmarks-grid {
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
     }
   }
 
@@ -958,78 +941,73 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2, 8px);
-    padding: var(--space-3, 12px);
-    aspect-ratio: 1 / 1;
+    gap: 6px;
+    padding: 10px 6px;
+    min-height: 78px;
     background: #fff;
     border: 1px solid var(--color-border-default, #E5E5E5);
-    border-radius: var(--radius-md, 12px);
+    border-radius: var(--radius-sm, 8px);
+    color: var(--color-text-primary, #000);
     cursor: pointer;
-    transition: border-color var(--ease-default, 0.2s ease),
-                box-shadow var(--ease-default, 0.2s ease),
-                transform var(--ease-default, 0.2s ease);
+    transition: background var(--ease-default, 0.2s ease),
+                border-color var(--ease-default, 0.2s ease),
+                color var(--ease-default, 0.2s ease);
   }
   .section-{{ section.id }}-stack .lt-stack-hallmark-card:hover {
     border-color: var(--color-dark, #364F56);
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md, 0 4px 12px rgba(0,0,0,0.08));
   }
+  /* Active: gerade im Detail-Panel angezeigt — subtiler Outline */
   .section-{{ section.id }}-stack .lt-stack-hallmark-card.is-active {
-    border-color: var(--color-dark, #364F56);
     box-shadow: 0 0 0 2px var(--color-dark, #364F56);
   }
-  /* State: no products available — desaturate */
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card--state-none-available {
-    opacity: 0.55;
+  /* Toggled: alle Produkte dieses Hallmarks im Stack — dunkel gefüllt */
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card.is-toggled {
+    background: var(--color-dark, #364F56);
+    border-color: var(--color-dark, #364F56);
+    color: #fff;
   }
-  /* State: fully covered → green check + grünlicher Border */
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card--state-fully-added {
-    border-color: var(--color-success, #22C55E);
-    box-shadow: 0 0 0 1px var(--color-success, #22C55E);
+  /* Unavailable: kein Wirkstoff im Sortiment — dezent gestrichelt */
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--unavailable {
+    border-style: dashed;
+    color: var(--color-text-muted, #A3A3A3);
+    opacity: 0.7;
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--unavailable .lt-stack-hallmark-card__icon {
+    color: var(--color-text-muted, #A3A3A3);
   }
 
   .section-{{ section.id }}-stack .lt-stack-hallmark-card__icon {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     color: var(--color-dark, #364F56);
     flex-shrink: 0;
+    transition: color var(--ease-default, 0.2s ease);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card.is-toggled .lt-stack-hallmark-card__icon {
+    color: #fff;
   }
   .section-{{ section.id }}-stack .lt-stack-hallmark-card__icon svg {
-    width: 28px;
-    height: 28px;
+    width: 22px;
+    height: 22px;
   }
   .section-{{ section.id }}-stack .lt-stack-hallmark-card__name {
     font-family: var(--font-body, 'Lato');
-    font-size: var(--text-body-sm, 14px);
+    font-size: 12px;
     font-weight: var(--weight-semibold, 600);
     text-align: center;
-    color: var(--color-text-primary, #000);
     line-height: 1.2;
+    /* Bei langen Namen auf 2 Zeilen umbrechen */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
-  /* Status-Indikatoren oben rechts */
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card__check,
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card__dot {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    width: 18px;
-    height: 18px;
-    border-radius: var(--radius-full, 999px);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 11px;
-    font-weight: var(--weight-bold, 700);
-  }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card__check {
-    background: var(--color-success, #22C55E);
-    color: #fff;
-  }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card__dot {
-    background: var(--color-dark, #364F56);
+  @media (min-width: 1024px) {
+    .section-{{ section.id }}-stack .lt-stack-hallmark-card__name { font-size: 13px; }
+    .section-{{ section.id }}-stack .lt-stack-hallmark-card { min-height: 86px; }
   }
 
   /* Subtile Kategorie-Akzente am linken Rand der Card */
@@ -1038,8 +1016,8 @@
   .section-{{ section.id }}-stack .lt-stack-hallmark-card--integrative::before {
     content: '';
     position: absolute;
-    top: 8px;
-    left: 8px;
+    top: 6px;
+    left: 6px;
     width: 4px;
     height: 4px;
     border-radius: var(--radius-full, 999px);
@@ -1054,25 +1032,32 @@
     background: var(--color-sand, #C7A39B);
   }
 
-  /* ---- Detail-Panel ---- */
+  /* ---- Detail-Panel (info-only, keine Aktionen) ---- */
   .section-{{ section.id }}-stack .lt-stack-hallmark-detail {
     background: #fff;
     border: 1px solid var(--color-border-default, #E5E5E5);
     border-radius: var(--radius-md, 12px);
     padding: var(--space-5, 24px);
-    min-height: 200px;
   }
   .section-{{ section.id }}-stack .lt-stack-hallmark-detail__empty {
     color: var(--color-text-muted, #A3A3A3);
     font-size: var(--text-body, 16px);
     line-height: var(--leading-body, 1.4);
-    text-align: center;
-    padding: var(--space-5, 24px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__empty p {
+    margin: 0 0 var(--space-2, 8px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__empty p strong {
+    color: var(--color-text-primary, #000);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__hint {
+    font-size: var(--text-body-sm, 14px);
+    opacity: 0.8;
   }
   .section-{{ section.id }}-stack .lt-stack-hallmark-detail__inner {
     display: flex;
     flex-direction: column;
-    gap: var(--space-4, 16px);
+    gap: var(--space-3, 12px);
   }
 
   .section-{{ section.id }}-stack .lt-stack-hallmark-detail__header {
@@ -1096,7 +1081,7 @@
   .section-{{ section.id }}-stack .lt-stack-hallmark-detail__category--integrative { color: var(--color-sand, #C7A39B); }
   .section-{{ section.id }}-stack .lt-stack-hallmark-detail__title {
     font-family: var(--font-heading, Helvetica);
-    font-size: var(--text-h2, 28px);
+    font-size: var(--text-h3, 24px);
     font-weight: var(--weight-bold, 700);
     line-height: var(--leading-heading, 1.15);
     margin: 0;
@@ -1108,107 +1093,29 @@
     margin: 0;
   }
 
-  /* Wirkstoffe-Liste im Detail */
-  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__products {
+  /* Status-Zeile am Ende des Detail-Panels */
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__status {
     border-top: 1px solid var(--color-border-default, #E5E5E5);
-    padding-top: var(--space-4, 16px);
+    padding-top: var(--space-3, 12px);
   }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__label {
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__products-line {
+    margin: 0 0 4px;
     font-size: var(--text-body-sm, 14px);
-    font-weight: var(--weight-semibold, 600);
-    color: var(--color-text-secondary, #525252);
-    margin: 0 0 var(--space-3, 12px);
+    color: var(--color-text-primary, #000);
   }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__label span {
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__products-meta {
+    margin: 0;
+    font-size: var(--text-body-sm, 14px);
     color: var(--color-text-muted, #A3A3A3);
-    font-weight: var(--weight-regular, 400);
   }
   .section-{{ section.id }}-stack .lt-stack-hallmark-detail__no-products {
     font-size: var(--text-body-sm, 14px);
     color: var(--color-text-muted, #A3A3A3);
     line-height: 1.5;
     margin: 0;
-    padding: var(--space-3, 12px);
-    background: var(--color-light-warm, #F6F4F1);
-    border-radius: var(--radius-sm, 8px);
   }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__product-list {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 var(--space-3, 12px);
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2, 8px);
-  }
-
-  .section-{{ section.id }}-stack .lt-stack-hallmark-product {
-    display: grid;
-    grid-template-columns: 28px 1fr auto;
-    align-items: center;
-    gap: var(--space-3, 12px);
-    width: 100%;
-    padding: 10px var(--space-3, 12px);
-    background: #fff;
-    border: 1px solid var(--color-border-default, #E5E5E5);
-    border-radius: var(--radius-sm, 8px);
-    cursor: pointer;
-    text-align: left;
-    transition: border-color var(--ease-default, 0.2s ease), background var(--ease-default, 0.2s ease);
-  }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-product:hover {
-    border-color: var(--color-dark, #364F56);
-  }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-product.is-in-stack {
-    border-color: var(--color-success, #22C55E);
-    background: rgba(34, 197, 94, 0.06);
-  }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-product__icon {
-    width: 24px;
-    height: 24px;
-    border-radius: var(--radius-full, 999px);
-    background: var(--color-light-warm, #F6F4F1);
-    color: var(--color-text-secondary, #525252);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: var(--weight-bold, 700);
-  }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-product.is-in-stack .lt-stack-hallmark-product__icon {
-    background: var(--color-success, #22C55E);
-    color: #fff;
-  }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-product__title {
-    font-size: var(--text-body-sm, 14px);
-    font-weight: var(--weight-semibold, 600);
+  .section-{{ section.id }}-stack .lt-stack-hallmark-detail__no-products strong {
     color: var(--color-text-primary, #000);
-  }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-product__price {
-    font-size: var(--text-body-sm, 14px);
-    color: var(--color-text-muted, #A3A3A3);
-    white-space: nowrap;
-  }
-
-  .section-{{ section.id }}-stack .lt-stack-hallmark-bulk {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    min-height: 44px;
-    padding: 0 var(--space-5, 24px);
-    border: 1px solid var(--color-dark, #364F56);
-    background: transparent;
-    color: var(--color-dark, #364F56);
-    border-radius: var(--radius-full, 999px);
-    font-family: var(--font-body, 'Lato');
-    font-size: var(--text-body-sm, 14px);
-    font-weight: var(--weight-semibold, 600);
-    cursor: pointer;
-    transition: background var(--ease-default, 0.2s ease), color var(--ease-default, 0.2s ease);
-  }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-bulk:hover {
-    background: var(--color-dark, #364F56);
-    color: #fff;
   }
 
   /* Produktgrid */
