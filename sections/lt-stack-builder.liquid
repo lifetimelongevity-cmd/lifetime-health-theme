@@ -31,8 +31,20 @@
     </header>
 
     <div class="lt-stack-layout">
-      <div class="lt-stack-grid" id="lt-stack-grid-{{ section.id }}" data-stack-grid>
-        <p class="lt-stack-loading">Stack wird geladen…</p>
+
+      <div class="lt-stack-main">
+        <div class="lt-stack-tabs" role="tablist">
+          <button class="lt-stack-tab is-active" data-stack-tab="goals" role="tab" aria-selected="true" type="button">
+            Nach Ziel
+          </button>
+          <button class="lt-stack-tab" data-stack-tab="products" role="tab" aria-selected="false" type="button">
+            Wirkstoffe wählen
+          </button>
+        </div>
+
+        <div class="lt-stack-pane" id="lt-stack-pane-{{ section.id }}" data-stack-pane>
+          <p class="lt-stack-loading">Stack wird geladen…</p>
+        </div>
       </div>
 
       <aside class="lt-stack-sidebar" id="lt-stack-sidebar-{{ section.id }}" data-stack-sidebar></aside>
@@ -43,6 +55,18 @@
 
 <div class="lt-stack-backdrop" data-stack-backdrop hidden></div>
 
+{%- comment -%}
+  Hallmark-Icons als hidden <template>-Tags. JS liest sie über
+  data-icon-Attribut und rendert sie in den Goal-Cards.
+  Single Source of Truth bleibt snippets/icon-pack.liquid.
+{%- endcomment -%}
+<template data-stack-icon="mitochondrial">{% render 'icon-pack', icon: 'hallmark-mitochondrial' %}</template>
+<template data-stack-icon="senescence">{% render 'icon-pack', icon: 'hallmark-senescence' %}</template>
+<template data-stack-icon="autophagy">{% render 'icon-pack', icon: 'hallmark-autophagy' %}</template>
+<template data-stack-icon="epigenetic">{% render 'icon-pack', icon: 'hallmark-epigenetic' %}</template>
+<template data-stack-icon="inflammation">{% render 'icon-pack', icon: 'hallmark-inflammation' %}</template>
+<template data-stack-icon="complete">{% render 'icon-pack', icon: 'hallmark-complete' %}</template>
+
 {%- assign stack_collection_handle = section.settings.product_collection | default: 'stack-eligible' -%}
 {%- assign stack_products = collections[stack_collection_handle].products -%}
 
@@ -51,6 +75,22 @@
   {%- for product in stack_products -%}
     {%- assign variant = product.selected_or_first_available_variant -%}
     {%- assign sp = product.selling_plan_groups.first.selling_plans.first -%}
+    {%- comment -%}
+      Wirkweise: zuerst Metafield-Override, sonst hardcoded per Produkt-Handle.
+      Erlaubt dem Merchant, einzelne Texte über Shopify-Admin zu übersteuern,
+      ohne dass die anderen Produkte ohne Text dastehen.
+    {%- endcomment -%}
+    {%- assign wirkweise = product.metafields.custom.product-wirkweise -%}
+    {%- if wirkweise == blank -%}
+      {%- case product.handle -%}
+        {%- when 'spermidin-kapseln' -%}{%- assign wirkweise = 'Aktiviert die zelluläre Autophagie — den körpereigenen Reinigungsprozess.' -%}
+        {%- when 'resveratrol-kapseln' -%}{%- assign wirkweise = 'Stimuliert Sirtuine, eine Familie zellschützender Langlebigkeits-Enzyme.' -%}
+        {%- when 'fisetin-kapseln' -%}{%- assign wirkweise = 'Wirkt senolytisch — beseitigt alte, geschädigte Zellen aus dem Gewebe.' -%}
+        {%- when 'betain-tmg-kapseln' -%}{%- assign wirkweise = 'Unterstützt den Methylierungs-Stoffwechsel und Homocystein-Abbau.' -%}
+        {%- when 'caakg-kapseln' -%}{%- assign wirkweise = 'Liefert Energie-Bausteine für Mitochondrien und Zellteilung.' -%}
+        {%- when 'nad-booster' -%}{%- assign wirkweise = 'Hebt NAD⁺-Spiegel — den zentralen Co-Faktor für Zellenergie.' -%}
+      {%- endcase -%}
+    {%- endif -%}
     {
       "id": {{ product.id }},
       "handle": {{ product.handle | json }},
@@ -60,6 +100,7 @@
       "priceCents": {{ variant.price }},
       "sellingPlanId": {%- if sp -%}{{ sp.id }}{%- else -%}null{%- endif -%},
       "claim": {{ product.metafields.custom.product-benefit | default: '' | json }},
+      "wirkweise": {{ wirkweise | default: '' | json }},
       "portion": {{ product.metafields.custom.portion_label | default: '60 Kapseln · 1 Monat' | json }}
     }{%- unless forloop.last -%},{%- endunless -%}
   {%- endfor -%}
@@ -69,17 +110,79 @@
 <script>
   (function() {
     var sectionId = '{{ section.id }}';
-    var grid = document.querySelector('[data-stack-grid]');
+    var pane = document.querySelector('[data-stack-pane]');
     var sidebar = document.querySelector('[data-stack-sidebar]');
+    var tabs = document.querySelectorAll('[data-stack-tab]');
     var dataEl = document.querySelector('[data-stack-products-' + sectionId + ']');
-    if (!grid || !sidebar || !dataEl) return;
+    if (!pane || !sidebar || !dataEl) return;
 
     var products = [];
     try { products = JSON.parse(dataEl.textContent); } catch (e) {}
     if (!products.length) {
-      grid.innerHTML = '<p class="lt-stack-empty">Keine Stack-Produkte konfiguriert. Bitte Collection prüfen.</p>';
+      pane.innerHTML = '<p class="lt-stack-empty">Keine Stack-Produkte konfiguriert. Bitte Collection prüfen.</p>';
       return;
     }
+
+    /* Goal-Presets — adressieren die Hallmarks of Aging
+       (López-Otín et al. 2013/2023, der wissenschaftliche Standard-Frame
+       der Longevity-Forschung).
+
+       Format pro Goal:
+         title       → plain-language Outcome (was Customer fühlt/will)
+         hallmark    → wissenschaftlicher Anker (zeigt Tiefe)
+         description → erklärt das WHY in 1-2 verständlichen Sätzen
+         productHandles → welche Wirkstoffe diesen Hallmark adressieren
+
+       Customer klickt ein Goal → Produkte werden additiv zum Stack
+       hinzugefügt (Union, kein Reset). Mehrfach-Klicks auf verschiedene
+       Goals kombinieren mehrere Hallmarks → höhere Stack-Tier.
+    */
+    var goals = [
+      {
+        id: 'mitochondrial',
+        title: 'Mehr Energie',
+        hallmark: 'Mitochondrien-Funktion',
+        description: 'Mitochondrien sind die Energiekraftwerke deiner Zellen. Mit dem Alter werden sie ineffizienter — du fühlst dich müder, weniger leistungsfähig.',
+        productHandles: ['nad-booster', 'caakg-kapseln', 'resveratrol-kapseln']
+      },
+      {
+        id: 'senescence',
+        title: 'Alte Zellen entfernen',
+        hallmark: 'Zellseneszenz',
+        description: 'Manche Zellen werden alt und teilen sich nicht mehr — sterben aber auch nicht ab. Diese „Zombie-Zellen" schaden dem umliegenden Gewebe.',
+        productHandles: ['fisetin-kapseln', 'spermidin-kapseln']
+      },
+      {
+        id: 'autophagy',
+        title: 'Zellen reinigen',
+        hallmark: 'Autophagie',
+        description: 'Dein Körper räumt geschädigte Zellbestandteile selbst auf — aber dieser Prozess verlangsamt sich mit dem Alter. Wieder anschalten lohnt sich.',
+        productHandles: ['spermidin-kapseln', 'resveratrol-kapseln']
+      },
+      {
+        id: 'epigenetic',
+        title: 'Epigenetik & DNA-Schutz',
+        hallmark: 'Epigenetische Veränderungen',
+        description: 'Methylierungs-Muster auf deiner DNA verändern sich mit dem Alter und beeinflussen, welche Gene aktiv sind. NAD⁺ und Methyl-Spender stabilisieren sie.',
+        productHandles: ['nad-booster', 'betain-tmg-kapseln']
+      },
+      {
+        id: 'inflammation',
+        title: 'Stille Entzündungen senken',
+        hallmark: 'Inflammaging',
+        description: 'Chronische, oft unbemerkte Entzündungen sind ein zentraler Treiber des Alterungsprozesses und vieler altersbedingter Erkrankungen.',
+        productHandles: ['fisetin-kapseln', 'resveratrol-kapseln']
+      },
+      {
+        id: 'complete',
+        title: 'Mein kompletter Stack',
+        hallmark: 'Alle 5 Hallmarks gleichzeitig',
+        description: 'Alle 6 Wirkstoffe parallel aktiv — adressiert die fünf wichtigsten Hallmarks of Aging zur gleichen Zeit. Höchster Stack-Bonus (40 %).',
+        productHandles: ['spermidin-kapseln', 'resveratrol-kapseln', 'fisetin-kapseln', 'betain-tmg-kapseln', 'caakg-kapseln', 'nad-booster']
+      }
+    ];
+
+    var activeTab = 'goals';
 
     /* Tier-Set: codePercent ist der reine Code-Wert in Shopify Admin.
        Effektive Rabattrate ergibt sich aus Stacking mit dem 10%-Single-Abo-
@@ -149,8 +252,8 @@
       window.history.replaceState({}, '', url);
     }
 
-    function renderGrid() {
-      grid.innerHTML = products.map(function(p) {
+    function renderProducts() {
+      pane.innerHTML = '<div class="lt-stack-grid">' + products.map(function(p) {
         var isSel = selected.has(p.id);
         return ''
           + '<button class="lt-stack-card' + (isSel ? ' is-selected' : '') + '" data-id="' + p.id + '" type="button" aria-pressed="' + (isSel ? 'true' : 'false') + '">'
@@ -159,12 +262,87 @@
           +   '<div class="lt-stack-card__body">'
           +     '<h3>' + escape(p.title) + '</h3>'
           +     (p.claim ? '<p class="lt-stack-card__claim">' + escape(p.claim) + '</p>' : '')
+          +     (p.wirkweise ? '<p class="lt-stack-card__wirkweise">' + escape(p.wirkweise) + '</p>' : '')
           +     '<p class="lt-stack-card__portion">' + escape(p.portion) + '</p>'
           +     '<p class="lt-stack-card__price">' + fmt(p.priceCents) + '<small> /Monat im Abo</small></p>'
           +   '</div>'
           +   '<span class="lt-stack-card__cta">' + (isSel ? '✓ Im Stack' : 'Hinzufügen') + '</span>'
           + '</button>';
-      }).join('');
+      }).join('') + '</div>';
+    }
+
+    /* Icon-Markup aus den hidden <template>-Tags ziehen.
+       Cached, damit wir nicht bei jedem Re-Render querySelectors machen. */
+    var iconCache = {};
+    function getGoalIcon(id) {
+      if (iconCache[id] !== undefined) return iconCache[id];
+      var tpl = document.querySelector('template[data-stack-icon="' + id + '"]');
+      iconCache[id] = tpl ? tpl.innerHTML.trim() : '';
+      return iconCache[id];
+    }
+
+    function renderGoals() {
+      pane.innerHTML = '<div class="lt-stack-goals">' + goals.map(function(g) {
+        /* Welche Goal-Produkte sind schon im aktuellen Stack? */
+        var includedTitles = g.productHandles.map(function(h) {
+          var p = products.find(function(x) { return x.handle === h; });
+          return p ? p.title : null;
+        }).filter(Boolean);
+
+        var allInStack = g.productHandles.every(function(h) {
+          var p = products.find(function(x) { return x.handle === h; });
+          return p && selected.has(p.id);
+        });
+
+        var hallmarkLabel = g.hallmark
+          ? (g.id === 'complete' ? g.hallmark : 'Hallmark · ' + g.hallmark)
+          : '';
+
+        var iconSvg = getGoalIcon(g.id);
+
+        return ''
+          + '<button class="lt-stack-goal' + (allInStack ? ' is-active' : '') + '" data-goal="' + g.id + '" type="button">'
+          +   (iconSvg ? '<span class="lt-stack-goal__icon" aria-hidden="true">' + iconSvg + '</span>' : '')
+          +   (hallmarkLabel ? '<span class="lt-stack-goal__hallmark">' + escape(hallmarkLabel) + '</span>' : '')
+          +   '<h3 class="lt-stack-goal__title">' + escape(g.title) + '</h3>'
+          +   '<p class="lt-stack-goal__desc">' + escape(g.description) + '</p>'
+          +   '<ul class="lt-stack-goal__items">'
+          +     includedTitles.map(function(t) { return '<li>' + escape(t) + '</li>'; }).join('')
+          +   '</ul>'
+          +   '<span class="lt-stack-goal__cta">'
+          +     (allInStack ? '✓ Bereits im Stack' : '+ ' + g.productHandles.length + ' Wirkstoffe in den Stack')
+          +   '</span>'
+          + '</button>';
+      }).join('') + '</div>';
+    }
+
+    function renderPane() {
+      if (activeTab === 'goals') renderGoals();
+      else renderProducts();
+    }
+
+    function setTab(tab) {
+      if (tab === activeTab) return;
+      activeTab = tab;
+      tabs.forEach(function(t) {
+        var isActive = t.getAttribute('data-stack-tab') === tab;
+        t.classList.toggle('is-active', isActive);
+        t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      });
+      renderPane();
+    }
+
+    function applyGoal(goalId) {
+      var g = goals.find(function(x) { return x.id === goalId; });
+      if (!g) return;
+      g.productHandles.forEach(function(h) {
+        var p = products.find(function(x) { return x.handle === h; });
+        if (p) selected.add(p.id);
+      });
+      /* Nach Goal-Klick: zum Wirkstoff-Tab wechseln, damit Customer die Auswahl sieht */
+      setTab('products');
+      renderSidebar();
+      syncUrl();
     }
 
     function renderSidebar() {
@@ -259,19 +437,37 @@
     }
 
     function rerender() {
-      renderGrid();
+      renderPane();
       renderSidebar();
       syncUrl();
     }
 
-    grid.addEventListener('click', function(e) {
+    /* Tab-Navigation: Klick auf "Nach Ziel" oder "Wirkstoffe wählen" */
+    tabs.forEach(function(t) {
+      t.addEventListener('click', function() {
+        setTab(t.getAttribute('data-stack-tab'));
+      });
+    });
+
+    /* Pane: Klicks auf Produkt-Cards UND Goal-Cards landen hier */
+    pane.addEventListener('click', function(e) {
+      /* Produkt-Card → Toggle Selection */
       var card = e.target.closest('[data-id]');
-      if (!card) return;
-      e.preventDefault();
-      var id = parseInt(card.getAttribute('data-id'), 10);
-      if (selected.has(id)) selected.delete(id);
-      else selected.add(id);
-      rerender();
+      if (card) {
+        e.preventDefault();
+        var id = parseInt(card.getAttribute('data-id'), 10);
+        if (selected.has(id)) selected.delete(id);
+        else selected.add(id);
+        rerender();
+        return;
+      }
+      /* Goal-Card → Bulk-Add der Goal-Produkte + Tab-Wechsel */
+      var goalCard = e.target.closest('[data-goal]');
+      if (goalCard) {
+        e.preventDefault();
+        applyGoal(goalCard.getAttribute('data-goal'));
+        return;
+      }
     });
 
     sidebar.addEventListener('click', function(e) {
@@ -399,6 +595,151 @@
     }
   }
 
+  /* Tab-Navigation */
+  .section-{{ section.id }}-stack .lt-stack-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: var(--space-5, 24px);
+    background: rgba(0, 0, 0, 0.04);
+    padding: 4px;
+    border-radius: var(--radius-full, 999px);
+    width: fit-content;
+  }
+  .section-{{ section.id }}-stack .lt-stack-tab {
+    padding: 10px 20px;
+    border: none;
+    background: transparent;
+    border-radius: var(--radius-full, 999px);
+    font-family: var(--font-body, 'Lato');
+    font-size: var(--text-body-sm, 14px);
+    font-weight: var(--weight-semibold, 600);
+    color: var(--color-text-secondary, #525252);
+    cursor: pointer;
+    transition: all var(--ease-default, 0.2s ease);
+  }
+  .section-{{ section.id }}-stack .lt-stack-tab:hover {
+    color: var(--color-text-primary, #000);
+  }
+  .section-{{ section.id }}-stack .lt-stack-tab.is-active {
+    background: var(--color-dark, #364F56);
+    color: #fff;
+  }
+  @media (max-width: 480px) {
+    .section-{{ section.id }}-stack .lt-stack-tabs { width: 100%; }
+    .section-{{ section.id }}-stack .lt-stack-tab { flex: 1; padding: 10px 12px; }
+  }
+
+  /* Goals-Grid */
+  .section-{{ section.id }}-stack .lt-stack-goals {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4, 16px);
+  }
+  @media (max-width: 1023px) {
+    .section-{{ section.id }}-stack .lt-stack-goals { grid-template-columns: 1fr; }
+  }
+
+  /* Goal-Card */
+  .section-{{ section.id }}-stack .lt-stack-goal {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3, 12px);
+    padding: var(--space-5, 24px);
+    background: #fff;
+    border: 1px solid var(--color-border-default, #E5E5E5);
+    border-radius: var(--radius-md, 12px);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color var(--ease-default, 0.2s ease), box-shadow var(--ease-default, 0.2s ease);
+  }
+  .section-{{ section.id }}-stack .lt-stack-goal:hover {
+    border-color: var(--color-dark, #364F56);
+    box-shadow: var(--shadow-sm, 0 1px 3px rgba(0,0,0,0.05));
+  }
+  .section-{{ section.id }}-stack .lt-stack-goal.is-active {
+    border-color: var(--color-dark, #364F56);
+    box-shadow: 0 0 0 2px var(--color-dark, #364F56);
+  }
+  /* Hallmark-Icon — visueller Anker am Card-Top */
+  .section-{{ section.id }}-stack .lt-stack-goal__icon {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-dark, #364F56);
+    margin-bottom: var(--space-3, 12px);
+    border-radius: var(--radius-md, 12px);
+    background: var(--color-light-warm, #F6F4F1);
+    transition: background var(--ease-default, 0.2s ease), color var(--ease-default, 0.2s ease);
+  }
+  .section-{{ section.id }}-stack .lt-stack-goal__icon svg {
+    width: 24px;
+    height: 24px;
+  }
+  .section-{{ section.id }}-stack .lt-stack-goal.is-active .lt-stack-goal__icon {
+    background: var(--color-dark, #364F56);
+    color: #fff;
+  }
+
+  .section-{{ section.id }}-stack .lt-stack-goal__hallmark {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    background: var(--color-light-warm, #F6F4F1);
+    color: var(--color-text-secondary, #525252);
+    font-family: var(--font-body, 'Lato');
+    font-size: var(--text-micro, 12px);
+    font-weight: var(--weight-semibold, 600);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    border-radius: var(--radius-full, 999px);
+    margin-bottom: var(--space-1, 4px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-goal.is-active .lt-stack-goal__hallmark {
+    background: var(--color-dark, #364F56);
+    color: #fff;
+  }
+  .section-{{ section.id }}-stack .lt-stack-goal__title {
+    font-family: var(--font-heading, Helvetica);
+    font-size: var(--text-h3, 24px);
+    font-weight: var(--weight-bold, 700);
+    line-height: 1.2;
+    margin: 0;
+  }
+  .section-{{ section.id }}-stack .lt-stack-goal__desc {
+    font-size: var(--text-body-sm, 14px);
+    color: var(--color-text-secondary, #525252);
+    line-height: var(--leading-body, 1.4);
+    margin: 0;
+  }
+  .section-{{ section.id }}-stack .lt-stack-goal__items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: auto;
+  }
+  .section-{{ section.id }}-stack .lt-stack-goal__items li {
+    background: var(--color-light-warm, #F6F4F1);
+    color: var(--color-text-secondary, #525252);
+    font-size: var(--text-micro, 12px);
+    padding: 4px 10px;
+    border-radius: var(--radius-full, 999px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-goal__cta {
+    font-size: var(--text-body-sm, 14px);
+    font-weight: var(--weight-semibold, 600);
+    color: var(--color-dark, #364F56);
+    margin-top: var(--space-2, 8px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-goal.is-active .lt-stack-goal__cta {
+    color: var(--color-success, #22C55E);
+  }
+
   /* Produktgrid */
   .section-{{ section.id }}-stack .lt-stack-grid {
     display: grid;
@@ -483,9 +824,16 @@
   }
   .section-{{ section.id }}-stack .lt-stack-card__claim {
     font-size: var(--text-body-sm, 14px);
-    color: var(--color-text-secondary, #525252);
+    font-weight: var(--weight-semibold, 600);
+    color: var(--color-text-primary, #000);
     margin: 0 0 var(--space-2, 8px);
     line-height: 1.4;
+  }
+  .section-{{ section.id }}-stack .lt-stack-card__wirkweise {
+    font-size: var(--text-body-sm, 14px);
+    color: var(--color-text-secondary, #525252);
+    margin: 0 0 var(--space-3, 12px);
+    line-height: var(--leading-body, 1.4);
   }
   .section-{{ section.id }}-stack .lt-stack-card__portion {
     font-size: var(--text-micro, 12px);
@@ -520,6 +868,72 @@
   .section-{{ section.id }}-stack .lt-stack-card.is-selected .lt-stack-card__cta {
     background: var(--color-dark, #364F56);
     color: #fff;
+  }
+
+  /* ---- Mobile-Card-Anpassungen ---- */
+
+  /* Tablet / mittlere Mobile-Breiten (481-1023): Bild kleiner, kein 1:1 mehr */
+  @media (max-width: 1023px) and (min-width: 481px) {
+    .section-{{ section.id }}-stack .lt-stack-card__media {
+      aspect-ratio: 4 / 3;
+      max-height: 140px;
+    }
+    .section-{{ section.id }}-stack .lt-stack-card h3 {
+      font-size: var(--text-section, 20px);
+    }
+  }
+
+  /* Kleine Mobile (≤480, 1-Spalten-Grid): Card horizontal mit kompaktem Bild */
+  @media (max-width: 480px) {
+    .section-{{ section.id }}-stack .lt-stack-card {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      grid-template-rows: auto auto;
+      gap: var(--space-3, 12px);
+      padding: var(--space-4, 16px);
+    }
+    .section-{{ section.id }}-stack .lt-stack-card__check {
+      top: var(--space-2, 8px);
+      right: var(--space-2, 8px);
+      width: 24px;
+      height: 24px;
+      font-size: 14px;
+    }
+    .section-{{ section.id }}-stack .lt-stack-card__media {
+      grid-column: 1;
+      grid-row: 1;
+      aspect-ratio: 1 / 1;
+      width: 96px;
+      height: 96px;
+      margin-bottom: 0;
+    }
+    .section-{{ section.id }}-stack .lt-stack-card__body {
+      grid-column: 2;
+      grid-row: 1;
+      padding-right: 32px; /* Platz für Check-Badge oben rechts */
+    }
+    .section-{{ section.id }}-stack .lt-stack-card h3 {
+      font-size: var(--text-body-lg, 18px);
+      margin-bottom: 4px;
+    }
+    .section-{{ section.id }}-stack .lt-stack-card__claim {
+      margin-bottom: 4px;
+    }
+    .section-{{ section.id }}-stack .lt-stack-card__wirkweise {
+      margin-bottom: 6px;
+      font-size: var(--text-body-sm, 14px);
+    }
+    .section-{{ section.id }}-stack .lt-stack-card__portion {
+      margin-bottom: 6px;
+    }
+    .section-{{ section.id }}-stack .lt-stack-card__price {
+      margin-bottom: 0;
+      font-size: var(--text-body, 16px);
+    }
+    .section-{{ section.id }}-stack .lt-stack-card__cta {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
   }
 
   /* ============================================================
