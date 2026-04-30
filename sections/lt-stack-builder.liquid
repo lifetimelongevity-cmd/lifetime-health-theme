@@ -34,11 +34,11 @@
 
       <div class="lt-stack-main">
         <div class="lt-stack-tabs" role="tablist">
-          <button class="lt-stack-tab is-active" data-stack-tab="hallmarks" role="tab" aria-selected="true" type="button">
-            Hallmarks of Aging
+          <button class="lt-stack-tab is-active" data-stack-tab="products" role="tab" aria-selected="true" type="button">
+            Nährstoffe
           </button>
-          <button class="lt-stack-tab" data-stack-tab="products" role="tab" aria-selected="false" type="button">
-            Wirkstoffe direkt
+          <button class="lt-stack-tab" data-stack-tab="hallmarks" role="tab" aria-selected="false" type="button">
+            Hallmarks of Aging
           </button>
         </div>
 
@@ -260,7 +260,7 @@
     ];
 
     var activeHallmarkId = null;
-    var activeTab = 'hallmarks';
+    var activeTab = 'products';
 
     /* Tier-Set: codePercent ist der reine Code-Wert in Shopify Admin.
        Effektive Rabattrate ergibt sich aus Stacking mit dem 10%-Single-Abo-
@@ -392,9 +392,7 @@
         html +=   '<div class="lt-stack-hallmarks-grid">';
 
         byCategory[cat].forEach(function(h) {
-          var state = hallmarkCoverageState(h);
           var iconSvg = getHallmarkIcon(h.id);
-          var isToggled = state === 'fully-added';
           var isActive = h.id === activeHallmarkId;
           var hasProducts = h.productHandles.length > 0;
 
@@ -402,12 +400,11 @@
             + ' class="lt-stack-hallmark-card'
             +   ' lt-stack-hallmark-card--' + h.category
             +   (hasProducts ? '' : ' lt-stack-hallmark-card--unavailable')
-            +   (isToggled ? ' is-toggled' : '')
             +   (isActive ? ' is-active' : '')
             + '"'
             + ' data-hallmark="' + h.id + '"'
             + ' type="button"'
-            + ' aria-pressed="' + (isToggled ? 'true' : 'false') + '">'
+            + ' aria-pressed="' + (isActive ? 'true' : 'false') + '">'
             +   (iconSvg ? '<span class="lt-stack-hallmark-card__icon" aria-hidden="true">' + iconSvg + '</span>' : '')
             +   '<span class="lt-stack-hallmark-card__name">' + escape(h.short) + '</span>'
             + '</button>';
@@ -425,8 +422,8 @@
       } else {
         html += ''
           + '<div class="lt-stack-hallmark-detail__empty">'
-          +   '<p><strong>Klick auf einen der 12 Hallmarks</strong>, um die Wirkstoffe zu deinem Stack hinzuzufügen und zu erfahren, wie dieser Hallmark den Alterungsprozess beeinflusst.</p>'
-          +   '<p class="lt-stack-hallmark-detail__hint">Erneuter Klick entfernt den Hallmark wieder. Mehrere Hallmarks gleichzeitig kombinierbar.</p>'
+          +   '<p><strong>Klick auf einen Hallmark</strong>, um die passenden Wirkstoffe in deinen Stack zu legen und zu erfahren, wie dieser Hallmark den Alterungsprozess beeinflusst.</p>'
+          +   '<p class="lt-stack-hallmark-detail__hint">Es ist immer nur ein Hallmark aktiv. Wer Wirkstoffe aus mehreren Pfaden kombinieren will, nutzt den Tab „Nährstoffe".</p>'
           + '</div>';
       }
       html += '</div>';
@@ -461,12 +458,12 @@
       } else {
         var titles = hallmarkProducts.map(function(p) { return p.title; }).join(' · ');
         var statusLabel;
-        if (inStackCount === 0) {
-          statusLabel = 'Klick auf die Kachel, um diese Wirkstoffe zu deinem Stack hinzuzufügen.';
-        } else if (inStackCount === hallmarkProducts.length) {
-          statusLabel = 'Im Stack aktiv. Erneuter Klick entfernt sie wieder.';
+        if (h.id === activeHallmarkId) {
+          statusLabel = 'Im Stack. Erneuter Klick entfernt diesen Hallmark wieder.';
+        } else if (inStackCount > 0) {
+          statusLabel = inStackCount + ' von ' + hallmarkProducts.length + ' Wirkstoffen sind über den Nährstoffe-Tab im Stack. Klick aktiviert diesen Hallmark.';
         } else {
-          statusLabel = inStackCount + ' von ' + hallmarkProducts.length + ' Wirkstoffen in deinem Stack.';
+          statusLabel = 'Klick auf die Kachel, um diese Wirkstoffe in den Stack zu legen.';
         }
         html += '<p class="lt-stack-hallmark-detail__products-line"><strong>' + escape(titles) + '</strong></p>';
         html += '<p class="lt-stack-hallmark-detail__products-meta">' + escape(statusLabel) + '</p>';
@@ -493,29 +490,54 @@
       renderPane();
     }
 
-    /* Hallmark-Click ist primär eine Toggle-Aktion auf alle Produkte
-       dieses Hallmarks. Plus: Detail-Panel zeigt diesen Hallmark.
-       Hallmarks ohne Wirkstoffe sind nur informativ — Click zeigt nur
-       das Detail (kein Stack-Update). */
+    /* Single-Select: Es kann immer nur EIN Hallmark gleichzeitig aktiv sein.
+       - Click auf inaktiven Hallmark → vorherigen deaktivieren (Produkte raus),
+         neuen aktivieren (Produkte rein)
+       - Click auf bereits aktiven Hallmark → deaktivieren (Produkte raus)
+       - Hallmarks ohne Wirkstoffe sind nur informativ — Click zeigt nur das
+         Detail, kein Produkt-Update.
+
+       Wer mehrere Pathways kombinieren will, nutzt den Nährstoffe-Tab und
+       baut den Stack manuell zusammen. */
+    function removeHallmarkProductsFromStack(hallmarkId) {
+      var target = hallmarks.find(function(x) { return x.id === hallmarkId; });
+      if (!target) return;
+      target.productHandles.forEach(function(handle) {
+        var p = products.find(function(x) { return x.handle === handle; });
+        if (p) selected.delete(p.id);
+      });
+    }
+
+    function addHallmarkProductsToStack(hallmarkId) {
+      var target = hallmarks.find(function(x) { return x.id === hallmarkId; });
+      if (!target) return;
+      target.productHandles.forEach(function(handle) {
+        var p = products.find(function(x) { return x.handle === handle; });
+        if (p) selected.add(p.id);
+      });
+    }
+
     function handleHallmarkClick(id) {
       var h = hallmarks.find(function(x) { return x.id === id; });
       if (!h) return;
 
-      activeHallmarkId = id;
+      var isCurrentlyActive = (id === activeHallmarkId);
+      var hasProducts = h.productHandles.length > 0;
 
-      if (h.productHandles.length > 0) {
-        /* Sind alle Produkte schon im Stack → entfernen.
-           Sonst → alle hinzufügen. */
-        var allInStack = h.productHandles.every(function(handle) {
-          var p = products.find(function(x) { return x.handle === handle; });
-          return p && selected.has(p.id);
-        });
-        h.productHandles.forEach(function(handle) {
-          var p = products.find(function(x) { return x.handle === handle; });
-          if (!p) return;
-          if (allInStack) selected.delete(p.id);
-          else selected.add(p.id);
-        });
+      if (isCurrentlyActive) {
+        /* Click auf den aktiven Hallmark → deaktivieren */
+        if (hasProducts) removeHallmarkProductsFromStack(id);
+        activeHallmarkId = null;
+      } else {
+        /* Wechsel: vorherigen Hallmark abräumen, neuen aktivieren */
+        if (activeHallmarkId) {
+          var prev = hallmarks.find(function(x) { return x.id === activeHallmarkId; });
+          if (prev && prev.productHandles.length > 0) {
+            removeHallmarkProductsFromStack(activeHallmarkId);
+          }
+        }
+        if (hasProducts) addHallmarkProductsToStack(id);
+        activeHallmarkId = id;
       }
 
       rerender();
@@ -917,22 +939,22 @@
   }
 
   /* ============================================================
-     Hallmarks-Grid — kompakte Toggle-Chips
+     Hallmarks-Grid — Single-Select Tiles
      ------------------------------------------------------------
-     12 Hallmark-Tiles als Icon + Kurzname. Click toggelt alle
-     Produkte des Hallmarks rein/raus + zeigt Detail darunter.
+     12 Hallmark-Tiles als Icon + Kurzname. Es kann immer nur EIN
+     Hallmark gleichzeitig aktiv sein. Click toggelt diesen einen
+     Hallmark rein (legt Produkte in den Stack) oder raus (entfernt
+     sie), und zeigt Detail-Panel darunter.
 
      States:
        default                   → weiß, dunkles Icon, dunkler Text
-       is-toggled                → dunkel gefüllt, weißes Icon + Text
-       is-active                 → letztes geklickt (subtiler Outline)
-       is-toggled + is-active    → dunkel gefüllt + Outline
-       --unavailable             → kein Wirkstoff im Sortiment, nicht toggelnd
+       is-active                 → dunkel gefüllt, weißes Icon + Text
+       --unavailable             → gestrichelt, kein Wirkstoff (nur Detail)
+       --unavailable.is-active   → Outline-Highlight statt Dark-Fill
 
      Layout:
-       Desktop ≥1024  → 6 Spalten
-       Tablet 600-1023 → 4 Spalten
-       Mobile ≤600    → 3 Spalten
+       Desktop / Tablet → 4 Spalten
+       Mobile ≤600     → 3 Spalten
      ============================================================ */
   /* Gruppen-Container: jeweils ein Pill-Tag-Heading + dazugehöriger Grid */
   .section-{{ section.id }}-stack .lt-stack-hallmarks-group {
@@ -1001,12 +1023,9 @@
   .section-{{ section.id }}-stack .lt-stack-hallmark-card:hover {
     border-color: var(--color-dark, #364F56);
   }
-  /* Active: gerade im Detail-Panel angezeigt — subtiler Outline */
+  /* Active (Single-Select): aktiver Hallmark bekommt Dark-Fill —
+     visualisiert gleichzeitig "im Stack" und "aktuell im Detail" */
   .section-{{ section.id }}-stack .lt-stack-hallmark-card.is-active {
-    box-shadow: 0 0 0 2px var(--color-dark, #364F56);
-  }
-  /* Toggled: alle Produkte dieses Hallmarks im Stack — dunkel gefüllt */
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card.is-toggled {
     background: var(--color-dark, #364F56);
     border-color: var(--color-dark, #364F56);
     color: #fff;
@@ -1020,6 +1039,19 @@
   .section-{{ section.id }}-stack .lt-stack-hallmark-card--unavailable .lt-stack-hallmark-card__icon {
     color: var(--color-text-muted, #A3A3A3);
   }
+  /* Unavailable + active: kein Dark-Fill (würde "im Stack" suggerieren),
+     nur Outline-Highlight zur Detail-Anzeige */
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--unavailable.is-active {
+    background: #fff;
+    color: var(--color-text-primary, #000);
+    border-color: var(--color-dark, #364F56);
+    border-style: solid;
+    box-shadow: 0 0 0 1px var(--color-dark, #364F56);
+    opacity: 1;
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card--unavailable.is-active .lt-stack-hallmark-card__icon {
+    color: var(--color-dark, #364F56);
+  }
 
   .section-{{ section.id }}-stack .lt-stack-hallmark-card__icon {
     width: 28px;
@@ -1031,7 +1063,7 @@
     flex-shrink: 0;
     transition: color var(--ease-default, 0.2s ease);
   }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card.is-toggled .lt-stack-hallmark-card__icon {
+  .section-{{ section.id }}-stack .lt-stack-hallmark-card.is-active .lt-stack-hallmark-card__icon {
     color: #fff;
   }
   .section-{{ section.id }}-stack .lt-stack-hallmark-card__icon svg {
