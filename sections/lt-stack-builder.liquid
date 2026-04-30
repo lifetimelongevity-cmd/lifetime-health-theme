@@ -371,36 +371,53 @@
       return 'partial';
     }
 
+    /* Group-Labels für die 3 Hallmark-Kategorien (López-Otín-Taxonomie) */
+    var groupLabels = {
+      primary: 'Primär · Schäden',
+      antagonistic: 'Antagonistisch · Antwort',
+      integrative: 'Integrativ · Folge'
+    };
+    var groupOrder = ['primary', 'antagonistic', 'integrative'];
+
     function renderHallmarks() {
-      var html = '<div class="lt-stack-hallmarks-grid">';
+      /* Hallmarks nach Kategorie gruppieren */
+      var byCategory = { primary: [], antagonistic: [], integrative: [] };
+      hallmarks.forEach(function(h) { byCategory[h.category].push(h); });
 
-      hallmarks.forEach(function(h) {
-        var state = hallmarkCoverageState(h);
-        var iconSvg = getHallmarkIcon(h.id);
-        /* is-toggled: alle Produkte dieses Hallmarks im Stack
-           is-active: gerade im Detail-Panel angezeigt (separater Visual-Hint) */
-        var isToggled = state === 'fully-added';
-        var isActive = h.id === activeHallmarkId;
-        var hasProducts = h.productHandles.length > 0;
+      var html = '';
 
-        html += '<button'
-          + ' class="lt-stack-hallmark-card'
-          +   ' lt-stack-hallmark-card--' + h.category
-          +   (hasProducts ? '' : ' lt-stack-hallmark-card--unavailable')
-          +   (isToggled ? ' is-toggled' : '')
-          +   (isActive ? ' is-active' : '')
-          + '"'
-          + ' data-hallmark="' + h.id + '"'
-          + ' type="button"'
-          + ' aria-pressed="' + (isToggled ? 'true' : 'false') + '">'
-          +   (iconSvg ? '<span class="lt-stack-hallmark-card__icon" aria-hidden="true">' + iconSvg + '</span>' : '')
-          +   '<span class="lt-stack-hallmark-card__name">' + escape(h.short) + '</span>'
-          + '</button>';
+      groupOrder.forEach(function(cat) {
+        html += '<div class="lt-stack-hallmarks-group lt-stack-hallmarks-group--' + cat + '">';
+        html +=   '<span class="lt-stack-hallmarks-group__pill">' + escape(groupLabels[cat]) + '</span>';
+        html +=   '<div class="lt-stack-hallmarks-grid">';
+
+        byCategory[cat].forEach(function(h) {
+          var state = hallmarkCoverageState(h);
+          var iconSvg = getHallmarkIcon(h.id);
+          var isToggled = state === 'fully-added';
+          var isActive = h.id === activeHallmarkId;
+          var hasProducts = h.productHandles.length > 0;
+
+          html += '<button'
+            + ' class="lt-stack-hallmark-card'
+            +   ' lt-stack-hallmark-card--' + h.category
+            +   (hasProducts ? '' : ' lt-stack-hallmark-card--unavailable')
+            +   (isToggled ? ' is-toggled' : '')
+            +   (isActive ? ' is-active' : '')
+            + '"'
+            + ' data-hallmark="' + h.id + '"'
+            + ' type="button"'
+            + ' aria-pressed="' + (isToggled ? 'true' : 'false') + '">'
+            +   (iconSvg ? '<span class="lt-stack-hallmark-card__icon" aria-hidden="true">' + iconSvg + '</span>' : '')
+            +   '<span class="lt-stack-hallmark-card__name">' + escape(h.short) + '</span>'
+            + '</button>';
+        });
+
+        html +=   '</div>';
+        html += '</div>';
       });
 
-      html += '</div>';
-
-      /* Detail-Panel unter dem Grid — reine Information, keine Aktionen */
+      /* Detail-Panel unter den Gruppen — reine Information, keine Aktionen */
       html += '<div class="lt-stack-hallmark-detail" data-hallmark-detail>';
       if (activeHallmarkId) {
         var h = hallmarks.find(function(x) { return x.id === activeHallmarkId; });
@@ -917,16 +934,44 @@
        Tablet 600-1023 → 4 Spalten
        Mobile ≤600    → 3 Spalten
      ============================================================ */
-  .section-{{ section.id }}-stack .lt-stack-hallmarks-grid {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: var(--space-2, 8px);
+  /* Gruppen-Container: jeweils ein Pill-Tag-Heading + dazugehöriger Grid */
+  .section-{{ section.id }}-stack .lt-stack-hallmarks-group {
     margin-bottom: var(--space-5, 24px);
   }
-  @media (max-width: 1023px) {
-    .section-{{ section.id }}-stack .lt-stack-hallmarks-grid {
-      grid-template-columns: repeat(4, 1fr);
-    }
+  .section-{{ section.id }}-stack .lt-stack-hallmarks-group:last-of-type {
+    margin-bottom: var(--space-4, 16px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmarks-group__pill {
+    display: inline-flex;
+    align-items: center;
+    background: var(--color-light-warm, #F6F4F1);
+    font-family: var(--font-body, 'Lato');
+    font-size: var(--text-micro, 12px);
+    font-weight: var(--weight-semibold, 600);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    border-radius: var(--radius-full, 999px);
+    margin-bottom: var(--space-3, 12px);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmarks-group--primary .lt-stack-hallmarks-group__pill {
+    color: var(--color-promo, #E85D5D);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmarks-group--antagonistic .lt-stack-hallmarks-group__pill {
+    color: var(--color-teal-dark, #4A8C85);
+  }
+  .section-{{ section.id }}-stack .lt-stack-hallmarks-group--integrative .lt-stack-hallmarks-group__pill {
+    color: var(--color-sand, #C7A39B);
+  }
+
+  /* Tile-Grid pro Gruppe — gleiche Spaltenanzahl überall, damit Tile-
+     Größen über alle Gruppen konsistent sind. Trailing leere Cells in
+     Gruppen mit 3 Cards (Antagonistisch + Integrativ) werden akzeptiert,
+     Gruppen-Heading darüber kompensiert visuell. */
+  .section-{{ section.id }}-stack .lt-stack-hallmarks-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-2, 8px);
   }
   @media (max-width: 600px) {
     .section-{{ section.id }}-stack .lt-stack-hallmarks-grid {
@@ -1010,27 +1055,8 @@
     .section-{{ section.id }}-stack .lt-stack-hallmark-card { min-height: 86px; }
   }
 
-  /* Subtile Kategorie-Akzente am linken Rand der Card */
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card--primary::before,
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card--antagonistic::before,
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card--integrative::before {
-    content: '';
-    position: absolute;
-    top: 6px;
-    left: 6px;
-    width: 4px;
-    height: 4px;
-    border-radius: var(--radius-full, 999px);
-  }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card--primary::before {
-    background: var(--color-promo, #E85D5D);
-  }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card--antagonistic::before {
-    background: var(--color-teal, #65C0B6);
-  }
-  .section-{{ section.id }}-stack .lt-stack-hallmark-card--integrative::before {
-    background: var(--color-sand, #C7A39B);
-  }
+  /* Kategorie-Akzent am Card-Niveau ist entfernt — Differenzierung passiert
+     jetzt über den Gruppen-Pill darüber. */
 
   /* ---- Detail-Panel (info-only, keine Aktionen) ---- */
   .section-{{ section.id }}-stack .lt-stack-hallmark-detail {
