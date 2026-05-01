@@ -233,6 +233,12 @@
   margin-bottom: 8px;
 }
 
+/* 3-column variant: header gets 3 equal slim cards on mobile */
+.lct-table[data-cols="3"] .lct-row--head {
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 6px;
+}
+
 .lct-th--label {
   display: none;
 }
@@ -333,6 +339,15 @@
   border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
 }
 
+/* 3-column variant: 3 equal value cards in a row */
+.lct-table[data-cols="3"] .lct-row--data {
+  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-areas:
+    "label label label"
+    "c1 c2 c3";
+  gap: 8px 6px;
+}
+
 .lct-row--data:first-of-type,
 .lct-row--group + .lct-row--data {
   border-top: none;
@@ -342,6 +357,11 @@
   grid-area: label;
   padding: 0 2px;
 }
+
+/* In 3-col mode, cells map to c1/c2/c3 by DOM order */
+.lct-table[data-cols="3"] .lct-cell:nth-child(2) { grid-area: c1; }
+.lct-table[data-cols="3"] .lct-cell:nth-child(3) { grid-area: c2; }
+.lct-table[data-cols="3"] .lct-cell:nth-child(4) { grid-area: c3; }
 
 .lct-row-label {
   font-size: 13px;
@@ -380,6 +400,50 @@
   gap: 8px;
   padding: 12px;
   width: 100%;
+}
+
+/* 3-col mode: tighter cells, vertical icon+text stacking, smaller text */
+.lct-table[data-cols="3"] .lct-cell__inner {
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 6px;
+  text-align: center;
+  align-items: center;
+  justify-content: center;
+}
+
+.lct-table[data-cols="3"] .lct-cell {
+  min-height: 72px;
+}
+
+.lct-table[data-cols="3"] .lct-cell__text {
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.lct-table[data-cols="3"] .lct-icon-wrap svg {
+  width: 18px;
+  height: 18px;
+}
+
+.lct-table[data-cols="3"] .lct-th--col {
+  padding: 10px 4px;
+  min-height: 64px;
+}
+
+.lct-table[data-cols="3"] .lct-th__heading {
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.lct-table[data-cols="3"] .lct-th--active .lct-th__heading {
+  font-size: 12px;
+}
+
+.lct-table[data-cols="3"] .lct-badge {
+  font-size: 9px;
+  padding: 2px 7px;
+  top: -8px;
 }
 
 .lct-icon-wrap {
