@@ -13,17 +13,39 @@
   if section.settings.heading_size == 'product_title'
     assign crs_h_headline_lg = true
   endif
+
+  assign active_col_idx = section.settings.active_column_index | plus: 0
+  if active_col_idx < 1
+    assign active_col_idx = 1
+  endif
+
+  assign group_1_label = section.settings.group_1_label | strip
+  assign group_2_label = section.settings.group_2_label | strip
+  assign group_split_after = section.settings.group_split_after | plus: 0
+
+  assign badge_text = section.settings.recommended_badge_text | default: 'Empfohlen'
+
+  assign rh1 = section.settings.first_row_heading
+  assign rh2 = section.settings.second_row_heading
+  assign rh3 = section.settings.third_row_heading
+  assign rh4 = section.settings.fourth_row_heading
+  assign rh5 = section.settings.fifth_row_heading
+  assign rh6 = section.settings.sixth_row_heading
+
+  assign data_blocks = section.blocks | where: 'type', 'column'
+  assign col_count = data_blocks.size
 -%}
 {% style %}
   #section-{{ section.id }} {
-    --crs-bg:       {{ section.settings.color_bg }};
-    --crs-card-bg:  {{ section.settings.color_card_bg }};
-    --crs-text:     {{ section.settings.color_text }};
-    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
-    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
-    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.05 }};
-    padding-top:    {{ section.settings.padding_top }}px;
-    padding-bottom: {{ section.settings.padding_bottom }}px;
+    --crs-bg:        {{ section.settings.color_bg }};
+    --crs-card-bg:   {{ section.settings.color_card_bg }};
+    --crs-text:      {{ section.settings.color_text }};
+    --crs-text-sec:  {{ section.settings.color_text | color_modify: 'alpha', 0.62 }};
+    --crs-text-ter:  {{ section.settings.color_text | color_modify: 'alpha', 0.42 }};
+    --crs-border:    {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
+    --crs-accent:    {{ section.settings.color_accent | default: '#65c0b6' }};
+    padding-top:     {{ section.settings.padding_top }}px;
+    padding-bottom:  {{ section.settings.padding_bottom }}px;
   }
 {% endstyle %}
 
@@ -47,255 +69,560 @@
       </div>
     {%- endif -%}
 
-    <div class="lct-scroll">
-      <div
+    <div class="lct-wrap">
+      <table
         class="lct-table"
-        role="region"
+        data-cols="{{ col_count }}"
         aria-label="{{ section.settings.headline | default: 'Produktvergleich' | escape }}"
       >
-        {%- liquid
-          assign rh1 = section.settings.first_row_heading
-          assign rh2 = section.settings.second_row_heading
-          assign rh3 = section.settings.third_row_heading
-          assign rh4 = section.settings.fourth_row_heading
-          assign rh5 = section.settings.fifth_row_heading
-          assign rh6 = section.settings.sixth_row_heading
-        -%}
+        <thead class="lct-thead">
+          <tr class="lct-row lct-row--head">
+            <th scope="col" class="lct-th lct-th--label" aria-hidden="true"></th>
+            {%- for block in data_blocks -%}
+              {%- assign col_index = forloop.index -%}
+              {%- assign is_active = false -%}
+              {%- if col_index == active_col_idx -%}{%- assign is_active = true -%}{%- endif -%}
+              <th
+                scope="col"
+                class="lct-th lct-th--col{% if is_active %} lct-th--active{% endif %}"
+                {{ block.shopify_attributes }}
+              >
+                <div class="lct-th__inner">
+                  {%- if is_active and badge_text != blank -%}
+                    <span class="lct-badge">{{ badge_text | escape }}</span>
+                  {%- endif -%}
+                  {%- if block.settings.column_heading_image != blank -%}
+                    {%- assign lct_ch_alt = block.settings.column_heading_image.alt | default: block.settings.column_heading | escape -%}
+                    <span class="lct-th__img">
+                      {{
+                        block.settings.column_heading_image
+                        | image_url: width: 240
+                        | image_tag: loading: 'lazy', class: 'lct-th__img-el', alt: lct_ch_alt
+                      }}
+                    </span>
+                  {%- endif -%}
+                  {%- if block.settings.column_heading != blank -%}
+                    <span class="lct-th__heading">{{ block.settings.column_heading | escape }}</span>
+                  {%- endif -%}
+                </div>
+              </th>
+            {%- endfor -%}
+          </tr>
+        </thead>
+        <tbody class="lct-tbody">
+          {%- comment -%} Define the row sequence so we can inject group dividers cleanly. {%- endcomment -%}
+          {%- assign row_data = '' -%}
+          {%- if rh1 != blank -%}{%- assign row_data = row_data | append: '1|' | append: rh1 | append: ';' -%}{%- endif -%}
+          {%- if rh2 != blank -%}{%- assign row_data = row_data | append: '2|' | append: rh2 | append: ';' -%}{%- endif -%}
+          {%- if rh3 != blank -%}{%- assign row_data = row_data | append: '3|' | append: rh3 | append: ';' -%}{%- endif -%}
+          {%- if rh4 != blank -%}{%- assign row_data = row_data | append: '4|' | append: rh4 | append: ';' -%}{%- endif -%}
+          {%- if rh5 != blank -%}{%- assign row_data = row_data | append: '5|' | append: rh5 | append: ';' -%}{%- endif -%}
+          {%- if rh6 != blank -%}{%- assign row_data = row_data | append: '6|' | append: rh6 | append: ';' -%}{%- endif -%}
+          {%- assign row_list = row_data | split: ';' -%}
 
-        <div class="lct-col lct-col--labels active">
-          <div class="lct-row lct-row--head"></div>
-          {%- if rh1 != blank -%}
-            <div class="lct-row lct-row--label"><p class="lct-row-heading">{{ rh1 | escape }}</p></div>
+          {%- if group_1_label != blank -%}
+            <tr class="lct-row lct-row--group">
+              <th colspan="{{ col_count | plus: 1 }}" class="lct-group-head" scope="colgroup">{{ group_1_label | escape }}</th>
+            </tr>
           {%- endif -%}
-          {%- if rh2 != blank -%}
-            <div class="lct-row lct-row--label"><p class="lct-row-heading">{{ rh2 | escape }}</p></div>
-          {%- endif -%}
-          {%- if rh3 != blank -%}
-            <div class="lct-row lct-row--label"><p class="lct-row-heading">{{ rh3 | escape }}</p></div>
-          {%- endif -%}
-          {%- if rh4 != blank -%}
-            <div class="lct-row lct-row--label"><p class="lct-row-heading">{{ rh4 | escape }}</p></div>
-          {%- endif -%}
-          {%- if rh5 != blank -%}
-            <div class="lct-row lct-row--label"><p class="lct-row-heading">{{ rh5 | escape }}</p></div>
-          {%- endif -%}
-          {%- if rh6 != blank -%}
-            <div class="lct-row lct-row--label"><p class="lct-row-heading">{{ rh6 | escape }}</p></div>
-          {%- endif -%}
-        </div>
 
-        {%- assign first_data_col = true -%}
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'column' -%}
-            <div
-              class="lct-col{% if first_data_col %} active{% endif %}"
-              {{ block.shopify_attributes }}
-            >
-              {%- assign first_data_col = false -%}
-              <div class="lct-row lct-row--head lct-row--col-head">
-                {%- if block.settings.column_heading_image != blank -%}
-                  {%- assign lct_ch_alt = block.settings.column_heading_image.alt | default: '' | escape -%}
-                  <div class="lct-col-head-img">
-                    {{
-                      block.settings.column_heading_image
-                      | image_url: width: 240
-                      | image_tag: loading: 'lazy', class: 'lct-col-head-img__el', alt: lct_ch_alt
-                    }}
-                  </div>
-                {%- endif -%}
-                {%- if block.settings.column_heading != blank -%}
-                  <p class="lct-col-heading">{{ block.settings.column_heading | escape }}</p>
-                {%- endif -%}
-              </div>
-              {%- if rh1 != blank -%}{% render 'lt-comparison-value-cell', block: block, row: 1 %}{% endif -%}
-              {%- if rh2 != blank -%}{% render 'lt-comparison-value-cell', block: block, row: 2 %}{% endif -%}
-              {%- if rh3 != blank -%}{% render 'lt-comparison-value-cell', block: block, row: 3 %}{% endif -%}
-              {%- if rh4 != blank -%}{% render 'lt-comparison-value-cell', block: block, row: 4 %}{% endif -%}
-              {%- if rh5 != blank -%}{% render 'lt-comparison-value-cell', block: block, row: 5 %}{% endif -%}
-              {%- if rh6 != blank -%}{% render 'lt-comparison-value-cell', block: block, row: 6 %}{% endif -%}
-            </div>
-          {%- endif -%}
-        {%- endfor -%}
-      </div>
+          {%- for entry in row_list -%}
+            {%- assign entry_parts = entry | split: '|' -%}
+            {%- assign row_idx = entry_parts[0] | plus: 0 -%}
+            {%- assign row_label = entry_parts[1] -%}
+            {%- assign visible_idx = forloop.index -%}
+
+            {%- if group_2_label != blank and group_split_after > 0 and visible_idx == group_split_after | plus: 1 -%}
+              <tr class="lct-row lct-row--group">
+                <th colspan="{{ col_count | plus: 1 }}" class="lct-group-head" scope="colgroup">{{ group_2_label | escape }}</th>
+              </tr>
+            {%- endif -%}
+
+            <tr class="lct-row lct-row--data">
+              <th scope="row" class="lct-th lct-th--row">
+                <span class="lct-row-label">{{ row_label | escape }}</span>
+              </th>
+              {%- for block in data_blocks -%}
+                {%- assign col_index = forloop.index -%}
+                {%- assign is_active = false -%}
+                {%- if col_index == active_col_idx -%}{%- assign is_active = true -%}{%- endif -%}
+                {%- render 'lt-comparison-value-cell',
+                    block: block,
+                    row: row_idx,
+                    row_label: row_label,
+                    is_active: is_active
+                -%}
+              {%- endfor -%}
+            </tr>
+          {%- endfor -%}
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
 
 {% stylesheet %}
-/* LT Comparison Table — aligns with crs-timeline header + crs color tokens */
+/* ========================================================================
+   LT Comparison Table — Mobile-First
+   • Semantic <table> markup, switches to card-per-row on mobile
+   • CSS Grid for desktop ensures equal row heights regardless of content
+   • Active column highlighted with accent border + badge
+   ======================================================================== */
 
 .lct-section.tl-section {
   background: var(--crs-bg, #f7f7f4);
 }
 
 .lct-container.tl-container {
-  max-width: 1280px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 0 var(--space-5);
+  padding: 0 var(--space-5, 16px);
 }
 
 .lct-header.tl-header {
-  margin-bottom: var(--space-7);
+  margin-bottom: var(--space-7, 32px);
   max-width: 48rem;
 }
 
-.lct-scroll {
-  overflow-x: auto;
-  scrollbar-width: none;
-  margin-left: calc(-1 * var(--space-5));
-  margin-right: calc(-1 * var(--space-5));
-  padding-left: var(--space-5);
-  padding-right: var(--space-5);
-  -webkit-overflow-scrolling: touch;
+.lct-wrap {
+  position: relative;
 }
 
-.lct-scroll::-webkit-scrollbar {
+/* ------------------------------------------------------------------------
+   Base table reset (works as foundation for both desktop and mobile)
+   ------------------------------------------------------------------------ */
+.lct-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  background: transparent;
+}
+
+.lct-table th,
+.lct-table td {
+  vertical-align: middle;
+  text-align: left;
+  font-weight: inherit;
+}
+
+/* ========================================================================
+   MOBILE LAYOUT (default — under 768px)
+   Each <tr.lct-row--data> becomes a card with:
+     • Row label on top (small, secondary)
+     • Two value cells side-by-side (active + other)
+   No horizontal scroll, fits 375px viewport.
+   ======================================================================== */
+
+.lct-table[data-cols] {
+  display: block;
+}
+
+.lct-thead,
+.lct-tbody {
+  display: block;
+}
+
+/* Header row on mobile: compact, shows only column titles */
+.lct-row--head {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 0 16px 0;
+  border-bottom: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  margin-bottom: 8px;
+}
+
+.lct-th--label {
   display: none;
 }
 
-.lct-table {
+.lct-th--col {
   display: flex;
-  flex-wrap: nowrap;
-  width: max-content;
-  min-width: 100%;
-  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.06));
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: var(--crs-bg, #f7f7f4);
-}
-
-.lct-col {
-  flex: 1 0 min(28vw, 200px);
-  min-width: 132px;
-  display: flex;
-  flex-direction: column;
-  border-left: 1px solid var(--crs-border, rgba(38, 37, 30, 0.06));
-}
-
-.lct-col:first-child {
-  border-left: none;
-}
-
-.lct-col--labels {
-  flex: 0 0 min(32vw, 220px);
-  min-width: 112px;
-  background: var(--crs-card-bg, #f2f1ed);
-}
-
-.lct-col.active {
-  background: var(--crs-card-bg, #f2f1ed);
-}
-
-.lct-row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  min-height: 3.5rem;
-  padding: var(--space-3) var(--space-4);
-  border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.06));
-}
-
-.lct-row--head {
-  border-top: none;
-  min-height: 4.5rem;
   align-items: center;
   justify-content: center;
   text-align: center;
+  padding: 12px 8px;
+  border-radius: 10px;
+  background: var(--crs-card-bg, #f2f1ed);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  position: relative;
+  min-height: 56px;
 }
 
-.lct-col--labels .lct-row--head {
-  min-height: 4.5rem;
+.lct-th--active {
+  background: #fff;
+  border: 2px solid var(--crs-accent, #65c0b6);
+  box-shadow: 0 4px 12px rgba(38, 37, 30, 0.06);
 }
 
-.lct-row--col-head {
+.lct-th__inner {
+  display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  align-items: center;
+  gap: 4px;
 }
 
-.lct-col-head-img {
-  max-height: 40px;
-  width: auto;
+.lct-badge {
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--crs-accent, #65c0b6);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 999px;
+  white-space: nowrap;
+  line-height: 1.2;
 }
 
-.lct-col-head-img__el {
+.lct-th__img {
+  display: flex;
+  max-height: 32px;
+}
+
+.lct-th__img-el {
   display: block;
-  max-height: 40px;
+  max-height: 32px;
   width: auto;
   object-fit: contain;
 }
 
-.lct-col-heading {
-  margin: 0;
-  font-family: var(--font-heading);
-  font-size: var(--text-body);
-  font-weight: var(--weight-semibold);
-  line-height: var(--leading-tight);
+.lct-th__heading {
+  font-family: var(--font-heading, inherit);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.25;
   color: var(--crs-text, #26251e);
 }
 
-.lct-col.active .lct-col-heading {
-  font-size: var(--text-section);
+.lct-th--active .lct-th__heading {
+  font-size: 14px;
 }
 
-.lct-row-heading {
-  margin: 0;
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-medium);
-  line-height: var(--leading-body);
-  color: var(--crs-text, #26251e);
+/* Group dividers on mobile */
+.lct-row--group {
+  display: block;
+  padding: 16px 0 6px 0;
 }
 
-.lct-row--body {
+.lct-group-head {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.42));
+  padding: 0;
+  text-align: left;
+}
+
+/* Data row → card on mobile */
+.lct-row--data {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas:
+    "label label"
+    "active other";
+  gap: 8px 12px;
+  padding: 10px 0 14px 0;
+  border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+}
+
+.lct-row--data:first-of-type,
+.lct-row--group + .lct-row--data {
+  border-top: none;
+}
+
+.lct-th--row {
+  grid-area: label;
+  padding: 0 2px;
+}
+
+.lct-row-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.62));
+  letter-spacing: 0;
+}
+
+.lct-cell {
+  background: var(--crs-card-bg, #f2f1ed);
+  border-radius: 10px;
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  padding: 0;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
   justify-content: flex-start;
 }
 
-.lct-value-icon {
-  flex-shrink: 0;
-  color: var(--crs-text, #26251e);
+.lct-cell:nth-child(2) { grid-area: active; }
+.lct-cell:nth-child(3) { grid-area: other; }
+
+.lct-cell--active {
+  background: #fff;
+  border: 2px solid var(--crs-accent, #65c0b6);
+}
+
+.lct-cell--cross:not(.lct-cell--active) {
+  background: var(--crs-bg, #f7f7f4);
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.42));
+}
+
+.lct-cell__inner {
   display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  width: 100%;
+}
+
+.lct-icon-wrap {
+  flex-shrink: 0;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-.lct-value-icon--img .lct-value-icon__img {
-  width: 20px;
-  height: 20px;
+.lct-cell--active .lct-icon-wrap {
+  color: var(--crs-accent, #65c0b6);
+}
+
+.lct-cell--cross:not(.lct-cell--active) .lct-icon-wrap {
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.42));
+}
+
+.lct-icon__img {
+  width: 22px;
+  height: 22px;
   object-fit: contain;
 }
 
-.lct-value-text {
-  margin: 0;
-  font-size: var(--text-body-sm);
-  line-height: var(--leading-body);
-  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
-}
-
-.lct-col.active .lct-value-text {
+.lct-cell__text {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.3;
   color: var(--crs-text, #26251e);
+  word-break: break-word;
 }
 
+.lct-cell--active .lct-cell__text {
+  font-weight: 600;
+}
+
+.lct-cell--cross:not(.lct-cell--active) .lct-cell__text {
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.62));
+  font-weight: 400;
+}
+
+/* ========================================================================
+   DESKTOP LAYOUT (≥768px)
+   Real 3-column grid table. CSS Grid on <table> ensures equal row heights.
+   ======================================================================== */
+
+@media (min-width: 768px) {
+  .lct-table[data-cols="2"] {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0;
+    border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--crs-bg, #f7f7f4);
+  }
+
+  .lct-table[data-cols="3"] {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+    gap: 0;
+    border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+    border-radius: 14px;
+    overflow: hidden;
+    background: var(--crs-bg, #f7f7f4);
+  }
+
+  .lct-thead {
+    display: contents;
+  }
+
+  .lct-tbody {
+    display: contents;
+  }
+
+  .lct-row {
+    display: contents;
+  }
+
+  /* Header row */
+  .lct-th--label {
+    display: block;
+    background: var(--crs-bg, #f7f7f4);
+  }
+
+  .lct-th--col {
+    background: var(--crs-card-bg, #f2f1ed);
+    border: none;
+    border-radius: 0;
+    padding: 24px 16px 20px 16px;
+    min-height: 110px;
+    text-align: center;
+    position: relative;
+    box-shadow: none;
+  }
+
+  .lct-th--col:not(:last-child) {
+    border-right: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  }
+
+  .lct-th--active {
+    background: #fff;
+    border: none;
+    border-bottom: 2px solid var(--crs-accent, #65c0b6);
+    box-shadow: inset 0 0 0 2px var(--crs-accent, #65c0b6);
+    z-index: 2;
+  }
+
+  .lct-th__inner {
+    gap: 6px;
+  }
+
+  .lct-th__heading {
+    font-size: 16px;
+    font-weight: 600;
+  }
+
+  .lct-th--active .lct-th__heading {
+    font-size: 17px;
+  }
+
+  .lct-badge {
+    top: 12px;
+    font-size: 10px;
+    padding: 4px 10px;
+  }
+
+  /* Group divider row */
+  .lct-row--group {
+    display: contents;
+    padding: 0;
+  }
+
+  .lct-group-head {
+    grid-column: 1 / -1;
+    background: var(--crs-bg, #f7f7f4);
+    padding: 18px 20px 8px 20px;
+    font-size: 11px;
+    border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  }
+
+  /* First group head: no top-border so it abuts cleanly under header */
+  .lct-thead + .lct-tbody .lct-row--group:first-child .lct-group-head {
+    border-top: none;
+    padding-top: 22px;
+  }
+
+  /* Data rows */
+  .lct-row--data {
+    display: contents;
+  }
+
+  .lct-th--row {
+    grid-area: auto;
+    background: var(--crs-card-bg, #f2f1ed);
+    padding: 16px 20px;
+    border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+    min-height: 64px;
+    display: flex;
+    align-items: center;
+  }
+
+  .lct-row-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--crs-text, #26251e);
+  }
+
+  .lct-cell {
+    grid-area: auto !important;
+    background: var(--crs-bg, #f7f7f4);
+    border: none;
+    border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+    border-radius: 0;
+    padding: 0;
+    min-height: 64px;
+  }
+
+  .lct-cell:not(:last-child) {
+    border-right: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  }
+
+  .lct-cell--active {
+    background: #fff;
+    border: none;
+    border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+    box-shadow: inset 2px 0 0 var(--crs-accent, #65c0b6), inset -2px 0 0 var(--crs-accent, #65c0b6);
+  }
+
+  .lct-cell--cross:not(.lct-cell--active) {
+    background: var(--crs-bg, #f7f7f4);
+  }
+
+  .lct-cell__inner {
+    padding: 16px 20px;
+    gap: 10px;
+  }
+
+  .lct-cell__text {
+    font-size: 14px;
+  }
+
+  .lct-cell--active .lct-cell__text {
+    font-weight: 600;
+  }
+
+  .lct-icon {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Bottom edge of active column gets accent rounding feel */
+  .lct-tbody .lct-row--data:last-of-type .lct-cell--active {
+    box-shadow: inset 2px 0 0 var(--crs-accent, #65c0b6), inset -2px 0 0 var(--crs-accent, #65c0b6), inset 0 -2px 0 var(--crs-accent, #65c0b6);
+  }
+}
+
+/* ========================================================================
+   LARGER DESKTOP — slightly more breathing room
+   ======================================================================== */
 @media (min-width: 1024px) {
-  .lct-scroll {
-    overflow-x: visible;
-    margin-left: 0;
-    margin-right: 0;
-    padding-left: 0;
-    padding-right: 0;
+  .lct-th--col {
+    padding: 28px 20px 22px 20px;
   }
 
-  .lct-table {
-    width: 100%;
-    min-width: 0;
+  .lct-th--row,
+  .lct-cell__inner {
+    padding-left: 28px;
+    padding-right: 28px;
   }
 
-  .lct-col--labels {
-    flex: 0 0 30%;
-    max-width: 320px;
+  .lct-cell__text,
+  .lct-row-label {
+    font-size: 15px;
   }
+}
 
-  .lct-col:not(.lct-col--labels) {
-    flex: 1 1 0;
-    min-width: 0;
+/* ========================================================================
+   Reduced motion / a11y polish
+   ======================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .lct-cell,
+  .lct-th--col {
+    transition: none;
   }
 }
 {% endstylesheet %}
@@ -319,7 +646,7 @@
     {
       "type": "color",
       "id": "color_card_bg",
-      "label": "Aktive Spalte / Randspalte",
+      "label": "Sekundäre Spalte / Label-Bereich",
       "default": "#f2f1ed"
     },
     {
@@ -327,6 +654,12 @@
       "id": "color_text",
       "label": "Textfarbe",
       "default": "#26251e"
+    },
+    {
+      "type": "color",
+      "id": "color_accent",
+      "label": "Akzentfarbe (Empfohlen-Spalte)",
+      "default": "#65c0b6"
     },
     {
       "type": "header",
@@ -375,27 +708,73 @@
         { "value": "section", "label": "Standard (Abschnitt)" },
         { "value": "product_title", "label": "Wie Produkttitel" }
       ],
-      "default": "section",
-      "info": "Zeilenumbruch: Enter in Überschrift/Unterüberschrift."
+      "default": "section"
     },
     {
       "type": "text",
       "id": "kicker",
       "label": "Kicker (optional)",
       "default": "__none__",
-      "info": "__none__ = ausblenden (Theme-Editor)"
+      "info": "__none__ = ausblenden"
     },
     {
       "type": "textarea",
       "id": "headline",
       "label": "Überschrift",
-      "default": "Warum LIFETIME NMN?"
+      "default": "Was du bei LIFETIME bekommst — und was nicht"
     },
     {
       "type": "textarea",
       "id": "subheading",
       "label": "Unterüberschrift",
-      "default": "Nicht jedes NMN ist gleich. Der Unterschied liegt im Rohstoff, der Transparenz – und darin, wer dahintersteht."
+      "default": "Direkter Vergleich. Keine Marketing-Floskeln."
+    },
+    {
+      "type": "header",
+      "content": "Empfohlen-Spalte"
+    },
+    {
+      "type": "range",
+      "id": "active_column_index",
+      "label": "Welche Spalte ist die Empfohlene?",
+      "info": "1 = erste Spalte, 2 = zweite Spalte usw.",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "text",
+      "id": "recommended_badge_text",
+      "label": "Empfohlen-Badge Text",
+      "default": "Empfohlen",
+      "info": "Leer lassen, um Badge auszublenden."
+    },
+    {
+      "type": "header",
+      "content": "Reihen-Gruppen (optional)"
+    },
+    {
+      "type": "text",
+      "id": "group_1_label",
+      "label": "Gruppe 1 — Überschrift",
+      "info": "Optional. Leer lassen, um keine Gruppen-Überschriften anzuzeigen."
+    },
+    {
+      "type": "text",
+      "id": "group_2_label",
+      "label": "Gruppe 2 — Überschrift",
+      "info": "Optional."
+    },
+    {
+      "type": "range",
+      "id": "group_split_after",
+      "label": "Gruppe 2 startet nach Reihe",
+      "info": "0 = keine zweite Gruppe.",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "default": 0
     },
     {
       "type": "header",
@@ -417,25 +796,25 @@
       "type": "text",
       "id": "third_row_heading",
       "label": "Zeile 3",
-      "default": "Laborprüfung (COA)"
+      "default": "Prüfbericht"
     },
     {
       "type": "text",
       "id": "fourth_row_heading",
       "label": "Zeile 4",
-      "default": "Herkunft & Arzt-geführt"
+      "default": "Formulierung"
     },
     {
       "type": "text",
       "id": "fifth_row_heading",
       "label": "Zeile 5",
-      "default": "Geld-zurück-Garantie"
+      "default": "Garantie"
     },
     {
       "type": "text",
       "id": "sixth_row_heading",
       "label": "Zeile 6",
-      "default": "Preis/Qualität"
+      "default": "Preis-Logik"
     }
   ],
   "blocks": [
@@ -466,14 +845,14 @@
         {
           "type": "text",
           "id": "first_row",
-          "label": "Wert",
+          "label": "Wert (max. 20 Zeichen empfohlen)",
           "default": "Wert"
         },
         {
           "type": "select",
           "id": "first_row_icon_type",
           "label": "Icon",
-          "default": "none",
+          "default": "default",
           "options": [
             { "value": "default", "label": "Vorlage" },
             { "value": "custom", "label": "Eigenes Bild" },
@@ -502,14 +881,14 @@
         {
           "type": "text",
           "id": "second_row",
-          "label": "Wert",
+          "label": "Wert (max. 20 Zeichen empfohlen)",
           "default": "Wert"
         },
         {
           "type": "select",
           "id": "second_row_icon_type",
           "label": "Icon",
-          "default": "none",
+          "default": "default",
           "options": [
             { "value": "default", "label": "Vorlage" },
             { "value": "custom", "label": "Eigenes Bild" },
@@ -538,14 +917,14 @@
         {
           "type": "text",
           "id": "third_row",
-          "label": "Wert",
+          "label": "Wert (max. 20 Zeichen empfohlen)",
           "default": "Wert"
         },
         {
           "type": "select",
           "id": "third_row_icon_type",
           "label": "Icon",
-          "default": "none",
+          "default": "default",
           "options": [
             { "value": "default", "label": "Vorlage" },
             { "value": "custom", "label": "Eigenes Bild" },
@@ -574,14 +953,14 @@
         {
           "type": "text",
           "id": "fourth_row",
-          "label": "Wert",
+          "label": "Wert (max. 20 Zeichen empfohlen)",
           "default": "Wert"
         },
         {
           "type": "select",
           "id": "fourth_row_icon_type",
           "label": "Icon",
-          "default": "none",
+          "default": "default",
           "options": [
             { "value": "default", "label": "Vorlage" },
             { "value": "custom", "label": "Eigenes Bild" },
@@ -610,14 +989,14 @@
         {
           "type": "text",
           "id": "fifth_row",
-          "label": "Wert",
+          "label": "Wert (max. 20 Zeichen empfohlen)",
           "default": "Wert"
         },
         {
           "type": "select",
           "id": "fifth_row_icon_type",
           "label": "Icon",
-          "default": "none",
+          "default": "default",
           "options": [
             { "value": "default", "label": "Vorlage" },
             { "value": "custom", "label": "Eigenes Bild" },
@@ -646,14 +1025,14 @@
         {
           "type": "text",
           "id": "sixth_row",
-          "label": "Wert",
+          "label": "Wert (max. 20 Zeichen empfohlen)",
           "default": "Wert"
         },
         {
           "type": "select",
           "id": "sixth_row_icon_type",
           "label": "Icon",
-          "default": "none",
+          "default": "default",
           "options": [
             { "value": "default", "label": "Vorlage" },
             { "value": "custom", "label": "Eigenes Bild" },
@@ -681,27 +1060,42 @@
   "presets": [
     {
       "name": "LT - Comparison Table",
+      "settings": {
+        "headline": "Was du bei LIFETIME bekommst — und was nicht",
+        "subheading": "Direkter Vergleich. Keine Marketing-Floskeln.",
+        "active_column_index": 1,
+        "recommended_badge_text": "Empfohlen",
+        "group_1_label": "Wirkstoff & Qualität",
+        "group_2_label": "Service & Vertrauen",
+        "group_split_after": 3,
+        "first_row_heading": "Reinheit",
+        "second_row_heading": "Rohstoff",
+        "third_row_heading": "Prüfbericht",
+        "fourth_row_heading": "Formulierung",
+        "fifth_row_heading": "Garantie",
+        "sixth_row_heading": "Preis-Logik"
+      },
       "blocks": [
         {
           "type": "column",
           "settings": {
-            "column_heading": "LIFETIME NMN",
-            "first_row": ">99,9% Uthever®",
+            "column_heading": "LIFETIME",
+            "first_row": "99,9 % Uthever®",
             "first_row_icon_type": "default",
             "first_row_icon": "check",
-            "second_row": "Patentierter Markenrohstoff",
+            "second_row": "Patentiert",
             "second_row_icon_type": "default",
             "second_row_icon": "check",
-            "third_row": "Öffentlich, jede Charge",
+            "third_row": "Jede Charge",
             "third_row_icon_type": "default",
             "third_row_icon": "check",
-            "fourth_row": "Berlin, Deutschland",
+            "fourth_row": "Chefarzt",
             "fourth_row_icon_type": "default",
             "fourth_row_icon": "check",
             "fifth_row": "30 Tage",
             "fifth_row_icon_type": "default",
             "fifth_row_icon": "check",
-            "sixth_row": "Premium-Rohstoff, fairer Preis",
+            "sixth_row": "Premium · fair",
             "sixth_row_icon_type": "default",
             "sixth_row_icon": "check"
           }
@@ -709,23 +1103,23 @@
         {
           "type": "column",
           "settings": {
-            "column_heading": "Andere Anbieter",
-            "first_row": "Oft unbekannt",
+            "column_heading": "Andere",
+            "first_row": "95–98 %",
             "first_row_icon_type": "default",
             "first_row_icon": "cross",
-            "second_row": "No-Name-Rohstoff",
+            "second_row": "Generisch",
             "second_row_icon_type": "default",
             "second_row_icon": "cross",
-            "third_row": "Nicht verfügbar",
+            "third_row": "Selten",
             "third_row_icon_type": "default",
             "third_row_icon": "cross",
-            "fourth_row": "Unbekannt",
+            "fourth_row": "Anonym",
             "fourth_row_icon_type": "default",
             "fourth_row_icon": "cross",
             "fifth_row": "Oft keine",
             "fifth_row_icon_type": "default",
             "fifth_row_icon": "cross",
-            "sixth_row": "Günstig — unklar warum",
+            "sixth_row": "Unklar",
             "sixth_row_icon_type": "default",
             "sixth_row_icon": "cross"
           }
