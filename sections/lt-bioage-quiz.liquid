@@ -156,6 +156,43 @@
   #lt-bioage-{{ section.id }} .bq-step { display: none; flex-direction: column; flex: 1 1 auto; min-height: 0; }
   #lt-bioage-{{ section.id }} .bq-step.is-active { display: flex; }
 
+  /* ── Intro (hero merge) ── */
+  #lt-bioage-{{ section.id }} .bq-intro { justify-content: center; }
+
+  #lt-bioage-{{ section.id }} .bq-intro-kicker {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c-text-3);
+    margin: 0 0 16px;
+  }
+
+  #lt-bioage-{{ section.id }} .bq-intro-headline {
+    font-family: var(--f-h);
+    font-size: clamp(28px, 3.6vw, 44px);
+    font-weight: 500;
+    line-height: 1.1;
+    letter-spacing: -0.018em;
+    color: var(--c-text);
+    margin: 0 0 16px;
+  }
+
+  #lt-bioage-{{ section.id }} .bq-intro-subline {
+    font-size: 15px;
+    line-height: 1.45;
+    color: var(--c-text-2);
+    margin: 0 0 28px;
+    max-width: 480px;
+  }
+
+  #lt-bioage-{{ section.id }} .bq-intro-cta {
+    align-self: flex-start;
+    height: 48px;
+    padding: 0 28px;
+    font-size: 15px;
+  }
+
   #lt-bioage-{{ section.id }} .bq-question {
     font-family: var(--f-h);
     font-size: clamp(18px, 1.8vw, 22px);
@@ -723,7 +760,7 @@
     <div class="bq-stage">
       {%- comment -%} Image panel — wechselt pro Step {%- endcomment -%}
       <div class="bq-image" data-image-panel>
-        {%- assign step_keys = 'q1,q2,q3,q4,q5,q6,q7,q8,gate' | split: ',' -%}
+        {%- assign step_keys = 'intro,q1,q2,q3,q4,q5,q6,q7,q8,gate' | split: ',' -%}
         {%- for key in step_keys -%}
           {%- assign img_setting = 'image_' | append: key -%}
           {%- assign img = section.settings[img_setting] -%}
@@ -746,6 +783,20 @@
             <div class="bq-progress-track"><div class="bq-progress-fill" data-progress-fill></div></div>
             <p class="bq-progress-counter" data-progress-counter></p>
           </div>
+        </div>
+
+        {%- comment -%} ───── Intro (Hero) ───── {%- endcomment -%}
+        <div class="bq-step bq-intro" data-step="intro" data-key="intro">
+          {%- if section.settings.intro_kicker != blank -%}
+            <p class="bq-intro-kicker">{{ section.settings.intro_kicker }}</p>
+          {%- endif -%}
+          <h1 class="bq-intro-headline">{{ section.settings.intro_headline | default: 'Wie alt bist du wirklich?' }}</h1>
+          {%- if section.settings.intro_subline != blank -%}
+            <p class="bq-intro-subline">{{ section.settings.intro_subline }}</p>
+          {%- endif -%}
+          <button type="button" class="bq-cta bq-intro-cta" data-intro-start>
+            {{ section.settings.intro_cta_label | default: 'Quiz starten →' }}
+          </button>
         </div>
 
         {%- comment -%} ───── 8 Fragen ───── {%- endcomment -%}
@@ -1054,8 +1105,8 @@
   try { config = JSON.parse(root.querySelector('[data-bq-config]').textContent); } catch (e) {}
 
   var STORAGE_KEY = 'lt_bioage_{{ section.id }}';
-  var STEP_ORDER = ['q1','q2','q3','q4','q5','q6','q7','q8','gate','result'];
-  var QUESTION_STEPS = STEP_ORDER.slice(0, 8);
+  var STEP_ORDER = ['intro','q1','q2','q3','q4','q5','q6','q7','q8','gate','result'];
+  var QUESTION_STEPS = ['q1','q2','q3','q4','q5','q6','q7','q8'];
 
   var state = {
     current: 'q1',
@@ -1390,10 +1441,13 @@
     }
   }
 
-  // Init — start at q1 (or restored step, but only if quiz not completed)
-  var initStep = state.current && STEP_ORDER.indexOf(state.current) >= 0 ? state.current : 'q1';
-  // Don't auto-restore to gate/result on fresh load — start clean
-  if (initStep === 'gate' || initStep === 'result') initStep = 'q1';
+  // Intro start button
+  var introBtn = root.querySelector('[data-intro-start]');
+  if (introBtn) introBtn.addEventListener('click', next);
+
+  // Init — fresh visitors land on intro, mid-quiz state is restored
+  var initStep = state.current && STEP_ORDER.indexOf(state.current) >= 0 ? state.current : 'intro';
+  if (initStep === 'gate' || initStep === 'result') initStep = 'intro';
   show(initStep);
 })();
 </script>
@@ -1404,6 +1458,13 @@
   "tag": "section",
   "class": "lt-section--bioage-quiz",
   "settings": [
+    { "type": "header", "content": "Intro (Hero-Einstieg)" },
+    { "type": "image_picker", "id": "image_intro",      "label": "Bild" },
+    { "type": "text",         "id": "intro_kicker",     "label": "Kicker",   "default": "2 MINUTEN · WO DICH DER LABORTEST AM MEISTEN UNTERSTÜTZT" },
+    { "type": "text",         "id": "intro_headline",   "label": "Headline", "default": "Wie alt bist du wirklich?" },
+    { "type": "textarea",     "id": "intro_subline",    "label": "Subline",  "default": "Schätze dein biologisches Alter und sieh, welche Test-Ergebnisse bei dir besonders zählen." },
+    { "type": "text",         "id": "intro_cta_label",  "label": "Start-Button-Label", "default": "Quiz starten →" },
+
     { "type": "header", "content": "Bilder pro Frage" },
     { "type": "image_picker", "id": "image_q1",   "label": "Frage 1 — Alter" },
     { "type": "image_picker", "id": "image_q2",   "label": "Frage 2 — Pflanzlich" },
