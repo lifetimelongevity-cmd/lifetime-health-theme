@@ -1020,6 +1020,39 @@
   backBtn.addEventListener('click', back);
 
   // ── Gate submit ──
+  function submitToShopify(email) {
+    // Compute current quiz signals to attach as customer tags.
+    var score = getTotalScore();
+    var delta = getDelta(score);
+    var bioAge = getChronoEstimate() + delta;
+    var mv = getMirrorVariant(score, state.answers.q8);
+    var weakest = pickWeakest(getCategoryScores());
+
+    var tags = ['quiz-bio-age',
+                'quiz-score-' + score,
+                'quiz-' + mv.variant,
+                'quiz-bio-' + bioAge,
+                'quiz-delta-' + (delta >= 0 ? 'plus' + delta : 'minus' + Math.abs(delta))];
+    weakest.forEach(function(w) { tags.push('quiz-weak-' + w.cat); });
+
+    var body = new URLSearchParams();
+    body.set('form_type', 'customer');
+    body.set('utf8', '✓');
+    body.set('contact[email]', email);
+    body.set('contact[tags]', tags.join(', '));
+    body.set('contact[accepts_marketing]', 'true');
+
+    // Fire-and-forget — UI continues regardless of network outcome.
+    try {
+      fetch('/contact', {
+        method: 'POST',
+        body: body,
+        headers: { 'Accept': 'text/html', 'X-Requested-With': 'XMLHttpRequest' },
+        credentials: 'same-origin'
+      }).catch(function() {});
+    } catch (e) {}
+  }
+
   var gateForm = root.querySelector('[data-gate-form]');
   if (gateForm) {
     gateForm.addEventListener('submit', function(e) {
@@ -1032,6 +1065,7 @@
       }
       state.email = email;
       persist();
+      submitToShopify(email);
       show('result');
     });
   }
