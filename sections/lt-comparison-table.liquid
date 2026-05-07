@@ -4,8 +4,8 @@
     assign crs_h_align = 'left'
   endif
   assign crs_lct_kicker = section.settings.kicker | strip
-  assign crs_lct_head = section.settings.headline | strip
-  assign crs_lct_sub = section.settings.subheading | strip
+  assign crs_lct_head   = section.settings.headline | strip
+  assign crs_lct_sub    = section.settings.subheading | strip
   if crs_lct_kicker == '__none__'
     assign crs_lct_kicker = ''
   endif
@@ -19,8 +19,8 @@
     assign active_col_idx = 1
   endif
 
-  assign group_1_label = section.settings.group_1_label | strip
-  assign group_2_label = section.settings.group_2_label | strip
+  assign group_1_label    = section.settings.group_1_label | strip
+  assign group_2_label    = section.settings.group_2_label | strip
   assign group_split_after = section.settings.group_split_after | plus: 0
 
   assign badge_text = section.settings.recommended_badge_text | default: 'Empfohlen'
@@ -33,24 +33,25 @@
   assign rh6 = section.settings.sixth_row_heading
 
   assign data_blocks = section.blocks | where: 'type', 'column'
-  assign col_count = data_blocks.size
+  assign col_count   = data_blocks.size
 -%}
 {% style %}
   #section-{{ section.id }} {
-    --crs-bg:        {{ section.settings.color_bg }};
-    --crs-card-bg:   {{ section.settings.color_card_bg }};
-    --crs-text:      {{ section.settings.color_text }};
-    --crs-text-sec:  {{ section.settings.color_text | color_modify: 'alpha', 0.62 }};
-    --crs-text-ter:  {{ section.settings.color_text | color_modify: 'alpha', 0.42 }};
-    --crs-border:    {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
-    --crs-accent:    {{ section.settings.color_accent | default: '#65c0b6' }};
-    padding-top:     {{ section.settings.padding_top }}px;
-    padding-bottom:  {{ section.settings.padding_bottom }}px;
+    --crs-bg:       {{ section.settings.color_bg }};
+    --crs-card-bg:  {{ section.settings.color_card_bg }};
+    --crs-text:     {{ section.settings.color_text }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.62 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.42 }};
+    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
+    --crs-accent:   {{ section.settings.color_accent | default: '#65c0b6' }};
+    --lct-pt:       {{ section.settings.padding_top }}px;
+    --lct-pb:       {{ section.settings.padding_bottom }}px;
   }
 {% endstyle %}
 
 <div class="tl-section lct-section" id="section-{{ section.id }}">
   <div class="tl-container lct-container">
+
     {%- if crs_lct_kicker != blank or crs_lct_head != blank or crs_lct_sub != blank -%}
       <div class="tl-header lct-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
         {%- if crs_lct_kicker != blank -%}
@@ -69,94 +70,101 @@
       </div>
     {%- endif -%}
 
-    <div class="lct-wrap">
-      <table
-        class="lct-table"
-        data-cols="{{ col_count }}"
-        aria-label="{{ section.settings.headline | default: 'Produktvergleich' | escape }}"
-      >
-        <thead class="lct-thead">
-          <tr class="lct-row lct-row--head">
-            <th scope="col" class="lct-th lct-th--label" aria-hidden="true"></th>
+    {%- comment -%} Build ordered row list from section headings {%- endcomment -%}
+    {%- assign row_data = '' -%}
+    {%- if rh1 != blank -%}{%- assign row_data = row_data | append: '1|' | append: rh1 | append: ';' -%}{%- endif -%}
+    {%- if rh2 != blank -%}{%- assign row_data = row_data | append: '2|' | append: rh2 | append: ';' -%}{%- endif -%}
+    {%- if rh3 != blank -%}{%- assign row_data = row_data | append: '3|' | append: rh3 | append: ';' -%}{%- endif -%}
+    {%- if rh4 != blank -%}{%- assign row_data = row_data | append: '4|' | append: rh4 | append: ';' -%}{%- endif -%}
+    {%- if rh5 != blank -%}{%- assign row_data = row_data | append: '5|' | append: rh5 | append: ';' -%}{%- endif -%}
+    {%- if rh6 != blank -%}{%- assign row_data = row_data | append: '6|' | append: rh6 | append: ';' -%}{%- endif -%}
+    {%- assign row_list = row_data | split: ';' -%}
+
+    <div class="lct-outer-wrap">
+      <div class="lct-scroll-wrap">
+        <div
+          class="lct-grid"
+          role="table"
+          aria-label="{{ section.settings.headline | default: 'Produktvergleich' | escape }}"
+          data-cols="{{ col_count }}"
+        >
+
+          {%- comment -%}── Column headers ──{%- endcomment -%}
+          <div class="lct-row lct-row--head" role="row">
+            <div class="lct-cell lct-cell--corner" role="columnheader" aria-hidden="true"></div>
             {%- for block in data_blocks -%}
-              {%- assign col_index = forloop.index -%}
               {%- assign is_active = false -%}
-              {%- if col_index == active_col_idx -%}{%- assign is_active = true -%}{%- endif -%}
-              <th
-                scope="col"
-                class="lct-th lct-th--col{% if is_active %} lct-th--active{% endif %}"
+              {%- if forloop.index == active_col_idx -%}{%- assign is_active = true -%}{%- endif -%}
+              <div
+                class="lct-cell lct-cell--head{% if is_active %} is-active{% endif %}"
+                role="columnheader"
                 {{ block.shopify_attributes }}
               >
-                <div class="lct-th__inner">
-                  {%- if is_active and badge_text != blank -%}
-                    <span class="lct-badge">{{ badge_text | escape }}</span>
-                  {%- endif -%}
-                  {%- if block.settings.column_heading_image != blank -%}
-                    {%- assign lct_ch_alt = block.settings.column_heading_image.alt | default: block.settings.column_heading | escape -%}
-                    <span class="lct-th__img">
-                      {{
-                        block.settings.column_heading_image
+                {%- if is_active and badge_text != blank -%}
+                  <span class="lct-badge">{{ badge_text | escape }}</span>
+                {%- endif -%}
+                {%- if block.settings.column_heading_image != blank -%}
+                  <span class="lct-head-img">
+                    {{- block.settings.column_heading_image
                         | image_url: width: 240
-                        | image_tag: loading: 'lazy', class: 'lct-th__img-el', alt: lct_ch_alt
-                      }}
-                    </span>
-                  {%- endif -%}
-                  {%- if block.settings.column_heading != blank -%}
-                    <span class="lct-th__heading">{{ block.settings.column_heading | escape }}</span>
-                  {%- endif -%}
-                </div>
-              </th>
+                        | image_tag: loading: 'lazy', class: 'lct-head-img-el',
+                            alt: block.settings.column_heading_image.alt | default: block.settings.column_heading -}}
+                  </span>
+                {%- endif -%}
+                {%- if block.settings.column_heading != blank -%}
+                  <span class="lct-head-name">{{ block.settings.column_heading | escape }}</span>
+                {%- endif -%}
+              </div>
             {%- endfor -%}
-          </tr>
-        </thead>
-        <tbody class="lct-tbody">
-          {%- comment -%} Define the row sequence so we can inject group dividers cleanly. {%- endcomment -%}
-          {%- assign row_data = '' -%}
-          {%- if rh1 != blank -%}{%- assign row_data = row_data | append: '1|' | append: rh1 | append: ';' -%}{%- endif -%}
-          {%- if rh2 != blank -%}{%- assign row_data = row_data | append: '2|' | append: rh2 | append: ';' -%}{%- endif -%}
-          {%- if rh3 != blank -%}{%- assign row_data = row_data | append: '3|' | append: rh3 | append: ';' -%}{%- endif -%}
-          {%- if rh4 != blank -%}{%- assign row_data = row_data | append: '4|' | append: rh4 | append: ';' -%}{%- endif -%}
-          {%- if rh5 != blank -%}{%- assign row_data = row_data | append: '5|' | append: rh5 | append: ';' -%}{%- endif -%}
-          {%- if rh6 != blank -%}{%- assign row_data = row_data | append: '6|' | append: rh6 | append: ';' -%}{%- endif -%}
-          {%- assign row_list = row_data | split: ';' -%}
+          </div>
 
+          {%- comment -%}── Group 1 label (optional) ──{%- endcomment -%}
           {%- if group_1_label != blank -%}
-            <tr class="lct-row lct-row--group">
-              <th class="lct-group-head lct-group-head--label" scope="colgroup">{{ group_1_label | escape }}</th>
+            <div class="lct-row lct-row--group" role="row">
+              <div class="lct-cell lct-cell--group-label" role="cell">{{ group_1_label | escape }}</div>
               {%- for block in data_blocks -%}
-                {%- assign gc_is_active = false -%}
-                {%- if forloop.index == active_col_idx -%}{%- assign gc_is_active = true -%}{%- endif -%}
-                <td class="lct-group-cell{% if gc_is_active %} lct-group-cell--active{% endif %}"></td>
+                {%- assign is_active = false -%}
+                {%- if forloop.index == active_col_idx -%}{%- assign is_active = true -%}{%- endif -%}
+                <div
+                  class="lct-cell lct-cell--group-filler{% if is_active %} is-active{% endif %}"
+                  role="cell"
+                  aria-hidden="true"
+                ></div>
               {%- endfor -%}
-            </tr>
+            </div>
           {%- endif -%}
 
+          {%- comment -%}── Data rows ──{%- endcomment -%}
           {%- assign group_split_target = group_split_after | plus: 1 -%}
           {%- for entry in row_list -%}
             {%- assign entry_parts = entry | split: '|' -%}
-            {%- assign row_idx = entry_parts[0] | plus: 0 -%}
-            {%- assign row_label = entry_parts[1] -%}
+            {%- assign row_idx    = entry_parts[0] | plus: 0 -%}
+            {%- assign row_label  = entry_parts[1] -%}
             {%- assign visible_idx = forloop.index -%}
 
+            {%- comment -%} Inject group 2 label before the correct row {%- endcomment -%}
             {%- if group_2_label != blank and group_split_after > 0 and visible_idx == group_split_target -%}
-              <tr class="lct-row lct-row--group">
-                <th class="lct-group-head lct-group-head--label" scope="colgroup">{{ group_2_label | escape }}</th>
+              <div class="lct-row lct-row--group" role="row">
+                <div class="lct-cell lct-cell--group-label" role="cell">{{ group_2_label | escape }}</div>
                 {%- for block in data_blocks -%}
-                  {%- assign gc_is_active = false -%}
-                  {%- if forloop.index == active_col_idx -%}{%- assign gc_is_active = true -%}{%- endif -%}
-                  <td class="lct-group-cell{% if gc_is_active %} lct-group-cell--active{% endif %}"></td>
+                  {%- assign is_active = false -%}
+                  {%- if forloop.index == active_col_idx -%}{%- assign is_active = true -%}{%- endif -%}
+                  <div
+                    class="lct-cell lct-cell--group-filler{% if is_active %} is-active{% endif %}"
+                    role="cell"
+                    aria-hidden="true"
+                  ></div>
                 {%- endfor -%}
-              </tr>
+              </div>
             {%- endif -%}
 
-            <tr class="lct-row lct-row--data">
-              <th scope="row" class="lct-th lct-th--row">
-                <span class="lct-row-label">{{ row_label | escape }}</span>
-              </th>
+            <div class="lct-row lct-row--data" role="row">
+              <div class="lct-cell lct-cell--label" role="rowheader">
+                <span class="lct-label-text">{{ row_label | escape }}</span>
+              </div>
               {%- for block in data_blocks -%}
-                {%- assign col_index = forloop.index -%}
                 {%- assign is_active = false -%}
-                {%- if col_index == active_col_idx -%}{%- assign is_active = true -%}{%- endif -%}
+                {%- if forloop.index == active_col_idx -%}{%- assign is_active = true -%}{%- endif -%}
                 {%- render 'lt-comparison-value-cell',
                     block: block,
                     row: row_idx,
@@ -164,24 +172,32 @@
                     is_active: is_active
                 -%}
               {%- endfor -%}
-            </tr>
+            </div>
           {%- endfor -%}
-        </tbody>
-      </table>
+
+        </div>
+      </div>
     </div>
+
   </div>
 </div>
 
 {% stylesheet %}
-/* ========================================================================
-   LT Comparison Table — Mobile-First
-   • Semantic <table> markup, switches to card-per-row on mobile
-   • CSS Grid for desktop ensures equal row heights regardless of content
-   • Active column highlighted with accent border + badge
-   ======================================================================== */
+/* ============================================================
+   LT Comparison Table — v2
+   Div-based CSS Grid. No <table> element conflicts.
+   Badge sits inside header cell (no negative top, no clip).
+   Group rows use per-column filler cells so the accent column
+   border is never interrupted by a spanning divider row.
+   Mobile: label + active column only (no horizontal scroll).
+   Tablet/Desktop (≥640px): full grid inside scroll wrapper.
+   ============================================================ */
 
+/* ── Section ── */
 .lct-section.tl-section {
   background: var(--crs-bg, #f7f7f4);
+  padding-top: var(--lct-pt, 80px);
+  padding-bottom: var(--lct-pb, 80px);
 }
 
 .lct-container.tl-container {
@@ -191,536 +207,276 @@
 }
 
 .lct-header.tl-header {
-  margin-bottom: var(--space-7, 32px);
+  margin-bottom: 32px;
   max-width: 48rem;
 }
 
-.lct-wrap {
-  position: relative;
+/* ── Outer wrap: single element that clips background colours at the radius.
+      Badge is inside the header cell (positive top offset) so nothing is clipped. ── */
+.lct-outer-wrap {
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  border-radius: 14px;
+  overflow: hidden;
 }
 
-/* ------------------------------------------------------------------------
-   Base table reset (works as foundation for both desktop and mobile)
-   ------------------------------------------------------------------------ */
-.lct-table {
+/* ── Scroll wrap ── */
+.lct-scroll-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.lct-scroll-wrap::-webkit-scrollbar { display: none; }
+
+/* ── Grid (mobile: label col + active col only) ── */
+.lct-grid {
+  display: grid;
+  grid-template-columns: minmax(120px, 1.4fr) 1fr;
   width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  table-layout: fixed;
+  background: var(--crs-bg, #f7f7f4);
+}
+
+/* ── All row wrappers collapsed out of flow ── */
+.lct-row { display: contents; }
+
+/* ── Base cell ── */
+.lct-cell {
+  display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  min-height: 58px;
+  position: relative;
   background: transparent;
 }
 
-.lct-table th,
-.lct-table td {
-  vertical-align: middle;
-  text-align: left;
-  font-weight: inherit;
-}
-
-/* ========================================================================
-   MOBILE LAYOUT (default — under 768px)
-   Each <tr.lct-row--data> becomes a card with:
-     • Row label on top (small, secondary)
-     • Two value cells side-by-side (active + other)
-   No horizontal scroll, fits 375px viewport.
-   ======================================================================== */
-
-.lct-table[data-cols] {
-  display: block;
-}
-
-.lct-thead,
-.lct-tbody {
-  display: block;
-}
-
-/* Header row on mobile: compact, shows only column titles */
-.lct-row--head {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  padding: 14px 0 16px 0;
-  border-bottom: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-  margin-bottom: 8px;
-}
-
-/* 3-column variant: header gets 3 equal slim cards on mobile */
-.lct-table[data-cols="3"] .lct-row--head {
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 6px;
-}
-
-/* Group divider helper cells — visible only on desktop grid */
-.lct-group-cell {
-  display: none;
-}
-
-.lct-th--label {
-  display: none;
-}
-
-.lct-th--col {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 12px 8px;
-  border-radius: 10px;
+/* ── Label-column cells ── */
+.lct-cell--corner,
+.lct-cell--label,
+.lct-cell--group-label {
   background: var(--crs-card-bg, #f2f1ed);
-  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-  position: relative;
-  min-height: 56px;
 }
 
-.lct-th--active {
-  background: #fff;
-  border: 2px solid var(--crs-accent, #65c0b6);
-  box-shadow: 0 4px 12px rgba(38, 37, 30, 0.06);
-}
+.lct-cell--corner { border-top: none; }
 
-.lct-th__inner {
-  display: flex;
+/* ── Column header cells ── */
+.lct-cell--head {
+  background: var(--crs-card-bg, #f2f1ed);
+  border-top: none;
+  border-left: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
   flex-direction: column;
   align-items: center;
+  justify-content: flex-end;
+  text-align: center;
+  padding: 14px 10px 14px;
+  min-height: 76px;
   gap: 4px;
 }
 
+/* Active header: white bg + accent top/side borders + room for badge */
+.lct-cell--head.is-active {
+  background: #fff;
+  padding-top: 40px;
+  box-shadow:
+    inset  2px 0 0 var(--crs-accent, #65c0b6),
+    inset -2px 0 0 var(--crs-accent, #65c0b6),
+    inset  0  2px 0 var(--crs-accent, #65c0b6);
+}
+
+.lct-head-img { display: flex; max-height: 28px; }
+.lct-head-img-el { max-height: 28px; width: auto; object-fit: contain; }
+
+.lct-head-name {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--crs-text, #26251e);
+}
+.lct-cell--head.is-active .lct-head-name { font-size: 13px; }
+
+/* ── Badge — positive top value, lives inside header padding, never clipped ── */
 .lct-badge {
   position: absolute;
-  top: -10px;
+  top: 10px;
   left: 50%;
   transform: translateX(-50%);
   background: var(--crs-accent, #65c0b6);
   color: #fff;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 3px 10px;
-  border-radius: 999px;
-  white-space: nowrap;
-  line-height: 1.2;
-}
-
-.lct-th__img {
-  display: flex;
-  max-height: 32px;
-}
-
-.lct-th__img-el {
-  display: block;
-  max-height: 32px;
-  width: auto;
-  object-fit: contain;
-}
-
-.lct-th__heading {
-  font-family: var(--font-heading, inherit);
-  font-size: 13px;
-  font-weight: 600;
-  line-height: 1.25;
-  color: var(--crs-text, #26251e);
-}
-
-.lct-th--active .lct-th__heading {
-  font-size: 14px;
-}
-
-/* Group dividers on mobile */
-.lct-row--group {
-  display: block;
-  padding: 16px 0 6px 0;
-}
-
-.lct-group-head {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 9px;
+  font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  line-height: 1.4;
+}
+
+/* ── Group divider label ── */
+.lct-cell--group-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
   color: var(--crs-text-ter, rgba(38, 37, 30, 0.42));
+  padding: 16px 14px 8px;
+  min-height: auto;
+}
+
+/* No border between header row and first group label */
+.lct-row--head + .lct-row--group .lct-cell--group-label {
+  border-top: none;
+  padding-top: 20px;
+}
+
+/* ── Group filler cells — one per data column, keeps accent column unbroken ── */
+.lct-cell--group-filler {
+  border-left: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  min-height: 0;
   padding: 0;
-  text-align: left;
+  background: transparent;
 }
 
-/* Data row → card on mobile */
-.lct-row--data {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-areas:
-    "label label"
-    "active other";
-  gap: 8px 12px;
-  padding: 10px 0 14px 0;
-  border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-}
-
-/* 3-column variant: 3 equal value cards in a row */
-.lct-table[data-cols="3"] .lct-row--data {
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-areas:
-    "label label label"
-    "c1 c2 c3";
-  gap: 8px 6px;
-}
-
-.lct-row--data:first-of-type,
-.lct-row--group + .lct-row--data {
+.lct-row--head + .lct-row--group .lct-cell--group-filler {
   border-top: none;
 }
 
-.lct-th--row {
-  grid-area: label;
-  padding: 0 2px;
+/* Active filler cell: continues the white background + side borders */
+.lct-cell--group-filler.is-active {
+  background: #fff;
+  box-shadow:
+    inset  2px 0 0 var(--crs-accent, #65c0b6),
+    inset -2px 0 0 var(--crs-accent, #65c0b6);
 }
 
-/* In 3-col mode, cells map to c1/c2/c3 by DOM order */
-.lct-table[data-cols="3"] .lct-cell:nth-child(2) { grid-area: c1; }
-.lct-table[data-cols="3"] .lct-cell:nth-child(3) { grid-area: c2; }
-.lct-table[data-cols="3"] .lct-cell:nth-child(4) { grid-area: c3; }
-
-.lct-row-label {
+/* ── Row label ── */
+.lct-label-text {
   font-size: 13px;
   font-weight: 500;
-  color: var(--crs-text-sec, rgba(38, 37, 30, 0.62));
-  letter-spacing: 0;
+  color: var(--crs-text, #26251e);
 }
 
-.lct-cell {
-  background: var(--crs-card-bg, #f2f1ed);
-  border-radius: 10px;
-  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-  padding: 0;
-  min-height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
-
-.lct-cell:nth-child(2) { grid-area: active; }
-.lct-cell:nth-child(3) { grid-area: other; }
-
-.lct-cell--active {
-  background: #fff;
-  border: 2px solid var(--crs-accent, #65c0b6);
-}
-
-.lct-cell--cross:not(.lct-cell--active) {
-  background: var(--crs-bg, #f7f7f4);
-  color: var(--crs-text-ter, rgba(38, 37, 30, 0.42));
-}
-
-.lct-cell__inner {
-  display: flex;
-  align-items: center;
+/* ── Data cells ── */
+.lct-cell--data {
+  border-left: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
   gap: 8px;
-  padding: 12px;
-  width: 100%;
+  background: var(--crs-bg, #f7f7f4);
 }
 
-/* 3-col mode: tighter cells, vertical icon+text stacking, smaller text */
-.lct-table[data-cols="3"] .lct-cell__inner {
-  flex-direction: column;
-  gap: 4px;
-  padding: 10px 6px;
-  text-align: center;
-  align-items: center;
-  justify-content: center;
+.lct-cell--data.is-active {
+  background: #fff;
+  box-shadow:
+    inset  2px 0 0 var(--crs-accent, #65c0b6),
+    inset -2px 0 0 var(--crs-accent, #65c0b6);
 }
 
-.lct-table[data-cols="3"] .lct-cell {
-  min-height: 72px;
+/* Close accent column at the bottom */
+.lct-row--data:last-of-type .lct-cell--data.is-active {
+  box-shadow:
+    inset  2px 0 0 var(--crs-accent, #65c0b6),
+    inset -2px 0 0 var(--crs-accent, #65c0b6),
+    inset  0 -2px 0 var(--crs-accent, #65c0b6);
 }
 
-.lct-table[data-cols="3"] .lct-cell__text {
-  font-size: 12px;
-  line-height: 1.25;
-}
+.lct-cell--cross:not(.is-active) { background: var(--crs-bg, #f7f7f4); }
 
-.lct-table[data-cols="3"] .lct-icon-wrap svg {
-  width: 18px;
-  height: 18px;
-}
-
-.lct-table[data-cols="3"] .lct-th--col {
-  padding: 10px 4px;
-  min-height: 64px;
-}
-
-.lct-table[data-cols="3"] .lct-th__heading {
-  font-size: 11px;
-  line-height: 1.2;
-}
-
-.lct-table[data-cols="3"] .lct-th--active .lct-th__heading {
-  font-size: 12px;
-}
-
-.lct-table[data-cols="3"] .lct-badge {
-  font-size: 9px;
-  padding: 2px 7px;
-  top: -8px;
-}
-
-.lct-icon-wrap {
+/* ── Icons ── */
+.lct-cell-icon {
   flex-shrink: 0;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.4));
 }
+.lct-cell--data.is-active .lct-cell-icon { color: var(--crs-accent, #65c0b6); }
+.lct-icon-img { width: 20px; height: 20px; object-fit: contain; }
 
-.lct-cell--active .lct-icon-wrap {
-  color: var(--crs-accent, #65c0b6);
-}
-
-.lct-cell--cross:not(.lct-cell--active) .lct-icon-wrap {
-  color: var(--crs-text-ter, rgba(38, 37, 30, 0.42));
-}
-
-.lct-icon__img {
-  width: 22px;
-  height: 22px;
-  object-fit: contain;
-}
-
-.lct-cell__text {
-  font-size: 13px;
+/* ── Cell text ── */
+.lct-cell-text {
+  font-size: 12px;
   font-weight: 500;
   line-height: 1.3;
   color: var(--crs-text, #26251e);
   word-break: break-word;
 }
-
-.lct-cell--active .lct-cell__text {
-  font-weight: 600;
-}
-
-.lct-cell--cross:not(.lct-cell--active) .lct-cell__text {
-  color: var(--crs-text-sec, rgba(38, 37, 30, 0.62));
+.lct-cell--data.is-active .lct-cell-text { font-weight: 600; }
+.lct-cell--cross:not(.is-active) .lct-cell-text {
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.42));
   font-weight: 400;
 }
 
-/* ========================================================================
-   DESKTOP LAYOUT (≥768px)
-   Real 3-column grid table. CSS Grid on <table> ensures equal row heights.
-   ======================================================================== */
+/* ── MOBILE: hide non-active data/header columns ── */
+.lct-cell--head:not(.is-active),
+.lct-cell--data:not(.is-active),
+.lct-cell--group-filler:not(.is-active) {
+  display: none;
+}
 
-@media (min-width: 768px) {
-  .lct-table[data-cols="2"] {
-    display: grid;
-    grid-template-columns: minmax(180px, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
-    gap: 0;
-    border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-    border-radius: 14px;
-    overflow: hidden;
-    background: var(--crs-bg, #f7f7f4);
+/* ══════════════════════════════════════════════════════════════
+   TABLET / DESKTOP  ≥ 640px
+   Full grid, all columns, horizontal scroll wrapper kicks in
+   only when viewport is narrower than the min-width below.
+   ══════════════════════════════════════════════════════════════ */
+@media (min-width: 640px) {
+  .lct-grid[data-cols="2"] {
+    grid-template-columns: minmax(160px, 1.4fr) repeat(2, 1fr);
+    min-width: 480px;
+  }
+  .lct-grid[data-cols="3"] {
+    grid-template-columns: minmax(160px, 1.4fr) repeat(3, 1fr);
+    min-width: 580px;
+  }
+  .lct-grid[data-cols="4"] {
+    grid-template-columns: minmax(160px, 1.4fr) repeat(4, 1fr);
+    min-width: 700px;
   }
 
-  .lct-table[data-cols="3"] {
-    display: grid;
-    grid-template-columns: minmax(180px, 1.2fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
-    gap: 0;
-    border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-    border-radius: 14px;
-    overflow: hidden;
-    background: var(--crs-bg, #f7f7f4);
-  }
+  /* Restore all hidden columns */
+  .lct-cell--head,
+  .lct-cell--data,
+  .lct-cell--group-filler { display: flex; }
 
-  .lct-thead {
-    display: contents;
-  }
+  .lct-cell { padding: 14px 18px; min-height: 62px; }
 
-  .lct-tbody {
-    display: contents;
-  }
-
-  .lct-row {
-    display: contents;
-  }
-
-  /* Header row */
-  .lct-th--label {
-    display: block;
-    background: var(--crs-bg, #f7f7f4);
-  }
-
-  .lct-th--col {
-    background: var(--crs-card-bg, #f2f1ed);
-    border: none;
-    border-radius: 0;
-    padding: 24px 16px 20px 16px;
-    min-height: 110px;
-    text-align: center;
-    position: relative;
-    box-shadow: none;
-  }
-
-  .lct-th--col:not(:last-child) {
-    border-right: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-  }
-
-  .lct-th--active {
-    background: #fff;
-    border: none;
-    border-bottom: 2px solid var(--crs-accent, #65c0b6);
-    box-shadow: inset 0 0 0 2px var(--crs-accent, #65c0b6);
-    z-index: 2;
-  }
-
-  .lct-th__inner {
+  .lct-cell--head {
+    padding: 18px 14px;
+    min-height: 92px;
     gap: 6px;
   }
+  .lct-cell--head.is-active { padding-top: 46px; }
 
-  .lct-th__heading {
-    font-size: 16px;
-    font-weight: 600;
-  }
+  .lct-head-name { font-size: 14px; }
+  .lct-cell--head.is-active .lct-head-name { font-size: 15px; }
 
-  .lct-th--active .lct-th__heading {
-    font-size: 17px;
-  }
+  .lct-badge { font-size: 10px; padding: 3px 10px; top: 12px; }
 
-  .lct-badge {
-    top: 12px;
-    font-size: 10px;
-    padding: 4px 10px;
-  }
+  .lct-cell--group-label { padding: 18px 18px 8px; }
 
-  /* Group divider row */
-  .lct-row--group {
-    display: contents;
-    padding: 0;
-  }
+  .lct-label-text { font-size: 14px; }
+  .lct-cell-text  { font-size: 13px; }
 
-  .lct-group-head--label {
-    background: var(--crs-bg, #f7f7f4);
-    padding: 18px 20px 8px 20px;
-    font-size: 11px;
-    border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-    display: flex;
-    align-items: flex-end;
-  }
-
-  /* First group head: no top-border so it abuts cleanly under header */
-  .lct-thead + .lct-tbody .lct-row--group:first-child .lct-group-head--label {
-    border-top: none;
-    padding-top: 22px;
-  }
-
-  /* Group divider helper cells — maintain accent column across dividers */
-  .lct-group-cell {
-    display: block;
-    background: var(--crs-bg, #f7f7f4);
-    border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-  }
-
-  .lct-thead + .lct-tbody .lct-row--group:first-child .lct-group-cell {
-    border-top: none;
-  }
-
-  .lct-group-cell--active {
-    background: #fff;
-    box-shadow: inset 2px 0 0 var(--crs-accent, #65c0b6), inset -2px 0 0 var(--crs-accent, #65c0b6);
-  }
-
-  /* Data rows */
-  .lct-row--data {
-    display: contents;
-  }
-
-  .lct-th--row {
-    grid-area: auto;
-    background: var(--crs-card-bg, #f2f1ed);
-    padding: 16px 20px;
-    border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-    min-height: 64px;
-    display: flex;
-    align-items: center;
-  }
-
-  .lct-row-label {
-    font-size: 14px;
-    font-weight: 500;
-    color: var(--crs-text, #26251e);
-  }
-
-  .lct-cell {
-    grid-area: auto !important;
-    background: var(--crs-bg, #f7f7f4);
-    border: none;
-    border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-    border-radius: 0;
-    padding: 0;
-    min-height: 64px;
-  }
-
-  .lct-cell:not(:last-child) {
-    border-right: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-  }
-
-  .lct-cell--active {
-    background: #fff;
-    border: none;
-    border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-    box-shadow: inset 2px 0 0 var(--crs-accent, #65c0b6), inset -2px 0 0 var(--crs-accent, #65c0b6);
-  }
-
-  .lct-cell--cross:not(.lct-cell--active) {
-    background: var(--crs-bg, #f7f7f4);
-  }
-
-  .lct-cell__inner {
-    padding: 16px 20px;
-    gap: 10px;
-  }
-
-  .lct-cell__text {
-    font-size: 14px;
-  }
-
-  .lct-cell--active .lct-cell__text {
-    font-weight: 600;
-  }
-
-  .lct-icon {
-    width: 22px;
-    height: 22px;
-  }
-
-  /* Bottom edge of active column gets accent rounding feel */
-  .lct-tbody .lct-row--data:last-of-type .lct-cell--active {
-    box-shadow: inset 2px 0 0 var(--crs-accent, #65c0b6), inset -2px 0 0 var(--crs-accent, #65c0b6), inset 0 -2px 0 var(--crs-accent, #65c0b6);
-  }
+  .lct-cell-icon svg { width: 20px; height: 20px; }
 }
 
-/* ========================================================================
-   LARGER DESKTOP — slightly more breathing room
-   ======================================================================== */
 @media (min-width: 1024px) {
-  .lct-th--col {
-    padding: 28px 20px 22px 20px;
-  }
+  .lct-cell { padding: 16px 24px; min-height: 66px; }
 
-  .lct-th--row,
-  .lct-cell__inner {
-    padding-left: 28px;
-    padding-right: 28px;
+  .lct-cell--head {
+    padding: 22px 18px 20px;
+    min-height: 104px;
   }
+  .lct-cell--head.is-active { padding-top: 50px; }
 
-  .lct-cell__text,
-  .lct-row-label {
-    font-size: 15px;
-  }
+  .lct-head-name { font-size: 15px; }
+  .lct-cell--head.is-active .lct-head-name { font-size: 16px; }
+
+  .lct-badge { top: 14px; }
+
+  .lct-cell--group-label { padding: 20px 24px 10px; }
+
+  .lct-label-text { font-size: 15px; }
+  .lct-cell-text  { font-size: 14px; }
 }
 
-/* ========================================================================
-   Reduced motion / a11y polish
-   ======================================================================== */
 @media (prefers-reduced-motion: reduce) {
-  .lct-cell,
-  .lct-th--col {
-    transition: none;
-  }
+  .lct-cell, .lct-cell--head { transition: none; }
 }
 {% endstylesheet %}
 
