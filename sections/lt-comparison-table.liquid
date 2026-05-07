@@ -122,7 +122,12 @@
 
           {%- if group_1_label != blank -%}
             <tr class="lct-row lct-row--group">
-              <th colspan="{{ col_count | plus: 1 }}" class="lct-group-head" scope="colgroup">{{ group_1_label | escape }}</th>
+              <th class="lct-group-head lct-group-head--label" scope="colgroup">{{ group_1_label | escape }}</th>
+              {%- for block in data_blocks -%}
+                {%- assign gc_is_active = false -%}
+                {%- if forloop.index == active_col_idx -%}{%- assign gc_is_active = true -%}{%- endif -%}
+                <td class="lct-group-cell{% if gc_is_active %} lct-group-cell--active{% endif %}"></td>
+              {%- endfor -%}
             </tr>
           {%- endif -%}
 
@@ -135,7 +140,12 @@
 
             {%- if group_2_label != blank and group_split_after > 0 and visible_idx == group_split_target -%}
               <tr class="lct-row lct-row--group">
-                <th colspan="{{ col_count | plus: 1 }}" class="lct-group-head" scope="colgroup">{{ group_2_label | escape }}</th>
+                <th class="lct-group-head lct-group-head--label" scope="colgroup">{{ group_2_label | escape }}</th>
+                {%- for block in data_blocks -%}
+                  {%- assign gc_is_active = false -%}
+                  {%- if forloop.index == active_col_idx -%}{%- assign gc_is_active = true -%}{%- endif -%}
+                  <td class="lct-group-cell{% if gc_is_active %} lct-group-cell--active{% endif %}"></td>
+                {%- endfor -%}
               </tr>
             {%- endif -%}
 
@@ -229,7 +239,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
-  padding: 0 0 16px 0;
+  padding: 14px 0 16px 0;
   border-bottom: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
   margin-bottom: 8px;
 }
@@ -238,6 +248,11 @@
 .lct-table[data-cols="3"] .lct-row--head {
   grid-template-columns: 1fr 1fr 1fr;
   gap: 6px;
+}
+
+/* Group divider helper cells — visible only on desktop grid */
+.lct-group-cell {
+  display: none;
 }
 
 .lct-th--label {
@@ -577,18 +592,35 @@
     padding: 0;
   }
 
-  .lct-group-head {
-    grid-column: 1 / -1;
+  .lct-group-head--label {
     background: var(--crs-bg, #f7f7f4);
     padding: 18px 20px 8px 20px;
     font-size: 11px;
     border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+    display: flex;
+    align-items: flex-end;
   }
 
   /* First group head: no top-border so it abuts cleanly under header */
-  .lct-thead + .lct-tbody .lct-row--group:first-child .lct-group-head {
+  .lct-thead + .lct-tbody .lct-row--group:first-child .lct-group-head--label {
     border-top: none;
     padding-top: 22px;
+  }
+
+  /* Group divider helper cells — maintain accent column across dividers */
+  .lct-group-cell {
+    display: block;
+    background: var(--crs-bg, #f7f7f4);
+    border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  }
+
+  .lct-thead + .lct-tbody .lct-row--group:first-child .lct-group-cell {
+    border-top: none;
+  }
+
+  .lct-group-cell--active {
+    background: #fff;
+    box-shadow: inset 2px 0 0 var(--crs-accent, #65c0b6), inset -2px 0 0 var(--crs-accent, #65c0b6);
   }
 
   /* Data rows */
