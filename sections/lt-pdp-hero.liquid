@@ -375,7 +375,6 @@
               </div>
               <div class="lt-founder-credentials">
                 <span class="lt-founder-cred">Chefarzt Neurologie</span>
-                <span class="lt-founder-cred">ARD · RTL · SAT1</span>
                 <span class="lt-founder-cred">Spiegel Bestseller</span>
                 <span class="lt-founder-cred">20+ Jahre Forschung</span>
               </div>
@@ -826,9 +825,10 @@
           {{ lt_doctor_block }}
         {%- endunless -%}
 
-        {%- if shop.enabled_payment_types.size > 0 -%}
+        {%- if shop.enabled_payment_types.size > 1 -%}
+          {%- assign lt_payment_limit = shop.enabled_payment_types.size | minus: 1 -%}
           <div class="lt-payment-icons" aria-label="Zahlungsmethoden">
-            {%- for type in shop.enabled_payment_types limit: 5 -%}
+            {%- for type in shop.enabled_payment_types limit: lt_payment_limit -%}
               {{ type | payment_type_svg_tag: class: 'lt-payment-icon' }}
             {%- endfor -%}
           </div>
