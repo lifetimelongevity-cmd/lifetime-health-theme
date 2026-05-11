@@ -1,0 +1,87 @@
+{% comment %}
+  ───────────────────────────────────────────────────────────────────────────
+  LIFETIME — Shared section heading snippet (CRS / LT sections)
+  ───────────────────────────────────────────────────────────────────────────
+  Renders the canonical `crs-heading-stack` block (kicker + title + subtitle
+  as ONE visual block, sub muted via color/opacity only — never via size).
+  Use this everywhere instead of building the HTML by hand. The wrapper +
+  `__pair` structure is enforced here, so callers cannot forget it.
+
+  Reference rule: `docs/section-heading-stack.md`
+  Reference CSS:  `assets/crs-section-headings.css`
+
+  ── Parameters ─────────────────────────────────────────────────────────────
+  heading       (string)  — h-tag text. Empty → no title rendered.
+  subheading    (string)  — subtitle text. Empty → no subtitle rendered.
+  kicker        (string)  — micro uppercase label above the title. Empty → omitted.
+  align         (string)  — 'left' | 'center' | 'right'. Default 'left'.
+  on_dark       (bool)    — true → adds `--on-dark` modifier for dark surfaces.
+  headline_lg   (bool)    — true → adds `--headline-lg` modifier (--text-h1 sizing).
+  heading_tag   (string)  — 'h1' | 'h2' | 'h3' | 'h4'. Default 'h2'.
+  extra_class   (string)  — optional additional class on the outer wrapper
+                            (e.g. `lt-pdp-final-cta__intro` for section-scoped CSS).
+  modifier      (string)  — optional extra crs-heading-stack modifier
+                            (e.g. 'homepage-truth' → adds `crs-heading-stack--homepage-truth`).
+
+  ── Usage ─────────────────────────────────────────────────────────────────
+  {% render 'section-heading-crs',
+    heading: section.settings.heading,
+    subheading: section.settings.subheading,
+    kicker: section.settings.kicker,
+    align: section.settings.content_align,
+    on_dark: true,
+    extra_class: 'lt-pdp-final-cta__intro'
+  %}
+
+  ── Notes ─────────────────────────────────────────────────────────────────
+  • If all three text fields are blank, nothing is rendered.
+  • Newlines in heading / subheading are preserved via newline_to_br.
+  • Never override `__title` or `__subtitle` font-size/weight/line-height in
+    section-local CSS. Use `extra_class` only for spacing / max-width / margin.
+{% endcomment %}
+
+{%- liquid
+  assign _crs_heading = heading | default: '' | strip
+  assign _crs_sub = subheading | default: '' | strip
+  assign _crs_kicker = kicker | default: '' | strip
+
+  assign _crs_align = align | default: 'left'
+  if _crs_align != 'left' and _crs_align != 'center' and _crs_align != 'right'
+    assign _crs_align = 'left'
+  endif
+
+  assign _crs_tag = heading_tag | default: 'h2'
+  if _crs_tag != 'h1' and _crs_tag != 'h2' and _crs_tag != 'h3' and _crs_tag != 'h4'
+    assign _crs_tag = 'h2'
+  endif
+
+  assign _crs_extra = extra_class | default: ''
+  assign _crs_modifier = modifier | default: ''
+-%}
+
+{%- if _crs_heading != blank or _crs_sub != blank or _crs_kicker != blank -%}
+  <div class="{% if _crs_extra != blank %}{{ _crs_extra }} {% endif %}crs-heading-stack crs-heading-stack--align-{{ _crs_align }}{% if on_dark %} crs-heading-stack--on-dark{% endif %}{% if headline_lg %} crs-heading-stack--headline-lg{% endif %}{% if _crs_modifier != blank %} crs-heading-stack--{{ _crs_modifier }}{% endif %}">
+    {%- if _crs_kicker != blank -%}
+      <p class="crs-heading-stack__kicker">{{ _crs_kicker | escape }}</p>
+    {%- endif -%}
+    {%- if _crs_heading != blank or _crs_sub != blank -%}
+      <div class="crs-heading-stack__pair">
+        {%- if _crs_heading != blank -%}
+          {%- case _crs_tag -%}
+            {%- when 'h1' -%}
+              <h1 class="crs-heading-stack__title">{{ _crs_heading | escape | newline_to_br }}</h1>
+            {%- when 'h3' -%}
+              <h3 class="crs-heading-stack__title">{{ _crs_heading | escape | newline_to_br }}</h3>
+            {%- when 'h4' -%}
+              <h4 class="crs-heading-stack__title">{{ _crs_heading | escape | newline_to_br }}</h4>
+            {%- else -%}
+              <h2 class="crs-heading-stack__title">{{ _crs_heading | escape | newline_to_br }}</h2>
+          {%- endcase -%}
+        {%- endif -%}
+        {%- if _crs_sub != blank -%}
+          <p class="crs-heading-stack__subtitle">{{ _crs_sub | escape | newline_to_br }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+{%- endif -%}

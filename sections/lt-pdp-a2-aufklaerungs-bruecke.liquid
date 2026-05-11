@@ -1,0 +1,646 @@
+{% comment %}
+  Section: lt-pdp-a2-aufklaerungs-bruecke
+  Chunk:   A2 — Aufklärungs-Brücke · AGE & DNA-Test PDP
+  Branch:  feat/a2-aufklaerungs-bruecke-2026-05-10
+  Spec:    A2.05 Visual-Spec (primär), A2.03 Copy-Final (Texte), A2.06 CRO-Sign-off
+  Adjustments:
+    A2-VS-01: 6-Wochen-Block hat NUR Teal-Tint-Background, KEIN border-left
+    A2-VS-02: Body Satz 1 als Lead (--text-body-bold, 18px Mobile), Sätze 2–5 Standard-Body
+    A2-VS-03: Asymmetrie-Container (gemeinsamer padding-bottom) — via align-items: stretch + min-height
+  WCAG AA:
+    - Icons aria-hidden="true" (dekorativ)
+    - blockquote + cite Markup für Quote-Card
+    - role="note" für 6-Wochen-Block
+    - Focus-Visible Halo analog A1.05 §6.03
+    - Anchor-Link font-weight:700 (Kontrast-Compliance §4.06)
+    - Alt-Text auf Portrait (Placeholder falls kein Asset)
+  Phosphor-CDN: ph-thin, identisch mit A1 — CDN-Load im section-template
+{% endcomment %}
+
+{% comment %} Phosphor-CDN-Load — nur auf AGE & DNA-Test PDP (V1, analog A1.05) {% endcomment %}
+{% if template == 'product' and product.handle == 'lifetime-age-dna' %}
+  <link rel="stylesheet"
+        href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/thin/style.css"
+        media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/thin/style.css">
+  </noscript>
+{% endif %}
+
+<section
+  id="lt-pdp-a2-{{ section.id }}"
+  class="section-lt-pdp-a2"
+  aria-labelledby="a2-headline-{{ section.id }}">
+
+  <div class="a2-container">
+
+    {%- comment -%} ── BLOCK 1: H2 Section-Headline ── {%- endcomment -%}
+    <h2
+      id="a2-headline-{{ section.id }}"
+      class="a2-headline">
+      {{ section.settings.headline | default: 'Das, was dein Hausarzt nicht misst. Weil er es nicht kann.' }}
+    </h2>
+
+    {%- comment -%} ── BLOCK 2: Body / Lead-Paragraf (A2-VS-02) ── {%- endcomment -%}
+    {%- comment -%}
+      A2-VS-02: Satz 1 als Lead (a2-body__lead — bold + 18px Mobile).
+      Sätze 2–5 in Standard-Body (a2-body__follow).
+      Optional Mini-Break nach Satz 3 (margin-bottom via a2-body__break).
+    {%- endcomment -%}
+    <div class="a2-body">
+      <p class="a2-body__lead">
+        Dein Körper altert täglich. Mit einer Geschwindigkeit, die kein Blutbild erfasst.
+      </p>
+      <p class="a2-body__follow">
+        Was ein Arzt misst: ob du heute krank bist. Was dieser Test misst: wie schnell dein Körper altert, bevor du krank bist.<span class="a2-body__break"></span>Ob du mit 46 biologisch 38 oder 54 bist, ist eine andere Frage als Diagnostik. Und eine wertvollere. Was du heute erfährst, ist messbar: es war schon immer dort, du hattest nur kein Werkzeug dafür.
+      </p>
+    </div>
+
+    {%- comment -%} ── BLOCK 3: 2-Spalten ✓/✗-Visual ── {%- endcomment -%}
+    <section
+      class="a2-check-visual"
+      aria-label="Was dieser Test misst und was nicht">
+
+      <div class="a2-check-columns-wrapper">
+
+        {%- comment -%} ✓-Spalte (6 Items) {%- endcomment -%}
+        <div class="check-col check-col--positive">
+          <h3 class="check-col__header">Was dieser Test misst</h3>
+          <ul class="check-list">
+            <li class="check-item">
+              <i class="ph-thin ph-check" aria-hidden="true"></i>
+              <span>Biologisches Alter <em class="fachbegriff">(Epigenetik)</em></span>
+            </li>
+            <li class="check-item">
+              <i class="ph-thin ph-check" aria-hidden="true"></i>
+              <span>Alterungsgeschwindigkeit <em class="fachbegriff">(MethylPace)</em></span>
+            </li>
+            <li class="check-item">
+              <i class="ph-thin ph-check" aria-hidden="true"></i>
+              <span>Körperalter
+                <span class="check-sublabel">Höralter · Sehalter · Gedächtnisalter</span>
+              </span>
+            </li>
+            <li class="check-item">
+              <i class="ph-thin ph-check" aria-hidden="true"></i>
+              <span>Immunsystem &amp; Entzündung <em class="fachbegriff">(Methylierungsstatus)</em></span>
+            </li>
+            <li class="check-item">
+              <i class="ph-thin ph-check" aria-hidden="true"></i>
+              <span>Lebensstil-Auswirkung auf deine Zellen</span>
+            </li>
+            <li class="check-item">
+              <i class="ph-thin ph-check" aria-hidden="true"></i>
+              <span>187 personalisierte DNA-Reports</span>
+            </li>
+          </ul>
+        </div>
+
+        {%- comment -%} ✗-Spalte (5 Items) {%- endcomment -%}
+        <div class="check-col check-col--negative">
+          <h3 class="check-col__header">Was dieser Test nicht misst</h3>
+          <ul class="check-list">
+            <li class="check-item">
+              <i class="ph-thin ph-x" aria-hidden="true"></i>
+              <span>Krankheitsdiagnosen <em class="fachbegriff">(kein Diagnostikum)</em></span>
+            </li>
+            <li class="check-item">
+              <i class="ph-thin ph-x" aria-hidden="true"></i>
+              <span>Blutmarker <em class="fachbegriff">(LDL-C, ApoB, LipoA)</em></span>
+            </li>
+            <li class="check-item">
+              <i class="ph-thin ph-x" aria-hidden="true"></i>
+              <span>Akute Erkrankungen</span>
+            </li>
+            <li class="check-item">
+              <i class="ph-thin ph-x" aria-hidden="true"></i>
+              <span>Medikamenten-Empfehlungen</span>
+            </li>
+            <li class="check-item">
+              <i class="ph-thin ph-x" aria-hidden="true"></i>
+              <span>APOE4 / genetische Krankheitsrisiko-Allele</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>{%- comment -%} /.a2-check-columns-wrapper {%- endcomment -%}
+    </section>{%- comment -%} /.a2-check-visual {%- endcomment -%}
+
+    {%- comment -%} ── Trenn-Divider (1px, zwischen ✓/✗-Block und Quote-Card) ── {%- endcomment -%}
+    <div class="a2-section-divider" role="presentation" aria-hidden="true"></div>
+
+    {%- comment -%} ── BLOCK 4: Quote-Card — Horvath (Featured) ── {%- endcomment -%}
+    {%- comment -%}
+      Portrait: Shopify-Settings-Asset. Fallback: ph-user-circle-thin Icon.
+      A0-AI-01: Kein border-left auf Quote-Card (retroaktiv 2026-05-10). Stattdessen: italic + padding-left --spacing-lg + rgba-Tint.
+      Attribution: neutralisiert per A2-CR-05 (kein Anschluss-Claim an LIFETIME).
+    {%- endcomment -%}
+    <figure
+      class="quote-card quote-card--featured"
+      role="figure"
+      aria-label="Zitat von Prof. Steve Horvath">
+
+      {%- if section.settings.horvath_portrait != blank -%}
+        <img
+          class="quote-portrait"
+          src="{{ section.settings.horvath_portrait | image_url: width: 192 }}"
+          srcset="{{ section.settings.horvath_portrait | image_url: width: 96 }} 1x, {{ section.settings.horvath_portrait | image_url: width: 192 }} 2x"
+          alt="Prof. Steve Horvath, UCLA, Pionier der epigenetischen Uhr"
+          width="80"
+          height="80"
+          loading="lazy">
+      {%- else -%}
+        <span class="quote-portrait quote-portrait--fallback" aria-label="Portraitbild Prof. Steve Horvath (nicht verfügbar)">
+          <i class="ph-thin ph-user-circle" aria-hidden="true"></i>
+        </span>
+      {%- endif -%}
+
+      <blockquote class="quote-body">
+        <p class="quote-text">
+          &#8222;Das DNA-Methylierungsalter ist einer der genauesten Indikatoren für das biologische Alter in vielen menschlichen Geweben und Zelltypen. Es erfasst, was der Kalender nicht erfassen kann.&#8220;
+        </p>
+        <footer class="quote-attribution">
+          <cite>
+            <strong class="quote-name">Prof. Steve Horvath · UCLA</strong>
+            <span class="quote-title">Begründer der epigenetischen Uhr · Genome Biology 14:R115 (2013)</span>
+          </cite>
+        </footer>
+      </blockquote>
+    </figure>
+
+    {%- comment -%} ── BLOCK 5: 6-Wochen-Quality-Frame (Highlight-Block) ── {%- endcomment -%}
+    {%- comment -%}
+      A2-VS-01: NUR background rgba(101,192,182,0.07) — KEIN border-left.
+      role="note" per A2.05 §4.05.
+    {%- endcomment -%}
+    <div
+      class="highlight-block"
+      role="note"
+      aria-label="Qualitätshinweis: Analysedauer und Methodik">
+      <p class="highlight-block__headline">
+        Klinische Laboranalyse. Kein Schnelltest.
+      </p>
+      <p class="highlight-block__body">
+        Das Eurofins-Labor in Dänemark braucht 6 Wochen für ein vollständiges Methylierungs-Profil. Das ist die Zeit, die klinische Tiefe braucht. Und der Grund, warum dieses Ergebnis seriöser ist als ein Online-Rechner oder ein Schnelltest-Anbieter.
+      </p>
+    </div>
+
+    {%- comment -%} ── BLOCK 6: Anchor-Link „Mehr zur Wissenschaft →" ── {%- endcomment -%}
+    {%- comment -%}
+      font-weight: 700 (--text-body-bold) für WCAG-Kontrast-Compliance (§4.06).
+      href: #a5-wissenschaft — Anchor zu A5-Wissenschafts-Section.
+      Touch-Target: min-height 44px via padding: 12px 0.
+    {%- endcomment -%}
+    <a
+      class="a2-anchor-link"
+      href="#a5-wissenschaft"
+      aria-label="Mehr zur Wissenschaft hinter dem AGE &amp; DNA-Test">
+      Mehr zur Wissenschaft
+      <i class="ph-thin ph-arrow-right" aria-hidden="true"></i>
+    </a>
+
+  </div>{%- comment -%} /.a2-container {%- endcomment -%}
+
+</section>
+
+{% schema %}
+{
+  "name": "A2 Aufklärungs-Brücke",
+  "tag": "section",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "H2 Headline",
+      "default": "Das, was dein Hausarzt nicht misst. Weil er es nicht kann."
+    },
+    {
+      "type": "image_picker",
+      "id": "horvath_portrait",
+      "label": "Horvath-Portrait (80–96px, rund)"
+    },
+    {
+      "type": "text",
+      "id": "anchor_link_target",
+      "label": "Anchor-Link Ziel (z. B. #a5-wissenschaft)",
+      "default": "#a5-wissenschaft"
+    }
+  ],
+  "presets": [
+    {
+      "name": "A2 Aufklärungs-Brücke"
+    }
+  ]
+}
+{% endschema %}
+
+{% stylesheet %}
+/* ============================================================
+   A2 AUFKLÄRUNGS-BRÜCKE — Section-Styles
+   Scope: .section-lt-pdp-a2
+   Mobile-First: 390px Base → Desktop ≥1024px
+   A0-AI-01 (2026-05-10): Quote-Card und 6-Wochen-Block beide OHNE border-left
+   A2-VS-02: Lead-Satz bold 18px Mobile, Sätze 2–5 Standard
+   A2-VS-03: align-items: stretch + min-height für gemeinsamen Container
+   ============================================================ */
+
+/* ── Section-Container ── */
+.section-lt-pdp-a2 {
+  background-color: var(--color-bg-default, #ffffff);
+  padding-top: var(--spacing-2xl, 48px);
+  padding-bottom: var(--spacing-2xl, 48px);
+}
+
+.a2-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-md, 16px);
+}
+
+/* ── H2 Section-Headline ── */
+.a2-headline {
+  font-family: var(--font-heading, 'Helvetica Neue', Helvetica, Arial, sans-serif);
+  font-size: 1.5rem; /* 24px Mobile — --text-h2-pdp */
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary, #364f56);
+  margin: 0 0 var(--spacing-lg, 24px) 0;
+}
+
+/* ── Body / Lead-Paragraf (A2-VS-02) ── */
+.a2-body {
+  margin: 0 0 var(--spacing-xl, 32px) 0;
+}
+
+/* Lead-Satz: bold + 18px Mobile (A2-VS-02 Pflicht-Adjustment) */
+.a2-body__lead {
+  font-family: var(--font-body, 'Lato', sans-serif);
+  font-size: 1.125rem; /* 18px Mobile */
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--color-text-primary, #364f56);
+  margin: 0 0 var(--spacing-sm, 8px) 0;
+}
+
+/* Standard Body-Folgesätze */
+.a2-body__follow {
+  font-family: var(--font-body, 'Lato', sans-serif);
+  font-size: 1rem; /* 16px */
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--color-text-primary, #364f56);
+  margin: 0;
+}
+
+/* Optional Mini-Absatz-Break nach Satz 3 (A2-VS-02) */
+.a2-body__break {
+  display: block;
+  margin-bottom: var(--spacing-sm, 8px);
+}
+
+/* ── 2-Spalten ✓/✗-Visual ── */
+.a2-check-visual {
+  margin: 0 0 0 0; /* Block-Abstand via columns-wrapper margin-bottom */
+}
+
+/* Mobile: gestacked */
+.a2-check-columns-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg, 24px);
+  margin-bottom: var(--spacing-xl, 32px);
+}
+
+.check-col {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Spalten-Header */
+.check-col__header {
+  font-family: var(--font-body, 'Lato', sans-serif);
+  font-size: 1rem; /* --text-body-bold */
+  font-weight: 700;
+  color: var(--color-text-primary, #364f56);
+  border-bottom: 1px solid var(--color-border, #e5e5e5);
+  padding-bottom: var(--spacing-sm, 8px);
+  margin: 0 0 var(--spacing-md, 16px) 0;
+}
+
+/* Item-Liste */
+.check-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 16px);
+}
+
+/* Einzelnes Item */
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm, 8px);
+}
+
+.check-item i {
+  font-size: 18px; /* icon--md */
+  line-height: 1.6; /* vertical-align mit Text */
+  flex-shrink: 0;
+}
+
+/* ✓-Icon Farbe */
+.check-col--positive .check-item i {
+  color: var(--color-success, #22c55e);
+}
+
+/* ✗-Icon Farbe */
+.check-col--negative .check-item i {
+  color: var(--color-gray-400, #a3a3a3);
+}
+
+/* Item-Text */
+.check-item span {
+  font-family: var(--font-body, 'Lato', sans-serif);
+  font-size: 1rem; /* --text-body */
+  font-weight: 400;
+  color: var(--color-text-primary, #364f56);
+  line-height: 1.6;
+}
+
+/* Fachbegriff in Klammern */
+.fachbegriff {
+  font-style: normal;
+  color: var(--color-text-primary, #364f56);
+}
+
+/* Sub-Label (Körperalter: Höralter · Sehalter · Gedächtnisalter) */
+.check-sublabel {
+  display: block;
+  font-family: var(--font-body, 'Lato', sans-serif);
+  font-size: 0.8125rem; /* 13px Mobile — --text-caption */
+  color: var(--color-text-secondary, #a3a3a3);
+  line-height: 1.4;
+  margin-top: 2px;
+}
+
+/* ── Trenn-Divider ── */
+.a2-section-divider {
+  width: 100%;
+  height: 1px;
+  background: var(--color-border, #e5e5e5);
+  margin: var(--spacing-xl, 32px) 0;
+}
+
+/* ── Quote-Card Featured (Horvath) ── */
+/* A0-AI-01: Kein border-left (retroaktiv 2026-05-10) — italic + padding-left + rgba-Tint */
+.quote-card--featured {
+  padding: var(--spacing-md, 16px);
+  padding-left: var(--spacing-lg, 24px);
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: var(--radius-sm, 4px);
+  display: flex;
+  flex-direction: column; /* Mobile: Portrait oben, Quote unten */
+  gap: var(--spacing-sm, 8px);
+  margin-bottom: var(--spacing-xl, 32px);
+}
+
+/* Portrait (Foto) */
+.quote-portrait {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Portrait Fallback (Icon-Placeholder) */
+.quote-portrait--fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--color-bg-muted, #f5f5f5);
+  flex-shrink: 0;
+}
+
+.quote-portrait--fallback i {
+  font-size: 48px;
+  color: var(--color-text-secondary, #a3a3a3);
+}
+
+/* blockquote — keine Default-Margins */
+.quote-body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Quote-Text — kursiv */
+.quote-text {
+  font-family: var(--font-body, 'Lato', sans-serif);
+  font-size: 1rem; /* --text-body */
+  font-style: italic;
+  font-weight: 400;
+  color: var(--color-text-primary, #364f56);
+  line-height: 1.6;
+  margin: 0 0 var(--spacing-sm, 8px) 0;
+}
+
+/* Attribution */
+.quote-attribution {
+  display: block;
+}
+
+.quote-name {
+  font-family: var(--font-body, 'Lato', sans-serif);
+  font-size: 1rem; /* --text-body-bold */
+  font-weight: 700;
+  color: var(--color-text-primary, #364f56);
+  display: block;
+}
+
+.quote-title {
+  font-family: var(--font-body, 'Lato', sans-serif);
+  font-size: 0.8125rem; /* 13px — --text-caption */
+  color: var(--color-text-secondary, #a3a3a3);
+  display: block;
+  margin-top: 2px;
+}
+
+/* ── 6-Wochen-Quality-Frame (Highlight-Block) ── */
+/*
+  A0-AI-01 (retroaktiv 2026-05-10):
+  KEIN border-left — Teal-Tint-Background als visueller Anker.
+  Quote-Card ebenfalls ohne border-left (padding-left + rgba-Tint).
+*/
+.highlight-block {
+  background: rgba(101, 192, 182, 0.07); /* Teal-Tint 7% — kein eigener Token */
+  /* border-left: BEWUSST WEGGELASSEN (A2-VS-01) */
+  border-radius: var(--radius-sm, 4px);
+  padding: var(--spacing-md, 16px);
+  max-width: 100%;
+  margin-top: var(--spacing-xl, 32px);
+  margin-bottom: var(--spacing-lg, 24px);
+}
+
+.highlight-block__headline {
+  font-family: var(--font-body, 'Lato', sans-serif);
+  font-size: 1rem; /* --text-body-bold */
+  font-weight: 700;
+  color: var(--color-text-primary, #364f56);
+  margin: 0 0 var(--spacing-sm, 8px) 0;
+}
+
+.highlight-block__body {
+  font-family: var(--font-body, 'Lato', sans-serif);
+  font-size: 1rem; /* --text-body */
+  font-weight: 400;
+  color: var(--color-text-primary, #364f56);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Anchor-Link „Mehr zur Wissenschaft →" ── */
+.a2-anchor-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs, 4px);
+  font-family: var(--font-body, 'Lato', sans-serif);
+  font-size: 1rem; /* --text-body */
+  font-weight: 700; /* --text-body-bold — WCAG-Kontrast-Pflicht (3.9:1 bei bold ≥14px) */
+  color: var(--color-cta-primary, #4a8c85);
+  text-decoration: none;
+  padding: 12px 0; /* ergibt min-height: 44px Tappfläche — WCAG 2.5.5 */
+  min-height: 44px;
+}
+
+.a2-anchor-link i {
+  font-size: 16px;
+}
+
+.a2-anchor-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Focus-Visible (Halo-Technik, analog A1.05 §6.03) ── */
+.section-lt-pdp-a2 :focus-visible {
+  outline: 2px solid var(--color-accent, #65c0b6);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(101, 192, 182, 0.3);
+  border-radius: var(--radius-sm, 4px);
+}
+
+/* ── Reduced-Motion (A2 hat keine Animationen — inherent konform) ── */
+@media (prefers-reduced-motion: reduce) {
+  .section-lt-pdp-a2 * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ============================================================
+   DESKTOP ≥ 1024px — Scale-up
+   ============================================================ */
+@media (min-width: 1024px) {
+
+  /* Section-Padding */
+  .section-lt-pdp-a2 {
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+
+  /* H2 */
+  .a2-headline {
+    font-size: 2.25rem; /* 36px Desktop — --text-h2-pdp */
+    margin-bottom: var(--spacing-xl, 32px);
+  }
+
+  /* Body */
+  .a2-body {
+    max-width: 720px;
+    margin-bottom: var(--spacing-2xl, 48px);
+  }
+
+  /* Lead-Satz Desktop: gleiche Bold-Auszeichnung, Standard-Größe */
+  .a2-body__lead {
+    font-size: 1rem; /* Desktop zurück auf 16px — Lead-Unterschied bleibt über Gewicht */
+  }
+
+  /* ✓/✗-Spalten — Desktop: nebeneinander (50/50) */
+  .a2-check-columns-wrapper {
+    flex-direction: row;
+    gap: var(--spacing-xl, 32px);
+    align-items: flex-start; /* Spalten starten oben, enden natürlich (flex-start) */
+    margin-bottom: var(--spacing-2xl, 48px);
+  }
+
+  /* A2-VS-03: Beide Spalten stretch für gemeinsame optische Höhe */
+  /* Implementierung als Empfehlung: align-items: stretch + gleicher padding-bottom */
+  .a2-check-columns-wrapper {
+    align-items: stretch;
+  }
+
+  .check-col {
+    flex: 1;
+    min-width: 0;
+    padding-bottom: var(--spacing-lg, 24px); /* gemeinsamer Bottom-Puffer (A2-VS-03) */
+  }
+
+  /* ✓-Spalte: Trennlinie rechts (Spalten-Divider) */
+  .check-col--positive {
+    border-right: 1px solid var(--color-border, #e5e5e5);
+    padding-right: var(--spacing-xl, 32px);
+  }
+
+  /* ✗-Spalte: Links-Abstand */
+  .check-col--negative {
+    padding-left: var(--spacing-xl, 32px);
+  }
+
+  /* Sub-Label Desktop: leicht größer */
+  .check-sublabel {
+    font-size: 0.875rem; /* 14px Desktop */
+  }
+
+  /* Trenn-Divider Desktop */
+  .a2-section-divider {
+    margin: var(--spacing-2xl, 48px) 0;
+  }
+
+  /* Quote-Card Desktop — Portrait links, Quote rechts */
+  .quote-card--featured {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--spacing-md, 16px);
+    margin-bottom: var(--spacing-2xl, 48px);
+  }
+
+  .quote-portrait {
+    width: 96px;
+    height: 96px;
+  }
+
+  .quote-portrait--fallback {
+    width: 96px;
+    height: 96px;
+  }
+
+  /* Quote-Title Desktop */
+  .quote-title {
+    font-size: 0.875rem; /* 14px Desktop */
+  }
+
+  /* 6-Wochen-Block Desktop */
+  .highlight-block {
+    max-width: 720px;
+    margin-top: var(--spacing-2xl, 48px);
+  }
+
+}
+
+{% endstylesheet %}

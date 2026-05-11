@@ -1,0 +1,606 @@
+{% comment %}
+  Section: lt-pdp-a3-process-press
+  Chunk:   A3 — Process & Press · AGE & DNA-Test PDP
+  Branch:  feat/a3-process-press-2026-05-10
+  Spec:    pdp-refit-age-dna/03-process-press/05-visual-spec.md (UPDATED nach Audits A3.08a/b)
+  Copy:    pdp-refit-age-dna/03-process-press/03-copy-final.md
+  Decisions:
+    A3-DR-01: Token-Reconciliation gegen Live-Theme
+    A3-DR-04: Connector-Linie zwischen Mobile-Steps entfernt
+    A3-DR-05: Step-Nummer als Eyebrow (nicht Kreis-Badge) — A1-Pattern
+    A3-DR-06: Step-3-Icon ph-flask-thin (Process-Logic statt Standort)
+    A3-DR-07: Press-Logo Hover-State entfernt
+    A3-AU-01: H2-Color = --color-text-primary (#000), nicht --lt-primary-dark
+    A3-AU-02: H2-Mikro-Typografie = A2-Live (lh 1.15, ls -0.01em)
+    A3-AU-03: Eyebrow-Pattern = A1-Live (weight 700, lh 1.2, color secondary)
+    A3-AU-04: min-height auf Step-Cards entfernt (Reversal zu DR-03 Layout C)
+    A3-AU-05: Press + Badge Mobile = 6-Spalten-Grid (kein 3-Col-Lücke-Hack)
+    A3-AU-06: Eyebrow-Position Desktop via Grid-Areas
+  WCAG AA:
+    - Step-Icons aria-hidden="true" (dekorativ)
+    - Step-Eyebrow-Nummer aria-hidden="true", Sequenz via aria-label="Schritt N von M: …"
+    - role="region" auf Press- und Badge-Riegel mit aria-label
+    - Focus-Visible Halo analog A1/A2
+  Phosphor-CDN: identisch zu A1/A2 — Conditional Load auf AGE-DNA-PDP
+  Migration: ersetzt crs-logo-garden + lt-pdp-process-steps in product.age-dna-test.json
+{% endcomment %}
+
+{% comment %} Phosphor-CDN-Load — nur auf AGE & DNA-Test PDP (V1, analog A1/A2) {% endcomment %}
+{% if template == 'product' and product.handle == 'lifetime-age-dna' %}
+  <link rel="stylesheet"
+        href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/thin/style.css"
+        media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/thin/style.css">
+  </noscript>
+{% endif %}
+
+<section
+  id="lt-pdp-a3-{{ section.id }}"
+  class="section-lt-pdp-a3"
+  aria-labelledby="a3-headline-{{ section.id }}">
+
+  <div class="a3-container">
+
+    {%- comment -%} ── BLOCK 1: H2 Section-Headline + Mini-Body ── {%- endcomment -%}
+    <h2 id="a3-headline-{{ section.id }}" class="a3-headline">
+      {{ section.settings.headline }}
+    </h2>
+    <p class="a3-mini-body">
+      {{ section.settings.mini_body }}
+    </p>
+
+    {%- comment -%} ── BLOCK 2: 4-Step Process ── {%- endcomment -%}
+    {% assign step_blocks = section.blocks | where: 'type', 'step' %}
+    {% if step_blocks.size > 0 %}
+      <div class="a3-steps">
+        {% for block in step_blocks %}
+          {% assign step_number = forloop.index %}
+          {% assign step_total = step_blocks.size %}
+          <div
+            class="a3-step"
+            aria-label="Schritt {{ step_number }} von {{ step_total }}: {{ block.settings.step_label }}"
+            {{ block.shopify_attributes }}>
+            <p class="a3-step__eyebrow" aria-hidden="true">{{ step_number | prepend: '0' | slice: -2, 2 }}</p>
+            <div class="a3-step__icon-col">
+              <i class="ph-thin {{ block.settings.icon_name }} icon--xl" aria-hidden="true"></i>
+            </div>
+            <div class="a3-step__content">
+              <p class="a3-step__label">{{ block.settings.step_label }}</p>
+              <p class="a3-step__detail">{{ block.settings.step_detail }}</p>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {%- comment -%} ── BLOCK 3: Press-Riegel ── {%- endcomment -%}
+    {% assign press_blocks = section.blocks | where: 'type', 'press_logo' %}
+    {% if press_blocks.size > 0 %}
+      <div class="a3-press" role="region" aria-label="Medienerwähnungen">
+        <p class="a3-mini-header a3-press__eyebrow">{{ section.settings.press_heading }}</p>
+        <div class="a3-press__logos">
+          {% for block in press_blocks %}
+            {% if block.settings.logo_image %}
+              {% if block.settings.logo_url != blank %}
+                <a href="{{ block.settings.logo_url }}" target="_blank" rel="noopener noreferrer" {{ block.shopify_attributes }}>
+                  <img
+                    class="a3-press__logo"
+                    src="{{ block.settings.logo_image | image_url: width: 240 }}"
+                    alt="{{ block.settings.logo_alt | escape }}"
+                    width="120"
+                    height="40"
+                    loading="lazy"
+                    decoding="async">
+                </a>
+              {% else %}
+                <img
+                  class="a3-press__logo"
+                  src="{{ block.settings.logo_image | image_url: width: 240 }}"
+                  alt="{{ block.settings.logo_alt | escape }}"
+                  width="120"
+                  height="40"
+                  loading="lazy"
+                  decoding="async"
+                  {{ block.shopify_attributes }}>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+    {%- comment -%} ── BLOCK 4: Badge-Riegel ── {%- endcomment -%}
+    {% assign badge_blocks = section.blocks | where: 'type', 'badge' %}
+    {% if badge_blocks.size > 0 %}
+      <div class="a3-badges" role="region" aria-label="Zertifizierungen und Laborpartner">
+        <p class="a3-mini-header a3-badges__eyebrow">{{ section.settings.badge_heading }}</p>
+        <div class="a3-badges__list">
+          {% for block in badge_blocks %}
+            {% if block.settings.badge_image %}
+              <img
+                class="a3-badge a3-badge--image{% if forloop.first %} a3-badge--eurofins{% endif %}"
+                src="{{ block.settings.badge_image | image_url: width: 200 }}"
+                alt="{{ block.settings.badge_alt | escape }}"
+                width="100"
+                height="40"
+                loading="lazy"
+                decoding="async"
+                {{ block.shopify_attributes }}>
+            {% elsif block.settings.badge_text != blank %}
+              <span
+                class="a3-badge a3-badge--text"
+                {{ block.shopify_attributes }}>{{ block.settings.badge_text }}</span>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+
+  </div>
+</section>
+
+{% stylesheet %}
+/* ============================================================
+   LT PDP A3 — Process & Press · Section-Styles
+   Scope: .section-lt-pdp-a3
+   Mobile-First: 390px Base → Tablet 768px → Desktop ≥1024px
+   A0-AI-01: KEIN border-left
+   A3-AU-01..06: H2 #000, Eyebrow A1-Pattern, Grid-Areas, 6-Col-Grid
+   ============================================================ */
+
+.section-lt-pdp-a3 {
+  /* PDP-Tokens Section-scoped — identisches Pattern wie A1 (lt-pdp-hero.liquid Z. 112-135) */
+  --text-eyebrow:   0.6875rem;  /* 11px Mobile */
+  --text-h2-pdp:    1.5rem;     /* 24px Mobile */
+  --text-body:      1rem;       /* 16px */
+  --text-caption:   0.8125rem;  /* 13px Mobile */
+
+  background: var(--color-surface-primary, #ffffff);
+  padding: var(--space-7) var(--space-4);    /* 48px / 16px */
+  font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.a3-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ── H2 + Mini-Body — Mikro-Typografie an A2-Live angeglichen (A3-AU-02) ─── */
+.a3-headline {
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: var(--text-h2-pdp);
+  font-weight: 700;
+  color: var(--color-text-primary, #000000);  /* IDENTISCH zu A1/A2 */
+  line-height: 1.15;                          /* = A2-Live */
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--space-4);                 /* 16px */
+}
+
+.a3-mini-body {
+  font-size: 0.9375rem;                       /* 15px Mobile */
+  font-weight: 400;
+  color: var(--color-text-secondary, #525252);
+  line-height: 1.6;                           /* = A2-Live */
+  margin: 0 0 var(--space-7);                 /* 48px */
+  max-width: 600px;
+}
+
+/* ── 4-Step Process ─── */
+.a3-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);                        /* 24px Inter-Card-Gap */
+  margin-bottom: var(--space-7);              /* 48px */
+}
+
+/* Mobile: Grid-Areas — Eyebrow oben über die ganze Card-Breite, dann Icon + Content side-by-side */
+.a3-step {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  grid-template-areas:
+    "eyebrow eyebrow"
+    "icon    content";
+  column-gap: var(--space-4);                 /* 16px Icon → Content */
+  row-gap: 0;
+  /* min-height ENTFERNT (A3-AU-04, Reversal zu DR-03 Layout C):
+     Cards atmen natürlich. Inter-Card-Gap 24px + teal Icon-Spalte links sind der visuelle Anker. */
+}
+
+.a3-step__eyebrow { grid-area: eyebrow; }
+.a3-step__icon-col { grid-area: icon; }
+.a3-step__content { grid-area: content; }
+
+.a3-step__icon-col {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+.a3-step__icon-col .icon--xl {
+  font-size: 32px;
+  color: var(--color-text-accent, #65C0B6);
+  line-height: 1;
+}
+
+/* Eyebrow-Pattern — A1-Live-konform (A3-AU-03) */
+.a3-step__eyebrow,
+.a3-press__eyebrow,
+.a3-badges__eyebrow {
+  font-family: 'Lato', sans-serif;
+  font-size: var(--text-eyebrow);
+  font-weight: 700;                           /* = A1-Live (NICHT 600) */
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary, #525252);
+  line-height: 1.2;                           /* = A1-Live (NICHT 1.0) */
+  margin: 0;
+}
+
+.a3-step__eyebrow {
+  margin: 0 0 var(--space-1);                 /* 4px zum Label */
+}
+
+.a3-step__content {
+  min-width: 0;
+}
+
+.a3-step__label {
+  font-size: 0.9375rem;                       /* 15px Mobile */
+  font-weight: 700;
+  color: var(--color-text-primary, #000000);
+  margin: 0 0 var(--space-1);                 /* 4px */
+  line-height: 1.3;
+}
+
+.a3-step__detail {
+  font-size: var(--text-caption);
+  font-weight: 400;
+  color: var(--color-text-secondary, #525252);
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* ── Mini-Headers (Press + Badge) ─── */
+.a3-mini-header {
+  text-align: center;
+  margin: 0 0 var(--space-5);                 /* 24px */
+}
+
+/* ── Press Logos ─── */
+.a3-press {
+  margin-bottom: var(--space-7);              /* 48px */
+}
+
+/* Mobile: 6-Spalten-Grid mit center-pair Reihe 2 (A3-AU-05) */
+.a3-press__logos {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-4);                        /* 16px */
+  justify-items: center;
+  align-items: center;
+}
+
+.a3-press__logos > :nth-child(1) { grid-column: 1 / 3; }
+.a3-press__logos > :nth-child(2) { grid-column: 3 / 5; }
+.a3-press__logos > :nth-child(3) { grid-column: 5 / 7; }
+.a3-press__logos > :nth-child(4) { grid-column: 2 / 4; }
+.a3-press__logos > :nth-child(5) { grid-column: 4 / 6; }
+
+.a3-press__logo {
+  height: 32px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+  filter: grayscale(100%);
+  opacity: 0.6;                               /* statisch, KEIN Hover-Switch (A3-DR-07) */
+  display: block;
+}
+
+/* ── Badge Riegel ─── */
+.a3-badges__list {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-4);                        /* 16px */
+  justify-items: center;
+  align-items: center;
+}
+
+.a3-badges__list > :nth-child(1) { grid-column: 1 / 3; }
+.a3-badges__list > :nth-child(2) { grid-column: 3 / 5; }
+.a3-badges__list > :nth-child(3) { grid-column: 5 / 7; }
+.a3-badges__list > :nth-child(4) { grid-column: 2 / 4; }
+.a3-badges__list > :nth-child(5) { grid-column: 4 / 6; }
+
+.a3-badge {
+  height: 40px;
+  width: auto;
+  max-width: 100px;
+  object-fit: contain;
+  display: block;
+  /* NO grayscale filter — Originalfarben (Visual-Spec §4) */
+}
+
+.a3-badge--eurofins {
+  filter: none;
+  opacity: 1;
+}
+
+/* Text-Pille Fallback für Badges ohne Logo-Asset (Phase-A-Quick-Patch) */
+.a3-badge--text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 var(--space-4);                  /* 16px horizontal */
+  border: 1px solid var(--color-border-default, #E5E5E5);
+  background: transparent;
+  border-radius: 4px;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.8125rem;                       /* 13px Mobile */
+  font-weight: 600;
+  color: var(--color-text-secondary, #525252);
+  letter-spacing: 0;
+  text-transform: none;                       /* KEINE Uppercase — würde mit Eyebrow konkurrieren */
+  white-space: nowrap;
+  max-width: none;
+}
+
+@media (min-width: 1024px) {
+  .a3-badge--text {
+    font-size: 0.875rem;                      /* 14px Desktop */
+    padding: 0 var(--space-5);                /* 24px horizontal */
+  }
+}
+
+/* ── Focus Visible (Pattern aus A2 übernommen) ─── */
+.section-lt-pdp-a3 *:focus-visible {
+  outline: 2px solid var(--color-text-accent, #65C0B6);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(101, 192, 182, 0.3);
+  border-radius: 2px;
+}
+
+/* ── Tablet 768px ─── */
+@media (min-width: 768px) {
+  .section-lt-pdp-a3 {
+    padding: var(--space-8) var(--space-7);   /* 64px / 48px */
+  }
+
+  /* 2x2 Grid für Steps — vertikales Card-Layout ab Tablet (smoother Resize zu Desktop) */
+  .a3-steps {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-5);                      /* 24px */
+    align-items: start;                       /* keine Stretch-Whitespace-Bottoms */
+  }
+
+  .a3-step {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "eyebrow"
+      "icon"
+      "content";
+    row-gap: var(--space-3);                  /* 12px */
+  }
+
+  .a3-step__icon-col {
+    justify-content: flex-start;
+  }
+
+  /* Press/Badge auf Tablet zurück zu 1×5 Flex (genug Breite vorhanden) */
+  .a3-press__logos,
+  .a3-badges__list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+  }
+  .a3-press__logos { gap: var(--space-6); }   /* 32px */
+  .a3-badges__list { gap: var(--space-5); }   /* 24px */
+  .a3-press__logos > *,
+  .a3-badges__list > * {
+    grid-column: auto;                        /* Mobile-Grid-Overrides zurücksetzen */
+  }
+
+  .a3-press__logo {
+    height: 40px;
+  }
+}
+
+/* ── Desktop 1024px ─── */
+@media (min-width: 1024px) {
+  .section-lt-pdp-a3 {
+    padding: var(--space-9) var(--space-9);   /* 80px / 80px */
+
+    /* Eyebrow-Token-Bump auf Desktop — A1-konform (lt-pdp-hero.liquid Z. 131) */
+    --text-eyebrow:   0.75rem;                /* 12px */
+    --text-h2-pdp:    2.25rem;                /* 36px */
+    --text-caption:   0.875rem;               /* 14px */
+  }
+
+  .a3-headline {
+    font-size: var(--text-h2-pdp);            /* 36px */
+    max-width: 720px;
+  }
+
+  .a3-mini-body {
+    font-size: 1rem;
+    max-width: 600px;
+    margin-bottom: var(--space-8);            /* 64px */
+  }
+
+  .a3-steps {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-5);                      /* 24px */
+    margin-bottom: var(--space-9);            /* 80px */
+    align-items: start;
+  }
+
+  .a3-step__eyebrow { margin-bottom: 0; }
+
+  .a3-step__label {
+    font-size: 1rem;                          /* 16px */
+  }
+
+  .a3-press__logos {
+    gap: var(--space-7);                      /* 48px */
+  }
+
+  .a3-badges__list {
+    gap: var(--space-5);                      /* 24px */
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT A3 Process & Press",
+  "tag": "section",
+  "class": "section-lt-pdp-a3",
+  "settings": [
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "So läuft der Test ab. In vier Schritten."
+    },
+    {
+      "type": "textarea",
+      "id": "mini_body",
+      "label": "Mini Body",
+      "default": "Eine Speichelprobe zu Hause. Klinische Laboranalyse bei Eurofins Genomics in Dänemark. Ergebnis in der App."
+    },
+    {
+      "type": "text",
+      "id": "press_heading",
+      "label": "Press Mini-Header",
+      "default": "Bekannt aus"
+    },
+    {
+      "type": "text",
+      "id": "badge_heading",
+      "label": "Badge Mini-Header",
+      "default": "Analysiert und zertifiziert von"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Prozessschritt",
+      "settings": [
+        {
+          "type": "text",
+          "id": "icon_name",
+          "label": "Phosphor Icon Name (z. B. ph-package-thin)",
+          "default": "ph-package-thin"
+        },
+        {
+          "type": "text",
+          "id": "step_label",
+          "label": "Step Label",
+          "default": "Testkit zu dir"
+        },
+        {
+          "type": "textarea",
+          "id": "step_detail",
+          "label": "Step Detail",
+          "default": "Versandkostenfrei in DE. 24 bis 48 Stunden."
+        }
+      ]
+    },
+    {
+      "type": "press_logo",
+      "name": "Press Logo",
+      "settings": [
+        { "type": "image_picker", "id": "logo_image", "label": "Logo" },
+        { "type": "text", "id": "logo_alt", "label": "Alt-Text" },
+        { "type": "url", "id": "logo_url", "label": "Link (optional)" }
+      ]
+    },
+    {
+      "type": "badge",
+      "name": "Zertifizierungs-Badge",
+      "settings": [
+        { "type": "image_picker", "id": "badge_image", "label": "Badge-Logo (optional, hat Vorrang vor Text)" },
+        { "type": "text", "id": "badge_alt", "label": "Alt-Text (für Bild)" },
+        { "type": "text", "id": "badge_text", "label": "Text-Pille (Fallback wenn kein Bild)" }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT A3 Process & Press",
+      "blocks": [
+        {
+          "type": "step",
+          "settings": {
+            "icon_name": "ph-package-thin",
+            "step_label": "Testkit zu dir",
+            "step_detail": "Versandkostenfrei in DE. 24 bis 48 Stunden."
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "icon_name": "ph-drop-thin",
+            "step_label": "Speichelprobe",
+            "step_detail": "5 Minuten. Kein Arzt. Kein Blut."
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "icon_name": "ph-flask-thin",
+            "step_label": "Eurofins Genomics, Dänemark",
+            "step_detail": "Klinische Methylierungsanalyse. 6 Wochen. DSGVO-konform. EU-Server."
+          }
+        },
+        {
+          "type": "step",
+          "settings": {
+            "icon_name": "ph-device-mobile-thin",
+            "step_label": "App-Ergebnis",
+            "step_detail": "187 Reports. KI-Coach. Lebenslang abrufbar."
+          }
+        },
+        { "type": "press_logo" },
+        { "type": "press_logo" },
+        { "type": "press_logo" },
+        { "type": "press_logo" },
+        { "type": "press_logo" },
+        {
+          "type": "badge",
+          "settings": {
+            "badge_alt": "Eurofins Genomics"
+          }
+        },
+        {
+          "type": "badge",
+          "settings": {
+            "badge_text": "GLP-zertifiziert"
+          }
+        },
+        {
+          "type": "badge",
+          "settings": {
+            "badge_text": "ISO 9001"
+          }
+        },
+        {
+          "type": "badge",
+          "settings": {
+            "badge_text": "ISO 17025"
+          }
+        },
+        {
+          "type": "badge",
+          "settings": {
+            "badge_text": "ISO 13485"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
