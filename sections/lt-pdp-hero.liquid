@@ -745,10 +745,12 @@
             </div>
             {%- else -%}
             <div class="lt-price-direct">
-              {%- if lt_compare_price > lt_pill_1_once -%}
-                <span class="lt-price-direct__compare">{{ lt_compare_price | money_without_trailing_zeros }}</span>
-              {%- endif -%}
-              <span class="lt-price-direct__amount">{{ lt_pill_1_once | money_without_trailing_zeros }}</span>
+              <div class="lt-price-direct__row">
+                <span class="lt-price-direct__amount">{{ lt_pill_1_once | money_without_trailing_zeros }}</span>
+                {%- if lt_compare_price > lt_pill_1_once -%}
+                  <span class="lt-price-direct__compare">{{ lt_compare_price | money_without_trailing_zeros }}</span>
+                {%- endif -%}
+              </div>
               {%- if lt_compare_price > lt_pill_1_once -%}
                 <span class="lt-price-direct__savings">Du sparst {{ lt_compare_price | minus: lt_pill_1_once | money_without_trailing_zeros }}</span>
               {%- endif -%}
@@ -1375,8 +1377,13 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 4px;
+  gap: 6px;
   margin-top: var(--space-5);
+}
+.lt-price-direct__row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
 }
 .lt-price-direct__compare {
   font-size: 14px;
@@ -1447,7 +1454,14 @@
   font-weight: 400 !important;
 }
 
-/* ATC — über .button--solid (theme.css: --color-text-main) erzwingen */
+/* ATC — Spacing zum Preis-Stack reduzieren + Solid-Button-Theme erzwingen */
+.lt-pdp-hero__content .product-form,
+.lt-pdp-hero__content .product__cart-functions {
+  margin-top: var(--space-4) !important;
+}
+.lt-pdp-hero__content .product-form .product__cart-functions {
+  margin-top: 0 !important;
+}
 .lt-pdp-hero__atc.button,
 #lt-hero-atc {
   border-radius: 999px !important;
