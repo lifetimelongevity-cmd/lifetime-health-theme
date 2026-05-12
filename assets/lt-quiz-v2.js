@@ -75,11 +75,6 @@
         { name: 'TP53', explainer: 'Der „Wächter des Genoms" — verhindert dass beschädigte Zellen unkontrolliert wachsen.', example: 'Zeigt deine zelluläre Schutz-Reserve.' },
         { name: 'MTOR', explainer: 'Schaltet zwischen Wachstum und Reparatur deiner Zellen.', example: 'Bestimmt, wie dein Körper auf Protein und Aktivität antwortet.' },
       ],
-      inTest: [
-        'Deine SIRT1-Variante und was sie für dich bedeutet',
-        'Dein FOXO3-Profil im Vergleich zu Hundertjährigen',
-        'Konkrete Empfehlungen für dein Langlebigkeits-Profil',
-      ],
       epiLine: 'Dazu dein epigenetisches Alter und MethylPace-Score — der direkteste Indikator für dein biologisches Alter.',
     },
     weight: {
@@ -92,11 +87,6 @@
         { name: 'TCF7L2', explainer: 'Reguliert deine Insulin-Antwort.', example: 'Zeigt, wie dein Körper auf Kohlenhydrate reagiert.' },
         { name: 'MCM6', explainer: 'Bestimmt deine Laktose-Verträglichkeit.', example: 'Erklärt mögliche Beschwerden nach Milchprodukten.' },
         { name: 'MC4R', explainer: 'Der zentrale Sättigungs-Schalter im Gehirn.', example: 'Bestimmt, wie schnell du Sättigung wahrnimmst.' },
-      ],
-      inTest: [
-        'Deine Stoffwechsel-Variante (FTO + TCF7L2)',
-        'Deine Sensitivitäten für Laktose, Histamin, Koffein',
-        'Empfehlungen für deine Makronährstoff-Verteilung',
       ],
       epiLine: 'Plus dein epigenetisches Entzündungsprofil — entscheidend für Stoffwechsel-Gesundheit.',
     },
@@ -111,11 +101,6 @@
         { name: 'IL6', explainer: 'Marker für stille Entzündungs-Aktivität.', example: 'Chronisch erhöht: Erschöpfung und schlechte Regeneration.' },
         { name: 'TLR4', explainer: 'Steuert deine angeborene Immunantwort.', example: 'Beeinflusst, wie schnell dein Körper mit Entzündung reagiert.' },
       ],
-      inTest: [
-        'Deine Methylierungs-Variante (MTHFR)',
-        'Dein Vitamin-D-Verwertungsprofil',
-        'Dein stilles Entzündungsprofil',
-      ],
       epiLine: 'Plus epigenetische Marker, die zeigen, wie aktiv dein Energiestoffwechsel läuft.',
     },
     sleep: {
@@ -128,11 +113,6 @@
         { name: 'CYP1A2', explainer: 'Reguliert dein Koffein-Abbau-Tempo.', example: 'Schnelle Variante: Espresso nach dem Essen geht. Langsame: nach 14 Uhr wird Schlaf zum Glücksspiel.' },
         { name: 'ADORA2A', explainer: 'Bestimmt, wie stark Koffein dein Nervensystem aufdreht.', example: 'Macht den Unterschied zwischen wach und nervös bei der gleichen Dosis.' },
       ],
-      inTest: [
-        'Dein Chronotyp und passende Schlaf-Fenster',
-        'Deine genetisch optimale Koffein-Strategie',
-        'Empfehlungen zu Magnesium, Melatonin und Schlaf-Hygiene',
-      ],
       epiLine: 'Plus epigenetische Schlaf-Marker — zeigen, wie regenerativ dein Schlaf tatsächlich ist.',
     },
     stress: {
@@ -143,11 +123,6 @@
       genes: [
         { name: 'COMT', explainer: 'Reguliert den Abbau von Stress-Hormonen wie Adrenalin und Dopamin.', example: 'Schnelle Variante: stressresistent. Langsame: tiefer Denker, längere Erholung.' },
         { name: 'BDNF', explainer: 'Wachstumsfaktor für deine Nervenzellen.', example: 'Bestimmt deine mentale Resilienz und Lern-Geschwindigkeit.' },
-      ],
-      inTest: [
-        'Dein COMT-Profil und passende Stress-Strategien',
-        'Dein BDNF-Status und Resilienz-Empfehlungen',
-        'Cortisol-Rhythmus und Erholungs-Faktoren',
       ],
       epiLine: 'Plus epigenetische Stress-Marker — zeigen, wie sehr chronischer Stress dich prägt.',
     },
@@ -160,11 +135,6 @@
         { name: 'BDNF', explainer: 'Wachstumsfaktor für Nervenzellen — Basis für Lernen und Erinnerung.', example: 'Aktive Variante: schnelles Lernen, gute Konzentration unter Druck.' },
         { name: 'FADS1', explainer: 'Bestimmt, wie gut du pflanzliche Omega-3 in nutzbare Form umwandelst.', example: 'Schwache Variante: brauchst eher Fisch oder Algenöl statt Leinöl.' },
         { name: 'APOE', explainer: 'Wichtigster genetischer Marker für kognitive Langzeit-Gesundheit.', example: 'Zeigt dein Risiko-Profil und welche Prävention bei dir am stärksten greift.' },
-      ],
-      inTest: [
-        'Dein BDNF-Lern-Profil',
-        'Dein Omega-3-Verwertungsprofil (FADS1)',
-        'Dein APOE-Status mit konkreten Lifestyle-Hebeln',
       ],
       epiLine: 'Plus epigenetische Marker für deine aktuelle kognitive Reserve.',
     },
@@ -179,11 +149,6 @@
         { name: 'COL5A1', explainer: 'Reguliert die Stabilität deiner Sehnen und Bänder.', example: 'Bestimmt dein genetisches Verletzungs-Risiko.' },
         { name: 'PPARA', explainer: 'Steuert den Fett-Stoffwechsel bei Belastung.', example: 'Bestimmt, wie gut du Fett als Energiequelle bei langem Cardio nutzt.' },
       ],
-      inTest: [
-        'Dein Trainings-Typ (Kraft vs. Ausdauer)',
-        'Dein Verletzungs- und Regenerations-Profil',
-        'Optimale Trainings-Frequenz und Erholungs-Empfehlungen',
-      ],
       epiLine: 'Plus epigenetische Marker, die deine aktuelle Trainings-Belastung sichtbar machen.',
     },
     heart: {
@@ -196,11 +161,6 @@
         { name: 'AGT', explainer: 'Beeinflusst, wie dein Blutdruck auf Salz reagiert.', example: 'Sensitive Variante: Salz-Reduktion senkt Blutdruck stärker.' },
         { name: 'CDKN2B-AS1', explainer: 'Der 9p21-Locus — stärkster bekannter genetischer Herz-Risiko-Marker.', example: 'Zeigt, wie früh und intensiv du präventiv ansetzen solltest.' },
         { name: 'CETP', explainer: 'Reguliert das HDL-Cholesterin.', example: 'Bestimmt deine genetische "gute Cholesterin"-Reserve.' },
-      ],
-      inTest: [
-        'Dein Cholesterin-Stoffwechsel-Profil',
-        'Dein Salz-Sensitivitäts-Status',
-        'Dein 9p21-Risiko mit konkreten Präventions-Empfehlungen',
       ],
       epiLine: 'Plus epigenetische Marker, die zeigen, wie aktiv dein kardiovaskuläres System ist.',
     },
@@ -215,11 +175,6 @@
         { name: 'FUT2', explainer: 'Beeinflusst deine Vitamin-B12-Aufnahme über die Darmwand.', example: 'Non-secretor: höheres Risiko für B12-Mangel trotz Ernährung.' },
         { name: 'BCO1', explainer: 'Wandelt pflanzliches Beta-Carotin in nutzbares Vitamin A.', example: 'Schwache Variante: brauchst direkt Vitamin A oder tierische Quellen.' },
       ],
-      inTest: [
-        'Dein MTHFR-Methylierungs-Profil',
-        'Dein Vitamin-D-Rezeptor-Status',
-        'Empfohlene Supplement-Formen für deine Genetik',
-      ],
       epiLine: 'Plus epigenetische Mikronährstoff-Marker für deinen aktuellen Versorgungs-Status.',
     },
     skin: {
@@ -232,11 +187,6 @@
         { name: 'ERCC2', explainer: 'Repariert UV-Schäden in deiner DNA.', example: 'Reduzierte Aktivität: schnellere Hautalterung durch Sonne.' },
         { name: 'AR', explainer: 'Androgen-Rezeptor — bestimmt deine DHT-Sensitivität.', example: 'Hauptfaktor für androgenetischen Haarausfall.' },
         { name: 'MC1R', explainer: 'Reguliert Pigment-Bildung und Hautempfindlichkeit.', example: 'Bestimmt dein UV-Schutz-Niveau.' },
-      ],
-      inTest: [
-        'Dein Hautalterungs-Profil (SOD2 + ERCC2)',
-        'Dein Haarausfall-Risiko (AR + Familienprofil)',
-        'Konkrete Empfehlungen für Haut- und Haar-Pflege',
       ],
       epiLine: 'Plus epigenetische Hautalter-Marker — zeigen den biologischen Zustand deiner Haut.',
     },
