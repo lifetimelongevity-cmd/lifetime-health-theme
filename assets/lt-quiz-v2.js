@@ -68,7 +68,7 @@
       topic: 'Biologisches Alter',
       icon: 'hourglass-medium',
       title: 'Biologisches Alter senken',
-      short: 'Dein Alter im Pass ist Statistik. Dein epigenetisches Alter ist Realität. Wir zeigen dir, welche Schalter bei dir wirken: SIRT1, FOXO3 und TP53 — die wichtigsten Langlebigkeits-Gene.',
+      short: 'Dein Alter im Pass ist Statistik. Dein epigenetisches Alter ist Realität. Wir zeigen dir, welche Schalter bei dir wirken: SIRT1, FOXO3 und TP53. Die wichtigsten Langlebigkeits-Gene.',
       genes: [
         { name: 'SIRT1', explainer: 'Reguliert Reparatur-Prozesse deiner DNA und das Energie-Management deiner Zellen.', example: 'Bestimmt, wie stark Fasten und Kalorien-Reduktion bei dir wirken.' },
         { name: 'FOXO3', explainer: 'Eines der stärksten Langlebigkeits-Gene weltweit.', example: 'Bei Hundertjährigen ist die aktive Variante deutlich häufiger.' },
@@ -81,7 +81,7 @@
       topic: 'Stoffwechsel',
       icon: 'scales',
       title: 'Verstehen, wie der Körper Essen verarbeitet',
-      short: 'Dein FTO-Gen bestimmt, wie schnell du zunimmst. Dein TCF7L2-Gen, wie dein Blutzucker reagiert. Plus MC4R — der zentrale Sättigungs-Schalter.',
+      short: 'Dein FTO-Gen bestimmt, wie schnell du zunimmst. Dein TCF7L2-Gen, wie dein Blutzucker reagiert. Plus MC4R, der zentrale Sättigungs-Schalter.',
       genes: [
         { name: 'FTO', explainer: 'Beeinflusst Appetit und Fettspeicherung.', example: 'Erklärt, warum manche bei gleicher Kalorienmenge schneller zunehmen.' },
         { name: 'TCF7L2', explainer: 'Reguliert deine Insulin-Antwort.', example: 'Zeigt, wie dein Körper auf Kohlenhydrate reagiert.' },
@@ -107,7 +107,7 @@
       topic: 'Schlaf',
       icon: 'moon',
       title: 'Endlich durchschlafen',
-      short: 'Dein PER3-Gen sagt, ob du Lerche oder Eule bist. Dein CYP1A2-Gen, wie schnell du Koffein abbaust. Plus ADORA2A — wie sehr Koffein dein Nervensystem aufdreht.',
+      short: 'Dein PER3-Gen sagt, ob du Lerche oder Eule bist. Dein CYP1A2-Gen, wie schnell du Koffein abbaust. Plus ADORA2A, das bestimmt, wie sehr Koffein dein Nervensystem aufdreht.',
       genes: [
         { name: 'PER3', explainer: 'Bestimmt deinen Chronotyp — biologisch früh oder spät aktiv.', example: 'Erklärt, warum manche morgens nicht produktiv sein können.' },
         { name: 'CYP1A2', explainer: 'Reguliert dein Koffein-Abbau-Tempo.', example: 'Schnelle Variante: Espresso nach dem Essen geht. Langsame: nach 14 Uhr wird Schlaf zum Glücksspiel.' },
@@ -119,7 +119,7 @@
       topic: 'Stress',
       icon: 'wind',
       title: 'Stress verstehen und Nervensystem unterstützen',
-      short: 'Dein COMT-Gen bestimmt, wie du Stress verarbeitest. Schnelle Variante: stressresistent. Langsame: tiefer Denker, längere Reaktion. Dazu BDNF — deine mentale Erholung.',
+      short: 'Dein COMT-Gen bestimmt, wie du Stress verarbeitest. Schnelle Variante: stressresistent. Langsame: tiefer Denker, längere Reaktion. Dazu BDNF, deine mentale Erholung.',
       genes: [
         { name: 'COMT', explainer: 'Reguliert den Abbau von Stress-Hormonen wie Adrenalin und Dopamin.', example: 'Schnelle Variante: stressresistent. Langsame: tiefer Denker, längere Erholung.' },
         { name: 'BDNF', explainer: 'Wachstumsfaktor für deine Nervenzellen.', example: 'Bestimmt deine mentale Resilienz und Lern-Geschwindigkeit.' },
@@ -155,7 +155,7 @@
       topic: 'Herz & Kreislauf',
       icon: 'heartbeat',
       title: 'Herz aktiv schützen',
-      short: 'APOE zeigt dein Cholesterin-Profil. AGT, wie Salz deinen Blutdruck beeinflusst. CDKN2B-AS1 am 9p21-Locus — das stärkste bekannte genetische Herz-Risiko.',
+      short: 'APOE zeigt dein Cholesterin-Profil. AGT, wie Salz deinen Blutdruck beeinflusst. CDKN2B-AS1 am 9p21-Locus: das stärkste bekannte genetische Herz-Risiko.',
       genes: [
         { name: 'APOE', explainer: 'Reguliert deinen Cholesterin-Stoffwechsel.', example: 'E4-Variante: höheres LDL, profitiert besonders von mediterraner Ernährung.' },
         { name: 'AGT', explainer: 'Beeinflusst, wie dein Blutdruck auf Salz reagiert.', example: 'Sensitive Variante: Salz-Reduktion senkt Blutdruck stärker.' },
@@ -181,7 +181,7 @@
       topic: 'Haut & Haar',
       icon: 'sparkle',
       title: 'Haut und Haar von innen',
-      short: 'Hautalterung hängt an SOD2 (antioxidative Abwehr) und ERCC2 (UV-Schaden-Reparatur). Beim Haar zeigt AR, wie deine Follikel auf DHT reagieren — der Hauptfaktor für Haarausfall.',
+      short: 'Hautalterung hängt an SOD2 (antioxidative Abwehr) und ERCC2 (UV-Schaden-Reparatur). Beim Haar zeigt AR, wie deine Follikel auf DHT reagieren. Das ist der Hauptfaktor für Haarausfall.',
       genes: [
         { name: 'SOD2', explainer: 'Hauptenzym der antioxidativen Abwehr in deinen Zellen.', example: 'Schwache Variante: höherer oxidativer Stress, profitiert von Antioxidantien.' },
         { name: 'ERCC2', explainer: 'Repariert UV-Schäden in deiner DNA.', example: 'Reduzierte Aktivität: schnellere Hautalterung durch Sonne.' },
@@ -238,7 +238,7 @@
   }
 
   function getResultSummary() {
-    return 'Diese drei Bereiche sind für dich besonders relevant — und hier siehst du, welche genetischen Hebel dein Test bei dir aufdecken kann.';
+    return 'Diese drei Bereiche sind für dich besonders relevant. Hier siehst du, welche genetischen Hebel dein Test bei dir aufdecken kann.';
   }
 
   // ── Takeaway-Daten (Narrative-Reaktionen pro Antwort) ────────────
@@ -677,8 +677,7 @@
                 `<h4 class="lt-quiz-result-theme__title">${escapeHtml(def.title)}</h4>` +
               `</div>` +
             `</header>` +
-            `<p class="lt-quiz-result-theme__lead">${escapeHtml(def.short)}</p>` +
-            `<p class="lt-quiz-result-theme__epi">${escapeHtml(def.epiLine)}</p>`;
+            `<p class="lt-quiz-result-theme__lead">${escapeHtml(def.short)}</p>`;
           themesEl.appendChild(article);
         });
       }
