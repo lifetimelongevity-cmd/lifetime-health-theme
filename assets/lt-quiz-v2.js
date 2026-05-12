@@ -238,13 +238,8 @@
     return topics.map((t) => `${t}.`).join(' ');
   }
 
-  function getResultSummary(age) {
-    let framing;
-    if (age < 35)      framing = 'Du legst früh den Grundstein.';
-    else if (age < 50) framing = 'Genau jetzt zählt, was du über deinen Körper weißt.';
-    else if (age < 65) framing = 'Mit gezieltem Wissen kannst du dein biologisches Alter aktiv beeinflussen.';
-    else               framing = 'Vitalität ist keine Frage des Passes, sondern deiner Biologie.';
-    return `${framing} Aus deinen Antworten kristallisieren sich diese drei Bereiche als deine größten Hebel heraus.`;
+  function getResultSummary() {
+    return 'Aus deinen Antworten kristallisieren sich diese drei Bereiche als deine größten Hebel heraus. Hier setzt dein Test bei dir besonders an.';
   }
 
   // ── Takeaway-Daten (Narrative-Reaktionen pro Antwort) ────────────
@@ -648,7 +643,7 @@
       const h1El = result.querySelector('[data-result-h1]');
       if (h1El) h1El.textContent = getResultHeadline(top);
       const subEl = result.querySelector('[data-result-sub]');
-      if (subEl) subEl.textContent = getResultSummary(age);
+      if (subEl) subEl.textContent = getResultSummary();
 
       // 2 — Top-3 als prägnante Themen-Blöcke (ohne Gen-Marker)
       const themesEl = result.querySelector('[data-result-themes]');
