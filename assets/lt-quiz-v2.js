@@ -628,7 +628,7 @@
       const subEl = result.querySelector('[data-result-sub]');
       if (subEl) subEl.textContent = getResultHeaderSub(age);
 
-      // 2 — Top-3 als vollständig sichtbare Themen-Blöcke (Card-Info-Pattern)
+      // 2 — Top-3 als prägnante Themen-Blöcke (ohne Gen-Marker)
       const themesEl = result.querySelector('[data-result-themes]');
       if (themesEl) {
         themesEl.innerHTML = '';
@@ -640,19 +640,9 @@
           article.innerHTML =
             `<header class="lt-quiz-result-theme__header">` +
               `<span class="lt-quiz-result-theme__pos">${String(idx + 1).padStart(2, '0')} / 03</span>` +
-              `<h3 class="lt-quiz-result-theme__title">${escapeHtml(def.title)}</h3>` +
+              `<h4 class="lt-quiz-result-theme__title">${escapeHtml(def.title)}</h4>` +
             `</header>` +
             `<p class="lt-quiz-result-theme__lead">${escapeHtml(def.short)}</p>` +
-            `<p class="lt-quiz-result-theme__sublabel">Genetische Marker in deinem Test</p>` +
-            `<ul class="lt-quiz-result-theme__genes">` +
-              def.genes.map((g) =>
-                `<li class="lt-quiz-result-theme__gene">` +
-                  `<p class="lt-quiz-result-theme__gene-name">${escapeHtml(g.name)}</p>` +
-                  `<p class="lt-quiz-result-theme__gene-explainer">${escapeHtml(g.explainer)}</p>` +
-                  `<p class="lt-quiz-result-theme__gene-example">${escapeHtml(g.example)}</p>` +
-                `</li>`
-              ).join('') +
-            `</ul>` +
             `<p class="lt-quiz-result-theme__sublabel">Im Test bekommst du</p>` +
             `<ul class="lt-quiz-result-theme__in-test">` +
               def.inTest.map((line) => `<li>${escapeHtml(line)}</li>`).join('') +
