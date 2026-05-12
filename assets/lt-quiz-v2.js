@@ -567,7 +567,6 @@
         this.state.topThree = getTopThree(this.state.scores, this.state.answers.age);
         if (this.loadingTimer) clearTimeout(this.loadingTimer);
         this.loadingTimer = window.setTimeout(() => this.goto('result'), LOADING_DURATION_MS);
-        this.startLoadingChecklist();
       }
 
       this.render();
@@ -766,30 +765,7 @@
       }
     }
 
-    // ── Loading-Checkliste: Items werden gestaffelt eingeblendet ──
-    startLoadingChecklist() {
-      const steps = this.root.querySelectorAll('.lt-quiz-loading__step');
-      // Reset (für den Fall, dass Loading erneut betreten wird)
-      if (this.checklistTimers) this.checklistTimers.forEach((t) => clearTimeout(t));
-      this.checklistTimers = [];
-      steps.forEach((step) => {
-        step.classList.remove('is-visible', 'is-in');
-      });
-
-      const stagger = 500; // ms zwischen den Items
-      steps.forEach((step, idx) => {
-        const t = window.setTimeout(() => {
-          step.classList.add('is-visible');
-          // Reflow erzwingen, damit die transition ab opacity:0 läuft
-          // eslint-disable-next-line no-unused-expressions
-          step.offsetWidth;
-          step.classList.add('is-in');
-        }, idx * stagger);
-        this.checklistTimers.push(t);
-      });
-    }
-
-    // ── Takeaway-Panel: pro Antwort eine Notiz-Karte ──────────────
+// ── Takeaway-Panel: pro Antwort eine Notiz-Karte ──────────────
     updateTakeaways() {
       if (!this.takeawaysList) return;
       const items = getTakeaways(this.state.answers);
