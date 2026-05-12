@@ -712,17 +712,8 @@
     }
 
     bindResultCta() {
-      const primaryBtn = this.root.querySelector('[data-result-cta-primary]');
       const form = this.root.querySelector('[data-result-form]');
       const successEl = this.root.querySelector('[data-result-success]');
-      if (primaryBtn && form) {
-        primaryBtn.addEventListener('click', () => {
-          primaryBtn.hidden = true;
-          form.hidden = false;
-          const emailEl = form.querySelector('[data-result-email]');
-          if (emailEl) emailEl.focus();
-        });
-      }
       if (form) {
         form.addEventListener('submit', (e) => {
           e.preventDefault();
