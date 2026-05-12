@@ -63,6 +63,7 @@
   // ── Bedürfnis-Stammdaten für Result-Page ─────────────────────────
   const NEEDS_DETAIL = {
     bioage: {
+      topic: 'biologisches Alter',
       title: 'Biologisches Alter senken',
       short: 'Dein Alter im Pass ist Statistik. Dein epigenetisches Alter ist Realität. Wir zeigen dir, welche Schalter bei dir wirken: SIRT1, FOXO3 und TP53 — die wichtigsten Langlebigkeits-Gene.',
       genes: [
@@ -79,6 +80,7 @@
       epiLine: 'Dazu dein epigenetisches Alter und MethylPace-Score — der direkteste Indikator für dein biologisches Alter.',
     },
     weight: {
+      topic: 'Stoffwechsel',
       title: 'Verstehen, wie der Körper Essen verarbeitet',
       short: 'Dein FTO-Gen bestimmt, wie schnell du zunimmst. Dein TCF7L2-Gen, wie dein Blutzucker reagiert. Plus MC4R — der zentrale Sättigungs-Schalter.',
       genes: [
@@ -95,6 +97,7 @@
       epiLine: 'Plus dein epigenetisches Entzündungsprofil — entscheidend für Stoffwechsel-Gesundheit.',
     },
     energy: {
+      topic: 'Energie',
       title: 'Energie zurückgewinnen',
       short: 'Müdigkeit hat drei Quellen: Mikronährstoff-Defizite (MTHFR, VDR), schlechter Schlaf, stille Entzündungen (IL6, TLR4). Wir zeigen dir, welcher Hebel bei dir am stärksten greift.',
       genes: [
@@ -111,6 +114,7 @@
       epiLine: 'Plus epigenetische Marker, die zeigen, wie aktiv dein Energiestoffwechsel läuft.',
     },
     sleep: {
+      topic: 'Schlaf',
       title: 'Endlich durchschlafen',
       short: 'Dein PER3-Gen sagt, ob du Lerche oder Eule bist. Dein CYP1A2-Gen, wie schnell du Koffein abbaust. Plus ADORA2A — wie sehr Koffein dein Nervensystem aufdreht.',
       genes: [
@@ -126,6 +130,7 @@
       epiLine: 'Plus epigenetische Schlaf-Marker — zeigen, wie regenerativ dein Schlaf tatsächlich ist.',
     },
     stress: {
+      topic: 'Stress',
       title: 'Stress verstehen und Nervensystem unterstützen',
       short: 'Dein COMT-Gen bestimmt, wie du Stress verarbeitest. Schnelle Variante: stressresistent. Langsame: tiefer Denker, längere Reaktion. Dazu BDNF — deine mentale Erholung.',
       genes: [
@@ -140,6 +145,7 @@
       epiLine: 'Plus epigenetische Stress-Marker — zeigen, wie sehr chronischer Stress dich prägt.',
     },
     cognition: {
+      topic: 'Konzentration',
       title: 'Konzentration, Klarheit, Gedächtnis',
       short: 'Drei Schalter für geistige Schärfe: BDNF für Lernfähigkeit, FADS1 für Omega-3-Verwertung, APOE als wichtigster Marker für kognitive Langzeit-Gesundheit.',
       genes: [
@@ -155,6 +161,7 @@
       epiLine: 'Plus epigenetische Marker für deine aktuelle kognitive Reserve.',
     },
     training: {
+      topic: 'Training',
       title: 'Smarter trainieren',
       short: 'Dein ACTN3-Gen sagt, ob du Kraft- oder Ausdauer-Typ bist. Dein ACE-Gen, wie schnell dein VO₂max trainierbar ist. COL5A1 zeigt deine Sehnen-Stabilität.',
       genes: [
@@ -171,6 +178,7 @@
       epiLine: 'Plus epigenetische Marker, die deine aktuelle Trainings-Belastung sichtbar machen.',
     },
     heart: {
+      topic: 'Herz & Kreislauf',
       title: 'Herz aktiv schützen',
       short: 'APOE zeigt dein Cholesterin-Profil. AGT, wie Salz deinen Blutdruck beeinflusst. CDKN2B-AS1 am 9p21-Locus — das stärkste bekannte genetische Herz-Risiko.',
       genes: [
@@ -187,6 +195,7 @@
       epiLine: 'Plus epigenetische Marker, die zeigen, wie aktiv dein kardiovaskuläres System ist.',
     },
     supplements: {
+      topic: 'Vitamine & Supplements',
       title: 'Passende Vitamine und Supplements',
       short: 'Deine MTHFR-Variante bestimmt, ob du normale Folsäure verwerten kannst oder methylierte brauchst. VDR, wie viel Vitamin D ankommt. BCO1, ob du Beta-Carotin in Vitamin A umwandeln kannst.',
       genes: [
@@ -203,6 +212,7 @@
       epiLine: 'Plus epigenetische Mikronährstoff-Marker für deinen aktuellen Versorgungs-Status.',
     },
     skin: {
+      topic: 'Haut & Haar',
       title: 'Haut und Haar von innen',
       short: 'Hautalterung hängt an SOD2 (antioxidative Abwehr) und ERCC2 (UV-Schaden-Reparatur). Beim Haar zeigt AR, wie deine Follikel auf DHT reagieren — der Hauptfaktor für Haarausfall.',
       genes: [
@@ -220,11 +230,24 @@
     },
   };
 
-  function getResultHeaderSub(age) {
-    if (age < 35) return 'Du legst früh den Grundstein. Wir zeigen dir, welche genetischen Bereiche jetzt am wichtigsten sind.';
-    if (age < 50) return 'Genau jetzt zählt, was du über deinen Körper weißt. Wir haben deine Antworten mit 22 DNA-Bereichen abgeglichen.';
-    if (age < 65) return 'Mit gezieltem Wissen kannst du dein biologisches Alter aktiv beeinflussen. Hier sind deine wichtigsten Hebel.';
-    return 'Vitalität ist keine Frage des Passes, sondern deiner Biologie. Wir zeigen dir, wo deine Hebel liegen.';
+  function getResultSummary(age, topThree) {
+    const topics = topThree
+      .map((id) => (NEEDS_DETAIL[id] || {}).topic)
+      .filter(Boolean);
+    let topicLine = '';
+    if (topics.length === 3) {
+      topicLine = `Bei dir sind <strong>${topics[0]}</strong>, <strong>${topics[1]}</strong> und <strong>${topics[2]}</strong> die drei wichtigsten Hebel.`;
+    } else if (topics.length > 0) {
+      topicLine = `Bei dir steht ${topics.map((t) => `<strong>${t}</strong>`).join(' und ')} im Fokus.`;
+    }
+
+    let framing;
+    if (age < 35)      framing = 'Du legst früh den Grundstein.';
+    else if (age < 50) framing = 'Genau jetzt zählt, was du über deinen Körper weißt.';
+    else if (age < 65) framing = 'Mit gezieltem Wissen kannst du dein biologisches Alter aktiv beeinflussen.';
+    else               framing = 'Vitalität ist keine Frage des Passes, sondern deiner Biologie.';
+
+    return `${framing} ${topicLine} Auf diese Bereiche schauen wir bei dir mit voller Tiefe — und du bekommst zusätzlich das Bild aus allen 22 DNA-Bereichen plus dein epigenetisches Profil.`;
   }
 
   // ── Takeaway-Daten (Narrative-Reaktionen pro Antwort) ────────────
@@ -624,9 +647,9 @@
       const top = this.state.topThree || [];
       const age = this.state.answers.age || 40;
 
-      // 1 — Sub-Text nach Alter
+      // 1 — Personalisierte 2-3-Satz-Zusammenfassung
       const subEl = result.querySelector('[data-result-sub]');
-      if (subEl) subEl.textContent = getResultHeaderSub(age);
+      if (subEl) subEl.innerHTML = getResultSummary(age, top);
 
       // 2 — Top-3 als prägnante Themen-Blöcke (ohne Gen-Marker)
       const themesEl = result.querySelector('[data-result-themes]');
