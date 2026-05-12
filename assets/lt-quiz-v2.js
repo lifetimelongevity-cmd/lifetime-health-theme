@@ -50,6 +50,66 @@
     return s;
   }
 
+  // ── Takeaway-Daten (Narrative-Reaktionen pro Antwort) ────────────
+  const SLIDER_REACTIONS = {
+    sleep: {
+      title: 'Schlaf',
+      pills: ['Chronotyp (PER3)', 'Koffein-Abbau (CYP1A2)', 'Adenosin (ADORA2A)', 'Schlaf-Qualität'],
+    },
+    energy: {
+      title: 'Energie',
+      pills: ['Methylierung (MTHFR)', 'Vitamin D (VDR)', 'Entzündung (IL6)', 'Stoffwechsel'],
+    },
+    stress: {
+      title: 'Stress',
+      pills: ['Stress-Antwort (COMT)', 'Mentale Resilienz (BDNF)', 'Cortisol-Reaktion', 'Schlaf-Bezug'],
+    },
+    weight: {
+      title: 'Stoffwechsel',
+      pills: ['Sättigung (MC4R)', 'Kohlenhydrate (TCF7L2)', 'Fette (FTO)', 'Sensitivitäten'],
+    },
+  };
+
+  function sliderLine(v) {
+    if (v <= 2) return 'Hier liegt ein deutlicher Hebel — wir schauen genau hin.';
+    if (v === 3) return 'Spannender Bereich — lohnt einen genaueren Blick.';
+    return 'Stabil — wir checken trotzdem deine genetische Basis.';
+  }
+
+  const ACTIVITY_REACTIONS = {
+    aktiv:     { line: 'Sportlich — wir kennen deinen Trainings-Typ.', pills: ['Trainings-Typ (ACTN3)', 'VO₂max (ACE)', 'Sehnen (COL5A1)'] },
+    neustart:  { line: 'Neuanfang — wir zeigen dir den passenden Einstieg.', pills: ['Trainings-Antwort', 'Regenerations-Profil', 'Verletzungs-Risiko'] },
+    arm:       { line: 'Wir prüfen, was dich genetisch aktivieren würde.', pills: ['Aktivierungs-Empfehlung', 'Bewegungs-Profil'] },
+    wechselnd: { line: 'Schwankungen lassen sich oft genetisch erklären.', pills: ['Energie-Profil', 'Trainings-Antwort'] },
+  };
+
+  const PREVENTION_REACTIONS = {
+    herz:        { title: 'Herz & Kreislauf',    pills: ['Cholesterin (APOE)', 'Blutdruck (AGT)', '9p21 (CDKN2B)'] },
+    kognition:   { title: 'Geistige Fitness',    pills: ['Lernfähigkeit (BDNF)', 'Omega-3 (FADS1)', 'APOE'] },
+    haut:        { title: 'Haut & Haar',         pills: ['UV-Reparatur (ERCC2)', 'Haarausfall (AR)', 'SOD2'] },
+    supplements: { title: 'Vitamine & Supplements', pills: ['Folsäure (MTHFR)', 'Vitamin D (VDR)', 'Beta-Carotin (BCO1)'] },
+    bioalter:    { title: 'Biologisches Alter',  pills: ['SIRT1', 'FOXO3', 'TP53', 'MTOR'] },
+  };
+
+  function getTakeaways(answers) {
+    const items = [];
+    ['sleep', 'energy', 'stress', 'weight'].forEach((key) => {
+      const v = answers[key];
+      if (v == null) return;
+      const def = SLIDER_REACTIONS[key];
+      items.push({ key, title: def.title, line: sliderLine(v), pills: def.pills });
+    });
+    if (answers.activity) {
+      const a = ACTIVITY_REACTIONS[answers.activity];
+      if (a) items.push({ key: 'activity', title: 'Bewegung', line: a.line, pills: a.pills });
+    }
+    (answers.prevention || []).forEach((p) => {
+      const def = PREVENTION_REACTIONS[p];
+      if (def) items.push({ key: 'prev-' + p, title: def.title, line: 'Im Fokus.', pills: def.pills });
+    });
+    return items;
+  }
+
   // ── Matrix-State: welche Kategorie wie aktiv ─────────────────────
   // Bedürfnis → DNA-Kategorien (aus docs/lifetime-quiz-spec.md NEEDS)
   const NEED_CATEGORIES = {
@@ -123,7 +183,8 @@
         this.steps.set(el.dataset.quizStep, el);
       });
       this.grid = root.querySelector('[data-quiz-grid]');
-      this.matrixRoot = root.querySelector('[data-quiz-matrix]');
+      this.takeawaysRoot = root.querySelector('[data-quiz-takeaways]');
+      this.takeawaysList = root.querySelector('[data-quiz-takeaways-list]');
       this.progressBar = root.querySelector('[data-quiz-progress-bar]');
       this.progressLabel = root.querySelector('[data-quiz-progress-label]');
       this.backBtn = root.querySelector('[data-quiz-back]');
@@ -196,7 +257,7 @@
         s.setAttribute('aria-checked', active ? 'true' : 'false');
       });
       this.state.answers[questionId] = value;
-      this.updateMatrix();
+      this.updateTakeaways();
       this.advanceAfterDelay();
     }
 
@@ -218,7 +279,7 @@
         c.setAttribute('aria-checked', active ? 'true' : 'false');
       });
       this.state.answers[questionId] = picked.dataset.value;
-      this.updateMatrix();
+      this.updateTakeaways();
       this.advanceAfterDelay();
     }
 
@@ -244,7 +305,7 @@
               return; // Limit erreicht, kein Add
             }
             this.refreshMulti(cards, arr, advanceBtn, advanceLabel, max);
-            this.updateMatrix();
+            this.updateTakeaways();
           });
         });
 
@@ -362,37 +423,50 @@
 
       if (inFullscreen) this.root.scrollTo({ top: 0, behavior: 'instant' });
 
-      // Matrix-State auch bei Step-Wechsel synchronisieren (z.B. Back/Reset)
-      this.updateMatrix();
+      // Takeaway-Panel auch bei Step-Wechsel synchronisieren (Back/Reset)
+      this.updateTakeaways();
     }
 
-    // ── Matrix-Update mit Stagger beim Aufleuchten ────────────────
-    updateMatrix() {
-      if (!this.matrixRoot) return;
-      const levels = computeMatrixState(this.state.answers);
-      const tiles = this.matrixRoot.querySelectorAll('[data-matrix-cat]');
-      let lightUpDelay = 0;
-      tiles.forEach((tile) => {
-        const cat = tile.dataset.matrixCat;
-        const newLevel = levels[cat] || null;
-        const newStrong = newLevel === 'strong';
-        const newMedium = newLevel === 'medium';
-        const wasActive = tile.classList.contains('is-strong') || tile.classList.contains('is-medium');
-        const willBeActive = newStrong || newMedium;
-        const isLightUp = !wasActive && willBeActive;
+    // ── Takeaway-Panel: pro Antwort eine Notiz-Karte ──────────────
+    updateTakeaways() {
+      if (!this.takeawaysList) return;
+      const items = getTakeaways(this.state.answers);
+      const existing = new Map();
+      this.takeawaysList.querySelectorAll('[data-takeaway-key]').forEach((el) => {
+        existing.set(el.dataset.takeawayKey, el);
+      });
+      const newKeys = new Set(items.map((i) => i.key));
 
-        if (isLightUp) {
-          const delay = lightUpDelay;
-          lightUpDelay += 80;
-          window.setTimeout(() => {
-            tile.classList.toggle('is-strong', newStrong);
-            tile.classList.toggle('is-medium', newMedium);
-          }, delay);
+      // Remove cards that no longer apply
+      existing.forEach((el, key) => {
+        if (!newKeys.has(key)) el.remove();
+      });
+
+      // Append new cards in current order; update lines for existing
+      items.forEach((item) => {
+        const prev = existing.get(item.key);
+        if (prev) {
+          const lineEl = prev.querySelector('.lt-quiz-takeaway__line');
+          if (lineEl && lineEl.textContent !== item.line) lineEl.textContent = item.line;
+          this.takeawaysList.appendChild(prev); // keep order in sync
         } else {
-          tile.classList.toggle('is-strong', newStrong);
-          tile.classList.toggle('is-medium', newMedium);
+          const card = document.createElement('div');
+          card.className = 'lt-quiz-takeaway';
+          card.dataset.takeawayKey = item.key;
+          card.innerHTML =
+            `<p class="lt-quiz-takeaway__title">${item.title}</p>` +
+            `<p class="lt-quiz-takeaway__line">${item.line}</p>` +
+            `<ul class="lt-quiz-takeaway__pills">` +
+            item.pills.map((p) => `<li class="lt-quiz-takeaway__pill">${p}</li>`).join('') +
+            `</ul>`;
+          this.takeawaysList.appendChild(card);
+          window.requestAnimationFrame(() => card.classList.add('is-in'));
         }
       });
+
+      if (this.takeawaysRoot) {
+        this.takeawaysRoot.classList.toggle('is-empty', items.length === 0);
+      }
     }
 
     snapshot() {
