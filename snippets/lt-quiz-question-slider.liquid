@@ -1,0 +1,69 @@
+{%- comment -%}
+  LIFETIME — Quiz v2 Slider-Frage (Snippet)
+  Echter Slider: durchgehender Gradient-Track (rot → gelb → grün) mit
+  5 Snap-Dots darüber. Labels: 5 auf Desktop, 3 Anker auf Mobile.
+
+  Pflicht-Parameter:
+    question_id  → state-Key (sleep|energy|stress|weight)
+    headline     → Frage-Headline
+    label_1..5   → Slider-Stop-Labels (links → rechts)
+    hint         → "Warum fragen wir das?"-Text
+  Optional:
+    step         → State-Step-ID, default = question_id
+{%- endcomment -%}
+
+{%- assign _step = step | default: question_id -%}
+
+<div
+  class="lt-quiz__step lt-quiz__step--slider"
+  data-quiz-step="{{ _step }}"
+  data-question-id="{{ question_id }}"
+  hidden
+>
+  <h2 class="lt-quiz__headline">{{ headline | escape }}</h2>
+
+  <div class="lt-quiz-slider" data-quiz-slider>
+    <div class="lt-quiz-slider__track" aria-hidden="true"></div>
+    <div
+      class="lt-quiz-slider__stops"
+      role="radiogroup"
+      aria-label="{{ headline | escape }}"
+    >
+      {%- for i in (1..5) -%}
+        <button
+          type="button"
+          class="lt-quiz-slider__stop"
+          role="radio"
+          aria-checked="false"
+          data-value="{{ i }}"
+        >
+          <span class="lt-quiz-slider__dot" aria-hidden="true"></span>
+          <span class="lt-quiz-slider__hit" aria-hidden="true"></span>
+        </button>
+      {%- endfor -%}
+    </div>
+
+    {%- comment -%} Desktop: alle 5 Labels {%- endcomment -%}
+    <div class="lt-quiz-slider__labels lt-quiz-slider__labels--full" aria-hidden="true">
+      <span>{{ label_1 | escape }}</span>
+      <span>{{ label_2 | escape }}</span>
+      <span>{{ label_3 | escape }}</span>
+      <span>{{ label_4 | escape }}</span>
+      <span>{{ label_5 | escape }}</span>
+    </div>
+
+    {%- comment -%} Mobile: nur 3 Anker (links / Mitte / rechts) {%- endcomment -%}
+    <div class="lt-quiz-slider__labels lt-quiz-slider__labels--anchors" aria-hidden="true">
+      <span>{{ label_1 | escape }}</span>
+      <span>{{ label_3 | escape }}</span>
+      <span>{{ label_5 | escape }}</span>
+    </div>
+  </div>
+
+  {%- if hint != blank -%}
+    <details class="lt-quiz__hint">
+      <summary class="lt-quiz__hint-toggle">Warum fragen wir das?</summary>
+      <p class="lt-quiz__hint-text">{{ hint | escape }}</p>
+    </details>
+  {%- endif -%}
+</div>
