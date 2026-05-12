@@ -1,15 +1,28 @@
 {%- comment -%}
-  LIFETIME — Quiz v2 Result-Page (v2)
+  LIFETIME — Quiz v2 Result-Page
 
-  Restrukturiert (Feedback Iteration 2):
-  - Keine doppelte Top-3-Anzeige mehr (vorher: Karten + Detail-Akkordeons)
-  - Top-3 sind direkt vollständig sichtbar als gestapelte Themen-Blöcke
-  - Matrix entfernt — kompakte Pill-Zeile "Mehr in deinem Test" statt 4×4-Grid
-  - CTA-Framing: Test-Code per E-Mail (nicht "Vollständiges Ergebnis", da bereits gezeigt)
-  - CTA-Button: teal bg + weiße Schrift (per LIFETIME-Brand-Pattern)
+  Parameter (vom Section-Aufruf):
+    hero_female  → Bild-URL bei state.gender === 'female'
+    hero_male    → Bild-URL bei state.gender === 'male' oder 'diverse' (Fallback)
 {%- endcomment -%}
 
+{%- assign _hero_female = hero_female | default: 'https://www.lifetime-health.de/cdn/shop/files/lifetime-sport-mood-tennis-woman.png?v=1777040629&width=1200' -%}
+{%- assign _hero_male = hero_male | default: 'https://www.lifetime-health.de/cdn/shop/files/Product-gallery_tst.png?v=1777229670&width=1080' -%}
+
 <div class="lt-quiz-result" data-quiz-result>
+
+  {%- comment -%} 0 — Hero-Bild (gender-personalisiert, JS swap) ───── {%- endcomment -%}
+  <div class="lt-quiz-result__hero">
+    <img
+      src="{{ _hero_male }}"
+      data-result-hero
+      data-hero-female="{{ _hero_female }}"
+      data-hero-male="{{ _hero_male }}"
+      alt=""
+      loading="eager"
+      decoding="async"
+    >
+  </div>
 
   {%- comment -%} 1 — Hook: die drei Topics ALS Headline ──────────── {%- endcomment -%}
   <section class="lt-quiz-result__header">

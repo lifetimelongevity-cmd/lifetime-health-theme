@@ -140,9 +140,20 @@
             hint: 'Manche genetischen Marker werden ab einer Lebensphase wichtiger — APOE für Herz und Kognition, AR für Haar, SIRT1 und FOXO3 für Langlebigkeit.'
         -%}
 
-        {%- comment -%} ── Q7 Alter (Numeric Slider) ──────────────── {%- endcomment -%}
-        {%- render 'lt-quiz-question-age',
+        {%- comment -%} ── Q7 Geschlecht (Single-Select Cards) ───── {%- endcomment -%}
+        {%- assign q7_options = 'female|Frau|gender-female,male|Mann|gender-male,diverse|Divers / keine Angabe|gender-nonbinary' | split: ',' -%}
+        {%- render 'lt-quiz-question-cards',
             step: 'q7',
+            question_id: 'gender',
+            kicker: 'Geschlecht',
+            headline: 'Du bist…',
+            options: q7_options,
+            hint: 'Dein Geschlecht beeinflusst, welche genetischen Marker für dich relevanter sind — z. B. AR-Gen für Haarausfall oder hormonelle Verschiebungen. Außerdem stellen wir dein Ergebnis passend dar.'
+        -%}
+
+        {%- comment -%} ── Q8 Alter (Numeric Slider) ──────────────── {%- endcomment -%}
+        {%- render 'lt-quiz-question-age',
+            step: 'q8',
             question_id: 'age',
             kicker: 'Alter',
             headline: 'Wie alt bist du?',
@@ -162,7 +173,10 @@
 
     {%- comment -%} ── Result-Page ─────────────────────────────────────── {%- endcomment -%}
     <div class="lt-quiz__step lt-quiz__step--result" data-quiz-step="result" hidden>
-      {%- render 'lt-quiz-result' -%}
+      {%- render 'lt-quiz-result',
+          hero_female: section.settings.hero_image_female,
+          hero_male: section.settings.hero_image_male
+      -%}
     </div>
 
   </div>
@@ -203,6 +217,24 @@
       "id": "intro_cta",
       "label": "Intro CTA",
       "default": "Quiz starten →"
+    },
+    {
+      "type": "header",
+      "content": "Result-Hero"
+    },
+    {
+      "type": "text",
+      "id": "hero_image_female",
+      "label": "Hero-Bild Frau (URL)",
+      "info": "Volle URL zum Bild auf dem Shopify-CDN",
+      "default": "https://www.lifetime-health.de/cdn/shop/files/lifetime-sport-mood-tennis-woman.png?v=1777040629&width=1200"
+    },
+    {
+      "type": "text",
+      "id": "hero_image_male",
+      "label": "Hero-Bild Mann/Divers (URL)",
+      "info": "Fallback auch für 'diverse'",
+      "default": "https://www.lifetime-health.de/cdn/shop/files/Product-gallery_tst.png?v=1777229670&width=1080"
     },
     {
       "type": "header",
