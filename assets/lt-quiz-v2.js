@@ -392,6 +392,19 @@
       this.bindEscape();
       this.bindResultCta();
       this.render();
+      this.checkAutoStart();
+    }
+
+    // Deep-Link: /pages/meine-routine#quiz oder ?start=quiz startet das Quiz direkt
+    checkAutoStart() {
+      const hash = window.location.hash || '';
+      const search = new URLSearchParams(window.location.search);
+      const wantsStart =
+        hash === '#quiz' ||
+        hash === '#quiz-start' ||
+        search.get('start') === 'quiz' ||
+        search.get('quiz') === '1';
+      if (wantsStart) this.goto('q1');
     }
 
     bindIntro() {
