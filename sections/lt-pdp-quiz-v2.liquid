@@ -17,27 +17,32 @@
   data-lt-quiz-v2
   data-section-id="{{ section.id }}"
 >
+  {%- comment -%} Full-bleed Progress-Rail (außerhalb Container, edge-to-edge) {%- endcomment -%}
+  <div class="lt-quiz__rail" aria-hidden="true">
+    <div class="lt-quiz__rail-fill" data-quiz-progress-bar></div>
+  </div>
+
   <div class="lt-quiz__container">
 
-    {%- comment -%} Topbar — nur in Frage- und Loading-Steps sichtbar {%- endcomment -%}
+    {%- comment -%} Chrome-Row (Back + Counter + Close) — sichtbar während Fragen/Loading {%- endcomment -%}
     <div class="lt-quiz__topbar">
-      <button type="button" class="lt-quiz__back" data-quiz-back hidden aria-label="Zurück">←</button>
-      <div class="lt-quiz__progress" aria-hidden="true">
-        <div class="lt-quiz__progress-bar" data-quiz-progress-bar></div>
+      <div class="lt-quiz__chrome-row">
+        <button type="button" class="lt-quiz__back" data-quiz-back hidden aria-label="Zurück">←</button>
+        <div class="lt-quiz__progress-label" data-quiz-progress-label aria-live="polite"></div>
+        <button type="button" class="lt-quiz__close" data-quiz-close aria-label="Quiz schließen">×</button>
       </div>
-      <div class="lt-quiz__progress-label" data-quiz-progress-label aria-live="polite"></div>
-      <button type="button" class="lt-quiz__close" data-quiz-close aria-label="Quiz schließen">×</button>
     </div>
 
     {%- comment -%} ── Intro (full-width, zentriert) ─────────────────── {%- endcomment -%}
     <div class="lt-quiz__step lt-quiz__step--intro" data-quiz-step="intro">
-      {%- if section.settings.intro_kicker != blank -%}
-        <p class="lt-quiz__kicker">{{ section.settings.intro_kicker | escape }}</p>
-      {%- endif -%}
-      <h2 class="lt-quiz__headline">{{ section.settings.intro_headline | escape }}</h2>
-      {%- if section.settings.intro_sub != blank -%}
-        <p class="lt-quiz__sub">{{ section.settings.intro_sub | escape }}</p>
-      {%- endif -%}
+      {%- render 'section-heading-crs',
+          heading: section.settings.intro_headline,
+          subheading: section.settings.intro_sub,
+          kicker: section.settings.intro_kicker,
+          align: 'center',
+          headline_lg: true,
+          extra_class: 'lt-quiz__intro-heading'
+      -%}
       <button type="button" class="lt-quiz__cta" data-quiz-start>
         {{ section.settings.intro_cta | escape }}
       </button>
@@ -64,10 +69,10 @@
         {%- assign question_phs = 'q2,q3,q4,q5,q6,q7' | split: ',' -%}
         {%- for ph in question_phs -%}
           <div class="lt-quiz__step" data-quiz-step="{{ ph }}" hidden>
-            <h2 class="lt-quiz__headline">Schritt: {{ ph }}</h2>
             <div class="lt-quiz__placeholder">
-              Dieser Schritt wird in einer späteren Iteration implementiert.
-              State-Maschine ist durchgängig — Snapshot inspizierbar via
+              <strong>Schritt {{ ph }}</strong><br>
+              Wird in einer späteren Iteration implementiert.
+              State-Maschine ist durchgängig — Snapshot via
               <code>window.LIFETIME.QuizV2</code>.
             </div>
           </div>
@@ -86,9 +91,9 @@
     {%- assign fullwidth_phs = 'loading,result' | split: ',' -%}
     {%- for ph in fullwidth_phs -%}
       <div class="lt-quiz__step" data-quiz-step="{{ ph }}" hidden>
-        <h2 class="lt-quiz__headline">Schritt: {{ ph }}</h2>
         <div class="lt-quiz__placeholder">
-          Dieser Schritt wird in einer späteren Iteration implementiert.
+          <strong>Schritt {{ ph }}</strong><br>
+          Wird in einer späteren Iteration implementiert.
         </div>
       </div>
     {%- endfor -%}
