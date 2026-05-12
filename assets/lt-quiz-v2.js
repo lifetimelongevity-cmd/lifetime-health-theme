@@ -20,9 +20,10 @@
       .replace(/'/g, '&#39;');
   }
 
-  const STEPS = ['intro', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'loading', 'result'];
-  const QUESTION_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'];
-  const FULLSCREEN_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'loading', 'result'];
+  const STEPS = ['intro', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'loading', 'result'];
+  const QUESTION_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8'];
+  const FULLSCREEN_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'loading', 'result'];
+  const TOTAL_QUESTIONS = QUESTION_STEPS.length;
   const AUTO_ADVANCE_MS = 300;
   const LOADING_DURATION_MS = 3000;
 
@@ -36,6 +37,7 @@
         weight: null,
         activity: null,
         prevention: [],
+        gender: null,
         age: 40,
       },
       scores: {},
@@ -229,6 +231,43 @@
       epiLine: 'Plus epigenetische Hautalter-Marker — zeigen den biologischen Zustand deiner Haut.',
     },
   };
+
+  function ageGroup(age) {
+    if (age == null) return '';
+    if (age < 35) return '25-34';
+    if (age < 45) return '35-44';
+    if (age < 55) return '45-54';
+    if (age < 65) return '55-64';
+    return '65+';
+  }
+
+  function buildCustomerTags(topThree, answers) {
+    const tags = ['quiz-completed'];
+    (topThree || []).forEach((id, idx) => {
+      if (id) tags.push(`top${idx + 1}-${id}`);
+    });
+    const ag = ageGroup(answers.age);
+    if (ag) tags.push(`age-${ag}`);
+    if (answers.gender) tags.push(`gender-${answers.gender}`);
+    return tags;
+  }
+
+  function dispatchQuizCompleted(state) {
+    const payload = {
+      event: 'quiz_completed',
+      quiz_top1: state.topThree[0] || null,
+      quiz_top2: state.topThree[1] || null,
+      quiz_top3: state.topThree[2] || null,
+      quiz_age: state.answers.age,
+      quiz_age_group: ageGroup(state.answers.age),
+      quiz_gender: state.answers.gender,
+    };
+    if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+      window.dataLayer.push(payload);
+    }
+    // CustomEvent für theme-interne Listener / TripleWhale-Hook
+    window.dispatchEvent(new CustomEvent('lifetime:quiz-completed', { detail: payload }));
+  }
 
   function getResultHeadline(topThree) {
     const topics = topThree
@@ -431,7 +470,7 @@
       const a = this.state.answers;
       const hasInput =
         a.sleep || a.energy || a.stress || a.weight ||
-        a.activity || (a.prevention && a.prevention.length > 0);
+        a.activity || (a.prevention && a.prevention.length > 0) || a.gender;
       if (hasInput && !window.confirm('Quiz wirklich abbrechen? Deine bisherigen Antworten gehen verloren.')) return;
       this.state = createInitialState();
       this.goto('intro');
@@ -577,9 +616,12 @@
       if (!STEPS.includes(step)) return;
       this.state.step = step;
 
-      // Result-Hook: Top-3 ist bereits berechnet — Result-Page rendern
+      // Result-Hook: Top-3 ist bereits berechnet — Result-Page rendern,
+      // Customer-Tags vorbereiten + quiz_completed-Event dispatchen
       if (step === 'result') {
         this.renderResult();
+        this.state.tags = buildCustomerTags(this.state.topThree, this.state.answers);
+        dispatchQuizCompleted(this.state);
       }
 
       // Loading-Hook: Scoring berechnen + Auto-Übergang zu Result nach 3s
@@ -616,11 +658,11 @@
       const qIdx = QUESTION_STEPS.indexOf(current);
       if (this.progressBar) {
         this.progressBar.style.width = qIdx >= 0
-          ? `${((qIdx + 1) / 7) * 100}%`
+          ? `${((qIdx + 1) / TOTAL_QUESTIONS) * 100}%`
           : current === 'loading' || current === 'result' ? '100%' : '0%';
       }
       if (this.progressLabel) {
-        this.progressLabel.textContent = qIdx >= 0 ? `${qIdx + 1} / 7` : '';
+        this.progressLabel.textContent = qIdx >= 0 ? `${qIdx + 1} / ${TOTAL_QUESTIONS}` : '';
       }
       if (this.backBtn) {
         this.backBtn.hidden = !inQuestion;
@@ -638,6 +680,16 @@
       if (!result) return;
       const top = this.state.topThree || [];
       const age = this.state.answers.age || 40;
+      const gender = this.state.answers.gender;
+
+      // 0 — Hero-Bild nach Geschlecht swappen (diverse → Fallback Mann)
+      const heroEl = result.querySelector('[data-result-hero]');
+      if (heroEl) {
+        const targetSrc = gender === 'female'
+          ? heroEl.dataset.heroFemale
+          : heroEl.dataset.heroMale;
+        if (targetSrc && heroEl.src !== targetSrc) heroEl.src = targetSrc;
+      }
 
       // 1 — H1 = die drei Topic-Namen + altersgestimmte 2-Satz-Sub
       const h1El = result.querySelector('[data-result-h1]');
@@ -724,10 +776,18 @@
             return;
           }
           // Echte Submission folgt in Step 8 (Shopify-Customer-Endpoint)
+          // Tags vorhanden in this.state.tags (gesetzt beim Result-Hook)
           this.state.email = email.value;
           this.state.submitted = true;
           form.hidden = true;
           if (successEl) successEl.hidden = false;
+          if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+            window.dataLayer.push({
+              event: 'quiz_email_submitted',
+              quiz_gender: this.state.answers.gender,
+              quiz_age_group: ageGroup(this.state.answers.age),
+            });
+          }
         });
       }
     }
