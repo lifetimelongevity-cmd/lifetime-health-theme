@@ -63,7 +63,7 @@
   // ── Bedürfnis-Stammdaten für Result-Page ─────────────────────────
   const NEEDS_DETAIL = {
     bioage: {
-      topic: 'biologisches Alter',
+      topic: 'Biologisches Alter',
       title: 'Biologisches Alter senken',
       short: 'Dein Alter im Pass ist Statistik. Dein epigenetisches Alter ist Realität. Wir zeigen dir, welche Schalter bei dir wirken: SIRT1, FOXO3 und TP53 — die wichtigsten Langlebigkeits-Gene.',
       genes: [
@@ -230,24 +230,21 @@
     },
   };
 
-  function getResultSummary(age, topThree) {
+  function getResultHeadline(topThree) {
     const topics = topThree
       .map((id) => (NEEDS_DETAIL[id] || {}).topic)
       .filter(Boolean);
-    let topicLine = '';
-    if (topics.length === 3) {
-      topicLine = `Bei dir sind <strong>${topics[0]}</strong>, <strong>${topics[1]}</strong> und <strong>${topics[2]}</strong> die drei wichtigsten Hebel.`;
-    } else if (topics.length > 0) {
-      topicLine = `Bei dir steht ${topics.map((t) => `<strong>${t}</strong>`).join(' und ')} im Fokus.`;
-    }
+    if (topics.length === 0) return 'Hier ist dein Bild.';
+    return topics.map((t) => `${t}.`).join(' ');
+  }
 
+  function getResultSummary(age) {
     let framing;
     if (age < 35)      framing = 'Du legst früh den Grundstein.';
     else if (age < 50) framing = 'Genau jetzt zählt, was du über deinen Körper weißt.';
     else if (age < 65) framing = 'Mit gezieltem Wissen kannst du dein biologisches Alter aktiv beeinflussen.';
     else               framing = 'Vitalität ist keine Frage des Passes, sondern deiner Biologie.';
-
-    return `${framing} ${topicLine} Auf diese Bereiche schauen wir bei dir mit voller Tiefe — und du bekommst zusätzlich das Bild aus allen 22 DNA-Bereichen plus dein epigenetisches Profil.`;
+    return `${framing} Aus deinen Antworten kristallisieren sich diese drei Bereiche als deine größten Hebel heraus.`;
   }
 
   // ── Takeaway-Daten (Narrative-Reaktionen pro Antwort) ────────────
@@ -647,9 +644,11 @@
       const top = this.state.topThree || [];
       const age = this.state.answers.age || 40;
 
-      // 1 — Personalisierte 2-3-Satz-Zusammenfassung
+      // 1 — H1 = die drei Topic-Namen + altersgestimmte 2-Satz-Sub
+      const h1El = result.querySelector('[data-result-h1]');
+      if (h1El) h1El.textContent = getResultHeadline(top);
       const subEl = result.querySelector('[data-result-sub]');
-      if (subEl) subEl.innerHTML = getResultSummary(age, top);
+      if (subEl) subEl.textContent = getResultSummary(age);
 
       // 2 — Top-3 als prägnante Themen-Blöcke (ohne Gen-Marker)
       const themesEl = result.querySelector('[data-result-themes]');
