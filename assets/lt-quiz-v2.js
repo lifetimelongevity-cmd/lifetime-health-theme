@@ -1,11 +1,11 @@
 /**
  * LIFETIME — AGE & DNA Quiz v2
- * Step 1+2 der Implementierungs-Reihenfolge (siehe docs/lifetime-quiz-spec.md):
+ * Step 1-4 der Implementierungs-Reihenfolge (siehe docs/lifetime-quiz-spec.md):
  *  - State-Maschine (intro → q1..q7 → loading → result)
- *  - Slider-Frage funktionsfähig (Q1), restliche Steps als Platzhalter
- *  - Fullscreen-Modus während Q1..Loading (blendet Site-Header/Footer aus)
- *
- * Scoring/Top-3-Logik ist hier schon vorhanden für späteren Schritt 6.
+ *  - Slider-Fragen (Q1-Q4), Single-Select-Cards (Q5),
+ *    Multi-Select-Cards mit Limit (Q6), Numerischer Slider (Q7)
+ *  - Auto-Advance bei Slider/Single-Select (300ms), Weiter-Button bei Multi/Age
+ *  - Loading → Result Auto-Übergang mit Scoring + Top-3
  */
 (function () {
   'use strict';
@@ -14,6 +14,7 @@
   const QUESTION_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'];
   const FULLSCREEN_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'loading'];
   const AUTO_ADVANCE_MS = 300;
+  const LOADING_DURATION_MS = 3000;
 
   function createInitialState() {
     return {
@@ -34,7 +35,7 @@
     };
   }
 
-  // ── Scoring (vorbereitet für Schritt 6) ─────────────────────────
+  // ── Scoring ───────────────────────────────────────────────────────
   function computeScores(answers) {
     const s = {};
     if (answers.sleep)  s.sleep  = 6 - answers.sleep;
@@ -64,7 +65,7 @@
     return top;
   }
 
-  // ── State-Maschine ──────────────────────────────────────────────
+  // ── State-Maschine ────────────────────────────────────────────────
   class QuizV2 {
     constructor(root) {
       this.root = root;
@@ -78,8 +79,13 @@
       this.progressLabel = root.querySelector('[data-quiz-progress-label]');
       this.backBtn = root.querySelector('[data-quiz-back]');
       this.closeBtn = root.querySelector('[data-quiz-close]');
+      this.loadingTimer = null;
+
       this.bindIntro();
       this.bindSliders();
+      this.bindSingleSelect();
+      this.bindMultiSelect();
+      this.bindAge();
       this.bindBack();
       this.bindClose();
       this.bindEscape();
@@ -105,34 +111,35 @@
     }
 
     bindEscape() {
-      this.escapeHandler = (e) => {
+      document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape' && FULLSCREEN_STEPS.includes(this.state.step)) {
           this.tryClose();
         }
-      };
-      document.addEventListener('keydown', this.escapeHandler);
+      });
     }
 
     tryClose() {
-      const anyAnswer = Object.values(this.state.answers).some(
-        (v) => v !== null && !(Array.isArray(v) && v.length === 0) && v !== 40
-      );
-      if (anyAnswer && !window.confirm('Quiz wirklich abbrechen? Deine bisherigen Antworten gehen verloren.')) return;
+      const a = this.state.answers;
+      const hasInput =
+        a.sleep || a.energy || a.stress || a.weight ||
+        a.activity || (a.prevention && a.prevention.length > 0);
+      if (hasInput && !window.confirm('Quiz wirklich abbrechen? Deine bisherigen Antworten gehen verloren.')) return;
       this.state = createInitialState();
       this.goto('intro');
     }
 
+    // ── Slider (Q1-Q4) ─────────────────────────────────────────────
     bindSliders() {
       this.root.querySelectorAll('[data-quiz-step].lt-quiz__step--slider').forEach((stepEl) => {
         const questionId = stepEl.dataset.questionId;
         const stops = stepEl.querySelectorAll('.lt-quiz-slider__stop');
         stops.forEach((stop) => {
-          stop.addEventListener('click', () => this.handleSliderPick(stepEl, stops, stop, questionId));
+          stop.addEventListener('click', () => this.handleSliderPick(stops, stop, questionId));
         });
       });
     }
 
-    handleSliderPick(stepEl, stops, picked, questionId) {
+    handleSliderPick(stops, picked, questionId) {
       const value = parseInt(picked.dataset.value, 10);
       stops.forEach((s) => {
         const active = s === picked;
@@ -140,17 +147,132 @@
         s.setAttribute('aria-checked', active ? 'true' : 'false');
       });
       this.state.answers[questionId] = value;
-      this.state.scores = computeScores(this.state.answers);
+      this.advanceAfterDelay();
+    }
 
-      const currentIdx = STEPS.indexOf(this.state.step);
-      const nextStep = STEPS[currentIdx + 1];
-      if (!nextStep) return;
-      window.setTimeout(() => this.goto(nextStep), AUTO_ADVANCE_MS);
+    // ── Single-Select Cards (Q5) ───────────────────────────────────
+    bindSingleSelect() {
+      this.root.querySelectorAll('[data-question-mode="single"]').forEach((stepEl) => {
+        const questionId = stepEl.dataset.questionId;
+        const cards = stepEl.querySelectorAll('.lt-quiz-card');
+        cards.forEach((card) => {
+          card.addEventListener('click', () => this.handleSinglePick(cards, card, questionId));
+        });
+      });
+    }
+
+    handleSinglePick(cards, picked, questionId) {
+      cards.forEach((c) => {
+        const active = c === picked;
+        c.classList.toggle('is-selected', active);
+        c.setAttribute('aria-checked', active ? 'true' : 'false');
+      });
+      this.state.answers[questionId] = picked.dataset.value;
+      this.advanceAfterDelay();
+    }
+
+    // ── Multi-Select Cards mit Limit (Q6) ──────────────────────────
+    bindMultiSelect() {
+      this.root.querySelectorAll('[data-question-mode="multi"]').forEach((stepEl) => {
+        const questionId = stepEl.dataset.questionId;
+        const max = parseInt(stepEl.dataset.maxSelect, 10) || 3;
+        const cards = stepEl.querySelectorAll('.lt-quiz-card');
+        const advanceBtn = stepEl.querySelector('[data-quiz-advance]');
+        const advanceLabel = stepEl.querySelector('[data-quiz-advance-label]');
+
+        cards.forEach((card) => {
+          card.addEventListener('click', () => {
+            const value = card.dataset.value;
+            const arr = this.state.answers[questionId];
+            const idx = arr.indexOf(value);
+            if (idx >= 0) {
+              arr.splice(idx, 1);
+            } else if (arr.length < max) {
+              arr.push(value);
+            } else {
+              return; // Limit erreicht, kein Add
+            }
+            this.refreshMulti(cards, arr, advanceBtn, advanceLabel, max);
+          });
+        });
+
+        if (advanceBtn) {
+          advanceBtn.addEventListener('click', () => {
+            if (this.state.answers[questionId].length > 0) this.goto(this.nextStep());
+          });
+        }
+      });
+    }
+
+    refreshMulti(cards, selectedArr, advanceBtn, advanceLabel, max) {
+      const count = selectedArr.length;
+      const atLimit = count >= max;
+      cards.forEach((card) => {
+        const sel = selectedArr.includes(card.dataset.value);
+        card.classList.toggle('is-selected', sel);
+        card.classList.toggle('is-disabled', atLimit && !sel);
+        card.setAttribute('aria-pressed', sel ? 'true' : 'false');
+      });
+      if (advanceBtn) {
+        advanceBtn.disabled = count === 0;
+      }
+      if (advanceLabel) {
+        if (count === 0)       advanceLabel.textContent = `Wähle bis zu ${max} Themen`;
+        else if (count === max) advanceLabel.textContent = `Weiter (${count} ausgewählt) →`;
+        else                    advanceLabel.textContent = `Weiter (${count} ausgewählt) →`;
+      }
+    }
+
+    // ── Numerischer Slider (Q7) ────────────────────────────────────
+    bindAge() {
+      this.root.querySelectorAll('[data-question-mode="age"]').forEach((stepEl) => {
+        const questionId = stepEl.dataset.questionId;
+        const input = stepEl.querySelector('[data-quiz-age-input]');
+        const valueEl = stepEl.querySelector('[data-quiz-age-value]');
+        const advanceBtn = stepEl.querySelector('[data-quiz-advance]');
+        if (!input) return;
+
+        const sync = () => {
+          const v = parseInt(input.value, 10);
+          this.state.answers[questionId] = v;
+          if (valueEl) valueEl.textContent = v;
+          // Track-Fill visual
+          const min = parseInt(input.min, 10);
+          const max = parseInt(input.max, 10);
+          const pct = ((v - min) / (max - min)) * 100;
+          input.style.setProperty('--age-pct', `${pct}%`);
+        };
+        input.addEventListener('input', sync);
+        sync();
+
+        if (advanceBtn) {
+          advanceBtn.addEventListener('click', () => this.goto(this.nextStep()));
+        }
+      });
+    }
+
+    // ── Step-Transitions ───────────────────────────────────────────
+    advanceAfterDelay() {
+      window.setTimeout(() => this.goto(this.nextStep()), AUTO_ADVANCE_MS);
+    }
+
+    nextStep() {
+      const idx = STEPS.indexOf(this.state.step);
+      return STEPS[idx + 1];
     }
 
     goto(step) {
       if (!STEPS.includes(step)) return;
       this.state.step = step;
+
+      // Loading-Hook: Scoring berechnen + Auto-Übergang zu Result nach 3s
+      if (step === 'loading') {
+        this.state.scores = computeScores(this.state.answers);
+        this.state.topThree = getTopThree(this.state.scores, this.state.answers.age);
+        if (this.loadingTimer) clearTimeout(this.loadingTimer);
+        this.loadingTimer = window.setTimeout(() => this.goto('result'), LOADING_DURATION_MS);
+      }
+
       this.render();
       this.root.dispatchEvent(new CustomEvent('quiz:step', { detail: { step, state: this.snapshot() } }));
     }
@@ -160,35 +282,32 @@
       const inQuestion = QUESTION_STEPS.includes(current);
       const inFullscreen = FULLSCREEN_STEPS.includes(current);
 
-      // Step-Sichtbarkeit
       this.steps.forEach((el, key) => {
         const active = key === current;
         el.hidden = !active;
         el.classList.toggle('is-active', active);
       });
 
-      // Grid-Sichtbarkeit (nur während Frage-Steps)
       if (this.grid) this.grid.hidden = !inQuestion;
 
-      // Section-Modi (CSS-Hooks)
       this.root.classList.toggle('lt-quiz--in-questions', inQuestion);
       this.root.classList.toggle('lt-quiz--in-loading', current === 'loading');
       this.root.classList.toggle('lt-quiz--fullscreen', inFullscreen);
       document.body.classList.toggle('lt-quiz-fullscreen', inFullscreen);
 
-      // Progress (1..7)
       const qIdx = QUESTION_STEPS.indexOf(current);
       if (this.progressBar) {
-        this.progressBar.style.width = qIdx >= 0 ? `${((qIdx + 1) / 7) * 100}%` : '0%';
+        this.progressBar.style.width = qIdx >= 0
+          ? `${((qIdx + 1) / 7) * 100}%`
+          : current === 'loading' || current === 'result' ? '100%' : '0%';
       }
       if (this.progressLabel) {
-        this.progressLabel.textContent = qIdx >= 0 ? `${qIdx + 1} von 7` : '';
+        this.progressLabel.textContent = qIdx >= 0 ? `${qIdx + 1} / 7` : '';
       }
       if (this.backBtn) {
         this.backBtn.hidden = !inQuestion || current === 'q1';
       }
 
-      // Top: Fullscreen scrollt nach oben
       if (inFullscreen) this.root.scrollTo({ top: 0, behavior: 'instant' });
     }
 
@@ -197,7 +316,6 @@
     }
   }
 
-  // Exponieren für späteres Andocken (Matrix, Result, Tests)
   window.LIFETIME = window.LIFETIME || {};
   window.LIFETIME.QuizV2 = { create: (root) => new QuizV2(root), computeScores, getTopThree, STEPS };
 

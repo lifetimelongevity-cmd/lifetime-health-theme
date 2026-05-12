@@ -1,0 +1,73 @@
+{%- comment -%}
+  LIFETIME — Quiz v2 Numerischer Alters-Slider (Snippet)
+
+  Pflicht-Parameter:
+    question_id  → state-Key (z.B. 'age')
+    headline     → Frage-Headline
+    hint         → "Warum fragen wir das?"-Text
+  Optional:
+    step         → State-Step-ID, default = question_id
+    kicker       → Thema-Anker
+    age_min      → Range-Minimum, default 25
+    age_max      → Range-Maximum, default 75
+    age_default  → Startwert, default 40
+    unit_label   → Einheit unter Zahl, default "Jahre"
+{%- endcomment -%}
+
+{%- assign _step = step | default: question_id -%}
+{%- assign _min = age_min | default: 25 -%}
+{%- assign _max = age_max | default: 75 -%}
+{%- assign _default = age_default | default: 40 -%}
+{%- assign _unit = unit_label | default: 'Jahre' -%}
+
+<div
+  class="lt-quiz__step lt-quiz__step--age"
+  data-quiz-step="{{ _step }}"
+  data-question-id="{{ question_id }}"
+  data-question-mode="age"
+  hidden
+>
+  {%- render 'section-heading-crs',
+      heading: headline,
+      kicker: kicker,
+      align: 'left',
+      headline_lg: true,
+      extra_class: 'lt-quiz__step-heading'
+  -%}
+
+  <div class="lt-quiz-age" data-quiz-age>
+    <div class="lt-quiz-age__display">
+      <span class="lt-quiz-age__value" data-quiz-age-value>{{ _default }}</span>
+      <span class="lt-quiz-age__unit">{{ _unit | escape }}</span>
+    </div>
+
+    <input
+      type="range"
+      class="lt-quiz-age__input"
+      min="{{ _min }}"
+      max="{{ _max }}"
+      step="1"
+      value="{{ _default }}"
+      data-quiz-age-input
+      aria-label="{{ headline | escape }}"
+    >
+
+    <div class="lt-quiz-age__bounds" aria-hidden="true">
+      <span>{{ _min }}</span>
+      <span>{{ _max }}</span>
+    </div>
+  </div>
+
+  <div class="lt-quiz__footer">
+    <button type="button" class="lt-quiz__cta lt-quiz__cta--advance" data-quiz-advance>
+      Auswertung starten →
+    </button>
+  </div>
+
+  {%- if hint != blank -%}
+    <details class="lt-quiz__hint">
+      <summary class="lt-quiz__hint-toggle">Warum fragen wir das?</summary>
+      <p class="lt-quiz__hint-text">{{ hint | escape }}</p>
+    </details>
+  {%- endif -%}
+</div>

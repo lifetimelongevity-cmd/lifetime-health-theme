@@ -1,0 +1,82 @@
+{%- comment -%}
+  LIFETIME — Quiz v2 Multi-Select-Karten-Frage (Snippet)
+
+  Multi-Select mit Auswahl-Limit. Weiter-Button am Fuß zeigt Auswahl-Count.
+
+  Pflicht-Parameter:
+    question_id  → state-Key (z.B. 'prevention')
+    headline     → Frage-Headline
+    options      → "value|label|icon"-Strings
+    hint         → "Warum fragen wir das?"-Text
+  Optional:
+    step         → State-Step-ID, default = question_id
+    kicker       → Thema-Anker
+    sub          → Sub-Text unter Headline (z.B. "Wähle bis zu 3 Themen.")
+    max_select   → Auswahl-Limit, default 3
+{%- endcomment -%}
+
+{%- assign _step = step | default: question_id -%}
+{%- assign _max = max_select | default: 3 -%}
+
+<div
+  class="lt-quiz__step lt-quiz__step--cards lt-quiz__step--multi"
+  data-quiz-step="{{ _step }}"
+  data-question-id="{{ question_id }}"
+  data-question-mode="multi"
+  data-max-select="{{ _max }}"
+  hidden
+>
+  {%- render 'section-heading-crs',
+      heading: headline,
+      subheading: sub,
+      kicker: kicker,
+      align: 'left',
+      headline_lg: true,
+      extra_class: 'lt-quiz__step-heading'
+  -%}
+
+  <div
+    class="lt-quiz-cards lt-quiz-cards--multi"
+    role="group"
+    aria-label="{{ headline | escape }}"
+    data-quiz-cards
+  >
+    {%- for opt in options -%}
+      {%- assign parts = opt | split: '|' -%}
+      {%- assign opt_value = parts[0] -%}
+      {%- assign opt_label = parts[1] -%}
+      {%- assign opt_icon = parts[2] -%}
+      <button
+        type="button"
+        class="lt-quiz-card"
+        aria-pressed="false"
+        data-value="{{ opt_value }}"
+      >
+        {%- if opt_icon != blank -%}
+          <span class="lt-quiz-card__icon" aria-hidden="true">
+            <i class="ph-thin ph-{{ opt_icon }}"></i>
+          </span>
+        {%- endif -%}
+        <span class="lt-quiz-card__label">{{ opt_label | escape }}</span>
+      </button>
+    {%- endfor -%}
+  </div>
+
+  <div class="lt-quiz__footer">
+    <button
+      type="button"
+      class="lt-quiz__cta lt-quiz__cta--advance"
+      data-quiz-advance
+      disabled
+    >
+      <span data-quiz-advance-label>Wähle bis zu {{ _max }} Themen</span>
+    </button>
+  </div>
+
+  {%- if hint != blank -%}
+    <details class="lt-quiz__hint">
+      <summary class="lt-quiz__hint-toggle">Warum fragen wir das?</summary>
+      <p class="lt-quiz__hint-text">{{ hint | escape }}</p>
+    </details>
+  {%- endif -%}
+</div>
