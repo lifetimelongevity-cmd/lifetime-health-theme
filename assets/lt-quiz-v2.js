@@ -288,7 +288,7 @@
   }
 
   function getResultSummary() {
-    return 'Aus deinen Antworten kristallisieren sich diese drei Bereiche als deine größten Hebel heraus. Hier setzt dein Test bei dir besonders an.';
+    return 'Diese drei Bereiche sind für dich besonders relevant — und hier siehst du, welche genetischen Hebel dein Test bei dir aufdecken kann.';
   }
 
   // ── Takeaway-Daten (Narrative-Reaktionen pro Antwort) ────────────
@@ -728,10 +728,6 @@
               `</div>` +
             `</header>` +
             `<p class="lt-quiz-result-theme__lead">${escapeHtml(def.short)}</p>` +
-            `<p class="lt-quiz-result-theme__sublabel">Im Test bekommst du</p>` +
-            `<ul class="lt-quiz-result-theme__in-test">` +
-              def.inTest.map((line) => `<li>${escapeHtml(line)}</li>`).join('') +
-            `</ul>` +
             `<p class="lt-quiz-result-theme__epi">${escapeHtml(def.epiLine)}</p>`;
           themesEl.appendChild(article);
         });
