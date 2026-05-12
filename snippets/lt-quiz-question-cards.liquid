@@ -1,0 +1,66 @@
+{%- comment -%}
+  LIFETIME — Quiz v2 Single-Select-Karten-Frage (Snippet)
+
+  Pflicht-Parameter:
+    question_id  → state-Key (z.B. 'activity')
+    headline     → Frage-Headline
+    options      → Array von Liquid-Strings im Format "value|label|icon"
+                   (icon = Phosphor-Klassenname ohne Prefix, z.B. 'barbell')
+    hint         → "Warum fragen wir das?"-Text
+  Optional:
+    step         → State-Step-ID, default = question_id
+    kicker       → Thema-Anker
+{%- endcomment -%}
+
+{%- assign _step = step | default: question_id -%}
+
+<div
+  class="lt-quiz__step lt-quiz__step--cards"
+  data-quiz-step="{{ _step }}"
+  data-question-id="{{ question_id }}"
+  data-question-mode="single"
+  hidden
+>
+  {%- render 'section-heading-crs',
+      heading: headline,
+      kicker: kicker,
+      align: 'left',
+      headline_lg: true,
+      extra_class: 'lt-quiz__step-heading'
+  -%}
+
+  <div
+    class="lt-quiz-cards lt-quiz-cards--single"
+    role="radiogroup"
+    aria-label="{{ headline | escape }}"
+    data-quiz-cards
+  >
+    {%- for opt in options -%}
+      {%- assign parts = opt | split: '|' -%}
+      {%- assign opt_value = parts[0] -%}
+      {%- assign opt_label = parts[1] -%}
+      {%- assign opt_icon = parts[2] -%}
+      <button
+        type="button"
+        class="lt-quiz-card"
+        role="radio"
+        aria-checked="false"
+        data-value="{{ opt_value }}"
+      >
+        {%- if opt_icon != blank -%}
+          <span class="lt-quiz-card__icon" aria-hidden="true">
+            <i class="ph-thin ph-{{ opt_icon }}"></i>
+          </span>
+        {%- endif -%}
+        <span class="lt-quiz-card__label">{{ opt_label | escape }}</span>
+      </button>
+    {%- endfor -%}
+  </div>
+
+  {%- if hint != blank -%}
+    <details class="lt-quiz__hint">
+      <summary class="lt-quiz__hint-toggle">Warum fragen wir das?</summary>
+      <p class="lt-quiz__hint-text">{{ hint | escape }}</p>
+    </details>
+  {%- endif -%}
+</div>

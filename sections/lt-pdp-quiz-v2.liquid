@@ -11,6 +11,11 @@
 {%- endcomment -%}
 
 {{ 'section-lt-pdp-quiz-v2.css' | asset_url | stylesheet_tag }}
+<noscript>
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/thin/style.css">
+</noscript>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/thin/style.css">
+
 
 <section
   class="lt-quiz"
@@ -52,6 +57,7 @@
     <div class="lt-quiz__grid" data-quiz-grid hidden>
       <div class="lt-quiz__main">
 
+        {%- comment -%} ── Q1 Schlaf (Slider) ─────────────────────── {%- endcomment -%}
         {%- render 'lt-quiz-question-slider',
             step: 'q1',
             question_id: 'sleep',
@@ -65,18 +71,84 @@
             hint: section.settings.q1_hint
         -%}
 
-        {%- comment -%} Q2-Q7 Platzhalter (durch echte Snippets ersetzt in Step 3-7) {%- endcomment -%}
-        {%- assign question_phs = 'q2,q3,q4,q5,q6,q7' | split: ',' -%}
-        {%- for ph in question_phs -%}
-          <div class="lt-quiz__step" data-quiz-step="{{ ph }}" hidden>
-            <div class="lt-quiz__placeholder">
-              <strong>Schritt {{ ph }}</strong><br>
-              Wird in einer späteren Iteration implementiert.
-              State-Maschine ist durchgängig — Snapshot via
-              <code>window.LIFETIME.QuizV2</code>.
-            </div>
-          </div>
-        {%- endfor -%}
+        {%- comment -%} ── Q2 Energie (Slider) ────────────────────── {%- endcomment -%}
+        {%- render 'lt-quiz-question-slider',
+            step: 'q2',
+            question_id: 'energy',
+            kicker: 'Energie',
+            headline: 'Wie ist deine Energie tagsüber?',
+            label_1: 'Permanent müde',
+            label_2: 'Oft müde',
+            label_3: 'Wechselnd',
+            label_4: 'Meistens fit',
+            label_5: 'Voll Energie',
+            hint: 'Müdigkeit hat oft drei genetische Quellen: Mikronährstoffe (MTHFR, VDR), Schlaf, und stille Entzündungen. Deine Antwort hilft uns, deinen Fokus zu bestimmen.'
+        -%}
+
+        {%- comment -%} ── Q3 Stress (Slider) ─────────────────────── {%- endcomment -%}
+        {%- render 'lt-quiz-question-slider',
+            step: 'q3',
+            question_id: 'stress',
+            kicker: 'Stress',
+            headline: 'Wie sehr belastet dich Stress?',
+            label_1: 'Sehr stark',
+            label_2: 'Stark',
+            label_3: 'Mittel',
+            label_4: 'Wenig',
+            label_5: 'Kaum',
+            hint: 'Wie dein Körper Stress verarbeitet, steht in deinem COMT-Gen — und beeinflusst Schlaf, Konzentration und sogar dein biologisches Alter.'
+        -%}
+
+        {%- comment -%} ── Q4 Gewicht (Slider) ────────────────────── {%- endcomment -%}
+        {%- render 'lt-quiz-question-slider',
+            step: 'q4',
+            question_id: 'weight',
+            kicker: 'Stoffwechsel',
+            headline: 'Wie zufrieden bist du mit deinem Gewicht und Stoffwechsel?',
+            label_1: 'Gar nicht',
+            label_2: 'Wenig',
+            label_3: 'Mittel',
+            label_4: 'Ziemlich',
+            label_5: 'Sehr',
+            hint: 'Dein FTO- und TCF7L2-Gen bestimmen, wie dein Körper auf Kohlenhydrate reagiert. Deine Selbsteinschätzung hilft uns, den passenden Schwerpunkt zu setzen.'
+        -%}
+
+        {%- comment -%} ── Q5 Aktivität (Single-Select Cards) ─────── {%- endcomment -%}
+        {%- assign q5_options = 'aktiv|Sportlich aktiv|barbell,arm|Eher bewegungsarm|couch,wechselnd|Wechselnd|arrows-clockwise,neustart|Will neu starten|target' | split: ',' -%}
+        {%- render 'lt-quiz-question-cards',
+            step: 'q5',
+            question_id: 'activity',
+            kicker: 'Bewegung',
+            headline: 'Wie aktiv bist du körperlich?',
+            options: q5_options,
+            hint: 'Sport wirkt genetisch verschieden — dein ACTN3-Gen bestimmt, ob du eher Kraft- oder Ausdauertyp bist. So priorisieren wir die richtigen Empfehlungen.'
+        -%}
+
+        {%- comment -%} ── Q6 Prävention (Multi-Select Cards, max 3) ─ {%- endcomment -%}
+        {%- assign q6_options = 'herz|Herz & Kreislauf|heart,kognition|Geistige Fitness|brain,haut|Haut & Haar|sparkle,supplements|Vitamine & Supplements|pill,bioalter|Biologisches Alter|dna' | split: ',' -%}
+        {%- render 'lt-quiz-question-multi',
+            step: 'q6',
+            question_id: 'prevention',
+            kicker: 'Prävention',
+            headline: 'Worauf willst du dich präventiv konzentrieren?',
+            sub: 'Wähle bis zu 3 Themen.',
+            options: q6_options,
+            max_select: 3,
+            hint: 'Manche genetischen Marker werden ab einer Lebensphase wichtiger — APOE für Herz und Kognition, AR für Haar, SIRT1 und FOXO3 für Langlebigkeit.'
+        -%}
+
+        {%- comment -%} ── Q7 Alter (Numeric Slider) ──────────────── {%- endcomment -%}
+        {%- render 'lt-quiz-question-age',
+            step: 'q7',
+            question_id: 'age',
+            kicker: 'Alter',
+            headline: 'Wie alt bist du?',
+            age_min: 25,
+            age_max: 75,
+            age_default: 40,
+            unit_label: 'Jahre',
+            hint: 'Manche Themen werden mit dem Alter relevanter (hormonelle Verschiebungen, Prävention, kognitive Reserve). Dein Alter hilft uns, die richtige Tiefe zu wählen.'
+        -%}
 
       </div>
 
