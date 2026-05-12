@@ -10,6 +10,16 @@
 (function () {
   'use strict';
 
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   const STEPS = ['intro', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'loading', 'result'];
   const QUESTION_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'];
   const FULLSCREEN_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'loading'];
@@ -48,6 +58,173 @@
     const map = { herz: 'heart', kognition: 'cognition', haut: 'skin', supplements: 'supplements', bioalter: 'bioage' };
     (answers.prevention || []).forEach((k) => { if (map[k]) s[map[k]] = 4; });
     return s;
+  }
+
+  // ── Bedürfnis-Stammdaten für Result-Page ─────────────────────────
+  const NEEDS_DETAIL = {
+    bioage: {
+      title: 'Biologisches Alter senken',
+      short: 'Dein Alter im Pass ist Statistik. Dein epigenetisches Alter ist Realität. Wir zeigen dir, welche Schalter bei dir wirken: SIRT1, FOXO3 und TP53 — die wichtigsten Langlebigkeits-Gene.',
+      genes: [
+        { name: 'SIRT1', explainer: 'Reguliert Reparatur-Prozesse deiner DNA und das Energie-Management deiner Zellen.', example: 'Bestimmt, wie stark Fasten und Kalorien-Reduktion bei dir wirken.' },
+        { name: 'FOXO3', explainer: 'Eines der stärksten Langlebigkeits-Gene weltweit.', example: 'Bei Hundertjährigen ist die aktive Variante deutlich häufiger.' },
+        { name: 'TP53', explainer: 'Der „Wächter des Genoms" — verhindert dass beschädigte Zellen unkontrolliert wachsen.', example: 'Zeigt deine zelluläre Schutz-Reserve.' },
+        { name: 'MTOR', explainer: 'Schaltet zwischen Wachstum und Reparatur deiner Zellen.', example: 'Bestimmt, wie dein Körper auf Protein und Aktivität antwortet.' },
+      ],
+      inTest: [
+        'Deine SIRT1-Variante und was sie für dich bedeutet',
+        'Dein FOXO3-Profil im Vergleich zu Hundertjährigen',
+        'Konkrete Empfehlungen für dein Langlebigkeits-Profil',
+      ],
+      epiLine: 'Dazu dein epigenetisches Alter und MethylPace-Score — der direkteste Indikator für dein biologisches Alter.',
+    },
+    weight: {
+      title: 'Verstehen, wie der Körper Essen verarbeitet',
+      short: 'Dein FTO-Gen bestimmt, wie schnell du zunimmst. Dein TCF7L2-Gen, wie dein Blutzucker reagiert. Plus MC4R — der zentrale Sättigungs-Schalter.',
+      genes: [
+        { name: 'FTO', explainer: 'Beeinflusst Appetit und Fettspeicherung.', example: 'Erklärt, warum manche bei gleicher Kalorienmenge schneller zunehmen.' },
+        { name: 'TCF7L2', explainer: 'Reguliert deine Insulin-Antwort.', example: 'Zeigt, wie dein Körper auf Kohlenhydrate reagiert.' },
+        { name: 'MCM6', explainer: 'Bestimmt deine Laktose-Verträglichkeit.', example: 'Erklärt mögliche Beschwerden nach Milchprodukten.' },
+        { name: 'MC4R', explainer: 'Der zentrale Sättigungs-Schalter im Gehirn.', example: 'Bestimmt, wie schnell du Sättigung wahrnimmst.' },
+      ],
+      inTest: [
+        'Deine Stoffwechsel-Variante (FTO + TCF7L2)',
+        'Deine Sensitivitäten für Laktose, Histamin, Koffein',
+        'Empfehlungen für deine Makronährstoff-Verteilung',
+      ],
+      epiLine: 'Plus dein epigenetisches Entzündungsprofil — entscheidend für Stoffwechsel-Gesundheit.',
+    },
+    energy: {
+      title: 'Energie zurückgewinnen',
+      short: 'Müdigkeit hat drei Quellen: Mikronährstoff-Defizite (MTHFR, VDR), schlechter Schlaf, stille Entzündungen (IL6, TLR4). Wir zeigen dir, welcher Hebel bei dir am stärksten greift.',
+      genes: [
+        { name: 'MTHFR', explainer: 'Reguliert deine Methylierung — zentral für Energie- und Nervenstoffwechsel.', example: 'Bestimmt, ob du normale Folsäure verwertest oder methylierte brauchst.' },
+        { name: 'VDR', explainer: 'Vitamin-D-Rezeptor — wie gut Vitamin D in deinen Zellen ankommt.', example: 'Erklärt, warum hohe Blutwerte trotzdem Müdigkeit lassen können.' },
+        { name: 'IL6', explainer: 'Marker für stille Entzündungs-Aktivität.', example: 'Chronisch erhöht: Erschöpfung und schlechte Regeneration.' },
+        { name: 'TLR4', explainer: 'Steuert deine angeborene Immunantwort.', example: 'Beeinflusst, wie schnell dein Körper mit Entzündung reagiert.' },
+      ],
+      inTest: [
+        'Deine Methylierungs-Variante (MTHFR)',
+        'Dein Vitamin-D-Verwertungsprofil',
+        'Dein stilles Entzündungsprofil',
+      ],
+      epiLine: 'Plus epigenetische Marker, die zeigen, wie aktiv dein Energiestoffwechsel läuft.',
+    },
+    sleep: {
+      title: 'Endlich durchschlafen',
+      short: 'Dein PER3-Gen sagt, ob du Lerche oder Eule bist. Dein CYP1A2-Gen, wie schnell du Koffein abbaust. Plus ADORA2A — wie sehr Koffein dein Nervensystem aufdreht.',
+      genes: [
+        { name: 'PER3', explainer: 'Bestimmt deinen Chronotyp — biologisch früh oder spät aktiv.', example: 'Erklärt, warum manche morgens nicht produktiv sein können.' },
+        { name: 'CYP1A2', explainer: 'Reguliert dein Koffein-Abbau-Tempo.', example: 'Schnelle Variante: Espresso nach dem Essen geht. Langsame: nach 14 Uhr wird Schlaf zum Glücksspiel.' },
+        { name: 'ADORA2A', explainer: 'Bestimmt, wie stark Koffein dein Nervensystem aufdreht.', example: 'Macht den Unterschied zwischen wach und nervös bei der gleichen Dosis.' },
+      ],
+      inTest: [
+        'Dein Chronotyp und passende Schlaf-Fenster',
+        'Deine genetisch optimale Koffein-Strategie',
+        'Empfehlungen zu Magnesium, Melatonin und Schlaf-Hygiene',
+      ],
+      epiLine: 'Plus epigenetische Schlaf-Marker — zeigen, wie regenerativ dein Schlaf tatsächlich ist.',
+    },
+    stress: {
+      title: 'Stress verstehen und Nervensystem unterstützen',
+      short: 'Dein COMT-Gen bestimmt, wie du Stress verarbeitest. Schnelle Variante: stressresistent. Langsame: tiefer Denker, längere Reaktion. Dazu BDNF — deine mentale Erholung.',
+      genes: [
+        { name: 'COMT', explainer: 'Reguliert den Abbau von Stress-Hormonen wie Adrenalin und Dopamin.', example: 'Schnelle Variante: stressresistent. Langsame: tiefer Denker, längere Erholung.' },
+        { name: 'BDNF', explainer: 'Wachstumsfaktor für deine Nervenzellen.', example: 'Bestimmt deine mentale Resilienz und Lern-Geschwindigkeit.' },
+      ],
+      inTest: [
+        'Dein COMT-Profil und passende Stress-Strategien',
+        'Dein BDNF-Status und Resilienz-Empfehlungen',
+        'Cortisol-Rhythmus und Erholungs-Faktoren',
+      ],
+      epiLine: 'Plus epigenetische Stress-Marker — zeigen, wie sehr chronischer Stress dich prägt.',
+    },
+    cognition: {
+      title: 'Konzentration, Klarheit, Gedächtnis',
+      short: 'Drei Schalter für geistige Schärfe: BDNF für Lernfähigkeit, FADS1 für Omega-3-Verwertung, APOE als wichtigster Marker für kognitive Langzeit-Gesundheit.',
+      genes: [
+        { name: 'BDNF', explainer: 'Wachstumsfaktor für Nervenzellen — Basis für Lernen und Erinnerung.', example: 'Aktive Variante: schnelles Lernen, gute Konzentration unter Druck.' },
+        { name: 'FADS1', explainer: 'Bestimmt, wie gut du pflanzliche Omega-3 in nutzbare Form umwandelst.', example: 'Schwache Variante: brauchst eher Fisch oder Algenöl statt Leinöl.' },
+        { name: 'APOE', explainer: 'Wichtigster genetischer Marker für kognitive Langzeit-Gesundheit.', example: 'Zeigt dein Risiko-Profil und welche Prävention bei dir am stärksten greift.' },
+      ],
+      inTest: [
+        'Dein BDNF-Lern-Profil',
+        'Dein Omega-3-Verwertungsprofil (FADS1)',
+        'Dein APOE-Status mit konkreten Lifestyle-Hebeln',
+      ],
+      epiLine: 'Plus epigenetische Marker für deine aktuelle kognitive Reserve.',
+    },
+    training: {
+      title: 'Smarter trainieren',
+      short: 'Dein ACTN3-Gen sagt, ob du Kraft- oder Ausdauer-Typ bist. Dein ACE-Gen, wie schnell dein VO₂max trainierbar ist. COL5A1 zeigt deine Sehnen-Stabilität.',
+      genes: [
+        { name: 'ACTN3', explainer: 'Bestimmt deine Muskelfaser-Verteilung.', example: 'RR-Variante: Kraft- und Sprint-Typ. XX: Ausdauer-Typ.' },
+        { name: 'ACE', explainer: 'Beeinflusst, wie stark dein Herz-Kreislauf-System auf Training reagiert.', example: 'I-Variante: gute VO₂max-Trainierbarkeit. D: schnellere Kraft-Adaption.' },
+        { name: 'COL5A1', explainer: 'Reguliert die Stabilität deiner Sehnen und Bänder.', example: 'Bestimmt dein genetisches Verletzungs-Risiko.' },
+        { name: 'PPARA', explainer: 'Steuert den Fett-Stoffwechsel bei Belastung.', example: 'Bestimmt, wie gut du Fett als Energiequelle bei langem Cardio nutzt.' },
+      ],
+      inTest: [
+        'Dein Trainings-Typ (Kraft vs. Ausdauer)',
+        'Dein Verletzungs- und Regenerations-Profil',
+        'Optimale Trainings-Frequenz und Erholungs-Empfehlungen',
+      ],
+      epiLine: 'Plus epigenetische Marker, die deine aktuelle Trainings-Belastung sichtbar machen.',
+    },
+    heart: {
+      title: 'Herz aktiv schützen',
+      short: 'APOE zeigt dein Cholesterin-Profil. AGT, wie Salz deinen Blutdruck beeinflusst. CDKN2B-AS1 am 9p21-Locus — das stärkste bekannte genetische Herz-Risiko.',
+      genes: [
+        { name: 'APOE', explainer: 'Reguliert deinen Cholesterin-Stoffwechsel.', example: 'E4-Variante: höheres LDL, profitiert besonders von mediterraner Ernährung.' },
+        { name: 'AGT', explainer: 'Beeinflusst, wie dein Blutdruck auf Salz reagiert.', example: 'Sensitive Variante: Salz-Reduktion senkt Blutdruck stärker.' },
+        { name: 'CDKN2B-AS1', explainer: 'Der 9p21-Locus — stärkster bekannter genetischer Herz-Risiko-Marker.', example: 'Zeigt, wie früh und intensiv du präventiv ansetzen solltest.' },
+        { name: 'CETP', explainer: 'Reguliert das HDL-Cholesterin.', example: 'Bestimmt deine genetische "gute Cholesterin"-Reserve.' },
+      ],
+      inTest: [
+        'Dein Cholesterin-Stoffwechsel-Profil',
+        'Dein Salz-Sensitivitäts-Status',
+        'Dein 9p21-Risiko mit konkreten Präventions-Empfehlungen',
+      ],
+      epiLine: 'Plus epigenetische Marker, die zeigen, wie aktiv dein kardiovaskuläres System ist.',
+    },
+    supplements: {
+      title: 'Passende Vitamine und Supplements',
+      short: 'Deine MTHFR-Variante bestimmt, ob du normale Folsäure verwerten kannst oder methylierte brauchst. VDR, wie viel Vitamin D ankommt. BCO1, ob du Beta-Carotin in Vitamin A umwandeln kannst.',
+      genes: [
+        { name: 'MTHFR', explainer: 'Reguliert die Folsäure-Verwertung.', example: 'C677T-Variante: brauchst Methylfolat statt synthetische Folsäure.' },
+        { name: 'VDR', explainer: 'Vitamin-D-Rezeptor — wie effizient Vitamin D in deinen Zellen wirkt.', example: 'Bestimmt deinen optimalen Vitamin-D-Zielwert.' },
+        { name: 'FUT2', explainer: 'Beeinflusst deine Vitamin-B12-Aufnahme über die Darmwand.', example: 'Non-secretor: höheres Risiko für B12-Mangel trotz Ernährung.' },
+        { name: 'BCO1', explainer: 'Wandelt pflanzliches Beta-Carotin in nutzbares Vitamin A.', example: 'Schwache Variante: brauchst direkt Vitamin A oder tierische Quellen.' },
+      ],
+      inTest: [
+        'Dein MTHFR-Methylierungs-Profil',
+        'Dein Vitamin-D-Rezeptor-Status',
+        'Empfohlene Supplement-Formen für deine Genetik',
+      ],
+      epiLine: 'Plus epigenetische Mikronährstoff-Marker für deinen aktuellen Versorgungs-Status.',
+    },
+    skin: {
+      title: 'Haut und Haar von innen',
+      short: 'Hautalterung hängt an SOD2 (antioxidative Abwehr) und ERCC2 (UV-Schaden-Reparatur). Beim Haar zeigt AR, wie deine Follikel auf DHT reagieren — der Hauptfaktor für Haarausfall.',
+      genes: [
+        { name: 'SOD2', explainer: 'Hauptenzym der antioxidativen Abwehr in deinen Zellen.', example: 'Schwache Variante: höherer oxidativer Stress, profitiert von Antioxidantien.' },
+        { name: 'ERCC2', explainer: 'Repariert UV-Schäden in deiner DNA.', example: 'Reduzierte Aktivität: schnellere Hautalterung durch Sonne.' },
+        { name: 'AR', explainer: 'Androgen-Rezeptor — bestimmt deine DHT-Sensitivität.', example: 'Hauptfaktor für androgenetischen Haarausfall.' },
+        { name: 'MC1R', explainer: 'Reguliert Pigment-Bildung und Hautempfindlichkeit.', example: 'Bestimmt dein UV-Schutz-Niveau.' },
+      ],
+      inTest: [
+        'Dein Hautalterungs-Profil (SOD2 + ERCC2)',
+        'Dein Haarausfall-Risiko (AR + Familienprofil)',
+        'Konkrete Empfehlungen für Haut- und Haar-Pflege',
+      ],
+      epiLine: 'Plus epigenetische Hautalter-Marker — zeigen den biologischen Zustand deiner Haut.',
+    },
+  };
+
+  function getResultHeaderSub(age) {
+    if (age < 35) return 'Du legst früh den Grundstein. Wir zeigen dir, welche genetischen Bereiche jetzt am wichtigsten sind.';
+    if (age < 50) return 'Genau jetzt zählt, was du über deinen Körper weißt. Wir haben deine Antworten mit 22 DNA-Bereichen abgeglichen.';
+    if (age < 65) return 'Mit gezieltem Wissen kannst du dein biologisches Alter aktiv beeinflussen. Hier sind deine wichtigsten Hebel.';
+    return 'Vitalität ist keine Frage des Passes, sondern deiner Biologie. Wir zeigen dir, wo deine Hebel liegen.';
   }
 
   // ── Takeaway-Daten (Narrative-Reaktionen pro Antwort) ────────────
@@ -199,6 +376,7 @@
       this.bindBack();
       this.bindClose();
       this.bindEscape();
+      this.bindResultCta();
       this.render();
     }
 
@@ -378,6 +556,11 @@
       if (!STEPS.includes(step)) return;
       this.state.step = step;
 
+      // Result-Hook: Top-3 ist bereits berechnet — Result-Page rendern
+      if (step === 'result') {
+        this.renderResult();
+      }
+
       // Loading-Hook: Scoring berechnen + Auto-Übergang zu Result nach 3s
       if (step === 'loading') {
         this.state.scores = computeScores(this.state.answers);
@@ -426,6 +609,161 @@
 
       // Takeaway-Panel auch bei Step-Wechsel synchronisieren (Back/Reset)
       this.updateTakeaways();
+    }
+
+    // ── Result-Page: Top-3-Karten, Matrix-Aktivierung, Detail-Akkordeons
+    renderResult() {
+      const result = this.root.querySelector('[data-quiz-result]');
+      if (!result) return;
+      const top = this.state.topThree || [];
+      const age = this.state.answers.age || 40;
+
+      // Sektion 1: Sub-Text nach Alter
+      const subEl = result.querySelector('[data-result-sub]');
+      if (subEl) subEl.textContent = getResultHeaderSub(age);
+
+      // Sektion 2: Top-3-Karten
+      const top3El = result.querySelector('[data-result-top3]');
+      if (top3El) {
+        top3El.innerHTML = '';
+        top.forEach((needId, idx) => {
+          const def = NEEDS_DETAIL[needId];
+          if (!def) return;
+          const card = document.createElement('a');
+          card.className = 'lt-quiz-result-card lt-quiz-result-card--pos-' + (idx + 1);
+          card.href = '#lt-quiz-detail-' + needId;
+          card.dataset.scrollTarget = 'lt-quiz-detail-' + needId;
+          card.innerHTML =
+            `<span class="lt-quiz-result-card__pos">${String(idx + 1).padStart(2, '0')}</span>` +
+            `<h3 class="lt-quiz-result-card__title">${escapeHtml(def.title)}</h3>` +
+            `<p class="lt-quiz-result-card__short">${escapeHtml(def.short)}</p>` +
+            `<ul class="lt-quiz-result-card__genes">` +
+            def.genes.slice(0, 4).map((g) => `<li class="lt-quiz-result-card__gene">${escapeHtml(g.name)}</li>`).join('') +
+            `</ul>`;
+          card.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = document.getElementById(card.dataset.scrollTarget);
+            if (target) {
+              target.setAttribute('open', '');
+              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+          });
+          top3El.appendChild(card);
+        });
+      }
+
+      // Sektion 3: Matrix — Aktivierung der Union der Top-3 dnaCategories
+      const NEED_CATEGORIES_LOCAL = {
+        sleep:       ['schlaf', 'stress', 'mental-health', 'supplements'],
+        energy:      ['vitamine', 'supplements', 'schlaf', 'stoffwechsel'],
+        stress:      ['stress', 'psychologisch', 'mental-health', 'schlaf'],
+        weight:      ['stoffwechsel', 'sensitivitaeten', 'vitamine', 'stress'],
+        training:    ['fitness', 'verletzung-regeneration', 'supplements', 'stoffwechsel'],
+        cognition:   ['mental-health', 'schlaf', 'vitamine', 'psychologisch'],
+        skin:        ['haare', 'vitamine', 'supplements', 'gesunde-alterung'],
+        supplements: ['vitamine', 'supplements', 'sensitivitaeten', 'stoffwechsel'],
+        heart:       ['herz', 'stoffwechsel', 'vitamine', 'supplements'],
+        bioage:      ['gesunde-alterung', 'stoffwechsel', 'supplements', 'vitamine'],
+      };
+      const activeCats = new Set();
+      top.forEach((n) => (NEED_CATEGORIES_LOCAL[n] || []).forEach((c) => activeCats.add(c)));
+
+      const matrixWrap = result.querySelector('[data-result-matrix]');
+      if (matrixWrap) {
+        matrixWrap.querySelectorAll('[data-matrix-cat]').forEach((tile) => {
+          const cat = tile.dataset.matrixCat;
+          if (cat === 'bioalter' || cat === 'entzuendung') return; // Epi-Anker bleiben wie sie sind
+          tile.classList.toggle('is-strong', activeCats.has(cat));
+          tile.classList.remove('is-medium');
+        });
+      }
+
+      const countEl = result.querySelector('[data-result-matrix-count]');
+      if (countEl) {
+        countEl.innerHTML =
+          `<strong>${activeCats.size} von 22</strong> Bereichen sind für deine Top-3-Themen direkt relevant. ` +
+          `Plus weitere Bereiche, die du im Test ebenfalls entdeckst — Sehalter, Höralter, Herzgesundheit.`;
+      }
+
+      // Sektion 4: Detail-Akkordeons
+      const detailsEl = result.querySelector('[data-result-details]');
+      if (detailsEl) {
+        detailsEl.innerHTML = '';
+        top.forEach((needId, idx) => {
+          const def = NEEDS_DETAIL[needId];
+          if (!def) return;
+          const acc = document.createElement('details');
+          acc.className = 'lt-quiz-result-detail';
+          acc.id = 'lt-quiz-detail-' + needId;
+          acc.innerHTML =
+            `<summary class="lt-quiz-result-detail__summary">` +
+              `<span class="lt-quiz-result-detail__pos">${String(idx + 1).padStart(2, '0')}</span>` +
+              `<span class="lt-quiz-result-detail__title">${escapeHtml(def.title)}</span>` +
+              `<span class="lt-quiz-result-detail__chevron" aria-hidden="true"></span>` +
+            `</summary>` +
+            `<div class="lt-quiz-result-detail__body">` +
+              `<p class="lt-quiz-result-detail__intro">Was wir in deinem Test analysieren</p>` +
+              `<ul class="lt-quiz-result-detail__genes">` +
+              def.genes.map((g) =>
+                `<li class="lt-quiz-result-detail__gene">` +
+                  `<p class="lt-quiz-result-detail__gene-name">${escapeHtml(g.name)}</p>` +
+                  `<p class="lt-quiz-result-detail__gene-explainer">${escapeHtml(g.explainer)}</p>` +
+                  `<p class="lt-quiz-result-detail__gene-example">${escapeHtml(g.example)}</p>` +
+                `</li>`
+              ).join('') +
+              `</ul>` +
+              `<div class="lt-quiz-result-detail__separator"></div>` +
+              `<p class="lt-quiz-result-detail__in-test-label">Im Test bekommst du</p>` +
+              `<div class="lt-quiz-result-detail__in-test">` +
+              def.inTest.map((line) => `<p class="lt-quiz-result-detail__in-test-line">${escapeHtml(line)}</p>`).join('') +
+              `</div>` +
+              `<p class="lt-quiz-result-detail__epi">${escapeHtml(def.epiLine)}</p>` +
+            `</div>`;
+          detailsEl.appendChild(acc);
+        });
+      }
+
+      // Sektion 5: Secondary CTA — UTM mit top1 anreichern
+      const secondaryCta = result.querySelector('[data-result-cta-secondary]');
+      if (secondaryCta && top[0]) {
+        const url = new URL(secondaryCta.getAttribute('href'), window.location.origin);
+        url.searchParams.set('top1', top[0]);
+        secondaryCta.setAttribute('href', url.pathname + url.search);
+      }
+    }
+
+    bindResultCta() {
+      const primaryBtn = this.root.querySelector('[data-result-cta-primary]');
+      const form = this.root.querySelector('[data-result-form]');
+      const successEl = this.root.querySelector('[data-result-success]');
+      if (primaryBtn && form) {
+        primaryBtn.addEventListener('click', () => {
+          primaryBtn.hidden = true;
+          form.hidden = false;
+          const emailEl = form.querySelector('[data-result-email]');
+          if (emailEl) emailEl.focus();
+        });
+      }
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const email = form.querySelector('[data-result-email]');
+          const consent = form.querySelector('[data-result-consent]');
+          if (!email || !email.value || !email.value.includes('@')) {
+            if (email) email.focus();
+            return;
+          }
+          if (!consent || !consent.checked) {
+            if (consent) consent.focus();
+            return;
+          }
+          // Echte Submission folgt in Step 8 (Shopify-Customer-Endpoint)
+          this.state.email = email.value;
+          this.state.submitted = true;
+          form.hidden = true;
+          if (successEl) successEl.hidden = false;
+        });
+      }
     }
 
     // ── Loading-Checkliste: Items werden gestaffelt eingeblendet ──
