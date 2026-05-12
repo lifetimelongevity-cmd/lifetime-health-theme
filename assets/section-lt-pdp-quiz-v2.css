@@ -207,18 +207,109 @@ body.lt-quiz-fullscreen .header-spacer {
   top: var(--space-7);
 }
 
-.lt-quiz__matrix-slot {
-  background: transparent;
-  border: 1px dashed rgba(38, 37, 30, 0.14);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  min-height: 480px;
+/* legacy placeholder slot — kept for safety, matrix renders directly into aside now */
+.lt-quiz__matrix-slot { display: none; }
+
+/* ── Matrix-Komponente ─────────────────────────────────────────── */
+.lt-quiz-matrix {
+  width: 100%;
+}
+
+.lt-quiz-matrix__title {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-body);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.lt-quiz-matrix__sub {
+  display: inline;
+  margin-left: var(--space-2);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+.lt-quiz-matrix__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.lt-quiz-matrix__tile {
+  background: var(--color-surface-primary);
+  border: 1px solid rgba(38, 37, 30, 0.08);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-3);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--color-text-muted);
+  cursor: help;
+  text-align: center;
+  min-height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-muted);
-  font-size: 13px;
-  text-align: center;
+  transition:
+    background 280ms ease,
+    color 280ms ease,
+    border-color 280ms ease,
+    transform 360ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.lt-quiz-matrix__tile.is-medium {
+  background: var(--color-sand);
+  border-color: var(--color-sand);
+  color: var(--color-text-primary);
+  animation: lt-tile-light-up 520ms ease-out;
+}
+
+.lt-quiz-matrix__tile.is-strong {
+  background: var(--color-teal);
+  border-color: var(--color-teal);
+  color: var(--color-white);
+  animation: lt-tile-light-up 520ms ease-out;
+}
+
+@keyframes lt-tile-light-up {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+/* ── Epigenetik-Bar (immer sichtbar aktiv) ─────────────────────── */
+.lt-quiz-matrix__epi {
+  display: grid;
+  grid-template-columns: auto 1fr 1fr;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid rgba(38, 37, 30, 0.08);
+}
+
+.lt-quiz-matrix__epi-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  padding-right: var(--space-2);
+}
+
+.lt-quiz-matrix__tile--epi {
+  background: var(--color-dark);
+  border-color: var(--color-dark);
+  color: var(--color-text-on-dark);
+  min-height: 52px;
 }
 
 /* ── Slider (Rail-Pattern: Dots absolut auf der Linie) ─────────── */
@@ -634,8 +725,10 @@ body.lt-quiz-fullscreen .header-spacer {
   .lt-quiz__main { min-height: auto; }
   .lt-quiz__main > .lt-quiz__step { max-width: none; }
   .lt-quiz__aside { position: static; }
-  .lt-quiz__matrix-slot { min-height: 220px; padding: var(--space-5); }
   .lt-quiz__step-heading { margin-bottom: var(--space-6); }
+
+  .lt-quiz-matrix__tile { font-size: 11px; min-height: 56px; padding: var(--space-2); }
+  .lt-quiz-matrix__tile--epi { min-height: 44px; }
 }
 
 @media (max-width: 640px) {

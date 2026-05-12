@@ -50,6 +50,54 @@
     return s;
   }
 
+  // ── Matrix-State: welche Kategorie wie aktiv ─────────────────────
+  // Bedürfnis → DNA-Kategorien (aus docs/lifetime-quiz-spec.md NEEDS)
+  const NEED_CATEGORIES = {
+    sleep:       ['schlaf', 'stress', 'mental-health', 'supplements'],
+    energy:      ['vitamine', 'supplements', 'schlaf', 'stoffwechsel'],
+    stress:      ['stress', 'psychologisch', 'mental-health', 'schlaf'],
+    weight:      ['stoffwechsel', 'sensitivitaeten', 'vitamine', 'stress'],
+    training:    ['fitness', 'verletzung-regeneration', 'supplements', 'stoffwechsel'],
+    cognition:   ['mental-health', 'schlaf', 'vitamine', 'psychologisch'],
+    skin:        ['haare', 'vitamine', 'supplements', 'gesunde-alterung'],
+    supplements: ['vitamine', 'supplements', 'sensitivitaeten', 'stoffwechsel'],
+    heart:       ['herz', 'stoffwechsel', 'vitamine', 'supplements'],
+    bioage:      ['gesunde-alterung', 'stoffwechsel', 'supplements', 'vitamine'],
+  };
+
+  function sliderLevel(v) {
+    if (v == null) return null;
+    if (v <= 2) return 'strong';
+    if (v === 3) return 'medium';
+    return null;
+  }
+
+  function computeMatrixState(answers) {
+    const needLevels = {};
+    needLevels.sleep  = sliderLevel(answers.sleep);
+    needLevels.energy = sliderLevel(answers.energy);
+    needLevels.stress = sliderLevel(answers.stress);
+    needLevels.weight = sliderLevel(answers.weight);
+    if (answers.activity === 'aktiv' || answers.activity === 'neustart') {
+      needLevels.training = 'strong';
+    }
+    const prevMap = { herz: 'heart', kognition: 'cognition', haut: 'skin', supplements: 'supplements', bioalter: 'bioage' };
+    (answers.prevention || []).forEach((p) => {
+      if (prevMap[p]) needLevels[prevMap[p]] = 'strong';
+    });
+
+    // Union der Kategorien — strong gewinnt über medium
+    const cats = {};
+    Object.entries(needLevels).forEach(([need, level]) => {
+      if (!level) return;
+      (NEED_CATEGORIES[need] || []).forEach((cat) => {
+        if (cats[cat] === 'strong') return;
+        cats[cat] = level;
+      });
+    });
+    return cats;
+  }
+
   function getTopThree(scores, age) {
     const top = Object.entries(scores)
       .filter(([, v]) => v >= 2)
@@ -75,6 +123,7 @@
         this.steps.set(el.dataset.quizStep, el);
       });
       this.grid = root.querySelector('[data-quiz-grid]');
+      this.matrixRoot = root.querySelector('[data-quiz-matrix]');
       this.progressBar = root.querySelector('[data-quiz-progress-bar]');
       this.progressLabel = root.querySelector('[data-quiz-progress-label]');
       this.backBtn = root.querySelector('[data-quiz-back]');
@@ -147,6 +196,7 @@
         s.setAttribute('aria-checked', active ? 'true' : 'false');
       });
       this.state.answers[questionId] = value;
+      this.updateMatrix();
       this.advanceAfterDelay();
     }
 
@@ -168,6 +218,7 @@
         c.setAttribute('aria-checked', active ? 'true' : 'false');
       });
       this.state.answers[questionId] = picked.dataset.value;
+      this.updateMatrix();
       this.advanceAfterDelay();
     }
 
@@ -193,6 +244,7 @@
               return; // Limit erreicht, kein Add
             }
             this.refreshMulti(cards, arr, advanceBtn, advanceLabel, max);
+            this.updateMatrix();
           });
         });
 
@@ -309,6 +361,38 @@
       }
 
       if (inFullscreen) this.root.scrollTo({ top: 0, behavior: 'instant' });
+
+      // Matrix-State auch bei Step-Wechsel synchronisieren (z.B. Back/Reset)
+      this.updateMatrix();
+    }
+
+    // ── Matrix-Update mit Stagger beim Aufleuchten ────────────────
+    updateMatrix() {
+      if (!this.matrixRoot) return;
+      const levels = computeMatrixState(this.state.answers);
+      const tiles = this.matrixRoot.querySelectorAll('[data-matrix-cat]');
+      let lightUpDelay = 0;
+      tiles.forEach((tile) => {
+        const cat = tile.dataset.matrixCat;
+        const newLevel = levels[cat] || null;
+        const newStrong = newLevel === 'strong';
+        const newMedium = newLevel === 'medium';
+        const wasActive = tile.classList.contains('is-strong') || tile.classList.contains('is-medium');
+        const willBeActive = newStrong || newMedium;
+        const isLightUp = !wasActive && willBeActive;
+
+        if (isLightUp) {
+          const delay = lightUpDelay;
+          lightUpDelay += 80;
+          window.setTimeout(() => {
+            tile.classList.toggle('is-strong', newStrong);
+            tile.classList.toggle('is-medium', newMedium);
+          }, delay);
+        } else {
+          tile.classList.toggle('is-strong', newStrong);
+          tile.classList.toggle('is-medium', newMedium);
+        }
+      });
     }
 
     snapshot() {
