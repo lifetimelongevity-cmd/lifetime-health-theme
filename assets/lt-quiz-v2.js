@@ -101,7 +101,7 @@
       if (!this.backBtn) return;
       this.backBtn.addEventListener('click', () => {
         const idx = STEPS.indexOf(this.state.step);
-        if (idx > 1) this.goto(STEPS[idx - 1]);
+        if (idx > 0) this.goto(STEPS[idx - 1]);
       });
     }
 
@@ -305,7 +305,7 @@
         this.progressLabel.textContent = qIdx >= 0 ? `${qIdx + 1} / 7` : '';
       }
       if (this.backBtn) {
-        this.backBtn.hidden = !inQuestion || current === 'q1';
+        this.backBtn.hidden = !inQuestion;
       }
 
       if (inFullscreen) this.root.scrollTo({ top: 0, behavior: 'instant' });
