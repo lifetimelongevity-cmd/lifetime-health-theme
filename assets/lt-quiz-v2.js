@@ -66,6 +66,7 @@
   const NEEDS_DETAIL = {
     bioage: {
       topic: 'Biologisches Alter',
+      icon: 'hourglass-medium',
       title: 'Biologisches Alter senken',
       short: 'Dein Alter im Pass ist Statistik. Dein epigenetisches Alter ist Realität. Wir zeigen dir, welche Schalter bei dir wirken: SIRT1, FOXO3 und TP53 — die wichtigsten Langlebigkeits-Gene.',
       genes: [
@@ -83,6 +84,7 @@
     },
     weight: {
       topic: 'Stoffwechsel',
+      icon: 'scales',
       title: 'Verstehen, wie der Körper Essen verarbeitet',
       short: 'Dein FTO-Gen bestimmt, wie schnell du zunimmst. Dein TCF7L2-Gen, wie dein Blutzucker reagiert. Plus MC4R — der zentrale Sättigungs-Schalter.',
       genes: [
@@ -100,6 +102,7 @@
     },
     energy: {
       topic: 'Energie',
+      icon: 'lightning',
       title: 'Energie zurückgewinnen',
       short: 'Müdigkeit hat drei Quellen: Mikronährstoff-Defizite (MTHFR, VDR), schlechter Schlaf, stille Entzündungen (IL6, TLR4). Wir zeigen dir, welcher Hebel bei dir am stärksten greift.',
       genes: [
@@ -117,6 +120,7 @@
     },
     sleep: {
       topic: 'Schlaf',
+      icon: 'moon',
       title: 'Endlich durchschlafen',
       short: 'Dein PER3-Gen sagt, ob du Lerche oder Eule bist. Dein CYP1A2-Gen, wie schnell du Koffein abbaust. Plus ADORA2A — wie sehr Koffein dein Nervensystem aufdreht.',
       genes: [
@@ -133,6 +137,7 @@
     },
     stress: {
       topic: 'Stress',
+      icon: 'wind',
       title: 'Stress verstehen und Nervensystem unterstützen',
       short: 'Dein COMT-Gen bestimmt, wie du Stress verarbeitest. Schnelle Variante: stressresistent. Langsame: tiefer Denker, längere Reaktion. Dazu BDNF — deine mentale Erholung.',
       genes: [
@@ -148,6 +153,7 @@
     },
     cognition: {
       topic: 'Konzentration',
+      icon: 'lightbulb',
       title: 'Konzentration, Klarheit, Gedächtnis',
       short: 'Drei Schalter für geistige Schärfe: BDNF für Lernfähigkeit, FADS1 für Omega-3-Verwertung, APOE als wichtigster Marker für kognitive Langzeit-Gesundheit.',
       genes: [
@@ -164,6 +170,7 @@
     },
     training: {
       topic: 'Training',
+      icon: 'barbell',
       title: 'Smarter trainieren',
       short: 'Dein ACTN3-Gen sagt, ob du Kraft- oder Ausdauer-Typ bist. Dein ACE-Gen, wie schnell dein VO₂max trainierbar ist. COL5A1 zeigt deine Sehnen-Stabilität.',
       genes: [
@@ -181,6 +188,7 @@
     },
     heart: {
       topic: 'Herz & Kreislauf',
+      icon: 'heartbeat',
       title: 'Herz aktiv schützen',
       short: 'APOE zeigt dein Cholesterin-Profil. AGT, wie Salz deinen Blutdruck beeinflusst. CDKN2B-AS1 am 9p21-Locus — das stärkste bekannte genetische Herz-Risiko.',
       genes: [
@@ -198,6 +206,7 @@
     },
     supplements: {
       topic: 'Vitamine & Supplements',
+      icon: 'pill',
       title: 'Passende Vitamine und Supplements',
       short: 'Deine MTHFR-Variante bestimmt, ob du normale Folsäure verwerten kannst oder methylierte brauchst. VDR, wie viel Vitamin D ankommt. BCO1, ob du Beta-Carotin in Vitamin A umwandeln kannst.',
       genes: [
@@ -215,6 +224,7 @@
     },
     skin: {
       topic: 'Haut & Haar',
+      icon: 'sparkle',
       title: 'Haut und Haar von innen',
       short: 'Hautalterung hängt an SOD2 (antioxidative Abwehr) und ERCC2 (UV-Schaden-Reparatur). Beim Haar zeigt AR, wie deine Follikel auf DHT reagieren — der Hauptfaktor für Haarausfall.',
       genes: [
@@ -706,10 +716,16 @@
           if (!def) return;
           const article = document.createElement('article');
           article.className = 'lt-quiz-result-theme';
+          const iconName = def.icon ? escapeHtml(def.icon) : '';
           article.innerHTML =
             `<header class="lt-quiz-result-theme__header">` +
-              `<span class="lt-quiz-result-theme__pos">${String(idx + 1).padStart(2, '0')} / 03</span>` +
-              `<h4 class="lt-quiz-result-theme__title">${escapeHtml(def.title)}</h4>` +
+              (iconName
+                ? `<span class="lt-quiz-result-theme__icon" aria-hidden="true"><i class="ph-thin ph-${iconName}"></i></span>`
+                : '') +
+              `<div class="lt-quiz-result-theme__head-text">` +
+                `<span class="lt-quiz-result-theme__pos">${String(idx + 1).padStart(2, '0')} / 03</span>` +
+                `<h4 class="lt-quiz-result-theme__title">${escapeHtml(def.title)}</h4>` +
+              `</div>` +
             `</header>` +
             `<p class="lt-quiz-result-theme__lead">${escapeHtml(def.short)}</p>` +
             `<p class="lt-quiz-result-theme__sublabel">Im Test bekommst du</p>` +
