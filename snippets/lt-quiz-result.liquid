@@ -1,16 +1,17 @@
 {%- comment -%}
-  LIFETIME — Quiz v2 Result-Page
+  LIFETIME — Quiz v2 Result-Page (v2)
 
-  5-teilige Result-Page nach docs/lifetime-quiz-spec.md §Result-Page.
-  Personalisierte Inhalte werden via JS aus NEEDS_DETAIL (siehe lt-quiz-v2.js)
-  in die Slots gerendert: Sub-Text, Top-3-Karten, Matrix-Aktivierung,
-  Detail-Akkordeons. Matrix-Snippet wird hier statisch gerendert; JS aktiviert
-  die Kategorien aus der Union der Top-3 dnaCategories.
+  Restrukturiert (Feedback Iteration 2):
+  - Keine doppelte Top-3-Anzeige mehr (vorher: Karten + Detail-Akkordeons)
+  - Top-3 sind direkt vollständig sichtbar als gestapelte Themen-Blöcke
+  - Matrix entfernt — kompakte Pill-Zeile "Mehr in deinem Test" statt 4×4-Grid
+  - CTA-Framing: Test-Code per E-Mail (nicht "Vollständiges Ergebnis", da bereits gezeigt)
+  - CTA-Button: teal bg + weiße Schrift (per LIFETIME-Brand-Pattern)
 {%- endcomment -%}
 
 <div class="lt-quiz-result" data-quiz-result>
 
-  {%- comment -%} Sektion 1 — Header ──────────────────────────── {%- endcomment -%}
+  {%- comment -%} 1 — Header ─────────────────────────────────────── {%- endcomment -%}
   <section class="lt-quiz-result__header">
     <p class="lt-quiz-result__kicker">Dein Ergebnis</p>
     <h2 class="lt-quiz-result__h1">Deine 3 wichtigsten Themen.</h2>
@@ -20,35 +21,42 @@
     </p>
   </section>
 
-  {%- comment -%} Sektion 2 — Top 3 ─────────────────────────────── {%- endcomment -%}
-  <section class="lt-quiz-result__top3" data-result-top3>
-    {%- comment -%} JS rendert 3 Karten in data-result-top3 {%- endcomment -%}
+  {%- comment -%} 2 — Top-3-Themenblöcke (vollständig sichtbar) ─────── {%- endcomment -%}
+  <section class="lt-quiz-result__themes" data-result-themes>
+    {%- comment -%} JS rendert 3 <article>-Blöcke {%- endcomment -%}
   </section>
 
-  {%- comment -%} Sektion 3 — Matrix ────────────────────────────── {%- endcomment -%}
-  <section class="lt-quiz-result__matrix-section">
-    <h3 class="lt-quiz-result__h2">Diese Bereiche aus deinem Test sind für dich besonders relevant</h3>
-    <div class="lt-quiz-result__matrix-wrap" data-result-matrix>
-      {%- render 'lt-quiz-matrix' -%}
-    </div>
-    <p class="lt-quiz-result__matrix-count" data-result-matrix-count></p>
+  {%- comment -%} 3 — Scope (kompakte Pills statt Matrix-Grid) ──────── {%- endcomment -%}
+  <section class="lt-quiz-result__scope">
+    <h3 class="lt-quiz-result__h2">Mehr in deinem Test</h3>
+    <p class="lt-quiz-result__scope-sub">
+      <strong>187 Reports</strong> zu 22 DNA-Bereichen plus dein epigenetisches Profil. Was sonst noch dabei ist:
+    </p>
+    <ul class="lt-quiz-result__pills" data-result-scope-pills>
+      {%- assign cats = 'gesunde-alterung|Gesunde Alterung,supplements|Supplements,vitamine|Vitamine,sensitivitaeten|Sensitivitäten,stoffwechsel|Stoffwechsel,fitness|Fitness,verletzung-regeneration|Verletzung & Regeneration,mental-health|Mental Health,psychologisch|Psychologisch,schlaf|Schlaf,stress|Stress,herz|Herz,atemwege|Atemwege,augen|Augen,haare|Haare,niere|Niere' | split: ',' -%}
+      {%- for c in cats -%}
+        {%- assign parts = c | split: '|' -%}
+        <li class="lt-quiz-result__pill" data-scope-cat="{{ parts[0] }}">{{ parts[1] }}</li>
+      {%- endfor -%}
+    </ul>
+    <p class="lt-quiz-result__scope-epi">
+      Plus deine epigenetischen Marker: <strong>Biologisches Alter</strong> · <strong>Entzündung</strong>
+    </p>
   </section>
 
-  {%- comment -%} Sektion 4 — Detail-Akkordeons ──────────────────── {%- endcomment -%}
-  <section class="lt-quiz-result__details" data-result-details>
-    {%- comment -%} JS rendert 3 <details>-Akkordeons {%- endcomment -%}
-  </section>
-
-  {%- comment -%} Sektion 5 — CTA ───────────────────────────────── {%- endcomment -%}
+  {%- comment -%} 4 — CTA (dunkle Card, Code per E-Mail Framing) ────── {%- endcomment -%}
   <section class="lt-quiz-result__cta-section">
     <div class="lt-quiz-result__cta-card">
-      <p class="lt-quiz-result__cta-kicker">Dein vollständiges Ergebnis</p>
-      <p class="lt-quiz-result__cta-text">
-        Du hast deine Top-3-Themen kennengelernt. Lass dir dein vollständiges Ergebnis zusenden — mit allen Details zu deinen relevanten DNA-Bereichen, plus Hintergründen und nächsten Schritten.
+      <p class="lt-quiz-result__cta-kicker">Dein Profil sichern</p>
+      <h3 class="lt-quiz-result__cta-text">
+        Wir senden dir deinen persönlichen Test-Code per E-Mail.
+      </h3>
+      <p class="lt-quiz-result__cta-sub">
+        So findest du deine Top-3-Themen wieder und sicherst dir die personalisierte Test-Bestellung.
       </p>
 
-      <button type="button" class="lt-quiz__cta lt-quiz-result__cta-primary" data-result-cta-primary>
-        Mein Ergebnis per E-Mail erhalten — Kostenlos &amp; unverbindlich
+      <button type="button" class="lt-quiz-result__cta-primary" data-result-cta-primary>
+        Per E-Mail erhalten →
       </button>
 
       <form class="lt-quiz-result__form" data-result-form hidden novalidate>
@@ -65,16 +73,16 @@
         <label class="lt-quiz-result__form-consent">
           <input type="checkbox" required data-result-consent>
           <span>
-            Ich möchte mein Ergebnis und gelegentliche LIFETIME-Updates per E-Mail erhalten. Abmeldung jederzeit möglich.
+            Ich möchte mein Profil und gelegentliche LIFETIME-Updates per E-Mail erhalten. Abmeldung jederzeit möglich.
           </span>
         </label>
-        <button type="submit" class="lt-quiz__cta lt-quiz-result__form-submit">
-          Senden →
+        <button type="submit" class="lt-quiz-result__cta-primary">
+          Code senden →
         </button>
       </form>
 
       <div class="lt-quiz-result__success" hidden data-result-success>
-        ✓ Danke! Du erhältst gleich eine E-Mail mit deinem vollständigen Ergebnis.
+        ✓ Danke! Du erhältst gleich eine E-Mail mit deinem persönlichen Test-Code.
       </div>
 
       <a
@@ -82,7 +90,7 @@
         href="/products/age-dna-test?utm_source=quiz&amp;utm_medium=result-page&amp;utm_campaign=cta-direct"
         data-result-cta-secondary
       >
-        Oder: Test direkt bestellen — 349 €
+        Oder direkt zur Test-Bestellung — 349 €
       </a>
 
       <p class="lt-quiz-result__trust-footer">
