@@ -727,13 +727,8 @@
         form.addEventListener('submit', (e) => {
           e.preventDefault();
           const email = form.querySelector('[data-result-email]');
-          const consent = form.querySelector('[data-result-consent]');
           if (!email || !email.value || !email.value.includes('@')) {
             if (email) email.focus();
-            return;
-          }
-          if (!consent || !consent.checked) {
-            if (consent) consent.focus();
             return;
           }
           // Echte Submission folgt in Step 8 (Shopify-Customer-Endpoint)
