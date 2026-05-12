@@ -22,7 +22,7 @@
 
   const STEPS = ['intro', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'loading', 'result'];
   const QUESTION_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7'];
-  const FULLSCREEN_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'loading'];
+  const FULLSCREEN_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'loading', 'result'];
   const AUTO_ADVANCE_MS = 300;
   const LOADING_DURATION_MS = 3000;
 
@@ -407,6 +407,12 @@
     }
 
     tryClose() {
+      // Aus dem Result: direkt schließen ohne Confirm (Quiz ist abgeschlossen)
+      if (this.state.step === 'result') {
+        this.state = createInitialState();
+        this.goto('intro');
+        return;
+      }
       const a = this.state.answers;
       const hasInput =
         a.sleep || a.energy || a.stress || a.weight ||
@@ -588,6 +594,7 @@
 
       this.root.classList.toggle('lt-quiz--in-questions', inQuestion);
       this.root.classList.toggle('lt-quiz--in-loading', current === 'loading');
+      this.root.classList.toggle('lt-quiz--in-result', current === 'result');
       this.root.classList.toggle('lt-quiz--fullscreen', inFullscreen);
       document.body.classList.toggle('lt-quiz-fullscreen', inFullscreen);
 
