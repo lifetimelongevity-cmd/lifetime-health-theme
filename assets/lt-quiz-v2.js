@@ -617,48 +617,52 @@
       this.updateTakeaways();
     }
 
-    // ── Result-Page: Top-3-Karten, Matrix-Aktivierung, Detail-Akkordeons
+    // ── Result-Page rendern (vereinfacht, ohne doppelte Top-3) ────
     renderResult() {
       const result = this.root.querySelector('[data-quiz-result]');
       if (!result) return;
       const top = this.state.topThree || [];
       const age = this.state.answers.age || 40;
 
-      // Sektion 1: Sub-Text nach Alter
+      // 1 — Sub-Text nach Alter
       const subEl = result.querySelector('[data-result-sub]');
       if (subEl) subEl.textContent = getResultHeaderSub(age);
 
-      // Sektion 2: Top-3-Karten
-      const top3El = result.querySelector('[data-result-top3]');
-      if (top3El) {
-        top3El.innerHTML = '';
+      // 2 — Top-3 als vollständig sichtbare Themen-Blöcke (Card-Info-Pattern)
+      const themesEl = result.querySelector('[data-result-themes]');
+      if (themesEl) {
+        themesEl.innerHTML = '';
         top.forEach((needId, idx) => {
           const def = NEEDS_DETAIL[needId];
           if (!def) return;
-          const card = document.createElement('a');
-          card.className = 'lt-quiz-result-card lt-quiz-result-card--pos-' + (idx + 1);
-          card.href = '#lt-quiz-detail-' + needId;
-          card.dataset.scrollTarget = 'lt-quiz-detail-' + needId;
-          card.innerHTML =
-            `<span class="lt-quiz-result-card__pos">${String(idx + 1).padStart(2, '0')}</span>` +
-            `<h3 class="lt-quiz-result-card__title">${escapeHtml(def.title)}</h3>` +
-            `<p class="lt-quiz-result-card__short">${escapeHtml(def.short)}</p>` +
-            `<ul class="lt-quiz-result-card__genes">` +
-            def.genes.slice(0, 4).map((g) => `<li class="lt-quiz-result-card__gene">${escapeHtml(g.name)}</li>`).join('') +
-            `</ul>`;
-          card.addEventListener('click', (e) => {
-            e.preventDefault();
-            const target = document.getElementById(card.dataset.scrollTarget);
-            if (target) {
-              target.setAttribute('open', '');
-              target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
-          });
-          top3El.appendChild(card);
+          const article = document.createElement('article');
+          article.className = 'lt-quiz-result-theme';
+          article.innerHTML =
+            `<header class="lt-quiz-result-theme__header">` +
+              `<span class="lt-quiz-result-theme__pos">${String(idx + 1).padStart(2, '0')} / 03</span>` +
+              `<h3 class="lt-quiz-result-theme__title">${escapeHtml(def.title)}</h3>` +
+            `</header>` +
+            `<p class="lt-quiz-result-theme__lead">${escapeHtml(def.short)}</p>` +
+            `<p class="lt-quiz-result-theme__sublabel">Genetische Marker in deinem Test</p>` +
+            `<ul class="lt-quiz-result-theme__genes">` +
+              def.genes.map((g) =>
+                `<li class="lt-quiz-result-theme__gene">` +
+                  `<p class="lt-quiz-result-theme__gene-name">${escapeHtml(g.name)}</p>` +
+                  `<p class="lt-quiz-result-theme__gene-explainer">${escapeHtml(g.explainer)}</p>` +
+                  `<p class="lt-quiz-result-theme__gene-example">${escapeHtml(g.example)}</p>` +
+                `</li>`
+              ).join('') +
+            `</ul>` +
+            `<p class="lt-quiz-result-theme__sublabel">Im Test bekommst du</p>` +
+            `<ul class="lt-quiz-result-theme__in-test">` +
+              def.inTest.map((line) => `<li>${escapeHtml(line)}</li>`).join('') +
+            `</ul>` +
+            `<p class="lt-quiz-result-theme__epi">${escapeHtml(def.epiLine)}</p>`;
+          themesEl.appendChild(article);
         });
       }
 
-      // Sektion 3: Matrix — Aktivierung der Union der Top-3 dnaCategories
+      // 3 — Scope-Pills: Union der Top-3 dnaCategories markieren
       const NEED_CATEGORIES_LOCAL = {
         sleep:       ['schlaf', 'stress', 'mental-health', 'supplements'],
         energy:      ['vitamine', 'supplements', 'schlaf', 'stoffwechsel'],
@@ -674,62 +678,11 @@
       const activeCats = new Set();
       top.forEach((n) => (NEED_CATEGORIES_LOCAL[n] || []).forEach((c) => activeCats.add(c)));
 
-      const matrixWrap = result.querySelector('[data-result-matrix]');
-      if (matrixWrap) {
-        matrixWrap.querySelectorAll('[data-matrix-cat]').forEach((tile) => {
-          const cat = tile.dataset.matrixCat;
-          if (cat === 'bioalter' || cat === 'entzuendung') return; // Epi-Anker bleiben wie sie sind
-          tile.classList.toggle('is-strong', activeCats.has(cat));
-          tile.classList.remove('is-medium');
-        });
-      }
+      result.querySelectorAll('[data-scope-cat]').forEach((pill) => {
+        pill.classList.toggle('is-relevant', activeCats.has(pill.dataset.scopeCat));
+      });
 
-      const countEl = result.querySelector('[data-result-matrix-count]');
-      if (countEl) {
-        countEl.innerHTML =
-          `<strong>${activeCats.size} von 22</strong> Bereichen sind für deine Top-3-Themen direkt relevant. ` +
-          `Plus weitere Bereiche, die du im Test ebenfalls entdeckst — Sehalter, Höralter, Herzgesundheit.`;
-      }
-
-      // Sektion 4: Detail-Akkordeons
-      const detailsEl = result.querySelector('[data-result-details]');
-      if (detailsEl) {
-        detailsEl.innerHTML = '';
-        top.forEach((needId, idx) => {
-          const def = NEEDS_DETAIL[needId];
-          if (!def) return;
-          const acc = document.createElement('details');
-          acc.className = 'lt-quiz-result-detail';
-          acc.id = 'lt-quiz-detail-' + needId;
-          acc.innerHTML =
-            `<summary class="lt-quiz-result-detail__summary">` +
-              `<span class="lt-quiz-result-detail__pos">${String(idx + 1).padStart(2, '0')}</span>` +
-              `<span class="lt-quiz-result-detail__title">${escapeHtml(def.title)}</span>` +
-              `<span class="lt-quiz-result-detail__chevron" aria-hidden="true"></span>` +
-            `</summary>` +
-            `<div class="lt-quiz-result-detail__body">` +
-              `<p class="lt-quiz-result-detail__intro">Was wir in deinem Test analysieren</p>` +
-              `<ul class="lt-quiz-result-detail__genes">` +
-              def.genes.map((g) =>
-                `<li class="lt-quiz-result-detail__gene">` +
-                  `<p class="lt-quiz-result-detail__gene-name">${escapeHtml(g.name)}</p>` +
-                  `<p class="lt-quiz-result-detail__gene-explainer">${escapeHtml(g.explainer)}</p>` +
-                  `<p class="lt-quiz-result-detail__gene-example">${escapeHtml(g.example)}</p>` +
-                `</li>`
-              ).join('') +
-              `</ul>` +
-              `<div class="lt-quiz-result-detail__separator"></div>` +
-              `<p class="lt-quiz-result-detail__in-test-label">Im Test bekommst du</p>` +
-              `<div class="lt-quiz-result-detail__in-test">` +
-              def.inTest.map((line) => `<p class="lt-quiz-result-detail__in-test-line">${escapeHtml(line)}</p>`).join('') +
-              `</div>` +
-              `<p class="lt-quiz-result-detail__epi">${escapeHtml(def.epiLine)}</p>` +
-            `</div>`;
-          detailsEl.appendChild(acc);
-        });
-      }
-
-      // Sektion 5: Secondary CTA — UTM mit top1 anreichern
+      // 4 — Secondary CTA mit top1 anreichern
       const secondaryCta = result.querySelector('[data-result-cta-secondary]');
       if (secondaryCta && top[0]) {
         const url = new URL(secondaryCta.getAttribute('href'), window.location.origin);
