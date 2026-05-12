@@ -1,0 +1,162 @@
+{%- comment -%}
+  LIFETIME — AGE & DNA Quiz v2 (Skeleton, Step 1+2)
+  ──────────────────────────────────────────────────
+  Implementiert Schritt 1 + 2 aus docs/lifetime-quiz-spec.md:
+    1. Section-Skeleton + State-Maschine (intro → q1..q7 → loading → result)
+    2. Slider-Frage (Q1 Schlaf) als Snippet, voll funktionsfähig
+
+  Layout-Architektur ist bereits final (40/60-Grid + Fullscreen-Modus),
+  damit Q2-Q7 visuell konsistent landen. Matrix-Slot ist als Platzhalter
+  angelegt — Inhalt folgt in Schritt 3.
+{%- endcomment -%}
+
+{{ 'section-lt-pdp-quiz-v2.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="lt-quiz"
+  data-lt-quiz-v2
+  data-section-id="{{ section.id }}"
+>
+  <div class="lt-quiz__container">
+
+    {%- comment -%} Topbar — nur in Frage- und Loading-Steps sichtbar {%- endcomment -%}
+    <div class="lt-quiz__topbar">
+      <button type="button" class="lt-quiz__back" data-quiz-back hidden aria-label="Zurück">←</button>
+      <div class="lt-quiz__progress" aria-hidden="true">
+        <div class="lt-quiz__progress-bar" data-quiz-progress-bar></div>
+      </div>
+      <div class="lt-quiz__progress-label" data-quiz-progress-label aria-live="polite"></div>
+      <button type="button" class="lt-quiz__close" data-quiz-close aria-label="Quiz schließen">×</button>
+    </div>
+
+    {%- comment -%} ── Intro (full-width, zentriert) ─────────────────── {%- endcomment -%}
+    <div class="lt-quiz__step lt-quiz__step--intro" data-quiz-step="intro">
+      {%- if section.settings.intro_kicker != blank -%}
+        <p class="lt-quiz__kicker">{{ section.settings.intro_kicker | escape }}</p>
+      {%- endif -%}
+      <h2 class="lt-quiz__headline">{{ section.settings.intro_headline | escape }}</h2>
+      {%- if section.settings.intro_sub != blank -%}
+        <p class="lt-quiz__sub">{{ section.settings.intro_sub | escape }}</p>
+      {%- endif -%}
+      <button type="button" class="lt-quiz__cta" data-quiz-start>
+        {{ section.settings.intro_cta | escape }}
+      </button>
+    </div>
+
+    {%- comment -%} ── Frage-Grid (40/60) — sichtbar in q1..q7 ────────── {%- endcomment -%}
+    <div class="lt-quiz__grid" data-quiz-grid hidden>
+      <div class="lt-quiz__main">
+
+        {%- render 'lt-quiz-question-slider',
+            step: 'q1',
+            question_id: 'sleep',
+            headline: section.settings.q1_headline,
+            label_1: section.settings.q1_label_1,
+            label_2: section.settings.q1_label_2,
+            label_3: section.settings.q1_label_3,
+            label_4: section.settings.q1_label_4,
+            label_5: section.settings.q1_label_5,
+            hint: section.settings.q1_hint
+        -%}
+
+        {%- comment -%} Q2-Q7 Platzhalter (durch echte Snippets ersetzt in Step 3-7) {%- endcomment -%}
+        {%- assign question_phs = 'q2,q3,q4,q5,q6,q7' | split: ',' -%}
+        {%- for ph in question_phs -%}
+          <div class="lt-quiz__step" data-quiz-step="{{ ph }}" hidden>
+            <h2 class="lt-quiz__headline">Schritt: {{ ph }}</h2>
+            <div class="lt-quiz__placeholder">
+              Dieser Schritt wird in einer späteren Iteration implementiert.
+              State-Maschine ist durchgängig — Snapshot inspizierbar via
+              <code>window.LIFETIME.QuizV2</code>.
+            </div>
+          </div>
+        {%- endfor -%}
+
+      </div>
+
+      <aside class="lt-quiz__aside">
+        <div class="lt-quiz__matrix-slot" data-quiz-matrix-slot>
+          Matrix-Komponente folgt in Schritt 3.
+        </div>
+      </aside>
+    </div>
+
+    {%- comment -%} ── Loading / Result Platzhalter (full-width) ──────── {%- endcomment -%}
+    {%- assign fullwidth_phs = 'loading,result' | split: ',' -%}
+    {%- for ph in fullwidth_phs -%}
+      <div class="lt-quiz__step" data-quiz-step="{{ ph }}" hidden>
+        <h2 class="lt-quiz__headline">Schritt: {{ ph }}</h2>
+        <div class="lt-quiz__placeholder">
+          Dieser Schritt wird in einer späteren Iteration implementiert.
+        </div>
+      </div>
+    {%- endfor -%}
+
+  </div>
+</section>
+
+<script src="{{ 'lt-quiz-v2.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "LT Quiz v2",
+  "tag": "section",
+  "class": "section lt-quiz-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Intro"
+    },
+    {
+      "type": "text",
+      "id": "intro_kicker",
+      "label": "Intro Kicker",
+      "default": "2 Minuten · Dein persönlicher Quiz-Start"
+    },
+    {
+      "type": "text",
+      "id": "intro_headline",
+      "label": "Intro Headline",
+      "default": "Was bringt dir der AGE & DNA-Test wirklich?"
+    },
+    {
+      "type": "textarea",
+      "id": "intro_sub",
+      "label": "Intro Sub-Text",
+      "default": "Beantworte 7 kurze Fragen — wir zeigen dir, welche DNA-Bereiche für dich gerade die wichtigsten Hebel sind."
+    },
+    {
+      "type": "text",
+      "id": "intro_cta",
+      "label": "Intro CTA",
+      "default": "Quiz starten →"
+    },
+    {
+      "type": "header",
+      "content": "Q1 Schlaf"
+    },
+    {
+      "type": "text",
+      "id": "q1_headline",
+      "label": "Headline",
+      "default": "Wie ist dein Schlaf?"
+    },
+    { "type": "text", "id": "q1_label_1", "label": "Label 1", "default": "Sehr schlecht" },
+    { "type": "text", "id": "q1_label_2", "label": "Label 2", "default": "Schlecht" },
+    { "type": "text", "id": "q1_label_3", "label": "Label 3", "default": "Mittel" },
+    { "type": "text", "id": "q1_label_4", "label": "Label 4", "default": "Gut" },
+    { "type": "text", "id": "q1_label_5", "label": "Label 5", "default": "Sehr gut" },
+    {
+      "type": "textarea",
+      "id": "q1_hint",
+      "label": "Warum fragen wir das?",
+      "default": "Schlaf ist genetisch stark beeinflusst — dein PER3-Gen bestimmt deinen Chronotyp, dein CYP1A2-Gen, wie schnell du Koffein abbaust. Deine Antwort hilft uns, dir die relevanten DNA-Bereiche zu zeigen."
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Quiz v2"
+    }
+  ]
+}
+{% endschema %}
