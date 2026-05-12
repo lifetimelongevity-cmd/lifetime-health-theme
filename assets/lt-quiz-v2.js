@@ -717,25 +717,69 @@
       if (form) {
         form.addEventListener('submit', (e) => {
           e.preventDefault();
-          const email = form.querySelector('[data-result-email]');
-          if (!email || !email.value || !email.value.includes('@')) {
-            if (email) email.focus();
-            return;
-          }
-          // Echte Submission folgt in Step 8 (Shopify-Customer-Endpoint)
-          // Tags vorhanden in this.state.tags (gesetzt beim Result-Hook)
-          this.state.email = email.value;
-          this.state.submitted = true;
-          form.hidden = true;
-          if (successEl) successEl.hidden = false;
-          if (window.dataLayer && typeof window.dataLayer.push === 'function') {
-            window.dataLayer.push({
-              event: 'quiz_email_submitted',
-              quiz_gender: this.state.answers.gender,
-              quiz_age_group: ageGroup(this.state.answers.age),
-            });
-          }
+          this.submitQuizCustomer(form, successEl);
         });
+      }
+    }
+
+    async submitQuizCustomer(form, successEl) {
+      const emailEl = form.querySelector('[data-result-email]');
+      const submitBtn = form.querySelector('button[type="submit"]');
+      const errorEl = form.querySelector('[data-result-error]');
+      const email = emailEl ? emailEl.value.trim() : '';
+
+      if (!email || !email.includes('@')) {
+        if (emailEl) emailEl.focus();
+        return;
+      }
+
+      // Loading-State
+      const originalLabel = submitBtn ? submitBtn.textContent : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Wird gesendet…';
+      }
+      if (errorEl) errorEl.hidden = true;
+
+      try {
+        // Shopify Standard-Customer-Form endpoint
+        const fd = new FormData();
+        fd.append('form_type', 'customer');
+        fd.append('utf8', '✓');
+        fd.append('contact[email]', email);
+        fd.append('contact[tags]', (this.state.tags || []).join(','));
+        fd.append('contact[accepts_marketing]', 'true');
+
+        const res = await fetch('/contact', {
+          method: 'POST',
+          body: fd,
+          credentials: 'same-origin',
+        });
+
+        // Shopify gibt 200 zurück auch bei "Email schon existiert" — als Erfolg behandeln
+        if (!res.ok && res.status !== 422) throw new Error('HTTP ' + res.status);
+
+        this.state.email = email;
+        this.state.submitted = true;
+        form.hidden = true;
+        if (successEl) successEl.hidden = false;
+
+        if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+          window.dataLayer.push({
+            event: 'quiz_email_submitted',
+            quiz_gender: this.state.answers.gender,
+            quiz_age_group: ageGroup(this.state.answers.age),
+          });
+        }
+      } catch (err) {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalLabel || 'Dein Ergebnis per E-Mail erhalten →';
+        }
+        if (errorEl) {
+          errorEl.textContent = 'Etwas ist schiefgelaufen. Bitte versuch es nochmal.';
+          errorEl.hidden = false;
+        }
       }
     }
 
