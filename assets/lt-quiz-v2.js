@@ -237,6 +237,27 @@
     return topics.map((t) => `${t}.`).join(' ');
   }
 
+  // Bio-Age-Schätzung aus den Quiz-Antworten (kein zusätzlicher Aufwand für den User).
+  // Slider 1-5: 1 = worst → +2, 5 = best → -2 (linear). Aktivität: aktiv -2, arm +2.
+  function computeBioAge(answers) {
+    const chronoAge = parseInt(answers.age, 10) || 40;
+    let delta = 0;
+
+    ['sleep', 'energy', 'stress', 'weight'].forEach((key) => {
+      const v = answers[key];
+      if (v == null) return;
+      delta += (3 - v) * 1;  // value 1 → +2, value 3 → 0, value 5 → -2
+    });
+
+    if (answers.activity === 'aktiv') delta -= 2;
+    else if (answers.activity === 'arm') delta += 2;
+
+    delta = Math.max(-10, Math.min(10, delta));
+    const bioAge = Math.max(18, Math.min(90, Math.round(chronoAge + delta)));
+    const direction = delta > 0 ? 'up' : delta < 0 ? 'down' : 'zero';
+    return { chronoAge, bioAge, delta: Math.round(delta), direction };
+  }
+
   function getResultSummary() {
     return 'Diese drei Bereiche sind für dich besonders relevant. Hier siehst du, welche genetischen Hebel dein Test bei dir aufdecken kann.';
   }
@@ -669,6 +690,22 @@
       if (h1El) h1El.textContent = getResultHeadline(top);
       const subEl = result.querySelector('[data-result-sub]');
       if (subEl) subEl.textContent = getResultSummary();
+
+      // 1b — Bio-Age-Schätzung (Pass-Alter ↔ Bio-Alter, side-by-side)
+      const bioAge = computeBioAge(this.state.answers);
+      const passEl = result.querySelector('[data-bioage-pass]');
+      const bioEl = result.querySelector('[data-bioage-num]');
+      const arrowEl = result.querySelector('[data-bioage-arrow]');
+      const bioAgeRoot = result.querySelector('[data-result-bioage]');
+      if (passEl) passEl.textContent = bioAge.chronoAge;
+      if (bioEl) bioEl.textContent = bioAge.bioAge;
+      if (arrowEl) {
+        arrowEl.textContent = bioAge.direction === 'up' ? '↗' : bioAge.direction === 'down' ? '↘' : '→';
+      }
+      if (bioAgeRoot) {
+        bioAgeRoot.classList.remove('is-up', 'is-down', 'is-zero');
+        bioAgeRoot.classList.add('is-' + bioAge.direction);
+      }
 
       // 2 — Top-3 als prägnante Themen-Blöcke (ohne Gen-Marker)
       const themesEl = result.querySelector('[data-result-themes]');
