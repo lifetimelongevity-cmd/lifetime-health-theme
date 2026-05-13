@@ -42,70 +42,59 @@ Was Shopify dadurch automatisch macht:
 
 Verifizieren: Test-Quiz absolvieren, dann Admin → **Kunden** → nach `quiz-completed` filtern. Die Test-E-Mail sollte mit allen Tags auftauchen.
 
-## 3. E-Mail-Automation einrichten
+## 3. Longevity-101-Guide als PDF hochladen
 
-Damit der User nach Abschluss eine echte E-Mail mit seinem Ergebnis + Rabattcode bekommt.
+Die Result-Page-CTA verspricht "Longevity 101 als PDF". Das PDF muss in Shopify hochgeladen werden, damit es per Email-Automation versendbar ist.
+
+**Schritte:**
+
+1. PDF erstellen (Content-Arbeit — kein technischer Schritt)
+2. Shopify Admin → **Content** → **Files** → **Datei hochladen**
+3. PDF hochladen (z.B. `lifetime-longevity-101.pdf`)
+4. URL kopieren — sieht aus wie `https://cdn.shopify.com/s/files/1/.../lifetime-longevity-101.pdf`
+5. URL für die Email-Automation merken (siehe nächster Schritt)
+
+## 4. E-Mail-Automation einrichten
+
+Damit der User nach Submission eine Mail mit Longevity-Guide-Link + Rabattcode bekommt.
 
 **Schritte:**
 
 1. Shopify Admin → **Marketing** → **Automationen** → **Automation erstellen**
-2. **Trigger:** „Kunde abonniert" oder „Kunde hinzugefügt mit Tag" (je nach verfügbarer Option)
+2. **Trigger:** „Kunde abonniert" oder „Kunde hinzugefügt mit Tag"
 3. **Filter:** Tag enthält `quiz-completed`
 4. **Aktion:** E-Mail senden
-5. **Vorlage:** Neue E-Mail anlegen, siehe Liquid-Vorschlag unten
+5. **Vorlage:** Neue E-Mail anlegen, siehe Liquid unten
 
 ### E-Mail-Template (zum Einfügen in Shopify Email Editor)
 
-Betreff: `Deine LIFETIME-Auswertung ist da`
+Betreff: `Dein Longevity-Guide und 10 % Rabatt`
 
-Body (HTML / Liquid):
+Body (HTML/Liquid). `{{ PDF_URL }}` ersetzen durch die URL aus Schritt 3:
 
 ```liquid
 <div style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; max-width: 560px; margin: 0 auto; padding: 32px 24px; color: #26251e;">
 
   <h1 style="font-size: 28px; font-weight: 400; line-height: 1.2; margin: 0 0 24px;">
-    Deine Auswertung ist da.
+    Dein Longevity-Guide ist da.
   </h1>
 
   <p style="font-size: 16px; line-height: 1.55; color: #26251e; margin: 0 0 24px;">
     Hallo,<br><br>
-    danke fürs Mitmachen beim AGE &amp; DNA-Quiz. Aus deinen Antworten haben sich drei Bereiche
-    als deine größten Hebel herauskristallisiert.
+    danke fürs Mitmachen beim AGE &amp; DNA-Quiz. Hier ist dein Longevity-101-Guide
+    als PDF — plus dein persönlicher 10 %-Rabattcode für den Test.
   </p>
 
-  {%- comment -%} Dynamische Top-3 aus Customer-Tags {%- endcomment -%}
-  <p style="font-size: 18px; font-weight: 600; margin: 24px 0 12px;">Deine drei wichtigsten Hebel:</p>
-  <ul style="font-size: 16px; line-height: 1.7; padding-left: 20px; margin: 0 0 32px;">
-    {%- assign tags = customer.tags -%}
-    {%- for tag in tags -%}
-      {%- if tag contains 'top1-' or tag contains 'top2-' or tag contains 'top3-' -%}
-        {%- assign parts = tag | split: '-' -%}
-        {%- assign pos = parts[0] | remove: 'top' -%}
-        {%- assign need = parts[1] -%}
-        {%- case need -%}
-          {%- when 'sleep' -%}        <li><strong>Schlaf</strong> — Endlich durchschlafen</li>
-          {%- when 'energy' -%}       <li><strong>Energie</strong> — Energie zurückgewinnen</li>
-          {%- when 'stress' -%}       <li><strong>Stress</strong> — Nervensystem unterstützen</li>
-          {%- when 'weight' -%}       <li><strong>Stoffwechsel</strong> — Verstehen, wie der Körper Essen verarbeitet</li>
-          {%- when 'training' -%}     <li><strong>Training</strong> — Smarter trainieren</li>
-          {%- when 'cognition' -%}    <li><strong>Konzentration</strong> — Klarheit und Gedächtnis</li>
-          {%- when 'skin' -%}         <li><strong>Haut &amp; Haar</strong> — Haut und Haar von innen</li>
-          {%- when 'supplements' -%}  <li><strong>Vitamine &amp; Supplements</strong> — Passende Supplements für deine Genetik</li>
-          {%- when 'heart' -%}        <li><strong>Herz &amp; Kreislauf</strong> — Herz aktiv schützen</li>
-          {%- when 'bioage' -%}       <li><strong>Biologisches Alter</strong> — Aktiv beeinflussen</li>
-        {%- endcase -%}
-      {%- endif -%}
-    {%- endfor -%}
-  </ul>
-
-  <p style="font-size: 16px; line-height: 1.55; margin: 0 0 16px;">
-    Mit dem AGE &amp; DNA-Test bekommst du zu jedem dieser Hebel die konkreten genetischen Marker
-    und die passenden Empfehlungen.
+  <p style="text-align: center; margin: 32px 0;">
+    <a href="{{ PDF_URL }}"
+       style="display: inline-block; background: #364f56; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 999px; font-weight: 600; font-size: 15px;">
+      Longevity-101-Guide herunterladen (PDF)
+    </a>
   </p>
 
   <div style="background: #f6f4f1; border-radius: 12px; padding: 24px; margin: 32px 0; text-align: center;">
     <p style="font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: #525252; margin: 0 0 8px; font-weight: 600;">
-      Dein 10 % Rabatt
+      Dein 10 % Quiz-Rabatt
     </p>
     <p style="font-family: 'Helvetica Neue', Helvetica, sans-serif; font-size: 32px; letter-spacing: 0.06em; color: #4A8C85; margin: 0 0 12px; font-weight: 400;">
       LIFETIME10
@@ -116,9 +105,9 @@ Body (HTML / Liquid):
   </div>
 
   <p style="text-align: center; margin: 32px 0;">
-    <a href="https://lifetime-health.de/products/age-dna-test?discount=LIFETIME10"
+    <a href="https://lifetime-health.de/products/lifetime-age-dna?discount=LIFETIME10"
        style="display: inline-block; background: #4A8C85; color: #ffffff; text-decoration: none; padding: 14px 32px; border-radius: 999px; font-weight: 600; font-size: 15px;">
-      Test jetzt bestellen →
+      Jetzt Test bestellen →
     </a>
   </p>
 
@@ -129,18 +118,37 @@ Body (HTML / Liquid):
 </div>
 ```
 
+Alternative — wenn du das PDF direkt als Attachment senden willst statt Link: das geht in Shopify Email nur eingeschränkt (per Anhang ≤ 2 MB). Link-Variante ist robuster und trackbar.
+
 ### Test-Plan
 
 1. Echtes Quiz auf der Live-Seite absolvieren mit Test-Email (z.B. `+test1@lifetime-health.de`)
-2. Admin → Kunden → Test-Email sollte mit Tags angelegt sein
+2. Admin → Kunden → Test-Email sollte mit Tags `quiz-completed`, `top1-...`, `gender-...` angelegt sein
 3. Marketing → Automationen → die Quiz-Automation sollte „1 Aktion" im Log haben
-4. E-Mail-Inbox checken — Mail mit korrekten Top-3 sollte ankommen
+4. E-Mail-Inbox checken — Mail mit PDF-Link + Rabattcode-Block sollte ankommen
+5. PDF-Link klicken → öffnet das hochgeladene Dokument
+6. Rabattcode `LIFETIME10` an der Kasse testen
 
-## 4. Was passieren würde, wenn die Automation NICHT eingerichtet ist
+## 5. Was passieren würde, wenn die Automation NICHT eingerichtet ist
 
 - Quiz funktioniert weiter normal
 - Customer wird trotzdem in Shopify angelegt (mit Tags)
 - Success-State zeigt `LIFETIME10` direkt — User kann den Code sofort verwenden
-- Aber: kein bestätigendes E-Mail wird verschickt
+- Aber: kein PDF-Link wird verschickt, kein bestätigendes E-Mail
 
-Das ist akzeptabel als Übergangs-Zustand. Die Automation kannst du jederzeit nachträglich einrichten.
+Das ist akzeptabel als Übergangs-Zustand. Die Automation kannst du jederzeit nachträglich einrichten — alle Customer-Tags sind bereits gesetzt, du startest die Automation einfach und sie greift ab dem Moment für alle neuen Submissions.
+
+## 6. Optional: Customer-Tags für Segment-Marketing
+
+Die gesetzten Tags lassen sich später für gezielte Kampagnen nutzen:
+
+| Tag-Muster | Bedeutung | Beispiel-Kampagne |
+|---|---|---|
+| `quiz-completed` | Hat Quiz abgeschlossen + Email gegeben | Re-Engagement nach 7 Tagen wenn nicht bestellt |
+| `top1-sleep` | Top-1-Hebel ist Schlaf | Schlaf-fokussierter Content (Newsletter) |
+| `top1-stress` | Top-1-Hebel ist Stress | Stress-Resilienz-Content |
+| `gender-female` | weiblich | Gender-spezifische Newsletter |
+| `gender-male` | männlich | Gender-spezifische Newsletter |
+| `age-35-44` / `age-45-54` etc. | Altersgruppe | Altersgruppen-spezifischer Content |
+
+Über Shopify Customer Segments (Admin → Customers → Segments) sind alle Kombinationen filterbar (z.B. „Frauen 35–44 mit Top-1 Schlaf").
