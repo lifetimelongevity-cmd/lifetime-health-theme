@@ -53,6 +53,33 @@
           {%- if section.settings.intro_body != blank -%}
             <p class="lt-quiz__intro-body">{{ section.settings.intro_body | escape | newline_to_br }}</p>
           {%- endif -%}
+
+          {%- assign _b1 = section.settings.intro_bullet_1 | strip -%}
+          {%- assign _b2 = section.settings.intro_bullet_2 | strip -%}
+          {%- assign _b3 = section.settings.intro_bullet_3 | strip -%}
+          {%- if _b1 != blank or _b2 != blank or _b3 != blank -%}
+            <ul class="lt-quiz__intro-bullets" role="list">
+              {%- for b in 'a,b,c' | split: ',' -%}
+                {%- case forloop.index -%}
+                  {%- when 1 -%}{%- assign _t = _b1 -%}
+                  {%- when 2 -%}{%- assign _t = _b2 -%}
+                  {%- when 3 -%}{%- assign _t = _b3 -%}
+                {%- endcase -%}
+                {%- if _t != blank -%}
+                  <li class="lt-quiz__intro-bullet">
+                    <span class="lt-quiz__intro-bullet-icon" aria-hidden="true">
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                        <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.4"></circle>
+                        <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+                      </svg>
+                    </span>
+                    <span>{{ _t | escape }}</span>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+
           {%- if section.settings.intro_price != blank -%}
             <p class="lt-quiz__intro-price">{{ section.settings.intro_price | escape }}</p>
           {%- endif -%}
@@ -78,6 +105,17 @@
               {%- endif -%}
             {%- endif -%}
           </div>
+          {%- assign _rating_value = section.settings.intro_rating_value | strip -%}
+          {%- assign _rating_count = section.settings.intro_rating_count | strip -%}
+          {%- if _rating_value != blank and _rating_count != blank -%}
+            <div class="lt-quiz__intro-rating">
+              <span class="lt-quiz__intro-rating-stars" aria-hidden="true">★★★★★</span>
+              <span class="lt-quiz__intro-rating-text">
+                <strong>{{ _rating_value | escape }}</strong>/5 · {{ _rating_count | escape }} Bewertungen
+              </span>
+            </div>
+          {%- endif -%}
+
           {%- if section.settings.intro_trust != blank -%}
             <p class="lt-quiz__intro-trust">{{ section.settings.intro_trust | escape }}</p>
           {%- endif -%}
@@ -267,6 +305,24 @@
     },
     {
       "type": "text",
+      "id": "intro_bullet_1",
+      "label": "Intro Bullet 1",
+      "default": "Eurofins-Laboranalyse · ISO-zertifiziert"
+    },
+    {
+      "type": "text",
+      "id": "intro_bullet_2",
+      "label": "Intro Bullet 2",
+      "default": "Eine Speichelprobe · kein Arzttermin"
+    },
+    {
+      "type": "text",
+      "id": "intro_bullet_3",
+      "label": "Intro Bullet 3",
+      "default": "Ergebnis in 6 Wochen · lebenslang abrufbar"
+    },
+    {
+      "type": "text",
       "id": "intro_price",
       "label": "Intro Preis-Zeile (optional, default leer)",
       "info": "Default leer — Preis kommt aus den Google-Ads-Pin-Extensions. Wenn doch im Hero gewünscht, hier eintragen."
@@ -294,6 +350,18 @@
       "id": "intro_cta_secondary_url",
       "label": "Intro CTA Sekundär (Link, leer = startet Quiz)",
       "default": "/products/lifetime-age-dna"
+    },
+    {
+      "type": "text",
+      "id": "intro_rating_value",
+      "label": "Intro Rating-Wert",
+      "default": "4,8"
+    },
+    {
+      "type": "text",
+      "id": "intro_rating_count",
+      "label": "Intro Rating-Anzahl",
+      "default": "431"
     },
     {
       "type": "text",
