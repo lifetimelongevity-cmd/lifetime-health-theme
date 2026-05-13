@@ -68,7 +68,7 @@
       topic: 'Biologisches Alter',
       icon: 'hourglass-medium',
       title: 'Biologisches Alter senken',
-      short: 'Dein Alter im Pass ist Statistik. Dein epigenetisches Alter ist Realität. Wir zeigen dir, welche Schalter bei dir wirken: SIRT1, FOXO3 und TP53. Die wichtigsten Langlebigkeits-Gene.',
+      short: 'Du willst wissen, wie schnell du wirklich alterst. SIRT1 reguliert deine Zell-Reparatur, FOXO3 ist eines der stärksten Langlebigkeits-Gene weltweit, TP53 schützt vor Zellschäden. Heißt: Bei aktiver FOXO3-Variante bringen Fasten und Kalorien-Reduktion bei dir mehr als bei anderen.',
       genes: [
         { name: 'SIRT1', explainer: 'Reguliert Reparatur-Prozesse deiner DNA und das Energie-Management deiner Zellen.', example: 'Bestimmt, wie stark Fasten und Kalorien-Reduktion bei dir wirken.' },
         { name: 'FOXO3', explainer: 'Eines der stärksten Langlebigkeits-Gene weltweit.', example: 'Bei Hundertjährigen ist die aktive Variante deutlich häufiger.' },
@@ -81,7 +81,7 @@
       topic: 'Stoffwechsel',
       icon: 'scales',
       title: 'Verstehen, wie der Körper Essen verarbeitet',
-      short: 'Dein FTO-Gen bestimmt, wie schnell du zunimmst. Dein TCF7L2-Gen, wie dein Blutzucker reagiert. Plus MC4R, der zentrale Sättigungs-Schalter.',
+      short: 'Du willst nicht raten, warum dein Stoffwechsel anders tickt als beim Nachbarn. FTO steuert dein Sättigungsgefühl, TCF7L2 deine Insulin-Antwort, MCM6 deine Laktose-Verträglichkeit. Heißt: Deine Makro-Verteilung sollte zu deiner Genetik passen, nicht zur Standard-Ernährung.',
       genes: [
         { name: 'FTO', explainer: 'Beeinflusst Appetit und Fettspeicherung.', example: 'Erklärt, warum manche bei gleicher Kalorienmenge schneller zunehmen.' },
         { name: 'TCF7L2', explainer: 'Reguliert deine Insulin-Antwort.', example: 'Zeigt, wie dein Körper auf Kohlenhydrate reagiert.' },
@@ -94,7 +94,7 @@
       topic: 'Energie',
       icon: 'lightning',
       title: 'Energie zurückgewinnen',
-      short: 'Müdigkeit hat drei Quellen: Mikronährstoff-Defizite (MTHFR, VDR), schlechter Schlaf, stille Entzündungen (IL6, TLR4). Wir zeigen dir, welcher Hebel bei dir am stärksten greift.',
+      short: 'Du willst wissen, woher deine Müdigkeit wirklich kommt. MTHFR steuert deine Methylierung, VDR deine Vitamin-D-Verwertung, IL6 zeigt stille Entzündung. Heißt: Hohe Vitamin-D-Blutwerte kommen bei dir vielleicht nicht in den Zellen an. Dann hilft die richtige Form, nicht mehr Dosis.',
       genes: [
         { name: 'MTHFR', explainer: 'Reguliert deine Methylierung — zentral für Energie- und Nervenstoffwechsel.', example: 'Bestimmt, ob du normale Folsäure verwertest oder methylierte brauchst.' },
         { name: 'VDR', explainer: 'Vitamin-D-Rezeptor — wie gut Vitamin D in deinen Zellen ankommt.', example: 'Erklärt, warum hohe Blutwerte trotzdem Müdigkeit lassen können.' },
@@ -107,7 +107,7 @@
       topic: 'Schlaf',
       icon: 'moon',
       title: 'Endlich durchschlafen',
-      short: 'Dein PER3-Gen sagt, ob du Lerche oder Eule bist. Dein CYP1A2-Gen, wie schnell du Koffein abbaust. Plus ADORA2A, das bestimmt, wie sehr Koffein dein Nervensystem aufdreht.',
+      short: 'Du willst wissen, warum dein Schlaf bei dir anders läuft als bei anderen. PER3 verrät deinen Chronotyp, CYP1A2 dein Koffein-Tempo, ADORA2A wie sehr es dein Nervensystem aufdreht. Heißt: Eine späte Tasse Kaffee wirkt bei dir vielleicht bis 23 Uhr, beim Nachbarn schon um 18 Uhr abgebaut.',
       genes: [
         { name: 'PER3', explainer: 'Bestimmt deinen Chronotyp — biologisch früh oder spät aktiv.', example: 'Erklärt, warum manche morgens nicht produktiv sein können.' },
         { name: 'CYP1A2', explainer: 'Reguliert dein Koffein-Abbau-Tempo.', example: 'Schnelle Variante: Espresso nach dem Essen geht. Langsame: nach 14 Uhr wird Schlaf zum Glücksspiel.' },
@@ -119,7 +119,7 @@
       topic: 'Stress',
       icon: 'wind',
       title: 'Stress verstehen und Nervensystem unterstützen',
-      short: 'Dein COMT-Gen bestimmt, wie du Stress verarbeitest. Schnelle Variante: stressresistent. Langsame: tiefer Denker, längere Reaktion. Dazu BDNF, deine mentale Erholung.',
+      short: 'Du willst wissen, wo deine Belastungs-Grenze wirklich liegt. COMT entscheidet, wie schnell du Stress-Hormone abbaust. BDNF zeigt deine mentale Erholungs-Kapazität. Heißt: Schnelle Variante ist stressresistent, langsame ist tiefer Denker mit längerer Erholungs-Zeit. Beides hat seinen Rhythmus.',
       genes: [
         { name: 'COMT', explainer: 'Reguliert den Abbau von Stress-Hormonen wie Adrenalin und Dopamin.', example: 'Schnelle Variante: stressresistent. Langsame: tiefer Denker, längere Erholung.' },
         { name: 'BDNF', explainer: 'Wachstumsfaktor für deine Nervenzellen.', example: 'Bestimmt deine mentale Resilienz und Lern-Geschwindigkeit.' },
@@ -130,7 +130,7 @@
       topic: 'Konzentration',
       icon: 'lightbulb',
       title: 'Konzentration, Klarheit, Gedächtnis',
-      short: 'Drei Schalter für geistige Schärfe: BDNF für Lernfähigkeit, FADS1 für Omega-3-Verwertung, APOE als wichtigster Marker für kognitive Langzeit-Gesundheit.',
+      short: 'Du willst Klarheit und Konzentration auf Knopfdruck. BDNF ist dein Lern-Faktor, FADS1 wandelt pflanzliches Omega-3 in nutzbare Form um, APOE entscheidet über deine kognitive Langzeit-Reserve. Heißt: Bei schwacher FADS1-Variante brauchst du Fisch oder Algenöl. Leinöl bringt dir wenig.',
       genes: [
         { name: 'BDNF', explainer: 'Wachstumsfaktor für Nervenzellen — Basis für Lernen und Erinnerung.', example: 'Aktive Variante: schnelles Lernen, gute Konzentration unter Druck.' },
         { name: 'FADS1', explainer: 'Bestimmt, wie gut du pflanzliche Omega-3 in nutzbare Form umwandelst.', example: 'Schwache Variante: brauchst eher Fisch oder Algenöl statt Leinöl.' },
@@ -142,7 +142,7 @@
       topic: 'Training',
       icon: 'barbell',
       title: 'Smarter trainieren',
-      short: 'Dein ACTN3-Gen sagt, ob du Kraft- oder Ausdauer-Typ bist. Dein ACE-Gen, wie schnell dein VO₂max trainierbar ist. COL5A1 zeigt deine Sehnen-Stabilität.',
+      short: 'Du willst aus weniger Training mehr holen. ACTN3 bestimmt deinen Typ (Kraft oder Ausdauer), ACE deine VO₂max-Trainierbarkeit, COL5A1 dein Verletzungs-Risiko an Sehnen. Heißt: Ausdauer-Typ mit reinem Kraft-Programm bringt weniger als umgekehrt. Deine Trainings-Antwort ist genetisch.',
       genes: [
         { name: 'ACTN3', explainer: 'Bestimmt deine Muskelfaser-Verteilung.', example: 'RR-Variante: Kraft- und Sprint-Typ. XX: Ausdauer-Typ.' },
         { name: 'ACE', explainer: 'Beeinflusst, wie stark dein Herz-Kreislauf-System auf Training reagiert.', example: 'I-Variante: gute VO₂max-Trainierbarkeit. D: schnellere Kraft-Adaption.' },
@@ -155,7 +155,7 @@
       topic: 'Herz & Kreislauf',
       icon: 'heartbeat',
       title: 'Herz aktiv schützen',
-      short: 'APOE zeigt dein Cholesterin-Profil. AGT, wie Salz deinen Blutdruck beeinflusst. CDKN2B-AS1 am 9p21-Locus: das stärkste bekannte genetische Herz-Risiko.',
+      short: 'Du willst wissen, wo dein Herz-Risiko tatsächlich liegt. APOE zeigt dein Cholesterin-Profil, AGT wie sensitiv du auf Salz reagierst, CDKN2B-AS1 am 9p21-Locus dein stärkstes Herz-Signal. Heißt: Bei sensitiver AGT-Variante senkt jedes Gramm Salz weniger deinen Blutdruck spürbar.',
       genes: [
         { name: 'APOE', explainer: 'Reguliert deinen Cholesterin-Stoffwechsel.', example: 'E4-Variante: höheres LDL, profitiert besonders von mediterraner Ernährung.' },
         { name: 'AGT', explainer: 'Beeinflusst, wie dein Blutdruck auf Salz reagiert.', example: 'Sensitive Variante: Salz-Reduktion senkt Blutdruck stärker.' },
@@ -168,7 +168,7 @@
       topic: 'Vitamine & Supplements',
       icon: 'pill',
       title: 'Passende Vitamine und Supplements',
-      short: 'Deine MTHFR-Variante bestimmt, ob du normale Folsäure verwerten kannst oder methylierte brauchst. VDR, wie viel Vitamin D ankommt. BCO1, ob du Beta-Carotin in Vitamin A umwandeln kannst.',
+      short: 'Du willst, dass die Supplements bei dir tatsächlich ankommen. MTHFR entscheidet zwischen normaler und methylierter Folsäure, VDR deinen Vitamin-D-Bedarf, FUT2 deine B12-Aufnahme über die Darmwand. Heißt: Die richtige Form ist bei dir oft wichtiger als die Dosis.',
       genes: [
         { name: 'MTHFR', explainer: 'Reguliert die Folsäure-Verwertung.', example: 'C677T-Variante: brauchst Methylfolat statt synthetische Folsäure.' },
         { name: 'VDR', explainer: 'Vitamin-D-Rezeptor — wie effizient Vitamin D in deinen Zellen wirkt.', example: 'Bestimmt deinen optimalen Vitamin-D-Zielwert.' },
@@ -181,7 +181,7 @@
       topic: 'Haut & Haar',
       icon: 'sparkle',
       title: 'Haut und Haar von innen',
-      short: 'Hautalterung hängt an SOD2 (antioxidative Abwehr) und ERCC2 (UV-Schaden-Reparatur). Beim Haar zeigt AR, wie deine Follikel auf DHT reagieren. Das ist der Hauptfaktor für Haarausfall.',
+      short: 'Du willst wissen, was bei dir Hautalterung und Haarausfall tatsächlich treibt. SOD2 ist deine antioxidative Abwehr, ERCC2 deine UV-Reparatur, AR die DHT-Sensitivität deiner Follikel. Heißt: Bei schwacher ERCC2-Variante zählt konsequenter UV-Schutz mehr als jede teure Creme.',
       genes: [
         { name: 'SOD2', explainer: 'Hauptenzym der antioxidativen Abwehr in deinen Zellen.', example: 'Schwache Variante: höherer oxidativer Stress, profitiert von Antioxidantien.' },
         { name: 'ERCC2', explainer: 'Repariert UV-Schäden in deiner DNA.', example: 'Reduzierte Aktivität: schnellere Hautalterung durch Sonne.' },
