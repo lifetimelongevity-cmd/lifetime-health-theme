@@ -691,17 +691,13 @@
       const subEl = result.querySelector('[data-result-sub]');
       if (subEl) subEl.textContent = getResultSummary();
 
-      // 1b — Bio-Age-Schätzung (Pass-Alter ↔ Bio-Alter, side-by-side)
+      // 1b — Bio-Age-Schätzung; Indikator-Dreieck via Direction-Class auf Root
       const bioAge = computeBioAge(this.state.answers);
       const passEl = result.querySelector('[data-bioage-pass]');
       const bioEl = result.querySelector('[data-bioage-num]');
-      const arrowEl = result.querySelector('[data-bioage-arrow]');
       const bioAgeRoot = result.querySelector('[data-result-bioage]');
       if (passEl) passEl.textContent = bioAge.chronoAge;
       if (bioEl) bioEl.textContent = bioAge.bioAge;
-      if (arrowEl) {
-        arrowEl.textContent = bioAge.direction === 'up' ? '↗' : bioAge.direction === 'down' ? '↘' : '→';
-      }
       if (bioAgeRoot) {
         bioAgeRoot.classList.remove('is-up', 'is-down', 'is-zero');
         bioAgeRoot.classList.add('is-' + bioAge.direction);
