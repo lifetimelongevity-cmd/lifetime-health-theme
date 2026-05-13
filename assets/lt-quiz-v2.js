@@ -81,7 +81,7 @@
       topic: 'Stoffwechsel',
       icon: 'scales',
       title: 'Verstehen, wie der Körper Essen verarbeitet',
-      short: 'Du willst nicht raten, warum dein Stoffwechsel anders tickt als beim Nachbarn. FTO steuert dein Sättigungsgefühl, TCF7L2 deine Insulin-Antwort, MCM6 deine Laktose-Verträglichkeit. Heißt: Deine Makro-Verteilung sollte zu deiner Genetik passen, nicht zur Standard-Ernährung.',
+      short: 'Du willst verstehen, warum dein Stoffwechsel anders reagiert als bei anderen. FTO steuert dein Sättigungsgefühl, TCF7L2 deine Insulin-Antwort, MCM6 deine Laktose-Verträglichkeit. Heißt: Deine Makro-Verteilung sollte zu deiner Genetik passen, nicht zur Standard-Ernährung.',
       genes: [
         { name: 'FTO', explainer: 'Beeinflusst Appetit und Fettspeicherung.', example: 'Erklärt, warum manche bei gleicher Kalorienmenge schneller zunehmen.' },
         { name: 'TCF7L2', explainer: 'Reguliert deine Insulin-Antwort.', example: 'Zeigt, wie dein Körper auf Kohlenhydrate reagiert.' },
@@ -107,7 +107,7 @@
       topic: 'Schlaf',
       icon: 'moon',
       title: 'Endlich durchschlafen',
-      short: 'Du willst wissen, warum dein Schlaf bei dir anders läuft als bei anderen. PER3 verrät deinen Chronotyp, CYP1A2 dein Koffein-Tempo, ADORA2A wie sehr es dein Nervensystem aufdreht. Heißt: Eine späte Tasse Kaffee wirkt bei dir vielleicht bis 23 Uhr, beim Nachbarn schon um 18 Uhr abgebaut.',
+      short: 'Du willst wissen, warum dein Schlaf bei dir anders läuft als bei anderen. PER3 verrät deinen Chronotyp, CYP1A2 dein Koffein-Tempo, ADORA2A wie sehr es dein Nervensystem aufdreht. Heißt: Eine späte Tasse Kaffee wirkt bei dir vielleicht bis 23 Uhr, bei anderen ist sie um 18 Uhr schon abgebaut.',
       genes: [
         { name: 'PER3', explainer: 'Bestimmt deinen Chronotyp — biologisch früh oder spät aktiv.', example: 'Erklärt, warum manche morgens nicht produktiv sein können.' },
         { name: 'CYP1A2', explainer: 'Reguliert dein Koffein-Abbau-Tempo.', example: 'Schnelle Variante: Espresso nach dem Essen geht. Langsame: nach 14 Uhr wird Schlaf zum Glücksspiel.' },
