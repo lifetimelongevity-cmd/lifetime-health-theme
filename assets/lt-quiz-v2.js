@@ -27,6 +27,13 @@
   const AUTO_ADVANCE_MS = 300;
   const LOADING_DURATION_MS = 3000;
 
+  // GA4 / Smart Bidding tracking helper — pushed to GTM dataLayer
+  function pushDataLayer(payload) {
+    if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+      window.dataLayer.push(payload);
+    }
+  }
+
   function createInitialState() {
     return {
       step: 'intro',
@@ -363,12 +370,37 @@
         hash === '#quiz-start' ||
         search.get('start') === 'quiz' ||
         search.get('quiz') === '1';
-      if (wantsStart) this.goto('q1');
+      if (wantsStart) {
+        pushDataLayer({ event: 'quiz_started', quiz_start_source: 'url_param' });
+        this.goto('q1');
+      }
     }
 
     bindIntro() {
-      const start = this.root.querySelector('[data-quiz-start]');
-      if (start) start.addEventListener('click', () => this.goto('q1'));
+      // All [data-quiz-start] buttons trigger quiz start + fire DataLayer event
+      const startButtons = this.root.querySelectorAll('[data-quiz-start]');
+      startButtons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          pushDataLayer({ event: 'quiz_started', quiz_start_source: 'intro_button' });
+          this.goto('q1');
+        });
+      });
+
+      // Track clicks on PDP CTAs (intro "Jetzt Test bestellen" + result "Oder direkt zur Test-Bestellung")
+      const pdpCtas = this.root.querySelectorAll('[data-quiz-pdp-cta], [data-result-cta-secondary]');
+      pdpCtas.forEach((cta) => {
+        cta.addEventListener('click', () => {
+          const source = cta.hasAttribute('data-quiz-pdp-cta')
+            ? cta.getAttribute('data-quiz-pdp-cta') || 'intro_secondary'
+            : 'result_secondary';
+          pushDataLayer({
+            event: 'quiz_pdp_click',
+            quiz_pdp_source: source,
+            quiz_step: this.state ? this.state.step : 'intro',
+          });
+          // Do NOT preventDefault — let the link navigate to PDP as normal
+        });
+      });
     }
 
     bindBack() {
