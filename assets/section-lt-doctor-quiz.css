@@ -1,0 +1,525 @@
+/**
+ * LIFETIME — Ärzte-Quiz (B2B Partnerprogramm)
+ * Spec: docs/lifetime-doctor-quiz-spec.md
+ *
+ * Additive Styles auf Basis von section-lt-pdp-quiz-v2.css (Intro, Cards, Loading-Shell,
+ * Hint, Footer-Button werden von dort übernommen).
+ * Diese Datei enthält nur das doctor-quiz-spezifische: Loading-Ring, Result-Page-Sektionen,
+ * Matrix mit Perspektiv-Wechsler, Trust-Footer, Report-Karten, Epi-Karten.
+ *
+ * Alle Werte aus design-tokens.mdc (--color-*, --space-*, --radius-*, --text-*).
+ */
+
+/* ── Solo-Intro-Grid (nur Text, kein rechtes Bild) ──────────────── */
+.lt-quiz__intro-grid--solo {
+  grid-template-columns: 1fr;
+  max-width: 720px;
+}
+
+/* ── Loading-Screen — kreisförmiger Progress ────────────────────── */
+.lt-doctor-quiz__loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-10) var(--space-5);
+  text-align: center;
+  min-height: 60vh;
+}
+
+.lt-doctor-quiz__loading-ring {
+  width: 120px;
+  height: 120px;
+  margin-bottom: var(--space-6);
+}
+
+.lt-doctor-quiz__loading-svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.lt-doctor-quiz__loading-track,
+.lt-doctor-quiz__loading-fill {
+  fill: none;
+  stroke-width: 4;
+}
+
+.lt-doctor-quiz__loading-track {
+  stroke: var(--color-border-default);
+}
+
+.lt-doctor-quiz__loading-fill {
+  stroke: var(--color-teal);
+  stroke-linecap: round;
+  stroke-dasharray: 289; /* 2*PI*46 */
+  stroke-dashoffset: 289;
+}
+
+.lt-doctor-quiz__loading-headline {
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-3);
+}
+
+.lt-doctor-quiz__loading-sub {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-5);
+  min-height: 1.5em;
+  transition: opacity var(--ease-default);
+}
+
+.lt-doctor-quiz__loading-trust {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* ── Result-Page ────────────────────────────────────────────────── */
+.lt-doctor-quiz__result {
+  padding: var(--space-7) 0;
+}
+
+.lt-doctor-quiz__result > * + * {
+  margin-top: var(--space-8);
+}
+
+/* Header */
+.lt-doctor-quiz__result-header {
+  max-width: 840px;
+  margin: 0 auto;
+  text-align: left;
+}
+
+.lt-doctor-quiz__result-kicker {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-accent);
+  margin: 0 0 var(--space-3);
+}
+
+.lt-doctor-quiz__result-headline {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-display);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-4);
+}
+
+.lt-doctor-quiz__result-sub {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-4);
+}
+
+.lt-doctor-quiz__result-trust {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+/* Sektion-Headlines im Result */
+.lt-doctor-quiz__section-headline {
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-4);
+}
+
+.lt-doctor-quiz__section-sub {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-5);
+  max-width: 720px;
+}
+
+/* ── Top-Reports-Grid ───────────────────────────────────────────── */
+.lt-doctor-quiz__reports {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.lt-doctor-quiz__report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--space-4);
+}
+
+.lt-doctor-quiz__report-card {
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lt-doctor-quiz__report-cat {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-accent);
+  margin: 0;
+}
+
+.lt-doctor-quiz__report-name {
+  font-family: var(--font-heading);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.lt-doctor-quiz__report-note {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+.lt-doctor-quiz__science-note {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-text-muted);
+  margin: var(--space-5) 0 0;
+  max-width: 720px;
+}
+
+.lt-doctor-quiz__science-note em {
+  color: var(--color-text-secondary);
+  font-style: normal;
+  font-weight: var(--weight-medium);
+}
+
+/* ── Epigenetik-Karten ──────────────────────────────────────────── */
+.lt-doctor-quiz__epi {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.lt-doctor-quiz__epi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+}
+
+.lt-doctor-quiz__epi-card {
+  background: var(--color-surface-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+}
+
+.lt-doctor-quiz__epi-name {
+  font-family: var(--font-heading);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2);
+}
+
+.lt-doctor-quiz__epi-note {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ── Matrix mit Perspektiv-Wechsler ─────────────────────────────── */
+.lt-doctor-quiz__matrix-section {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.lt-doctor-quiz__perspective {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.lt-doctor-quiz__perspective-chip {
+  appearance: none;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-secondary);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all var(--ease-default);
+}
+
+.lt-doctor-quiz__perspective-chip:hover {
+  border-color: var(--color-teal);
+  color: var(--color-text-primary);
+}
+
+.lt-doctor-quiz__perspective-chip.is-active {
+  background: var(--color-dark);
+  border-color: var(--color-dark);
+  color: var(--color-text-on-dark);
+}
+
+.lt-doctor-quiz__perspective-chip.is-original:not(.is-active) {
+  border-color: var(--color-teal);
+  color: var(--color-text-accent);
+}
+
+.lt-doctor-quiz__perspective-marker {
+  font-size: var(--text-micro);
+  opacity: 0.7;
+  margin-left: var(--space-1);
+}
+
+.lt-doctor-quiz__perspective-hint {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-5);
+}
+
+/* Matrix Grid */
+.lt-doctor-quiz__matrix {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.lt-doctor-quiz__matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+}
+
+@media (max-width: 640px) {
+  .lt-doctor-quiz__matrix-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.lt-doctor-quiz__matrix-bar {
+  background: var(--color-surface-secondary);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+
+.lt-doctor-quiz__matrix-bar-label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+.lt-doctor-quiz__matrix-epi {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: var(--space-2);
+}
+
+@media (max-width: 768px) {
+  .lt-doctor-quiz__matrix-epi {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .lt-doctor-quiz__matrix-epi {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Matrix Cells — 3 Highlight-Stufen */
+.lt-doctor-quiz__matrix-cell {
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  text-align: center;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: help;
+  transition: all var(--ease-default);
+}
+
+.lt-doctor-quiz__matrix-cell-label {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+}
+
+.lt-doctor-quiz__matrix-cell.is-off {
+  color: var(--color-text-muted);
+  background: var(--color-surface-tertiary);
+  border-color: var(--color-border-default);
+  opacity: 0.65;
+}
+
+.lt-doctor-quiz__matrix-cell.is-secondary {
+  color: var(--color-text-secondary);
+  background: var(--color-benefit-bg);
+  border-color: rgba(101, 192, 182, 0.3);
+}
+
+.lt-doctor-quiz__matrix-cell.is-primary {
+  color: var(--color-text-on-dark);
+  background: var(--color-teal-dark);
+  border-color: var(--color-teal-dark);
+}
+
+.lt-doctor-quiz__matrix-cell--epi {
+  min-height: 48px;
+  padding: var(--space-2) var(--space-3);
+}
+
+.lt-doctor-quiz__matrix-footnote {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+  max-width: 720px;
+}
+
+/* ── CTA-Sektion ────────────────────────────────────────────────── */
+.lt-doctor-quiz__cta {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.lt-doctor-quiz__cta-card {
+  background: var(--color-surface-dark);
+  color: var(--color-text-on-dark);
+  border-radius: var(--radius-lg);
+  padding: var(--space-7) var(--space-6);
+  text-align: left;
+}
+
+.lt-doctor-quiz__cta-kicker {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-teal);
+  margin: 0 0 var(--space-3);
+}
+
+.lt-doctor-quiz__cta-headline {
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-display);
+  margin: 0 0 var(--space-4);
+}
+
+.lt-doctor-quiz__cta-body {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-body);
+  color: var(--color-text-on-dark-muted);
+  margin: 0 0 var(--space-6);
+  max-width: 720px;
+}
+
+.lt-doctor-quiz__cta-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.lt-doctor-quiz__cta-primary {
+  background: var(--color-teal);
+  color: var(--color-text-primary);
+}
+
+.lt-doctor-quiz__cta-secondary {
+  color: var(--color-text-on-dark);
+  border-color: var(--color-text-on-dark-muted);
+}
+
+/* ── Trust-Footer ───────────────────────────────────────────────── */
+.lt-doctor-quiz__trust-footer {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+  padding-top: var(--space-7);
+  border-top: 1px solid var(--color-border-default);
+}
+
+@media (max-width: 768px) {
+  .lt-doctor-quiz__trust-footer {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+}
+
+.lt-doctor-quiz__trust-col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.lt-doctor-quiz__trust-label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.lt-doctor-quiz__trust-value {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/* ── Container-Padding (für Result-Page) ────────────────────────── */
+.lt-doctor-quiz .lt-quiz__container > .lt-quiz__step--result {
+  padding-left: var(--space-5);
+  padding-right: var(--space-5);
+}
+
+@media (min-width: 768px) {
+  .lt-doctor-quiz .lt-quiz__container > .lt-quiz__step--result {
+    padding-left: var(--space-7);
+    padding-right: var(--space-7);
+  }
+}
