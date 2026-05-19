@@ -387,7 +387,7 @@
       });
 
       // Track clicks on PDP CTAs (intro "Jetzt Test bestellen" + result "Oder direkt zur Test-Bestellung")
-      const pdpCtas = this.root.querySelectorAll('[data-quiz-pdp-cta], [data-result-cta-secondary]');
+      const pdpCtas = this.root.querySelectorAll('[data-quiz-pdp-cta], [data-result-pdp-cta]');
       pdpCtas.forEach((cta) => {
         cta.addEventListener('click', () => {
           const source = cta.hasAttribute('data-quiz-pdp-cta')
@@ -713,12 +713,12 @@
         pill.classList.toggle('is-relevant', activeCats.has(pill.dataset.scopeCat));
       });
 
-      // 4 — Secondary CTA mit top1 anreichern
-      const secondaryCta = result.querySelector('[data-result-cta-secondary]');
-      if (secondaryCta && top[0]) {
-        const url = new URL(secondaryCta.getAttribute('href'), window.location.origin);
+      // 4 — Primary PDP-CTA mit top1 anreichern
+      const pdpCta = result.querySelector('[data-result-pdp-cta]');
+      if (pdpCta && top[0]) {
+        const url = new URL(pdpCta.getAttribute('href'), window.location.origin);
         url.searchParams.set('top1', top[0]);
-        secondaryCta.setAttribute('href', url.pathname + url.search);
+        pdpCta.setAttribute('href', url.pathname + url.search);
       }
     }
 
