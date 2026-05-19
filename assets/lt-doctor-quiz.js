@@ -402,7 +402,20 @@
       if (this.grid) this.grid.hidden = !QUESTION_STEPS.includes(stepId);
 
       // Body-Class für Fullscreen-Modus (nimmt Page-Header weg)
-      document.body.classList.toggle('lt-quiz-fullscreen', FULLSCREEN_STEPS.includes(stepId));
+      const isFullscreen = FULLSCREEN_STEPS.includes(stepId);
+      document.body.classList.toggle('lt-quiz-fullscreen', isFullscreen);
+
+      // Section-Modifier-Klassen — das ist was die Live-CSS für Layout braucht
+      this.root.classList.toggle('lt-quiz--fullscreen', isFullscreen);
+      this.root.classList.toggle('lt-quiz--in-intro', stepId === 'intro');
+      this.root.classList.toggle('lt-quiz--in-questions', QUESTION_STEPS.includes(stepId));
+      this.root.classList.toggle('lt-quiz--in-loading', stepId === 'loading');
+      this.root.classList.toggle('lt-quiz--in-result', stepId === 'result');
+
+      // Scroll oben in der Quiz-Shell (nicht body) für sauberen Übergang
+      if (isFullscreen) {
+        this.root.scrollTop = 0;
+      }
 
       // Progress-Rail
       this.updateProgress(stepId);
@@ -420,8 +433,6 @@
       // Result-Render
       if (stepId === 'result') {
         this.renderResult();
-        // Scroll nach oben für saubere Result-Wahrnehmung
-        this.root.scrollIntoView({ behavior: 'smooth', block: 'start' });
         pushDataLayer({
           event: 'doctor_quiz_completed',
           specialty: this.state.answers.specialty,
@@ -485,7 +496,7 @@
       if (headlineEl) headlineEl.textContent = specialty.headline;
       if (subEl) subEl.textContent = specialty.sub;
 
-      // Top-Reports (re-sorted by focus)
+      // Top-Reports (re-sorted by focus) — als lt-quiz-result-theme Karten
       const reportsEl = this.root.querySelector('[data-result-reports]');
       const sortedReports = sortReportsByFocus(specialty.reports, focus).slice(0, 6);
       if (reportsEl) {
@@ -493,10 +504,14 @@
           const cat = DNA_CATEGORIES.find((c) => c.id === r.category);
           const catLabel = cat ? cat.label : '';
           return `
-            <article class="lt-doctor-quiz__report-card">
-              <p class="lt-doctor-quiz__report-cat">${escapeHtml(catLabel)}</p>
-              <h4 class="lt-doctor-quiz__report-name">${escapeHtml(r.name)}</h4>
-              <p class="lt-doctor-quiz__report-note">${escapeHtml(r.note)}</p>
+            <article class="lt-quiz-result-theme">
+              <div class="lt-quiz-result-theme__header">
+                <div class="lt-quiz-result-theme__head-text">
+                  <span class="lt-quiz-result-theme__pos">${escapeHtml(catLabel)}</span>
+                  <h4 class="lt-quiz-result-theme__title">${escapeHtml(r.name)}</h4>
+                </div>
+              </div>
+              <p class="lt-quiz-result-theme__lead">${escapeHtml(r.note)}</p>
             </article>
           `;
         }).join('');
@@ -508,13 +523,18 @@
         genesEl.innerHTML = `<em>Wissenschaftliche Grundlage:</em> u.a. ${specialty.genes.map(escapeHtml).join(' · ')}. Im Befund sehen Ihre Patient:innen die interpretierte Aussage pro Report, nicht die Rohdaten.`;
       }
 
-      // Epigenetik-Karten
+      // Epigenetik-Karten — als lt-quiz-result-theme Karten
       const epiEl = this.root.querySelector('[data-result-epi]');
       if (epiEl) {
         epiEl.innerHTML = sortEpiByFocus(specialty.epiReports, focus).map((r) => `
-          <article class="lt-doctor-quiz__epi-card">
-            <h4 class="lt-doctor-quiz__epi-name">${escapeHtml(r.name)}</h4>
-            <p class="lt-doctor-quiz__epi-note">${escapeHtml(r.note)}</p>
+          <article class="lt-quiz-result-theme">
+            <div class="lt-quiz-result-theme__header">
+              <div class="lt-quiz-result-theme__head-text">
+                <span class="lt-quiz-result-theme__pos">Epigenetik</span>
+                <h4 class="lt-quiz-result-theme__title">${escapeHtml(r.name)}</h4>
+              </div>
+            </div>
+            <p class="lt-quiz-result-theme__lead">${escapeHtml(r.note)}</p>
           </article>
         `).join('');
       }

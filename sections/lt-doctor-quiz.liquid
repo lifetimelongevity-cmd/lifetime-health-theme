@@ -3,14 +3,18 @@
   ──────────────────────────────────────────────
   Spec: docs/lifetime-doctor-quiz-spec.md (status: living)
 
-  Kurz-Quiz für Ärzt:innen aller Fachrichtungen mit Ziel "Buchung Partner-Gespräch".
-  State: intro → q1 (Fachrichtung) → q2 (Fokus, max 2) → loading → result
-  Result-Inhalte werden komplett von JS aus SPECIALTIES-Datenstruktur gerendert.
-  Source of Truth für alle Reports: lifetime-produktdetails/produktdetails-age-dna-test.md
+  Folgt visuell konsequent dem Live AGE-Quiz (lt-pdp-quiz-v2). Reused:
+    - section-lt-pdp-quiz-v2.css für Intro, Fragen-Cards, Result-Header,
+      Themes, Scope, CTA-Card.
+    - Snippets: lt-quiz-question-cards, lt-quiz-question-multi,
+      section-heading-crs, lt-quiz-loading (Loading-Screen).
+  Eigenes nur für Matrix + Perspektiv-Wechsler + Trust-Footer.
+
+  Source of Truth für alle Reports: produktdetails-age-dna-test.md
 {%- endcomment -%}
 
-{{ 'section-lt-doctor-quiz.css' | asset_url | stylesheet_tag }}
 {{ 'section-lt-pdp-quiz-v2.css' | asset_url | stylesheet_tag }}
+{{ 'section-lt-doctor-quiz.css' | asset_url | stylesheet_tag }}
 <noscript>
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/thin/style.css">
 </noscript>
@@ -25,14 +29,14 @@
   data-calendly-url="{{ section.settings.calendly_url | default: 'https://calendly.com/lifetime365/longevity-coaching' }}"
   data-secondary-cta-url="{{ section.settings.secondary_cta_url | default: '/products/lifetime-age-dna' }}"
 >
-  {%- comment -%} Progress-Rail (oben, edge-to-edge) {%- endcomment -%}
+  {%- comment -%} Progress-Rail (edge-to-edge, blendet sich via Modifier-Klassen ein) {%- endcomment -%}
   <div class="lt-quiz__rail" aria-hidden="true">
     <div class="lt-quiz__rail-fill" data-quiz-progress-bar></div>
   </div>
 
   <div class="lt-quiz__container">
 
-    {%- comment -%} Chrome-Row (Back + Counter) {%- endcomment -%}
+    {%- comment -%} Chrome-Row {%- endcomment -%}
     <div class="lt-quiz__topbar">
       <div class="lt-quiz__chrome-row">
         <button type="button" class="lt-quiz__back" data-quiz-back hidden aria-label="Zurück">←</button>
@@ -41,9 +45,9 @@
       </div>
     </div>
 
-    {%- comment -%} ── Intro ─────────────────────────────────────────── {%- endcomment -%}
+    {%- comment -%} ── Intro (2-Spalten wie Live-Quiz) ──────────────── {%- endcomment -%}
     <div class="lt-quiz__step lt-quiz__step--intro" data-quiz-step="intro">
-      <div class="lt-quiz__intro-grid lt-quiz__intro-grid--solo">
+      <div class="lt-quiz__intro-grid">
         <div class="lt-quiz__intro-content">
           {%- render 'section-heading-crs',
               heading: section.settings.intro_headline,
@@ -63,13 +67,24 @@
             <p class="lt-quiz__intro-trust">{{ section.settings.intro_trust | escape }}</p>
           {%- endif -%}
         </div>
+
+        {%- assign _intro_image = section.settings.intro_image | default: 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/lifetime-app-hand-test.png?v=1778667349' -%}
+        <aside class="lt-quiz__intro-visual" aria-hidden="true">
+          <img
+            class="lt-quiz__intro-visual-img"
+            src="{{ _intro_image }}"
+            alt=""
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+          >
+        </aside>
       </div>
     </div>
 
-    {%- comment -%} ── Fragen-Container ──────────────────────────────── {%- endcomment -%}
+    {%- comment -%} ── Fragen ────────────────────────────────────────── {%- endcomment -%}
     <div class="lt-quiz__questions" data-quiz-grid hidden>
 
-      {%- comment -%} ── Q1 Fachrichtung (Single-Select Karten) ──── {%- endcomment -%}
       {%- assign q1_options = 'kardio|Kardiologie|heartbeat,ortho|Orthopädie|bone,allgemein|Allgemeinmedizin|stethoscope,innere|Innere Medizin|microscope,neuro|Neurologie / Psychiatrie|brain,sport|Sportmedizin|barbell,andere|Andere Fachrichtung|dots-three-circle' | split: ',' -%}
       {%- render 'lt-quiz-question-cards',
           step: 'q1',
@@ -81,7 +96,6 @@
           hint: 'Unser Test liefert 187 Reports in 16 DNA-Kategorien plus 6 Epigenetik-Bereiche. Welche dieser Reports klinisch im Vordergrund stehen, hängt von Ihrer Fachrichtung ab — das Produkt selbst ändert sich nicht.'
       -%}
 
-      {%- comment -%} ── Q2 Fokus (Multi-Select, max 2) ──────────── {%- endcomment -%}
       {%- assign q2_options = 'praevention|Prävention & Healthspan|heart,veranlagung|Familiäre Veranlagung|tree-structure,sensitivitaet|Verträglichkeiten & Nährstoffe|leaf,lifestyle|Lifestyle-Beratung|barbell' | split: ',' -%}
       {%- render 'lt-quiz-question-multi',
           step: 'q2',
@@ -96,7 +110,7 @@
 
     </div>
 
-    {%- comment -%} ── Loading-Screen ────────────────────────────────── {%- endcomment -%}
+    {%- comment -%} ── Loading ───────────────────────────────────────── {%- endcomment -%}
     <div class="lt-quiz__step lt-quiz__step--loading" data-quiz-step="loading" hidden>
       <div class="lt-doctor-quiz__loading">
         <div class="lt-doctor-quiz__loading-ring" aria-hidden="true">
@@ -111,78 +125,98 @@
       </div>
     </div>
 
-    {%- comment -%} ── Result-Page (JS rendert Inhalt aus SPECIALTIES) ── {%- endcomment -%}
-    <div class="lt-quiz__step lt-quiz__step--result lt-doctor-quiz__result" data-quiz-step="result" hidden>
+    {%- comment -%} ── Result (Live-Klassenstruktur .lt-quiz-result) ───── {%- endcomment -%}
+    <div class="lt-quiz__step lt-quiz__step--result" data-quiz-step="result" hidden>
+      <div class="lt-quiz-result">
 
-      <header class="lt-doctor-quiz__result-header" data-result-header>
-        <p class="lt-doctor-quiz__result-kicker" data-result-kicker>Ihr Ergebnis</p>
-        <h2 class="lt-doctor-quiz__result-headline" data-result-headline></h2>
-        <p class="lt-doctor-quiz__result-sub" data-result-sub></p>
-        <p class="lt-doctor-quiz__result-trust">Wissenschaftlich begleitet von Prof. Dr. med. Volker Limmroth · Laboranalyse durch Eurofins Genomics</p>
-      </header>
+        {%- comment -%} 1 — Header {%- endcomment -%}
+        <section class="lt-quiz-result__header">
+          <p class="lt-quiz-result__kicker">Ihr Ergebnis</p>
+          <h2 class="lt-quiz-result__h1" data-result-headline></h2>
+          <p class="lt-quiz-result__sub" data-result-sub></p>
+          <p class="lt-doctor-quiz__result-trust">Wissenschaftlich begleitet von Prof. Dr. med. Volker Limmroth · Laboranalyse durch Eurofins Genomics</p>
+        </section>
 
-      <section class="lt-doctor-quiz__reports" aria-labelledby="reports-heading">
-        <h3 id="reports-heading" class="lt-doctor-quiz__section-headline">Im Befund besonders relevant für Sie</h3>
-        <div class="lt-doctor-quiz__report-grid" data-result-reports></div>
-        <p class="lt-doctor-quiz__science-note" data-result-genes></p>
-      </section>
+        {%- comment -%} 2 — Top-Reports (als Themes) {%- endcomment -%}
+        <section class="lt-quiz-result__themes-section">
+          <p class="lt-quiz-result__themes-lead">Im Befund besonders relevant für Sie</p>
+          <h3 class="lt-quiz-result__h2">Die Reports, die in Ihrer Praxis im Vordergrund stehen.</h3>
+          <div class="lt-quiz-result__themes" data-result-reports></div>
+          <p class="lt-doctor-quiz__science-note" data-result-genes></p>
+        </section>
 
-      <section class="lt-doctor-quiz__epi" aria-labelledby="epi-heading">
-        <h3 id="epi-heading" class="lt-doctor-quiz__section-headline">Aktueller Status (epigenetisch)</h3>
-        <p class="lt-doctor-quiz__section-sub">Zusätzlich zur DNA-Veranlagung misst der Test über Methylierungs-Analyse einen aktuellen Status — modifizierbar durch Lebensstil und sinnvoll als Verlaufsparameter.</p>
-        <div class="lt-doctor-quiz__epi-grid" data-result-epi></div>
-      </section>
+        {%- comment -%} 3 — Epigenetik {%- endcomment -%}
+        <section class="lt-quiz-result__themes-section">
+          <p class="lt-quiz-result__themes-lead">Aktueller Status (epigenetisch)</p>
+          <h3 class="lt-quiz-result__h2">Zusätzlich zur DNA-Veranlagung — Methylierungs-Status.</h3>
+          <p class="lt-quiz-result__sub" style="font-size: var(--text-body); margin-bottom: var(--space-4);">Modifizierbar durch Lebensstil und sinnvoll als Verlaufsparameter.</p>
+          <div class="lt-quiz-result__themes" data-result-epi></div>
+        </section>
 
-      <section class="lt-doctor-quiz__matrix-section" aria-labelledby="matrix-heading">
-        <h3 id="matrix-heading" class="lt-doctor-quiz__section-headline">Ein Test, 22 Bereiche — jede Fachrichtung wertet andere Schwerpunkte aus</h3>
+        {%- comment -%} 4 — Matrix mit Perspektiv-Wechsler {%- endcomment -%}
+        <section class="lt-quiz-result__scope lt-doctor-quiz__matrix-section">
+          <p class="lt-quiz-result__themes-lead">Ein Test, 22 Bereiche</p>
+          <h3 class="lt-quiz-result__h2">Jede Fachrichtung wertet andere Schwerpunkte aus.</h3>
+          <p class="lt-quiz-result__scope-sub">Wechseln Sie die Perspektive, um zu sehen, was Ihre Kolleg:innen aus einer anderen Fachrichtung sähen.</p>
 
-        <div class="lt-doctor-quiz__perspective" role="tablist" aria-label="Fachrichtungs-Perspektive wechseln" data-result-perspective></div>
+          <div class="lt-doctor-quiz__perspective" role="tablist" aria-label="Fachrichtungs-Perspektive wechseln" data-result-perspective></div>
 
-        <p class="lt-doctor-quiz__perspective-hint" data-perspective-hint>Klicken Sie eine andere Fachrichtung an, um zu sehen, welche Bereiche dort im Vordergrund stehen.</p>
-
-        <div class="lt-doctor-quiz__matrix">
-          <div class="lt-doctor-quiz__matrix-grid" data-matrix-dna></div>
-          <div class="lt-doctor-quiz__matrix-bar">
-            <p class="lt-doctor-quiz__matrix-bar-label">Epigenetische Bereiche</p>
-            <div class="lt-doctor-quiz__matrix-epi" data-matrix-epi></div>
+          <div class="lt-doctor-quiz__matrix">
+            <div class="lt-doctor-quiz__matrix-grid" data-matrix-dna></div>
+            <div class="lt-doctor-quiz__matrix-bar">
+              <p class="lt-doctor-quiz__matrix-bar-label">Epigenetische Bereiche</p>
+              <div class="lt-doctor-quiz__matrix-epi" data-matrix-epi></div>
+            </div>
           </div>
-        </div>
 
-        <p class="lt-doctor-quiz__matrix-footnote" data-matrix-footnote></p>
-      </section>
+          <p class="lt-doctor-quiz__matrix-footnote" data-matrix-footnote></p>
+        </section>
 
-      <section class="lt-doctor-quiz__cta" aria-labelledby="cta-heading">
-        <div class="lt-doctor-quiz__cta-card">
-          <p class="lt-doctor-quiz__cta-kicker">Empfehlungsprogramm</p>
-          <h3 id="cta-heading" class="lt-doctor-quiz__cta-headline">Gespräch zum Partnerprogramm</h3>
-          <p class="lt-doctor-quiz__cta-body">LIFETIME arbeitet mit Ärzt:innen zusammen, die unseren Test in passende Präventions- und Lebensstil-Gespräche integrieren. Im persönlichen Gespräch zeigen wir Ihnen die LIFETIME App (in der Ihre Patient:innen ihre Reports erhalten) und besprechen die Konditionen einer Zusammenarbeit.</p>
+        {%- comment -%} 5 — CTA (Live-Klassen) {%- endcomment -%}
+        <section class="lt-quiz-result__cta-section">
+          <div class="lt-quiz-result__cta-card lt-doctor-quiz__cta-card">
+            <div class="lt-quiz-result__cta-content">
+              <p class="lt-quiz-result__cta-kicker">Empfehlungsprogramm</p>
+              <h3 class="lt-quiz-result__cta-text">Gespräch zum Partnerprogramm.</h3>
+              <p class="lt-quiz-result__cta-sub">
+                LIFETIME arbeitet mit Ärzt:innen zusammen, die unseren Test in passende Präventions- und Lebensstil-Gespräche integrieren. Im persönlichen Gespräch zeigen wir Ihnen die LIFETIME App und besprechen die Konditionen einer Zusammenarbeit.
+              </p>
+              <a class="lt-quiz-result__cta-primary" data-cta-booking target="_blank" rel="noopener">
+                Gespräch vereinbaren →
+              </a>
 
-          <div class="lt-doctor-quiz__cta-buttons">
-            <a class="lt-quiz__cta lt-doctor-quiz__cta-primary" data-cta-booking target="_blank" rel="noopener">
-              Gespräch vereinbaren →
-            </a>
-            <a class="lt-quiz__cta lt-quiz__cta--ghost lt-doctor-quiz__cta-secondary" data-cta-secondary>
-              Mehr zum Test erfahren
-            </a>
+              <div class="lt-quiz-result__cta-divider" role="separator" aria-label="Oder">
+                <span class="lt-quiz-result__cta-divider-label">Oder</span>
+              </div>
+
+              <p class="lt-quiz-result__cta-kicker lt-quiz-result__cta-kicker--small">Lieber erst informieren?</p>
+              <p class="lt-quiz-result__cta-sub lt-quiz-result__cta-sub--small">
+                Sehen Sie sich die Produktseite an und informieren Sie sich in Ruhe über den Test.
+              </p>
+              <a class="lt-quiz-result__cta-secondary" data-cta-secondary>
+                Mehr zum Test erfahren →
+              </a>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      <footer class="lt-doctor-quiz__trust-footer">
-        <div class="lt-doctor-quiz__trust-col">
-          <p class="lt-doctor-quiz__trust-label">Wissenschaftliche Begleitung</p>
-          <p class="lt-doctor-quiz__trust-value">Prof. Dr. med. Volker Limmroth</p>
-        </div>
-        <div class="lt-doctor-quiz__trust-col">
-          <p class="lt-doctor-quiz__trust-label">Laboranalyse</p>
-          <p class="lt-doctor-quiz__trust-value">Eurofins Genomics<br>ISO 9001 · ISO 17025 · ISO 13485</p>
-        </div>
-        <div class="lt-doctor-quiz__trust-col">
-          <p class="lt-doctor-quiz__trust-label">Ablauf</p>
-          <p class="lt-doctor-quiz__trust-value">Speichelprobe von zuhause<br>Ergebnisse in 6–8 Wochen in der LIFETIME App</p>
-        </div>
-      </footer>
+        {%- comment -%} 6 — Trust-Footer {%- endcomment -%}
+        <section class="lt-doctor-quiz__trust-footer">
+          <div class="lt-doctor-quiz__trust-col">
+            <p class="lt-doctor-quiz__trust-label">Wissenschaftliche Begleitung</p>
+            <p class="lt-doctor-quiz__trust-value">Prof. Dr. med. Volker Limmroth</p>
+          </div>
+          <div class="lt-doctor-quiz__trust-col">
+            <p class="lt-doctor-quiz__trust-label">Laboranalyse</p>
+            <p class="lt-doctor-quiz__trust-value">Eurofins Genomics<br>ISO 9001 · ISO 17025 · ISO 13485</p>
+          </div>
+          <div class="lt-doctor-quiz__trust-col">
+            <p class="lt-doctor-quiz__trust-label">Ablauf</p>
+            <p class="lt-doctor-quiz__trust-value">Speichelprobe von zuhause<br>Ergebnisse in 6–8 Wochen in der LIFETIME App</p>
+          </div>
+        </section>
 
+      </div>
     </div>
 
   </div>
@@ -235,6 +269,13 @@
       "id": "intro_trust",
       "label": "Intro Trust-Zeile (optional)",
       "default": "Wissenschaftlich begleitet von Prof. Dr. med. Volker Limmroth"
+    },
+    {
+      "type": "text",
+      "id": "intro_image",
+      "label": "Intro-Bild (URL)",
+      "info": "Default: LIFETIME App in Hand (gleich wie Live-Quiz)",
+      "default": "https://cdn.shopify.com/s/files/1/0621/2173/8340/files/lifetime-app-hand-test.png?v=1778667349"
     },
     {
       "type": "header",
