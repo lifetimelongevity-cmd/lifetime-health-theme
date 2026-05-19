@@ -72,12 +72,12 @@
       secondary: ['vitamine', 'gesunde-alterung'],
       epi: ['biologisches-alter', 'entzuendung', 'epivitality'],
       reports: [
-        { name: 'Cholesterin',           category: 'herz',              note: 'Veranlagung im Lipid-Stoffwechsel — Grundlage für individualisierte Ernährungs- und Bewegungs-Empfehlungen.' },
-        { name: 'Herzkrankheits-Risiko', category: 'herz',              note: 'Polygene Veranlagung für Herz-Kreislauf-Belastbarkeit — auch ohne klassische Risikofaktoren sichtbar, geeignet für frühe präventive Beratung.' },
-        { name: 'Bluthochdruck',         category: 'herz',              note: 'Veranlagung der individuellen Blutdruck-Regulation — Basis für Lifestyle-Empfehlungen (Bewegung, Salz, Stress).' },
+        { name: 'Cholesterin',           category: 'herz',              genes: ['APOE', 'CETP', 'LDLR', 'ABCG5', 'ABCG8'], note: 'Veranlagung im Lipid-Stoffwechsel — Grundlage für individualisierte Ernährungs- und Bewegungs-Empfehlungen.' },
+        { name: 'Herzkrankheits-Risiko', category: 'herz',              genes: ['CDKN2B-AS1 (9p21)', 'APOE'], note: 'Polygene Veranlagung für Herz-Kreislauf-Belastbarkeit — auch ohne klassische Risikofaktoren sichtbar, geeignet für frühe präventive Beratung.' },
+        { name: 'Bluthochdruck',         category: 'herz',              genes: ['AGT', 'ACE', 'ADD1', 'ATP2B1'], note: 'Veranlagung der individuellen Blutdruck-Regulation — Basis für Lifestyle-Empfehlungen (Bewegung, Salz, Stress).' },
         { name: 'Vorhofflimmern',        category: 'herz',              note: 'Veranlagungs-Hinweis bei familiärer Häufung — präventive Lebensstil-Beratung (Koffein, Schlaf, Alkohol).' },
-        { name: 'Salz & Blutdruck',      category: 'stoffwechsel',      note: 'Salzsensitivität — individualisiert die Ernährungs-Empfehlung zur Blutdruck-Prävention.' },
-        { name: 'Zellstress & Herz',     category: 'gesunde-alterung',  note: 'Oxidativer-Stress-Status — orientiert antioxidative Ernährungs- und Supplement-Beratung.' },
+        { name: 'Salz & Blutdruck',      category: 'stoffwechsel',      genes: ['ADD1', 'STK39', 'AGT'], note: 'Salzsensitivität — individualisiert die Ernährungs-Empfehlung zur Blutdruck-Prävention.' },
+        { name: 'Zellstress & Herz',     category: 'gesunde-alterung',  genes: ['SOD2', 'NOS3', 'GPx'], note: 'Oxidativer-Stress-Status — orientiert antioxidative Ernährungs- und Supplement-Beratung.' },
       ],
       epiReports: [
         { name: 'Biologisches Alter',           note: 'MethylPace-Score als integrierter Endpunkt kardiovaskulärer Lebensstil-Wirkung.' },
@@ -95,13 +95,13 @@
       secondary: ['vitamine', 'supplements', 'stoffwechsel'],
       epi: ['muskelschwund', 'entzuendung'],
       reports: [
-        { name: 'LWS-Bandscheiben',          category: 'verletzung-regeneration', note: 'Veranlagung für die Belastbarkeit der Wirbelsäule — Grundlage für individualisierte Bewegungs- und Belastungs-Empfehlungen.' },
-        { name: 'Knochen-/Gelenkstabilität', category: 'verletzung-regeneration', note: 'Bindegewebs-Veranlagung — orientiert präventive Belastungs- und Trainings-Beratung.' },
-        { name: 'Achillessehne',             category: 'verletzung-regeneration', note: 'Sehnen-Belastbarkeit — individualisiert Trainings- und Aufwärm-Empfehlungen.' },
-        { name: 'Arthrose-Bezug',            category: 'verletzung-regeneration', note: 'Veranlagung im Gelenk-Stoffwechsel — Grundlage für frühe Bewegungs- und Ernährungs-Beratung.' },
-        { name: 'Reha-/Erholungstyp',        category: 'verletzung-regeneration', note: 'Individuelle Regenerations-Kinetik — orientiert Trainings- und Erholungs-Empfehlungen.' },
-        { name: 'Knochendichte',             category: 'stoffwechsel',            note: 'Veranlagung für die Knochendichte — Grundlage für präventive Bewegungs- und Nährstoff-Beratung.' },
-        { name: 'Vitamin D',                 category: 'vitamine',                note: 'Veranlagung in der Verwertung — erklärt unterschiedliche Antworten auf Substitution.' },
+        { name: 'LWS-Bandscheiben',          category: 'verletzung-regeneration', genes: ['COL1A1', 'COL9A3', 'COL11A1'], note: 'Veranlagung für die Belastbarkeit der Wirbelsäule — Grundlage für individualisierte Bewegungs- und Belastungs-Empfehlungen.' },
+        { name: 'Knochen-/Gelenkstabilität', category: 'verletzung-regeneration', genes: ['COL5A1', 'COL1A1'], note: 'Bindegewebs-Veranlagung — orientiert präventive Belastungs- und Trainings-Beratung.' },
+        { name: 'Achillessehne',             category: 'verletzung-regeneration', genes: ['COL5A1', 'MCF2L'], note: 'Sehnen-Belastbarkeit — individualisiert Trainings- und Aufwärm-Empfehlungen.' },
+        { name: 'Arthrose-Bezug',            category: 'verletzung-regeneration', genes: ['GDF5', 'COL11A1'], note: 'Veranlagung im Gelenk-Stoffwechsel — Grundlage für frühe Bewegungs- und Ernährungs-Beratung.' },
+        { name: 'Reha-/Erholungstyp',        category: 'verletzung-regeneration', genes: ['IL6', 'PPARGC1A'], note: 'Individuelle Regenerations-Kinetik — orientiert Trainings- und Erholungs-Empfehlungen.' },
+        { name: 'Knochendichte',             category: 'stoffwechsel',            genes: ['VDR', 'LRP1'], note: 'Veranlagung für die Knochendichte — Grundlage für präventive Bewegungs- und Nährstoff-Beratung.' },
+        { name: 'Vitamin D',                 category: 'vitamine',                genes: ['VDR', 'CYP2R1', 'GC', 'NADSYN1'], note: 'Veranlagung in der Verwertung — erklärt unterschiedliche Antworten auf Substitution.' },
         { name: 'Glucosamin/Chondroitin',    category: 'supplements',             note: 'Veranlagungs-Hinweis für die Response auf Knorpel-relevante Supplements.' },
       ],
       epiReports: [
@@ -120,16 +120,16 @@
       secondary: ['herz', 'sensitivitaeten', 'gesunde-alterung'],
       epi: ['biologisches-alter', 'entzuendung', 'immunscore'],
       reports: [
-        { name: 'Vitamin D',         category: 'vitamine',         note: 'Veranlagung in der Verwertung — erklärt unterschiedliche Antworten auf Substitution.' },
-        { name: 'Vitamin B12',       category: 'vitamine',         note: 'Veranlagung in Verwertung und Bedarf — Hintergrund für unklare Energie-Themen.' },
-        { name: 'Magnesium',         category: 'vitamine',         note: 'Veranlagung im Magnesium-Bedarf — Bezug zu Schlaf, Krampfneigung, Stress-Resilienz.' },
-        { name: 'Omega-3',           category: 'vitamine',         note: 'Veranlagung für Bedarf und Verstoffwechslung — Grundlage für Ernährungs- und Supplement-Beratung.' },
-        { name: 'Typ-2-Diabetes',    category: 'stoffwechsel',     note: 'Veranlagung im Glukose-Stoffwechsel — Grundlage für frühzeitige Lebensstil-Beratung.' },
-        { name: 'Adipositas-Risiko', category: 'stoffwechsel',     note: 'Genetisch erklärbarer Anteil der Gewichts-Veranlagung — individualisiert Ernährungs- und Bewegungs-Empfehlungen.' },
-        { name: 'Cholesterin',       category: 'herz',             note: 'Veranlagung im Lipid-Stoffwechsel — Grundlage für individualisierte Ernährungs- und Bewegungs-Beratung.' },
-        { name: 'Bluthochdruck',     category: 'herz',             note: 'Veranlagung in der Blutdruck-Regulation — Basis für Lifestyle-Beratung.' },
-        { name: 'Gluten',            category: 'sensitivitaeten',  note: 'Veranlagungs-Hinweis bei Verdacht auf Gluten-Sensitivität.' },
-        { name: 'Laktose',           category: 'sensitivitaeten',  note: 'Veranlagung in der Laktose-Verwertung — Hintergrund bei Verträglichkeits-Themen.' },
+        { name: 'Vitamin D',         category: 'vitamine',         genes: ['VDR', 'CYP2R1', 'GC', 'NADSYN1'], note: 'Veranlagung in der Verwertung — erklärt unterschiedliche Antworten auf Substitution.' },
+        { name: 'Vitamin B12',       category: 'vitamine',         genes: ['FUT2', 'MTR', 'MTRR'], note: 'Veranlagung in Verwertung und Bedarf — Hintergrund für unklare Energie-Themen.' },
+        { name: 'Magnesium',         category: 'vitamine',         genes: ['MUC1'], note: 'Veranlagung im Magnesium-Bedarf — Bezug zu Schlaf, Krampfneigung, Stress-Resilienz.' },
+        { name: 'Omega-3',           category: 'vitamine',         genes: ['FADS1', 'FADS2'], note: 'Veranlagung für Bedarf und Verstoffwechslung — Grundlage für Ernährungs- und Supplement-Beratung.' },
+        { name: 'Typ-2-Diabetes',    category: 'stoffwechsel',     genes: ['TCF7L2', 'CDKAL1', 'KCNJ11', 'SLC30A8'], note: 'Veranlagung im Glukose-Stoffwechsel — Grundlage für frühzeitige Lebensstil-Beratung.' },
+        { name: 'Adipositas-Risiko', category: 'stoffwechsel',     genes: ['FTO', 'MC4R', 'LEPR'], note: 'Genetisch erklärbarer Anteil der Gewichts-Veranlagung — individualisiert Ernährungs- und Bewegungs-Empfehlungen.' },
+        { name: 'Cholesterin',       category: 'herz',             genes: ['APOE', 'CETP', 'LDLR'], note: 'Veranlagung im Lipid-Stoffwechsel — Grundlage für individualisierte Ernährungs- und Bewegungs-Beratung.' },
+        { name: 'Bluthochdruck',     category: 'herz',             genes: ['AGT', 'ACE', 'ADD1'], note: 'Veranlagung in der Blutdruck-Regulation — Basis für Lifestyle-Beratung.' },
+        { name: 'Gluten',            category: 'sensitivitaeten',  genes: ['HLA', 'MYO9B'], note: 'Veranlagungs-Hinweis bei Verdacht auf Gluten-Sensitivität.' },
+        { name: 'Laktose',           category: 'sensitivitaeten',  genes: ['MCM6'], note: 'Veranlagung in der Laktose-Verwertung — Hintergrund bei Verträglichkeits-Themen.' },
       ],
       epiReports: [
         { name: 'Biologisches Alter',        note: 'Integrierter Endpunkt — sinnvolles Maß für die Wirkung von Lebensstil-Empfehlungen über Zeit.' },
@@ -148,15 +148,15 @@
       secondary: ['vitamine', 'gesunde-alterung'],
       epi: ['biologisches-alter', 'entzuendung', 'immunscore'],
       reports: [
-        { name: 'Typ-2-Diabetes',     category: 'stoffwechsel',    note: 'Polygene Veranlagung im Glukose-Stoffwechsel — Grundlage für frühe Lebensstil-Beratung.' },
-        { name: 'Adipositas-Risiko',  category: 'stoffwechsel',    note: 'Genetisch erklärbarer Anteil der Gewichts-Veranlagung — individualisiert Ernährungs-Beratung.' },
-        { name: 'Salz & Blutdruck',   category: 'stoffwechsel',    note: 'Salzsensitivität — individualisiert die Ernährungs-Empfehlung zur Blutdruck-Prävention.' },
-        { name: 'Cholesterin',        category: 'herz',            note: 'Veranlagung im Lipid-Stoffwechsel — Grundlage für Ernährungs- und Bewegungs-Beratung.' },
-        { name: 'Herzkrankheits-Risiko', category: 'herz',         note: 'Polygene Veranlagung für Herz-Kreislauf-Belastbarkeit — sichtbar auch ohne klassische Risikofaktoren.' },
-        { name: 'Gluten',             category: 'sensitivitaeten', note: 'Veranlagungs-Hinweis Gluten-Sensitivität — Hintergrund für Ernährungs-Beratung.' },
-        { name: 'Laktose',            category: 'sensitivitaeten', note: 'Veranlagung in der Laktose-Verwertung — Hintergrund für Ernährungs-Beratung.' },
-        { name: 'Zucker/Fruktose',    category: 'sensitivitaeten', note: 'Veranlagung in der Kohlenhydrat-Verträglichkeit — Hintergrund für Ernährungs-Beratung.' },
-        { name: 'Fettverträglichkeit', category: 'sensitivitaeten', note: 'Veranlagung in der Fett-Verträglichkeit — individualisiert Ernährungs-Empfehlungen.' },
+        { name: 'Typ-2-Diabetes',     category: 'stoffwechsel',    genes: ['TCF7L2', 'CDKAL1', 'KCNJ11', 'SLC30A8'], note: 'Polygene Veranlagung im Glukose-Stoffwechsel — Grundlage für frühe Lebensstil-Beratung.' },
+        { name: 'Adipositas-Risiko',  category: 'stoffwechsel',    genes: ['FTO', 'MC4R', 'LEPR'], note: 'Genetisch erklärbarer Anteil der Gewichts-Veranlagung — individualisiert Ernährungs-Beratung.' },
+        { name: 'Salz & Blutdruck',   category: 'stoffwechsel',    genes: ['ADD1', 'STK39', 'AGT'], note: 'Salzsensitivität — individualisiert die Ernährungs-Empfehlung zur Blutdruck-Prävention.' },
+        { name: 'Cholesterin',        category: 'herz',            genes: ['APOE', 'CETP', 'LDLR'], note: 'Veranlagung im Lipid-Stoffwechsel — Grundlage für Ernährungs- und Bewegungs-Beratung.' },
+        { name: 'Herzkrankheits-Risiko', category: 'herz',         genes: ['CDKN2B-AS1 (9p21)', 'APOE'], note: 'Polygene Veranlagung für Herz-Kreislauf-Belastbarkeit — sichtbar auch ohne klassische Risikofaktoren.' },
+        { name: 'Gluten',             category: 'sensitivitaeten', genes: ['HLA', 'MYO9B'], note: 'Veranlagungs-Hinweis Gluten-Sensitivität — Hintergrund für Ernährungs-Beratung.' },
+        { name: 'Laktose',            category: 'sensitivitaeten', genes: ['MCM6'], note: 'Veranlagung in der Laktose-Verwertung — Hintergrund für Ernährungs-Beratung.' },
+        { name: 'Zucker/Fruktose',    category: 'sensitivitaeten', genes: ['GCKR', 'ALDOB'], note: 'Veranlagung in der Kohlenhydrat-Verträglichkeit — Hintergrund für Ernährungs-Beratung.' },
+        { name: 'Fettverträglichkeit', category: 'sensitivitaeten', genes: ['APOA2', 'PPARG'], note: 'Veranlagung in der Fett-Verträglichkeit — individualisiert Ernährungs-Empfehlungen.' },
         { name: 'Stoffwechsel & Alter', category: 'gesunde-alterung', note: 'Langzeit-Veranlagung metabolischer Pfade — Endpunkt für präventive Beratung.' },
       ],
       epiReports: [
@@ -176,17 +176,17 @@
       secondary: ['vitamine', 'gesunde-alterung'],
       epi: ['biologisches-alter', 'entzuendung'],
       reports: [
-        { name: 'Kognition',              category: 'gesunde-alterung', note: 'Langzeit-Veranlagung kognitiver Reserve — Endpunkt präventiver Lebensstil-Beratung.' },
-        { name: 'Stress-Resilienz',       category: 'mental-health',    note: 'Veranlagungs-Phänotyp unter Belastung — Grundlage für Stress-Management-Beratung.' },
-        { name: 'Aufmerksamkeit',         category: 'mental-health',    note: 'Veranlagung der Aufmerksamkeits-Regulation — Hintergrund für Lifestyle-Empfehlungen (Schlaf, Ernährung, Bewegung).' },
-        { name: 'Gedächtnis',             category: 'mental-health',    note: 'Veranlagung für Lernen und Gedächtnis-Konsolidierung — Grundlage für individualisierte Empfehlungen.' },
-        { name: 'Warrior/Worrier-Profil', category: 'mental-health',    note: 'Phänotyp der Stress- und Reiz-Verarbeitung — orientiert präventive Beratung.' },
-        { name: 'COMT',                   category: 'psychologisch',    note: 'Dopamin-Abbau-Phänotyp — orientiert Stress-Management- und Lebensstil-Beratung.' },
-        { name: 'Emotionsregulation',     category: 'psychologisch',    note: 'Veranlagung für emotionale Reaktivität — Hintergrund für Beratung zu Stress und Schlaf.' },
+        { name: 'Kognition',              category: 'gesunde-alterung', genes: ['APOE', 'BDNF'], note: 'Langzeit-Veranlagung kognitiver Reserve — Endpunkt präventiver Lebensstil-Beratung.' },
+        { name: 'Stress-Resilienz',       category: 'mental-health',    genes: ['COMT', 'BDNF'], note: 'Veranlagungs-Phänotyp unter Belastung — Grundlage für Stress-Management-Beratung.' },
+        { name: 'Aufmerksamkeit',         category: 'mental-health',    genes: ['DRD2', 'DRD1', 'SLC6A3', 'COMT'], note: 'Veranlagung der Aufmerksamkeits-Regulation — Hintergrund für Lifestyle-Empfehlungen (Schlaf, Ernährung, Bewegung).' },
+        { name: 'Gedächtnis',             category: 'mental-health',    genes: ['BDNF', 'APOE'], note: 'Veranlagung für Lernen und Gedächtnis-Konsolidierung — Grundlage für individualisierte Empfehlungen.' },
+        { name: 'Warrior/Worrier-Profil', category: 'mental-health',    genes: ['COMT'], note: 'Phänotyp der Stress- und Reiz-Verarbeitung — orientiert präventive Beratung.' },
+        { name: 'COMT',                   category: 'psychologisch',    genes: ['COMT'], note: 'Dopamin-Abbau-Phänotyp — orientiert Stress-Management- und Lebensstil-Beratung.' },
+        { name: 'Emotionsregulation',     category: 'psychologisch',    genes: ['OXTR', 'MAOA'], note: 'Veranlagung für emotionale Reaktivität — Hintergrund für Beratung zu Stress und Schlaf.' },
         { name: 'Brain-Fog-Bezug',        category: 'psychologisch',    note: 'Veranlagungs-Hinweis kognitive Klarheit — Bezug zu Ernährung, Schlaf, Stress.' },
-        { name: 'Chronotyp',              category: 'schlaf',           note: 'Lerche/Eule-Phänotyp — individualisiert Schlafhygiene und Tagesstruktur.' },
-        { name: 'Schlafqualität',         category: 'schlaf',           note: 'Veranlagung in der Schlaf-Architektur — Grundlage für Schlafhygiene-Beratung.' },
-        { name: 'Stress & Schlaf',        category: 'stress',           note: 'Stress-Schlaf-Achse — Grundlage für individualisierte Lebensstil-Empfehlungen.' },
+        { name: 'Chronotyp',              category: 'schlaf',           genes: ['PER3', 'CLOCK', 'BMAL1'], note: 'Lerche/Eule-Phänotyp — individualisiert Schlafhygiene und Tagesstruktur.' },
+        { name: 'Schlafqualität',         category: 'schlaf',           genes: ['ABCC9'], note: 'Veranlagung in der Schlaf-Architektur — Grundlage für Schlafhygiene-Beratung.' },
+        { name: 'Stress & Schlaf',        category: 'stress',           genes: ['PER3', 'COMT'], note: 'Stress-Schlaf-Achse — Grundlage für individualisierte Lebensstil-Empfehlungen.' },
       ],
       epiReports: [
         { name: 'Gedächtnisalter',     note: 'Epigenetischer Endpunkt kognitiver Alterung — modifizierbar durch Lebensstil.' },
@@ -204,15 +204,15 @@
       secondary: ['supplements', 'stoffwechsel'],
       epi: ['muskelschwund', 'entzuendung', 'biologisches-alter'],
       reports: [
-        { name: 'VO₂max',              category: 'fitness',                 note: 'Veranlagung in der aeroben Trainierbarkeit — individualisiert Ausdauer-Empfehlungen.' },
-        { name: 'Muskelkraft',         category: 'fitness',                 note: 'Veranlagung im Kraft-Phänotyp — orientiert Trainings-Planung.' },
-        { name: 'Muskelausdauer',      category: 'fitness',                 note: 'Veranlagung im Ausdauer-Phänotyp — orientiert Trainings-Planung.' },
-        { name: 'Anaerobe Schwelle',   category: 'fitness',                 note: 'Veranlagung im Laktat-Stoffwechsel — orientiert Intensitäts-Bereiche.' },
-        { name: 'Erholungsfähigkeit',  category: 'fitness',                 note: 'Regenerations-Kinetik nach Belastung — orientiert Erholungs-Empfehlungen.' },
-        { name: 'Lean Mass',           category: 'fitness',                 note: 'Veranlagung im Magermasse-Aufbau — orientiert Krafttrainings- und Ernährungs-Empfehlungen.' },
-        { name: 'Training fasted/fed', category: 'fitness',                 note: 'Substrat-Nutzungs-Phänotyp — orientiert Ernährungs-Timing.' },
-        { name: 'Achillessehne',       category: 'verletzung-regeneration', note: 'Sehnen-Belastbarkeit — individualisiert Trainings- und Aufwärm-Empfehlungen.' },
-        { name: 'Reha-/Erholungstyp',  category: 'verletzung-regeneration', note: 'Individuelle Regenerations-Kinetik — orientiert Erholungs-Empfehlungen.' },
+        { name: 'VO₂max',              category: 'fitness',                 genes: ['PPARGC1A', 'ACE', 'VEGFA'], note: 'Veranlagung in der aeroben Trainierbarkeit — individualisiert Ausdauer-Empfehlungen.' },
+        { name: 'Muskelkraft',         category: 'fitness',                 genes: ['ACTN3', 'ACE'], note: 'Veranlagung im Kraft-Phänotyp — orientiert Trainings-Planung.' },
+        { name: 'Muskelausdauer',      category: 'fitness',                 genes: ['PPARA', 'PPARGC1A', 'ACE'], note: 'Veranlagung im Ausdauer-Phänotyp — orientiert Trainings-Planung.' },
+        { name: 'Anaerobe Schwelle',   category: 'fitness',                 genes: ['ADRB2', 'PPARA'], note: 'Veranlagung im Laktat-Stoffwechsel — orientiert Intensitäts-Bereiche.' },
+        { name: 'Erholungsfähigkeit',  category: 'fitness',                 genes: ['IL6', 'IL6-AS1'], note: 'Regenerations-Kinetik nach Belastung — orientiert Erholungs-Empfehlungen.' },
+        { name: 'Lean Mass',           category: 'fitness',                 genes: ['MSTN', 'ACTN3'], note: 'Veranlagung im Magermasse-Aufbau — orientiert Krafttrainings- und Ernährungs-Empfehlungen.' },
+        { name: 'Training fasted/fed', category: 'fitness',                 genes: ['PPARA', 'PPARG', 'FABP7'], note: 'Substrat-Nutzungs-Phänotyp — orientiert Ernährungs-Timing.' },
+        { name: 'Achillessehne',       category: 'verletzung-regeneration', genes: ['COL5A1', 'MCF2L'], note: 'Sehnen-Belastbarkeit — individualisiert Trainings- und Aufwärm-Empfehlungen.' },
+        { name: 'Reha-/Erholungstyp',  category: 'verletzung-regeneration', genes: ['IL6', 'PPARGC1A'], note: 'Individuelle Regenerations-Kinetik — orientiert Erholungs-Empfehlungen.' },
         { name: 'Kreatin',             category: 'supplements',             note: 'Veranlagungs-Hinweis Kreatin-Response.' },
       ],
       epiReports: [
@@ -232,11 +232,11 @@
       epi: ['biologisches-alter', 'entzuendung', 'immunscore'],
       reports: [
         { name: 'Vitamin-/Mineralbedarf', category: 'gesunde-alterung', note: 'Übersicht systematischer Bedarfs-Veranlagungen.' },
-        { name: 'Langlebigkeit',          category: 'gesunde-alterung', note: 'Polygene Langzeit-Veranlagung — Endpunkt präventiver Beratung.' },
-        { name: 'Vitamin D',              category: 'vitamine',         note: 'Veranlagung in der Verwertung.' },
-        { name: 'Vitamin B12',            category: 'vitamine',         note: 'Veranlagung in der Verwertung — Hintergrund für Energie-Themen.' },
-        { name: 'Typ-2-Diabetes',         category: 'stoffwechsel',     note: 'Veranlagung im Glukose-Stoffwechsel — Grundlage präventiver Beratung.' },
-        { name: 'Cholesterin',            category: 'herz',             note: 'Veranlagung im Lipid-Stoffwechsel.' },
+        { name: 'Langlebigkeit',          category: 'gesunde-alterung', genes: ['FOXO3', 'SIRT1', 'APOE'], note: 'Polygene Langzeit-Veranlagung — Endpunkt präventiver Beratung.' },
+        { name: 'Vitamin D',              category: 'vitamine',         genes: ['VDR', 'CYP2R1', 'GC'], note: 'Veranlagung in der Verwertung.' },
+        { name: 'Vitamin B12',            category: 'vitamine',         genes: ['FUT2', 'MTR'], note: 'Veranlagung in der Verwertung — Hintergrund für Energie-Themen.' },
+        { name: 'Typ-2-Diabetes',         category: 'stoffwechsel',     genes: ['TCF7L2', 'CDKAL1'], note: 'Veranlagung im Glukose-Stoffwechsel — Grundlage präventiver Beratung.' },
+        { name: 'Cholesterin',            category: 'herz',             genes: ['APOE', 'CETP'], note: 'Veranlagung im Lipid-Stoffwechsel.' },
       ],
       epiReports: [
         { name: 'Biologisches Alter',        note: 'Integrierter Endpunkt präventiver Lebensstil-Beratung.' },
@@ -323,6 +323,19 @@
       // Back-Button
       if (this.backBtn) this.backBtn.addEventListener('click', () => this.goBack());
 
+      // Close-Button
+      const closeBtn = this.root.querySelector('[data-quiz-close]');
+      if (closeBtn) closeBtn.addEventListener('click', () => {
+        if (this.state.step === 'result') {
+          // Im Result: einfach zurück zum Intro ohne Bestätigung
+          this.resetQuiz();
+        } else {
+          if (confirm('Quiz beenden? Ihre Auswahl geht verloren.')) {
+            this.resetQuiz();
+          }
+        }
+      });
+
       // Q1 Karten (Single-Select)
       const q1 = this.steps.q1;
       if (q1) {
@@ -388,6 +401,23 @@
       const order = ['intro', 'q1', 'q2'];
       const idx = order.indexOf(this.state.step);
       if (idx > 0) this.goTo(order[idx - 1]);
+    }
+
+    resetQuiz() {
+      this.state = createInitialState();
+      // Visuelle Reset-Pässe: alle Card-Selections löschen
+      this.root.querySelectorAll('.lt-quiz-card.is-selected').forEach((c) => {
+        c.classList.remove('is-selected', 'is-disabled');
+        c.removeAttribute('aria-checked');
+        c.removeAttribute('aria-pressed');
+        c.disabled = false;
+      });
+      // Advance-Button-State zurücksetzen
+      const advance = this.root.querySelector('[data-quiz-advance]');
+      const advanceLabel = this.root.querySelector('[data-quiz-advance-label]');
+      if (advance) advance.disabled = true;
+      if (advanceLabel) advanceLabel.textContent = 'Wählen Sie bis zu 2 Bereiche';
+      this.goTo('intro');
     }
 
     goTo(stepId) {
@@ -503,6 +533,14 @@
         reportsEl.innerHTML = sortedReports.map((r) => {
           const cat = DNA_CATEGORIES.find((c) => c.id === r.category);
           const catLabel = cat ? cat.label : '';
+          const genesHtml = (r.genes && r.genes.length)
+            ? `<div class="lt-doctor-quiz__gene-pills" aria-label="Untersuchte Marker">
+                 <span class="lt-doctor-quiz__gene-pills-label">Marker:</span>
+                 ${r.genes.map((g) => `<span class="lt-doctor-quiz__gene-pill">${escapeHtml(g)}</span>`).join('')}
+               </div>`
+            : `<div class="lt-doctor-quiz__gene-pills lt-doctor-quiz__gene-pills--empty">
+                 <span class="lt-doctor-quiz__gene-pills-label">Polygen — mehrere Marker.</span>
+               </div>`;
           return `
             <article class="lt-quiz-result-theme">
               <div class="lt-quiz-result-theme__header">
@@ -512,15 +550,16 @@
                 </div>
               </div>
               <p class="lt-quiz-result-theme__lead">${escapeHtml(r.note)}</p>
+              ${genesHtml}
             </article>
           `;
         }).join('');
       }
 
-      // Gene-Footnote (Sekundär-Info)
+      // Methodik-Footnote (am Ende des Reports-Blocks)
       const genesEl = this.root.querySelector('[data-result-genes]');
-      if (genesEl && specialty.genes && specialty.genes.length) {
-        genesEl.innerHTML = `<em>Wissenschaftliche Grundlage:</em> u.a. ${specialty.genes.map(escapeHtml).join(' · ')}. Im Befund sehen Ihre Patient:innen die interpretierte Aussage pro Report, nicht die Rohdaten.`;
+      if (genesEl) {
+        genesEl.innerHTML = `<em>Zur Methodik:</em> Jeder Report beruht auf peer-reviewed Studien zu den genannten Markern. Im Befund sehen Ihre Patient:innen pro Report eine interpretierte Aussage (Veranlagungs-Stufe + individualisierte Empfehlung) — nicht die Genotyp-Rohdaten. Die wissenschaftliche Begleitung übernimmt Prof. Dr. med. Volker Limmroth.`;
       }
 
       // Epigenetik-Karten — als lt-quiz-result-theme Karten
@@ -542,8 +581,8 @@
       // Perspektiv-Wechsler
       this.renderPerspectiveChips();
 
-      // Matrix (initial mit aktueller Fachrichtung)
-      this.renderMatrix(specialtyId);
+      // Scope-Pills (initial mit aktueller Fachrichtung)
+      this.renderScope(specialtyId);
 
       // CTA URLs mit UTM
       const focusStr = focus.join('+') || 'none';
@@ -591,17 +630,17 @@
           const from = this.state.perspective;
           this.state.perspective = id;
           this.renderPerspectiveChips();
-          this.renderMatrix(id);
+          this.renderScope(id);
           pushDataLayer({ event: 'doctor_quiz_perspective_switched', from: from, to: id });
         });
       });
     }
 
-    renderMatrix(specialtyId) {
+    renderScope(specialtyId) {
       const specialty = SPECIALTIES[specialtyId] || SPECIALTIES.andere;
       const focus = this.state.answers.focus.slice();
 
-      // Boost-Kategorien aus Fokus (nur wenn aktueller Perspektiv = ursprüngliche Auswahl)
+      // Boost-Kategorien aus Fokus (nur wenn Perspektive == Ursprungs-Auswahl)
       const useBoost = specialtyId === this.state.answers.specialty;
       const focusBoostCats = new Set();
       const focusBoostEpi = new Set();
@@ -615,42 +654,33 @@
         });
       }
 
-      const primarySet = new Set(specialty.primary);
-      const secondarySet = new Set(specialty.secondary);
-      const epiSet = new Set(specialty.epi);
+      // Relevante DNA-Kategorien = primary + secondary + focus-boost
+      const relevantCats = new Set([
+        ...specialty.primary,
+        ...specialty.secondary,
+        ...focusBoostCats,
+      ]);
 
-      const dnaWrap = this.root.querySelector('[data-matrix-dna]');
-      if (dnaWrap) {
-        dnaWrap.innerHTML = DNA_CATEGORIES.map((cat) => {
-          let stage = 'off';
-          if (primarySet.has(cat.id) || focusBoostCats.has(cat.id)) stage = 'primary';
-          else if (secondarySet.has(cat.id)) stage = 'secondary';
-          return `
-            <div class="lt-doctor-quiz__matrix-cell is-${stage}" title="${escapeHtml(cat.tooltip)}">
-              <span class="lt-doctor-quiz__matrix-cell-label">${escapeHtml(cat.label)}</span>
-            </div>
-          `;
+      const pillsEl = this.root.querySelector('[data-result-scope-pills]');
+      if (pillsEl) {
+        pillsEl.innerHTML = DNA_CATEGORIES.map((cat) => {
+          const isRelevant = relevantCats.has(cat.id);
+          return `<li class="lt-quiz-result__pill ${isRelevant ? 'is-relevant' : ''}" data-scope-cat="${escapeHtml(cat.id)}" title="${escapeHtml(cat.tooltip)}">${escapeHtml(cat.label)}</li>`;
         }).join('');
       }
 
-      const epiWrap = this.root.querySelector('[data-matrix-epi]');
-      if (epiWrap) {
-        epiWrap.innerHTML = EPIGENETICS.map((e) => {
-          const isActive = epiSet.has(e.id) || focusBoostEpi.has(e.id);
-          return `
-            <div class="lt-doctor-quiz__matrix-cell lt-doctor-quiz__matrix-cell--epi is-${isActive ? 'primary' : 'off'}" title="${escapeHtml(e.tooltip)}">
-              <span class="lt-doctor-quiz__matrix-cell-label">${escapeHtml(e.label)}</span>
-            </div>
-          `;
-        }).join('');
-      }
-
-      // Footnote: X von 22 Bereichen
-      const allPrimary = new Set([...primarySet, ...focusBoostCats]);
-      const relevantCount = allPrimary.size + epiSet.size + focusBoostEpi.size;
-      const fn = this.root.querySelector('[data-matrix-footnote]');
-      if (fn) {
-        fn.textContent = `Von 22 Bereichen sind ${relevantCount} für ${specialty.label} direkt im Vordergrund — die übrigen liefern Kontext und werden im Befund nicht versteckt.`;
+      // Epigenetik als Inline-Strong-Liste, wie Live-Quiz
+      const epiRelevant = new Set([...specialty.epi, ...focusBoostEpi]);
+      const epiLabels = EPIGENETICS
+        .filter((e) => epiRelevant.has(e.id))
+        .map((e) => `<strong>${escapeHtml(e.label)}</strong>`);
+      const epiEl = this.root.querySelector('[data-result-scope-epi]');
+      if (epiEl) {
+        if (epiLabels.length) {
+          epiEl.innerHTML = `Plus die für ${escapeHtml(specialty.label)} relevanten epigenetischen Bereiche: ${epiLabels.join(' · ')}.`;
+        } else {
+          epiEl.innerHTML = `Plus 6 epigenetische Bereiche (biologisches Alter, EpiVitality, Immunscore, Entzündung, Muskelschwund, Körperalter).`;
+        }
       }
     }
   }
