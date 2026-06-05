@@ -20,6 +20,21 @@
       .replace(/'/g, '&#39;');
   }
 
+  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+  // Animiert el.textContent von from→to (gerundet) über duration ms, ease-out.
+  function countUp(el, from, to, duration) {
+    if (!el) return;
+    const startTs = performance.now();
+    function frame(now) {
+      const t = Math.min(1, (now - startTs) / duration);
+      el.textContent = Math.round(from + (to - from) * easeOutCubic(t));
+      if (t < 1) requestAnimationFrame(frame);
+      else el.textContent = to;
+    }
+    requestAnimationFrame(frame);
+  }
+
   const STEPS = ['intro', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'loading', 'result'];
   const QUESTION_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8'];
   const FULLSCREEN_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'loading', 'result'];
@@ -656,16 +671,55 @@
       const subEl = result.querySelector('[data-result-sub]');
       if (subEl) subEl.textContent = getResultSummary();
 
-      // 1b — Bio-Age-Schätzung; Indikator-Dreieck via Direction-Class auf Root
+      // 1b — Bio-Age-Schätzung: Count-up + ruhige Delta-Skala (Signatur-Moment)
       const bioAge = computeBioAge(this.state.answers);
       const passEl = result.querySelector('[data-bioage-pass]');
       const bioEl = result.querySelector('[data-bioage-num]');
       const bioAgeRoot = result.querySelector('[data-result-bioage]');
+      const scaleFill = result.querySelector('[data-bioage-scale-fill]');
+      const scaleBio = result.querySelector('[data-bioage-scale-bio]');
+      const deltaEl = result.querySelector('[data-bioage-delta]');
+
+      if (bioAgeRoot) {
+        bioAgeRoot.classList.remove('is-up', 'is-down', 'is-zero', 'is-revealed');
+        bioAgeRoot.classList.add('is-' + bioAge.direction);
+      }
+
+      // Delta-Caption — ruhig, faktisch (kein medizinischer Claim; Disclaimer steht darunter)
+      const dAbs = Math.abs(bioAge.delta);
+      const dUnit = dAbs === 1 ? 'Jahr' : 'Jahre';
+      if (deltaEl) {
+        if (bioAge.direction === 'up') deltaEl.innerHTML = 'Geschätzt rund <strong>' + dAbs + '&nbsp;' + dUnit + '</strong> über deinem Pass-Alter.';
+        else if (bioAge.direction === 'down') deltaEl.innerHTML = 'Geschätzt rund <strong>' + dAbs + '&nbsp;' + dUnit + '</strong> unter deinem Pass-Alter.';
+        else deltaEl.textContent = 'Geschätzt im Einklang mit deinem Pass-Alter.';
+      }
+
+      // Skala-Zielposition (24-Jahre-Fenster, Pass = Mitte 50 %)
+      const _span = 24;
+      const _bioPct = Math.max(4, Math.min(96, ((bioAge.delta + _span / 2) / _span) * 100));
+      const _lo = Math.min(50, _bioPct), _hi = Math.max(50, _bioPct);
+
+      // Fallback: Endwerte sofort (falls keine Animation läuft)
       if (passEl) passEl.textContent = bioAge.chronoAge;
       if (bioEl) bioEl.textContent = bioAge.bioAge;
-      if (bioAgeRoot) {
-        bioAgeRoot.classList.remove('is-up', 'is-down', 'is-zero');
-        bioAgeRoot.classList.add('is-' + bioAge.direction);
+
+      const _reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (_reduce) {
+        if (scaleBio) scaleBio.style.left = _bioPct + '%';
+        if (scaleFill) { scaleFill.style.left = _lo + '%'; scaleFill.style.width = (_hi - _lo) + '%'; }
+        if (bioAgeRoot) bioAgeRoot.classList.add('is-revealed');
+      } else {
+        const _startVal = Math.max(18, bioAge.chronoAge - 10);
+        if (passEl) passEl.textContent = _startVal;
+        if (bioEl) bioEl.textContent = _startVal;
+        // Nach dem nächsten Frame (Result-Step ist dann sichtbar): Reveal + Count-up + Skala
+        requestAnimationFrame(function () {
+          if (bioAgeRoot) bioAgeRoot.classList.add('is-revealed');
+          countUp(passEl, _startVal, bioAge.chronoAge, 1000);
+          countUp(bioEl, _startVal, bioAge.bioAge, 1000);
+          if (scaleBio) scaleBio.style.left = _bioPct + '%';
+          if (scaleFill) { scaleFill.style.left = _lo + '%'; scaleFill.style.width = (_hi - _lo) + '%'; }
+        });
       }
 
       // 2 — Top-3 als prägnante Themen-Blöcke (ohne Gen-Marker)

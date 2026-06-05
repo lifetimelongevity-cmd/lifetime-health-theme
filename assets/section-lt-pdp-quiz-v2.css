@@ -1144,32 +1144,94 @@ body.lt-quiz-fullscreen .header-spacer {
   color: var(--color-teal);
 }
 
-/* Indikator-Dreieck rechts neben dem biologischen Alter
-   (CSS-Triangle, skaliert mit der Schrift) */
-.lt-quiz-result__bioage-num-wrap {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-3);
+/* ── Reveal der Bio-Alter-Karte (Signatur-Moment, via JS-Klasse is-revealed) ──── */
+.lt-quiz-result__bioage.is-revealed {
+  animation: lt-bioage-in 700ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+@keyframes lt-bioage-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
 }
 
-.lt-quiz-result__bioage-indicator {
-  display: inline-block;
+/* ── Ruhige Delta-Skala (ersetzt das rote Indikator-Dreieck) ──────────────────── */
+.lt-quiz-result__bioage-scale {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  height: 16px;
+  margin: var(--space-3) auto 0;
+}
+.lt-quiz-result__bioage-scale::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: var(--radius-full);
+  background: var(--color-border-default);
+}
+.lt-quiz-result__bioage-scale-fill {
+  position: absolute;
+  top: 50%;
+  left: 50%;
   width: 0;
-  height: 0;
-  border-left: 9px solid transparent;
-  border-right: 9px solid transparent;
+  height: 3px;
+  transform: translateY(-50%);
+  border-radius: var(--radius-full);
+  background: var(--color-text-muted);
+  transition: left 900ms cubic-bezier(0.22, 0.61, 0.36, 1), width 900ms cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-
-.lt-quiz-result__bioage.is-up .lt-quiz-result__bioage-indicator {
-  border-bottom: 14px solid var(--color-promo);
+.lt-quiz-result__bioage-scale-dot {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-primary);
+  transform: translate(-50%, -50%);
 }
-
-.lt-quiz-result__bioage.is-down .lt-quiz-result__bioage-indicator {
-  border-top: 14px solid var(--color-teal);
+.lt-quiz-result__bioage-scale-dot--pass {
+  left: 50%;
+  border: 2px solid var(--color-text-muted);
 }
+.lt-quiz-result__bioage-scale-dot--bio {
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--color-text-muted);
+  z-index: 2;
+  transition: left 900ms cubic-bezier(0.22, 0.61, 0.36, 1), border-color 500ms ease, box-shadow 500ms ease;
+}
+.lt-quiz-result__bioage.is-up .lt-quiz-result__bioage-scale-fill { background: var(--color-promo); }
+.lt-quiz-result__bioage.is-up .lt-quiz-result__bioage-scale-dot--bio {
+  border-color: var(--color-promo);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-promo) 16%, transparent);
+}
+.lt-quiz-result__bioage.is-down .lt-quiz-result__bioage-scale-fill { background: var(--color-teal); }
+.lt-quiz-result__bioage.is-down .lt-quiz-result__bioage-scale-dot--bio {
+  border-color: var(--color-teal);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-teal) 16%, transparent);
+}
+.lt-quiz-result__bioage.is-zero .lt-quiz-result__bioage-scale-fill { display: none; }
 
-.lt-quiz-result__bioage.is-zero .lt-quiz-result__bioage-indicator {
-  display: none;
+/* ── Delta-Caption (ruhige Wort-Aussage statt Alarm-Dreieck) ──────────────────── */
+.lt-quiz-result__bioage-delta {
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--color-text-secondary);
+}
+.lt-quiz-result__bioage.is-up .lt-quiz-result__bioage-delta strong { color: var(--color-promo); }
+.lt-quiz-result__bioage.is-down .lt-quiz-result__bioage-delta strong { color: var(--color-teal-dark); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lt-quiz-result__bioage.is-revealed { animation: none; }
+  .lt-quiz-result__bioage-scale-fill,
+  .lt-quiz-result__bioage-scale-dot--bio { transition: none; }
 }
 
 .lt-quiz-result__bioage-disclaimer {
