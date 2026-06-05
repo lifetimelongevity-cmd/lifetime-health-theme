@@ -713,13 +713,13 @@
         pill.classList.toggle('is-relevant', activeCats.has(pill.dataset.scopeCat));
       });
 
-      // 4 — Primary PDP-CTA mit top1 anreichern
-      const pdpCta = result.querySelector('[data-result-pdp-cta]');
-      if (pdpCta && top[0]) {
+      // 4 — Alle PDP-CTAs (früh + Card + sticky) mit top1 anreichern
+      result.querySelectorAll('[data-result-pdp-cta]').forEach((pdpCta) => {
+        if (!top[0]) return;
         const url = new URL(pdpCta.getAttribute('href'), window.location.origin);
         url.searchParams.set('top1', top[0]);
         pdpCta.setAttribute('href', url.pathname + url.search);
-      }
+      });
     }
 
     bindResultCta() {

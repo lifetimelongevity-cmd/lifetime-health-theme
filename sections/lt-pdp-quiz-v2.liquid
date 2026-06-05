@@ -11,10 +11,16 @@
 {%- endcomment -%}
 
 {{ 'section-lt-pdp-quiz-v2.css' | asset_url | stylesheet_tag }}
+{%- comment -%}
+  Phosphor-Thin wird NUR für Quiz-/Result-Icons gebraucht (Intro/First-Screen nutzt keine Icons).
+  Daher NICHT render-blocking laden: preconnect + async media-toggle. noscript-Fallback bleibt.
+  (Mobile-LP-Audit 2026-06-04, F2 — vorher 2× render-blocking von unpkg.)
+{%- endcomment -%}
+<link rel="preconnect" href="https://unpkg.com" crossorigin>
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/thin/style.css" media="print" onload="this.media='all'">
 <noscript>
   <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/thin/style.css">
 </noscript>
-<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/thin/style.css">
 
 {%- comment -%} Sitelink-Alias: kurzes #quiz statt #shopify-section-template--...__quiz_v2 {%- endcomment -%}
 <a id="quiz" aria-hidden="true" tabindex="-1" style="display:block;scroll-margin-top:100px;"></a>
@@ -86,13 +92,18 @@
 
         {%- assign _intro_image = section.settings.intro_image | default: 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/lifetime-app-hand-test.png?v=1778667349' -%}
         <aside class="lt-quiz__intro-visual" aria-hidden="true">
+          {%- comment -%}
+            Mobile-LP-Audit 2026-06-04, F3: Auf Mobile (~86% Traffic) stapelt dieses Bild UNTER dem Fold
+            (Content/CTAs stehen davor). eager + fetchpriority=high klaute dort LCP-Priorität vom
+            Above-the-Fold-Content. → lazy + ohne fetchpriority. Auf Desktop liegt das Bild im Initial-
+            Viewport, lazy lädt es dort trotzdem sofort.
+          {%- endcomment -%}
           <img
             class="lt-quiz__intro-visual-img"
             src="{{ _intro_image }}"
             alt=""
-            loading="eager"
+            loading="lazy"
             decoding="async"
-            fetchpriority="high"
           >
         </aside>
       </div>
