@@ -255,7 +255,7 @@
     const topics = topThree
       .map((id) => (NEEDS_DETAIL[id] || {}).topic)
       .filter(Boolean);
-    if (topics.length === 0) return 'Hier ist dein Bild.';
+    if (topics.length === 0) return 'Dein persönliches Ergebnis.';
     return topics.map((t) => `${t}.`).join(' ');
   }
 
@@ -656,14 +656,7 @@
       const age = this.state.answers.age || 40;
       const gender = this.state.answers.gender;
 
-      // 0 — Hero-Bild nach Geschlecht swappen (diverse → Fallback Mann)
-      const heroEl = result.querySelector('[data-result-hero]');
-      if (heroEl) {
-        const targetSrc = gender === 'female'
-          ? heroEl.dataset.heroFemale
-          : heroEl.dataset.heroMale;
-        if (targetSrc && heroEl.src !== targetSrc) heroEl.src = targetSrc;
-      }
+      // 0 — Hero-Bild entfernt: Data-as-Hero (Headline + Bio-Alter-Reveal tragen den Hero)
 
       // 1 — H1 = die drei Topic-Namen + altersgestimmte 2-Satz-Sub
       const h1El = result.querySelector('[data-result-h1]');
