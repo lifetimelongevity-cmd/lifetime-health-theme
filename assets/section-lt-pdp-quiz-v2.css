@@ -1059,6 +1059,15 @@ body.lt-quiz-fullscreen .header-spacer {
   font-weight: 500;
 }
 
+/* #7 — Leichter orchestrierter Eintritt des Openings (Header steigt rein, Bio-Alter folgt mit #1-Reveal) */
+.lt-quiz--in-result .lt-quiz-result__header {
+  animation: lt-result-rise 600ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+@keyframes lt-result-rise {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: none; }
+}
+
 
 /* ── Bio-Age-Schätzung (Pass ↔ Biologisch side-by-side) ──────── */
 .lt-quiz-result__bioage {
@@ -1211,7 +1220,8 @@ body.lt-quiz-fullscreen .header-spacer {
 .lt-quiz-result__bioage.is-down .lt-quiz-result__bioage-delta strong { color: var(--color-teal-dark); }
 
 @media (prefers-reduced-motion: reduce) {
-  .lt-quiz-result__bioage.is-revealed { animation: none; }
+  .lt-quiz-result__bioage.is-revealed,
+  .lt-quiz--in-result .lt-quiz-result__header { animation: none; }
   .lt-quiz-result__bioage-scale-fill,
   .lt-quiz-result__bioage-scale-dot--bio { transition: none; }
 }
@@ -1324,6 +1334,35 @@ body.lt-quiz-fullscreen .header-spacer {
   color: var(--color-text-primary);
 }
 
+/* #3 — Gen-Marker als gestaltete Tokens (Lato uppercase — kein neuer Font) */
+.lt-quiz-result-theme__markers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.lt-quiz-result-theme__marker {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  padding: 3px var(--space-2);
+}
+
+/* #4 — #1 hervorgehoben (größerer Titel + voller Lead); #2/#3 mit gekürztem Lead */
+.lt-quiz-result-theme--featured { gap: var(--space-4); }
+.lt-quiz-result-theme--featured .lt-quiz-result-theme__title { font-size: 24px; }
+.lt-quiz-result-theme:not(.lt-quiz-result-theme--featured) .lt-quiz-result-theme__lead {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
 
 
 
@@ -1378,11 +1417,11 @@ body.lt-quiz-fullscreen .header-spacer {
   transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
 }
 
-/* Active: weißer Fill + dunkler Rahmen — kein teal-Tint */
+/* #5 — Matched: teal-getönt + teal-Rahmen, klar dominant vs. die gedämpften übrigen */
 .lt-quiz-result__pill.is-relevant {
-  background: var(--color-surface-primary);
-  color: var(--color-text-primary);
-  border-color: var(--color-text-primary);
+  background: color-mix(in srgb, var(--color-teal) 14%, var(--color-surface-primary));
+  color: var(--color-teal-dark);
+  border-color: var(--color-teal);
   font-weight: 600;
 }
 

@@ -715,7 +715,7 @@
         });
       }
 
-      // 2 — Top-3 als prägnante Themen-Blöcke (ohne Gen-Marker)
+      // 2 — Top-3 als Themen-Blöcke MIT Gen-Markern; #1 hervorgehoben
       const themesEl = result.querySelector('[data-result-themes]');
       if (themesEl) {
         themesEl.innerHTML = '';
@@ -723,8 +723,11 @@
           const def = NEEDS_DETAIL[needId];
           if (!def) return;
           const article = document.createElement('article');
-          article.className = 'lt-quiz-result-theme';
+          article.className = 'lt-quiz-result-theme' + (idx === 0 ? ' lt-quiz-result-theme--featured' : '');
           const iconName = def.icon ? escapeHtml(def.icon) : '';
+          const markers = (def.genes || [])
+            .map((g) => `<span class="lt-quiz-result-theme__marker">${escapeHtml(g.name)}</span>`)
+            .join('');
           article.innerHTML =
             `<header class="lt-quiz-result-theme__header">` +
               (iconName
@@ -735,6 +738,7 @@
                 `<h4 class="lt-quiz-result-theme__title">${escapeHtml(def.title)}</h4>` +
               `</div>` +
             `</header>` +
+            (markers ? `<div class="lt-quiz-result-theme__markers" aria-label="Relevante Gen-Marker">${markers}</div>` : '') +
             `<p class="lt-quiz-result-theme__lead">${escapeHtml(def.short)}</p>`;
           themesEl.appendChild(article);
         });
@@ -756,9 +760,14 @@
       const activeCats = new Set();
       top.forEach((n) => (NEED_CATEGORIES_LOCAL[n] || []).forEach((c) => activeCats.add(c)));
 
+      let scopeMatched = 0;
       result.querySelectorAll('[data-scope-cat]').forEach((pill) => {
-        pill.classList.toggle('is-relevant', activeCats.has(pill.dataset.scopeCat));
+        const rel = activeCats.has(pill.dataset.scopeCat);
+        pill.classList.toggle('is-relevant', rel);
+        if (rel) scopeMatched += 1;
       });
+      const scopeCountEl = result.querySelector('[data-result-scope-count]');
+      if (scopeCountEl) scopeCountEl.textContent = scopeMatched + (scopeMatched === 1 ? ' Bereich' : ' Bereiche');
 
       // 4 — Alle PDP-CTAs (früh + Card + sticky) mit top1 anreichern
       result.querySelectorAll('[data-result-pdp-cta]').forEach((pdpCta) => {
