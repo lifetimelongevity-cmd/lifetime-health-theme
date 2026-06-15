@@ -161,8 +161,12 @@
                 src="{{ hpva_direct_video_src | escape }}"
               ></video>
             {%- elsif hpva_is_youtube and hpva_youtube_id != blank -%}
+              {%- comment -%} loading=lazy: YouTube-Embed ist auf der Quiz-LP unter dem Fold (Section 3 von 6).
+                 Defer spart den schwersten Netzwerk-Posten beim Initial-Load auf Mobile; Autoplay feuert
+                 weiterhin, sobald das iframe nahe Viewport lädt. (Mobile-LP-/QS-Diagnose 2026-06-09, C) {%- endcomment -%}
               <iframe
                 class="hpva__iframe"
+                loading="lazy"
                 src="https://www.youtube.com/embed/{{ hpva_youtube_id }}?playsinline=1&rel=0&controls={{ hpva_youtube_controls }}{% if section.settings.video_autoplay %}&autoplay=1{% endif %}{% if section.settings.video_muted %}&mute=1{% endif %}{% if section.settings.video_loop %}&loop=1&playlist={{ hpva_youtube_id }}{% endif %}"
                 allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
                 allowfullscreen
@@ -171,6 +175,7 @@
             {%- elsif hpva_is_vimeo and hpva_vimeo_id != blank -%}
               <iframe
                 class="hpva__iframe"
+                loading="lazy"
                 src="https://player.vimeo.com/video/{{ hpva_vimeo_id }}?title=0&byline=0&portrait=0&playsinline=1{% if section.settings.video_autoplay %}&autoplay=1{% endif %}{% if section.settings.video_muted %}&muted=1{% endif %}{% if section.settings.video_loop %}&loop=1{% endif %}&background={{ hpva_vimeo_background }}"
                 allow="autoplay; encrypted-media; picture-in-picture"
                 allowfullscreen

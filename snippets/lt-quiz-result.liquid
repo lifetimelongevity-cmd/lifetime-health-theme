@@ -57,7 +57,12 @@
     <p class="lt-quiz-result__themes-lead">Was deine Gene dazu verraten.</p>
     <h3 class="lt-quiz-result__h2">Deine drei wichtigsten Themen im Detail.</h3>
     <div class="lt-quiz-result__themes" data-result-themes>
-      {%- comment -%} JS rendert 3 <article>-Blöcke {%- endcomment -%}
+      {%- comment -%}
+        Statischer, crawlbarer Fallback — JS (renderResult) ersetzt ihn beim Result-Render via
+        themesEl.innerHTML = '' durch die 3 personalisierten Themen-Blöcke. Verhindert, dass
+        Crawler hier eine leere Überschrift ohne Inhalt sehen (Mobile-LP-/QS-Diagnose 2026-06-09, B).
+      {%- endcomment -%}
+      <p class="lt-quiz-result__themes-fallback">Dein AGE &amp; DNA-Test analysiert deine drei wichtigsten Themen im Detail — von Schlaf, Energie und Stoffwechsel bis Herzgesundheit — und zeigt, welche genetischen Marker dahinterstehen und was sie konkret für dich bedeuten.</p>
     </div>
   </section>
 
@@ -65,7 +70,7 @@
   <section class="lt-quiz-result__scope">
     <h3 class="lt-quiz-result__h2">Plus alles, was dein Test sonst zeigt.</h3>
     <p class="lt-quiz-result__scope-sub">
-      <strong data-result-scope-count>—</strong> passen direkt zu deinen Themen — unten markiert. Dazu <strong>187 Reports</strong> zu 22 DNA-Bereichen und dein epigenetisches Profil; den Rest entdeckst du beim Auspacken.
+      <strong data-result-scope-count>Mehrere Bereiche</strong> passen direkt zu deinen Themen — unten markiert. Dazu <strong>187 Reports</strong> zu 22 DNA-Bereichen und dein epigenetisches Profil; den Rest entdeckst du beim Auspacken.
     </p>
     <ul class="lt-quiz-result__pills" data-result-scope-pills>
       {%- assign cats = 'gesunde-alterung|Gesunde Alterung,supplements|Supplements,vitamine|Vitamine,sensitivitaeten|Sensitivitäten,stoffwechsel|Stoffwechsel,fitness|Fitness,verletzung-regeneration|Verletzung & Regeneration,mental-health|Mental Health,psychologisch|Psychologisch,schlaf|Schlaf,stress|Stress,herz|Herz,atemwege|Atemwege,augen|Augen,haare|Haare,niere|Niere' | split: ',' -%}
