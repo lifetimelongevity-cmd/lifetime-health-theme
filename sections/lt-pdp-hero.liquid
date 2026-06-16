@@ -336,10 +336,23 @@
                     <path d="M9 12l2 2 4-4"></path>
                   </svg>
                 {%- endif -%}
-                <span>{{ lt_trust_4 }}</span>
+                {%- if section.settings.trust_4_popup_body != blank -%}
+                  <button type="button" class="lt-pdp-hero__trust-link" data-crs-dialog-open aria-haspopup="dialog" aria-controls="crs-lt-hero-trust4-{{ section.id }}">{{ lt_trust_4 }}</button>
+                {%- else -%}
+                  <span>{{ lt_trust_4 }}</span>
+                {%- endif -%}
               </div>
             {%- endif -%}
           </div>
+          {%- if section.settings.trust_4_popup_body != blank -%}
+            <dialog id="crs-lt-hero-trust4-{{ section.id }}" class="crs-micro-dialog" aria-modal="true" aria-labelledby="crs-lt-hero-trust4-title-{{ section.id }}">
+              <div class="crs-micro-dialog__inner">
+                <button type="button" class="crs-micro-dialog__close" data-crs-dialog-close aria-label="{{ 'general.accessibility_labels.close' | t }}"><span aria-hidden="true">×</span></button>
+                <h2 id="crs-lt-hero-trust4-title-{{ section.id }}" class="crs-micro-dialog__title">{{ section.settings.trust_4_popup_title | default: 'Warum Forschungs- und Analysezwecke?' | escape }}</h2>
+                <div class="crs-micro-dialog__body rte">{{ section.settings.trust_4_popup_body }}</div>
+              </div>
+            </dialog>
+          {%- endif -%}
         {%- endcapture -%}
 
         {%- capture lt_doctor_block -%}
@@ -743,7 +756,11 @@
                           <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
                       {%- endif -%}
-                      <span>{{ bb_b2 | escape }}</span>
+                      {%- if section.settings.cancel_popup_body != blank -%}
+                        <button type="button" class="lt-bb-card__perk-link" data-crs-dialog-open aria-haspopup="dialog" aria-controls="crs-lt-hero-cancel-{{ section.id }}">{{ bb_b2 | escape }}</button>
+                      {%- else -%}
+                        <span>{{ bb_b2 | escape }}</span>
+                      {%- endif -%}
                     </span>
                     <span class="lt-bb-card__perk">
                       {%- if section.settings.bb_perk_3_icon != blank -%}
@@ -829,6 +846,9 @@
                 {%- endif -%}
               </div>
             </div>
+            {%- if lt_show_sizes and section.settings.bb_size_hint != blank -%}
+              <button type="button" class="lt-bb__size-hint" data-lt-size-hint>{{ section.settings.bb_size_hint | escape }}</button>
+            {%- endif -%}
             {%- else -%}
             <div class="lt-price-direct">
               <div class="lt-price-direct__row">
@@ -857,6 +877,16 @@
           >
             <div class="appstle_subscription_widget" data-product-id="{{ product.id }}"></div>
           </div>
+        {%- endif -%}
+
+        {%- if lt_show_sub and section.settings.cancel_popup_body != blank -%}
+          <dialog id="crs-lt-hero-cancel-{{ section.id }}" class="crs-micro-dialog" aria-modal="true" aria-labelledby="crs-lt-hero-cancel-title-{{ section.id }}">
+            <div class="crs-micro-dialog__inner">
+              <button type="button" class="crs-micro-dialog__close" data-crs-dialog-close aria-label="{{ 'general.accessibility_labels.close' | t }}"><span aria-hidden="true">×</span></button>
+              <h2 id="crs-lt-hero-cancel-title-{{ section.id }}" class="crs-micro-dialog__title">{{ section.settings.cancel_popup_title | default: 'Abo jederzeit kündbar' | escape }}</h2>
+              <div class="crs-micro-dialog__body rte">{{ section.settings.cancel_popup_body }}</div>
+            </div>
+          </dialog>
         {%- endif -%}
 
         {%- unless lt_show_sub -%}
@@ -1485,6 +1515,15 @@
       });
     }
 
+    // Größen-Hinweis (Abo-Default): öffnet den Einmalkauf, der die Größen-Pills zeigt
+    const sizeHintEl = section.querySelector('[data-lt-size-hint]');
+    if (sizeHintEl && onceCardEl) {
+      sizeHintEl.addEventListener('click', function() {
+        selectCard(onceCardEl);
+        onceCardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
+
     if (sizeGroup) {
       // Größe antippen → Einmalkauf + diese Größe
       sizeGroup.querySelectorAll('.lt-size__input').forEach(inp => {
@@ -1594,6 +1633,38 @@
   color: var(--lt-text, #26251e);
   margin-top: 8px;
   line-height: 1.4;
+}
+
+/* Inline-Dialog-Trigger (Kündigung / Trust-4) — wirken wie verlinkter Text, nicht wie Button */
+.lt-bb-card__perk-link,
+.lt-pdp-hero__trust-link {
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+
+/* Größen-Hinweis unter der Buy-Box */
+.lt-bb__size-hint {
+  display: inline-block;
+  appearance: none;
+  -webkit-appearance: none;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin-top: var(--space-4, 0.75rem);
+  font-size: 0.8125rem;
+  color: var(--lt-muted, rgba(38, 37, 30, 0.55));
+  cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
 }
 
 /* Buy-box cards — flat cursor style */
@@ -2180,6 +2251,24 @@
       "label": "Abo-Vorteil 3 — Icon (optional)"
     },
     {
+      "type": "text",
+      "id": "cancel_popup_title",
+      "label": "Abo-Kündigung — Popup-Titel",
+      "default": "Abo jederzeit kündbar"
+    },
+    {
+      "type": "richtext",
+      "id": "cancel_popup_body",
+      "label": "Abo-Kündigung — Popup-Inhalt",
+      "info": "Wenn ausgefüllt: Abo-Vorteil 2 wird klickbar und öffnet dieses Popup."
+    },
+    {
+      "type": "text",
+      "id": "bb_size_hint",
+      "label": "Größen-Hinweis unter Buy-Box",
+      "info": "Nur bei Produkten mit mehreren Größen. Klick öffnet den Einmalkauf mit Größenauswahl."
+    },
+    {
       "type": "header",
       "content": "Kaufoptionen"
     },
@@ -2288,6 +2377,18 @@
       "type": "image_picker",
       "id": "trust_4_icon",
       "label": "Trust-Zeile 4 — Icon (optional)"
+    },
+    {
+      "type": "text",
+      "id": "trust_4_popup_title",
+      "label": "Trust-Zeile 4 — Popup-Titel",
+      "default": "Warum Forschungs- und Analysezwecke?"
+    },
+    {
+      "type": "richtext",
+      "id": "trust_4_popup_body",
+      "label": "Trust-Zeile 4 — Popup-Inhalt",
+      "info": "Wenn ausgefüllt: Trust-Zeile 4 wird klickbar und öffnet dieses Popup."
     },
     {
       "type": "header",
