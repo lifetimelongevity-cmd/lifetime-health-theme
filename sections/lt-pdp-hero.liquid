@@ -501,9 +501,9 @@
           <span class="lt-pdp-hero__count">
             ·
             {%- if lt_count > 0 -%}
-              {{ lt_count }} Bewertungen
+              {{ lt_count }} Produktbewertungen
             {%- else -%}
-              227 Bewertungen
+              227 Produktbewertungen
             {%- endif -%}
           </span>
         </button>
@@ -572,6 +572,29 @@
                 <span>{{ hb3 | escape }}</span>
               </div>
             {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- comment -%} Verifiable purity proof — batch COA link (CRO QW1+QW2) {%- endcomment -%}
+        {%- assign lt_coa_url = product.metafields.custom.coa_url | default: section.settings.coa_url | strip -%}
+        {%- if lt_coa_url != blank -%}
+          <div class="lt-pdp-hero__coa">
+            <svg class="lt-pdp-hero__coa-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M3.5 1.75h5L12.5 5.5v8.75H3.5V1.75Z" stroke="currentColor" stroke-width="1" opacity="0.5" stroke-linejoin="round"></path>
+              <path d="M8.25 1.75V5.5h3.75" stroke="currentColor" stroke-width="1" opacity="0.5" stroke-linejoin="round"></path>
+              <path d="M5.5 9l1.5 1.5L10 7.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path>
+            </svg>
+            <span class="lt-pdp-hero__coa-text">
+              <span class="lt-pdp-hero__coa-line">
+                {%- if section.settings.coa_purity_label != blank -%}
+                  <span class="lt-pdp-hero__coa-purity">{{ section.settings.coa_purity_label | escape }}</span>
+                {%- endif -%}
+                <a class="lt-pdp-hero__coa-link" href="{{ lt_coa_url | escape }}" target="_blank" rel="noopener noreferrer">{{ section.settings.coa_link_label | default: 'Prüfbericht ansehen →' | escape }}</a>
+              </span>
+              {%- if section.settings.coa_caption != blank -%}
+                <span class="lt-pdp-hero__coa-caption">{{ section.settings.coa_caption | escape }}</span>
+              {%- endif -%}
+            </span>
           </div>
         {%- endif -%}
 
@@ -756,11 +779,7 @@
                           <path d="M4 7l2 2 4-4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
                         </svg>
                       {%- endif -%}
-                      {%- if section.settings.cancel_popup_body != blank -%}
-                        <button type="button" class="lt-bb-card__perk-link" data-crs-dialog-open aria-haspopup="dialog" aria-controls="crs-lt-hero-cancel-{{ section.id }}">{{ bb_b2 | escape }}</button>
-                      {%- else -%}
-                        <span>{{ bb_b2 | escape }}</span>
-                      {%- endif -%}
+                      <span>{{ bb_b2 | escape }}</span>
                     </span>
                     <span class="lt-bb-card__perk">
                       {%- if section.settings.bb_perk_3_icon != blank -%}
@@ -848,6 +867,9 @@
             </div>
             {%- if lt_show_sizes and section.settings.bb_size_hint != blank -%}
               <button type="button" class="lt-bb__size-hint" data-lt-size-hint>{{ section.settings.bb_size_hint | escape }}</button>
+            {%- endif -%}
+            {%- if section.settings.cancel_popup_body != blank -%}
+              <button type="button" class="lt-bb__cancel-link" data-crs-dialog-open aria-haspopup="dialog" aria-controls="crs-lt-hero-cancel-{{ section.id }}">{{ section.settings.cancel_popup_title | default: 'Abo jederzeit kündbar' | escape }}</button>
             {%- endif -%}
             {%- else -%}
             <div class="lt-price-direct">
@@ -1635,8 +1657,7 @@
   line-height: 1.4;
 }
 
-/* Inline-Dialog-Trigger (Kündigung / Trust-4) — wirken wie verlinkter Text, nicht wie Button */
-.lt-bb-card__perk-link,
+/* Inline-Dialog-Trigger (Trust-4) — wirkt wie verlinkter Text, nicht wie Button */
 .lt-pdp-hero__trust-link {
   appearance: none;
   -webkit-appearance: none;
@@ -1648,23 +1669,32 @@
   text-align: left;
   cursor: pointer;
   text-decoration: underline dotted;
-  text-underline-offset: 2px;
+  text-underline-offset: 0.125em;
 }
 
-/* Größen-Hinweis unter der Buy-Box */
-.lt-bb__size-hint {
-  display: inline-block;
+/* Größen-Hinweis + Kündigungs-Link unter der Buy-Box */
+.lt-bb__size-hint,
+.lt-bb__cancel-link {
+  display: block;
   appearance: none;
   -webkit-appearance: none;
   background: none;
   border: 0;
   padding: 0;
-  margin-top: var(--space-4, 0.75rem);
+  margin-top: var(--space-4);
   font-size: 0.8125rem;
-  color: var(--lt-muted, rgba(38, 37, 30, 0.55));
+  color: var(--lt-muted);
   cursor: pointer;
   text-decoration: underline dotted;
-  text-underline-offset: 2px;
+  text-underline-offset: 0.125em;
+}
+
+/* Sichtbarer Tastatur-Fokus für die neuen Text-Trigger (a11y) */
+.lt-pdp-hero__trust-link:focus-visible,
+.lt-bb__size-hint:focus-visible,
+.lt-bb__cancel-link:focus-visible {
+  outline: 0.125rem solid var(--lt-text);
+  outline-offset: 0.125rem;
 }
 
 /* Buy-box cards — flat cursor style */
@@ -2027,6 +2057,45 @@
   text-decoration: line-through;
 }
 
+/* Verifiable purity proof — batch COA link */
+.lt-pdp-hero__coa {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3, 0.5rem);
+  margin-top: var(--space-4, 0.75rem);
+}
+.lt-pdp-hero__coa-icon {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--lt-text, #26251e);
+}
+.lt-pdp-hero__coa-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.875rem;
+  line-height: 1.3;
+}
+.lt-pdp-hero__coa-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0 var(--space-3, 0.5rem);
+}
+.lt-pdp-hero__coa-purity {
+  font-weight: 600;
+  color: var(--lt-text, #26251e);
+}
+.lt-pdp-hero__coa-link {
+  color: var(--lt-text, #26251e);
+  text-decoration: underline dotted;
+  text-underline-offset: 2px;
+}
+.lt-pdp-hero__coa-caption {
+  font-size: 0.75rem;
+  color: var(--lt-muted, rgba(38, 37, 30, 0.55));
+}
+
 {% endstylesheet %}
 
 {% schema %}
@@ -2129,6 +2198,35 @@
       "type": "image_picker",
       "id": "hero_bullet_3_icon",
       "label": "Bullet 3 — Icon (optional)"
+    },
+    {
+      "type": "header",
+      "content": "Prüfbericht / COA (Reinheits-Nachweis)"
+    },
+    {
+      "type": "text",
+      "id": "coa_url",
+      "label": "Prüfbericht-URL (PDF)",
+      "info": "Direktlink zum öffentlichen Laborbericht. Leer = Block ausgeblendet. Per-Produkt überschreibbar via Metafeld custom.coa_url.",
+      "default": "https://cdn.shopify.com/s/files/1/0621/2173/8340/files/Pruefbericht_L-24-04702.pdf"
+    },
+    {
+      "type": "text",
+      "id": "coa_purity_label",
+      "label": "Reinheits-Label",
+      "default": ">99,9 % Reinheit"
+    },
+    {
+      "type": "text",
+      "id": "coa_link_label",
+      "label": "Link-Text",
+      "default": "Prüfbericht ansehen →"
+    },
+    {
+      "type": "text",
+      "id": "coa_caption",
+      "label": "Bildunterschrift (Charge / Umfang)",
+      "default": "Charge L-24-04702 · Reinheit & Schwermetalle"
     },
     {
       "type": "header",
