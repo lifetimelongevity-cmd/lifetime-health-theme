@@ -9,6 +9,19 @@
     assign product = all_products[lt_landing_default_product_handle]
   endif
   assign current_variant = product.selected_or_first_available_variant
+  # GMC/Deep-Link: ?variant= kann auf eine ausverkaufte Variante zeigen → für Pill-Vorauswahl + ATC erste VERFÜGBARE bevorzugen.
+  # NUR bei aktiver Größen-Auswahl; sonst bleibt der Legacy-Pfad (current_variant / lt_variant_1) unverändert.
+  assign lt_preselect_variant = current_variant
+  if section.settings.show_size_selector and product.variants.size > 1
+    unless current_variant.available
+      for v in product.variants
+        if v.available
+          assign lt_preselect_variant = v
+          break
+        endif
+      endfor
+    endunless
+  endif
   assign default_to_first_variant = true
   assign gallery_layout = 'one-col slider'
   assign gallery_mobile_width = 100
@@ -614,6 +627,43 @@
 
         {%- if lt_show_sub or section.settings.show_price_standalone -%}
           <div class="lt-purchase-block">
+            {%- liquid
+              assign lt_show_sizes = false
+              if section.settings.show_size_selector and product.variants.size > 1
+                assign lt_show_sizes = true
+              endif
+              assign lt_disc = section.settings.sub_discount_percent | default: 10
+              assign lt_sub_mult = 100 | minus: lt_disc
+              # Abo = kleinste Gramm-Variante (nicht stur variants.first → robust gegen Umsortierung)
+              assign lt_abo_variant = product.variants.first
+              assign lt_abo_min = 9999999
+              for v in product.variants
+                assign vg = v.title | replace: ' ', '' | replace: 'g', '' | replace: 'G', '' | times: 1
+                if vg > 0 and vg < lt_abo_min
+                  assign lt_abo_min = vg
+                  assign lt_abo_variant = v
+                endif
+              endfor
+              assign lt_abo_grams = lt_abo_variant.title | replace: ' ', '' | replace: 'g', '' | replace: 'G', '' | times: 1
+              # Abo-Preis aus der echten Selling-Plan-Allocation (Appstle), Fallback price × (100 − Rabatt)
+              assign lt_abo_alloc = lt_abo_variant.selling_plan_allocations.first
+              if lt_abo_alloc
+                assign lt_abo_sub = lt_abo_alloc.price
+              else
+                assign lt_abo_sub = lt_abo_variant.price | times: lt_sub_mult | divided_by: 100
+              endif
+              # Deep-Link (?variant=, z. B. GMC-Shopping-Klick) → Einmalkauf + Größe vorwählen statt Abo.
+              # Nur bei aktiver Größen-Auswahl; sonst bleibt das Abo-Default unverändert (andere PDPs).
+              assign lt_deeplinked = false
+              if lt_show_sizes and product.selected_variant != blank
+                assign lt_deeplinked = true
+              endif
+              # SSR-aktive Variante für hidden id + ATC-Disabled: Abo→kleinste Größe, Deep-Link→gewählte Größe
+              assign lt_active_variant = lt_abo_variant
+              if lt_deeplinked
+                assign lt_active_variant = lt_preselect_variant
+              endif
+            -%}
             {%- if lt_show_sub -%}
             <div
               class="lt-bb"
@@ -624,7 +674,7 @@
               aria-label="Kaufoption wählen"
             >
               <label
-                class="lt-bb-card lt-bb-card--sub is-selected"
+                class="lt-bb-card lt-bb-card--sub{% unless lt_deeplinked %} is-selected{% endunless %}"
                 data-lt-bb-card
                 data-bb-kind="sub"
               >
@@ -633,10 +683,18 @@
                   class="lt-bb-card__input"
                   name="lt-bb-{{ section.id }}"
                   value="sub-1"
-                  checked
+                  {% unless lt_deeplinked %}checked{% endunless %}
                   data-quantity="{{ lt_pill_1_qty }}"
+                  {%- if lt_show_sizes -%}
+                  data-once-price="{{ lt_abo_variant.price }}"
+                  data-sub-price="{{ lt_abo_sub }}"
+                  data-variant-id="{{ lt_abo_variant.id }}"
+                  data-grams="{{ lt_abo_grams }}"
+                  data-size-short="{{ lt_abo_variant.title | escape }}"
+                  {%- else -%}
                   data-once-price="{{ lt_pill_1_once }}"
                   data-sub-price="{{ lt_pill_1_sub }}"
+                  {%- endif -%}
                 >
                 <span class="lt-bb-card__body">
                   <span class="lt-bb-card__head">
@@ -712,12 +770,14 @@
                 <span class="lt-bb__or-line" aria-hidden="true"></span>
               </div>
 
-              <label class="lt-bb-card lt-bb-card--once" data-lt-bb-card data-bb-kind="once">
+              <div class="lt-bb-card lt-bb-card--once{% if lt_deeplinked %} is-selected{% endif %}" data-lt-bb-card data-bb-kind="once">
                 <input
                   type="radio"
                   class="lt-bb-card__input"
                   name="lt-bb-{{ section.id }}"
                   value="once"
+                  aria-label="{{ bb_once_title | escape }}"
+                  {% if lt_deeplinked %}checked{% endif %}
                   data-quantity="{{ lt_pill_1_qty }}"
                   data-once-price="{{ lt_pill_1_once }}"
                   data-sub-price="{{ lt_pill_1_sub }}"
@@ -730,7 +790,7 @@
                         <span class="lt-bb-card__title-row">
                           <span class="lt-bb-card__title">{{ bb_once_title | escape }}</span>
                         </span>
-                        <span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>
+                        {%- unless lt_show_sizes -%}<span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>{%- endunless -%}
                       </span>
                       <span class="lt-bb-card__prices">
                         <del class="lt-bb-card__compare" data-lt-bb-compare></del>
@@ -740,7 +800,34 @@
                     </span>
                   </span>
                 </span>
-              </label>
+                {%- if lt_show_sizes -%}
+                  <div class="lt-size" data-lt-size-group role="radiogroup" aria-label="Größe wählen">
+                    {%- for variant in product.variants -%}
+                      {%- liquid
+                        assign v_compare = variant.compare_at_price | default: 0
+                        assign v_grams = variant.title | replace: ' ', '' | replace: 'g', '' | replace: 'G', '' | times: 1
+                      -%}
+                      <label class="lt-size__pill{% if variant.id == lt_preselect_variant.id %} is-selected{% endif %}" data-lt-size>
+                        <input
+                          type="radio"
+                          class="lt-size__input"
+                          name="lt-size-{{ section.id }}"
+                          value="{{ variant.id }}"
+                          {% if variant.id == lt_preselect_variant.id %}checked{% endif %}
+                          data-variant-id="{{ variant.id }}"
+                          data-once-price="{{ variant.price }}"
+                          data-compare-price="{{ v_compare }}"
+                          data-grams="{{ v_grams }}"
+                          data-size-short="{{ variant.title | escape }}"
+                          {% unless variant.available %}disabled{% endunless %}
+                        >
+                        <span class="lt-size__name">{{ variant.title | escape }}</span>
+                        <span class="lt-size__price">{{ variant.price | money }}</span>
+                      </label>
+                    {%- endfor -%}
+                  </div>
+                {%- endif -%}
+              </div>
             </div>
             {%- else -%}
             <div class="lt-price-direct">
@@ -792,7 +879,7 @@
             novalidate: 'novalidate',
             data-type: 'add-to-cart-form'
           -%}
-            <input type="hidden" name="id" value="{{ lt_variant_1.id }}" data-lt-variant-input>
+            <input type="hidden" name="id" value="{% if lt_show_sizes %}{{ lt_active_variant.id }}{% else %}{{ lt_variant_1.id }}{% endif %}" data-lt-variant-input>
             <input type="hidden" name="quantity" value="1" data-lt-quantity-input>
             <input type="hidden" id="lt-selling-plan-input" name="selling_plan" value="">
             <div class="product__cart-functions">
@@ -801,7 +888,7 @@
                   id="lt-hero-atc"
                   type="submit"
                   name="add"
-                  class="add-to-cart button button--solid button--product button--loader button--move lt-pdp-hero__atc {% unless current_variant.available %}disabled{% endunless %}"
+                  class="add-to-cart button button--solid button--product button--loader button--move lt-pdp-hero__atc {% if lt_show_sizes %}{% unless lt_active_variant.available %}disabled{% endunless %}{% else %}{% unless current_variant.available %}disabled{% endunless %}{% endif %}"
                   data-js-product-add-to-cart
                   data-main-product-add-to-cart
                   aria-label="{{ lt_primary_cta_aria | escape }}"
@@ -1107,7 +1194,12 @@
       return (cents / 100).toFixed(2).replace('.', ',') + ' €';
     }
 
-    function formatPerDay(cents, qty) {
+    // grams>0 → €/g (reiner Preis-pro-Gramm, keine Verzehr-/Dosis-/Dauer-Aussage); sonst Legacy €/Tag
+    function formatUnit(cents, grams, qty) {
+      if (grams > 0) {
+        const perGram = (cents / 100) / grams;
+        return perGram.toFixed(2).replace('.', ',') + ' €/g';
+      }
       const totalDays = Math.max(1, supplyDays * Math.max(1, qty || 1));
       const perDay = (cents / 100) / totalDays;
       return perDay.toFixed(2).replace('.', ',') + ' €/Tag';
@@ -1122,11 +1214,12 @@
     }
 
     /** Vergleichspreis für Sticky (wie Buy-Box / updatePriceMeta) */
-    function stickyCompareCents(isSub, qty, onceCents, subCents, currentCents) {
+    function stickyCompareCents(isSub, qty, onceCents, subCents, currentCents, perSizeCompare) {
       if (isSub) {
         return onceCents > subCents ? onceCents : 0;
       }
-      var shopCompare = baseComparePrice > 0 ? baseComparePrice * qty : 0;
+      var fallback = baseComparePrice > 0 ? baseComparePrice * qty : 0;
+      var shopCompare = (!isNaN(perSizeCompare) && perSizeCompare > 0) ? perSizeCompare : fallback;
       return shopCompare > onceCents ? shopCompare : 0;
     }
 
@@ -1145,8 +1238,8 @@
       return h;
     }
 
-    function syncStickyAtcPrice(isSub, qty, onceCents, subCents, currentCents) {
-      var cmp = stickyCompareCents(isSub, qty, onceCents, subCents, currentCents);
+    function syncStickyAtcPrice(isSub, qty, onceCents, subCents, currentCents, perSizeCompare) {
+      var cmp = stickyCompareCents(isSub, qty, onceCents, subCents, currentCents, perSizeCompare);
       var inner = buildStickyPriceInner(currentCents, cmp);
       var wrapped =
         '<span class="show-block-if-variant-selected">' + inner + '</span>';
@@ -1158,6 +1251,15 @@
       if (hidden) hidden.innerHTML = wrapped;
     }
 
+    // Sticky-Subline: Größen-Label der AKTIVEN Auswahl voranstellen. Sticky liegt nach
+    // Upgrade an <body> → document-weit suchen. Basis-Text einmalig cachen (kein Doppeln).
+    function updateStickySubline(short) {
+      const el = document.querySelector('#lt-sticky-atc [data-lt-sticky-atc-subline]');
+      if (!el) return;
+      if (stickySublineBase === null) stickySublineBase = el.textContent.trim();
+      if (short) el.textContent = stickySublineBase ? (short + ' · ' + stickySublineBase) : short;
+    }
+
     function savingsPct(onceC, subC) {
       if (!onceC || onceC <= subC) return 0;
       return Math.round((1 - subC / onceC) * 100);
@@ -1167,8 +1269,10 @@
       return card.querySelector('.lt-bb-card__input');
     }
 
-    function updatePriceMeta(isSub, qty, onceCents, currentCents) {
-      const compareCents = isSub ? onceCents : (baseComparePrice > 0 ? baseComparePrice * qty : 0);
+    function updatePriceMeta(isSub, qty, onceCents, currentCents, perSizeCompare) {
+      const fallback = baseComparePrice > 0 ? baseComparePrice * qty : 0;
+      const onceCompare = (!isNaN(perSizeCompare) && perSizeCompare > 0) ? perSizeCompare : fallback;
+      const compareCents = isSub ? onceCents : onceCompare;
       const savingCents = compareCents > currentCents ? compareCents - currentCents : 0;
 
       if (priceCompare) {
@@ -1189,6 +1293,7 @@
 
         const kind = card.dataset.bbKind;
         const qty = Math.max(1, parseInt(input.dataset.quantity, 10) || 1);
+        const grams = parseInt(input.dataset.grams, 10) || 0;
         const onceC = parseInt(input.dataset.oncePrice, 10) || 0;
         const subC = parseInt(input.dataset.subPrice, 10) || 0;
         const compareEl = card.querySelector('[data-lt-bb-compare]');
@@ -1220,10 +1325,14 @@
           }
           if (currentEl) currentEl.textContent = formatPrice(subC);
           if (unitEl) {
-            unitEl.textContent = formatPerDay(subC, qty);
+            unitEl.textContent = formatUnit(subC, grams, qty);
           }
         } else {
-          const shopCompare = baseComparePrice > 0 ? baseComparePrice * qty : 0;
+          // Per-size compare (from size selector) takes precedence over the section-level compare
+          const perSizeCompare = parseInt(input.dataset.comparePrice, 10);
+          const shopCompare = (!isNaN(perSizeCompare) && perSizeCompare > 0)
+            ? perSizeCompare
+            : (baseComparePrice > 0 ? baseComparePrice * qty : 0);
           if (compareEl) {
             if (shopCompare > onceC) {
               compareEl.textContent = formatPrice(shopCompare);
@@ -1235,7 +1344,7 @@
           }
           if (currentEl) currentEl.textContent = formatPrice(onceC);
           if (unitEl) {
-            unitEl.textContent = formatPerDay(onceC, qty);
+            unitEl.textContent = formatUnit(onceC, grams, qty);
           }
         }
       });
@@ -1262,9 +1371,11 @@
       const qty = Math.max(1, parseInt(input.dataset.quantity, 10) || 1);
       const onceCents = parseInt(input.dataset.oncePrice, 10) || 0;
       const subCents = parseInt(input.dataset.subPrice, 10) || 0;
+      const perSizeCompare = parseInt(input.dataset.comparePrice, 10);
       const isSub = kind === 'sub';
       const currentCents = isSub ? subCents : onceCents;
 
+      if (variantInput && input.dataset.variantId) variantInput.value = input.dataset.variantId;
       if (quantityInput) quantityInput.value = String(qty);
       if (planInput) {
         planInput.value = isSub && ltPlans.length ? String(ltPlans[0].id) : '';
@@ -1272,9 +1383,10 @@
       if (mainPrice) mainPrice.textContent = formatPrice(currentCents);
 
       updateCardFacades();
-      updatePriceMeta(isSub, qty, onceCents, currentCents);
+      updatePriceMeta(isSub, qty, onceCents, currentCents, perSizeCompare);
 
-      syncStickyAtcPrice(isSub, qty, onceCents, subCents, currentCents);
+      syncStickyAtcPrice(isSub, qty, onceCents, subCents, currentCents, perSizeCompare);
+      updateStickySubline(input.dataset.sizeShort);
 
       var atcTextEl = section.querySelector('[data-js-product-add-to-cart-text]');
       var atcLabel =
@@ -1323,6 +1435,73 @@
         if (noOnceRadio) noOnceRadio.checked = true;
       }
     }
+
+    // --- Größen-Auswahl (Varianten) -------------------------------------
+    // Eine Kachel pro Variante. Pro Größe: Variant-ID ins Formular, Einmal-/
+    // Abo-/Vergleichspreis auf die Kaufoption-Karten, dann bestehende
+    // Sync-Logik (syncFromCard) neu anwerfen. Wenn keine Größen-Gruppe da
+    // ist, bleibt das Verhalten unverändert.
+    const sizeGroup = section.querySelector('[data-lt-size-group]');
+    const variantInput = section.querySelector('[data-lt-variant-input]');
+    const appstleWidget = section.querySelector('#lt-appstle-widget');
+    let stickySublineBase = null; // SSR-Subline-Text, einmalig gecacht (sonst doppeltes Voranstellen)
+
+    // Größe betrifft NUR den Einmalkauf. Schreibt die Daten der gewählten Größe auf die
+    // Einmal-Karte; selectOnce=true wählt den Einmalkauf zusätzlich aus. Abo-Karte bleibt 30 g.
+    function applySize(sizeInput, selectOnce) {
+      if (!sizeInput) return;
+      const onceCard = section.querySelector('.lt-bb-card--once');
+      const onceRadio = onceCard ? getRadio(onceCard) : null;
+      if (onceRadio) {
+        onceRadio.dataset.variantId = sizeInput.dataset.variantId || '';
+        onceRadio.dataset.oncePrice = sizeInput.dataset.oncePrice || '0';
+        onceRadio.dataset.comparePrice = sizeInput.dataset.comparePrice || '0';
+        onceRadio.dataset.grams = sizeInput.dataset.grams || '0';
+        onceRadio.dataset.sizeShort = sizeInput.dataset.sizeShort || '';
+        onceRadio.dataset.quantity = '1';
+      }
+      if (appstleWidget && sizeInput.dataset.variantId) {
+        appstleWidget.setAttribute('data-variant-id', sizeInput.dataset.variantId);
+      }
+      section.querySelectorAll('[data-lt-size]').forEach(pill => {
+        const inp = pill.querySelector('.lt-size__input');
+        const on = inp === sizeInput;
+        pill.classList.toggle('is-selected', on);
+        if (inp) inp.checked = on;
+      });
+      if (selectOnce && onceCard) {
+        selectCard(onceCard);
+      } else {
+        updateCardFacades();
+      }
+    }
+
+    // Einmal-Karte ist immer ein <div> (kein <label>, weil die Größen-Radios darin liegen) → Klick-Auswahl per JS.
+    const onceCardEl = section.querySelector('.lt-bb-card--once');
+    if (onceCardEl) {
+      onceCardEl.addEventListener('click', function(e) {
+        if (e.target.closest('[data-lt-size]')) return;
+        selectCard(onceCardEl);
+      });
+    }
+
+    if (sizeGroup) {
+      // Größe antippen → Einmalkauf + diese Größe
+      sizeGroup.querySelectorAll('.lt-size__input').forEach(inp => {
+        inp.addEventListener('change', function() {
+          if (this.checked) applySize(this, true);
+        });
+      });
+      // Init: Basis-Größe (30 g bzw. Deep-Link) in die Einmal-Karte schreiben, OHNE sie zu
+      // erzwingen — die Default-Auswahl (Abo/Einmal) kommt aus dem SSR-checked-State.
+      const baseSize = sizeGroup.querySelector('.lt-size__input:checked:not(:disabled)')
+        || sizeGroup.querySelector('.lt-size__input:not(:disabled)');
+      if (baseSize) {
+        baseSize.checked = true;
+        applySize(baseSize, false);
+      }
+    }
+    // --------------------------------------------------------------------
 
     const initialCard = section.querySelector('.lt-bb-card__input:checked')?.closest('[data-lt-bb-card]');
     if (initialCard) {
@@ -1699,6 +1878,70 @@
   opacity: 0.65;
 }
 
+/* Größen-Auswahl — segmentierte Pills (flat, wie Buy-Box-Karten) */
+.lt-size {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-top: var(--space-5);
+  margin-bottom: var(--space-4);
+}
+/* Größenauswahl sitzt jetzt IN der Einmalkauf-Karte → engerer Abstand, Karte klickbar */
+.lt-bb-card--once { cursor: pointer; }
+.lt-bb-card--once .lt-size { margin: 12px 0 2px; }
+.lt-size__pill {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 56px;
+  padding: 10px 6px;
+  border: 1px solid var(--lt-border, rgba(38,37,30,0.1));
+  border-radius: 4px;
+  background: var(--lt-bg, #f7f7f4);
+  cursor: pointer;
+  text-align: center;
+  transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+.lt-size__pill:not(.is-selected) { opacity: 0.6; }
+.no-touchevents .lt-size__pill:not(.is-selected):hover { opacity: 0.85; }
+.lt-size__pill.is-selected {
+  background: #fff;
+  border-color: var(--lt-text, #26251e);
+  border-width: 1.5px;
+  opacity: 1;
+}
+.lt-size__pill:focus-within {
+  outline: 2px solid var(--lt-text, #26251e);
+  outline-offset: 2px;
+}
+.lt-size__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.lt-size__name {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.1;
+  color: var(--lt-text, #26251e);
+}
+.lt-size__price {
+  font-size: 12px;
+  line-height: 1.1;
+  color: var(--lt-muted, rgba(38,37,30,0.55));
+}
+.lt-size__input:disabled ~ .lt-size__name,
+.lt-size__input:disabled ~ .lt-size__price {
+  opacity: 0.4;
+  text-decoration: line-through;
+}
+
 {% endstylesheet %}
 
 {% schema %}
@@ -1976,6 +2219,13 @@
       "label": "Preis-Block separat anzeigen",
       "info": "Deaktivieren wenn der Preis ausschließlich im Value Stack (letzte zwei Zeilen) erscheinen soll. Bei Einmal-Kauf-Produkten ohne Abo auf false setzen.",
       "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_size_selector",
+      "label": "Größen-Auswahl anzeigen (Varianten)",
+      "info": "Zeigt über den Kaufoptionen eine Kachel pro Produktvariante (z. B. 30/60/90 g). Einmal-/Abo-Preis und Warenkorb-Variante wechseln pro Größe. Nur aktivieren, wenn das Produkt mehrere Varianten hat.",
+      "default": false
     },
     {
       "type": "header",
