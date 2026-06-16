@@ -822,7 +822,7 @@
                           {% unless variant.available %}disabled{% endunless %}
                         >
                         <span class="lt-size__name">{{ variant.title | escape }}</span>
-                        <span class="lt-size__price">{{ variant.price | money }}</span>
+                        <span class="lt-size__save">{%- if v_compare > variant.price -%}−{{ v_compare | minus: variant.price | money }}{%- endif -%}</span>
                       </label>
                     {%- endfor -%}
                   </div>
@@ -1523,7 +1523,7 @@
 {% stylesheet %}
 /* ===================================================
    LT PDP Hero — Cursor-Style Overrides
-   lt-pdp.css tokens are remapped via {% style %} above.
+   lt-pdp.css tokens are remapped via the style block above.
    This block handles structural overrides that need
    CSS (not just token swaps).
    =================================================== */
@@ -1886,9 +1886,17 @@
   margin-top: var(--space-5);
   margin-bottom: var(--space-4);
 }
-/* Größenauswahl sitzt jetzt IN der Einmalkauf-Karte → engerer Abstand, Karte klickbar */
+/* Größenauswahl sitzt IN der Einmalkauf-Karte → erst sichtbar wenn Einmalkauf gewählt, vom Kartenrand eingerückt */
 .lt-bb-card--once { cursor: pointer; }
-.lt-bb-card--once .lt-size { margin: 12px 0 2px; }
+.lt-bb-card--once .lt-size { margin: 2px var(--space-4) var(--space-4); }
+.lt-bb-card--once:not(.is-selected) .lt-size { display: none; }
+/* Streichpreis-Zeile auch ohne compare (30 g) reservieren → kein Höhen-Sprung beim Größenwechsel.
+   display:block schlägt bewusst die globale .lt-bb-card__compare:empty{display:none} UND das per JS
+   gesetzte [hidden] (compareEl.hidden=true bei 30 g). :has(.lt-size)-Scope NICHT entfernen. */
+.lt-bb-card--once:has(.lt-size) .lt-bb-card__compare {
+  display: block;
+  min-height: 1.4em;
+}
 .lt-size__pill {
   position: relative;
   display: flex;
@@ -1896,8 +1904,8 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  min-height: 56px;
-  padding: 10px 6px;
+  min-height: 48px;
+  padding: 8px 6px;
   border: 1px solid var(--lt-border, rgba(38,37,30,0.1));
   border-radius: 4px;
   background: var(--lt-bg, #f7f7f4);
@@ -1913,9 +1921,12 @@
   border-width: 1.5px;
   opacity: 1;
 }
-.lt-size__pill:focus-within {
+/* Fokus-Ring nur per Tastatur (focus-visible) → kein Doppelrahmen beim Klick. Sibling-Pattern statt
+   :has() → Indikator hängt nicht an :has-Support (WCAG 2.4.7 auch auf alten Browsern gewährleistet). */
+.lt-size__input:focus-visible ~ .lt-size__name {
   outline: 2px solid var(--lt-text, #26251e);
-  outline-offset: 2px;
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 .lt-size__input {
   position: absolute;
@@ -1931,13 +1942,16 @@
   line-height: 1.1;
   color: var(--lt-text, #26251e);
 }
-.lt-size__price {
+.lt-size__save {
+  display: block;
+  min-height: 14px;
   font-size: 12px;
-  line-height: 1.1;
+  font-weight: 500;
+  line-height: 1.15;
   color: var(--lt-muted, rgba(38,37,30,0.55));
 }
 .lt-size__input:disabled ~ .lt-size__name,
-.lt-size__input:disabled ~ .lt-size__price {
+.lt-size__input:disabled ~ .lt-size__save {
   opacity: 0.4;
   text-decoration: line-through;
 }
