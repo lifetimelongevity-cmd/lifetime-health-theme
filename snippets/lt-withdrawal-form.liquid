@@ -6,10 +6,11 @@
 {% enddoc %}
 
 <div class="container--large container--vertical-space-small remove-empty-space">
-  <div class="contact-form grid grid--layout grid-4 grid-portable-2 grid-lap-1">
-    <div class="contact-form__the-form grid-offset-2 grid-offset-lap-1">
-      {%- assign form_id = 'withdrawal-request' -%}
-      {%- form 'contact', id: form_id, class: 'isolate' -%}
+  <section class="lt-withdrawal-form">
+    <div class="contact-form grid grid--layout grid-4 grid-portable-2 grid-lap-1">
+      <div class="contact-form__the-form grid-offset-2 grid-offset-lap-1">
+        {%- assign form_id = 'withdrawal-request' -%}
+        {%- form 'contact', id: form_id, class: 'isolate' -%}
         {%- liquid
           if form.posted_successfully?
             assign message = 'general.withdrawal_form.success_message' | t
@@ -84,12 +85,31 @@
           </div>
 
           <div class="contact-form__row">
-            <button type="submit" class="button button--solid button--regular">
+            <button type="submit" class="button button--solid button--regular lt-withdrawal-form__submit">
               {{- 'general.withdrawal_form.submit_label' | t -}}
             </button>
           </div>
         {%- endunless -%}
-      {%- endform -%}
+        {%- endform -%}
+      </div>
     </div>
-  </div>
+  </section>
 </div>
+
+{% stylesheet %}
+  .lt-withdrawal-form {
+    padding: var(--space-6);
+    border: 1px solid var(--color-border-default);
+    color: var(--color-text-primary);
+    background: var(--color-surface-secondary);
+    border-radius: var(--radius-md);
+  }
+
+  .button.lt-withdrawal-form__submit {
+    min-height: var(--space-7);
+    padding-inline: var(--space-6);
+    border-color: var(--color-surface-dark);
+    color: var(--color-text-on-dark);
+    background: var(--color-surface-dark);
+  }
+{% endstylesheet %}
