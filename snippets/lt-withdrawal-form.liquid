@@ -1,0 +1,95 @@
+{% doc %}
+  Renders the withdrawal form above the refund policy.
+
+  The form uses Shopify's standard contact form, so submissions are sent to the
+  contact email address configured in Shopify.
+{% enddoc %}
+
+<div class="container--large container--vertical-space-small remove-empty-space">
+  <div class="contact-form grid grid--layout grid-4 grid-portable-2 grid-lap-1">
+    <div class="contact-form__the-form grid-offset-2 grid-offset-lap-1">
+      {%- assign form_id = 'withdrawal-request' -%}
+      {%- form 'contact', id: form_id, class: 'isolate' -%}
+        {%- liquid
+          if form.posted_successfully?
+            assign message = 'general.withdrawal_form.success_message' | t
+            render 'form-success', message: message
+          elsif form.errors
+            render 'form-errors', form: form
+          endif
+        -%}
+
+        {%- unless form.posted_successfully? -%}
+          <input type="hidden" name="contact[Betreff]" value="{{ 'general.withdrawal_form.subject' | t }}">
+
+          <div class="contact-form__row">
+            <label for="{{ form_id }}-name">{{ 'general.withdrawal_form.name_label' | t }}</label>
+            <input
+              autocomplete="name"
+              type="text"
+              id="{{ form_id }}-name"
+              class="field__input"
+              name="contact[{{ 'general.withdrawal_form.name_label' | t }}]"
+              value="{% if form.name %}{{ form.name | escape }}{% elsif customer %}{{ customer.name | escape }}{% endif %}"
+              required
+              aria-required="true"
+            >
+          </div>
+
+          <div class="contact-form__row">
+            <label for="{{ form_id }}-email">
+              {{- 'general.withdrawal_form.email_label' | t }} <span aria-hidden="true">*</span>
+            </label>
+            <input
+              autocomplete="email"
+              type="email"
+              id="{{ form_id }}-email"
+              class="field__input"
+              name="contact[email]"
+              spellcheck="false"
+              autocapitalize="off"
+              value="{% if form.email %}{{ form.email | escape }}{% elsif customer %}{{ customer.email | escape }}{% endif %}"
+              required
+              aria-required="true"
+              {% if form.errors contains 'email' %}
+                aria-invalid="true"
+              {% endif %}
+            >
+          </div>
+
+          <div class="contact-form__row">
+            <label for="{{ form_id }}-order-number">{{ 'general.withdrawal_form.order_number_label' | t }}</label>
+            <input
+              autocomplete="off"
+              type="text"
+              id="{{ form_id }}-order-number"
+              class="field__input"
+              name="contact[{{ 'general.withdrawal_form.order_number_label' | t }}]"
+              required
+              aria-required="true"
+            >
+          </div>
+
+          <div class="contact-form__row">
+            <label for="{{ form_id }}-items">{{ 'general.withdrawal_form.items_label' | t }}</label>
+            <textarea
+              rows="6"
+              id="{{ form_id }}-items"
+              class="text-area field__input"
+              name="contact[{{ 'general.withdrawal_form.items_label' | t }}]"
+              placeholder="{{ 'general.withdrawal_form.items_placeholder' | t }}"
+              required
+              aria-required="true"
+            ></textarea>
+          </div>
+
+          <div class="contact-form__row">
+            <button type="submit" class="button button--solid button--regular">
+              {{- 'general.withdrawal_form.submit_label' | t -}}
+            </button>
+          </div>
+        {%- endunless -%}
+      {%- endform -%}
+    </div>
+  </div>
+</div>
