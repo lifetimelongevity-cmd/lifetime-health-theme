@@ -1,0 +1,127 @@
+/*
+  LIFETIME — section-lt-about-team.css
+  Pattern „Team-Grid": card-info-Disziplin (weiße Karte, --radius-md,
+  Padding --space-5) mit Foto oben, full-bleed bis an die Kartenkante.
+  Referenz-Example: `_examples/sections/team-grid.liquid`.
+  Section-Header-Typografie kommt aus crs-heading-stack (global).
+  Token references: design-governance §3, §5 (Card Info), §6.
+*/
+
+/* ── Section shell ──────────────────────────────────────────── */
+.lt-about-team {
+  background-color: var(--color-surface-secondary); /* #F6F4F1 */
+  padding-top: var(--space-9);    /* 80px desktop */
+  padding-bottom: var(--space-9);
+}
+
+.lt-about-team__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+@media screen and (max-width: 768px) {
+  .lt-about-team {
+    padding-top: var(--space-8);  /* 64px mobile */
+    padding-bottom: var(--space-8);
+  }
+  .lt-about-team__container {
+    padding: 0 var(--space-4);
+  }
+}
+
+/* ── Section header ─────────────────────────────────────────── */
+.lt-about-team__header {
+  max-width: 640px;
+  margin-bottom: var(--space-6);  /* 32px → grid (§4 header → content) */
+}
+
+/* ── Card grid ───────────────────────────────────────────────── */
+/*
+  DECISION: grid-3 → grid-palm-1. Bei 3 Mitgliedern bleibt die
+  Dreierreihe bis 768px stehen (2+1 wäre ein Waisen-Layout),
+  darunter eine Spalte.
+*/
+.lt-about-team__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);            /* 24px */
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+@media screen and (max-width: 768px) {
+  .lt-about-team__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Card ────────────────────────────────────────────────────── */
+/*
+  DECISION: weiße Karte auf warmem Grund, --radius-md, shadow-sm —
+  identische Card-Behandlung wie lt-benefits auf derselben Seite
+  (§7: konsistente Card-Optik pro Seite). Foto full-bleed:
+  overflow hidden lässt Bild und Karte als ein Objekt lesen.
+*/
+.lt-about-team__card {
+  background-color: var(--color-surface-primary); /* white */
+  border-radius: var(--radius-md);                /* 12px */
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Photo ───────────────────────────────────────────────────── */
+.lt-about-team__visual {
+  width: 100%;
+}
+
+.lt-about-team__img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  aspect-ratio: 4 / 3;
+  display: block;
+}
+
+.lt-about-team__img-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: var(--color-surface-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+
+/* ── Meta (Name + Rolle) ─────────────────────────────────────── */
+/*
+  DECISION: zentriert unter dem Porträt — ruhige Galerie-Caption
+  (entspricht der Live-Ausrichtung der Team-Karten).
+*/
+.lt-about-team__meta {
+  padding: var(--space-5);        /* 24px — card-info Innenmaß */
+  text-align: center;
+}
+
+.lt-about-team__name {
+  font-family: var(--font-heading);
+  font-size: var(--text-section); /* 20px — dominantes Element der Karte */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2);     /* 8px */
+}
+
+.lt-about-team__role {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);   /* 12px */
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0;
+}

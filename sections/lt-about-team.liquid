@@ -1,0 +1,136 @@
+{% comment %}
+  LIFETIME — LT Team-Grid (Pattern „Team-Grid")
+  ─────────────────────────────────────────────
+  Neues approved Pattern, Referenz: `_examples/sections/team-grid.liquid`.
+  Card-Grid (Foto + Name + Rolle), Optik an card-info orientiert, aber
+  mit Foto oben. Section-Header über das kanonische
+  `section-heading-crs`-Snippet.
+
+  §12 Build Spec:
+  - Surface:          --color-surface-secondary (warm)
+  - Section label:    nein — Headline „Management Team" trägt den
+                      Kontext selbst (§11 Subtraction)
+  - Dominant element: Section-Headline (headline_lg); in der Card
+                      der Name (--text-section, bold)
+  - Content pattern:  NEU „team-grid": card-info-Disziplin (weiße
+                      Karte, --radius-md, --space-5) mit Foto oben
+  - CTA:              keiner
+  - Removed:          Foto-Borders, Card-Links, Captions unter Fotos
+  - Quality move:     Foto läuft randlos bis an die Kartenkante
+                      (overflow hidden) — Karte und Bild lesen sich
+                      als ein Objekt, der Text sitzt als ruhige
+                      Galerie-Caption darunter
+{% endcomment %}
+
+{{ 'section-lt-about-team.css' | asset_url | stylesheet_tag }}
+
+<section class="lt-about-team">
+  <div class="lt-about-team__container">
+
+    {%- if section.settings.title != blank -%}
+      {% render 'section-heading-crs',
+        heading: section.settings.title,
+        kicker: section.settings.kicker,
+        align: 'left',
+        headline_lg: true,
+        heading_tag: 'h2',
+        extra_class: 'lt-about-team__header'
+      %}
+    {%- endif -%}
+
+    <ul class="lt-about-team__grid" role="list">
+      {%- for block in section.blocks -%}
+        <li class="lt-about-team__card" {{ block.shopify_attributes }}>
+
+          <div class="lt-about-team__visual">
+            {%- if block.settings.photo != blank -%}
+              {{
+                block.settings.photo
+                | image_url: width: 800
+                | image_tag:
+                  loading: 'lazy',
+                  class: 'lt-about-team__img',
+                  alt: block.settings.name
+              }}
+            {%- else -%}
+              <div class="lt-about-team__img-placeholder" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+            {%- endif -%}
+          </div>
+
+          <div class="lt-about-team__meta">
+            {%- if block.settings.name != blank -%}
+              <h3 class="lt-about-team__name">{{ block.settings.name | escape }}</h3>
+            {%- endif -%}
+            {%- if block.settings.role != blank -%}
+              <p class="lt-about-team__role">{{ block.settings.role | escape }}</p>
+            {%- endif -%}
+          </div>
+
+        </li>
+      {%- endfor -%}
+    </ul>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LT Team-Grid",
+  "tag": "section",
+  "class": "lt-about-team-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (micro label)",
+      "info": "Optional. Leer lassen, wenn die Headline den Kontext trägt."
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Management Team"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "member",
+      "name": "Team-Mitglied",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "photo",
+          "label": "Foto"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Vor- und Nachname"
+        },
+        {
+          "type": "text",
+          "id": "role",
+          "label": "Rolle",
+          "default": "Founder & CEO"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Team-Grid",
+      "blocks": [
+        { "type": "member" },
+        { "type": "member" },
+        { "type": "member" }
+      ]
+    }
+  ]
+}
+{% endschema %}

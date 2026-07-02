@@ -1,0 +1,197 @@
+/*
+  LIFETIME — section-expert-profile.css
+  Approved example: expert-profile pattern (Split Foto + Textspalte,
+  alternierend links/rechts). Produktiv-Implementierung:
+  `assets/section-lt-about-experts.css` (inhaltsgleich).
+  Section-Header-Typografie kommt aus crs-heading-stack (global);
+  Rolle/Name/Bio sind block-interne Hierarchie (wie Card-Titles).
+  Token references: design-governance §3, §4, §6, §6b.
+*/
+
+/* ── Section shell ──────────────────────────────────────────── */
+.lt-about-experts {
+  background-color: var(--color-surface-primary);
+  padding-top: var(--space-9);    /* 80px desktop */
+  padding-bottom: var(--space-9);
+}
+
+.lt-about-experts__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+@media screen and (max-width: 768px) {
+  .lt-about-experts {
+    padding-top: var(--space-8);  /* 64px mobile */
+    padding-bottom: var(--space-8);
+  }
+  .lt-about-experts__container {
+    padding: 0 var(--space-4);
+  }
+}
+
+/* ── Section header ─────────────────────────────────────────── */
+.lt-about-experts__header {
+  max-width: 640px;
+  margin-bottom: var(--space-8);  /* 64px — Header trennt sich klar vom ersten Profil */
+}
+
+/* ── Profile list ────────────────────────────────────────────── */
+/*
+  DECISION: Profile trennen sich über Weißraum, nicht über Karten
+  oder Linien (§11). --space-9 zwischen Profilen: jedes Profil ist
+  eine eigenständige Lese-Einheit, kein Grid-Item.
+*/
+.lt-about-experts__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-9);            /* 80px zwischen Profilen */
+}
+
+@media screen and (max-width: 768px) {
+  .lt-about-experts__list {
+    gap: var(--space-8);          /* 64px gestapelt */
+  }
+}
+
+/* ── Profile (split layout) ──────────────────────────────────── */
+/*
+  DECISION: 2fr/3fr — Foto 40 %, Text 60 % (wie lt-science-limmroth).
+  align-items: start — bei langen Bios bleibt das Foto oben verankert.
+  Alternierung über :nth-child(even), kein Schema-Setting nötig.
+*/
+.lt-about-experts__profile {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: var(--space-8);            /* 64px zwischen Foto und Text */
+  align-items: start;
+}
+
+.lt-about-experts__profile:nth-child(even) .lt-about-experts__visual {
+  order: 2;
+}
+
+.lt-about-experts__profile:nth-child(even) .lt-about-experts__content {
+  order: 1;
+}
+
+@media (max-width: 1024px) {
+  .lt-about-experts__profile {
+    gap: var(--space-7);          /* 48px */
+  }
+}
+
+@media (max-width: 768px) {
+  .lt-about-experts__profile {
+    grid-template-columns: 1fr;   /* Bild oben, Text darunter */
+    gap: var(--space-5);          /* 24px */
+  }
+  /* Mobil immer Bild zuerst — Alternierung ist ein Desktop-Rhythmus */
+  .lt-about-experts__profile:nth-child(even) .lt-about-experts__visual {
+    order: 1;
+  }
+  .lt-about-experts__profile:nth-child(even) .lt-about-experts__content {
+    order: 2;
+  }
+}
+
+/* ── Photo ───────────────────────────────────────────────────── */
+.lt-about-experts__visual {
+  min-width: 0;
+}
+
+.lt-about-experts__img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--radius-md);
+  display: block;
+}
+
+.lt-about-experts__img-placeholder {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: var(--color-surface-secondary);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+
+@media (max-width: 768px) {
+  .lt-about-experts__img,
+  .lt-about-experts__img-placeholder {
+    aspect-ratio: 1 / 1;          /* Porträts mobil quadratisch — kein Kopf-Beschnitt */
+  }
+}
+
+/* ── Content column ──────────────────────────────────────────── */
+.lt-about-experts__content {
+  min-width: 0;
+}
+
+/*
+  DECISION: Rolle als Eyebrow ÜBER dem Namen — Funktion → Person →
+  Vita. Micro, uppercase, muted: klar untergeordnet.
+*/
+.lt-about-experts__role {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);   /* 12px */
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0 0 var(--space-3);     /* 12px */
+}
+
+/*
+  DECISION: Name ist das dominante Element des Profils —
+  --text-h2 (28px), heading font, bold. Nicht --text-h1: die
+  Section-Headline behält die oberste Ebene der Seite.
+*/
+.lt-about-experts__name {
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);      /* 28px */
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-4);     /* 16px */
+}
+
+/* ── Bio ─────────────────────────────────────────────────────── */
+.lt-about-experts__bio p {
+  font-family: var(--font-body);
+  font-size: var(--text-body);    /* 16px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-4);     /* 16px zwischen Absätzen */
+  max-width: 62ch;                /* Lesemaß */
+}
+
+.lt-about-experts__bio p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Optional quote ──────────────────────────────────────────── */
+/*
+  DECISION: Zitat rein typografisch abgesetzt — italic, Primärfarbe
+  (die Bio ist secondary), eigener Freiraum. Gleiche Größe wie die
+  Bio: zwei Größen unter 8px Abstand in Nachbarschaft sind verboten
+  (§6 Typographic Contrast). Kein farbiger Left-Border (Anti-Pattern),
+  kein Anführungszeichen-Ornament.
+*/
+.lt-about-experts__quote {
+  font-family: var(--font-body);
+  font-size: var(--text-body);    /* 16px — wie Bio, Differenzierung über Stil + Farbe */
+  font-weight: var(--weight-regular);
+  font-style: italic;
+  line-height: var(--leading-body);
+  color: var(--color-text-primary);
+  margin: var(--space-5) 0 0;     /* 24px über dem Zitat */
+  max-width: 52ch;
+}

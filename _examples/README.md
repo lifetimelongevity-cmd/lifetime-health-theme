@@ -39,6 +39,10 @@ Das ist das approved Mobile-PDP Design mit:
 | `sections/benefits.liquid` | card-info × 3 | `--color-surface-secondary` | Section Heading (h1) |
 | `sections/reviews.liquid` | card-review × 3 | `--color-surface-primary` | Section Heading (h1) |
 | `sections/quote.liquid` | quote-block | `--color-surface-dark` | Quote-Text (28px italic) |
+| `sections/expert-profile.liquid` | expert-profile (Split, alternierend) | `--color-surface-primary` | Profil-Name (28px) |
+| `sections/team-grid.liquid` | team-grid (card-info + Foto oben) | `--color-surface-secondary` | Section Heading (h1) |
+
+Hinweis zu den zwei neuesten Patterns (expert-profile, team-grid): Section-Header laufen über das kanonische `section-heading-crs`-Snippet (`docs/section-heading-stack.md`), nicht über lokales Header-CSS. Produktiv-Implementierungen: `sections/lt-about-experts.liquid`, `sections/lt-about-team.liquid`.
 
 ---
 

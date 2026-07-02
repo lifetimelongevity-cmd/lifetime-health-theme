@@ -1,0 +1,166 @@
+{% comment %}
+  LIFETIME — Approved Example: Expert Profile Section (expert-profile pattern)
+  ────────────────────────────────────────────────────────────────────────────
+  Produktiv-Implementierung: `sections/lt-about-experts.liquid`
+  CSS: `_examples/assets/section-expert-profile.css`
+       (produktiv: `assets/section-lt-about-experts.css`)
+
+  §12 Build Spec:
+  - Surface:          --color-surface-primary (hell)
+  - Section label:    optional — weglassen, wenn die Headline den Kontext
+                      trägt (§11 Subtraction)
+  - Dominant element: pro Profil der Name (--text-h2, heading font, bold);
+                      auf Section-Ebene die Headline (crs-heading-stack,
+                      headline_lg)
+  - Heading size:     --text-h1 (Section) / --text-h2 (Profil-Name)
+  - Content pattern:  expert-profile — Split-Layout Foto (2fr) + Text (3fr),
+                      alternierend links/rechts via :nth-child(even),
+                      Hierarchie: Rolle-Eyebrow → Name → Bio → opt. Zitat
+  - CTA:              keiner (Autoritäts-Section, kein Conversion-Moment)
+  - Removed:          Karten-Container um die Profile (Trennung über
+                      Weißraum, --space-9 zwischen Profilen),
+                      dekorative Borders und Trennlinien,
+                      Foto-Captions (der Name steht in der Textspalte)
+  - Quality move:     Rolle als Micro-Eyebrow ÜBER dem Namen — die Abfolge
+                      Funktion → Person → Vita liest sich wie ein
+                      redaktionelles Porträt, nicht wie eine Team-Datenbank.
+                      Das optionale Zitat ist rein typografisch abgesetzt
+                      (italic + Primärfarbe + Freiraum) — nie über einen
+                      farbigen Accent-Border (Anti-Pattern).
+
+  Heading-System: Section-Header IMMER über `section-heading-crs`
+  (docs/section-heading-stack.md). Rolle/Name/Bio sind block-interne
+  Hierarchie (wie Card-Titles) und dürfen lokal gestylt werden.
+{% endcomment %}
+
+{{ 'section-expert-profile.css' | asset_url | stylesheet_tag }}
+
+<section class="lt-about-experts">
+  <div class="lt-about-experts__container">
+
+    {%- if section.settings.title != blank -%}
+      {% render 'section-heading-crs',
+        heading: section.settings.title,
+        kicker: section.settings.kicker,
+        align: 'left',
+        headline_lg: true,
+        heading_tag: 'h2',
+        extra_class: 'lt-about-experts__header'
+      %}
+    {%- endif -%}
+
+    <div class="lt-about-experts__list">
+      {%- for block in section.blocks -%}
+        <article class="lt-about-experts__profile" {{ block.shopify_attributes }}>
+
+          <div class="lt-about-experts__visual">
+            {%- if block.settings.photo != blank -%}
+              {{
+                block.settings.photo
+                | image_url: width: 800
+                | image_tag:
+                  loading: 'lazy',
+                  class: 'lt-about-experts__img',
+                  alt: block.settings.name
+              }}
+            {%- else -%}
+              <div class="lt-about-experts__img-placeholder" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+            {%- endif -%}
+          </div>
+
+          <div class="lt-about-experts__content">
+            {%- if block.settings.role != blank -%}
+              <p class="lt-about-experts__role">{{ block.settings.role | escape }}</p>
+            {%- endif -%}
+            {%- if block.settings.name != blank -%}
+              <h3 class="lt-about-experts__name">{{ block.settings.name | escape }}</h3>
+            {%- endif -%}
+            {%- if block.settings.bio != blank -%}
+              <div class="lt-about-experts__bio">{{ block.settings.bio }}</div>
+            {%- endif -%}
+            {%- if block.settings.quote != blank -%}
+              <blockquote class="lt-about-experts__quote">
+                {{ block.settings.quote | escape }}
+              </blockquote>
+            {%- endif -%}
+          </div>
+
+        </article>
+      {%- endfor -%}
+    </div>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Expert Profile",
+  "tag": "section",
+  "class": "lt-about-experts-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (micro label)",
+      "info": "Optional. Leer lassen, wenn die Headline den Kontext trägt."
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Unsere Experten"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "expert",
+      "name": "Experte",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "photo",
+          "label": "Foto"
+        },
+        {
+          "type": "text",
+          "id": "role",
+          "label": "Rolle (Eyebrow)",
+          "default": "Chief Scientific Officer"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Prof. Dr. med. Limmroth"
+        },
+        {
+          "type": "richtext",
+          "id": "bio",
+          "label": "Bio",
+          "default": "<p>Kurzvita des Experten. Credentials beschreiben, keine Produkt-Wirkversprechen.</p>"
+        },
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Zitat (optional)",
+          "info": "Wird typografisch hervorgehoben. Leer lassen, wenn kein Zitat."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Expert Profile",
+      "blocks": [
+        { "type": "expert" },
+        { "type": "expert" }
+      ]
+    }
+  ]
+}
+{% endschema %}
