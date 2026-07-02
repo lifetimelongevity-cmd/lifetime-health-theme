@@ -1,0 +1,79 @@
+{% comment %}
+  LIFETIME — LT About Mission
+  ───────────────────────────
+  Konsolidiert die zwei Mission-Blöcke der Über-uns-Seite (rich-text +
+  Slideshow-Band) zu einem redaktionellen Intro: Heading-Stack links,
+  Absätze rechts. Header läuft über das kanonische
+  `section-heading-crs`-Snippet (docs/section-heading-stack.md).
+
+  §12 Build Spec:
+  - Surface:          --color-surface-primary (weiß)
+  - Section label:    kicker „Unsere Mission"
+  - Dominant element: Headline (--text-h1 via headline_lg)
+  - Content pattern:  heading-stack + Body-Absätze (richtext)
+  - CTA:              keiner
+  - Removed:          zweites Mission-Band (Slideshow), Teal-Strong-
+                      Custom-CSS, Bild (die Absätze tragen die Section)
+  - Quality move:     asymmetrischer 5/7-Split — Headline und Text
+                      stehen sich als Spalten gegenüber statt als
+                      gestapelter Rich-Text-Block
+{% endcomment %}
+
+{{ 'section-lt-about-mission.css' | asset_url | stylesheet_tag }}
+
+<section class="lt-about-mission">
+  <div class="lt-about-mission__container">
+    <div class="lt-about-mission__grid">
+
+      <div class="lt-about-mission__heading">
+        {% render 'section-heading-crs',
+          heading: section.settings.title,
+          kicker: section.settings.kicker,
+          align: 'left',
+          headline_lg: true,
+          heading_tag: 'h2'
+        %}
+      </div>
+
+      {%- if section.settings.body != blank -%}
+        <div class="lt-about-mission__body">
+          {{ section.settings.body }}
+        </div>
+      {%- endif -%}
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LT About Mission",
+  "tag": "section",
+  "class": "lt-about-mission-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (micro label)",
+      "default": "Unsere Mission"
+    },
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "Heading",
+      "default": "Forschungserfolge in erlebbare Gesundheit verwandeln"
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Text",
+      "default": "<p>Wir stellen uns eine Welt vor, in der Altern grenzenlose Möglichkeiten bietet.</p>"
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT About Mission"
+    }
+  ]
+}
+{% endschema %}

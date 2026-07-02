@@ -1,0 +1,113 @@
+{% comment %}
+  LIFETIME — LT Stat Callout
+  ──────────────────────────
+  Port des approved Examples `_examples/sections/stat-callout.liquid`.
+  Stat-Pattern (Number + Suffix + Label) 1:1 übernommen.
+  Abweichung zum Example: Section-Header läuft über das kanonische
+  `section-heading-crs`-Snippet (docs/section-heading-stack.md) —
+  bewusst klein, damit die Stat-Zahlen das schwerste Element bleiben (§6b).
+
+  §12 Build Spec:
+  - Surface:          --color-surface-dark (intentionaler Rhythmusbruch)
+  - Section label:    nein — Headline liefert den Kontext (approved decision)
+  - Dominant element: Stat-Zahlen (--text-stat, heading font, bold)
+  - Content pattern:  stat-callout × 3, zentriertes Grid
+  - CTA:              keiner (die Zahlen tragen die Section)
+  - Removed:          Section-Label, Body-Text unter den Stats,
+                      Trennlinien (dunkle Fläche übernimmt den Rhythmus)
+  - Quality move:     Suffix in teal-dark — Farbhierarchie innerhalb
+                      einer monochromen Fläche
+{% endcomment %}
+
+{{ 'section-lt-stat-callout.css' | asset_url | stylesheet_tag }}
+
+<section class="lt-stat-callout">
+  <div class="lt-stat-callout__container">
+
+    {%- if section.settings.title != blank -%}
+      {% render 'section-heading-crs',
+        heading: section.settings.title,
+        subheading: section.settings.description,
+        align: 'center',
+        on_dark: true,
+        heading_tag: 'h2',
+        extra_class: 'lt-stat-callout__header'
+      %}
+    {%- endif -%}
+
+    <ul class="lt-stat-callout__grid" role="list">
+      {%- for block in section.blocks -%}
+        <li class="lt-stat-callout__item" {{ block.shopify_attributes }}>
+          <div class="lt-stat-callout__number-row">
+            <span class="lt-stat-callout__number">{{ block.settings.number | escape }}</span>
+            {%- if block.settings.suffix != blank -%}
+              <span class="lt-stat-callout__suffix">{{ block.settings.suffix | escape }}</span>
+            {%- endif -%}
+          </div>
+          {%- if block.settings.label != blank -%}
+            <p class="lt-stat-callout__label">{{ block.settings.label | escape }}</p>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LT Stat Callout",
+  "tag": "section",
+  "class": "lt-stat-callout-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Was die Forschung zeigt"
+    },
+    {
+      "type": "text",
+      "id": "description",
+      "label": "Subheading",
+      "info": "Optional. Läuft als zweite Zeile im Heading-Block (nur Opacity abgesetzt)."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Stat",
+      "settings": [
+        {
+          "type": "text",
+          "id": "number",
+          "label": "Number",
+          "default": "250"
+        },
+        {
+          "type": "text",
+          "id": "suffix",
+          "label": "Suffix (%, +, x …)",
+          "info": "Optional. Leer lassen, wenn kein Suffix gebraucht wird."
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "wissenschaftliche Arbeiten"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Stat Callout",
+      "blocks": [
+        { "type": "stat" },
+        { "type": "stat" },
+        { "type": "stat" }
+      ]
+    }
+  ]
+}
+{% endschema %}

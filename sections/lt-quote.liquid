@@ -1,0 +1,95 @@
+{% comment %}
+  LIFETIME — LT Quote (quote-block)
+  ─────────────────────────────────
+  Port des approved Examples `_examples/sections/quote.liquid`, 1:1.
+  Kein Section-Header: das Zitat IST die Headline (deshalb kein
+  heading-stack nötig).
+
+  §12 Build Spec:
+  - Surface:          --color-surface-dark (intentionaler Rhythmusbruch)
+  - Section label:    nein — Zitatform ist selbsterklärend (§11)
+  - Dominant element: Quote-Text (--text-quote, italic)
+  - Content pattern:  einzelner quote-block, zentriert, max-width 720px
+  - CTA:              optional outline-inverted; Default: keiner
+  - Removed:          dekoratives Anführungszeichen-Grafikelement,
+                      Autorenfoto (Name + Rolle tragen die Autorität),
+                      Trennlinien
+  - Quality move:     Attribution als eine Zeile — Name (semibold, hell)
+                      · Rolle (muted) mit zentriertem Punkt, liest sich
+                      wie eine Magazin-Bildunterschrift
+{% endcomment %}
+
+{{ 'section-lt-quote.css' | asset_url | stylesheet_tag }}
+
+<section class="lt-quote">
+  <div class="lt-quote__container">
+
+    <figure class="lt-quote__figure">
+      <blockquote class="lt-quote__text">
+        {{ section.settings.quote | escape }}
+      </blockquote>
+      {%- if section.settings.author_name != blank -%}
+        <figcaption class="lt-quote__attribution">
+          <span class="lt-quote__author-name">{{ section.settings.author_name | escape }}</span>
+          {%- if section.settings.author_title != blank -%}
+            <span class="lt-quote__separator" aria-hidden="true">·</span>
+            <span class="lt-quote__author-title">{{ section.settings.author_title | escape }}</span>
+          {%- endif -%}
+        </figcaption>
+      {%- endif -%}
+    </figure>
+
+    {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+      <div class="lt-quote__cta">
+        <a href="{{ section.settings.cta_url }}" class="lt-btn--outline-inverted">
+          {{ section.settings.cta_label | escape }}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LT Quote",
+  "tag": "section",
+  "class": "lt-quote-section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "quote",
+      "label": "Quote",
+      "default": "Biologisches Altern ist kein unausweichliches Schicksal. Es ist ein Prozess, den wir heute beeinflussen können, mit den richtigen Werkzeugen."
+    },
+    {
+      "type": "text",
+      "id": "author_name",
+      "label": "Author name",
+      "default": "Prof. Dr. med. Limmroth"
+    },
+    {
+      "type": "text",
+      "id": "author_title",
+      "label": "Author title / role",
+      "default": "Chief Scientific Officer der LIFETIME Group"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA link"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA label",
+      "info": "Leer lassen, wenn kein CTA gebraucht wird."
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Quote"
+    }
+  ]
+}
+{% endschema %}

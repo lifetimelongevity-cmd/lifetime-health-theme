@@ -1,0 +1,140 @@
+{% comment %}
+  LIFETIME — LT Benefits (card-info × 3)
+  ──────────────────────────────────────
+  Port des approved Examples `_examples/sections/benefits.liquid`.
+  Content-Pattern (Grid, card-info, Icon-Pocket) 1:1 übernommen.
+  Abweichung zum Example: Section-Header läuft über das kanonische
+  `section-heading-crs`-Snippet (docs/section-heading-stack.md) statt
+  lokalem Header-CSS.
+
+  §12 Build Spec:
+  - Surface:          --color-surface-secondary (warm)
+  - Section label:    kicker via heading-stack
+  - Dominant element: Section-Headline (--text-h1 via headline_lg)
+  - Content pattern:  card-info × 3 (Icon + Titel + Beschreibung)
+  - CTA:              optional outline; Default: keiner
+  - Removed:          Card-Bilder, Card-CTAs, Card-Borders auf warmem Grund,
+                      Section-Description (Kicker + Headline reichen)
+  - Quality move:     Icon in benefit-bg Pocket mit teal-dark Icon —
+                      weicher Akzent ohne Farbflutung der Karte
+{% endcomment %}
+
+{{ 'section-lt-benefits.css' | asset_url | stylesheet_tag }}
+
+<section class="lt-benefits">
+  <div class="lt-benefits__container">
+
+    {% render 'section-heading-crs',
+      heading: section.settings.title,
+      kicker: section.settings.kicker,
+      align: section.settings.content_align,
+      headline_lg: true,
+      heading_tag: 'h2',
+      extra_class: 'lt-benefits__header'
+    %}
+
+    <ul class="lt-benefits__grid" role="list">
+      {%- for block in section.blocks -%}
+        <li class="lt-benefits__card" {{ block.shopify_attributes }}>
+          {%- if block.settings.icon != blank -%}
+            <div class="lt-benefits__card-icon" aria-hidden="true">
+              {{ block.settings.icon }}
+            </div>
+          {%- endif -%}
+          <h3 class="lt-benefits__card-title">{{ block.settings.title | escape }}</h3>
+          {%- if block.settings.description != blank -%}
+            <p class="lt-benefits__card-description">{{ block.settings.description | escape }}</p>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+
+    {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+      <div class="lt-benefits__cta">
+        <a href="{{ section.settings.cta_url }}" class="lt-btn--outline">
+          {{ section.settings.cta_label | escape }}
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LT Benefits",
+  "tag": "section",
+  "class": "lt-benefits-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (micro label)",
+      "default": "Unsere Werte"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "Was macht LIFETIME einzigartig?"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung Header",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA link"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA label",
+      "info": "Leer lassen, wenn kein CTA gebraucht wird."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "benefit",
+      "name": "Benefit",
+      "settings": [
+        {
+          "type": "html",
+          "id": "icon",
+          "label": "Icon (SVG)",
+          "info": "Inline-SVG einfügen (lucide, 24×24, currentColor stroke)."
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Wissenschaftlich fundiert"
+        },
+        {
+          "type": "text",
+          "id": "description",
+          "label": "Description",
+          "default": "Jede Empfehlung beruht auf soliden, evidenzbasierten Erkenntnissen."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Benefits",
+      "blocks": [
+        { "type": "benefit" },
+        { "type": "benefit" },
+        { "type": "benefit" }
+      ]
+    }
+  ]
+}
+{% endschema %}
