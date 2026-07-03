@@ -1,11 +1,15 @@
 /*
   LIFETIME — section-expert-profile.css
-  Approved example: expert-profile pattern (Split Foto + Textspalte,
-  alternierend links/rechts). Produktiv-Implementierung:
-  `assets/section-lt-about-experts.css` (inhaltsgleich).
-  Section-Header-Typografie kommt aus crs-heading-stack (global);
-  Rolle/Name/Bio sind block-interne Hierarchie (wie Card-Titles).
-  Token references: design-governance §3, §4, §6, §6b.
+  Approved example: expert-card grid.
+  Produktiv-Implementierung: `assets/section-lt-about-experts.css`
+  (inhaltsgleich).
+  Pattern „expert-card grid": Karten-Grid (2×2) mit einheitlichem
+  96px-Avatar + Meta-Kopfzeile, Bio und optionalem Zitat darunter.
+  Design-Sprache der PDP-Expert-Card (sections/lt-pdp-expert.liquid),
+  Card-Disziplin von card-info (Border + shadow-sm auf weißem Grund).
+  Referenz-Example: `_examples/sections/expert-profile.liquid`.
+  Section-Header-Typografie kommt aus crs-heading-stack (global).
+  Token references: design-governance §3, §5 (Card Info), §6, §6b.
 */
 
 /* ── Section shell ──────────────────────────────────────────── */
@@ -34,108 +38,88 @@
 /* ── Section header ─────────────────────────────────────────── */
 .lt-about-experts__header {
   max-width: 640px;
-  margin-bottom: var(--space-8);  /* 64px — Header trennt sich klar vom ersten Profil */
+  margin-bottom: var(--space-6);  /* 32px → grid (§4 header → content) */
 }
 
-/* ── Profile list ────────────────────────────────────────────── */
+/* ── Card grid ───────────────────────────────────────────────── */
 /*
-  DECISION: Profile trennen sich über Weißraum, nicht über Karten
-  oder Linien (§11). --space-9 zwischen Profilen: jedes Profil ist
-  eine eigenständige Lese-Einheit, kein Grid-Item.
+  DECISION: 2 Spalten Desktop (4 Experten = 2×2), 1 Spalte Mobile.
+  Grid-stretch macht die Karten einer Zeile gleich hoch — kurze Bios
+  erzeugen keine offenen Leerräume mehr wie im früheren Split-Layout.
 */
-.lt-about-experts__list {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-9);            /* 80px zwischen Profilen */
+.lt-about-experts__grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-5);            /* 24px */
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 @media screen and (max-width: 768px) {
-  .lt-about-experts__list {
-    gap: var(--space-8);          /* 64px gestapelt */
+  .lt-about-experts__grid {
+    grid-template-columns: 1fr;
   }
 }
 
-/* ── Profile (split layout) ──────────────────────────────────── */
+/* ── Card ────────────────────────────────────────────────────── */
 /*
-  DECISION: 2fr/3fr — Foto 40 %, Text 60 % (wie lt-science-limmroth).
-  align-items: start — bei langen Bios bleibt das Foto oben verankert.
-  Alternierung über :nth-child(even), kein Schema-Setting nötig.
+  DECISION: card-info-Regel auf weißem Section-Grund — Border
+  (--color-border-default) + shadow-sm, --radius-md, Padding --space-5.
 */
-.lt-about-experts__profile {
-  display: grid;
-  grid-template-columns: 2fr 3fr;
-  gap: var(--space-8);            /* 64px zwischen Foto und Text */
-  align-items: start;
-}
-
-.lt-about-experts__profile:nth-child(even) .lt-about-experts__visual {
-  order: 2;
-}
-
-.lt-about-experts__profile:nth-child(even) .lt-about-experts__content {
-  order: 1;
-}
-
-@media (max-width: 1024px) {
-  .lt-about-experts__profile {
-    gap: var(--space-7);          /* 48px */
-  }
-}
-
-@media (max-width: 768px) {
-  .lt-about-experts__profile {
-    grid-template-columns: 1fr;   /* Bild oben, Text darunter */
-    gap: var(--space-5);          /* 24px */
-  }
-  /* Mobil immer Bild zuerst — Alternierung ist ein Desktop-Rhythmus */
-  .lt-about-experts__profile:nth-child(even) .lt-about-experts__visual {
-    order: 1;
-  }
-  .lt-about-experts__profile:nth-child(even) .lt-about-experts__content {
-    order: 2;
-  }
-}
-
-/* ── Photo ───────────────────────────────────────────────────── */
-.lt-about-experts__visual {
-  min-width: 0;
-}
-
-.lt-about-experts__img {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  aspect-ratio: 3 / 4;
+.lt-about-experts__card {
+  background-color: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
-  display: block;
+  padding: var(--space-5);        /* 24px */
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
 }
 
-.lt-about-experts__img-placeholder {
-  width: 100%;
-  aspect-ratio: 3 / 4;
-  background: var(--color-surface-secondary);
+/* ── Kopfzeile: Avatar + Meta ────────────────────────────────── */
+.lt-about-experts__top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);            /* 16px */
+  margin-bottom: var(--space-4);  /* 16px zur Bio */
+}
+
+/*
+  DECISION: EIN fester Avatar für alle — 96px Quadrat, --radius-md
+  (Systemform, keine Kreise). Die vier Quellfotos haben unterschiedliche
+  Hintergründe und Ausschnitte; die kleine, identische Box normalisiert
+  sie zu einer gleichwertigen Reihe („einheitliche Bildgröße").
+*/
+.lt-about-experts__avatar {
+  width: 96px;  /* intrinsic: Avatar-Containergröße des Patterns */
+  height: 96px;
   border-radius: var(--radius-md);
+  background-color: var(--color-surface-secondary);
+  overflow: hidden;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--color-text-muted);
 }
 
-@media (max-width: 768px) {
-  .lt-about-experts__img,
-  .lt-about-experts__img-placeholder {
-    aspect-ratio: 1 / 1;          /* Porträts mobil quadratisch — kein Kopf-Beschnitt */
-  }
+.lt-about-experts__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 30%; /* intentional: Gesichts-Bias — Porträts tragen das Gesicht im oberen Drittel */
+  display: block;
 }
 
-/* ── Content column ──────────────────────────────────────────── */
-.lt-about-experts__content {
+.lt-about-experts__meta {
+  flex: 1;
   min-width: 0;
 }
 
 /*
-  DECISION: Rolle als Eyebrow ÜBER dem Namen — Funktion → Person →
-  Vita. Micro, uppercase, muted: klar untergeordnet.
+  DECISION: Rolle als Micro-Eyebrow ÜBER dem Namen — Funktion →
+  Person → Vita, wie in der PDP-Expert-Card.
 */
 .lt-about-experts__role {
   font-family: var(--font-body);
@@ -145,21 +129,21 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-text-muted);
-  margin: 0 0 var(--space-3);     /* 12px */
+  margin: 0 0 var(--space-1);     /* 4px */
 }
 
 /*
-  DECISION: Name ist das dominante Element des Profils —
-  --text-h2 (28px), heading font, bold. Nicht --text-h1: die
-  Section-Headline behält die oberste Ebene der Seite.
+  DECISION: Name = dominantes Element der Karte — --text-section
+  (20px), heading font, bold. Gleiche Card-Title-Ebene wie
+  lt-benefits und lt-about-team (§7: konsistente Karten pro Seite).
 */
 .lt-about-experts__name {
   font-family: var(--font-heading);
-  font-size: var(--text-h2);      /* 28px */
+  font-size: var(--text-section); /* 20px */
   font-weight: var(--weight-bold);
-  line-height: var(--leading-heading);
+  line-height: var(--leading-tight);
   color: var(--color-text-primary);
-  margin: 0 0 var(--space-4);     /* 16px */
+  margin: 0;
 }
 
 /* ── Bio ─────────────────────────────────────────────────────── */
@@ -170,7 +154,6 @@
   line-height: var(--leading-relaxed);
   color: var(--color-text-secondary);
   margin: 0 0 var(--space-4);     /* 16px zwischen Absätzen */
-  max-width: 62ch;                /* Lesemaß */
 }
 
 .lt-about-experts__bio p:last-child {
@@ -179,11 +162,12 @@
 
 /* ── Optional quote ──────────────────────────────────────────── */
 /*
-  DECISION: Zitat rein typografisch abgesetzt — italic, Primärfarbe
-  (die Bio ist secondary), eigener Freiraum. Gleiche Größe wie die
-  Bio: zwei Größen unter 8px Abstand in Nachbarschaft sind verboten
-  (§6 Typographic Contrast). Kein farbiger Left-Border (Anti-Pattern),
-  kein Anführungszeichen-Ornament.
+  DECISION: Zitat rein typografisch abgesetzt — italic + Primärfarbe
+  (Bio ist secondary) + Freiraum. Gleiche Größe wie die Bio (§6:
+  keine zwei Größen unter 8px Abstand in Nachbarschaft). Kein
+  farbiger Left-Border, keine Trennlinie (§11).
+  margin-top: auto schiebt das Zitat bei Karten mit kürzerer Bio an
+  die Kartenbasis — die Zeile schließt die Komposition.
 */
 .lt-about-experts__quote {
   font-family: var(--font-body);
@@ -192,6 +176,7 @@
   font-style: italic;
   line-height: var(--leading-body);
   color: var(--color-text-primary);
-  margin: var(--space-5) 0 0;     /* 24px über dem Zitat */
-  max-width: 52ch;
+  margin: 0;
+  padding-top: var(--space-4);    /* 16px über dem Zitat */
+  margin-top: auto;
 }

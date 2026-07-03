@@ -1,36 +1,51 @@
 {% comment %}
-  LIFETIME — Approved Example: Expert Profile Section (expert-profile pattern)
-  ────────────────────────────────────────────────────────────────────────────
+  LIFETIME — Approved Example: Expert Profile Section (expert-card grid)
+  ──────────────────────────────────────────────────────────────────────
   Produktiv-Implementierung: `sections/lt-about-experts.liquid`
   CSS: `_examples/assets/section-expert-profile.css`
        (produktiv: `assets/section-lt-about-experts.css`)
 
+  v2 (2026-07-03). Die v1 dieses Patterns war ein alternierender
+  2fr/3fr-Split (Foto groß neben Text). Sie ist an heterogenem Material
+  gescheitert und wurde ersetzt — Lehren für künftige Builds:
+  - `order`-Alternierung in einem asymmetrischen Grid legt Fotos in
+    unterschiedlich breite Spalten → uneinheitliche Bildgrößen.
+  - Große Porträts verstärken Unterschiede in Hintergrund, Licht und
+    Ausschnitt der Quellfotos.
+  - Stark unterschiedliche Bio-Längen reißen im offenen Split-Layout
+    Leerräume auf.
+  Karten mit kleinem, identischem Avatar normalisieren all das.
+
   §12 Build Spec:
   - Surface:          --color-surface-primary (hell)
-  - Section label:    optional — weglassen, wenn die Headline den Kontext
-                      trägt (§11 Subtraction)
-  - Dominant element: pro Profil der Name (--text-h2, heading font, bold);
-                      auf Section-Ebene die Headline (crs-heading-stack,
+  - Section label:    optional — weglassen, wenn die Headline den
+                      Kontext trägt (§11 Subtraction)
+  - Dominant element: pro Karte der Name (--text-section, bold, gleiche
+                      Card-Title-Ebene wie card-info/team-grid, §7);
+                      Section-Ebene: Headline (crs-heading-stack,
                       headline_lg)
-  - Heading size:     --text-h1 (Section) / --text-h2 (Profil-Name)
-  - Content pattern:  expert-profile — Split-Layout Foto (2fr) + Text (3fr),
-                      alternierend links/rechts via :nth-child(even),
-                      Hierarchie: Rolle-Eyebrow → Name → Bio → opt. Zitat
+  - Heading size:     --text-h1 (Section) / --text-section (Card-Name)
+  - Content pattern:  expert-card × N im 2er-Grid — Kopfzeile
+                      (96px-Avatar + Rolle-Eyebrow + Name), Bio,
+                      optionales Zitat; Design-Sprache der
+                      PDP-Expert-Card (`sections/lt-pdp-expert.liquid`,
+                      `_examples/pdp-reference.html`)
   - CTA:              keiner (Autoritäts-Section, kein Conversion-Moment)
-  - Removed:          Karten-Container um die Profile (Trennung über
-                      Weißraum, --space-9 zwischen Profilen),
-                      dekorative Borders und Trennlinien,
-                      Foto-Captions (der Name steht in der Textspalte)
-  - Quality move:     Rolle als Micro-Eyebrow ÜBER dem Namen — die Abfolge
-                      Funktion → Person → Vita liest sich wie ein
-                      redaktionelles Porträt, nicht wie eine Team-Datenbank.
-                      Das optionale Zitat ist rein typografisch abgesetzt
-                      (italic + Primärfarbe + Freiraum) — nie über einen
-                      farbigen Accent-Border (Anti-Pattern).
+  - Removed:          alternierender Split (siehe v1-Lehren), große
+                      Porträts, Foto-Captions, Trennlinie vor dem Zitat
+  - Quality move:     EIN fester 96px-Avatar (--radius-md, Systemform,
+                      keine Kreise) mit Gesichts-Bias-Crop
+                      (object-position center 30%) für alle Experten —
+                      vier uneinheitliche Quellfotos lesen sich als
+                      eine ruhige, gleichwertige Reihe. Das optionale
+                      Zitat sitzt via margin-top:auto an der Kartenbasis
+                      und schließt die Komposition.
 
   Heading-System: Section-Header IMMER über `section-heading-crs`
-  (docs/section-heading-stack.md). Rolle/Name/Bio sind block-interne
+  (docs/section-heading-stack.md). Rolle/Name sind block-interne
   Hierarchie (wie Card-Titles) und dürfen lokal gestylt werden.
+  Farbregel: kein Teal als Text-/Label-Farbe (anders als die ältere
+  PDP-Expert-Card) — Eyebrow läuft muted.
 {% endcomment %}
 
 {{ 'section-expert-profile.css' | asset_url | stylesheet_tag }}
@@ -49,50 +64,54 @@
       %}
     {%- endif -%}
 
-    <div class="lt-about-experts__list">
+    <ul class="lt-about-experts__grid" role="list">
       {%- for block in section.blocks -%}
-        <article class="lt-about-experts__profile" {{ block.shopify_attributes }}>
+        <li class="lt-about-experts__card" {{ block.shopify_attributes }}>
 
-          <div class="lt-about-experts__visual">
-            {%- if block.settings.photo != blank -%}
-              {{
-                block.settings.photo
-                | image_url: width: 800
-                | image_tag:
-                  loading: 'lazy',
-                  class: 'lt-about-experts__img',
-                  alt: block.settings.name
-              }}
-            {%- else -%}
-              <div class="lt-about-experts__img-placeholder" aria-hidden="true">
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <div class="lt-about-experts__top">
+            <div class="lt-about-experts__avatar">
+              {%- if block.settings.photo != blank -%}
+                {{
+                  block.settings.photo
+                  | image_url: width: 192
+                  | image_tag:
+                    loading: 'lazy',
+                    class: 'lt-about-experts__photo',
+                    width: 96,
+                    height: 96,
+                    alt: block.settings.name
+                }}
+              {%- else -%}
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                   <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                   <circle cx="12" cy="7" r="4"/>
                 </svg>
-              </div>
-            {%- endif -%}
+              {%- endif -%}
+            </div>
+
+            <div class="lt-about-experts__meta">
+              {%- if block.settings.role != blank -%}
+                <p class="lt-about-experts__role">{{ block.settings.role | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.name != blank -%}
+                <h3 class="lt-about-experts__name">{{ block.settings.name | escape }}</h3>
+              {%- endif -%}
+            </div>
           </div>
 
-          <div class="lt-about-experts__content">
-            {%- if block.settings.role != blank -%}
-              <p class="lt-about-experts__role">{{ block.settings.role | escape }}</p>
-            {%- endif -%}
-            {%- if block.settings.name != blank -%}
-              <h3 class="lt-about-experts__name">{{ block.settings.name | escape }}</h3>
-            {%- endif -%}
-            {%- if block.settings.bio != blank -%}
-              <div class="lt-about-experts__bio">{{ block.settings.bio }}</div>
-            {%- endif -%}
-            {%- if block.settings.quote != blank -%}
-              <blockquote class="lt-about-experts__quote">
-                {{ block.settings.quote | escape }}
-              </blockquote>
-            {%- endif -%}
-          </div>
+          {%- if block.settings.bio != blank -%}
+            <div class="lt-about-experts__bio">{{ block.settings.bio }}</div>
+          {%- endif -%}
 
-        </article>
+          {%- if block.settings.quote != blank -%}
+            <blockquote class="lt-about-experts__quote">
+              {{ block.settings.quote | escape }}
+            </blockquote>
+          {%- endif -%}
+
+        </li>
       {%- endfor -%}
-    </div>
+    </ul>
 
   </div>
 </section>
@@ -124,7 +143,8 @@
         {
           "type": "image_picker",
           "id": "photo",
-          "label": "Foto"
+          "label": "Foto",
+          "info": "Wird als einheitliches Quadrat (96px) beschnitten."
         },
         {
           "type": "text",
