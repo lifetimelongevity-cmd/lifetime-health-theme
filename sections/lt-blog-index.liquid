@@ -1,0 +1,465 @@
+{% comment %}
+  ───────────────────────────────────────────────────────────────────────────
+  LT Blog Index — Blog-Übersicht (Featured-Hero + Tag-Filter + Grid + Mehr laden)
+  ───────────────────────────────────────────────────────────────────────────
+  §12-Spec (Spec: docs/blog-design-best-practices.md §6):
+  • Surface: --color-surface-primary. Featured-Karte + Cards auf weiß mit Border,
+    Featured-Text-Spalte auf --color-surface-secondary.
+  • Dominantes Element: Featured-Artikel (großes Bild + Titel). Auf Folgeseiten /
+    Tag-Filtern: das Section-Heading.
+  • Heading: section-heading-crs (kanonisch), h1 auf Blog-Template, h2 auf Page.
+  • Content-Pattern: card-info-Grid × 3 Spalten.
+  • Pagination: "Mehr laden"-Button (Baymard) mit JS-Append, Fallback = Link auf ?page=N.
+  • Kategorien: Shopify-Tags als Filter-Pills (link_to_tag-URLs, ein Blog, keine Multi-Blogs).
+  • Subtraction: kein Infinite Scroll, keine Autoren-Zeile auf Karten, kein Datum
+    auf der Featured-Karte (Tag + Titel + Excerpt tragen die Karte).
+
+  Funktioniert auf zwei Templates:
+  • blog.json  → nutzt das globale blog-Objekt + current_tags
+  • page.*.json → nutzt den Blog aus dem Section-Setting (Picker)
+{% endcomment %}
+
+{%- liquid
+  if template.name == 'blog'
+    assign target_blog = blog
+    assign heading_tag_var = 'h1'
+  else
+    assign target_blog = blogs[section.settings.blog]
+    assign heading_tag_var = 'h2'
+  endif
+
+  assign show_featured = section.settings.show_featured
+-%}
+
+{%- if target_blog != blank and target_blog.articles_count > 0 -%}
+{%- paginate target_blog.articles by section.settings.per_page -%}
+
+{%- liquid
+  if show_featured
+    if paginate.current_page != 1
+      assign show_featured = false
+    endif
+    if current_tags != blank
+      assign show_featured = false
+    endif
+  endif
+-%}
+
+<div class="lt-blog-index">
+  <div class="lt-blog-index__container">
+
+    {% render 'section-heading-crs',
+      heading: section.settings.heading,
+      subheading: section.settings.subheading,
+      kicker: section.settings.kicker,
+      align: 'left',
+      heading_tag: heading_tag_var,
+      extra_class: 'lt-blog-index__header'
+    %}
+
+    {%- if section.settings.show_tags and target_blog.all_tags.size > 0 -%}
+      <nav class="lt-blog-index__tags" aria-label="Kategorien">
+        <a
+          class="lt-blog-index__tag-pill{% if current_tags == blank %} is-active{% endif %}"
+          href="{{ target_blog.url }}"
+        >Alle</a>
+        {%- for tag in target_blog.all_tags -%}
+          <a
+            class="lt-blog-index__tag-pill{% if current_tags contains tag %} is-active{% endif %}"
+            href="{{ target_blog.url }}/tagged/{{ tag | handleize }}"
+          >{{ tag | escape }}</a>
+        {%- endfor -%}
+      </nav>
+    {%- endif -%}
+
+    {%- if show_featured -%}
+      {%- assign featured = target_blog.articles.first -%}
+      <a class="lt-blog-index__featured" href="{{ featured.url }}">
+        {%- if featured.image != blank -%}
+          <div class="lt-blog-index__featured-image">
+            {{-
+              featured.image
+              | image_url: width: 1200
+              | image_tag: widths: '600, 900, 1200', sizes: '(max-width: 767px) 100vw, 640px', loading: 'eager', fetchpriority: 'high', alt: featured.image.alt
+            -}}
+          </div>
+        {%- endif -%}
+        <div class="lt-blog-index__featured-body">
+          {%- assign featured_tag = featured.tags | first -%}
+          {%- if featured_tag != blank -%}
+            <p class="lt-blog-index__card-tag">{{ featured_tag | escape }}</p>
+          {%- endif -%}
+          <p class="lt-blog-index__featured-title">{{ featured.title | escape }}</p>
+          <p class="lt-blog-index__featured-excerpt">{{ featured.excerpt_or_content | strip_html | truncatewords: 32 }}</p>
+          <p class="lt-blog-index__featured-more">Artikel lesen</p>
+        </div>
+      </a>
+    {%- endif -%}
+
+    <div class="lt-blog-index__grid" data-lt-blog-grid>
+      {%- for item in target_blog.articles -%}
+        {%- if show_featured and forloop.first -%}
+          {%- continue -%}
+        {%- endif -%}
+        <a class="lt-blog-index__card" href="{{ item.url }}">
+          {%- if item.image != blank -%}
+            <div class="lt-blog-index__card-image">
+              {{-
+                item.image
+                | image_url: width: 800
+                | image_tag: widths: '400, 600, 800', sizes: '(max-width: 767px) 100vw, 380px', loading: 'lazy', alt: item.image.alt
+              -}}
+            </div>
+          {%- endif -%}
+          <div class="lt-blog-index__card-body">
+            {%- assign item_tag = item.tags | first -%}
+            {%- if item_tag != blank -%}
+              <p class="lt-blog-index__card-tag">{{ item_tag | escape }}</p>
+            {%- endif -%}
+            <p class="lt-blog-index__card-title">{{ item.title | escape }}</p>
+            <p class="lt-blog-index__card-excerpt">{{ item.excerpt_or_content | strip_html | truncatewords: 20 }}</p>
+            <p class="lt-blog-index__card-meta">
+              <time datetime="{{ item.published_at | date: '%Y-%m-%d' }}">{{ item.published_at | date: '%d.%m.%Y' }}</time>
+            </p>
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+
+    {%- if paginate.next -%}
+      <div class="lt-blog-index__more-wrap">
+        <a class="lt-blog-index__more" href="{{ paginate.next.url }}" data-lt-blog-more>
+          Mehr Artikel laden
+        </a>
+      </div>
+    {%- endif -%}
+
+  </div>
+</div>
+
+{%- endpaginate -%}
+{%- endif -%}
+
+{% stylesheet %}
+.lt-blog-index {
+  background: var(--color-surface-primary);
+  padding: var(--space-8) 0 var(--space-9);
+}
+
+.lt-blog-index__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.lt-blog-index__header {
+  margin-bottom: var(--space-6);
+}
+
+.lt-blog-index__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.lt-blog-index__tag-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px; /* intentional: kompakte Filter-Pill, kein 48px-CTA-Button */
+  padding: var(--space-1) var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: border-color var(--ease-default), color var(--ease-default);
+}
+
+.lt-blog-index__tag-pill:hover {
+  border-color: var(--color-text-primary);
+  color: var(--color-text-primary);
+}
+
+.lt-blog-index__tag-pill.is-active {
+  background: var(--color-cta-bg);
+  border-color: var(--color-cta-bg);
+  color: var(--color-cta-text);
+}
+
+.lt-blog-index__featured {
+  display: grid;
+  grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  text-decoration: none;
+  margin-bottom: var(--space-7);
+  background: var(--color-surface-secondary);
+}
+
+.lt-blog-index__featured-image {
+  aspect-ratio: 3 / 2;
+}
+
+.lt-blog-index__featured-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lt-blog-index__featured-body {
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.lt-blog-index__featured-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+}
+
+.lt-blog-index__featured-excerpt {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
+.lt-blog-index__featured-more {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px; /* intentional: sub-token, wie Artikel-Links */
+}
+
+.lt-blog-index__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.lt-blog-index__card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  text-decoration: none;
+  transition: box-shadow var(--ease-default);
+}
+
+.lt-blog-index__card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.lt-blog-index__card-image {
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+}
+
+.lt-blog-index__card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lt-blog-index__card-body {
+  padding: var(--space-5);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.lt-blog-index__card-tag {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.lt-blog-index__card-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+}
+
+.lt-blog-index__card-excerpt {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.lt-blog-index__card-meta {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+}
+
+.lt-blog-index__more-wrap {
+  margin-top: var(--space-7);
+  text-align: center;
+}
+
+.lt-blog-index__more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px; /* intentional: Button-Spec aus design-components.mdc */
+  padding: 0.875rem var(--space-7);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  transition: border-color var(--ease-default);
+}
+
+.lt-blog-index__more:hover,
+.lt-blog-index__more:focus-visible {
+  border-color: var(--color-text-primary);
+}
+
+@media screen and (max-width: 1024px) {
+  .lt-blog-index__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .lt-blog-index__featured {
+    grid-template-columns: 1fr;
+  }
+
+  .lt-blog-index__featured-body {
+    padding: var(--space-5);
+  }
+
+  .lt-blog-index__grid {
+    grid-template-columns: 1fr;
+  }
+}
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  document.querySelectorAll('[data-lt-blog-more]').forEach(function (button) {
+    button.addEventListener('click', function (event) {
+      event.preventDefault();
+      button.setAttribute('aria-busy', 'true');
+
+      fetch(button.href)
+        .then(function (response) { return response.text(); })
+        .then(function (html) {
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          var newGrid = doc.querySelector('[data-lt-blog-grid]');
+          var grid = button.closest('.lt-blog-index').querySelector('[data-lt-blog-grid]');
+          if (newGrid && grid) {
+            while (newGrid.firstElementChild) {
+              grid.appendChild(newGrid.firstElementChild);
+            }
+          }
+          var nextButton = doc.querySelector('[data-lt-blog-more]');
+          if (nextButton) {
+            button.href = nextButton.href;
+            button.removeAttribute('aria-busy');
+          } else {
+            button.parentElement.remove();
+          }
+        })
+        .catch(function () {
+          // Fallback: normal navigieren, wenn fetch scheitert
+          window.location.href = button.href;
+        });
+    });
+  });
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "LT Blog Index",
+  "tag": "section",
+  "class": "lt-blog-index-section",
+  "settings": [
+    {
+      "type": "blog",
+      "id": "blog",
+      "label": "Blog (nur auf Pages nötig, Blog-Template nutzt den eigenen)"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Longevity Blog"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Headline",
+      "default": "Wissen, das länger wirkt"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheadline",
+      "default": "Forschung, Biomarker und Routinen, verständlich erklärt."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_tags",
+      "label": "Kategorie-Filter (Tags) anzeigen",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_featured",
+      "label": "Neuesten Artikel als Featured-Karte zeigen",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "per_page",
+      "label": "Artikel pro Seite",
+      "min": 6,
+      "max": 24,
+      "step": 3,
+      "default": 12
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Blog Index"
+    }
+  ]
+}
+{% endschema %}

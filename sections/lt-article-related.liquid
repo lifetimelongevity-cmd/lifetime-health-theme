@@ -1,0 +1,202 @@
+{% comment %}
+  ───────────────────────────────────────────────────────────────────────────
+  LT Article Related — "Weiterlesen"-Grid am Artikelende
+  ───────────────────────────────────────────────────────────────────────────
+  §12-Spec:
+  • Surface: --color-surface-secondary (warmer Rhythmusbruch nach weißem Artikel).
+  • Dominantes Element: Section-Heading (via section-heading-crs, kanonisch).
+  • Content-Pattern: card-info × 3 (angelehnt an _examples/sections/benefits.liquid,
+    Karte = Bild + Tag-Label + Titel + Meta).
+  • CTA: keine. Die Karten sind die Handlung.
+  • Subtraction: kein Excerpt auf den Karten (Titel + Tag reichen zum Scannen),
+    kein "Alle Artikel"-Button (Breadcrumb im Artikel deckt den Weg zurück ab).
+  • Auswahl: neueste Artikel desselben Blogs, aktueller Artikel ausgeschlossen.
+{% endcomment %}
+
+{%- liquid
+  assign shown = 0
+  assign max_items = section.settings.max_items
+-%}
+
+<div class="lt-art-rel">
+  <div class="lt-art-rel__container">
+    {% render 'section-heading-crs',
+      heading: section.settings.heading,
+      subheading: section.settings.subheading,
+      kicker: section.settings.kicker,
+      align: 'left',
+      extra_class: 'lt-art-rel__header'
+    %}
+
+    <div class="lt-art-rel__grid">
+      {%- for related in blog.articles limit: 12 -%}
+        {%- if related.id == article.id -%}
+          {%- continue -%}
+        {%- endif -%}
+        {%- if shown >= max_items -%}
+          {%- break -%}
+        {%- endif -%}
+        {%- assign shown = shown | plus: 1 -%}
+        <a class="lt-art-rel__card" href="{{ related.url }}">
+          {%- if related.image != blank -%}
+            <div class="lt-art-rel__image">
+              {{-
+                related.image
+                | image_url: width: 800
+                | image_tag: widths: '400, 600, 800', sizes: '(max-width: 767px) 100vw, 380px', loading: 'lazy', alt: related.image.alt
+              -}}
+            </div>
+          {%- endif -%}
+          <div class="lt-art-rel__body">
+            {%- assign rel_tag = related.tags | first -%}
+            {%- if rel_tag != blank -%}
+              <p class="lt-art-rel__tag">{{ rel_tag | escape }}</p>
+            {%- endif -%}
+            <p class="lt-art-rel__title">{{ related.title | escape }}</p>
+            <p class="lt-art-rel__meta">
+              <time datetime="{{ related.published_at | date: '%Y-%m-%d' }}">{{ related.published_at | date: '%d.%m.%Y' }}</time>
+            </p>
+          </div>
+        </a>
+      {%- endfor -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+.lt-art-rel {
+  background: var(--color-surface-secondary);
+  padding: var(--space-8) 0;
+}
+
+.lt-art-rel__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.lt-art-rel__header {
+  margin-bottom: var(--space-6);
+}
+
+.lt-art-rel__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+.lt-art-rel__card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  text-decoration: none;
+  transition: box-shadow var(--ease-default);
+}
+
+.lt-art-rel__card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.lt-art-rel__image {
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+}
+
+.lt-art-rel__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lt-art-rel__body {
+  padding: var(--space-5);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.lt-art-rel__tag {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.lt-art-rel__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+}
+
+.lt-art-rel__meta {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+}
+
+@media screen and (max-width: 1024px) {
+  .lt-art-rel__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .lt-art-rel__grid {
+    grid-template-columns: 1fr;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT Article Related",
+  "tag": "section",
+  "class": "lt-art-rel-section",
+  "enabled_on": {
+    "templates": ["article"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Longevity Blog"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Headline",
+      "default": "Weiterlesen"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheadline"
+    },
+    {
+      "type": "range",
+      "id": "max_items",
+      "label": "Anzahl Artikel",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Article Related"
+    }
+  ]
+}
+{% endschema %}

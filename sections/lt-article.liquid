@@ -1,0 +1,788 @@
+{% comment %}
+  ───────────────────────────────────────────────────────────────────────────
+  LT Article — Blog-Artikel-Roh-Template (Spec: docs/blog-design-best-practices.md)
+  ───────────────────────────────────────────────────────────────────────────
+  §12-Spec:
+  • Surface: --color-surface-primary (weiß). Boxen (Takeaways, TOC, CTA, Quellen,
+    Autor) auf --color-surface-secondary bzw. Border-only, kein Teal, keine
+    farbigen Left-Borders.
+  • Dominantes Element: der Artikel-Titel (H1).
+  • Heading: H1 = Artikel-Titel (--text-h1). Section nutzt bewusst NICHT
+    crs-heading-stack: Titel + Byline sind Artikel-Content, kein Section-Header.
+  • Content-Pattern: Longform-Editorial. Messmaß 680px (60–75 Zeichen/Zeile),
+    Body --text-article (19px/17px mobil), --leading-relaxed.
+  • CTA: genau EIN kontextueller Quiz-/Produkt-Einschub im Artikel (Default:
+    vor der dritten H2). Kein zweiter End-CTA in dieser Section, damit CTAs
+    nicht im selben Viewport konkurrieren (Anti-Pattern-Liste).
+  • Subtraction: kein Reading-Progress-Bar (keine UX-Evidenz), keine Sticky-
+    Sidebar-TOC in v1 (DTC-Standard ist Inline-Jump-List), keine Social-Buttons.
+  • Quality Move: TOC + Lesezeit + Anker-IDs werden vollautomatisch aus den
+    H2s in article.content generiert. Redaktioneller Aufwand: null.
+
+  Datenquellen (alle optional, Fallback = Section-Settings bzw. ausblenden):
+  • article.metafields.custom.takeaways      (mehrzeiliger Text, 1 Bullet/Zeile)
+  • article.metafields.custom.author_name    (Text)  — sonst Setting
+  • article.metafields.custom.author_credential (Text)
+  • article.metafields.custom.reviewer_name  (Text)  — sonst Setting
+  • article.metafields.custom.reviewer_credential (Text)
+  • article.metafields.custom.reviewed_date  (Datum) — zeigt "Aktualisiert am"
+  • article.metafields.custom.sources        (Rich Text) — Quellen-Accordion
+  E-E-A-T-Regel: Byline-Zeilen erscheinen NUR, wenn Name gepflegt ist.
+  Niemals Platzhalter-Credentials rendern.
+{% endcomment %}
+
+{%- liquid
+  assign mf = article.metafields.custom
+
+  assign author_name = mf.author_name.value | default: section.settings.author_name
+  assign author_credential = mf.author_credential.value | default: section.settings.author_credential
+  assign reviewer_name = mf.reviewer_name.value | default: section.settings.reviewer_name
+  assign reviewer_credential = mf.reviewer_credential.value | default: section.settings.reviewer_credential
+
+  assign word_count = article.content | strip_html | split: ' ' | size
+  assign reading_minutes = word_count | divided_by: 180 | at_least: 1
+
+  assign h2_parts = article.content | split: '<h2'
+  assign h2_count = h2_parts.size | minus: 1
+
+  assign show_toc = false
+  if section.settings.show_toc and h2_count >= section.settings.toc_min_headings
+    assign show_toc = true
+  endif
+
+  assign cta_enabled = false
+  if section.settings.cta_enable and section.settings.cta_heading != blank
+    assign cta_enabled = true
+  endif
+  assign cta_before_index = section.settings.cta_after_section | plus: 1
+
+  assign first_tag = article.tags | first
+-%}
+
+{%- capture inline_cta -%}
+  <aside class="lt-article__cta" aria-label="{{ section.settings.cta_heading | escape }}">
+    {%- if section.settings.cta_kicker != blank -%}
+      <p class="lt-article__cta-kicker">{{ section.settings.cta_kicker | escape }}</p>
+    {%- endif -%}
+    <p class="lt-article__cta-title">{{ section.settings.cta_heading | escape }}</p>
+    {%- if section.settings.cta_text != blank -%}
+      <p class="lt-article__cta-text">{{ section.settings.cta_text | escape }}</p>
+    {%- endif -%}
+    <a class="lt-article__cta-btn" href="{{ section.settings.cta_url | default: '/pages/quiz-age' }}">
+      {{- section.settings.cta_button_label | default: 'Quiz starten' | escape -}}
+    </a>
+  </aside>
+{%- endcapture -%}
+
+<article class="lt-article">
+  <div class="lt-article__shell">
+
+    {%- if section.settings.show_breadcrumb and blog != blank -%}
+      <nav class="lt-article__breadcrumb" aria-label="Breadcrumb">
+        <a href="{{ blog.url }}">&larr; {{ blog.title | escape }}</a>
+      </nav>
+    {%- endif -%}
+
+    <header class="lt-article__header">
+      <p class="lt-article__meta">
+        {%- if first_tag != blank -%}
+          <a class="lt-article__meta-tag" href="{{ blog.url }}/tagged/{{ first_tag | handleize }}">{{ first_tag | escape }}</a>
+          <span aria-hidden="true">&middot;</span>
+        {%- endif -%}
+        {%- if section.settings.show_reading_time -%}
+          <span>{{ reading_minutes }} Min. Lesezeit</span>
+          <span aria-hidden="true">&middot;</span>
+        {%- endif -%}
+        <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">{{ article.published_at | date: '%d.%m.%Y' }}</time>
+      </p>
+
+      <h1 class="lt-article__title">{{ article.title | escape }}</h1>
+
+      {%- if author_name != blank or reviewer_name != blank or mf.reviewed_date.value != blank -%}
+        <div class="lt-article__byline">
+          {%- if author_name != blank -%}
+            <p>
+              Geschrieben von <strong>{{ author_name | escape }}</strong>
+              {%- if author_credential != blank %}, {{ author_credential | escape }}{% endif -%}
+            </p>
+          {%- endif -%}
+          {%- if reviewer_name != blank -%}
+            <p>
+              Medizinisch gepr&uuml;ft von <strong>{{ reviewer_name | escape }}</strong>
+              {%- if reviewer_credential != blank %}, {{ reviewer_credential | escape }}{% endif -%}
+            </p>
+          {%- endif -%}
+          {%- if mf.reviewed_date.value != blank -%}
+            <p>Aktualisiert am <time datetime="{{ mf.reviewed_date.value | date: '%Y-%m-%d' }}">{{ mf.reviewed_date.value | date: '%d.%m.%Y' }}</time></p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </header>
+
+    {%- if mf.takeaways.value != blank -%}
+      {%- capture newline_char %}
+{% endcapture -%}
+      {%- assign takeaway_lines = mf.takeaways.value | strip | split: newline_char -%}
+      <div class="lt-article__takeaways">
+        <p class="lt-article__takeaways-title">{{ section.settings.takeaways_title | escape }}</p>
+        <ul>
+          {%- for line in takeaway_lines -%}
+            {%- assign clean_line = line | strip -%}
+            {%- if clean_line != blank -%}
+              <li>{{ clean_line | escape }}</li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+    {%- if article.image != blank -%}
+      <figure class="lt-article__hero">
+        {{-
+          article.image
+          | image_url: width: 1440
+          | image_tag:
+            widths: '600, 900, 1200, 1440',
+            sizes: '(max-width: 767px) 100vw, 720px',
+            loading: 'eager',
+            fetchpriority: 'high',
+            alt: article.image.alt
+        -}}
+      </figure>
+    {%- endif -%}
+
+    {%- if show_toc -%}
+      <details class="lt-article__toc" data-lt-toc>
+        <summary>{{ section.settings.toc_title | escape }}</summary>
+        <ol>
+          {%- for part in h2_parts offset: 1 -%}
+            {%- assign heading_html = part | split: '</h2>' | first -%}
+            {%- assign heading_text = heading_html | prepend: '<h2' | append: '</h2>' | strip_html | strip -%}
+            <li><a href="#abschnitt-{{ forloop.index }}">{{ heading_text }}</a></li>
+          {%- endfor -%}
+        </ol>
+      </details>
+    {%- endif -%}
+
+    <div class="lt-article__content rte">
+      {%- liquid
+        # Rekonstruiert article.content und injiziert dabei Anker-IDs in jede H2
+        # sowie den Inline-CTA vor Abschnitt N+1 (Fallback: ans Ende).
+        echo h2_parts | first
+        assign cta_inserted = false
+        for part in h2_parts offset: 1
+          if cta_enabled and forloop.index == cta_before_index
+            echo inline_cta
+            assign cta_inserted = true
+          endif
+          assign h2_open = '<h2 id="abschnitt-' | append: forloop.index | append: '"'
+          echo h2_open | append: part
+        endfor
+        if cta_enabled and cta_inserted == false
+          echo inline_cta
+        endif
+      -%}
+    </div>
+
+    {%- if mf.sources.value != blank -%}
+      <details class="lt-article__sources">
+        <summary>{{ section.settings.sources_title | escape }}</summary>
+        <div class="lt-article__sources-body">
+          {{ mf.sources | metafield_tag }}
+        </div>
+      </details>
+    {%- endif -%}
+
+    {%- if section.settings.show_author_box and author_name != blank and section.settings.author_bio != blank -%}
+      <div class="lt-article__author">
+        {%- if section.settings.author_image != blank -%}
+          {{-
+            section.settings.author_image
+            | image_url: width: 160
+            | image_tag: widths: '80, 160', sizes: '80px', loading: 'lazy', class: 'lt-article__author-photo', alt: author_name
+          -}}
+        {%- endif -%}
+        <div>
+          <p class="lt-article__author-name">
+            {{ author_name | escape }}{% if author_credential != blank %}, {{ author_credential | escape }}{% endif %}
+          </p>
+          <p class="lt-article__author-bio">{{ section.settings.author_bio | escape }}</p>
+        </div>
+      </div>
+    {%- endif -%}
+
+  </div>
+</article>
+
+{% stylesheet %}
+.lt-article {
+  background: var(--color-surface-primary);
+  padding: var(--space-6) 0 var(--space-9);
+}
+
+.lt-article__shell {
+  /* 680px Messmaß = 60–75 Zeichen/Zeile bei 19px, plus seitliches Padding.
+     Bewusst schmaler als der 1200px-Container (blog-design-best-practices §1). */
+  max-width: 728px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.lt-article__breadcrumb {
+  margin-bottom: var(--space-6);
+}
+
+.lt-article__breadcrumb a {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.lt-article__breadcrumb a:hover {
+  color: var(--color-text-primary);
+}
+
+.lt-article__meta {
+  margin: 0 0 var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+}
+
+.lt-article__meta-tag {
+  color: var(--color-text-primary);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: var(--text-micro);
+  letter-spacing: 0.08em;
+  align-self: center;
+}
+
+.lt-article__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(var(--text-h2), 5vw, var(--text-h1));
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+}
+
+.lt-article__byline {
+  margin-top: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-default);
+  display: grid;
+  gap: var(--space-1);
+}
+
+.lt-article__byline p {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+}
+
+.lt-article__byline strong {
+  color: var(--color-text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+.lt-article__takeaways {
+  margin-top: var(--space-6);
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+
+.lt-article__takeaways-title {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.lt-article__takeaways ul {
+  margin: 0;
+  padding-left: var(--space-4);
+  display: grid;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-primary);
+}
+
+.lt-article__hero {
+  margin: var(--space-6) 0 0;
+}
+
+.lt-article__hero img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+
+.lt-article__toc {
+  margin-top: var(--space-6);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+}
+
+.lt-article__toc summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.lt-article__toc summary::-webkit-details-marker {
+  display: none;
+}
+
+.lt-article__toc summary::after {
+  content: '+';
+  font-size: var(--text-body-lg);
+  color: var(--color-text-secondary);
+  line-height: 1; /* single glyph, no leading needed */
+}
+
+.lt-article__toc[open] summary::after {
+  content: '\2212'; /* minus sign */
+}
+
+.lt-article__toc ol {
+  margin: var(--space-4) 0 0;
+  padding-left: var(--space-5);
+  display: grid;
+  gap: var(--space-2);
+}
+
+.lt-article__toc ol li {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+}
+
+.lt-article__toc ol a {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px; /* intentional: sub-token, matches content link style */
+}
+
+/* ── Longform-Content-Typografie (blog-design-best-practices §1) ── */
+
+.lt-article__content {
+  margin-top: var(--space-6);
+  font-family: var(--font-body);
+  font-size: var(--text-article);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-primary);
+}
+
+.lt-article__content p {
+  margin: 0 0 var(--space-5);
+}
+
+.lt-article__content h2 {
+  margin: var(--space-8) 0 var(--space-4);
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  scroll-margin-top: 96px; /* intentional: sticky header (64px) + Luft, wie lt-guide-toc offset */
+}
+
+.lt-article__content h3 {
+  margin: var(--space-6) 0 var(--space-3);
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.lt-article__content ul,
+.lt-article__content ol {
+  margin: 0 0 var(--space-5);
+  padding-left: var(--space-5);
+}
+
+.lt-article__content li {
+  margin-bottom: var(--space-2);
+}
+
+.lt-article__content a {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px; /* intentional: sub-token, readable underline clearance */
+}
+
+.lt-article__content blockquote {
+  margin: var(--space-6) 0;
+  padding: 0 0 0 var(--space-5);
+  border: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-style: italic;
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+}
+
+.lt-article__content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+  margin: var(--space-6) 0;
+}
+
+.lt-article__content hr {
+  margin: var(--space-7) 0;
+  border: 0;
+  border-top: 1px solid var(--color-border-default);
+}
+
+@media screen and (max-width: 767px) {
+  .lt-article__content h2 {
+    font-size: var(--text-h3);
+    margin-top: var(--space-7);
+  }
+}
+
+/* ── Inline-CTA ── */
+
+.lt-article__cta {
+  margin: var(--space-7) 0;
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+.lt-article__cta-kicker {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.lt-article__cta-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+}
+
+.lt-article__cta-text {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
+.lt-article__cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--space-5);
+  min-height: 48px; /* intentional: Button-Spec aus design-components.mdc */
+  padding: 0.875rem var(--space-6);
+  border-radius: var(--radius-full);
+  background: var(--color-cta-bg);
+  color: var(--color-cta-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  transition: opacity var(--ease-default);
+}
+
+.lt-article__cta-btn:hover,
+.lt-article__cta-btn:focus-visible {
+  opacity: 0.9;
+}
+
+/* ── Quellen + Autor ── */
+
+.lt-article__sources {
+  margin-top: var(--space-7);
+  border-top: 1px solid var(--color-border-default);
+  padding-top: var(--space-5);
+}
+
+.lt-article__sources summary {
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.lt-article__sources summary::-webkit-details-marker {
+  display: none;
+}
+
+.lt-article__sources summary::after {
+  content: ' +';
+  color: var(--color-text-secondary);
+}
+
+.lt-article__sources[open] summary::after {
+  content: ' \2212';
+}
+
+.lt-article__sources-body {
+  margin-top: var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  overflow-wrap: break-word;
+}
+
+.lt-article__sources-body a {
+  color: var(--color-text-secondary);
+  text-decoration: underline;
+}
+
+.lt-article__author {
+  margin-top: var(--space-7);
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+
+.lt-article__author-photo {
+  width: 64px; /* intentional: Avatar-Format, kein Layout-Token */
+  height: 64px;
+  border-radius: var(--radius-full);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.lt-article__author-name {
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.lt-article__author-bio {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  var toc = document.querySelector('[data-lt-toc]');
+  if (!toc) return;
+
+  toc.addEventListener('click', function (event) {
+    var link = event.target.closest('a[href^="#"]');
+    if (!link) return;
+    var target = document.getElementById(link.getAttribute('href').slice(1));
+    if (!target) return;
+    event.preventDefault();
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    history.pushState(null, '', link.getAttribute('href'));
+    if (window.matchMedia('(max-width: 767px)').matches) {
+      toc.removeAttribute('open');
+    }
+  });
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "LT Article",
+  "tag": "section",
+  "class": "lt-article-section",
+  "enabled_on": {
+    "templates": ["article"]
+  },
+  "settings": [
+    {
+      "type": "checkbox",
+      "id": "show_breadcrumb",
+      "label": "Breadcrumb (zurück zum Blog)",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_reading_time",
+      "label": "Lesezeit anzeigen",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Inhaltsverzeichnis"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_toc",
+      "label": "Inhaltsverzeichnis anzeigen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "toc_title",
+      "label": "TOC-Titel",
+      "default": "Inhaltsverzeichnis"
+    },
+    {
+      "type": "range",
+      "id": "toc_min_headings",
+      "label": "TOC erst ab X Zwischenüberschriften",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 3
+    },
+    {
+      "type": "header",
+      "content": "Takeaways-Box (Metafield custom.takeaways, 1 Punkt pro Zeile)"
+    },
+    {
+      "type": "text",
+      "id": "takeaways_title",
+      "label": "Titel der Takeaways-Box",
+      "default": "Das Wichtigste in Kürze"
+    },
+    {
+      "type": "header",
+      "content": "Autor + Review (Fallback, wenn kein Metafield am Artikel)"
+    },
+    {
+      "type": "text",
+      "id": "author_name",
+      "label": "Autor (Name)"
+    },
+    {
+      "type": "text",
+      "id": "author_credential",
+      "label": "Autor (Qualifikation)"
+    },
+    {
+      "type": "text",
+      "id": "reviewer_name",
+      "label": "Medizinischer Reviewer (Name)"
+    },
+    {
+      "type": "text",
+      "id": "reviewer_credential",
+      "label": "Reviewer (Qualifikation)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author_box",
+      "label": "Autoren-Box am Artikelende",
+      "default": true
+    },
+    {
+      "type": "textarea",
+      "id": "author_bio",
+      "label": "Autoren-Kurzbio"
+    },
+    {
+      "type": "image_picker",
+      "id": "author_image",
+      "label": "Autoren-Foto"
+    },
+    {
+      "type": "header",
+      "content": "Quellen (Metafield custom.sources)"
+    },
+    {
+      "type": "text",
+      "id": "sources_title",
+      "label": "Quellen-Titel",
+      "default": "Quellen und Studien"
+    },
+    {
+      "type": "header",
+      "content": "Inline-CTA im Artikel"
+    },
+    {
+      "type": "checkbox",
+      "id": "cta_enable",
+      "label": "CTA-Einschub aktivieren",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "cta_after_section",
+      "label": "Einschub nach Abschnitt Nr.",
+      "min": 1,
+      "max": 6,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "text",
+      "id": "cta_kicker",
+      "label": "CTA Kicker",
+      "default": "Quiz Age"
+    },
+    {
+      "type": "text",
+      "id": "cta_heading",
+      "label": "CTA Headline",
+      "default": "Finde deinen Startpunkt"
+    },
+    {
+      "type": "textarea",
+      "id": "cta_text",
+      "label": "CTA Text",
+      "default": "Beantworte in zwei Minuten ein paar Fragen und erhalte eine Einschätzung, welche Routine zu dir passt."
+    },
+    {
+      "type": "text",
+      "id": "cta_button_label",
+      "label": "CTA Button-Label",
+      "default": "Quiz starten"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "CTA Ziel-URL"
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Article"
+    }
+  ]
+}
+{% endschema %}
