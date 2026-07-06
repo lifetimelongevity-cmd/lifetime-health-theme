@@ -181,15 +181,14 @@
         assign cta_inserted = false
         for part in h2_parts offset: 1
           assign part_heading = part | split: '</h2>' | first | prepend: '<h2' | append: '</h2>' | strip_html | strip | downcase
-          if part_heading == toc_title_dc
-            continue
-          endif
-          if cta_enabled and forloop.index == cta_before_index
-            echo inline_cta
-            assign cta_inserted = true
-          endif
-          assign h2_open = '<h2 id="abschnitt-' | append: forloop.index | append: '"'
-          echo h2_open | append: part
+          unless part_heading == toc_title_dc
+            if cta_enabled and forloop.index == cta_before_index
+              echo inline_cta
+              assign cta_inserted = true
+            endif
+            assign h2_open = '<h2 id="abschnitt-' | append: forloop.index | append: '"'
+            echo h2_open | append: part
+          endunless
         endfor
         if cta_enabled and cta_inserted == false
           echo inline_cta
