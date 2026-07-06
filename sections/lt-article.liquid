@@ -173,9 +173,17 @@
       {%- liquid
         # Rekonstruiert article.content und injiziert dabei Anker-IDs in jede H2
         # sowie den Inline-CTA vor Abschnitt N+1 (Fallback: ans Ende).
+        # Ein manuelles "Inhaltsverzeichnis"-H2 (Alt-Artikel) wird übersprungen,
+        # da das Template oben bereits ein Auto-TOC rendert. forloop.index bleibt
+        # dabei synchron zu den TOC-Sprunglinks (dort ebenfalls übersprungen).
+        assign toc_title_dc = section.settings.toc_title | default: 'Inhaltsverzeichnis' | downcase
         echo h2_parts | first
         assign cta_inserted = false
         for part in h2_parts offset: 1
+          assign part_heading = part | split: '</h2>' | first | prepend: '<h2' | append: '</h2>' | strip_html | strip | downcase
+          if part_heading == toc_title_dc
+            continue
+          endif
           if cta_enabled and forloop.index == cta_before_index
             echo inline_cta
             assign cta_inserted = true
