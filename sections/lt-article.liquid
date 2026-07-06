@@ -155,10 +155,15 @@
       <details class="lt-article__toc" data-lt-toc>
         <summary>{{ section.settings.toc_title | escape }}</summary>
         <ol>
+          {%- assign toc_title_dc = section.settings.toc_title | default: 'Inhaltsverzeichnis' | downcase -%}
           {%- for part in h2_parts offset: 1 -%}
             {%- assign heading_html = part | split: '</h2>' | first -%}
             {%- assign heading_text = heading_html | prepend: '<h2' | append: '</h2>' | strip_html | strip -%}
-            <li><a href="#abschnitt-{{ forloop.index }}">{{ heading_text }}</a></li>
+            {%- assign heading_text_dc = heading_text | downcase -%}
+            {%- comment -%} Alt-Artikel haben teils ein manuelles "Inhaltsverzeichnis"-H2 im Body — nicht als eigenen Sprungpunkt listen (forloop.index bleibt synchron zu den Content-Ankern). {%- endcomment -%}
+            {%- unless heading_text_dc == toc_title_dc -%}
+              <li><a href="#abschnitt-{{ forloop.index }}">{{ heading_text }}</a></li>
+            {%- endunless -%}
           {%- endfor -%}
         </ol>
       </details>
@@ -401,6 +406,8 @@
   margin: 0 0 var(--space-5);
 }
 
+/* Editorial-Heading-Skala: klare Stufen ÜBER dem 19px-Body.
+   28 (h2) > 24 (h3) > 20 (h4) > 19 bold (h5/h6). Nie kleiner als Body. */
 .lt-article__content h2 {
   margin: var(--space-8) 0 var(--space-4);
   font-family: var(--font-heading);
@@ -411,10 +418,28 @@
 }
 
 .lt-article__content h3 {
-  margin: var(--space-6) 0 var(--space-3);
+  margin: var(--space-7) 0 var(--space-3);
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  scroll-margin-top: 96px; /* intentional: falls H3 als TOC-Ziel dient, gleicher Offset wie H2 */
+}
+
+.lt-article__content h4 {
+  margin: var(--space-6) 0 var(--space-2);
   font-family: var(--font-heading);
   font-size: var(--text-section);
-  font-weight: var(--weight-semibold);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+
+.lt-article__content h5,
+.lt-article__content h6 {
+  margin: var(--space-5) 0 var(--space-2);
+  font-family: var(--font-heading);
+  font-size: var(--text-article);
+  font-weight: var(--weight-bold);
   line-height: var(--leading-tight);
 }
 
@@ -462,6 +487,11 @@
   .lt-article__content h2 {
     font-size: var(--text-h3);
     margin-top: var(--space-7);
+  }
+
+  .lt-article__content h3 {
+    font-size: var(--text-section);
+    margin-top: var(--space-6);
   }
 }
 
