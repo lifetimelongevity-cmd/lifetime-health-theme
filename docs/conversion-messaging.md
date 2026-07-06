@@ -211,3 +211,16 @@ Tone:
 - no redundancy?  
 - guides decision?  
 - fits UI?  
+
+---
+
+## 9. No AI Tells (Copy)
+
+German storefront copy must not read as machine-generated. Avoid the patterns that signal it:
+
+- **No em-dashes** (the long dash). Use a comma, a period, or parentheses instead. (Short hyphens in compounds like "AGE&DNA-Test" are fine.)
+- **No rhythmic triad / staccato slogans** such as "Schneller. Klarer. Besser." or "Mehr Energie. Mehr Fokus. Mehr Leben." Write one normal sentence.
+- **No claim stacking** (see §4): one badge, one statement.
+- **No empty superlatives or vague hype** (see §5).
+
+This section governs copy. The matching visual tell (decorative colored left-/accent-borders) is enforced in `.cursor/rules/design-components.mdc`.

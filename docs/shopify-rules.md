@@ -1,7 +1,8 @@
 ---
-description: Shopify platform limits and operating rules for LIFETIME theme
-globs: ["**/*.liquid", "**/*.json", "templates/**", "sections/**", "snippets/**"]
-alwaysApply: false
+status: living
+last_review: 2026-05-08
+canonical_for: shopify-platform-rules
+applies_to: liquid, json, templates, sections, snippets
 ---
 
 # Shopify Operating Rules (LIFETIME)
@@ -44,21 +45,25 @@ These cause `theme push` / Theme Check failures:
 - Error message: *name ist zu lang*
 - Use short names: `LT PDP Benefits` not `LIFETIME PDP Wissenschaftliche Vorteile`
 
-### 3. Schema setting `default` values
-- **Never use `"default": ""`** (empty string)
-- Error: *default darf nicht leer sein*
-- Either omit `default` and handle in Liquid with `| default: 'fallback'`
-- Or use a non-empty placeholder
+### 3. Schema `default` values — MUST NEVER be empty
 
-### 4. Schema `header` setting `content`
-- `"type": "header"` → `"content"`: **≤ 50 characters**
-- Error (nur beim `shopify theme push`, NICHT bei `shopify theme check`): *content ist zu lang (maximal 50 Zeichen)*
-- Ein zu langer Header lässt die ganze Section-Datei abweisen; ein Template, das sie referenziert, meldet dann *bezieht sich nicht auf eine existierende Abschnittsdatei*
-- Kurz halten: `"Autor + Review (Fallback ohne Metafield)"` statt langer Klammer-Erklärungen
+This is the single most frequent push error in this theme. Read carefully.
 
-### 5. `continue` im `{% liquid %}`-Tag meiden
-- In einer `for`-Schleife innerhalb eines `{% liquid %}`-Tags überspringt `continue` die aktuelle Iteration **nicht** zuverlässig (in `lt-article` rendert die Iteration trotzdem weiter).
-- Stattdessen die auszugebende Logik in `unless <bedingung> … endunless` (oder `if`) einwickeln. Das funktioniert identisch in `{% liquid %}` und in normalen Tags.
+- **Never use `"default": ""`** — neither in `settings`, `blocks[].settings`, nor `presets[].blocks[].settings`
+- Error: *default darf nicht leer sein* / *default can't be blank*
+- Applies to every setting type that carries a default: `text`, `textarea`, `richtext`, `html`, `url`, `color`, `select`, `radio`, `checkbox`, `range`, `number`
+- Also applies to `blocks[].name` and `presets[].name` — no empty strings
+
+**Two valid options:**
+1. **Omit the `default` key entirely** and fall back in Liquid: `{{ block.settings.sub | default: 'Kurzer Hinweis' }}`
+2. **Provide a real non-empty placeholder** string (e.g. `"default": "Kurzer Hinweis"`)
+
+**Checklist before every `theme push` that touches a schema:**
+- [ ] Grep the file for `"default": ""` — must return zero matches
+- [ ] Grep the file for `"default":""` (no space) — must return zero matches
+- [ ] Every `select`/`radio` `default` matches one of its `options[].value`
+- [ ] `presets[].settings` values are non-empty if the setting requires non-empty
+- [ ] `blocks[].name` and `presets[].name` are non-empty, ≤ 25 chars
 
 ## Section Schema Pattern
 
@@ -134,7 +139,7 @@ Always report:
 
 ## Design & Messaging
 
-For all visual decisions → follow `_examples/` and `.cursor/rules/design-components.mdc`
+For all visual decisions → follow `_examples/` and `docs/design-components.md`
 For all copy decisions → follow `docs/conversion-messaging.md`
 Do not mix responsibilities.
-Do not introduce patterns that conflict with design-governance.
+Do not introduce patterns that conflict with `docs/design-governance.md`.

@@ -226,7 +226,7 @@ block hebel_1:
   lifestyle:        "Ausdauertraining und Intervallfasten erhöhen NAD⁺-Vorläufer und aktivieren NAD⁺-abhängige Sirtuine messbar. Alkohol und Schlafmangel beschleunigen den Abfall."
   genetic:          "Varianten im NAMPT-Gen beeinflussen die individuelle NAD⁺-Synthesekapazität — manche Menschen produzieren von Natur aus weniger effizient."
   support:          "NMN Pulver · NAD⁺ Booster"
-  support_url:      "/products/nmn-pulver"
+  support_url:      "/products/lifetime-nmn"
 
 block hebel_2:
   mechanism:        "Epigenetische Drift"

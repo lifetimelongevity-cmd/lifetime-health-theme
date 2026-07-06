@@ -337,7 +337,7 @@ product_name:               "NMN Pulver"
 product_tagline:            "NAD+-Vorläufer · >99 % Reinheit · direkt dosierbar"
 product_image_url:          "[Bild einfügen: NMN Pulver]"
 product_price:              "39,90 €"
-product_url:                "/products/nmn-pulver"
+product_url:                "/products/lifetime-nmn"
 show_test_link_badge:       true
 test_link_label:            "Empfohlen bei erhöhtem MethylPace-Score"
 cta_label:                  "NMN entdecken"

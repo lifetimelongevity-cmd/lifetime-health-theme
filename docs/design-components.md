@@ -1,7 +1,8 @@
 ---
-description: LIFETIME component system and visual quality rules
-globs: ["sections/**/*.liquid", "snippets/**/*.liquid", "assets/**/*.css"]
-alwaysApply: false
+status: living
+last_review: 2026-05-08
+canonical_for: component-system-and-visual-qa
+applies_to: sections/**/*.liquid, snippets/**/*.liquid, assets/**/*.css
 ---
 
 # LIFETIME Component System
@@ -80,11 +81,14 @@ Dark sections are intentional breaks. Max 1–2 per page.
 - Suffix: `--font-heading`, `--text-h3`, bold, `--color-teal-dark`
 - Label: `--font-body`, `--text-body-sm`, `--color-text-on-dark-muted`
 
-### Section Header
+### Section Header / Heading Stack
+- LT-/CRS-section-headings use the shared `crs-heading-stack` system; canonical rules in `docs/section-heading-stack.md`
 - Centered, max-width 640px
 - Label: `--text-micro`, uppercase, letter-spacing 0.1em, muted
 - Title: `--font-heading`, `--text-h1` or `--text-h2`, bold
-- Description: `--font-body`, `--text-body-lg`, secondary
+- Title + subtitle must read as one visual block, not as two hierarchy levels
+- In the shared heading stack, title and subtitle keep the same `font-size`, `font-weight`, and `line-height`; subtitle is softened only through color/opacity and the shared component's font pairing
+- Section description is separate body copy outside the heading stack: `--font-body`, `--text-body-lg`, secondary
 
 ### Trust Strip (PDP)
 - Pills with border: `1px solid var(--color-border-default)`, `--radius-full`
@@ -101,6 +105,7 @@ Dark sections are intentional breaks. Max 1–2 per page.
 
 - Headings (`≥ --text-h3`): always `--font-heading`
 - Body, labels, badges: always `--font-body`
+- Heading-stack subtitles are part of the heading block, not standalone body copy
 - Never body text in Helvetica
 - Never headings in Lato
 - Max 3 type sizes per section (2 preferred)
@@ -114,7 +119,7 @@ Dark sections are intentional breaks. Max 1–2 per page.
 - On dark surfaces: reduce element count by one vs. equivalent light section
 
 
-## ICON SYSTEM
+## Icon System
 
 - Use ONLY lucide-react icons
 - Never use emojis
@@ -143,12 +148,11 @@ Remove:
 
 - Hardcoded hex, px, or font names in CSS
 - `#000000` as background
-- Decorative colored left-/accent-borders (`border-left` with a color); separate via whitespace, hierarchy, tokens
 - Multiple CTAs fighting in same viewport
 - Shadow to compensate for weak hierarchy
 - Generic "UI kit" cards that could be any health brand
 - Shrinking headings because layout is poorly composed
-- Tight spacing; air looks premium, tight looks cheap
+- Tight spacing — air looks premium, tight looks cheap
 
 ## Final Quality Gate
 

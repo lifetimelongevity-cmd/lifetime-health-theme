@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>LIFETIME Wedge-Bewertung · Finale Übersicht</title>
+<style>
+  :root {
+    --teal: #65C0B6;
+    --teal-dark: #4DA39A;
+    --dark: #364F56;
+    --sand: #C7A39B;
+    --yellow: #F4B740;
+    --bg: #FAF7F4;
+    --card: #FFFFFF;
+    --border: #E5DDD5;
+    --text: #2A3D43;
+    --muted: #6B7F85;
+    --red: #C85A54;
+    --amber: #E8A547;
+    --green: #6BAE91;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 40px 24px;
+    line-height: 1.55;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  h1 {
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .subtitle { color: var(--muted); font-size: 15px; margin-bottom: 40px; }
+  h2 {
+    font-family: Helvetica, sans-serif;
+    font-size: 22px;
+    color: var(--dark);
+    font-weight: 700;
+    margin-top: 48px;
+    margin-bottom: 8px;
+  }
+  .h2-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+
+  /* SECTION 1: Metric explainer */
+  .metric-explainer {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+  }
+  .metric-explainer-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .metric-num {
+    font-family: Helvetica, sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--teal);
+    line-height: 1;
+    min-width: 32px;
+  }
+  .metric-name {
+    font-family: Helvetica, sans-serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--dark);
+  }
+  .metric-importance {
+    margin-left: auto;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 4px 10px;
+    border-radius: 12px;
+  }
+  .imp-critical { background: #F4DBD6; color: #8A3A34; }
+  .imp-high { background: #F8E7CC; color: #8A5A1A; }
+  .imp-medium { background: #E2EBE3; color: #3D5A4A; }
+
+  .metric-question {
+    font-style: italic;
+    color: var(--muted);
+    font-size: 14px;
+    margin-bottom: 12px;
+    padding-left: 44px;
+  }
+  .metric-body {
+    padding-left: 44px;
+    font-size: 14px;
+  }
+  .metric-body p { margin-bottom: 8px; }
+  .metric-body strong { color: var(--dark); }
+  .startup-takeaway {
+    background: #FFF8E8;
+    border-left: 3px solid var(--yellow);
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-size: 13px;
+    border-radius: 0 4px 4px 0;
+  }
+  .startup-takeaway strong { color: #8A5A1A; }
+
+  /* SECTION 2: Wedge cards (detailed) */
+  .wedge {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+  .wedge-header {
+    padding: 24px 28px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .wedge-header-left { flex: 1; min-width: 280px; }
+  .wedge-rank {
+    display: inline-block;
+    font-family: Helvetica, sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    background: var(--teal);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+  .wedge-rank.r2 { background: var(--green); }
+  .wedge-rank.r3 { background: var(--amber); }
+  .wedge-rank.r4 { background: var(--sand); }
+  .wedge-rank.r5 { background: #A09590; }
+
+  .wedge-title {
+    font-family: Helvetica, sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 4px;
+  }
+  .wedge-tagline {
+    color: var(--muted);
+    font-size: 13px;
+    font-style: italic;
+  }
+  .wedge-total {
+    text-align: right;
+    font-family: Helvetica, sans-serif;
+  }
+  .wedge-total .num {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1;
+  }
+  .wedge-total .max {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .wedge-total .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* Test specs grid */
+  .specs {
+    background: #F7F4F0;
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .specs h4 {
+    font-family: Helvetica, sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .specs-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+  }
+  .spec {
+    font-size: 13px;
+  }
+  .spec-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 3px;
+  }
+  .spec-value {
+    font-weight: 700;
+    color: var(--dark);
+    font-size: 13px;
+  }
+  .spec-detail {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* 80% solution */
+  .eighty {
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border);
+    background: #FBF9F7;
+  }
+  .eighty h4 {
+    font-family: Helvetica, sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .eighty-list {
+    list-style: none;
+  }
+  .eighty-list li {
+    padding: 4px 0;
+    font-size: 13.5px;
+    padding-left: 22px;
+    position: relative;
+  }
+  .eighty-list li::before {
+    content: "✓";
+    color: var(--teal);
+    font-weight: 700;
+    position: absolute;
+    left: 0;
+  }
+
+  /* Scores */
+  .scores {
+    padding: 20px 28px;
+  }
+  .scores h4 {
+    font-family: Helvetica, sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+  .score-row {
+    display: grid;
+    grid-template-columns: 180px 1fr 28px;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 13px;
+  }
+  .score-label {
+    color: var(--text);
+    font-size: 12.5px;
+  }
+  .bar-track {
+    height: 12px;
+    background: #F0EBE5;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .bar-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+  .bar-fill.s1 { background: var(--red); }
+  .bar-fill.s2 { background: #DD8B5A; }
+  .bar-fill.s3 { background: var(--amber); }
+  .bar-fill.s4 { background: var(--green); }
+  .bar-fill.s5 { background: var(--teal); }
+  .score-num {
+    font-family: Helvetica, sans-serif;
+    font-weight: 700;
+    text-align: right;
+    color: var(--dark);
+    font-size: 13px;
+  }
+
+  /* Verdict */
+  .verdict {
+    background: var(--dark);
+    color: white;
+    padding: 18px 28px;
+    font-size: 13.5px;
+    line-height: 1.6;
+  }
+  .verdict-label {
+    font-family: Helvetica, sans-serif;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--teal);
+    margin-bottom: 6px;
+  }
+  .verdict p { color: rgba(255,255,255,0.92); }
+  .verdict strong { color: var(--yellow); }
+
+  /* Final recommendation */
+  .final-rec {
+    background: linear-gradient(135deg, var(--dark) 0%, #2A3D43 100%);
+    color: white;
+    padding: 32px;
+    border-radius: 12px;
+    margin-top: 40px;
+  }
+  .final-rec h2 {
+    color: var(--teal);
+    margin-top: 0;
+    border: none;
+  }
+  .final-rec p { color: rgba(255,255,255,0.88); margin-bottom: 14px; font-size: 14.5px; }
+  .final-rec ol { padding-left: 22px; }
+  .final-rec li {
+    margin-bottom: 12px;
+    font-size: 14.5px;
+    color: rgba(255,255,255,0.92);
+  }
+  .final-rec strong { color: var(--yellow); }
+
+  @media (max-width: 700px) {
+    .score-row { grid-template-columns: 130px 1fr 28px; }
+    .wedge-header { flex-direction: column; }
+    .wedge-total { text-align: left; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>LIFETIME Wedge-Bewertung</h1>
+  <p class="subtitle">10 Startup-Metriken kritisch erklärt · 5 Wedges mit Test-Steckbrief, Preisrahmen & Entwicklungszeit</p>
+
+  <!-- ===== TEIL 1: METRIKEN ERKLÄRT ===== -->
+  <h2>Teil 1 · Die 10 Metriken — was sie wirklich messen</h2>
+  <p class="h2-sub">Jede Metrik mit der zentralen Startup-Frage, kritischer Einordnung und konkretem Takeaway.</p>
+
+  <div class="metric-explainer">
+    <div class="metric-explainer-header">
+      <span class="metric-num">1</span>
+      <span class="metric-name">Pain / Nachfrage</span>
+      <span class="metric-importance imp-critical">Kritisch</span>
+    </div>
+    <p class="metric-question">„Wachen Menschen mit diesem Problem nachts auf?"</p>
+    <div class="metric-body">
+      <p>Misst <strong>akuten Leidensdruck plus Suchvolumen</strong>. Nicht zu verwechseln mit „interessantem Thema". Ein starker Pain hat drei Marker: hohe Forum-Aktivität, hohe Google-Suchvolumina, emotional aufgeladene Sprache („verzweifelt", „endlich").</p>
+      <p>Für Startups ist das die <strong>wichtigste Metrik überhaupt</strong>, weil ohne echten Pain jede Marketing-Aktion teurer wird. Niedriger Pain = hohe CAC, niedrige organische Reichweite, lange Sales Cycles.</p>
+      <div class="startup-takeaway"><strong>Takeaway:</strong> Score 4–5 ist die Voraussetzung. Alles darunter heißt: Du musst den Pain erst erzeugen — das machen nur Konzerne mit großen Marketing-Budgets.</div>
+    </div>
+  </div>
+
+  <div class="metric-explainer">
+    <div class="metric-explainer-header">
+      <span class="metric-num">2</span>
+      <span class="metric-name">Zahlungsbereitschaft</span>
+      <span class="metric-importance imp-critical">Kritisch</span>
+    </div>
+    <p class="metric-question">„Zahlt jemand heute 99–199 € — ohne Versicherung, ohne Rezept?"</p>
+    <div class="metric-body">
+      <p>Pain ist nicht gleich Geld. Menschen leiden auch unter Dingen, für die sie nichts zahlen. Diese Metrik misst die Selbstzahler-Bereitschaft im Vergleich zu Alternativen (Arzt, Krankenkasse, Drogerie).</p>
+      <p>Faustregel: Hoch ist die Zahlungsbereitschaft, wenn (a) der Schmerz konkret und akut ist, (b) das Gesundheitssystem versagt oder zu langsam ist, oder (c) eine teure Folgeentscheidung ansteht (z.B. monatlich 300 € für GLP-1).</p>
+      <div class="startup-takeaway"><strong>Takeaway:</strong> Niedrige Zahlungsbereitschaft (≤3) bedeutet zwingend hohe CAC-Effizienz oder Abo-Modell, sonst keine Unit Economics.</div>
+    </div>
+  </div>
+
+  <div class="metric-explainer">
+    <div class="metric-explainer-header">
+      <span class="metric-num">3</span>
+      <span class="metric-name">Evidenz der Marker</span>
+      <span class="metric-importance imp-high">Wichtig</span>
+    </div>
+    <p class="metric-question">„Sagen die Biomarker tatsächlich, was wir behaupten?"</p>
+    <div class="metric-body">
+      <p>Das ist der wissenschaftliche Boden: <strong>Sind die Marker durch Leitlinien gedeckt?</strong> Gibt es klare Cut-offs? Sind Studien reproduzierbar? Ferritin ist Evidenz 5, GLP-1-Genetik ist heute Evidenz 2–3.</p>
+      <p>Kritisch für Startups: Niedrige Evidenz ist nicht automatisch ein Killer — wenn die Positionierung ehrlich ist („Anhaltspunkt", nicht „Diagnose"). Aber sie limitiert deine Claims im Marketing und erhöht juristisches Risiko.</p>
+      <div class="startup-takeaway"><strong>Takeaway:</strong> Score ≤2 = du musst das Produkt als Bildungs-/Navigationsprodukt framen, nicht als Diagnostik. Sonst Abmahnrisiko.</div>
+    </div>
+  </div>
+
+  <div class="metric-explainer">
+    <div class="metric-explainer-header">
+      <span class="metric-num">4</span>
+      <span class="metric-name">Clinical Utility</span>
+      <span class="metric-importance imp-high">Wichtig</span>
+    </div>
+    <p class="metric-question">„Ändert das Ergebnis tatsächlich, was der Mensch in den nächsten 30 Tagen tut?"</p>
+    <div class="metric-body">
+      <p>Ein Test kann wissenschaftlich solide sein und trotzdem nutzlos: weil das Ergebnis zu keiner konkreten Handlung führt. Clinical Utility = <strong>Ergebnis → Handlung → messbarer Outcome</strong>.</p>
+      <p>Beispiel Müdigkeit: Ferritin niedrig → Eisen supplementieren → in 6 Wochen Energie zurück. Hohe Utility. Beispiel Lp(a) hoch: keine zugelassene Therapie verfügbar → niedrige akute Utility, aber hohe Langzeit-Utility (Risikoplanung).</p>
+      <div class="startup-takeaway"><strong>Takeaway:</strong> Niedrige Utility = niedrige Word-of-Mouth, weil niemand erzählt „Ich habe getestet und nichts ändert sich". Höchst entscheidend für organisches Wachstum.</div>
+    </div>
+  </div>
+
+  <div class="metric-explainer">
+    <div class="metric-explainer-header">
+      <span class="metric-num">5</span>
+      <span class="metric-name">Regulatorisches Risiko</span>
+      <span class="metric-importance imp-critical">Kritisch</span>
+    </div>
+    <p class="metric-question">„Was kann dich zwingen, das Produkt vom Markt zu nehmen?"</p>
+    <div class="metric-body">
+      <p>In Deutschland drei harte Gates: <strong>MDR</strong> (Software, die Ergebnisse interpretiert, kann Klasse IIa werden, ca. 9 Monate Zertifizierung), <strong>GenDG</strong> (Gendiagnostikgesetz — bei jeder genetischen Analyse zwingend ärztliche Aufklärung), <strong>HWG</strong> (Heilmittelwerbegesetz — keine Heilversprechen).</p>
+      <p>In der Visualisierung ist der Score <em>invertiert</em>: hoher Score = niedriges Risiko. Score 5 = reines Lifestyle, Score 1 = direkt MDR IIa + Rx-Nähe.</p>
+      <div class="startup-takeaway"><strong>Takeaway:</strong> Niedriger Score (≤2) bedeutet 6–12 Monate vor erstem Euro Umsatz. Killer für Bootstrapping ohne Funding.</div>
+    </div>
+  </div>
+
+  <div class="metric-explainer">
+    <div class="metric-explainer-header">
+      <span class="metric-num">6</span>
+      <span class="metric-name">Operative Einfachheit</span>
+      <span class="metric-importance imp-high">Wichtig</span>
+    </div>
+    <p class="metric-question">„Wie viele Bewegliche Teile hat der Funnel?"</p>
+    <div class="metric-body">
+      <p>Brauchst du Telemed-Arzt, Versandapotheke, Live-Beratung, mehrere Probentypen? Jedes zusätzliche Glied erhöht Kosten und Fehlerraten. Score 5 = vollautomatisierbar, Score 1 = jeder Fall braucht manuellen Eingriff.</p>
+      <p>Auch hier invertiert: Score 5 = einfach. Score 2 = mehrere Telemed-Schritte erforderlich.</p>
+      <div class="startup-takeaway"><strong>Takeaway:</strong> Operative Komplexität skaliert nicht linear — sie skaliert mit Quadrat. Doppelte Kunden = 4× Support-Last bei komplexen Wedges.</div>
+    </div>
+  </div>
+
+  <div class="metric-explainer">
+    <div class="metric-explainer-header">
+      <span class="metric-num">7</span>
+      <span class="metric-name">CAC-Potenzial</span>
+      <span class="metric-importance imp-critical">Kritisch</span>
+    </div>
+    <p class="metric-question">„Wie viel kostet ein zahlender Kunde — und steht das in Relation zum Preis?"</p>
+    <div class="metric-body">
+      <p>Misst die <strong>realistische Cost per Acquisition</strong> über Google/Meta, kombiniert mit organischem Potenzial (Foren, SEO, Word-of-Mouth). Hoher Score = niedrige CAC.</p>
+      <p>Müdigkeit hat hohes Suchvolumen, aber generisch — CPCs niedrig, aber Conversion auch. GLP-1 hat hohes Intent, aber zunehmend teure CPCs. Perimenopause hat starke Communitys = niedrige organische CAC.</p>
+      <div class="startup-takeaway"><strong>Takeaway:</strong> Faustregel: CAC sollte ≤30% des Erstkaufpreises sein, sonst funktioniert nur Abo. Bei 99€-Test = max. 30€ CAC.</div>
+    </div>
+  </div>
+
+  <div class="metric-explainer">
+    <div class="metric-explainer-header">
+      <span class="metric-num">8</span>
+      <span class="metric-name">Differenzierung</span>
+      <span class="metric-importance imp-medium">Mittel</span>
+    </div>
+    <p class="metric-question">„Warum bei uns, nicht bei Lykon oder Cerascreen?"</p>
+    <div class="metric-body">
+      <p>Marker selbst (Ferritin, TSH) sind <strong>nicht differenzierbar</strong> — jedes Labor kann sie messen. Differenzierung liegt in: Triage-Logik, Befund-Sprache, Folgepfad, Brand-Trust, Personalisierung, Datenintegration.</p>
+      <p>Für LIFETIME entscheidend: Die bestehende DNA-Datenbank (715K SNPs) ist ein nicht-kopierbarer Asset. Bei Wedges, die diese Daten nutzen können = hohe Differenzierung.</p>
+      <div class="startup-takeaway"><strong>Takeaway:</strong> Bei austauschbaren Markern (Müdigkeit) ist Differenzierung das Marketing-Versprechen — kein Produkt-Feature.</div>
+    </div>
+  </div>
+
+  <div class="metric-explainer">
+    <div class="metric-explainer-header">
+      <span class="metric-num">9</span>
+      <span class="metric-name">LIFETIME-Fit</span>
+      <span class="metric-importance imp-medium">Mittel</span>
+    </div>
+    <p class="metric-question">„Passt das Produkt zur LIFETIME-Marke und ihrem Versprechen?"</p>
+    <div class="metric-body">
+      <p>LIFETIME steht für <strong>Premium-Longevity, wissenschaftlich, präventiv</strong>. Ein Wedge sollte diese Position stützen, nicht verdünnen. Testosteron-TRT-Nähe würde die Marke verschieben — auch wenn sie Umsatz bringen würde.</p>
+      <p>Auch wichtig: Kann der Wedge in die Health Vault / Supplement-Range / Coaching-Pipeline integriert werden? Hohe Integration = höheren LTV pro Kunde.</p>
+      <div class="startup-takeaway"><strong>Takeaway:</strong> Niedriger Fit kann strategisch trotzdem sinnvoll sein, aber dann mit eigenem Sub-Brand, nicht unter LIFETIME.</div>
+    </div>
+  </div>
+
+  <div class="metric-explainer">
+    <div class="metric-explainer-header">
+      <span class="metric-num">10</span>
+      <span class="metric-name">MVP-Geschwindigkeit</span>
+      <span class="metric-importance imp-high">Wichtig</span>
+    </div>
+    <p class="metric-question">„Wie schnell zum ersten Euro Umsatz?"</p>
+    <div class="metric-body">
+      <p>Time-to-Revenue ist Kapitaleffizienz. Score 5 = 3–4 Monate (Standard-Labor + Standard-Marker, keine Zertifizierung nötig). Score 1 = 12+ Monate (MDR IIa + Telemed-Integration + neue Lab-Partner).</p>
+      <p>Wichtig: MVP-Geschwindigkeit hängt nicht nur vom Wedge ab, sondern auch von der Definition des „Minimum". Ein Wedge mit Score 2 kann mit MVP-Score 4 starten, wenn man bewusst Features rausnimmt (z.B. Waitlist + Concierge statt voll-automatisiert).</p>
+      <div class="startup-takeaway"><strong>Takeaway:</strong> Bei knappem Kapital ist MVP-Geschwindigkeit die wichtigste Metrik überhaupt — denn alle anderen lernt man erst nach Launch.</div>
+    </div>
+  </div>
+
+  <!-- Verdichtung -->
+  <h2>Was zusammengeführt zählt</h2>
+  <p class="h2-sub">Die 10 Metriken sind nicht gleichwertig. Drei Cluster entscheiden tatsächlich.</p>
+
+  <div class="metric-explainer" style="border-left: 4px solid var(--teal);">
+    <div class="metric-body" style="padding-left: 0;">
+      <p><strong>Cluster A · Will der Markt das?</strong> (Metrik 1, 2, 7) — Wenn dieser Cluster schwach ist, ist alles andere irrelevant. Kein Pain, keine Zahlungsbereitschaft, hohe CAC = totes Produkt.</p>
+      <p><strong>Cluster B · Kannst du es bauen?</strong> (Metrik 5, 6, 10) — Regulatorik, Komplexität, Zeit. Hier entscheidet sich, ob du im laufenden Jahr launchst oder im nächsten.</p>
+      <p><strong>Cluster C · Ist es echt?</strong> (Metrik 3, 4, 8, 9) — Wissenschaft, Nutzen, Differenzierung, Markenfit. Hier entscheidet sich, ob das Produkt nach 12 Monaten noch lebt — oder ob Abmahnungen, Refunds und Bad Reviews es killen.</p>
+      <p style="margin-top:14px;"><strong>Die ehrliche Reihenfolge:</strong> Cluster A killt dich sofort. Cluster B killt dich in 6 Monaten. Cluster C killt dich in 18 Monaten. Wenn du nur drei Metriken bewerten würdest: <strong>Zahlungsbereitschaft, Regulatorisches Risiko, Clinical Utility</strong>.</p>
+    </div>
+  </div>
+
+  <!-- ===== TEIL 2: WEDGE-STECKBRIEFE ===== -->
+  <h2>Teil 2 · Die 5 Wedges im Detail</h2>
+  <p class="h2-sub">Mit Test-Aufbau, 80%-Lösung, Preisrahmen und Entwicklungszeit.</p>
+
+  <!-- ============ WEDGE 1: MÜDIGKEIT ============ -->
+  <div class="wedge">
+    <div class="wedge-header">
+      <div class="wedge-header-left">
+        <span class="wedge-rank">#1 · Bester MVP</span>
+        <div class="wedge-title">Müdigkeits-Triage</div>
+        <div class="wedge-tagline">„Warum bin ich müde, obwohl ich genug schlafe?"</div>
+      </div>
+      <div class="wedge-total">
+        <div><span class="num">42</span><span class="max"> / 50</span></div>
+        <div class="label">Gesamt-Score</div>
+      </div>
+    </div>
+
+    <div class="specs">
+      <h4>Test-Aufbau</h4>
+      <div class="specs-grid">
+        <div class="spec">
+          <div class="spec-label">Probentyp</div>
+          <div class="spec-value">Trockenblut (Finger-Stich)</div>
+          <div class="spec-detail">Standard-Versandlabor, kein Arzt nötig</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Marker (Kern)</div>
+          <div class="spec-value">Ferritin, TSH, Vit. D, B12</div>
+          <div class="spec-detail">+ optional CRP, HbA1c</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Symptom-Quiz</div>
+          <div class="spec-value">Ja, zwingend</div>
+          <div class="spec-detail">15–20 Fragen für Triage-Logik</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Endpreis (geschätzt)</div>
+          <div class="spec-value">89–119 €</div>
+          <div class="spec-detail">Lykon, Cerascreen: 39–99 €/Marker</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Entwicklungszeit</div>
+          <div class="spec-value">3–4 Monate</div>
+          <div class="spec-detail">Standard-Lab + Quiz + Befund-Logik</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">COGS (Schätzung)</div>
+          <div class="spec-value">~25–35 €</div>
+          <div class="spec-detail">Kit + Lab + Versand hin/zurück</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="eighty">
+      <h4>Die 80%-Lösung</h4>
+      <ul class="eighty-list">
+        <li><strong>Ferritin allein</strong> deckt geschätzt 40–50% aller relevanten Müdigkeitsfälle ab (besonders bei Frauen). Wenn Budget eng: nur Ferritin + Symptom-Quiz starten.</li>
+        <li><strong>4-Marker-Panel</strong> (Ferritin, TSH, B12, Vit. D) deckt ~80% der häufigen Ursachen. Hier ist der Sweet Spot.</li>
+        <li><strong>Symptom-Quiz vorgeschaltet</strong> filtert Fälle, die direkt zum Arzt sollten (z.B. unerklärlicher Gewichtsverlust → Krebs-Verdacht).</li>
+      </ul>
+    </div>
+
+    <div class="scores">
+      <h4>Scoring im Detail</h4>
+      <div class="score-row"><span class="score-label">Pain / Nachfrage</span><div class="bar-track"><div class="bar-fill s5" style="width:100%"></div></div><span class="score-num">5</span></div>
+      <div class="score-row"><span class="score-label">Zahlungsbereitschaft</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+      <div class="score-row"><span class="score-label">Evidenz Marker</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">Clinical Utility</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">Reg. Risiko niedrig</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">Operativ einfach</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">CAC-Potenzial</span><div class="bar-track"><div class="bar-fill s5" style="width:100%"></div></div><span class="score-num">5</span></div>
+      <div class="score-row"><span class="score-label">Differenzierung</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+      <div class="score-row"><span class="score-label">LIFETIME-Fit</span><div class="bar-track"><div class="bar-fill s5" style="width:100%"></div></div><span class="score-num">5</span></div>
+      <div class="score-row"><span class="score-label">MVP-Geschwindigkeit</span><div class="bar-track"><div class="bar-fill s5" style="width:100%"></div></div><span class="score-num">5</span></div>
+    </div>
+
+    <div class="verdict">
+      <div class="verdict-label">Ehrliches Urteil</div>
+      <p>Schnellster Time-to-Revenue, niedrigstes Risiko. Aber: <strong>kein Burggraben</strong>. Lykon, Cerascreen und 5 andere haben Iron/Vitamin-Tests im Sortiment. Du gewinnst hier nur, wenn (a) deine Triage-Logik nachweisbar smarter ist, (b) der Befund-Report sich anfühlt wie Premium-Beratung statt PDF-Ausdruck, oder (c) du sofort in Supplement-Abo upsellst.</p>
+    </div>
+  </div>
+
+  <!-- ============ WEDGE 2: APOB ============ -->
+  <div class="wedge">
+    <div class="wedge-header">
+      <div class="wedge-header-left">
+        <span class="wedge-rank r2">#2 · Trust Builder</span>
+        <div class="wedge-title">ApoB / Lp(a) Cardio</div>
+        <div class="wedge-tagline">„Ist dein Herz-Kreislauf-Risiko unterschätzt?"</div>
+      </div>
+      <div class="wedge-total">
+        <div><span class="num">39</span><span class="max"> / 50</span></div>
+        <div class="label">Gesamt-Score</div>
+      </div>
+    </div>
+
+    <div class="specs">
+      <h4>Test-Aufbau</h4>
+      <div class="specs-grid">
+        <div class="spec">
+          <div class="spec-label">Probentyp</div>
+          <div class="spec-value">Trockenblut oder Venös</div>
+          <div class="spec-detail">Trockenblut für Lipide ist valide</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Marker (Kern)</div>
+          <div class="spec-value">ApoB, Lp(a), Lipidprofil, hsCRP, HbA1c</div>
+          <div class="spec-detail">Lp(a) idealerweise einmalig im Leben</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Symptom-Quiz</div>
+          <div class="spec-value">Optional (Familienanamnese)</div>
+          <div class="spec-detail">+ Lifestyle, Blutdruck-Selbstangabe</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Endpreis (geschätzt)</div>
+          <div class="spec-value">149–199 €</div>
+          <div class="spec-detail">Premium-Positionierung möglich</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Entwicklungszeit</div>
+          <div class="spec-value">4–6 Monate</div>
+          <div class="spec-detail">Lp(a) braucht spezialisiertes Lab</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">COGS (Schätzung)</div>
+          <div class="spec-value">~40–55 €</div>
+          <div class="spec-detail">Lp(a) treibt die Laborkosten</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="eighty">
+      <h4>Die 80%-Lösung</h4>
+      <ul class="eighty-list">
+        <li><strong>ApoB allein</strong> liefert 80% des Mehrwerts ggü. klassischem LDL-C. Wenn maximal schlank: nur ApoB + LDL + HDL als Vergleich.</li>
+        <li><strong>Lp(a) ist der „Wow-Marker"</strong>: 20% der Bevölkerung hat erhöhtes Lp(a), die meisten wissen es nicht. Das ist die Story, die geteilt wird.</li>
+        <li><strong>HbA1c</strong> mitnehmen, weil metabolisches Risiko und kardiovaskuläres Risiko zusammenhängen. Plus: marketingstark („sehe ich auf Diabetes zu?").</li>
+      </ul>
+    </div>
+
+    <div class="scores">
+      <h4>Scoring im Detail</h4>
+      <div class="score-row"><span class="score-label">Pain / Nachfrage</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">Zahlungsbereitschaft</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">Evidenz Marker</span><div class="bar-track"><div class="bar-fill s5" style="width:100%"></div></div><span class="score-num">5</span></div>
+      <div class="score-row"><span class="score-label">Clinical Utility</span><div class="bar-track"><div class="bar-fill s5" style="width:100%"></div></div><span class="score-num">5</span></div>
+      <div class="score-row"><span class="score-label">Reg. Risiko niedrig</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+      <div class="score-row"><span class="score-label">Operativ einfach</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+      <div class="score-row"><span class="score-label">CAC-Potenzial</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+      <div class="score-row"><span class="score-label">Differenzierung</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+      <div class="score-row"><span class="score-label">LIFETIME-Fit</span><div class="bar-track"><div class="bar-fill s5" style="width:100%"></div></div><span class="score-num">5</span></div>
+      <div class="score-row"><span class="score-label">MVP-Geschwindigkeit</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+    </div>
+
+    <div class="verdict">
+      <div class="verdict-label">Ehrliches Urteil</div>
+      <p>Wissenschaftlich der stärkste Wedge. Trust-Builder schlechthin für eine Longevity-Marke. Aber: <strong>Volumen-limitiert</strong>. Die Zielgruppe (Longevity-affine 35–55-Jährige) ist real, aber nicht riesig. Außerdem: ApoB ist nur akut umsetzbar mit Lebensstil oder Statin — wenn dein Befund „auffällig" sagt, schickst du den Kunden zum Arzt. Wer betreut den Pfad danach?</p>
+    </div>
+  </div>
+
+  <!-- ============ WEDGE 3: GLP-1 ============ -->
+  <div class="wedge">
+    <div class="wedge-header">
+      <div class="wedge-header-left">
+        <span class="wedge-rank r3">#3 · High Risk / High Reward</span>
+        <div class="wedge-title">GLP-1 Readiness Check</div>
+        <div class="wedge-tagline">„Bevor du monatlich 300 € für Ozempic ausgibst..."</div>
+      </div>
+      <div class="wedge-total">
+        <div><span class="num">36</span><span class="max"> / 50</span></div>
+        <div class="label">Gesamt-Score</div>
+      </div>
+    </div>
+
+    <div class="specs">
+      <h4>Test-Aufbau</h4>
+      <div class="specs-grid">
+        <div class="spec">
+          <div class="spec-label">Probentyp</div>
+          <div class="spec-value">Speichel (DNA) + Trockenblut</div>
+          <div class="spec-detail">GLP1R/GIPR-SNPs + Stoffwechsel-Marker</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Marker (Kern)</div>
+          <div class="spec-value">GLP1R, GIPR, FTO-Varianten + HbA1c, Insulin, Leptin</div>
+          <div class="spec-detail">+ Schilddrüse, Ferritin als Begleitung</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Symptom-Quiz</div>
+          <div class="spec-value">Ja, ausführlich</div>
+          <div class="spec-detail">Erwartungen, Ernährung, Vorerkrankungen</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Endpreis (geschätzt)</div>
+          <div class="spec-value">199–249 €</div>
+          <div class="spec-detail">Oder: 49 € Software-Upsell für Bestandskunden!</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Entwicklungszeit</div>
+          <div class="spec-value">6–9 Monate (Standalone)</div>
+          <div class="spec-detail">Software-Upsell: 6–8 Wochen</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">COGS (Schätzung)</div>
+          <div class="spec-value">~50–70 € (Standalone) · ~0 € (Upsell)</div>
+          <div class="spec-detail">GenDG: Telemed-Arzt nötig</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="eighty">
+      <h4>Die 80%-Lösung</h4>
+      <ul class="eighty-list">
+        <li><strong>Software-Upsell auf bestehende 715K DNA-Daten</strong> ist die 80%-Lösung schlechthin. COGS gegen 0, kein neuer Kit, schnell live.</li>
+        <li><strong>Erwartungsmanagement statt Vorhersage</strong>: nicht „du verlierst X kg", sondern „dein Profil deutet auf Y Nebenwirkungsrisiko und Z Begleitmarker hin".</li>
+        <li><strong>Concierge-MVP als Validierung</strong>: Landingpage + Warteliste + manueller Befund per Email. Erst nach 100 Verkäufen automatisieren.</li>
+      </ul>
+    </div>
+
+    <div class="scores">
+      <h4>Scoring im Detail</h4>
+      <div class="score-row"><span class="score-label">Pain / Nachfrage</span><div class="bar-track"><div class="bar-fill s5" style="width:100%"></div></div><span class="score-num">5</span></div>
+      <div class="score-row"><span class="score-label">Zahlungsbereitschaft</span><div class="bar-track"><div class="bar-fill s5" style="width:100%"></div></div><span class="score-num">5</span></div>
+      <div class="score-row"><span class="score-label">Evidenz Marker</span><div class="bar-track"><div class="bar-fill s2" style="width:40%"></div></div><span class="score-num">2</span></div>
+      <div class="score-row"><span class="score-label">Clinical Utility</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+      <div class="score-row"><span class="score-label">Reg. Risiko niedrig</span><div class="bar-track"><div class="bar-fill s2" style="width:40%"></div></div><span class="score-num">2</span></div>
+      <div class="score-row"><span class="score-label">Operativ einfach</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+      <div class="score-row"><span class="score-label">CAC-Potenzial</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">Differenzierung</span><div class="bar-track"><div class="bar-fill s5" style="width:100%"></div></div><span class="score-num">5</span></div>
+      <div class="score-row"><span class="score-label">LIFETIME-Fit</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">MVP-Geschwindigkeit</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+    </div>
+
+    <div class="verdict">
+      <div class="verdict-label">Ehrliches Urteil</div>
+      <p>Höchster Pain + höchste Zahlungsbereitschaft im Portfolio. Aber: <strong>die Evidenz ist heute schwach</strong>, und das GenDG zwingt zu ärztlicher Aufklärung bei jeder DNA-Auswertung. Der wirkliche Hebel ist nicht der Standalone-Test, sondern der <strong>49€-Software-Upsell auf die 715K Bestandsdaten</strong> — das ist die margenstärkste Einzelposition im ganzen Portfolio.</p>
+    </div>
+  </div>
+
+  <!-- ============ WEDGE 4: PERIMENOPAUSE ============ -->
+  <div class="wedge">
+    <div class="wedge-header">
+      <div class="wedge-header-left">
+        <span class="wedge-rank r4">#4 · Brand-Wedge</span>
+        <div class="wedge-title">Perimenopause Navigator</div>
+        <div class="wedge-tagline">„Endlich nimmt jemand meine Symptome ernst."</div>
+      </div>
+      <div class="wedge-total">
+        <div><span class="num">34</span><span class="max"> / 50</span></div>
+        <div class="label">Gesamt-Score</div>
+      </div>
+    </div>
+
+    <div class="specs">
+      <h4>Test-Aufbau</h4>
+      <div class="specs-grid">
+        <div class="spec">
+          <div class="spec-label">Probentyp</div>
+          <div class="spec-value">Trockenblut + optional Speichel</div>
+          <div class="spec-detail">Speichel für Cortisol-Tagesprofil</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Marker (Kern)</div>
+          <div class="spec-value">TSH, Ferritin, B12, Vit. D + ggf. FSH/E2</div>
+          <div class="spec-detail">Hormone nur kontextualisiert!</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Symptom-Quiz</div>
+          <div class="spec-value">Ja, Hauptprodukt</div>
+          <div class="spec-detail">MRS-Score (validiert) als Kern</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Endpreis (geschätzt)</div>
+          <div class="spec-value">99–149 €</div>
+          <div class="spec-detail">Niedrigere ZB als GLP-1/ApoB</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Entwicklungszeit</div>
+          <div class="spec-value">5–7 Monate</div>
+          <div class="spec-detail">Quiz-Validierung + ärztliche Review</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">COGS (Schätzung)</div>
+          <div class="spec-value">~30–45 €</div>
+          <div class="spec-detail">Standard-Marker, niedrige Lab-Kosten</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="eighty">
+      <h4>Die 80%-Lösung</h4>
+      <ul class="eighty-list">
+        <li><strong>MRS-Score (Menopause Rating Scale) + Zyklus-Tracking</strong> deckt ~80% der Diagnostik ab. Hormone sind oft nur Bestätigung, kein Kern.</li>
+        <li><strong>Differential-Marker</strong> (TSH, Ferritin) wichtig, weil Schilddrüse & Anämie sehr ähnliche Symptome machen — Ausschluss-Diagnostik.</li>
+        <li><strong>Gyn-Review als Premium-Upsell</strong> (29 €): Ein Gynäkologe sieht Quiz + Werte und gibt eine kurze schriftliche Einschätzung. Das ist der Burggraben.</li>
+      </ul>
+    </div>
+
+    <div class="scores">
+      <h4>Scoring im Detail</h4>
+      <div class="score-row"><span class="score-label">Pain / Nachfrage</span><div class="bar-track"><div class="bar-fill s5" style="width:100%"></div></div><span class="score-num">5</span></div>
+      <div class="score-row"><span class="score-label">Zahlungsbereitschaft</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+      <div class="score-row"><span class="score-label">Evidenz Marker</span><div class="bar-track"><div class="bar-fill s2" style="width:40%"></div></div><span class="score-num">2</span></div>
+      <div class="score-row"><span class="score-label">Clinical Utility</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+      <div class="score-row"><span class="score-label">Reg. Risiko niedrig</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+      <div class="score-row"><span class="score-label">Operativ einfach</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+      <div class="score-row"><span class="score-label">CAC-Potenzial</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">Differenzierung</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">LIFETIME-Fit</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">MVP-Geschwindigkeit</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+    </div>
+
+    <div class="verdict">
+      <div class="verdict-label">Ehrliches Urteil</div>
+      <p>Riesiger Markt, riesiger Pain, starke Communitys. Aber: <strong>als „Labortest" verkauft, ist es medizinisch fragwürdig</strong>. Hormone fluktuieren, FSH-Einzelwerte sagen wenig. Das Produkt muss als <strong>Symptom-Navigator mit Ausschluss-Diagnostik</strong> framen — sonst wird es zur Recht zerrissen. Wenn das gelingt: potenziell volumenstärkster Wedge nach Müdigkeit. LIFETIME muss aber für „Frauen ab 40" stehen wollen — das verändert die Marken-DNA.</p>
+    </div>
+  </div>
+
+  <!-- ============ WEDGE 5: TESTOSTERON ============ -->
+  <div class="wedge">
+    <div class="wedge-header">
+      <div class="wedge-header-left">
+        <span class="wedge-rank r5">#5 · Vorerst vertagen</span>
+        <div class="wedge-title">Testosteron Check</div>
+        <div class="wedge-tagline">„Stimmt mein Testosteron noch?"</div>
+      </div>
+      <div class="wedge-total">
+        <div><span class="num">31</span><span class="max"> / 50</span></div>
+        <div class="label">Gesamt-Score</div>
+      </div>
+    </div>
+
+    <div class="specs">
+      <h4>Test-Aufbau</h4>
+      <div class="specs-grid">
+        <div class="spec">
+          <div class="spec-label">Probentyp</div>
+          <div class="spec-value">Trockenblut (morgens 7–10 Uhr!)</div>
+          <div class="spec-detail">Speichel möglich, aber weniger valide</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Marker (Kern)</div>
+          <div class="spec-value">Gesamt-T, SHBG, freies T (berechnet), LH, FSH</div>
+          <div class="spec-detail">+ optional Östradiol, Prolaktin</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Symptom-Quiz</div>
+          <div class="spec-value">Ja, zwingend (AMS-Score)</div>
+          <div class="spec-detail">Diagnose nur mit Symptom + Wert</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Endpreis (geschätzt)</div>
+          <div class="spec-value">119–169 €</div>
+          <div class="spec-detail">Retests werden teuer</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">Entwicklungszeit</div>
+          <div class="spec-value">6–9 Monate</div>
+          <div class="spec-detail">Telemed-Partner zwingend</div>
+        </div>
+        <div class="spec">
+          <div class="spec-label">COGS (Schätzung)</div>
+          <div class="spec-value">~45–60 € + Retests</div>
+          <div class="spec-detail">Retest-Quote 15–25%</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="eighty">
+      <h4>Die 80%-Lösung</h4>
+      <ul class="eighty-list">
+        <li><strong>AMS-Symptom-Score allein</strong> kann als kostenloser Lead-Magnet die Zielgruppe einfangen — ohne Test-Risiko.</li>
+        <li><strong>Strenges Zeitfenster</strong> (Probenahme nur 7–10 Uhr) eindeutig kommunizieren, sonst Müll-Daten + Refunds.</li>
+        <li><strong>Telemed-Partnerschaft im Folgepfad</strong> ist Pflicht. Ohne saubere Übergabe an Androloge/Endokrinologe = Reputationsrisiko.</li>
+      </ul>
+    </div>
+
+    <div class="scores">
+      <h4>Scoring im Detail</h4>
+      <div class="score-row"><span class="score-label">Pain / Nachfrage</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">Zahlungsbereitschaft</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">Evidenz Marker</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">Clinical Utility</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">Reg. Risiko niedrig</span><div class="bar-track"><div class="bar-fill s2" style="width:40%"></div></div><span class="score-num">2</span></div>
+      <div class="score-row"><span class="score-label">Operativ einfach</span><div class="bar-track"><div class="bar-fill s1" style="width:20%"></div></div><span class="score-num">1</span></div>
+      <div class="score-row"><span class="score-label">CAC-Potenzial</span><div class="bar-track"><div class="bar-fill s4" style="width:80%"></div></div><span class="score-num">4</span></div>
+      <div class="score-row"><span class="score-label">Differenzierung</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+      <div class="score-row"><span class="score-label">LIFETIME-Fit</span><div class="bar-track"><div class="bar-fill s3" style="width:60%"></div></div><span class="score-num">3</span></div>
+      <div class="score-row"><span class="score-label">MVP-Geschwindigkeit</span><div class="bar-track"><div class="bar-fill s2" style="width:40%"></div></div><span class="score-num">2</span></div>
+    </div>
+
+    <div class="verdict">
+      <div class="verdict-label">Ehrliches Urteil</div>
+      <p>Markt validiert (Adon Health), Marker sind solide, Nachfrage da. Aber: <strong>operativ der komplexeste Wedge</strong>. Strenges Zeitfenster für Probenahme, hohe Retest-Quote, zwingender Telemed-Pfad für Folgebehandlung. Plus: TRT-Nähe könnte die LIFETIME-Marke in Richtung „Männergesundheit" verschieben — weg von der wissenschaftlichen Longevity-Position. <strong>Nicht der erste, aber möglicher 4. oder 5. Wedge</strong> — wenn der Telemed-Stack aus anderen Produkten eh schon steht.</p>
+    </div>
+  </div>
+
+  <!-- ===== EMPFEHLUNG ===== -->
+  <div class="final-rec">
+    <h2>Empfohlene Reihenfolge</h2>
+    <p>Basierend auf den drei kritischen Clustern (Markt-Wille, Bau-Fähigkeit, Echtheit) ergibt sich diese Roll-out-Logik:</p>
+    <ol>
+      <li><strong>Q1–Q2: Müdigkeits-Triage launchen</strong> — Cashflow, Logistik-Erfahrung, Lab-Partnerschaft etablieren. Niedrigstes Risiko, schnellster Launch.</li>
+      <li><strong>Parallel (Wochen, nicht Monate): GLP-1 Software-Upsell für DNA-Bestandskunden</strong> — der profitabelste Hebel im ganzen Portfolio. COGS ≈ 0, GenDG-konform über Telemed-Arzt.</li>
+      <li><strong>Q2–Q3: ApoB als Premium-Wedge vorbereiten</strong> — baut Trust für LIFETIME als Longevity-Marke. Nicht volumenstark, aber Marken-prägend.</li>
+      <li><strong>Q3–Q4: Perimenopause Navigator</strong> — wenn die ersten drei Wedges Cash und Lernkurve geliefert haben. Nur als Navigator, nicht als Hormontest.</li>
+      <li><strong>Vertagt: Testosteron-Standalone und GLP-1-Standalone</strong> — beide haben Telemed-Komplexität, die erst sinnvoll skaliert, wenn der Stack steht.</li>
+    </ol>
+    <p style="margin-top:20px; font-size:13px; color:rgba(255,255,255,0.7); font-style:italic;">Die strategisch wichtigste Erkenntnis: Du sitzt mit den 715K DNA-Datensätzen auf dem wertvollsten Asset im ganzen Portfolio. Jeder Wedge, der diese Daten als Upsell nutzen kann, hat eine fundamental andere Unit Economics als ein Standalone-Test.</p>
+  </div>
+
+</div>
+</body>
+</html>

@@ -212,6 +212,7 @@ No instruction to "find an image" is needed in the build prompt.
   --text-body: 16px;
   --text-body-sm: 14px;
   --text-micro: 12px;
+  --text-article: 19px; /* Longform-Artikel-Body, mobil 17px via Media Query; docs/blog-design-best-practices.md §1 */
 
   --leading-stat: 1;
   --leading-display: 1.1;
