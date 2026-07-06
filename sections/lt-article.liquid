@@ -42,7 +42,16 @@
   assign word_count = article.content | strip_html | split: ' ' | size
   assign reading_minutes = word_count | divided_by: 180 | at_least: 1
 
-  assign h2_parts = article.content | split: '<h2'
+  # Alt-Artikel ohne jede H2 (nur H3) bekommen ihre H3 beim Rendern zu H2
+  # hochgestuft: echte Abschnittsköpfe (28px statt 24px) + Auto-TOC greift.
+  # Artikel mit gemischter H2/H3-Hierarchie bleiben unberührt. Quelltext im
+  # Admin bleibt unverändert. Siehe docs/blog-design-best-practices.md.
+  assign article_body = article.content
+  assign h2_probe = article_body | split: '<h2'
+  if h2_probe.size == 1
+    assign article_body = article_body | replace: '<h3', '<h2' | replace: '</h3>', '</h2>'
+  endif
+  assign h2_parts = article_body | split: '<h2'
   assign h2_count = h2_parts.size | minus: 1
 
   assign show_toc = false
