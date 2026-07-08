@@ -2,19 +2,49 @@
   This snippet structures the micro-data using JSON-LD specification. For product and article pages, the data is 100% outputted by Shopify. The theme only offers schema for the organization and breadcrumb.
 {%- endcomment -%}
 
+{%- liquid
+  assign org_logo = null
+  if shop.brand.logo
+    assign org_logo = shop.brand.logo | image_url: width: 512
+  elsif settings.favicon != blank
+    assign org_logo = settings.favicon | image_url: width: 512
+  endif
+-%}
 <script type="application/ld+json">
   [
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
+      "@id": {{ shop.url | append: '/#website' | json }},
       "name": {{ shop.name | json }},
-      "url": {{ shop.url | json }}
+      "url": {{ shop.url | json }},
+      "publisher": { "@id": {{ shop.url | append: '/#organization' | json }} },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "{{ shop.url }}/search?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
     },
     {
       "@context": "https://schema.org",
       "@type": "Organization",
+      "@id": {{ shop.url | append: '/#organization' | json }},
       "name": {{ shop.name | json }},
-      "url": {{ shop.url | json }}
+      "url": {{ shop.url | json }},
+      "description": {{ 'LIFETIME Health ist eine deutsche Longevity- und Gesundheitsmarke für epigenetische Alterstests und Nahrungsergänzung.' | json }},
+      {%- if org_logo %}
+      "logo": {{ org_logo | json }},
+      "image": {{ org_logo | json }},
+      {%- endif %}
+      "sameAs": [
+        "https://www.instagram.com/lifetime.longevity/",
+        "https://www.facebook.com/lifetimehealthlongevity",
+        "https://www.linkedin.com/company/lifetime-health-longevity",
+        "https://www.tiktok.com/@lifetimelongevity"
+      ]
     }
   ]
 </script>
