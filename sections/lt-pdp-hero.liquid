@@ -1431,7 +1431,14 @@
         const badgeEl = card.querySelector('[data-lt-bb-badge]');
 
         if (kind === 'sub') {
-          const pct = badgeDiscountPct > 0 ? badgeDiscountPct : savingsPct(onceC, subC);
+          // Bei aktivem Sale (compare-at gesetzt) bezieht sich das Abo auf den Normalpreis
+          // → zeigt den echten Doppelrabatt (Sale + Abo). Sonst: klassisch Abo-Ersparnis vs. Einmalkauf.
+          const subRegular = baseComparePrice > 0 ? baseComparePrice : 0;
+          const subSaleActive = subRegular > subC;
+          const pct = subSaleActive
+            ? savingsPct(subRegular, subC)
+            : (badgeDiscountPct > 0 ? badgeDiscountPct : savingsPct(onceC, subC));
+          const subCmp = subSaleActive ? subRegular : onceC;
           subCards.push({ card, badgeEl, pct });
 
           if (badgeEl) {
@@ -1444,8 +1451,8 @@
             }
           }
           if (compareEl) {
-            if (onceC > subC) {
-              compareEl.textContent = formatPrice(onceC);
+            if (subCmp > subC) {
+              compareEl.textContent = formatPrice(subCmp);
               compareEl.hidden = false;
             } else {
               compareEl.textContent = '';
