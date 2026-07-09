@@ -666,6 +666,17 @@
 
         {%- if lt_show_sub or section.settings.show_price_standalone -%}
           <div class="lt-purchase-block">
+            {%- if section.settings.show_promo_banner and section.settings.promo_banner_title != blank -%}
+              <div class="lt-promo-banner" role="note">
+                <span class="lt-promo-banner__tag">{{ section.settings.promo_banner_tag | default: 'Aktion' | escape }}</span>
+                <span class="lt-promo-banner__text">
+                  <span class="lt-promo-banner__title">{{ section.settings.promo_banner_title | escape }}</span>
+                  {%- if section.settings.promo_banner_note != blank -%}
+                    <span class="lt-promo-banner__note">{{ section.settings.promo_banner_note | escape }}</span>
+                  {%- endif -%}
+                </span>
+              </div>
+            {%- endif -%}
             {%- liquid
               assign lt_show_sizes = false
               if section.settings.show_size_selector and product.variants.size > 1
@@ -2199,6 +2210,34 @@
       "id": "badge_text",
       "label": "Badge Text",
       "default": "Bestseller"
+    },
+    {
+      "type": "header",
+      "content": "Aktions-Banner"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_promo_banner",
+      "label": "Aktions-Banner anzeigen",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "promo_banner_tag",
+      "label": "Aktions-Label",
+      "default": "Aktion"
+    },
+    {
+      "type": "text",
+      "id": "promo_banner_title",
+      "label": "Aktions-Titel",
+      "default": "15 % Rabatt auf NMN-Pulver"
+    },
+    {
+      "type": "text",
+      "id": "promo_banner_note",
+      "label": "Aktions-Zusatz",
+      "default": "Alle Größen · inkl. Gratisversand · nur bis 6. August"
     },
     {
       "type": "header",
