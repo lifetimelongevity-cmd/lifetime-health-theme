@@ -674,8 +674,37 @@
                   {%- if section.settings.promo_banner_note != blank -%}
                     <span class="lt-promo-banner__note">{{ section.settings.promo_banner_note | escape }}</span>
                   {%- endif -%}
+                  {%- if section.settings.promo_banner_deadline != blank -%}
+                    <span class="lt-promo-banner__timer" data-lt-promo-deadline="{{ section.settings.promo_banner_deadline | escape }}" hidden>
+                      {{ section.settings.promo_banner_timer_label | default: 'Endet in' | escape }} <strong data-lt-promo-countdown>–</strong>
+                    </span>
+                  {%- endif -%}
                 </span>
               </div>
+              <script>
+                (function () {
+                  var banner = document.currentScript.previousElementSibling;
+                  var el = banner && banner.querySelector('[data-lt-promo-deadline]');
+                  if (!el) return;
+                  var out = el.querySelector('[data-lt-promo-countdown]');
+                  var deadline = new Date(el.getAttribute('data-lt-promo-deadline')).getTime();
+                  if (isNaN(deadline)) return;
+                  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+                  function tick() {
+                    var diff = deadline - Date.now();
+                    if (diff <= 0) { el.hidden = true; return; }
+                    var d = Math.floor(diff / 86400000);
+                    var h = Math.floor((diff % 86400000) / 3600000);
+                    var m = Math.floor((diff % 3600000) / 60000);
+                    var s = Math.floor((diff % 60000) / 1000);
+                    var txt = (d > 0 ? d + ' T ' : '') + pad(h) + ':' + pad(m) + ':' + pad(s);
+                    if (out) { out.textContent = txt; } else { el.textContent = txt; }
+                    el.hidden = false;
+                  }
+                  tick();
+                  setInterval(tick, 1000);
+                })();
+              </script>
             {%- endif -%}
             {%- liquid
               assign lt_show_sizes = false
@@ -2249,7 +2278,19 @@
       "type": "text",
       "id": "promo_banner_note",
       "label": "Aktions-Zusatz",
-      "default": "Alle Größen · inkl. Gratisversand · nur bis 6. August"
+      "default": "Alle Größen · inkl. Gratisversand"
+    },
+    {
+      "type": "text",
+      "id": "promo_banner_timer_label",
+      "label": "Countdown-Label",
+      "default": "Endet in"
+    },
+    {
+      "type": "text",
+      "id": "promo_banner_deadline",
+      "label": "Countdown-Enddatum (ISO, z. B. 2026-07-16T23:59:59). Leer = kein Countdown",
+      "default": "2026-07-16T23:59:59"
     },
     {
       "type": "header",
