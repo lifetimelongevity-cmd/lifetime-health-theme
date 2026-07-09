@@ -753,7 +753,7 @@
                       <span class="lt-bb-card__meta">
                         <span class="lt-bb-card__title-row">
                           <span class="lt-bb-card__title">{{ bb_sub1_title | escape }}</span>
-                          <span class="lt-bb-card__badge lt-bb-card__badge--strong" data-lt-bb-badge>SPARE 0%</span>
+                          <span class="lt-bb-card__badge lt-bb-card__badge--strong" data-lt-bb-badge>SPARE {{ section.settings.sub_discount_percent | default: 10 }}%</span>
                         </span>
                         <span class="lt-bb-card__sub">{{ bb_sub1_sub | escape }}</span>
                       </span>
@@ -842,6 +842,7 @@
                       <span class="lt-bb-card__meta">
                         <span class="lt-bb-card__title-row">
                           <span class="lt-bb-card__title">{{ bb_once_title | escape }}</span>
+                          <span class="lt-bb-card__badge lt-bb-card__badge--sale" data-lt-bb-sale-badge hidden></span>
                         </span>
                         {%- unless lt_show_sizes -%}<span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>{%- endunless -%}
                       </span>
@@ -1053,7 +1054,7 @@
           window.ltPricing = {
             basePrice: {{ lt_base_price }},
             comparePrice: {{ lt_compare_price | default: 0 }},
-            subDiscount: {{ section.settings.sub_discount_percent | default: 15 }} * 0.01
+            subDiscount: {{ section.settings.sub_discount_percent | default: 10 }} * 0.01
           };
         </script>
 
@@ -1444,6 +1445,17 @@
           if (currentEl) currentEl.textContent = formatPrice(onceC);
           if (unitEl) {
             unitEl.textContent = formatUnit(onceC, grams, qty);
+          }
+          const saleBadgeEl = card.querySelector('[data-lt-bb-sale-badge]');
+          if (saleBadgeEl) {
+            const salePct = shopCompare > onceC ? savingsPct(shopCompare, onceC) : 0;
+            if (salePct > 0) {
+              saleBadgeEl.textContent = '−' + salePct + '%';
+              saleBadgeEl.hidden = false;
+            } else {
+              saleBadgeEl.textContent = '';
+              saleBadgeEl.hidden = true;
+            }
           }
         }
       });
