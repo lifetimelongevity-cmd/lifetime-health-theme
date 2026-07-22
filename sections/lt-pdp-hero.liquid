@@ -257,8 +257,9 @@
         {%- assign lt_trust_4 = section.settings.trust_4 | strip -%}
         {%- assign lt_pill_1_label = section.settings.pill_1_label | default: '1 Monat' -%}
         {%- assign lt_pill_1_qty = section.settings.pill_1_quantity | default: 1 -%}
-        {%- assign lt_pill_1_once = section.settings.pill_1_once_price_cents | default: 3990 -%}
-        {%- assign lt_pill_1_sub = section.settings.pill_1_sub_price_cents | default: 3392 -%}
+        {%- comment -%} Preis IMMER dynamisch aus der echten Variante (kein Hardcode) — 2026-07-18 {%- endcomment -%}
+        {%- assign lt_pill_1_once = lt_variant_1.price -%}
+        {%- assign lt_pill_1_sub = lt_variant_1.price | times: 0.90 | round -%}
         {%- assign lt_rating = product.metafields.loox.avg_rating | default: 0 | plus: 0 -%}
         {%- assign lt_count = product.metafields.loox.num_reviews | default: 0 | plus: 0 -%}
         {%- assign lt_show_sub = section.settings.show_subscription_toggle -%}
@@ -905,6 +906,7 @@
                           {% unless variant.available %}disabled{% endunless %}
                         >
                         <span class="lt-size__name">{{ variant.title | escape }}</span>
+                        {%- if v_grams > 0 -%}<span class="lt-size__unit">{{ variant.price | times: 100 | divided_by: v_grams | money_without_trailing_zeros }}/100 g</span>{%- endif -%}
                         <span class="lt-size__save">{%- if v_compare > variant.price -%}−{{ v_compare | minus: variant.price | money }}{%- endif -%}</span>
                       </label>
                     {%- endfor -%}
@@ -2166,6 +2168,14 @@
   font-weight: 500;
   line-height: 1.15;
   color: var(--lt-muted, rgba(38,37,30,0.55));
+}
+/* Grundpreis €/100 g pro Variante (PAngV, dynamisch aus variant.price) — 2026-07-18 */
+.lt-size__unit {
+  display: block;
+  font-size: 11px;
+  line-height: 1.1;
+  color: var(--lt-muted, rgba(38,37,30,0.55));
+  letter-spacing: 0.01em;
 }
 .lt-size__input:disabled ~ .lt-size__name,
 .lt-size__input:disabled ~ .lt-size__save {

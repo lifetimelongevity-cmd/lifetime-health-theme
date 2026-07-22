@@ -1,0 +1,602 @@
+{%- liquid
+  assign crs_h_align = section.settings.content_align | default: 'left'
+  if crs_h_align != 'left' and crs_h_align != 'center' and crs_h_align != 'right'
+    assign crs_h_align = 'left'
+  endif
+  assign crs_nf_kicker = section.settings.kicker | strip
+  if crs_nf_kicker == '__none__'
+    assign crs_nf_kicker = ''
+  endif
+  assign crs_nf_head = section.settings.heading | strip
+  assign crs_nf_sub = section.settings.subheading | strip
+  assign crs_nf_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign crs_nf_headline_lg = true
+  endif
+
+  assign crs_nf_link_label = section.settings.link_label | strip
+  assign crs_nf_link_url = section.settings.link_url | strip
+-%}
+{% style %}
+  #section-{{ section.id }} {
+    --crs-bg:       {{ section.settings.color_bg }};
+    --crs-card-bg:  {{ section.settings.color_card_bg }};
+    --crs-text:     {{ section.settings.color_text }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.62 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
+    --crs-hairline: {{ section.settings.color_text | color_modify: 'alpha', 0.14 }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<div class="cnf-section" id="section-{{ section.id }}">
+  <div class="cnf-container">
+
+    <div class="cnf-head crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_nf_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+      {%- if crs_nf_kicker != blank -%}
+        <p class="crs-heading-stack__kicker">{{ crs_nf_kicker | escape }}</p>
+      {%- endif -%}
+      {%- if crs_nf_head != blank or crs_nf_sub != blank -%}
+        <div class="crs-heading-stack__pair">
+          {%- if crs_nf_head != blank -%}
+            <h2 class="crs-heading-stack__title">{{ crs_nf_head | escape | newline_to_br }}</h2>
+          {%- endif -%}
+          {%- if crs_nf_sub != blank -%}
+            <p class="crs-heading-stack__subtitle">{{ crs_nf_sub | escape | newline_to_br }}</p>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <div class="cnf-card">
+
+      {%- comment -%} Scannable core — stance + proof chips {%- endcomment -%}
+      {%- if section.settings.body_1 != blank -%}
+        <p class="cnf-lead">{{ section.settings.body_1 | escape | newline_to_br }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.chip_1 != blank or section.settings.chip_2 != blank or section.settings.chip_3 != blank -%}
+        <ul class="cnf-chips" role="list">
+          {%- for i in (1..3) -%}
+            {%- assign chip_key = 'chip_' | append: i -%}
+            {%- assign chip_val = section.settings[chip_key] | strip -%}
+            {%- if chip_val != blank -%}
+              <li class="cnf-chip">
+                <svg class="cnf-chip__icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M3.5 8.5l3 3 6-6.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>{{ chip_val | escape }}</span>
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+      {%- comment -%} Depth on demand — dated regulatory timeline with sources {%- endcomment -%}
+      {%- assign has_status = false -%}
+      {%- if section.settings.status_1_label != blank or section.settings.status_2_label != blank or section.settings.status_3_label != blank -%}
+        {%- assign has_status = true -%}
+      {%- endif -%}
+      {%- if has_status -%}
+        <details class="cnf-reg">
+          <summary class="cnf-reg__summary">
+            <span class="cnf-reg__summary-label">{{ section.settings.status_title | default: 'Regulatorischer Stand' | escape }}</span>
+            <svg class="cnf-reg__chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </summary>
+          <div class="cnf-reg__body">
+            <ol class="cnf-status__list" role="list">
+              {%- for i in (1..3) -%}
+                {%- assign lbl_key = 'status_' | append: i | append: '_label' -%}
+                {%- assign txt_key = 'status_' | append: i | append: '_text' -%}
+                {%- assign url_key = 'status_' | append: i | append: '_url' -%}
+                {%- assign src_key = 'status_' | append: i | append: '_source' -%}
+                {%- assign lbl_val = section.settings[lbl_key] | strip -%}
+                {%- assign txt_val = section.settings[txt_key] | strip -%}
+                {%- assign url_val = section.settings[url_key] | strip -%}
+                {%- assign src_val = section.settings[src_key] | strip -%}
+                {%- if lbl_val != blank or txt_val != blank -%}
+                  <li class="cnf-step{% if i == 3 %} cnf-step--open{% endif %}">
+                    <span class="cnf-step__dot" aria-hidden="true"></span>
+                    <div class="cnf-step__body">
+                      {%- if lbl_val != blank -%}<span class="cnf-step__label">{{ lbl_val | escape }}</span>{%- endif -%}
+                      {%- if txt_val != blank -%}<span class="cnf-step__text">{{ txt_val | escape }}</span>{%- endif -%}
+                      {%- if url_val != blank -%}
+                        <a class="cnf-step__src" href="{{ url_val | escape }}" target="_blank" rel="noopener noreferrer">
+                          {{ src_val | default: 'Quelle' | escape }}
+                          <svg viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M4 3h5v5M9 3l-6 6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </a>
+                      {%- endif -%}
+                    </div>
+                  </li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ol>
+            {%- if section.settings.footnote != blank -%}
+              <p class="cnf-status__foot">{{ section.settings.footnote | escape }}</p>
+            {%- endif -%}
+          </div>
+        </details>
+      {%- endif -%}
+
+      {%- if crs_nf_link_label != blank and crs_nf_link_url != blank -%}
+        <a class="cnf-link" href="{{ crs_nf_link_url }}">{{ crs_nf_link_label | escape }}
+          <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 8h8M8.5 4.5L12 8l-3.5 3.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </a>
+      {%- endif -%}
+
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+/* ===================================================
+   Novel Food Erklärung — crs-novel-food.liquid
+   Scanbarer Kern (Haltung + Chips) + Tiefe auf Abruf
+   (datierte Regulatorik-Timeline im <details>-Accordion).
+   =================================================== */
+
+.cnf-section {
+  background: var(--crs-bg, #f7f7f4);
+}
+
+.cnf-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.cnf-head {
+  margin-bottom: 28px;
+  max-width: 44ch;
+}
+
+.cnf-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding: 44px;
+  border-radius: 4px;
+  background: var(--crs-card-bg, #f2f1ed);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+}
+
+/* Core — stance line */
+.cnf-lead {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--crs-text, #26251e);
+}
+
+/* Core — proof chips */
+.cnf-chips {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cnf-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  background: var(--crs-bg, #f7f7f4);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--crs-text, #26251e);
+}
+
+.cnf-chip__icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--crs-text, #26251e);
+}
+
+/* Depth — regulatory accordion */
+.cnf-reg {
+  border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  padding-top: 6px;
+  max-width: 720px;
+}
+
+.cnf-reg__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0 2px;
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.4));
+}
+
+.cnf-reg__summary::-webkit-details-marker { display: none; }
+
+.cnf-reg__summary:focus-visible {
+  outline: 1px solid var(--crs-hairline, rgba(38, 37, 30, 0.4));
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.cnf-reg__chevron {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.cnf-reg[open] .cnf-reg__chevron {
+  transform: rotate(180deg);
+}
+
+.cnf-reg__body {
+  padding-top: 22px;
+}
+
+.cnf-status__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cnf-step {
+  position: relative;
+  display: grid;
+  grid-template-columns: 16px 1fr;
+  gap: 14px;
+  padding-bottom: 20px;
+}
+
+.cnf-step:last-child { padding-bottom: 0; }
+
+/* neutral vertical connector, no accent colour */
+.cnf-step::before {
+  content: '';
+  position: absolute;
+  left: 7px;
+  top: 16px;
+  bottom: -2px;
+  width: 1px;
+  background: var(--crs-hairline, rgba(38, 37, 30, 0.14));
+}
+
+.cnf-step:last-child::before { display: none; }
+
+.cnf-step__dot {
+  width: 15px;
+  height: 15px;
+  margin-top: 3px;
+  border-radius: 50%;
+  border: 1.5px solid var(--crs-text-ter, rgba(38, 37, 30, 0.4));
+  background: var(--crs-card-bg, #f2f1ed);
+}
+
+.cnf-step--open .cnf-step__dot { border-style: dashed; }
+
+.cnf-step__body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.cnf-step__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--crs-text, #26251e);
+}
+
+.cnf-step__text {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.62));
+}
+
+.cnf-step__src {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.4));
+  text-decoration: none;
+  border-bottom: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  padding-bottom: 1px;
+  align-self: flex-start;
+  transition: color 0.18s ease, border-color 0.18s ease;
+}
+
+.cnf-step__src svg { width: 11px; height: 11px; }
+
+.cnf-step__src:hover {
+  color: var(--crs-text, #26251e);
+  border-color: var(--crs-hairline, rgba(38, 37, 30, 0.14));
+}
+
+.cnf-status__foot {
+  margin: 18px 0 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.4));
+}
+
+/* Optional link */
+.cnf-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--crs-text, #26251e);
+  text-decoration: none;
+  border-bottom: 1px solid var(--crs-hairline, rgba(38, 37, 30, 0.14));
+  align-self: flex-start;
+  padding-bottom: 2px;
+  transition: border-color 0.18s ease;
+}
+
+.cnf-link svg { width: 15px; height: 15px; }
+.cnf-link:hover { border-color: var(--crs-text, #26251e); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cnf-reg__chevron { transition: none; }
+}
+
+/* Responsive — mobile */
+@media (max-width: 640px) {
+  .cnf-head { margin-bottom: 20px; }
+  .cnf-card { padding: 32px 22px; gap: 20px; }
+  .cnf-lead { font-size: 1rem; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Novel Food Erklärung",
+  "tag": "section",
+  "class": "crs-novel-food",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Überschrift"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung (Überschrift)",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section",
+      "info": "Zeilenumbruch: Enter in Überschrift/Unterüberschrift."
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": "Transparenz",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Warum wir NMN als Forschungschemikalie abgeben"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Unterüberschrift",
+      "default": "Auf dem Beutel steht \"nicht zum Verzehr\". Das hat einen Grund."
+    },
+    {
+      "type": "header",
+      "content": "Kernaussage (immer sichtbar)"
+    },
+    {
+      "type": "textarea",
+      "id": "body_1",
+      "label": "Kernsatz",
+      "default": "NMN ist in der EU rechtlich ein Sonderfall, und statt das im Kleingedruckten zu verstecken, erklären wir es offen. Für dich heißt das vor allem: wir belegen, was belegbar ist, statt Wirkung zu versprechen."
+    },
+    {
+      "type": "text",
+      "id": "chip_1",
+      "label": "Chip 1",
+      "default": "Keine Wirkversprechen"
+    },
+    {
+      "type": "text",
+      "id": "chip_2",
+      "label": "Chip 2",
+      "default": "Prüfbericht je Charge öffentlich"
+    },
+    {
+      "type": "text",
+      "id": "chip_3",
+      "label": "Chip 3",
+      "default": "Ehrliche Einordnung statt Hype"
+    },
+    {
+      "type": "text",
+      "id": "link_label",
+      "label": "Link-Text (optional)",
+      "default": "Mehr dazu: Ist NMN in Deutschland legal?"
+    },
+    {
+      "type": "url",
+      "id": "link_url",
+      "label": "Link-Ziel (optional)"
+    },
+    {
+      "type": "header",
+      "content": "Regulatorischer Stand (Accordion, zugeklappt)"
+    },
+    {
+      "type": "text",
+      "id": "status_title",
+      "label": "Accordion-Titel",
+      "default": "Regulatorischer Stand: Juli 2026"
+    },
+    {
+      "type": "text",
+      "id": "status_1_label",
+      "label": "Schritt 1 — Label",
+      "default": "Als Novel Food eingestuft"
+    },
+    {
+      "type": "textarea",
+      "id": "status_1_text",
+      "label": "Schritt 1 — Text",
+      "default": "In der EU als Lebensmittel nicht zugelassen; die erste Zulassungsprozedur endete am 31. März 2022 ohne Zulassung."
+    },
+    {
+      "type": "text",
+      "id": "status_1_source",
+      "label": "Schritt 1 — Quellen-Text",
+      "default": "EU Novel Food Catalogue"
+    },
+    {
+      "type": "text",
+      "id": "status_1_url",
+      "label": "Schritt 1 — Quellen-Link",
+      "default": "https://ec.europa.eu/food/food-feed-portal/screen/novel-food-catalogue/search"
+    },
+    {
+      "type": "text",
+      "id": "status_2_label",
+      "label": "Schritt 2 — Label",
+      "default": "Mai 2026: EFSA bestätigt die Sicherheit"
+    },
+    {
+      "type": "textarea",
+      "id": "status_2_text",
+      "label": "Schritt 2 — Text",
+      "default": "Die Sicherheitsprüfung im EU-Zulassungsverfahren fiel für den Antrag eines Drittanbieters positiv aus. Das ist keine Zulassung."
+    },
+    {
+      "type": "text",
+      "id": "status_2_source",
+      "label": "Schritt 2 — Quellen-Text",
+      "default": "EFSA-Gutachten, Mai 2026"
+    },
+    {
+      "type": "text",
+      "id": "status_2_url",
+      "label": "Schritt 2 — Quellen-Link",
+      "default": "https://efsa.onlinelibrary.wiley.com/doi/10.2903/j.efsa.2026.10007"
+    },
+    {
+      "type": "text",
+      "id": "status_3_label",
+      "label": "Schritt 3 — Label",
+      "default": "Zulassung: noch offen"
+    },
+    {
+      "type": "textarea",
+      "id": "status_3_text",
+      "label": "Schritt 3 — Text",
+      "default": "Darüber entscheiden EU-Kommission und Mitgliedstaaten. Eine Entscheidung steht aus."
+    },
+    {
+      "type": "text",
+      "id": "status_3_source",
+      "label": "Schritt 3 — Quellen-Text",
+      "default": "EU-Zulassungsstatus"
+    },
+    {
+      "type": "text",
+      "id": "status_3_url",
+      "label": "Schritt 3 — Quellen-Link",
+      "default": "https://www.cirs-group.com/en/food/eu-novel-food-application-updates-in-q1-2026"
+    },
+    {
+      "type": "textarea",
+      "id": "footnote",
+      "label": "Fußnote (im Accordion)",
+      "default": "LIFETIME gibt NMN ausschließlich zu Forschungs- und Analysezwecken ab."
+    }
+  ],
+  "blocks": [],
+  "presets": [
+    {
+      "name": "Novel Food Erklärung"
+    }
+  ]
+}
+{% endschema %}

@@ -1736,7 +1736,12 @@ body.lt-quiz-fullscreen .header-spacer {
 @media (max-width: 880px) {
   .lt-quiz-result {
     gap: var(--space-6);
-    padding: 0 0 var(--space-7);
+    /* 2026-07-22: Bottom-Padding 48 -> 80 px. Seit die Scope-Section hinter dem Ask
+       steht, endet die Seite auf einer Textzeile statt auf der dunklen Card. Am
+       Seitenende schloss der Sticky-CTA damit bündig an die letzte Zeile an (0 px),
+       jetzt bleiben 32 px Luft. Mid-Scroll überlagert der Sticky weiterhin, das ist
+       gewollt. */
+    padding: 0 0 var(--space-9);
   }
   .lt-quiz-result > section:first-of-type {
     margin-top: 0;
@@ -1750,7 +1755,11 @@ body.lt-quiz-fullscreen .header-spacer {
     padding: var(--space-7) var(--space-5);
     gap: var(--space-5);
   }
-  .lt-quiz-result__cta-media { order: -1; }
+  /* 2026-07-22: Media von order:-1 nach unten. Auf Mobile stand der 260-px-Bildstack
+     direkt über dem Kauf-CTA und schob den Ask um ~300 px nach hinten, auf dem Gerät,
+     das 92 % der Quiz-Starts liefert und den Result-Schritt nur mit 10 % konvertiert.
+     Das Bild bleibt als Abbinder unter dem E-Mail-Block stehen. */
+  .lt-quiz-result__cta-media { order: 1; }
   .lt-quiz-result__cta-media-stack { max-width: 260px; }
   .lt-quiz-result__cta-text { font-size: 19px; }
   .lt-quiz-result__cta-primary { align-self: stretch; }
@@ -1773,35 +1782,9 @@ body.lt-quiz-fullscreen .header-spacer {
   border-color: color-mix(in srgb, var(--color-surface-dark) 84%, var(--color-dark));
 }
 
-/* P3 — Guide/Rabatt als demoteter, einklappbarer Sekundär-Block (statt "Oder"-Gleichwertigkeit) */
-.lt-quiz-result__guide {
-  margin-top: var(--space-5);
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-  padding-top: var(--space-4);
-}
-.lt-quiz-result__guide-summary {
-  cursor: pointer;
-  list-style: none;
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-family: var(--font-body);
-  font-size: 13px;
-  line-height: 1.5;
-  letter-spacing: 0.01em;
-  color: rgba(255, 255, 255, 0.6);
-}
-.lt-quiz-result__guide-summary::-webkit-details-marker { display: none; }
-.lt-quiz-result__guide-summary strong { color: rgba(255, 255, 255, 0.82); font-weight: 600; }
-.lt-quiz-result__guide-summary::after {
-  content: "›";
-  margin-left: auto;
-  font-size: 18px;
-  opacity: 0.55;
-  transition: transform 200ms ease;
-}
-.lt-quiz-result__guide[open] .lt-quiz-result__guide-summary::after { transform: rotate(90deg); }
-.lt-quiz-result__guide-body { margin-top: var(--space-4); }
+/* 2026-07-22: .lt-quiz-result__guide* entfernt. Der Guide/Rabatt-Block war als
+   einklappbares <details> demoted; bei rund 1 % Capture-Rate auf 253 Quiz-Abschlüsse
+   ist er jetzt ein offener Sekundär-Block mit Oder-Trenner (siehe __cta-divider oben). */
 
 /* P1 — Sticky Kauf-CTA auf der Result-Page (nur Mobile/Tablet) */
 .lt-quiz-result__sticky-cta { display: none; }

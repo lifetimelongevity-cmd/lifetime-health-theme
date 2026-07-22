@@ -90,7 +90,7 @@
       topic: 'Biologisches Alter',
       icon: 'hourglass-medium',
       title: 'Biologisches Alter senken',
-      short: 'Du willst wissen, wie schnell du wirklich alterst. SIRT1 reguliert deine Zell-Reparatur, FOXO3 ist eines der stärksten Langlebigkeits-Gene weltweit, TP53 schützt vor Zellschäden. Heißt: Bei aktiver FOXO3-Variante bringen Fasten und Kalorien-Reduktion bei dir mehr als bei anderen.',
+      short: 'FOXO3 gilt als eines der stärksten Langlebigkeits-Gene, bei Hundertjährigen ist die aktive Variante deutlich häufiger. Ob du sie trägst, und ob Fasten bei dir deshalb mehr bringt als bei anderen, steht in deiner DNA und nicht in deinem Lebensstil.',
       genes: [
         { name: 'SIRT1', explainer: 'Reguliert Reparatur-Prozesse deiner DNA und das Energie-Management deiner Zellen.', example: 'Bestimmt, wie stark Fasten und Kalorien-Reduktion bei dir wirken.' },
         { name: 'FOXO3', explainer: 'Eines der stärksten Langlebigkeits-Gene weltweit.', example: 'Bei Hundertjährigen ist die aktive Variante deutlich häufiger.' },
@@ -103,7 +103,7 @@
       topic: 'Stoffwechsel',
       icon: 'scales',
       title: 'Verstehen, wie der Körper Essen verarbeitet',
-      short: 'Du willst verstehen, warum dein Stoffwechsel anders reagiert als bei anderen. FTO steuert dein Sättigungsgefühl, TCF7L2 deine Insulin-Antwort, MCM6 deine Laktose-Verträglichkeit. Heißt: Deine Makro-Verteilung sollte zu deiner Genetik passen, nicht zur Standard-Ernährung.',
+      short: 'FTO steuert dein Sättigungsgefühl, TCF7L2 deine Insulin-Antwort auf Kohlenhydrate. Ob deine Makro-Verteilung zu dir passt oder still gegen dich arbeitet, hängt davon ab, welche Varianten du trägst.',
       genes: [
         { name: 'FTO', explainer: 'Beeinflusst Appetit und Fettspeicherung.', example: 'Erklärt, warum manche bei gleicher Kalorienmenge schneller zunehmen.' },
         { name: 'TCF7L2', explainer: 'Reguliert deine Insulin-Antwort.', example: 'Zeigt, wie dein Körper auf Kohlenhydrate reagiert.' },
@@ -116,7 +116,7 @@
       topic: 'Energie',
       icon: 'lightning',
       title: 'Energie zurückgewinnen',
-      short: 'Du willst wissen, woher deine Müdigkeit wirklich kommt. MTHFR steuert deine Methylierung, VDR deine Vitamin-D-Verwertung, IL6 zeigt stille Entzündung. Heißt: Hohe Vitamin-D-Blutwerte kommen bei dir vielleicht nicht in den Zellen an. Dann hilft die richtige Form, nicht mehr Dosis.',
+      short: 'Bei einer schwachen VDR-Variante kommt Vitamin D trotz guter Blutwerte kaum in deinen Zellen an. Ob deine Müdigkeit daher kommt, von deiner Methylierung über MTHFR oder von stiller Entzündung über IL6, trennt erst der Test.',
       genes: [
         { name: 'MTHFR', explainer: 'Reguliert deine Methylierung — zentral für Energie- und Nervenstoffwechsel.', example: 'Bestimmt, ob du normale Folsäure verwertest oder methylierte brauchst.' },
         { name: 'VDR', explainer: 'Vitamin-D-Rezeptor — wie gut Vitamin D in deinen Zellen ankommt.', example: 'Erklärt, warum hohe Blutwerte trotzdem Müdigkeit lassen können.' },
@@ -129,7 +129,7 @@
       topic: 'Schlaf',
       icon: 'moon',
       title: 'Endlich durchschlafen',
-      short: 'Du willst wissen, warum dein Schlaf bei dir anders läuft als bei anderen. PER3 verrät deinen Chronotyp, CYP1A2 dein Koffein-Tempo, ADORA2A wie sehr es dein Nervensystem aufdreht. Heißt: Eine späte Tasse Kaffee wirkt bei dir vielleicht bis 23 Uhr, bei anderen ist sie um 18 Uhr schon abgebaut.',
+      short: 'Mit der langsamen CYP1A2-Variante wirkt der Espresso um 14 Uhr noch um Mitternacht, mit der schnellen ist er um 18 Uhr abgebaut. Welche du trägst, und was PER3 über deinen Chronotyp sagt, liest der Test aus deiner Probe.',
       genes: [
         { name: 'PER3', explainer: 'Bestimmt deinen Chronotyp — biologisch früh oder spät aktiv.', example: 'Erklärt, warum manche morgens nicht produktiv sein können.' },
         { name: 'CYP1A2', explainer: 'Reguliert dein Koffein-Abbau-Tempo.', example: 'Schnelle Variante: Espresso nach dem Essen geht. Langsame: nach 14 Uhr wird Schlaf zum Glücksspiel.' },
@@ -141,7 +141,7 @@
       topic: 'Stress',
       icon: 'wind',
       title: 'Stress verstehen und Nervensystem unterstützen',
-      short: 'Du willst wissen, wo deine Belastungs-Grenze wirklich liegt. COMT entscheidet, wie schnell du Stress-Hormone abbaust. BDNF zeigt deine mentale Erholungs-Kapazität. Heißt: Schnelle Variante ist stressresistent, langsame ist tiefer Denker mit längerer Erholungs-Zeit. Beides hat seinen Rhythmus.',
+      short: 'COMT entscheidet, wie schnell du Stress-Hormone wieder abbaust. Die schnelle Variante bleibt unter Druck ruhig, die langsame denkt tiefer und braucht länger zur Erholung. Auf welcher Seite du stehst, zeigt der Test.',
       genes: [
         { name: 'COMT', explainer: 'Reguliert den Abbau von Stress-Hormonen wie Adrenalin und Dopamin.', example: 'Schnelle Variante: stressresistent. Langsame: tiefer Denker, längere Erholung.' },
         { name: 'BDNF', explainer: 'Wachstumsfaktor für deine Nervenzellen.', example: 'Bestimmt deine mentale Resilienz und Lern-Geschwindigkeit.' },
@@ -152,7 +152,7 @@
       topic: 'Konzentration',
       icon: 'lightbulb',
       title: 'Konzentration, Klarheit, Gedächtnis',
-      short: 'Du willst Klarheit und Konzentration auf Knopfdruck. BDNF ist dein Lern-Faktor, FADS1 wandelt pflanzliches Omega-3 in nutzbare Form um, APOE entscheidet über deine kognitive Langzeit-Reserve. Heißt: Bei schwacher FADS1-Variante brauchst du Fisch oder Algenöl. Leinöl bringt dir wenig.',
+      short: 'Mit einer schwachen FADS1-Variante wandelt dein Körper pflanzliches Omega-3 kaum in die nutzbare Form um, Leinöl bringt dann wenig und Algenöl viel. Ob das auf dich zutrifft, steht in deinem FADS1-Status.',
       genes: [
         { name: 'BDNF', explainer: 'Wachstumsfaktor für Nervenzellen — Basis für Lernen und Erinnerung.', example: 'Aktive Variante: schnelles Lernen, gute Konzentration unter Druck.' },
         { name: 'FADS1', explainer: 'Bestimmt, wie gut du pflanzliche Omega-3 in nutzbare Form umwandelst.', example: 'Schwache Variante: brauchst eher Fisch oder Algenöl statt Leinöl.' },
@@ -164,7 +164,7 @@
       topic: 'Training',
       icon: 'barbell',
       title: 'Smarter trainieren',
-      short: 'Du willst aus weniger Training mehr holen. ACTN3 bestimmt deinen Typ (Kraft oder Ausdauer), ACE deine VO₂max-Trainierbarkeit, COL5A1 dein Verletzungs-Risiko an Sehnen. Heißt: Ausdauer-Typ mit reinem Kraft-Programm bringt weniger als umgekehrt. Deine Trainings-Antwort ist genetisch.',
+      short: 'ACTN3 bestimmt, ob du eher Kraft- oder Ausdauer-Typ bist, ACE wie stark deine VO₂max überhaupt auf Training anspringt. Welches Programm bei dir mehr bringt als das andere, entscheidet sich an diesen Varianten.',
       genes: [
         { name: 'ACTN3', explainer: 'Bestimmt deine Muskelfaser-Verteilung.', example: 'RR-Variante: Kraft- und Sprint-Typ. XX: Ausdauer-Typ.' },
         { name: 'ACE', explainer: 'Beeinflusst, wie stark dein Herz-Kreislauf-System auf Training reagiert.', example: 'I-Variante: gute VO₂max-Trainierbarkeit. D: schnellere Kraft-Adaption.' },
@@ -177,7 +177,7 @@
       topic: 'Herz & Kreislauf',
       icon: 'heartbeat',
       title: 'Herz aktiv schützen',
-      short: 'Du willst wissen, wo dein Herz-Risiko tatsächlich liegt. APOE zeigt dein Cholesterin-Profil, AGT wie sensitiv du auf Salz reagierst, CDKN2B-AS1 am 9p21-Locus dein stärkstes Herz-Signal. Heißt: Bei sensitiver AGT-Variante senkt jedes Gramm Salz weniger deinen Blutdruck spürbar.',
+      short: 'Mit einer salzsensitiven AGT-Variante bewegt jedes Gramm Salz deinen Blutdruck spürbar, mit der anderen kaum. Dazu dein APOE-Cholesterin-Profil und das 9p21-Signal, dein stärkster genetischer Herz-Marker.',
       genes: [
         { name: 'APOE', explainer: 'Reguliert deinen Cholesterin-Stoffwechsel.', example: 'E4-Variante: höheres LDL, profitiert besonders von mediterraner Ernährung.' },
         { name: 'AGT', explainer: 'Beeinflusst, wie dein Blutdruck auf Salz reagiert.', example: 'Sensitive Variante: Salz-Reduktion senkt Blutdruck stärker.' },
@@ -190,7 +190,7 @@
       topic: 'Vitamine & Supplements',
       icon: 'pill',
       title: 'Passende Vitamine und Supplements',
-      short: 'Du willst, dass die Supplements bei dir tatsächlich ankommen. MTHFR entscheidet zwischen normaler und methylierter Folsäure, VDR deinen Vitamin-D-Bedarf, FUT2 deine B12-Aufnahme über die Darmwand. Heißt: Die richtige Form ist bei dir oft wichtiger als die Dosis.',
+      short: 'MTHFR entscheidet, ob normale Folsäure bei dir funktioniert oder ob du die methylierte Form brauchst, FUT2 wie gut B12 durch deine Darmwand kommt. Die Form zählt meist mehr als die Dosis, welche Form, ist individuell.',
       genes: [
         { name: 'MTHFR', explainer: 'Reguliert die Folsäure-Verwertung.', example: 'C677T-Variante: brauchst Methylfolat statt synthetische Folsäure.' },
         { name: 'VDR', explainer: 'Vitamin-D-Rezeptor — wie effizient Vitamin D in deinen Zellen wirkt.', example: 'Bestimmt deinen optimalen Vitamin-D-Zielwert.' },
@@ -203,7 +203,7 @@
       topic: 'Haut & Haar',
       icon: 'sparkle',
       title: 'Haut und Haar von innen',
-      short: 'Du willst wissen, was bei dir Hautalterung und Haarausfall tatsächlich treibt. SOD2 ist deine antioxidative Abwehr, ERCC2 deine UV-Reparatur, AR die DHT-Sensitivität deiner Follikel. Heißt: Bei schwacher ERCC2-Variante zählt konsequenter UV-Schutz mehr als jede teure Creme.',
+      short: 'ERCC2 repariert UV-Schäden in deiner Haut, AR bestimmt, wie empfindlich deine Follikel auf DHT reagieren. Ob bei dir konsequenter UV-Schutz mehr zählt als jede teure Creme, hängt an deiner ERCC2-Variante.',
       genes: [
         { name: 'SOD2', explainer: 'Hauptenzym der antioxidativen Abwehr in deinen Zellen.', example: 'Schwache Variante: höherer oxidativer Stress, profitiert von Antioxidantien.' },
         { name: 'ERCC2', explainer: 'Repariert UV-Schäden in deiner DNA.', example: 'Reduzierte Aktivität: schnellere Hautalterung durch Sonne.' },
@@ -405,9 +405,12 @@
       const pdpCtas = this.root.querySelectorAll('[data-quiz-pdp-cta], [data-result-pdp-cta]');
       pdpCtas.forEach((cta) => {
         cta.addEventListener('click', () => {
+          // Result-CTAs tragen seit 2026-07-22 einen eigenen Wert (result_bioage /
+          // result_card / result_sticky). Vorher fielen alle drei auf denselben String,
+          // dadurch war in GA4 nicht erkennbar, welcher CTA die PDP-Klicks trägt.
           const source = cta.hasAttribute('data-quiz-pdp-cta')
             ? cta.getAttribute('data-quiz-pdp-cta') || 'intro_secondary'
-            : 'result_secondary';
+            : cta.getAttribute('data-result-pdp-cta') || 'result_secondary';
           pushDataLayer({
             event: 'quiz_pdp_click',
             quiz_pdp_source: source,
@@ -776,6 +779,24 @@
         url.searchParams.set('top1', top[0]);
         pdpCta.setAttribute('href', url.pathname + url.search);
       });
+
+      // 5 — Sichtbarkeits-Tracking auf den Haupt-Ask (2026-07-22).
+      // Trennt "hat die Frage gesehen und abgelehnt" von "ist nie hingekommen". Ohne das
+      // Signal waren 12,3 % PDP-Klicks und 1 form_start auf 261 Abschlüsse nicht deutbar.
+      // Feuert einmal pro Result-Ansicht, sobald der Card-CTA vollständig im Viewport ist.
+      const askCta = result.querySelector('[data-result-pdp-cta="result_card"]');
+      if (askCta && !this._askSeenBound && typeof IntersectionObserver === 'function') {
+        this._askSeenBound = true;
+        const askObserver = new IntersectionObserver((entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          askObserver.disconnect();
+          pushDataLayer({
+            event: 'quiz_result_cta_seen',
+            quiz_top1: top[0] || '',
+          });
+        }, { threshold: 1 });
+        askObserver.observe(askCta);
+      }
     }
 
     bindResultCta() {
