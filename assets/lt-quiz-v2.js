@@ -281,7 +281,18 @@
   }
 
   function getResultSummary() {
-    return 'Diese drei Themen sind für dich besonders relevant. Hier siehst du, was deine Gene dabei verraten.';
+    return 'Diese drei Themen sind für dich am relevantesten. Was deine Gene dazu sagen, zeigt erst der Labortest.';
+  }
+
+  // Gate-Persistenz: wer die E-Mail schon abgegeben hat, sieht die Tiefe direkt wieder.
+  const UNLOCK_KEY = 'lt_quiz_result_unlocked';
+
+  function isUnlocked() {
+    try { return localStorage.getItem(UNLOCK_KEY) === '1'; } catch (e) { return false; }
+  }
+
+  function persistUnlock() {
+    try { localStorage.setItem(UNLOCK_KEY, '1'); } catch (e) {}
   }
 
   // ── Matrix-State: welche Kategorie wie aktiv ─────────────────────
@@ -747,6 +758,41 @@
         });
       }
 
+      // 2b — Gate: Thema 1 bleibt frei, Thema 2+3 werden in der Unlock-Card nur benannt.
+      // Der Titel steht bewusst im Klartext — sonst weiß niemand, was hinter dem Gate liegt.
+      const gateEl = result.querySelector('[data-result-gate]');
+      const lockedEl = result.querySelector('[data-result-locked]');
+      const lockedNames = top.slice(1).filter((needId) => NEEDS_DETAIL[needId]);
+      if (lockedEl) {
+        lockedEl.innerHTML = '';
+        lockedNames.forEach((needId) => {
+          const def = NEEDS_DETAIL[needId];
+          const li = document.createElement('li');
+          li.className = 'lt-quiz-unlock__row';
+          li.innerHTML =
+            (def.icon
+              ? `<span class="lt-quiz-unlock__row-icon" aria-hidden="true"><i class="ph-thin ph-${escapeHtml(def.icon)}"></i></span>`
+              : '') +
+            `<span class="lt-quiz-unlock__row-title">${escapeHtml(def.title)}</span>` +
+            `<span class="lt-quiz-unlock__row-lock" aria-hidden="true"><i class="ph-thin ph-lock-simple"></i></span>`;
+          lockedEl.appendChild(li);
+        });
+      }
+      const lockedCountEl = result.querySelector('[data-result-locked-count]');
+      if (lockedCountEl) {
+        lockedCountEl.textContent = lockedNames.length === 1
+          ? 'Noch 1 Thema'
+          : `Noch ${lockedNames.length} Themen`;
+      }
+      // Deterministisch aus dem gespeicherten Zustand — sonst bleibt ein einmal
+      // geöffnetes Gate offen, wenn im selben Tab ein zweiter Durchlauf gerendert wird.
+      const unlocked = isUnlocked();
+      const formEl = result.querySelector('[data-result-form]');
+      const successEl = result.querySelector('[data-result-success]');
+      if (gateEl) gateEl.classList.toggle('is-unlocked', unlocked);
+      if (formEl) formEl.hidden = unlocked;
+      if (successEl) successEl.hidden = !unlocked;
+
       // 3 — Scope-Pills: Union der Top-3 dnaCategories markieren
       const NEED_CATEGORIES_LOCAL = {
         sleep:       ['schlaf', 'stress', 'mental-health', 'supplements'],
@@ -763,14 +809,11 @@
       const activeCats = new Set();
       top.forEach((n) => (NEED_CATEGORIES_LOCAL[n] || []).forEach((c) => activeCats.add(c)));
 
-      let scopeMatched = 0;
+      // Nur die passenden Bereiche bleiben sichtbar (CSS blendet den Rest aus) —
+      // 16 Pills waren als Wand länger als der Nutzen, den sie transportieren.
       result.querySelectorAll('[data-scope-cat]').forEach((pill) => {
-        const rel = activeCats.has(pill.dataset.scopeCat);
-        pill.classList.toggle('is-relevant', rel);
-        if (rel) scopeMatched += 1;
+        pill.classList.toggle('is-relevant', activeCats.has(pill.dataset.scopeCat));
       });
-      const scopeCountEl = result.querySelector('[data-result-scope-count]');
-      if (scopeCountEl) scopeCountEl.textContent = scopeMatched + (scopeMatched === 1 ? ' Bereich' : ' Bereiche');
 
       // 4 — Alle PDP-CTAs (früh + Card + sticky) mit top1 anreichern
       result.querySelectorAll('[data-result-pdp-cta]').forEach((pdpCta) => {
@@ -817,6 +860,11 @@
       const email = emailEl ? emailEl.value.trim() : '';
 
       if (!email || !email.includes('@')) {
+        // novalidate: ohne eigene Meldung passiert beim Klick sichtbar nichts
+        if (errorEl) {
+          errorEl.textContent = 'Bitte trag eine gültige E-Mail-Adresse ein.';
+          errorEl.hidden = false;
+        }
         if (emailEl) emailEl.focus();
         return;
       }
@@ -852,6 +900,10 @@
         form.hidden = true;
         if (successEl) successEl.hidden = false;
 
+        const gateEl = this.root.querySelector('[data-result-gate]');
+        if (gateEl) gateEl.classList.add('is-unlocked');
+        persistUnlock();
+
         if (window.dataLayer && typeof window.dataLayer.push === 'function') {
           window.dataLayer.push({
             event: 'quiz_email_submitted',
@@ -862,7 +914,7 @@
       } catch (err) {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.textContent = originalLabel || 'Dein Ergebnis per E-Mail erhalten →';
+          submitBtn.textContent = originalLabel || 'Freischalten';
         }
         if (errorEl) {
           errorEl.textContent = 'Etwas ist schiefgelaufen. Bitte versuch es nochmal.';

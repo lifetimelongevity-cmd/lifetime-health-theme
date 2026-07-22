@@ -1226,18 +1226,57 @@ body.lt-quiz-fullscreen .header-spacer {
   .lt-quiz-result__bioage-scale-dot--bio { transition: none; }
 }
 
-.lt-quiz-result__bioage-disclaimer {
-  margin: 0;
-  font-size: 12.5px;
-  line-height: 1.5;
-  color: var(--color-text-muted);
-  max-width: 560px;
+/* ── Schätzung vs. Messung (2026-07-23) ───────────────────────────────────────
+   Ersetzt den grauen Disclaimer unter dem Bio-Alter. Als Gegenüberstellung ist der
+   Unterschied zwischen Quiz-Vorschau und Labortest auf einen Blick lesbar, statt als
+   Kleingedrucktes, das über der Kauf-Entscheidung überlesen wird. */
+.lt-quiz-result__compare {
+  margin: var(--space-2) 0 0;
+  width: 100%;
+  max-width: 480px;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-default);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  text-align: left;
 }
+
+.lt-quiz-result__compare-row {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: baseline;
+}
+
+.lt-quiz-result__compare-key {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.lt-quiz-result__compare-val {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.lt-quiz-result__compare-row--lab .lt-quiz-result__compare-key { color: var(--color-teal-dark); }
+.lt-quiz-result__compare-row--lab .lt-quiz-result__compare-val { color: var(--color-text-primary); }
 
 @media (max-width: 640px) {
   .lt-quiz-result__bioage { padding: var(--space-5) var(--space-4); }
   .lt-quiz-result__bioage-numbers { gap: var(--space-4); }
   .lt-quiz-result__bioage-side { min-width: 80px; }
+  .lt-quiz-result__compare-row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
 }
 
 /* ── Top-3-Themenblöcke (prägnant, Card-Info-Pattern) ────────── */
@@ -1265,6 +1304,14 @@ body.lt-quiz-fullscreen .header-spacer {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+/* Nur sichtbar, wenn das JS die personalisierten Themen nicht ersetzt hat */
+.lt-quiz-result__themes-fallback {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
 }
 
 .lt-quiz-result-theme {
@@ -1361,6 +1408,209 @@ body.lt-quiz-fullscreen .header-spacer {
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+/* ── Gate + E-Mail-Capture als ein Element (2026-07-23) ───────────────────────
+   Vorgänger war ein Blur-Gate über allen drei Themen plus separate Unlock-Card plus
+   Lock-Overlay: derselbe Satz stand dreimal auf dem Schirm und niemand konnte sehen,
+   was gesperrt ist. Jetzt ist Thema 1 frei lesbar (Beleg für die Qualität), Thema 2+3
+   stehen namentlich in der Karte, die auch die E-Mail annimmt. */
+.lt-quiz-result__themes-section:not(.is-unlocked) .lt-quiz-result-theme:nth-of-type(n + 2) {
+  display: none;
+}
+
+.lt-quiz-result__themes-section.is-unlocked .lt-quiz-unlock__gate {
+  display: none;
+}
+
+/* Nach dem Unlock bleibt nur eine Bestätigungszeile — die Karte darf dann schrumpfen */
+.lt-quiz-result__themes-section.is-unlocked .lt-quiz-unlock {
+  padding: var(--space-4) var(--space-5);
+}
+
+.lt-quiz-unlock {
+  border: 1px solid color-mix(in srgb, var(--color-teal) 42%, var(--color-border-default));
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--color-teal) 6%, var(--color-surface-primary));
+  padding: var(--space-5) var(--space-6);
+}
+
+.lt-quiz-unlock__gate {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.lt-quiz-unlock__kicker {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-teal-dark);
+}
+
+.lt-quiz-unlock__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lt-quiz-unlock__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-primary);
+}
+
+.lt-quiz-unlock__row-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-secondary);
+  color: var(--color-teal-dark);
+  font-size: 20px;
+}
+
+.lt-quiz-unlock__row-icon i { display: block; line-height: 1; }
+
+.lt-quiz-unlock__row-title {
+  flex: 1;
+  min-width: 0;
+  font-family: var(--font-heading);
+  font-size: 16px;
+  line-height: 1.3;
+  color: var(--color-text-primary);
+}
+
+.lt-quiz-unlock__row-lock {
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--color-text-muted);
+}
+
+.lt-quiz-unlock__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.lt-quiz-unlock__form[hidden] { display: none; }
+
+/* Label bleibt für Screenreader, kostet aber keine Zeile in der Karte */
+.lt-quiz-unlock__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.lt-quiz-unlock__field {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.lt-quiz-unlock__input {
+  flex: 1;
+  min-width: 0;
+  min-height: 48px;
+  padding: 12px var(--space-5);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-primary);
+  color: var(--color-text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  outline: none;
+  transition: border-color 180ms ease;
+}
+
+.lt-quiz-unlock__input::placeholder { color: var(--color-text-muted); }
+.lt-quiz-unlock__input:focus { border-color: var(--color-teal); }
+
+.lt-quiz-unlock__submit {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px var(--space-6);
+  border: 1px solid var(--color-teal);
+  border-radius: var(--radius-full);
+  background: var(--color-teal);
+  color: var(--color-white);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.lt-quiz-unlock__submit:hover {
+  background: var(--color-teal-dark);
+  border-color: var(--color-teal-dark);
+}
+
+.lt-quiz-unlock__submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.lt-quiz-unlock__note {
+  margin: var(--space-1) 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+.lt-quiz-unlock__consent {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-text-muted);
+}
+
+.lt-quiz-unlock__error {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-promo);
+}
+
+.lt-quiz-unlock__error[hidden] { display: none; }
+
+.lt-quiz-unlock__success-line {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--color-teal-dark);
+  font-weight: 500;
+}
+
+.lt-quiz-unlock__success[hidden] { display: none; }
+
+@media (max-width: 640px) {
+  .lt-quiz-unlock { padding: var(--space-5) var(--space-4); }
+  .lt-quiz-unlock__field { flex-direction: column; }
+  .lt-quiz-unlock__submit { width: 100%; }
 }
 
 
@@ -1560,93 +1810,27 @@ body.lt-quiz-fullscreen .header-spacer {
   transform: translateY(-1px);
 }
 
-/* Form (inline, kein Modal) */
-.lt-quiz-result__form {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  margin-top: var(--space-3);
-  max-width: 480px;
-}
-
-.lt-quiz-result__form-field {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.lt-quiz-result__form-label {
-  font-size: 13px;
-  letter-spacing: 0.02em;
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.lt-quiz-result__form-input {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
-  color: var(--color-text-on-dark);
-  font-size: 16px;
-  font-family: var(--font-body);
-  outline: none;
-}
-
-.lt-quiz-result__form-input::placeholder {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.lt-quiz-result__form-input:focus {
-  border-color: var(--color-teal);
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.lt-quiz-result__form-consent-note {
-  margin: 0;
-  font-size: 12px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.55);
-  max-width: 480px;
-}
-
-.lt-quiz-result__form-error {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.5;
-  color: #F2A4A4;
-  max-width: 480px;
-}
+/* 2026-07-23: .lt-quiz-result__form* und .lt-quiz-result__success* entfernt.
+   Der E-Mail-Block saß früher in der dunklen Kauf-Card und brauchte deshalb
+   Dark-Styles. Er steckt jetzt in der hellen Unlock-Card (.lt-quiz-unlock__*). */
 
 .lt-quiz-result__cta-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
+/* Scope-Pills in der Kauf-Card: nur die zu den Top-3 passenden Bereiche.
+   JS setzt .is-relevant; alles andere bleibt ausgeblendet, statt als 16er-Wand
+   zu stehen. Regel gilt nur in der dunklen Card, die helle Pill-Liste im
+   Ärzte-Quiz (lt-doctor-quiz) bleibt unberührt. */
+.lt-quiz-result__cta-card .lt-quiz-result__pill { display: none; }
 
-.lt-quiz-result__success {
-  background: rgba(101, 192, 182, 0.16);
-  border: 1px solid var(--color-teal);
-  border-radius: var(--radius-md);
-  padding: var(--space-5) var(--space-5);
-  margin-top: var(--space-3);
-  color: var(--color-text-on-dark);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  max-width: 480px;
-}
-
-/* hidden-Attribute überschreibt display:flex — sonst sieht der User
-   den Success-Block schon vor dem Submit */
-.lt-quiz-result__success[hidden] {
-  display: none;
-}
-
-.lt-quiz-result__success-line {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.92);
+.lt-quiz-result__cta-card .lt-quiz-result__pill.is-relevant {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.10);
+  border-color: rgba(255, 255, 255, 0.20);
+  color: rgba(255, 255, 255, 0.86);
+  font-weight: 500;
 }
 
 .lt-quiz-result__cta-secondary {
@@ -1700,35 +1884,7 @@ body.lt-quiz-fullscreen .header-spacer {
   color: rgba(255, 255, 255, 0.72);
 }
 
-/* Form-Submit als Sekundär-Button (Outline auf dunkler Card) */
-.lt-quiz-result__form-submit {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 44px;
-  padding: 10px var(--space-5);
-  border-radius: var(--radius-full);
-  background: transparent;
-  color: var(--color-text-on-dark);
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-  align-self: flex-start;
-  transition: background 180ms ease, border-color 180ms ease, color 180ms ease;
-}
-
-.lt-quiz-result__form-submit:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.6);
-}
-
-.lt-quiz-result__form-submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
+/* 2026-07-23: .lt-quiz-result__form-submit entfernt (siehe .lt-quiz-unlock__submit). */
 
 
 /* ── Result Mobile ─────────────────────────────────────────────── */
@@ -1736,11 +1892,8 @@ body.lt-quiz-fullscreen .header-spacer {
 @media (max-width: 880px) {
   .lt-quiz-result {
     gap: var(--space-6);
-    /* 2026-07-22: Bottom-Padding 48 -> 80 px. Seit die Scope-Section hinter dem Ask
-       steht, endet die Seite auf einer Textzeile statt auf der dunklen Card. Am
-       Seitenende schloss der Sticky-CTA damit bündig an die letzte Zeile an (0 px),
-       jetzt bleiben 32 px Luft. Mid-Scroll überlagert der Sticky weiterhin, das ist
-       gewollt. */
+    /* Bottom-Padding hält den Sticky-CTA am Seitenende von der dunklen Kauf-Card weg.
+       Mid-Scroll überlagert der Sticky weiterhin, das ist gewollt. */
     padding: 0 0 var(--space-9);
   }
   .lt-quiz-result > section:first-of-type {
@@ -1760,10 +1913,11 @@ body.lt-quiz-fullscreen .header-spacer {
      das 92 % der Quiz-Starts liefert und den Result-Schritt nur mit 10 % konvertiert.
      Das Bild bleibt als Abbinder unter dem E-Mail-Block stehen. */
   .lt-quiz-result__cta-media { order: 1; }
-  .lt-quiz-result__cta-media-stack { max-width: 260px; }
+  /* Abbinder unter dem Kauf-CTA: 260 -> 200 px. Das Bild steht hinter dem Button und
+     trägt dort keine Entscheidung mehr, kostete aber 260 px Scroll am Seitenende. */
+  .lt-quiz-result__cta-media-stack { max-width: 200px; }
   .lt-quiz-result__cta-text { font-size: 19px; }
   .lt-quiz-result__cta-primary { align-self: stretch; }
-  .lt-quiz-result__form-submit { align-self: stretch; }
   .lt-quiz-result__cta-divider { margin-top: var(--space-4); }
 }
 

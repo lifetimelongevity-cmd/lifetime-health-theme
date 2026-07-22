@@ -1,4 +1,20 @@
+---
+status: superseded
+last_review: 2026-07-23
+canonical_for: nichts (Vor-Implementierungs-Stand)
+---
+
 # Spec: AGE & DNA Quiz
+
+> **Überholt.** Das ist die Spec *vor* dem Bau, sie beschreibt nicht den Live-Stand.
+> Abweichungen u. a.: 8 Fragen statt 7, keine Detail-Akkordeons, `lt-quiz-result-card.liquid`
+> und `lt-quiz-result-detail.liquid` existieren nicht, Result-Header-Copy und CTA-Texte sind andere.
+> Die Result-Page wurde am 2026-07-23 zusätzlich umgebaut (Vorschau-Framing, Gate mit sichtbaren
+> gesperrten Themen, aufgelöste Scope-Section).
+>
+> Kanonisch sind Code und Live-Seite: `sections/lt-pdp-quiz-v2.liquid`,
+> `snippets/lt-quiz-result.liquid`, `assets/lt-quiz-v2.js` und
+> `https://www.lifetime-health.de/pages/quiz-age`.
 
 Implementierungs-Spec für Claude Code. Design-Token, Farben, Typografie aus `_examples/` und `.cursor/rules/`. Keine Design-Entscheidungen in dieser Datei.
 
