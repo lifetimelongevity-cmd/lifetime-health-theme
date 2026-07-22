@@ -1,6 +1,10 @@
 {%- comment -%}
   LIFETIME — Quiz v2 Result-Page
   (Hero-Bild entfernt — Data-as-Hero; Hero-Params werden nicht mehr genutzt)
+  2026-07-22 — Gated Reveal: Hook (Bio-Alter) frei sichtbar, Tiefe (3 Themen) hinter E-Mail-Unlock.
+  Grund: die Seite verschenkte Ergebnis + Themen + Scope komplett gratis -> Capture ~1 %.
+  Jetzt gibt die E-Mail die Detail-Auswertung frei. Unlock rein additiv per Snippet-Script;
+  lt-quiz-v2.js unveraendert (alle data-*-Hooks erhalten).
 {%- endcomment -%}
 
 {%- assign _cta_image = cta_image | default: 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-8585364.png?v=1768563330' -%}
@@ -8,15 +12,126 @@
 
 <div class="lt-quiz-result" data-quiz-result>
 
-  {%- comment -%} Data-as-Hero: kein Stockfoto mehr — Headline + Bio-Alter-Reveal tragen den Hero {%- endcomment -%}
-  {%- comment -%} 1 — Hook: die drei Topics ALS Headline ──────────── {%- endcomment -%}
+  {%- comment -%} Gated-Reveal Styles (2026-07-22) — inline, damit der Umbau EIN reversibles File ist {%- endcomment -%}
+  <style>
+/* ═══ Gated Reveal — Tiefe hinter E-Mail-Unlock (2026-07-22) ══════════════════
+   Hook (Bio-Alter) bleibt frei; die 3 personalisierten Themen werden bis zum
+   E-Mail-Submit geblurrt. Inhalt bleibt im DOM (crawlbar). Unlock rein additiv
+   über JS-Klasse .is-unlocked auf [data-result-gate] — keine Änderung an lt-quiz-v2.js. */
+
+/* Unlock-Card (dunkel — spiegelt die Ask-Card, damit die vorhandenen Form-Styles greifen) */
+.lt-quiz-result__unlock {
+  background: var(--color-surface-dark);
+  color: var(--color-text-on-dark);
+  border: 1px solid var(--color-teal);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6) var(--space-7);
+  margin-top: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.lt-quiz-result__unlock-kicker {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-teal);
+  font-weight: 600;
+}
+.lt-quiz-result__unlock-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 22px;
+  line-height: 1.3;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+.lt-quiz-result__unlock-sub {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 560px;
+}
+.lt-quiz-result__form { display: flex; flex-direction: column; gap: var(--space-3); }
+.lt-quiz-result__form[hidden] { display: none; }
+
+/* Gate um die Tiefe (Themen) */
+.lt-quiz-result__gate { position: relative; margin-top: var(--space-5); }
+.lt-quiz-result__gate-inner {
+  transition: filter 450ms ease, opacity 450ms ease, max-height 600ms ease;
+}
+.lt-quiz-result__gate:not(.is-unlocked) .lt-quiz-result__gate-inner {
+  filter: blur(7px);
+  opacity: 0.5;
+  max-height: 300px;
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  -webkit-mask-image: linear-gradient(#000 26%, transparent 92%);
+          mask-image: linear-gradient(#000 26%, transparent 92%);
+}
+.lt-quiz-result__gate-lock {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-5);
+}
+.lt-quiz-result__gate.is-unlocked .lt-quiz-result__gate-lock { display: none; }
+.lt-quiz-result__gate-lock-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+  max-width: 360px;
+  padding: var(--space-5) var(--space-6);
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.12);
+}
+.lt-quiz-result__gate-lock-icon { font-size: 28px; line-height: 1; color: var(--color-teal); }
+.lt-quiz-result__gate-lock-title {
+  margin: 0; font-family: var(--font-heading); font-weight: 400; font-size: 18px;
+  color: var(--color-text-primary);
+}
+.lt-quiz-result__gate-lock-sub {
+  margin: 0; font-size: 13px; line-height: 1.5; color: var(--color-text-secondary);
+}
+.lt-quiz-result__gate-lock-cta {
+  margin-top: var(--space-2);
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 44px; padding: 10px var(--space-6);
+  border: 0; border-radius: var(--radius-full);
+  background: var(--color-teal); color: #fff;
+  font-family: var(--font-body); font-size: 14px; font-weight: 600; letter-spacing: 0.01em;
+  cursor: pointer; transition: filter 160ms ease;
+}
+.lt-quiz-result__gate-lock-cta:hover { filter: brightness(1.06); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lt-quiz-result__gate-inner { transition: none; }
+}
+@media (max-width: 880px) {
+  .lt-quiz-result__unlock { padding: var(--space-6) var(--space-5); }
+  .lt-quiz-result__unlock-title { font-size: 19px; }
+}
+  </style>
+
+
+  {%- comment -%} 1 — Hook: die drei Topics ALS Headline (frei sichtbar) {%- endcomment -%}
   <section class="lt-quiz-result__header">
     <p class="lt-quiz-result__kicker">Dein Ergebnis</p>
     <h2 class="lt-quiz-result__h1" data-result-h1>Dein persönliches Ergebnis.</h2>
     <p class="lt-quiz-result__sub" data-result-sub></p>
   </section>
 
-  {%- comment -%} 1b — Bio-Age-Schätzung (Pass | Biologisch ▲/▼) ────── {%- endcomment -%}
+  {%- comment -%} 1b — Bio-Age-Schätzung (Pass | Biologisch) — der Haken, bleibt frei {%- endcomment -%}
   <section class="lt-quiz-result__bioage" data-result-bioage>
     <p class="lt-quiz-result__bioage-label">Dein geschätztes biologisches Alter</p>
     <div class="lt-quiz-result__bioage-numbers">
@@ -30,7 +145,7 @@
       </div>
     </div>
 
-    {%- comment -%} Ruhige Delta-Skala: Pass = Mitte (50%), Bio-Marker gleitet per JS auf Zielposition, Lücke getönt {%- endcomment -%}
+    {%- comment -%} Ruhige Delta-Skala: Pass = Mitte (50%), Bio-Marker gleitet per JS auf Zielposition {%- endcomment -%}
     <div class="lt-quiz-result__bioage-scale" aria-hidden="true">
       <span class="lt-quiz-result__bioage-scale-fill" data-bioage-scale-fill></span>
       <span class="lt-quiz-result__bioage-scale-dot lt-quiz-result__bioage-scale-dot--pass"></span>
@@ -42,13 +157,7 @@
       Schätzung aus deinem Lebensstil. Der echte Test misst dein epigenetisches Alter über 10 CpG-Methylierungs-Marker.
     </p>
 
-    {%- comment -%}
-      P2 — Kauf-CTA direkt in die Bio-Alter-Karte integriert (dark teal).
-      2026-07-22: Preis hier entfernt. Dieser CTA sitzt am emotionalen Peak direkt nach dem
-      Schätzwert, der Ask war aber identisch mit den beiden CTAs weiter unten (3x "· 349 €").
-      Er setzt jetzt den Gedanken des Disclaimers fort statt den Preis vorwegzunehmen;
-      Preis steht unverändert am Haupt-CTA und am Sticky-Button.
-    {%- endcomment -%}
+    {%- comment -%} P2 — Kauf-CTA am emotionalen Peak (Preis bewusst raus; steht am Haupt-CTA + Sticky) {%- endcomment -%}
     <a
       class="lt-quiz-result__cta-primary lt-quiz-result__bioage-cta"
       href="/products/lifetime-age-dna?utm_source=quiz&amp;utm_medium=result-page&amp;utm_campaign=cta-early"
@@ -58,21 +167,68 @@
     </a>
   </section>
 
-  {%- comment -%} 2 — Depth: die drei Themen ausgepackt ───────────── {%- endcomment -%}
+  {%- comment -%} 2 — Depth: die drei Themen — hinter E-Mail-Unlock (2026-07-22) {%- endcomment -%}
   <section class="lt-quiz-result__themes-section">
     <p class="lt-quiz-result__themes-lead">Was deine Gene dazu verraten.</p>
     <h3 class="lt-quiz-result__h2">Deine drei wichtigsten Themen im Detail.</h3>
-    <div class="lt-quiz-result__themes" data-result-themes>
-      {%- comment -%}
-        Statischer, crawlbarer Fallback — JS (renderResult) ersetzt ihn beim Result-Render via
-        themesEl.innerHTML = '' durch die 3 personalisierten Themen-Blöcke. Verhindert, dass
-        Crawler hier eine leere Überschrift ohne Inhalt sehen (Mobile-LP-/QS-Diagnose 2026-06-09, B).
-      {%- endcomment -%}
-      <p class="lt-quiz-result__themes-fallback">Dein AGE &amp; DNA-Test analysiert deine drei wichtigsten Themen im Detail, von Schlaf, Energie und Stoffwechsel bis Herzgesundheit, und zeigt, welche genetischen Marker dahinterstehen und was sie konkret für dich bedeuten.</p>
+
+    {%- comment -%} Unlock-Card (dunkel -> nutzt die vorhandenen Form-Styles). Aus dem Ask hochgezogen:
+       die E-Mail schaltet jetzt die Tiefe frei, statt nur "Ergebnis zum Behalten" zu sein. {%- endcomment -%}
+    <div class="lt-quiz-result__unlock" data-result-unlock>
+      <p class="lt-quiz-result__unlock-kicker">Deine vollständige Auswertung ist fertig</p>
+      <p class="lt-quiz-result__unlock-title">Sieh, was hinter deinen 3 Themen steckt.</p>
+      <p class="lt-quiz-result__unlock-sub">
+        Deine drei wichtigsten Themen im Detail — mit den Gen-Markern dahinter und was sie konkret für dich bedeuten. Trag deine E-Mail ein, wir schalten die Auswertung frei und schicken dir den Longevity-Guide dazu, plus 10&nbsp;% auf deinen Test.
+      </p>
+      <form class="lt-quiz-result__form" data-result-form novalidate>
+        <label class="lt-quiz-result__form-field">
+          <span class="lt-quiz-result__form-label">E-Mail-Adresse</span>
+          <input
+            type="email"
+            required
+            placeholder="deine@email.de"
+            class="lt-quiz-result__form-input"
+            data-result-email
+          >
+        </label>
+        <button type="submit" class="lt-quiz-result__form-submit">
+          Auswertung freischalten →
+        </button>
+        <p class="lt-quiz-result__form-error" data-result-error hidden role="alert"></p>
+        <p class="lt-quiz-result__form-consent-note">
+          Mit dem Absenden bestätigst du, den Guide und gelegentliche LIFETIME-Updates per E-Mail erhalten zu wollen. Abmeldung jederzeit möglich.
+        </p>
+      </form>
+
+      <div class="lt-quiz-result__success" hidden data-result-success>
+        <p class="lt-quiz-result__success-line">✓ Freigeschaltet! Deine Detail-Auswertung steht direkt darunter — Zusammenfassung, Longevity-Guide und dein 10&nbsp;%-Code kommen zusätzlich per E-Mail.</p>
+      </div>
+    </div>
+
+    {%- comment -%} Gated Tiefe: JS füllt [data-result-themes]; bis zum Unlock geblurrt.
+       Inhalt (inkl. crawlbarer Fallback) bleibt im DOM -> SEO/QS unberührt. {%- endcomment -%}
+    <div class="lt-quiz-result__gate" data-result-gate>
+      <div class="lt-quiz-result__gate-inner">
+        <div class="lt-quiz-result__themes" data-result-themes>
+          {%- comment -%}
+            Statischer, crawlbarer Fallback — JS (renderResult) ersetzt ihn beim Result-Render via
+            themesEl.innerHTML = '' durch die 3 personalisierten Themen-Blöcke.
+          {%- endcomment -%}
+          <p class="lt-quiz-result__themes-fallback">Dein AGE &amp; DNA-Test analysiert deine drei wichtigsten Themen im Detail, von Schlaf, Energie und Stoffwechsel bis Herzgesundheit, und zeigt, welche genetischen Marker dahinterstehen und was sie konkret für dich bedeuten.</p>
+        </div>
+      </div>
+      <div class="lt-quiz-result__gate-lock" data-result-gate-lock>
+        <div class="lt-quiz-result__gate-lock-card">
+          <span class="lt-quiz-result__gate-lock-icon" aria-hidden="true"><i class="ph-thin ph-lock-simple"></i></span>
+          <p class="lt-quiz-result__gate-lock-title">Deine Detail-Auswertung ist gesperrt</p>
+          <p class="lt-quiz-result__gate-lock-sub">Trag oben deine E-Mail ein — dann schalten wir deine 3 Themen im Detail frei.</p>
+          <button type="button" class="lt-quiz-result__gate-lock-cta" data-result-gate-cta>Jetzt freischalten</button>
+        </div>
+      </div>
     </div>
   </section>
 
-  {%- comment -%} 3 — Der Ask (dunkle Card: Kauf-CTA, darunter Ergebnis per E-Mail) ────── {%- endcomment -%}
+  {%- comment -%} 3 — Der Ask (dunkle Card: Kauf-CTA). E-Mail-Block ist jetzt oben im Unlock. {%- endcomment -%}
   <section class="lt-quiz-result__cta-section">
     <div class="lt-quiz-result__cta-card">
       <div class="lt-quiz-result__cta-media" aria-hidden="true">
@@ -84,7 +240,7 @@
         </div>
       </div>
       <div class="lt-quiz-result__cta-content">
-      {%- comment -%} Primary: PDP-Klick als Haupt-CTA ───────────────── {%- endcomment -%}
+      {%- comment -%} Primary: PDP-Klick als Haupt-CTA {%- endcomment -%}
       <p class="lt-quiz-result__cta-kicker">Dein nächster Schritt</p>
       <h3 class="lt-quiz-result__cta-text">
         Den AGE&amp;DNA-Test bestellen.
@@ -99,51 +255,11 @@
       >
         Test bestellen · 349&nbsp;€
       </a>
-
-      {%- comment -%}
-        Secondary: Ergebnis + Guide per E-Mail.
-        2026-07-22, aus dem <details> geholt und neu gerahmt. Grund: Capture-Rate lag bei
-        rund 1 % der Quiz-Abschlüsse (2 Captures gegen 253 Abschlüsse, 30 Tage bis 21.07.),
-        während nur 12,3 % zur PDP klickten. 87 % verließen die Seite ohne jeden Kontaktpunkt.
-        Die Rahmung "Noch nicht bereit für den ganzen Test?" machte den zweiten Pfad zum
-        Trostpreis; jetzt führt er mit dem, was die Person gerade verdient hat, ihrem Ergebnis.
-        Ersetzt die P3-Demotion, die den PDP-Klick nicht gehoben, den Lead aber gekostet hat.
-      {%- endcomment -%}
-      <div class="lt-quiz-result__cta-divider">
-        <span class="lt-quiz-result__cta-divider-label">Oder</span>
-      </div>
-      <p class="lt-quiz-result__cta-kicker lt-quiz-result__cta-kicker--small">Dein Ergebnis zum Behalten</p>
-      <p class="lt-quiz-result__cta-sub lt-quiz-result__cta-sub--small">
-        Wir schicken dir deine Auswertung als Zusammenfassung, dazu den Longevity-Guide und 10&nbsp;% auf deinen Test.
-      </p>
-      <form class="lt-quiz-result__form" data-result-form novalidate>
-        <label class="lt-quiz-result__form-field">
-          <span class="lt-quiz-result__form-label">E-Mail-Adresse</span>
-          <input
-            type="email"
-            required
-            placeholder="deine@email.de"
-            class="lt-quiz-result__form-input"
-            data-result-email
-          >
-        </label>
-        <button type="submit" class="lt-quiz-result__form-submit">
-          Ergebnis per E-Mail sichern
-        </button>
-        <p class="lt-quiz-result__form-error" data-result-error hidden role="alert"></p>
-        <p class="lt-quiz-result__form-consent-note">
-          Mit dem Absenden bestätigst du, den Guide und gelegentliche LIFETIME-Updates per E-Mail erhalten zu wollen. Abmeldung jederzeit möglich.
-        </p>
-      </form>
-
-      <div class="lt-quiz-result__success" hidden data-result-success>
-        <p class="lt-quiz-result__success-line">✓ Danke! Deine Zusammenfassung, der Guide und dein 10 %-Code kommen gleich per E-Mail.</p>
-      </div>
       </div>
     </div>
   </section>
 
-  {%- comment -%} 4 — Breadth: was der Test sonst zeigt (2026-07-22 hinter den Ask sortiert) ────── {%- endcomment -%}
+  {%- comment -%} 4 — Breadth: was der Test sonst zeigt (frei sichtbar, Teaser für die Tiefe) {%- endcomment -%}
   <section class="lt-quiz-result__scope">
     <h3 class="lt-quiz-result__h2">Plus alles, was dein Test sonst zeigt.</h3>
     <p class="lt-quiz-result__scope-sub">
@@ -171,5 +287,45 @@
     <span class="lt-quiz-result__sticky-cta-label">Zum AGE&amp;DNA-Test</span>
     <span class="lt-quiz-result__sticky-cta-price">349&nbsp;€</span>
   </a>
+
+  {%- comment -%} Gated-Reveal Unlock (2026-07-22): schaltet die Tiefe frei, sobald die E-Mail
+     abgeschickt ist ([data-result-success] wird sichtbar) + Persistenz für Wiederkehrer.
+     Rein additiv, kein Eingriff in lt-quiz-v2.js. {%- endcomment -%}
+  <script>
+    (function () {
+      var root = document.querySelector('.lt-quiz-result[data-quiz-result]');
+      if (!root) return;
+      var gate = root.querySelector('[data-result-gate]');
+      var success = root.querySelector('[data-result-success]');
+      var form = root.querySelector('[data-result-form]');
+      var email = root.querySelector('[data-result-email]');
+      var gateCta = root.querySelector('[data-result-gate-cta]');
+      var KEY = 'lt_quiz_result_unlocked';
+      function reveal() { if (gate) { gate.classList.add('is-unlocked'); } }
+      try {
+        if (localStorage.getItem(KEY) === '1') {
+          reveal();
+          if (form) { form.hidden = true; }
+          if (success) { success.hidden = false; }
+        }
+      } catch (e) {}
+      if (success && 'MutationObserver' in window) {
+        var mo = new MutationObserver(function () {
+          if (!success.hasAttribute('hidden')) {
+            reveal();
+            try { localStorage.setItem(KEY, '1'); } catch (e) {}
+            mo.disconnect();
+          }
+        });
+        mo.observe(success, { attributes: true, attributeFilter: ['hidden'] });
+      }
+      if (gateCta && email) {
+        gateCta.addEventListener('click', function () {
+          try { email.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) {}
+          setTimeout(function () { try { email.focus(); } catch (e) {} }, 350);
+        });
+      }
+    })();
+  </script>
 
 </div>
