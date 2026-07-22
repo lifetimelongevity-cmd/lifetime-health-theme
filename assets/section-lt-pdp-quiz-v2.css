@@ -1226,57 +1226,10 @@ body.lt-quiz-fullscreen .header-spacer {
   .lt-quiz-result__bioage-scale-dot--bio { transition: none; }
 }
 
-/* ── Schätzung vs. Messung (2026-07-23) ───────────────────────────────────────
-   Ersetzt den grauen Disclaimer unter dem Bio-Alter. Als Gegenüberstellung ist der
-   Unterschied zwischen Quiz-Vorschau und Labortest auf einen Blick lesbar, statt als
-   Kleingedrucktes, das über der Kauf-Entscheidung überlesen wird. */
-.lt-quiz-result__compare {
-  margin: var(--space-2) 0 0;
-  width: 100%;
-  max-width: 480px;
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--color-border-default);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  text-align: left;
-}
-
-.lt-quiz-result__compare-row {
-  display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
-  gap: var(--space-3);
-  align-items: baseline;
-}
-
-.lt-quiz-result__compare-key {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-}
-
-.lt-quiz-result__compare-val {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--color-text-secondary);
-}
-
-.lt-quiz-result__compare-row--lab .lt-quiz-result__compare-key { color: var(--color-teal-dark); }
-.lt-quiz-result__compare-row--lab .lt-quiz-result__compare-val { color: var(--color-text-primary); }
-
 @media (max-width: 640px) {
   .lt-quiz-result__bioage { padding: var(--space-5) var(--space-4); }
   .lt-quiz-result__bioage-numbers { gap: var(--space-4); }
   .lt-quiz-result__bioage-side { min-width: 80px; }
-  .lt-quiz-result__compare-row {
-    grid-template-columns: 1fr;
-    gap: 2px;
-  }
 }
 
 /* ── Top-3-Themenblöcke (prägnant, Card-Info-Pattern) ────────── */
@@ -1410,106 +1363,141 @@ body.lt-quiz-fullscreen .header-spacer {
   overflow: hidden;
 }
 
-/* ── Gate + E-Mail-Capture als ein Element (2026-07-23) ───────────────────────
-   Vorgänger war ein Blur-Gate über allen drei Themen plus separate Unlock-Card plus
-   Lock-Overlay: derselbe Satz stand dreimal auf dem Schirm und niemand konnte sehen,
-   was gesperrt ist. Jetzt ist Thema 1 frei lesbar (Beleg für die Qualität), Thema 2+3
-   stehen namentlich in der Karte, die auch die E-Mail annimmt. */
-.lt-quiz-result__themes-section:not(.is-unlocked) .lt-quiz-result-theme:nth-of-type(n + 2) {
-  display: none;
-}
+/* ══ Themen-Karte: alle drei Themen in EINER Karte (2026-07-23) ═════════════════
+   Vorher: drei einzelne Karten plus separate Unlock-Karte. Jetzt eine Karte, in der
+   Thema 1 nach rund einem Satz ausblendet und Thema 2 + 3 nur als Titelzeile mit
+   Schloss stehen.
 
-.lt-quiz-result__themes-section.is-unlocked .lt-quiz-unlock__gate {
-  display: none;
-}
+   Alles hier ist unter .lt-quiz-result__themes-card gescoped, weil
+   sections/lt-doctor-quiz.liquid dieselbe CSS-Datei und die
+   .lt-quiz-result-theme-Klassen nutzt und unveraendert bleiben muss.
 
-/* Nach dem Unlock bleibt nur eine Bestätigungszeile — die Karte darf dann schrumpfen */
-.lt-quiz-result__themes-section.is-unlocked .lt-quiz-unlock {
-  padding: var(--space-4) var(--space-5);
-}
+   Design-System (.cursor/rules/design-components.mdc):
+   Card Info -> weisse Flaeche, Border --color-border-default, Icon 48 px mit
+   --color-surface-benefit und --color-teal-dark. Benefit Surface fuer den
+   E-Mail-Block. Button-Spec "cta" -> dark bg, weisse Schrift. */
 
-.lt-quiz-unlock {
-  border: 1px solid color-mix(in srgb, var(--color-teal) 42%, var(--color-border-default));
+.lt-quiz-result__themes-card {
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--color-teal) 6%, var(--color-surface-primary));
-  padding: var(--space-5) var(--space-6);
-}
-
-.lt-quiz-unlock__gate {
+  padding: var(--space-6);
   display: flex;
   flex-direction: column;
+  gap: var(--space-5);
+}
+
+.lt-quiz-result__themes-kicker {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+/* Die Themen-Bloecke verlieren in dieser Karte ihre eigene Karten-Optik —
+   sonst steckten Karten in einer Karte. Trennung ueber Linie statt Rahmen. */
+.lt-quiz-result__themes-card .lt-quiz-result-theme {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  gap: var(--space-3);
+}
+
+/* Abstand nur ueber margin/padding, damit die Trennlinie mittig zwischen den
+   Bloecken sitzt statt am oberen Rand des naechsten zu kleben */
+.lt-quiz-result__themes-card .lt-quiz-result__themes { gap: 0; }
+
+.lt-quiz-result__themes-card .lt-quiz-result-theme + .lt-quiz-result-theme {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.lt-quiz-result__themes-card .lt-quiz-result-theme__header {
   gap: var(--space-4);
 }
 
-.lt-quiz-unlock__kicker {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+/* Groessen auf die Text-Tokens statt freier px-Werte (nur in dieser Karte,
+   lt-doctor-quiz behaelt seine Werte) */
+.lt-quiz-result__themes-card .lt-quiz-result-theme__title {
+  font-size: var(--text-section);
+}
+
+.lt-quiz-result__themes-card .lt-quiz-result-theme--featured .lt-quiz-result-theme__title {
+  font-size: var(--text-h3);
+}
+
+.lt-quiz-result__themes-card .lt-quiz-result-theme__lead {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
+/* Card-Info-Spec: 48 px Container, Benefit-Bg, teal-dark Icon */
+.lt-quiz-result__themes-card .lt-quiz-result-theme__icon {
+  width: 48px;
+  height: 48px;
+  background: var(--color-surface-benefit);
   color: var(--color-teal-dark);
+  font-size: 26px;
 }
 
-.lt-quiz-unlock__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-}
-
-.lt-quiz-unlock__row {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-primary);
-}
-
-.lt-quiz-unlock__row-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 34px;
-  height: 34px;
-  flex-shrink: 0;
-  border-radius: var(--radius-full);
-  background: var(--color-surface-secondary);
-  color: var(--color-teal-dark);
-  font-size: 20px;
-}
-
-.lt-quiz-unlock__row-icon i { display: block; line-height: 1; }
-
-.lt-quiz-unlock__row-title {
+.lt-quiz-result__themes-card .lt-quiz-result-theme__title {
   flex: 1;
   min-width: 0;
-  font-family: var(--font-heading);
-  font-size: 16px;
-  line-height: 1.3;
-  color: var(--color-text-primary);
 }
 
-.lt-quiz-unlock__row-lock {
+.lt-quiz-result-theme__lock {
+  display: none;
   flex-shrink: 0;
   font-size: 18px;
   line-height: 1;
   color: var(--color-text-muted);
 }
 
+.lt-quiz-result-theme__lock i { display: block; line-height: 1; }
+
+/* ── Gesperrter Zustand ──────────────────────────────────────────────────── */
+
+/* Thema 1: rund ein Satz, dann sanft ausgeblendet */
+.lt-quiz-result__themes-card:not(.is-unlocked) .lt-quiz-result-theme:first-of-type .lt-quiz-result-theme__lead {
+  max-height: 4.2em;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(#000 40%, transparent 100%);
+          mask-image: linear-gradient(#000 40%, transparent 100%);
+}
+
+/* Thema 2 + 3: nur die Titelzeile mit Schloss */
+.lt-quiz-result__themes-card:not(.is-unlocked) .lt-quiz-result-theme:nth-of-type(n + 2) .lt-quiz-result-theme__markers,
+.lt-quiz-result__themes-card:not(.is-unlocked) .lt-quiz-result-theme:nth-of-type(n + 2) .lt-quiz-result-theme__lead {
+  display: none;
+}
+
+.lt-quiz-result__themes-card:not(.is-unlocked) .lt-quiz-result-theme:nth-of-type(n + 2) .lt-quiz-result-theme__lock {
+  display: block;
+}
+
+/* ── E-Mail-Block: Benefit Surface laut Spec ─────────────────────────────── */
+.lt-quiz-unlock {
+  background: var(--color-surface-benefit);
+  border: 1px solid rgba(94, 171, 161, 0.18);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+
 .lt-quiz-unlock__form {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-3);
 }
 
 .lt-quiz-unlock__form[hidden] { display: none; }
 
-/* Label bleibt für Screenreader, kostet aber keine Zeile in der Karte */
+/* Label bleibt fuer Screenreader, kostet aber keine Zeile */
 .lt-quiz-unlock__label {
   position: absolute;
   width: 1px;
@@ -1531,43 +1519,40 @@ body.lt-quiz-fullscreen .header-spacer {
   flex: 1;
   min-width: 0;
   min-height: 48px;
-  padding: 12px var(--space-5);
+  padding: 14px var(--space-5);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-full);
   background: var(--color-surface-primary);
   color: var(--color-text-primary);
   font-family: var(--font-body);
-  font-size: 16px;
+  font-size: var(--text-body);
   outline: none;
   transition: border-color 180ms ease;
 }
 
 .lt-quiz-unlock__input::placeholder { color: var(--color-text-muted); }
-.lt-quiz-unlock__input:focus { border-color: var(--color-teal); }
+.lt-quiz-unlock__input:focus { border-color: var(--color-teal-dark); }
 
+/* Button-Spec "cta": dark bg, weisse Schrift, 48 px, 14px/32px, body-sm semibold */
 .lt-quiz-unlock__submit {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 48px;
-  padding: 12px var(--space-6);
-  border: 1px solid var(--color-teal);
+  padding: 14px var(--space-6);
+  border: 1px solid var(--color-button-primary-bg);
   border-radius: var(--radius-full);
-  background: var(--color-teal);
-  color: var(--color-white);
+  background: var(--color-button-primary-bg);
+  color: var(--color-button-primary-text);
   font-family: var(--font-body);
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
   cursor: pointer;
-  transition: background 180ms ease, border-color 180ms ease;
+  transition: opacity 180ms ease;
 }
 
-.lt-quiz-unlock__submit:hover {
-  background: var(--color-teal-dark);
-  border-color: var(--color-teal-dark);
-}
+.lt-quiz-unlock__submit:hover { opacity: 0.88; }
 
 .lt-quiz-unlock__submit:disabled {
   opacity: 0.6;
@@ -1575,23 +1560,16 @@ body.lt-quiz-fullscreen .header-spacer {
 }
 
 .lt-quiz-unlock__note {
-  margin: var(--space-1) 0 0;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--color-text-secondary);
-}
-
-.lt-quiz-unlock__consent {
   margin: 0;
-  font-size: 12px;
-  line-height: 1.5;
-  color: var(--color-text-muted);
+  font-size: var(--text-micro);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
 }
 
 .lt-quiz-unlock__error {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
   color: var(--color-promo);
 }
 
@@ -1599,22 +1577,25 @@ body.lt-quiz-fullscreen .header-spacer {
 
 .lt-quiz-unlock__success-line {
   margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
   color: var(--color-teal-dark);
-  font-weight: 500;
+  font-weight: var(--weight-medium);
 }
 
 .lt-quiz-unlock__success[hidden] { display: none; }
 
+/* Nach dem Freischalten bleibt nur eine Bestaetigungszeile — der Block darf schrumpfen */
+.lt-quiz-result__themes-card.is-unlocked .lt-quiz-unlock {
+  padding: var(--space-4) var(--space-5);
+}
+
 @media (max-width: 640px) {
-  .lt-quiz-unlock { padding: var(--space-5) var(--space-4); }
+  .lt-quiz-result__themes-card { padding: var(--space-5) var(--space-4); }
+  .lt-quiz-unlock { padding: var(--space-4); }
   .lt-quiz-unlock__field { flex-direction: column; }
   .lt-quiz-unlock__submit { width: 100%; }
 }
-
-
-
 
 /* ── Sektion 3: Scope-Pills (kompakte Pills statt Matrix-Grid) ── */
 .lt-quiz-result__scope {

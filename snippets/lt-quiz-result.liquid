@@ -1,20 +1,24 @@
 {%- comment -%}
   LIFETIME — Quiz v2 Result-Page
 
-  2026-07-23 — Straffung + Vorschau-Framing:
-    · Redundanz raus: Themen-Section hatte Kicker + H3, die die Header-Sub wiederholten.
-      Header trägt die Einordnung jetzt allein.
-    · Vorschau statt Ergebnis: Kicker + Vergleichszeilen in der Bio-Alter-Karte machen
-      strukturell klar, dass das Quiz schätzt und der Labortest misst. Ersetzt den
-      grauen Disclaimer, der die Aussage vorher im Kleingedruckten versteckt hat.
-    · Scope-Section aufgelöst: die passenden DNA-Bereiche stehen jetzt als Pills in der
-      Kauf-Card (nur die relevanten, nicht alle 16). Eine Section weniger.
-    · Gate + Capture verheiratet: eine helle Karte zeigt die 2 gesperrten Themen mit
-      Titel (man sieht, was man verpasst) und nimmt direkt daneben die E-Mail an.
-      Thema 1 ist frei sichtbar. Ersetzt Blur-Gate + separate Unlock-Card + Lock-Overlay.
-    · Styles aus dem Inline-<style> in assets/section-lt-pdp-quiz-v2.css verschoben.
+  2026-07-23 (2. Straffung) — Text weiter runter, Design-System-Konformitaet:
+    · Header ist nur noch der Kicker. H1 (die drei Topic-Namen) und Sub sind raus,
+      die Topic-Namen stehen ohnehin in der Themen-Karte.
+    · Vergleichszeilen "Diese Vorschau / Der Labortest" entfernt. Das Vorschau-Framing
+      traegt jetzt der Kicker plus das Kartenlabel "Geschaetztes biologisches Alter"
+      plus der CTA "Dein echtes Alter messen lassen".
+    · Die drei Themen liegen in EINER Karte statt in drei. Thema 1 zeigt rund einen
+      Satz und blendet dann aus, Thema 2 + 3 nur die Titelzeile mit Schloss.
+    · Farben/Groessen auf das Design-System gezogen: die frei erfundene Teal-Toenung
+      ist raus, der E-Mail-Block nutzt Benefit Surface (#E6F4F1, Border wie in
+      .cursor/rules/design-components.mdc "Benefit Surface"), der Submit-Button
+      folgt dem cta-Spec (dark bg, weisse Schrift), Icon-Container 48 px mit
+      Benefit-Bg und teal-dark Icon, Groessen ueber die Text-Tokens.
 
-  Datenhooks für assets/lt-quiz-v2.js: data-result-*, data-bioage-*, data-scope-cat.
+  Alles Neue ist unter .lt-quiz-result__themes-card gescoped, weil sections/lt-doctor-quiz
+  sich dieselbe CSS-Datei und die .lt-quiz-result-theme-Klassen teilt.
+
+  Datenhooks fuer assets/lt-quiz-v2.js: data-result-*, data-bioage-*, data-scope-cat.
 {%- endcomment -%}
 
 {%- assign _cta_image = cta_image | default: 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-8585364.png?v=1768563330' -%}
@@ -22,14 +26,12 @@
 
 <div class="lt-quiz-result" data-quiz-result>
 
-  {%- comment -%} 1 — Hook: die drei Topics ALS Headline, plus Einordnung als Vorschau {%- endcomment -%}
+  {%- comment -%} 1 — Einordnung als Vorschau, mehr braucht es vor der Karte nicht {%- endcomment -%}
   <section class="lt-quiz-result__header">
     <p class="lt-quiz-result__kicker">Deine Quiz-Vorschau</p>
-    <h2 class="lt-quiz-result__h1" data-result-h1>Dein persönliches Ergebnis.</h2>
-    <p class="lt-quiz-result__sub" data-result-sub></p>
   </section>
 
-  {%- comment -%} 2 — Bio-Alter (Pass | Biologisch) + Schätzung-vs-Messung als Struktur {%- endcomment -%}
+  {%- comment -%} 2 — Bio-Alter (Pass | Biologisch) als Hero {%- endcomment -%}
   <section class="lt-quiz-result__bioage" data-result-bioage>
     <p class="lt-quiz-result__bioage-label">Geschätztes biologisches Alter</p>
     <div class="lt-quiz-result__bioage-numbers">
@@ -52,21 +54,6 @@
 
     <p class="lt-quiz-result__bioage-delta" data-bioage-delta></p>
 
-    {%- comment -%}
-      Ersetzt den alten grauen Disclaimer. Als Gegenüberstellung liest sich der Unterschied
-      zwischen Quiz und Labor auf einen Blick, statt als Kleingedrucktes unter dem Ergebnis.
-    {%- endcomment -%}
-    <dl class="lt-quiz-result__compare">
-      <div class="lt-quiz-result__compare-row">
-        <dt class="lt-quiz-result__compare-key">Diese Vorschau</dt>
-        <dd class="lt-quiz-result__compare-val">geschätzt aus 8 Fragen zu deinem Lebensstil</dd>
-      </div>
-      <div class="lt-quiz-result__compare-row lt-quiz-result__compare-row--lab">
-        <dt class="lt-quiz-result__compare-key">Der Labortest</dt>
-        <dd class="lt-quiz-result__compare-val">gemessen an 10 CpG-Methylierungs-Markern aus deiner Speichelprobe</dd>
-      </div>
-    </dl>
-
     <a
       class="lt-quiz-result__cta-primary lt-quiz-result__bioage-cta"
       href="/products/lifetime-age-dna?utm_source=quiz&amp;utm_medium=result-page&amp;utm_campaign=cta-early"
@@ -77,44 +64,36 @@
   </section>
 
   {%- comment -%}
-    3 — Themen. Thema 1 frei sichtbar, Thema 2 + 3 hinter dem Gate.
-    JS rendert alle drei Karten in [data-result-themes]; CSS blendet ab Karte 2 aus,
-    solange die Section kein .is-unlocked trägt.
+    3 — Alle drei Themen in einer Karte. JS rendert die Bloecke in [data-result-themes];
+    CSS blendet Thema 1 nach rund einem Satz aus und zeigt von Thema 2 + 3 nur die
+    Titelzeile, solange die Karte kein .is-unlocked traegt.
   {%- endcomment -%}
-  <section class="lt-quiz-result__themes-section" data-result-gate>
+  <section class="lt-quiz-result__themes-card" data-result-gate>
+    <p class="lt-quiz-result__themes-kicker">Deine genetischen Themen</p>
+
     <div class="lt-quiz-result__themes" data-result-themes>
-      {%- comment -%}
-        Statischer, crawlbarer Fallback — JS (renderResult) ersetzt ihn beim Result-Render
-        durch die personalisierten Themen-Blöcke.
-      {%- endcomment -%}
+      {%- comment -%} Crawlbarer Fallback, den renderResult beim Rendern ersetzt {%- endcomment -%}
       <p class="lt-quiz-result__themes-fallback">Dein AGE &amp; DNA-Test analysiert deine drei wichtigsten Themen im Detail, von Schlaf, Energie und Stoffwechsel bis Herzgesundheit, und zeigt, welche genetischen Marker dahinterstehen und was sie konkret für dich bedeuten.</p>
     </div>
 
-    {%- comment -%} Gate und E-Mail-Capture in einem Element: gesperrte Themen sichtbar benannt {%- endcomment -%}
     <div class="lt-quiz-unlock" data-result-unlock>
-      <div class="lt-quiz-unlock__gate">
-        <p class="lt-quiz-unlock__kicker" data-result-locked-count>Noch 2 Themen</p>
-        <ul class="lt-quiz-unlock__list" data-result-locked></ul>
-
-        <form class="lt-quiz-unlock__form" data-result-form novalidate>
-          <label class="lt-quiz-unlock__label" for="lt-quiz-unlock-email">E-Mail-Adresse</label>
-          <div class="lt-quiz-unlock__field">
-            <input
-              id="lt-quiz-unlock-email"
-              type="email"
-              required
-              placeholder="deine@email.de"
-              autocomplete="email"
-              class="lt-quiz-unlock__input"
-              data-result-email
-            >
-            <button type="submit" class="lt-quiz-unlock__submit">Freischalten</button>
-          </div>
-          <p class="lt-quiz-unlock__error" data-result-error hidden role="alert"></p>
-          <p class="lt-quiz-unlock__note">Dazu bekommst du den Longevity-Guide und 10&nbsp;% auf deinen Test.</p>
-          <p class="lt-quiz-unlock__consent">Mit dem Absenden willigst du in den E-Mail-Versand ein. Abmeldung jederzeit.</p>
-        </form>
-      </div>
+      <form class="lt-quiz-unlock__form" data-result-form novalidate>
+        <label class="lt-quiz-unlock__label" for="lt-quiz-unlock-email">E-Mail-Adresse</label>
+        <div class="lt-quiz-unlock__field">
+          <input
+            id="lt-quiz-unlock-email"
+            type="email"
+            required
+            placeholder="deine@email.de"
+            autocomplete="email"
+            class="lt-quiz-unlock__input"
+            data-result-email
+          >
+          <button type="submit" class="lt-quiz-unlock__submit">Freischalten</button>
+        </div>
+        <p class="lt-quiz-unlock__error" data-result-error hidden role="alert"></p>
+        <p class="lt-quiz-unlock__note">Dazu bekommst du den Longevity-Guide und 10&nbsp;% auf deinen Test. Mit dem Absenden willigst du in den E-Mail-Versand ein, Abmeldung jederzeit.</p>
+      </form>
 
       <div class="lt-quiz-unlock__success" hidden data-result-success>
         <p class="lt-quiz-unlock__success-line">Freigeschaltet. Der Longevity-Guide und dein 10&nbsp;%-Code kommen per E-Mail.</p>
@@ -123,9 +102,8 @@
   </section>
 
   {%- comment -%}
-    4 — Der Ask. Trägt seit 2026-07-23 auch die Breite des Tests: die zu den Themen
-    passenden DNA-Bereiche stehen als Pills in der Card (JS markiert sie via .is-relevant,
-    CSS blendet die nicht passenden aus). Die frühere Scope-Section entfällt dadurch.
+    4 — Der Ask. Traegt auch die Breite des Tests: die zu den Themen passenden
+    DNA-Bereiche als Pills (JS markiert via .is-relevant, CSS blendet den Rest aus).
   {%- endcomment -%}
   <section class="lt-quiz-result__cta-section">
     <div class="lt-quiz-result__cta-card">

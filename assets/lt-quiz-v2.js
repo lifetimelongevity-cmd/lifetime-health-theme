@@ -251,13 +251,9 @@
     window.dispatchEvent(new CustomEvent('lifetime:quiz-completed', { detail: payload }));
   }
 
-  function getResultHeadline(topThree) {
-    const topics = topThree
-      .map((id) => (NEEDS_DETAIL[id] || {}).topic)
-      .filter(Boolean);
-    if (topics.length === 0) return 'Dein persönliches Ergebnis.';
-    return topics.map((t) => `${t}.`).join(' ');
-  }
+  // 2026-07-23: getResultHeadline/getResultSummary entfernt. Die Result-Page hat keine
+  // H1 und keine Sub mehr — die Topic-Namen stehen in der Themen-Karte, der Kicker
+  // ordnet das Ergebnis als Vorschau ein.
 
   // Bio-Age-Schätzung aus den Quiz-Antworten (kein zusätzlicher Aufwand für den User).
   // Slider 1-5: 1 = worst → +2, 5 = best → -2 (linear). Aktivität: aktiv -2, arm +2.
@@ -278,10 +274,6 @@
     const bioAge = Math.max(18, Math.min(90, Math.round(chronoAge + delta)));
     const direction = delta > 0 ? 'up' : delta < 0 ? 'down' : 'zero';
     return { chronoAge, bioAge, delta: Math.round(delta), direction };
-  }
-
-  function getResultSummary() {
-    return 'Diese drei Themen sind für dich am relevantesten. Was deine Gene dazu sagen, zeigt erst der Labortest.';
   }
 
   // Gate-Persistenz: wer die E-Mail schon abgegeben hat, sieht die Tiefe direkt wieder.
@@ -670,15 +662,7 @@
       const age = this.state.answers.age || 40;
       const gender = this.state.answers.gender;
 
-      // 0 — Hero-Bild entfernt: Data-as-Hero (Headline + Bio-Alter-Reveal tragen den Hero)
-
-      // 1 — H1 = die drei Topic-Namen + altersgestimmte 2-Satz-Sub
-      const h1El = result.querySelector('[data-result-h1]');
-      if (h1El) h1El.textContent = getResultHeadline(top);
-      const subEl = result.querySelector('[data-result-sub]');
-      if (subEl) subEl.textContent = getResultSummary();
-
-      // 1b — Bio-Age-Schätzung: Count-up + ruhige Delta-Skala (Signatur-Moment)
+      // 1 — Bio-Age-Schätzung: Count-up + ruhige Delta-Skala (Signatur-Moment)
       const bioAge = computeBioAge(this.state.answers);
       const passEl = result.querySelector('[data-bioage-pass]');
       const bioEl = result.querySelector('[data-bioage-num]');
@@ -729,7 +713,8 @@
         });
       }
 
-      // 2 — Top-3 als Themen-Blöcke MIT Gen-Markern; #1 hervorgehoben
+      // 2 — Alle drei Themen als Blöcke in EINER Karte. Das Schloss steckt in jedem
+      // Block; CSS zeigt es nur im gesperrten Zustand bei Thema 2 und 3.
       const themesEl = result.querySelector('[data-result-themes]');
       if (themesEl) {
         themesEl.innerHTML = '';
@@ -747,10 +732,8 @@
               (iconName
                 ? `<span class="lt-quiz-result-theme__icon" aria-hidden="true"><i class="ph-thin ph-${iconName}"></i></span>`
                 : '') +
-              `<div class="lt-quiz-result-theme__head-text">` +
-                `<span class="lt-quiz-result-theme__pos">${String(idx + 1).padStart(2, '0')} / 03</span>` +
-                `<h4 class="lt-quiz-result-theme__title">${escapeHtml(def.title)}</h4>` +
-              `</div>` +
+              `<h4 class="lt-quiz-result-theme__title">${escapeHtml(def.title)}</h4>` +
+              `<span class="lt-quiz-result-theme__lock" aria-hidden="true"><i class="ph-thin ph-lock-simple"></i></span>` +
             `</header>` +
             (markers ? `<div class="lt-quiz-result-theme__markers" aria-label="Relevante Gen-Marker">${markers}</div>` : '') +
             `<p class="lt-quiz-result-theme__lead">${escapeHtml(def.short)}</p>`;
@@ -758,35 +741,10 @@
         });
       }
 
-      // 2b — Gate: Thema 1 bleibt frei, Thema 2+3 werden in der Unlock-Card nur benannt.
-      // Der Titel steht bewusst im Klartext — sonst weiß niemand, was hinter dem Gate liegt.
-      const gateEl = result.querySelector('[data-result-gate]');
-      const lockedEl = result.querySelector('[data-result-locked]');
-      const lockedNames = top.slice(1).filter((needId) => NEEDS_DETAIL[needId]);
-      if (lockedEl) {
-        lockedEl.innerHTML = '';
-        lockedNames.forEach((needId) => {
-          const def = NEEDS_DETAIL[needId];
-          const li = document.createElement('li');
-          li.className = 'lt-quiz-unlock__row';
-          li.innerHTML =
-            (def.icon
-              ? `<span class="lt-quiz-unlock__row-icon" aria-hidden="true"><i class="ph-thin ph-${escapeHtml(def.icon)}"></i></span>`
-              : '') +
-            `<span class="lt-quiz-unlock__row-title">${escapeHtml(def.title)}</span>` +
-            `<span class="lt-quiz-unlock__row-lock" aria-hidden="true"><i class="ph-thin ph-lock-simple"></i></span>`;
-          lockedEl.appendChild(li);
-        });
-      }
-      const lockedCountEl = result.querySelector('[data-result-locked-count]');
-      if (lockedCountEl) {
-        lockedCountEl.textContent = lockedNames.length === 1
-          ? 'Noch 1 Thema'
-          : `Noch ${lockedNames.length} Themen`;
-      }
-      // Deterministisch aus dem gespeicherten Zustand — sonst bleibt ein einmal
+      // 2b — Gate-Zustand. Deterministisch aus dem gespeicherten Zustand — sonst bleibt ein einmal
       // geöffnetes Gate offen, wenn im selben Tab ein zweiter Durchlauf gerendert wird.
       const unlocked = isUnlocked();
+      const gateEl = result.querySelector('[data-result-gate]');
       const formEl = result.querySelector('[data-result-form]');
       const successEl = result.querySelector('[data-result-success]');
       if (gateEl) gateEl.classList.toggle('is-unlocked', unlocked);
