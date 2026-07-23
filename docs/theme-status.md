@@ -22,7 +22,7 @@ canonical_for: theme-massnahmen-tracker
    - `ss-video-slider` (20×, 5 Templates), `ss-flip-cards`, `ss-social-proof`, `ss-product-ingredients-2`, `ss-comparison-table-24`, `ss-flexible-tabs`, `ss-feature-1`, `ss-steps-5` — alle ohne `crs-heading-stack`.
 3. **Sauber (kein Refactor nötig):** Alle `crs-*`-Sections, `lt-pdp-process-steps`/`lt-pdp-report-preview`/`lt-pdp-ideal-candidate` (Test-PDP), `lt-science-*`-Sections, die meisten `lt-hp-*`-Sections.
 4. **Frontmatter-Konvention** (`status / last_review / canonical_for / supersedes`) auf allen lebenden Specs in `docs/` ausgerollt.
-5. **Workspace-Cleanup 2026-05-08** entfernte mehrere veraltete Files (PDP-Briefings, "Meine Routine"-Konzepte, Marketing-Skills) — siehe `_archive/2026-05-08_workspace-cleanup/` im Workspace-Root.
+5. **Workspace-Cleanup 2026-07-10** bündelt veraltete Briefings, Prompts und Root-Level-Reste unter `docs/archive/` und trennt sie von aktiver Guidance.
 
 ---
 
@@ -47,7 +47,7 @@ canonical_for: theme-massnahmen-tracker
 | Push-Tooling | Theme Manager.app (täglich genutzt) |
 | Eintrittstür | `lifetime-health-theme/CLAUDE.md` → `AGENTS.md` |
 | Heading-System | `assets/crs-section-headings.css` + `snippets/section-heading-crs.liquid` |
-| Design-Rules | `docs/design-governance.md`, `docs/design-components.md`, `docs/section-heading-stack.md`, `docs/shopify-rules.md`, `docs/pdp-system.md` |
+| Design-Rules | `docs/design-governance.md`, `docs/design-components.md`, `docs/section-heading-stack.md`, `.cursor/rules/shopify-rules.mdc`, `docs/pdp-system.md` |
 | Visual Reference | `_examples/pdp-reference.html`, `_examples/sections/*.liquid` |
 
 ---
@@ -78,7 +78,7 @@ rich-text, text-columns-images, text-columns-icons, content-toggles, slideshow, 
 - **`_examples/sections/{benefits,stat-callout,reviews,quote}.liquid`** auf `crs-heading-stack`-Pattern refaktorisiert. Quote bleibt bewusst ohne Heading. Illegal-leere Schema-Defaults (`"default": ""`) entfernt.
 - **Live-Drift-Scan** mit Shopify-MCP: 33 aktive Templates identifiziert, 39 LT/CRS/SS-Sections gegen Pattern gecheckt → 14 Drift-Hotspots dokumentiert (siehe Tabelle oben).
 - **Frontmatter-Konvention** auf 19 lebende Specs ausgerollt (`status: living | superseded | archived`).
-- **Workspace-Cleanup:** lose Top-Level-Files in `_archive/2026-05-08_workspace-cleanup/` einsortiert (Quiz-Konzepte, PDP-Briefings, Marketing-Skills, lifetime-jobs-Skeleton).
+- **Workspace-Cleanup:** veraltete Root-Level-Files, superseded Blueprints und One-off-Prompts nach `docs/archive/` verschoben; `_archive/` bleibt fuer code-/asset-bezogene Altstaende.
 
 **Was bewusst nicht angefasst wurde:**
 

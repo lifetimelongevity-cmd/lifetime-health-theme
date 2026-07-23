@@ -1,0 +1,873 @@
+{%- comment -%}
+  ===================================================================
+  NMN PDP — Laborwerte  ·  lt-pdp-laborwerte.liquid
+  ===================================================================
+
+  ZWECK
+  Beantwortet die Kernfrage des NMN-Marktes: "Ist da überhaupt NMN drin?"
+  Unabhängige Tests zeigen, dass ein großer Teil der am Markt verkauften
+  NMN-Produkte die Deklaration verfehlt. Ein CoA-Bild allein ist deshalb
+  kein Differenzierer, das zeigen die Fälschungen auch. Differenzierend
+  ist nur ein Nachweis, den ein Dritter nachrechnen kann.
+
+  ENTSCHEIDUNGEN (§12 Build-Prozess)
+  - Surface        : color_bg #f7f7f4, wie alle Nachbar-Sections der NMN-PDP
+                     (crs-metrics-row, crs-feature-grid, lt-comparison-table).
+                     Kein Alternieren, die PDP fährt durchgehend Paper.
+  - Dominant       : die zwei Prüfwerte. Alles andere ist visuell untergeordnet.
+  - Heading        : crs-heading-stack, Standardgröße. Diese Section belegt,
+                     sie behauptet nicht, also kein --text-h1.
+  - Content-Muster : 2 Wert-Karten (card-info-Logik) + Meta-Zeile + Beleg-
+                     Thumbnail + aufklappbare Detailtabelle.
+  - CTA            : keiner. Ein Textlink auf den Prüfbericht, mehr nicht.
+                     Die Section soll Vertrauen abbauen helfen, nicht verkaufen.
+  - Subtraktion    : keine Icons, die den Text wiederholen; keine Trennlinien;
+                     kein zweiter CTA; kein "Vertrauen"-Füllsatz.
+  - Quality-Move   : Der Chargen-Hinweis. Er verwandelt eine Behauptung in
+                     etwas, das der Kunde in fünf Sekunden am eigenen Beutel
+                     prüfen kann. Genau das können Fälschungen nicht liefern.
+
+  SCHRIFTGRÖSSEN (bewusste Abweichung, dokumentiert)
+  Sichtbar sind 56 / 28 / 20 / 14 / 12, also fünf Stufen. Die Regel in
+  design-components.mdc nennt drei. Drei sind hier nicht erreichbar: 20px
+  (Titel) und 12px (Kicker) kommen aus dem geteilten crs-heading-stack und
+  sind nicht sektionslokal steuerbar. Das genehmigte Referenzmuster
+  _examples/sections/stat-callout.liquid liegt bei derselben Stufenzahl, und
+  _examples/ rangiert laut CLAUDE.md über .cursor/rules/. Sektionslokal sind
+  es drei: 56/28 (die zwei Prüfwerte, eine Rolle) und 14 mit 12 als Caption.
+
+  PROGRESSIVE DISCLOSURE (wichtig, nicht wegoptimieren)
+  Die Einzelwerte stehen in <details>. Zugeklappt für den Kunden, der sie
+  nicht braucht — aber vollständig im DOM, also lesbar für Suchmaschinen,
+  ChatGPT und Perplexity. Das ist der ganze Zweck der Konstruktion: ruhige
+  Fläche für Menschen, vollständige Daten für Maschinen. Wer <details>
+  gegen ein JS-Accordion tauscht, das Inhalte erst bei Klick nachlädt,
+  zerstört den maschinenlesbaren Teil.
+
+  KEIN PRODUCT-JSON-LD HIER
+  Bewusst nicht. Die PDP trägt bereits zwei konkurrierende Produkt-Entitäten
+  (Theme-ProductGroup + TinySEO-Product). Ein dritter Knoten würde die
+  Mehrdeutigkeit verschlimmern. Die Messwerte gehören als additionalProperty
+  an das konsolidierte Produktobjekt, siehe Action-Plan A1.
+
+  ABHÄNGIGKEITEN
+  - assets/crs-section-headings.css (in layout/theme.liquid eingebunden)
+  - Tokens aus assets/theme.css :root
+{%- endcomment -%}
+
+{%- liquid
+  assign lw_align = section.settings.content_align | default: 'left'
+  unless lw_align == 'left' or lw_align == 'center' or lw_align == 'right'
+    assign lw_align = 'left'
+  endunless
+
+  assign lw_kicker = section.settings.kicker | strip
+  assign lw_head   = section.settings.heading | strip
+  assign lw_sub    = section.settings.subheading | strip
+  if lw_kicker == '__none__'
+    assign lw_kicker = ''
+  endif
+  if lw_head == '__none__'
+    assign lw_head = ''
+  endif
+  if lw_sub == '__none__'
+    assign lw_sub = ''
+  endif
+
+  assign lw_meta_lab    = section.settings.lab_name | strip
+  assign lw_meta_accred = section.settings.lab_accreditation | strip
+  assign lw_batch       = section.settings.batch | strip
+  assign lw_tested_on   = section.settings.tested_on | strip
+  assign lw_method      = section.settings.method | strip
+  assign lw_expert      = section.settings.expert | strip
+  assign lw_batch_hint  = section.settings.batch_hint | strip
+  assign lw_img_alt     = section.settings.report_image_alt | strip
+  if lw_img_alt == blank
+    assign lw_img_alt = 'Prüfbericht des Labors zur abgebildeten Charge'
+  endif
+-%}
+
+{%- style -%}
+  #section-{{ section.id }} {
+    --ltlw-bg:       {{ section.settings.color_bg }};
+    --ltlw-card-bg:  {{ section.settings.color_card_bg }};
+    --ltlw-text:     {{ section.settings.color_text }};
+    /* 0.70 ist der niedrigste Wert, der auf BEIDEN Flächen (#f7f7f4 und
+       #f2f1ed) noch 4.5:1 erreicht: 5.53 bzw. 5.40. Nicht weiter aufhellen.
+       Die Nachbar-Sections fahren 0.6/0.4 und fallen damit durch AA. */
+    --ltlw-text-muted: {{ section.settings.color_text | color_modify: 'alpha', 0.70 }};
+    /* Nicht-Text-UI (Chevron) braucht nur 3:1 → 3.24 bzw. 3.19 */
+    --ltlw-icon:     {{ section.settings.color_text | color_modify: 'alpha', 0.52 }};
+    --ltlw-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.10 }};
+    --ltlw-rule:     {{ section.settings.color_text | color_modify: 'alpha', 0.07 }};
+    padding-top:     {{ section.settings.padding_top }}px;
+    padding-bottom:  {{ section.settings.padding_bottom }}px;
+  }
+{%- endstyle -%}
+
+<div class="ltlw" id="section-{{ section.id }}">
+  <div class="ltlw__container">
+
+    {%- if lw_kicker != blank or lw_head != blank or lw_sub != blank -%}
+      <div class="ltlw__header crs-heading-stack crs-heading-stack--align-{{ lw_align }}">
+        {%- if lw_kicker != blank -%}
+          <p class="crs-heading-stack__kicker">{{ lw_kicker | escape }}</p>
+        {%- endif -%}
+        {%- if lw_head != blank or lw_sub != blank -%}
+          <div class="crs-heading-stack__pair">
+            {%- if lw_head != blank -%}
+              <h2 class="crs-heading-stack__title">{{ lw_head | escape | newline_to_br }}</h2>
+            {%- endif -%}
+            {%- if lw_sub != blank -%}
+              <p class="crs-heading-stack__subtitle">{{ lw_sub | escape | newline_to_br }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    <div class="ltlw__layout{% if section.settings.report_image != blank %} ltlw__layout--with-proof{% endif %}">
+
+      <div class="ltlw__main">
+
+        <div class="ltlw__values">
+          <div class="ltlw-value">
+            <p class="ltlw-value__figure">{{ section.settings.value_primary | escape }}</p>
+            <p class="ltlw-value__label">{{ section.settings.value_primary_label | escape }}</p>
+          </div>
+          <div class="ltlw-value">
+            <p class="ltlw-value__figure ltlw-value__figure--word">{{ section.settings.value_secondary | escape }}</p>
+            <p class="ltlw-value__label">{{ section.settings.value_secondary_label | escape }}</p>
+          </div>
+        </div>
+
+        {%- if lw_meta_lab != blank or lw_meta_accred != blank -%}
+          <p class="ltlw__provenance">
+            {%- if lw_meta_lab != blank -%}{{ lw_meta_lab | escape }}{%- endif -%}
+            {%- if lw_meta_accred != blank -%}
+              {% if lw_meta_lab != blank %} {% endif %}{{ lw_meta_accred | escape }}
+            {%- endif -%}
+            {%- if lw_expert != blank -%}
+              <span class="ltlw__provenance-expert">{{ lw_expert | escape }}</span>
+            {%- endif -%}
+          </p>
+        {%- endif -%}
+
+        {%- if lw_batch != blank or lw_tested_on != blank or lw_method != blank -%}
+          <ul class="ltlw__facts">
+            {%- if lw_batch != blank -%}
+              <li class="ltlw__fact">Charge {{ lw_batch | escape }}</li>
+            {%- endif -%}
+            {%- if lw_tested_on != blank -%}
+              <li class="ltlw__fact">Geprüft am {{ lw_tested_on | escape }}</li>
+            {%- endif -%}
+            {%- if lw_method != blank -%}
+              <li class="ltlw__fact">Methode {{ lw_method | escape }}</li>
+            {%- endif -%}
+          </ul>
+        {%- endif -%}
+
+        {%- if lw_batch_hint != blank -%}
+          <p class="ltlw__hint">{{ lw_batch_hint | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.blocks.size > 0 -%}
+          <details class="ltlw__details">
+            <summary class="ltlw__summary">
+              <span class="ltlw__summary-text">{{ section.settings.details_label | default: 'Einzelwerte anzeigen' | escape }}</span>
+              <span class="ltlw__summary-icon" aria-hidden="true">
+                <svg viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
+                  <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="1.4"
+                        stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </span>
+            </summary>
+
+            <div class="ltlw__table-wrap">
+              <table class="ltlw-table">
+                <caption class="ltlw-table__caption">
+                  {%- if lw_batch != blank -%}
+                    Messwerte der Charge {{ lw_batch | escape }}
+                  {%- else -%}
+                    Messwerte der geprüften Charge
+                  {%- endif -%}
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Parameter</th>
+                    <th scope="col">Ergebnis</th>
+                    <th scope="col">Methode</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {%- for block in section.blocks -%}
+                    <tr {{ block.shopify_attributes }}>
+                      <th scope="row">{{ block.settings.parameter | escape }}</th>
+                      <td>{{ block.settings.result | escape }}</td>
+                      <td class="ltlw-table__method">{{ block.settings.method | escape }}</td>
+                    </tr>
+                  {%- endfor -%}
+                </tbody>
+              </table>
+            </div>
+
+            {%- if section.settings.details_note != blank -%}
+              <p class="ltlw__note">{{ section.settings.details_note | escape }}</p>
+            {%- endif -%}
+          </details>
+        {%- endif -%}
+
+      </div>
+
+      {%- if section.settings.report_image != blank -%}
+        <figure class="ltlw__proof">
+          <div class="ltlw__proof-sheet">
+            {{
+              section.settings.report_image
+              | image_url: width: 760
+              | image_tag:
+                loading: 'lazy',
+                widths: '260, 380, 520, 760',
+                sizes: '(max-width: 900px) 60vw, 300px',
+                alt: lw_img_alt,
+                class: 'ltlw__proof-img'
+            }}
+          </div>
+          {%- if section.settings.report_url != blank -%}
+            <figcaption class="ltlw__proof-caption">
+              <a class="ltlw__proof-link"
+                 href="{{ section.settings.report_url }}"
+                 target="_blank"
+                 rel="noopener noreferrer">
+                {{ section.settings.report_link_label | default: 'Vollständigen Prüfbericht ansehen' | escape }}
+                <span aria-hidden="true">&rarr;</span>
+              </a>
+            </figcaption>
+          {%- endif -%}
+        </figure>
+      {%- endif -%}
+
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+/* ===================================================
+   NMN PDP — Laborwerte · lt-pdp-laborwerte.liquid
+   Wertetafel + Beleg-Thumbnail + aufklappbare Messwerte
+   =================================================== */
+
+.ltlw {
+  background: var(--ltlw-bg, #f7f7f4);
+  color: var(--ltlw-text, #26251e);
+}
+
+/* 1280px/20px weicht bewusst von governance §4 (1200/24) ab: byte-identisch
+   mit crs-metrics-row und allen anderen crs-Sections dieser PDP. Flächen-
+   bündigkeit zum direkten Nachbarn schlägt hier die Doku-Vorgabe. Eine
+   gemeinsame Container-Klasse gehört als eigener Task ins Theme. */
+.ltlw__container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.ltlw__header {
+  margin-bottom: var(--space-7);
+}
+
+/* Layout: Werte links, Beleg rechts.
+   Einspaltig als Grundzustand. Die zweite Spalte wird NUR per Modifier
+   zugeschaltet, wenn wirklich ein Beleg-Bild gesetzt ist. Sonst bliebe
+   bei explizit definierten Tracks eine leere Spalte samt gap stehen —
+   also 48px totes Weiss am rechten Rand. */
+.ltlw__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-7);
+  align-items: start;
+}
+
+.ltlw__layout--with-proof {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.ltlw__main {
+  min-width: 0;
+}
+
+/* ---------- Wertepaar: das dominante Element ---------- */
+
+.ltlw__values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+}
+
+.ltlw-value {
+  box-sizing: border-box;
+  background: var(--ltlw-card-bg, #f2f1ed);
+  border: 1px solid var(--ltlw-border, rgba(38, 37, 30, 0.10));
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+}
+
+.ltlw-value__figure {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-stat);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-stat);
+  letter-spacing: -0.02em;
+  color: var(--ltlw-text, #26251e);
+}
+
+/* Der zweite Wert ist eine Wortgruppe ("unter der Bestimmungsgrenze"), keine Zahl.
+   Auf Stat-Größe würde er umbrechen und die Karten optisch entkoppeln. */
+.ltlw-value__figure--word {
+  font-size: var(--text-h2);
+  line-height: var(--leading-heading);
+  letter-spacing: -0.01em;
+}
+
+/* Stat-Callout-Spec: Label ist --text-body-sm, nicht --text-body.
+   Hält die Section zugleich bei drei Größenstufen. */
+.ltlw-value__label {
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--ltlw-text-muted, rgba(38, 37, 30, 0.70));
+}
+
+/* ---------- Herkunft ---------- */
+
+.ltlw__provenance {
+  margin: var(--space-5) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--ltlw-text-muted, rgba(38, 37, 30, 0.70));
+  max-width: 62ch;
+}
+
+.ltlw__provenance-expert {
+  display: block;
+}
+
+/* Meta-Zeile. Die Wörter tragen ihre eigene Beschriftung ("Charge 20250917"),
+   deshalb kein separates Key-Label: eine Größenstufe weniger und ruhiger. */
+.ltlw__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ltlw__fact {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-tight);
+  color: var(--ltlw-text, #26251e);
+}
+
+/* Der Prüf-Hinweis. Bewusst ohne Icon — der Satz sagt es selbst. */
+.ltlw__hint {
+  margin: var(--space-5) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--ltlw-text-muted, rgba(38, 37, 30, 0.70));
+  max-width: 52ch;
+}
+
+/* ---------- Aufklappbare Messwerte ---------- */
+
+.ltlw__details {
+  margin-top: var(--space-6);
+  border-top: 1px solid var(--ltlw-rule, rgba(38, 37, 30, 0.07));
+}
+
+.ltlw__summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-4) 0 0;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  color: var(--ltlw-text, #26251e);
+  list-style: none;
+}
+
+.ltlw__summary::-webkit-details-marker {
+  display: none;
+}
+
+.ltlw__summary:focus-visible {
+  outline: 2px solid var(--ltlw-text, #26251e);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+.ltlw__summary-icon {
+  display: inline-flex;
+  width: 12px; /* intrinsic: Chevron-Breite, kein Layout-Token */
+  color: var(--ltlw-icon, rgba(38, 37, 30, 0.52));
+  transition: transform var(--ease-default);
+}
+
+.ltlw__summary-icon svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.ltlw__details[open] .ltlw__summary-icon {
+  transform: rotate(180deg);
+}
+
+.ltlw__table-wrap {
+  margin-top: var(--space-5);
+  overflow-x: auto;
+}
+
+.ltlw-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-tight);
+  text-align: left;
+}
+
+/* Sichtbare caption statt versteckter: gibt der Tabelle einen Accessible Name
+   und ersetzt zugleich die halbe Fußnote. */
+.ltlw-table__caption {
+  text-align: left;
+  font-size: var(--text-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ltlw-text-muted, rgba(38, 37, 30, 0.70));
+  padding-bottom: var(--space-3);
+}
+
+.ltlw-table th,
+.ltlw-table td {
+  padding: var(--space-3) var(--space-4) var(--space-3) 0;
+  border-bottom: 1px solid var(--ltlw-rule, rgba(38, 37, 30, 0.07));
+  vertical-align: baseline;
+  font-weight: var(--weight-regular);
+}
+
+.ltlw-table thead th {
+  font-size: var(--text-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ltlw-text-muted, rgba(38, 37, 30, 0.70));
+}
+
+.ltlw-table tbody th {
+  color: var(--ltlw-text, #26251e);
+  white-space: nowrap;
+}
+
+.ltlw-table tbody td {
+  color: var(--ltlw-text-muted, rgba(38, 37, 30, 0.70));
+}
+
+.ltlw-table__method {
+  color: var(--ltlw-text-muted, rgba(38, 37, 30, 0.70));
+}
+
+.ltlw__note {
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-body);
+  color: var(--ltlw-text-muted, rgba(38, 37, 30, 0.70));
+  max-width: 72ch;
+}
+
+/* ---------- Beleg ---------- */
+
+/* 300px ist kein Zufallswert: identisch mit dem sizes-Hint am <img> weiter
+   oben. Wer die Breite ändert, muss sizes mitziehen, sonst wählt der Browser
+   die falsche Auflösung. Gilt ebenso für die 260px im Tablet-Block. */
+.ltlw__proof {
+  margin: 0;
+  width: 300px;
+}
+
+/* Das Blatt liegt auf der Fläche. Weißer Grund und ein sehr flacher
+   Schatten, damit es als Dokument gelesen wird und nicht als UI-Karte. */
+.ltlw__proof-sheet {
+  background: var(--color-white);
+  border: 1px solid var(--ltlw-border, rgba(38, 37, 30, 0.10));
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  line-height: 0;
+}
+
+.ltlw__proof-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.ltlw__proof-caption {
+  margin-top: var(--space-3);
+}
+
+.ltlw__proof-link {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  color: var(--ltlw-text, #26251e);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.ltlw__proof-link:hover {
+  color: var(--ltlw-text-muted, rgba(38, 37, 30, 0.70));
+}
+
+.ltlw__proof-link:focus-visible {
+  outline: 2px solid var(--ltlw-text, #26251e);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+/* ---------- Tablet ---------- */
+
+@media (max-width: 900px) {
+  .ltlw__layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-6);
+  }
+
+  /* Beleg unter die Werte, linksbündig statt gestreckt */
+  .ltlw__proof {
+    width: 260px;
+  }
+}
+
+/* ---------- Mobile ---------- */
+
+@media (max-width: 640px) {
+  .ltlw__values {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .ltlw-value__figure {
+    font-size: var(--text-display);
+  }
+
+  .ltlw-value__figure--word {
+    font-size: var(--text-h3);
+  }
+
+  .ltlw__facts {
+    gap: var(--space-4) var(--space-5);
+  }
+
+  .ltlw__proof {
+    width: 220px; /* intentional: kleinste sinnvolle Lesbarkeit des Belegs auf Mobil */
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ltlw__summary-icon {
+    transition: none;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "NMN PDP Laborwerte",
+  "tag": "section",
+  "class": "lt-pdp-laborwerte",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Überschrift"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung (Überschrift)",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Laborgeprüft",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Was wirklich drin ist",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Unterüberschrift",
+      "default": "Jede Charge wird unabhängig im Labor geprüft. Das sind die Werte, die dabei herauskommen.",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "header",
+      "content": "Die zwei Kernwerte"
+    },
+    {
+      "type": "text",
+      "id": "value_primary",
+      "label": "Wert 1",
+      "default": "> 99,9 %"
+    },
+    {
+      "type": "text",
+      "id": "value_primary_label",
+      "label": "Beschriftung Wert 1",
+      "default": "NMN-Gehalt, im Labor bestätigt"
+    },
+    {
+      "type": "text",
+      "id": "value_secondary",
+      "label": "Wert 2",
+      "default": "unter der Bestimmungsgrenze"
+    },
+    {
+      "type": "text",
+      "id": "value_secondary_label",
+      "label": "Beschriftung Wert 2",
+      "default": "Blei, Cadmium, Arsen und Quecksilber"
+    },
+    {
+      "type": "header",
+      "content": "Herkunft der Prüfung"
+    },
+    {
+      "type": "text",
+      "id": "lab_name",
+      "label": "Prüflabor",
+      "default": "Geprüft von Limbach Analytics, Arotop Laboratorien Mainz."
+    },
+    {
+      "type": "text",
+      "id": "lab_accreditation",
+      "label": "Akkreditierung",
+      "default": "DAkkS-akkreditiert nach DIN EN ISO/IEC 17025 (D-PL-20185-01-01)."
+    },
+    {
+      "type": "text",
+      "id": "expert",
+      "label": "Unterzeichner",
+      "default": "Unterzeichnet von Dr. Wolfram Wendler, öffentlich bestellter und vereidigter Sachverständiger der IHK Rheinhessen."
+    },
+    {
+      "type": "text",
+      "id": "batch",
+      "label": "Charge",
+      "default": "20250917"
+    },
+    {
+      "type": "text",
+      "id": "tested_on",
+      "label": "Prüfdatum",
+      "default": "11.11.2025"
+    },
+    {
+      "type": "text",
+      "id": "method",
+      "label": "Methode",
+      "default": "1H-NMR"
+    },
+    {
+      "type": "text",
+      "id": "batch_hint",
+      "label": "Chargen-Hinweis",
+      "default": "Die Chargennummer steht auf der Rückseite deines Beutels. Du kannst sie mit der hier angegebenen vergleichen.",
+      "info": "Macht die Angabe für den Kunden prüfbar."
+    },
+    {
+      "type": "header",
+      "content": "Beleg"
+    },
+    {
+      "type": "image_picker",
+      "id": "report_image",
+      "label": "Prüfbericht als Bild"
+    },
+    {
+      "type": "text",
+      "id": "report_image_alt",
+      "label": "Bildbeschreibung",
+      "default": "Prüfbericht von Limbach Analytics zur NMN-Charge 20250917"
+    },
+    {
+      "type": "url",
+      "id": "report_url",
+      "label": "Link zum Prüfbericht (PDF)"
+    },
+    {
+      "type": "text",
+      "id": "report_link_label",
+      "label": "Linktext",
+      "default": "Vollständigen Prüfbericht ansehen"
+    },
+    {
+      "type": "header",
+      "content": "Einzelwerte"
+    },
+    {
+      "type": "text",
+      "id": "details_label",
+      "label": "Aufklapp-Beschriftung",
+      "default": "Einzelwerte anzeigen"
+    },
+    {
+      "type": "textarea",
+      "id": "details_note",
+      "label": "Fußnote",
+      "default": "Die Bestimmungsgrenze ist der kleinste Wert, den ein Verfahren sicher beziffern kann. Alle vier Schwermetalle lagen darunter."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "measurement",
+      "name": "Messwert",
+      "settings": [
+        {
+          "type": "text",
+          "id": "parameter",
+          "label": "Parameter",
+          "default": "Blei"
+        },
+        {
+          "type": "text",
+          "id": "result",
+          "label": "Ergebnis",
+          "default": "< 0,05 mg/kg"
+        },
+        {
+          "type": "text",
+          "id": "method",
+          "label": "Methode",
+          "default": "ASU § 64 LFGB"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    {
+      "name": "NMN PDP Laborwerte",
+      "blocks": [
+        {
+          "type": "measurement",
+          "settings": {
+            "parameter": "NMN-Gehalt",
+            "result": "100,1 ± 1,3 %",
+            "method": "1H-NMR"
+          }
+        },
+        {
+          "type": "measurement",
+          "settings": {
+            "parameter": "Blei",
+            "result": "< 0,05 mg/kg",
+            "method": "ASU § 64 LFGB"
+          }
+        },
+        {
+          "type": "measurement",
+          "settings": {
+            "parameter": "Cadmium",
+            "result": "< 0,005 mg/kg",
+            "method": "ASU § 64 LFGB"
+          }
+        },
+        {
+          "type": "measurement",
+          "settings": {
+            "parameter": "Arsen",
+            "result": "< 0,01 mg/kg",
+            "method": "ASU § 64 LFGB"
+          }
+        },
+        {
+          "type": "measurement",
+          "settings": {
+            "parameter": "Quecksilber",
+            "result": "< 0,01 mg/kg",
+            "method": "ASU § 64 LFGB"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

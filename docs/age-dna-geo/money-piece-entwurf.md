@@ -10,10 +10,13 @@ supersedes: []
 Der zitier-stärkste Asset des Age-Test-Clusters (Playbook §6). Ziel-Query: „welcher/bester
 Alterstest", „biologisches alter testen", „epigenetik test vergleich".
 
-> **Status 2026-07-08:** Live-Template `templates/page.biologisches-alter-testen.json` als
-> **unveröffentlichter Draft gebaut** (rendert erst, wenn in Shopify eine Page mit diesem Template
-> zugewiesen wird). **NICHT veröffentlichen** bis: (1) Wettbewerber-Preise aus DE-Session re-checkt,
-> (2) PDP-Wording für die Bereichs-/Organ-Alter abgeglichen, (3) juristische Freigabe (§6 UWG).
+> **Status 2026-07-08 (v2):** Template `templates/page.biologisches-alter-testen.json` gebaut +
+> **ausgeblendete Shopify-Page** angelegt (`/pages/biologisches-alter-testen`, isPublished=false,
+> ID 704306610551). v2-Änderungen: **Cerascreen → neotes** ersetzt (Cerascreens Genetic Age Test ist
+> zwar Methylierung, aber ausverkauft; Telomer = deren *separater* Test), Methode sauber
+> „DNA-Methylierung" (Probe getrennt in Prosa), Ergebnis-Tiefe aufgedröselt inkl. **AI Health Coach**.
+> **Verbindlich ist das Template.** NICHT auf sichtbar stellen bis: (1) Preise DE-Session re-check,
+> (2) Bereichs-/Organ-Wording PDP-Abgleich, (3) §6-UWG-Rechtscheck.
 
 > **Warum diese Struktur:** Die sechs „Alterstests" am Markt messen **vier verschiedene Dinge**.
 > Nur epiAge + Cerascreen sind deutschsprachige DNA-Methylierungsuhren wie LIFETIME. Alle sechs in
@@ -107,14 +110,17 @@ Vier Mess-Ansätze, je 1–2 Sätze, erste Zeile = die Antwort:
 4 Spalten (Max der Section), LIFETIME = empfohlene Spalte 1. Werte faktisch; Icons nur bei binären
 Zeilen (Genetik, Sprache), sonst Text (Fairness + §6 UWG). **Keine CpG-Zahlen** (siehe §0).
 
-| Zeile | LIFETIME (Empfohlen) | epiAge | Cerascreen | TruDiagnostic |
+| Zeile | LIFETIME (Empfohlen) | epiAge | neotes | TruDiagnostic |
 |---|---|---|---|---|
-| **Methode** | Speichel-Methylierungsuhr | Methylierung (Speichel) | Methylierung (Abstrich) | Methylierung (Kapillarblut) |
-| **Ergebnis-Tiefe** | mehrere Körper-Bereiche | ein Alterswert | ein Alterswert | mehrere Organ-Werte |
-| **Genetik kombiniert** | Ja, inkl. Supplement-Genetik ✓ | Nein ✗ | Nein ✗ | Nein ✗ |
-| **Labor & Zertifizierung** | Eurofins, ISO 17025 | CAP/CLIA, Hongkong | Partnerlabor, DE | CLIA/CAP, USA |
-| **Report & Sprache** | App, Deutsch ✓ | Deutsch ✓ | App, Deutsch ✓ | Englisch ✗ |
-| **Preis** | 349 € | 199,95 € | 399 € (derzeit ausverkauft) | ≈ 460 € (499 $)* |
+| **Methode** | DNA-Methylierung | DNA-Methylierung | DNA-Methylierung | DNA-Methylierung |
+| **Ergebnis-Umfang** | Bereiche + 16 Kategorien | 1 Alterswert | 1 Bio-Alter | Bio-Alter + Organ-Werte |
+| **Genetik integriert** | Ja ✓ | Nein ✗ | Nein ✗ | Nein ✗ |
+| **AI Health Coach** | Ja ✓ | Nein ✗ | Nein ✗ | Nein ✗ |
+| **Report-Sprache** | Deutsch | Deutsch | Deutsch | Englisch |
+| **Preis** | 349 € | 199,95 € | ab 299 € | ≈ 460 € (499 $)* |
+
+Probe (in Prosa, nicht als Zeile): LIFETIME/epiAge = Speichel, neotes/TruDiagnostic = Blut.
+Eurofins ISO 17025 nur LIFETIME (in Prosa + CTA-Trust-Row). Icons nur auf Genetik + AI-Coach-Zeile.
 
 \* Umrechnung, kein Anbieter-EUR-Preis. Stand aller Werte: 2026-07-08.
 

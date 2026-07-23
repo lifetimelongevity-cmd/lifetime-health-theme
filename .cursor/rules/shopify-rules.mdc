@@ -60,6 +60,12 @@ These cause `theme push` / Theme Check failures:
 - In einer `for`-Schleife innerhalb eines `{% liquid %}`-Tags überspringt `continue` die aktuelle Iteration **nicht** zuverlässig (in `lt-article` rendert die Iteration trotzdem weiter).
 - Stattdessen die auszugebende Logik in `unless <bedingung> … endunless` (oder `if`) einwickeln. Das funktioniert identisch in `{% liquid %}` und in normalen Tags.
 
+### 6. Blog-Artikel: Inhalt in `article.content`, NICHT self-contained Rich-Text
+- Ein Artikel-Body gehört in `article.content` (via `articleUpdate`/Admin) + Template `article.<slug>.json` = `lt-article` (main) + optional `crs-faq-accordion` (faq). **Nicht** den ganzen Artikel als `rich-text`-Section mit vielen Blöcken bauen — das läuft in zwei harte Grenzen:
+  - **`rich-text`-Section: max 9 Blöcke** (`max_blocks: 9`). Longform (H1 + Byline + TL;DR + 6×H2 + Text + …) sprengt das → Push-Fehler *Blockanzahl übersteigt den Höchstwert von 9*.
+  - **`richtext`-Setting-Felder verbieten Tabellen**: nur `<p> <ul> <ol> <h1>–<h6>` erlaubt; `<table>/<thead>/<tr>/<td>` wird abgewiesen (*Tag table ist nicht erlaubt*). Tabellen gehören in `article.content` (dort erlaubt) oder einen `custom_liquid`-Block (rohes HTML, ggf. in `<div class="rte">` wrappen für Styling).
+- **JSON-valide ≠ Shopify-valide.** Weder `json.loads` noch `shopify theme check` fangen das; erst `shopify theme push` weist die Datei ab, meldet *"pushed with errors"* und die Datei landet **nicht** live — der Theme Manager verschluckt das stumm (Symptom: „Push durch, Datei trotzdem nicht auf dem Live-Theme"). **Nach jedem Push verifizieren**, dass die Datei auf dem MAIN-Theme liegt und rendert: `themes(first:1, roles:[MAIN]){ … files(filenames:[…]) }` oder Live-URL abrufen. CLI-Push-Fallback (Theme Manager übergeht neue Dateien teils): `shopify theme push --theme <MAIN-id> --allow-live --only templates/<datei>.json`.
+
 ## Section Schema Pattern
 
 ```liquid

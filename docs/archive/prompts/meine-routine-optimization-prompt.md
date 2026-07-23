@@ -24,7 +24,7 @@ Lies diese Dateien vollständig, bevor du arbeitest:
 - `templates/index.json` — Referenz für Layout-Pattern
 - `sections/crs-hero-typewriter.liquid` — Referenz für Klassen-Systematik
 - `sections/lt-hp-science.liquid` — Referenz für Expert-Block
-- `docs/science-page-rebuild-prompt.md` — Referenz für den Aufbau der Nachbarseite "Wissenschaft"
+- `docs/archive/prompts/science-page-rebuild-prompt.md` — Referenz für den Aufbau der Nachbarseite "Wissenschaft"
 
 ---
 

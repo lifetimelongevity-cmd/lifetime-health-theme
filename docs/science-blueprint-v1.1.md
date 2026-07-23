@@ -3,7 +3,7 @@
 
 **Version:** 1.1 — verschlankte Shipping-Version  
 **Zweck:** Wissenschaftliche Vertrauens- und Argumentationsseite im Hauptmenü. Primäre Funktion: Glaubwürdigkeit etablieren, biologische Logik erklären, Diagnostik einordnen und erst danach in Handlung überleiten.  
-**Ausgangspunkt:** `docs/science-blueprint-v1.md`  
+**Ausgangspunkt:** `docs/archive/drafts/science-blueprint-v1.md`  
 **V1.1-Ziel:** Gleiche strategische Richtung, aber weniger Scope, mehr Reuse, geringeres Implementierungsrisiko.
 
 ---
@@ -393,4 +393,3 @@ Die Seite wird dadurch:
 - weniger überladen
 - näher am bestehenden Theme-System
 - schneller umsetzbar
-
