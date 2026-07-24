@@ -781,11 +781,6 @@
                     else
                       assign v_sub = variant.price | times: lt_sub_mult | divided_by: 100
                     endif
-                    # Mengenvorteil in Euro vs. gleiche Menge in kleinster Größe (belegbar, keine Aktionsersparnis)
-                    assign v_bundle_ref = 0
-                    if lt_abo_min > 0 and v_grams > lt_abo_min
-                      assign v_bundle_ref = lt_abo_variant.price | times: v_grams | divided_by: lt_abo_min
-                    endif
                   -%}
                   <label class="lt-size__pill{% if variant.id == lt_active_variant.id %} is-selected{% endif %}" data-lt-size>
                     <input
@@ -803,10 +798,10 @@
                       data-size-short="{{ variant.title | escape }}"
                       {% unless variant.available %}disabled{% endunless %}
                     >
+                    {%- comment -%} Nur die Menge, keine Preise: Grundpreis/Ersparnis hängen am Modus (Abo vs. einmalig)
+                        und stehen deshalb ausschließlich in den Karten, die beim Größenwechsel live mitgehen.
+                        Zwei Grundpreis-Basen gleichzeitig (Pill einmalig, Karte Abo) wirkten widersprüchlich. {%- endcomment -%}
                     <span class="lt-size__name">{{ variant.title | escape }}</span>
-                    {%- comment -%} money (nicht without_trailing_zeros): Karten-JS formatiert immer zweistellig, 113,00 statt 113 {%- endcomment -%}
-                    {%- if v_grams > 0 -%}<span class="lt-size__unit">{{ variant.price | times: 100 | divided_by: v_grams | money }}/100 g</span>{%- endif -%}
-                    <span class="lt-size__save">{%- if v_bundle_ref > variant.price -%}spart {{ v_bundle_ref | minus: variant.price | money }}{%- endif -%}</span>
                   </label>
                 {%- endfor -%}
               </div>
@@ -852,7 +847,13 @@
                           <span class="lt-bb-card__title">{{ bb_sub1_title | escape }}</span>
                           <span class="lt-bb-card__badge lt-bb-card__badge--strong" data-lt-bb-badge>SPARE {{ section.settings.sub_discount_percent | default: 10 }}%</span>
                         </span>
-                        <span class="lt-bb-card__sub">{{ bb_sub1_sub | escape }}</span>
+                        {%- if lt_show_sizes and lt_abo_alloc -%}
+                          {%- comment -%} Subline = echter Liefertakt der gewählten Größe (Plan-Name, z. B. „Alle 2 Monate");
+                              JS zieht sie beim Größenwechsel nach. Der Takt ist je Größe fix vorbelegt, nicht frei wählbar. {%- endcomment -%}
+                          <span class="lt-bb-card__sub" data-lt-sub-subline>{{ lt_abo_alloc.selling_plan.name | escape }}</span>
+                        {%- else -%}
+                          <span class="lt-bb-card__sub">{{ bb_sub1_sub | escape }}</span>
+                        {%- endif -%}
                       </span>
                       <span class="lt-bb-card__prices">
                         <del class="lt-bb-card__compare" data-lt-bb-compare></del>
@@ -940,7 +941,14 @@
                           <span class="lt-bb-card__title">{{ bb_once_title | escape }}</span>
                           <span class="lt-bb-card__badge lt-bb-card__badge--sale" data-lt-bb-sale-badge hidden></span>
                         </span>
-                        <span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>
+                        {%- if lt_show_sizes -%}
+                          {%- comment -%} Versandstatus je gewählter Größe statt statischem „ab 49 €": über der DE-Schwelle
+                              positiv „Versandkostenfrei", darunter der Fakt. Schwelle/Kosten: §7 nmn-angebotsarchitektur;
+                              bei Versandänderung hier UND im JS (applySize) mitziehen. {%- endcomment -%}
+                          <span class="lt-bb-card__sub" data-lt-once-subline>{% if lt_active_variant.price >= 4900 %}Versandkostenfrei{% else %}zzgl. 4,90 € Versand{% endif %}</span>
+                        {%- else -%}
+                          <span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>
+                        {%- endif -%}
                       </span>
                       <span class="lt-bb-card__prices">
                         <del class="lt-bb-card__compare" data-lt-bb-compare></del>
@@ -1668,6 +1676,18 @@
       if (appstleWidget && sizeInput.dataset.variantId) {
         appstleWidget.setAttribute('data-variant-id', sizeInput.dataset.variantId);
       }
+      // Sublines je Größe: Abo-Karte = Liefertakt (Plan-Name), Einmal-Karte = Versandstatus
+      // (DE-Schwelle 49 €/4,90 €, siehe SSR-Kommentar an data-lt-once-subline)
+      const subSublineEl = section.querySelector('[data-lt-sub-subline]');
+      if (subSublineEl) {
+        const plan = ltPlans.find(p => String(p.id) === (sizeInput.dataset.planId || ''));
+        if (plan && plan.name) subSublineEl.textContent = plan.name;
+      }
+      const onceSublineEl = section.querySelector('[data-lt-once-subline]');
+      if (onceSublineEl) {
+        const oncePriceCents = parseInt(sizeInput.dataset.oncePrice, 10) || 0;
+        onceSublineEl.textContent = oncePriceCents >= 4900 ? 'Versandkostenfrei' : 'zzgl. 4,90 € Versand';
+      }
       section.querySelectorAll('[data-lt-size]').forEach(pill => {
         const inp = pill.querySelector('.lt-size__input');
         const on = inp === sizeInput;
@@ -2192,24 +2212,7 @@
   line-height: 1.1;
   color: var(--lt-text, #26251e);
 }
-.lt-size__save {
-  display: block;
-  min-height: 14px;
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 1.15;
-  color: var(--lt-muted, rgba(38,37,30,0.55));
-}
-/* Grundpreis €/100 g pro Variante (PAngV, dynamisch aus variant.price) — 2026-07-18 */
-.lt-size__unit {
-  display: block;
-  font-size: 11px;
-  line-height: 1.1;
-  color: var(--lt-muted, rgba(38,37,30,0.55));
-  letter-spacing: 0.01em;
-}
-.lt-size__input:disabled ~ .lt-size__name,
-.lt-size__input:disabled ~ .lt-size__save {
+.lt-size__input:disabled ~ .lt-size__name {
   opacity: 0.4;
   text-decoration: line-through;
 }
