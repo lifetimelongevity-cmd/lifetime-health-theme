@@ -68,10 +68,9 @@ Die drei Live-Änderungen müssen zusammen passieren, sonst Mischzustand auf bez
    „Gratisversand" umbenannt). Dazu Theme-weiter Versand-Copy-Sweep auf `main` (`fcaa267`,
    62 Stellen in 47 Dateien: alte 30/35/100-€-Schwellen und pauschales „Gratisversand" → 49-€-
    Formel; Cart-Gratisversand-Bar 35 → 49; Abo-Kontext-Aussagen bewusst belassen). Copy wirkt
-   mit dem nächsten Theme-Push. **OFFEN (BJ, manuell): Versandrichtlinie** in Shopify
-   (Einstellungen → Richtlinien → Versandrichtlinie) — API-Token hat kein
-   `write_legal_policies`; fertiger Text steht im Chat-Protokoll vom 24.07. (Alt-Text nennt
-   noch „pauschal 5,50 Euro" und nur DE/AT.)
+   mit dem nächsten Theme-Push. **Versandrichtlinie: aktualisiert (BJ, 24.07., per API
+   verifiziert)** — neue Fassung nennt 4,90/49 € DE, 8,90/59 € AT/CH/NL/IT und die
+   Abo-Versandbefreiung ab Lieferung 1.
 3. **Claude, auf BJ-Signal:** compare-at auf den 3 NMN-Varianten entfernen (= Sale-Ende).
 4. **BJ:** Branch `feat/nmn-abo-groessen-2026-07-24` previewen, mergen, Theme via Theme Manager pushen.
 5. **Gemeinsam:** Live-QA (Checkliste unten).
