@@ -129,9 +129,14 @@ zeigt die 30-g-Abo-Karte den Sale-Bezug (24 %); bis zur Appstle-Umstellung sind 
 - Erstkauf-Enabler: Trust-Pill 3 „Kauf auf Rechnung (Klarna)" (Klarna in enabled_payment_types
   verifiziert) + Abo-Perk 4 Willkommens-Deal „Zur ersten Lieferung: Forschungsdossier (PDF) und
   10 % auf den AGE & DNA-Test" (neues Setting bb_benefit_4, nur bei NMN gefüllt).
-- **PFLICHT-To-do (BJ, vor/mit dem nächsten Push): Einlösung des Willkommens-Deals sicherstellen.**
-  Dossier-PDF-Zustellung + Test-Rabattcode (z. B. per Bestellbestätigungs-Mail an Abo-Erstbesteller).
-  Ein beworbener, nicht eingelöster Vorteil wäre wettbewerbsrechtlich angreifbar und tötet Vertrauen.
+- Einlösung des Willkommens-Deals: **Code angelegt und AKTIV** — `WILLKOMMEN10`
+  (`DiscountCodeNode/2358693790071`), 10 % nur auf den AGE & DNA-Test, einmal pro Kunde,
+  kombinierbar mit Versandrabatten. **PFLICHT-To-do (BJ): Zustellung einbauen** — Snippet für die
+  Bestellbestätigung (Shopify Admin → Einstellungen → Benachrichtigungen → Bestellbestätigung)
+  steht im Chat-Protokoll 24.07.; Dossier-PDF-URL dort einsetzen. Solange die Mail nicht live ist,
+  wird der beworbene Vorteil nicht eingelöst → zeitnah einbauen oder Perk 4 vorerst leeren.
+- Fokus-Konsolidierung (BJ-Entscheid): EIN Störer, „Willkommens-Vorteil" solid auf der Oberkante
+  der Abo-Karte (`bb_sub_flag`); der 90-g-Pill-Störer „Bester Grundpreis" wurde wieder entfernt.
 
 ## Exakte Live-Aktionen (Werte)
 
