@@ -718,7 +718,7 @@
               endif
               assign lt_disc = section.settings.sub_discount_percent | default: 10
               assign lt_sub_mult = 100 | minus: lt_disc
-              # Abo = kleinste Gramm-Variante (nicht stur variants.first → robust gegen Umsortierung)
+              # Default-Größe = kleinste Gramm-Variante (nicht stur variants.first → robust gegen Umsortierung)
               assign lt_abo_variant = product.variants.first
               assign lt_abo_min = 9999999
               for v in product.variants
@@ -728,27 +728,88 @@
                   assign lt_abo_variant = v
                 endif
               endfor
-              assign lt_abo_grams = lt_abo_variant.title | replace: ' ', '' | replace: 'g', '' | replace: 'G', '' | times: 1
-              # Abo-Preis aus der echten Selling-Plan-Allocation (Appstle), Fallback price × (100 − Rabatt)
-              assign lt_abo_alloc = lt_abo_variant.selling_plan_allocations.first
-              if lt_abo_alloc
-                assign lt_abo_sub = lt_abo_alloc.price
-              else
-                assign lt_abo_sub = lt_abo_variant.price | times: lt_sub_mult | divided_by: 100
-              endif
-              # Deep-Link (?variant=, z. B. GMC-Shopping-Klick) → Einmalkauf + Größe vorwählen statt Abo.
-              # Nur bei aktiver Größen-Auswahl; sonst bleibt das Abo-Default unverändert (andere PDPs).
+              # Deep-Link (?variant=, z. B. GMC-Shopping-Klick) → Größe vorwählen, Abo bleibt Default;
+              # der Einmalpreis der Größe (= Feed-Preis) bleibt auf der Einmal-Karte sichtbar.
+              # Nur bei aktiver Größen-Auswahl; sonst bleibt das Verhalten anderer PDPs unverändert.
               assign lt_deeplinked = false
               if lt_show_sizes and product.selected_variant != blank
                 assign lt_deeplinked = true
               endif
-              # SSR-aktive Variante für hidden id + ATC-Disabled: Abo→kleinste Größe, Deep-Link→gewählte Größe
+              # SSR-aktive Variante für hidden id, ATC-Disabled und beide Karten: Deep-Link-Größe, sonst kleinste
               assign lt_active_variant = lt_abo_variant
               if lt_deeplinked
                 assign lt_active_variant = lt_preselect_variant
               endif
+              assign lt_abo_grams = lt_active_variant.title | replace: ' ', '' | replace: 'g', '' | replace: 'G', '' | times: 1
+              # Abo-Preis + Plan aus der Allocation mit FESTER Preis-Policy (größenspezifische
+              # Appstle-Gruppen „NMN 30/60/90 g", je Variante genau eine). Solange die alte
+              # 10-%-Gruppe „Spar-Abo" zusätzlich auf dem Produkt liegt, wäre .first mehrdeutig.
+              # Fallback: erste Allocation, sonst price × (100 − Rabatt).
+              assign lt_abo_alloc = lt_active_variant.selling_plan_allocations.first
+              for alloc in lt_active_variant.selling_plan_allocations
+                if alloc.selling_plan.price_adjustments.first.value_type == 'price'
+                  assign lt_abo_alloc = alloc
+                  break
+                endif
+              endfor
+              if lt_abo_alloc
+                assign lt_abo_sub = lt_abo_alloc.price
+              else
+                assign lt_abo_sub = lt_active_variant.price | times: lt_sub_mult | divided_by: 100
+              endif
             -%}
             {%- if lt_show_sub -%}
+            {%- if lt_show_sizes -%}
+              {%- comment -%} Größe VOR Modus (Zone B vor Zone C, nmn-angebotsarchitektur §6): der Selector
+                  steht über beiden Kaufoption-Karten und schreibt die gewählte Größe auf BEIDE. {%- endcomment -%}
+              <div class="lt-size" data-lt-size-group role="radiogroup" aria-label="Größe wählen">
+                {%- for variant in product.variants -%}
+                  {%- liquid
+                    assign v_compare = variant.compare_at_price | default: 0
+                    assign v_grams = variant.title | replace: ' ', '' | replace: 'g', '' | replace: 'G', '' | times: 1
+                    # Abo-Preis + Plan je Größe aus der Allocation mit FESTER Preis-Policy
+                    # (siehe Kommentar oben bei lt_abo_alloc), Fallback price × (100 − Rabatt)
+                    assign v_alloc = variant.selling_plan_allocations.first
+                    for alloc in variant.selling_plan_allocations
+                      if alloc.selling_plan.price_adjustments.first.value_type == 'price'
+                        assign v_alloc = alloc
+                        break
+                      endif
+                    endfor
+                    if v_alloc
+                      assign v_sub = v_alloc.price
+                    else
+                      assign v_sub = variant.price | times: lt_sub_mult | divided_by: 100
+                    endif
+                    # Mengenvorteil in Euro vs. gleiche Menge in kleinster Größe (belegbar, keine Aktionsersparnis)
+                    assign v_bundle_ref = 0
+                    if lt_abo_min > 0 and v_grams > lt_abo_min
+                      assign v_bundle_ref = lt_abo_variant.price | times: v_grams | divided_by: lt_abo_min
+                    endif
+                  -%}
+                  <label class="lt-size__pill{% if variant.id == lt_active_variant.id %} is-selected{% endif %}" data-lt-size>
+                    <input
+                      type="radio"
+                      class="lt-size__input"
+                      name="lt-size-{{ section.id }}"
+                      value="{{ variant.id }}"
+                      {% if variant.id == lt_active_variant.id %}checked{% endif %}
+                      data-variant-id="{{ variant.id }}"
+                      data-once-price="{{ variant.price }}"
+                      data-sub-price="{{ v_sub }}"
+                      data-plan-id="{% if v_alloc %}{{ v_alloc.selling_plan.id }}{% endif %}"
+                      data-compare-price="{{ v_compare }}"
+                      data-grams="{{ v_grams }}"
+                      data-size-short="{{ variant.title | escape }}"
+                      {% unless variant.available %}disabled{% endunless %}
+                    >
+                    <span class="lt-size__name">{{ variant.title | escape }}</span>
+                    {%- if v_grams > 0 -%}<span class="lt-size__unit">{{ variant.price | times: 100 | divided_by: v_grams | money_without_trailing_zeros }}/100 g</span>{%- endif -%}
+                    <span class="lt-size__save">{%- if v_bundle_ref > variant.price -%}spart {{ v_bundle_ref | minus: variant.price | money_without_trailing_zeros }}{%- endif -%}</span>
+                  </label>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
             <div
               class="lt-bb"
               data-lt-buy-box
@@ -758,7 +819,7 @@
               aria-label="Kaufoption wählen"
             >
               <label
-                class="lt-bb-card lt-bb-card--sub{% unless lt_deeplinked %} is-selected{% endunless %}"
+                class="lt-bb-card lt-bb-card--sub is-selected"
                 data-lt-bb-card
                 data-bb-kind="sub"
               >
@@ -767,14 +828,15 @@
                   class="lt-bb-card__input"
                   name="lt-bb-{{ section.id }}"
                   value="sub-1"
-                  {% unless lt_deeplinked %}checked{% endunless %}
+                  checked
                   data-quantity="{{ lt_pill_1_qty }}"
                   {%- if lt_show_sizes -%}
-                  data-once-price="{{ lt_abo_variant.price }}"
+                  data-once-price="{{ lt_active_variant.price }}"
                   data-sub-price="{{ lt_abo_sub }}"
-                  data-variant-id="{{ lt_abo_variant.id }}"
+                  data-plan-id="{% if lt_abo_alloc %}{{ lt_abo_alloc.selling_plan.id }}{% endif %}"
+                  data-variant-id="{{ lt_active_variant.id }}"
                   data-grams="{{ lt_abo_grams }}"
-                  data-size-short="{{ lt_abo_variant.title | escape }}"
+                  data-size-short="{{ lt_active_variant.title | escape }}"
                   {%- else -%}
                   data-once-price="{{ lt_pill_1_once }}"
                   data-sub-price="{{ lt_pill_1_sub }}"
@@ -857,14 +919,13 @@
                 <span class="lt-bb__or-line" aria-hidden="true"></span>
               </div>
 
-              <div class="lt-bb-card lt-bb-card--once{% if lt_deeplinked %} is-selected{% endif %}" data-lt-bb-card data-bb-kind="once">
+              <div class="lt-bb-card lt-bb-card--once" data-lt-bb-card data-bb-kind="once">
                 <input
                   type="radio"
                   class="lt-bb-card__input"
                   name="lt-bb-{{ section.id }}"
                   value="once"
                   aria-label="{{ bb_once_title | escape }}"
-                  {% if lt_deeplinked %}checked{% endif %}
                   data-quantity="{{ lt_pill_1_qty }}"
                   data-once-price="{{ lt_pill_1_once }}"
                   data-sub-price="{{ lt_pill_1_sub }}"
@@ -878,7 +939,7 @@
                           <span class="lt-bb-card__title">{{ bb_once_title | escape }}</span>
                           <span class="lt-bb-card__badge lt-bb-card__badge--sale" data-lt-bb-sale-badge hidden></span>
                         </span>
-                        {%- unless lt_show_sizes -%}<span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>{%- endunless -%}
+                        <span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>
                       </span>
                       <span class="lt-bb-card__prices">
                         <del class="lt-bb-card__compare" data-lt-bb-compare></del>
@@ -888,39 +949,8 @@
                     </span>
                   </span>
                 </span>
-                {%- if lt_show_sizes -%}
-                  <div class="lt-size" data-lt-size-group role="radiogroup" aria-label="Größe wählen">
-                    {%- for variant in product.variants -%}
-                      {%- liquid
-                        assign v_compare = variant.compare_at_price | default: 0
-                        assign v_grams = variant.title | replace: ' ', '' | replace: 'g', '' | replace: 'G', '' | times: 1
-                      -%}
-                      <label class="lt-size__pill{% if variant.id == lt_preselect_variant.id %} is-selected{% endif %}" data-lt-size>
-                        <input
-                          type="radio"
-                          class="lt-size__input"
-                          name="lt-size-{{ section.id }}"
-                          value="{{ variant.id }}"
-                          {% if variant.id == lt_preselect_variant.id %}checked{% endif %}
-                          data-variant-id="{{ variant.id }}"
-                          data-once-price="{{ variant.price }}"
-                          data-compare-price="{{ v_compare }}"
-                          data-grams="{{ v_grams }}"
-                          data-size-short="{{ variant.title | escape }}"
-                          {% unless variant.available %}disabled{% endunless %}
-                        >
-                        <span class="lt-size__name">{{ variant.title | escape }}</span>
-                        {%- if v_grams > 0 -%}<span class="lt-size__unit">{{ variant.price | times: 100 | divided_by: v_grams | money_without_trailing_zeros }}/100 g</span>{%- endif -%}
-                        <span class="lt-size__save">{%- if v_compare > variant.price -%}−{{ v_compare | minus: variant.price | money }}{%- endif -%}</span>
-                      </label>
-                    {%- endfor -%}
-                  </div>
-                {%- endif -%}
               </div>
             </div>
-            {%- if lt_show_sizes and section.settings.bb_size_hint != blank -%}
-              <button type="button" class="lt-bb__size-hint" data-lt-size-hint>{{ section.settings.bb_size_hint | escape }}</button>
-            {%- endif -%}
             {%- else -%}
             <div class="lt-price-direct">
               <div class="lt-price-direct__row">
@@ -1019,7 +1049,7 @@
           <div class="lt-pdp-hero__post-cta">
             {%- if lt_show_cancel_after_cta -%}
               {%- assign lt_cancel_hidden_initially = false -%}
-              {%- if lt_deeplinked or product.selling_plan_groups.size == 0 -%}
+              {%- if product.selling_plan_groups.size == 0 -%}
                 {%- assign lt_cancel_hidden_initially = true -%}
               {%- endif -%}
               <div class="lt-pdp-hero__guarantee lt-pdp-hero__guarantee--cancel" data-lt-sub-only{% if lt_cancel_hidden_initially %} hidden{% endif %}>
@@ -1312,6 +1342,7 @@
     const plansData = section.querySelector('#lt-selling-plans-data');
     const ltPlans = plansData ? JSON.parse(plansData.textContent).plans : [];
 
+
     const planInput = section.querySelector('#lt-selling-plan-input');
     const quantityInput = section.querySelector('[data-lt-quantity-input]');
     const mainPrice = section.querySelector('.lt-price-main');
@@ -1536,7 +1567,11 @@
       if (variantInput && input.dataset.variantId) variantInput.value = input.dataset.variantId;
       if (quantityInput) quantityInput.value = String(qty);
       if (planInput) {
-        planInput.value = isSub && ltPlans.length ? String(ltPlans[0].id) : '';
+        // Plan je Größe kommt aus der Varianten-Allocation (data-plan-id, größenspezifische
+        // Appstle-Gruppen mit Takt 2/4/6 Monate); ohne Größen-Selector Fallback ltPlans[0].
+        planInput.value = isSub
+          ? (input.dataset.planId || (ltPlans.length ? String(ltPlans[0].id) : ''))
+          : '';
       }
       if (mainPrice) mainPrice.textContent = formatPrice(currentCents);
 
@@ -1599,28 +1634,35 @@
     }
 
     // --- Größen-Auswahl (Varianten) -------------------------------------
-    // Eine Kachel pro Variante. Pro Größe: Variant-ID ins Formular, Einmal-/
-    // Abo-/Vergleichspreis auf die Kaufoption-Karten, dann bestehende
-    // Sync-Logik (syncFromCard) neu anwerfen. Wenn keine Größen-Gruppe da
-    // ist, bleibt das Verhalten unverändert.
+    // Eine Kachel pro Variante, als eigene Zone VOR den Kaufoption-Karten.
+    // Die gewählte Größe wird auf BEIDE Karten geschrieben (Einmalkauf UND
+    // Abo, je mit eigenem Preis aus data-once-/data-sub-price), danach synct
+    // die aktuell gewählte Karte neu — Größenwahl wechselt den Modus nicht.
+    // Wenn keine Größen-Gruppe da ist, bleibt das Verhalten unverändert.
     const sizeGroup = section.querySelector('[data-lt-size-group]');
     const variantInput = section.querySelector('[data-lt-variant-input]');
     const appstleWidget = section.querySelector('#lt-appstle-widget');
     let stickySublineBase = null; // SSR-Subline-Text, einmalig gecacht (sonst doppeltes Voranstellen)
 
-    // Größe betrifft NUR den Einmalkauf. Schreibt die Daten der gewählten Größe auf die
-    // Einmal-Karte; selectOnce=true wählt den Einmalkauf zusätzlich aus. Abo-Karte bleibt 30 g.
-    function applySize(sizeInput, selectOnce) {
+    function applySize(sizeInput) {
       if (!sizeInput) return;
       const onceCard = section.querySelector('.lt-bb-card--once');
+      const subCard = section.querySelector('.lt-bb-card--sub');
       const onceRadio = onceCard ? getRadio(onceCard) : null;
-      if (onceRadio) {
-        onceRadio.dataset.variantId = sizeInput.dataset.variantId || '';
-        onceRadio.dataset.oncePrice = sizeInput.dataset.oncePrice || '0';
-        onceRadio.dataset.comparePrice = sizeInput.dataset.comparePrice || '0';
-        onceRadio.dataset.grams = sizeInput.dataset.grams || '0';
-        onceRadio.dataset.sizeShort = sizeInput.dataset.sizeShort || '';
-        onceRadio.dataset.quantity = '1';
+      const subRadio = subCard ? getRadio(subCard) : null;
+      [onceRadio, subRadio].forEach(radio => {
+        if (!radio) return;
+        radio.dataset.variantId = sizeInput.dataset.variantId || '';
+        radio.dataset.oncePrice = sizeInput.dataset.oncePrice || '0';
+        radio.dataset.grams = sizeInput.dataset.grams || '0';
+        radio.dataset.sizeShort = sizeInput.dataset.sizeShort || '';
+        radio.dataset.quantity = '1';
+      });
+      // compare-at nur auf den Einmalkauf; die Abo-Karte rechnet gegen den Einmalpreis derselben Größe
+      if (onceRadio) onceRadio.dataset.comparePrice = sizeInput.dataset.comparePrice || '0';
+      if (subRadio) {
+        subRadio.dataset.subPrice = sizeInput.dataset.subPrice || '0';
+        subRadio.dataset.planId = sizeInput.dataset.planId || '';
       }
       if (appstleWidget && sizeInput.dataset.variantId) {
         appstleWidget.setAttribute('data-variant-id', sizeInput.dataset.variantId);
@@ -1631,45 +1673,36 @@
         pill.classList.toggle('is-selected', on);
         if (inp) inp.checked = on;
       });
-      if (selectOnce && onceCard) {
-        selectCard(onceCard);
+      const activeCard = section.querySelector('.lt-bb-card__input:checked')?.closest('[data-lt-bb-card]');
+      if (activeCard) {
+        syncFromCard(activeCard);
       } else {
         updateCardFacades();
       }
     }
 
-    // Einmal-Karte ist immer ein <div> (kein <label>, weil die Größen-Radios darin liegen) → Klick-Auswahl per JS.
+    // Einmal-Karte ist ein <div> (kein <label>, historisch wegen der Größen-Radios darin;
+    // bleibt so für alle Sub-Toggle-PDPs) → Klick-Auswahl per JS.
     const onceCardEl = section.querySelector('.lt-bb-card--once');
     if (onceCardEl) {
-      onceCardEl.addEventListener('click', function(e) {
-        if (e.target.closest('[data-lt-size]')) return;
+      onceCardEl.addEventListener('click', function() {
         selectCard(onceCardEl);
-      });
-    }
-
-    // Größen-Hinweis (Abo-Default): öffnet den Einmalkauf, der die Größen-Pills zeigt
-    const sizeHintEl = section.querySelector('[data-lt-size-hint]');
-    if (sizeHintEl && onceCardEl) {
-      sizeHintEl.addEventListener('click', function() {
-        selectCard(onceCardEl);
-        onceCardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
       });
     }
 
     if (sizeGroup) {
-      // Größe antippen → Einmalkauf + diese Größe
       sizeGroup.querySelectorAll('.lt-size__input').forEach(inp => {
         inp.addEventListener('change', function() {
-          if (this.checked) applySize(this, true);
+          if (this.checked) applySize(this);
         });
       });
-      // Init: Basis-Größe (30 g bzw. Deep-Link) in die Einmal-Karte schreiben, OHNE sie zu
-      // erzwingen — die Default-Auswahl (Abo/Einmal) kommt aus dem SSR-checked-State.
+      // Init: Basis-Größe (30 g bzw. Deep-Link) auf beide Karten schreiben — die
+      // Modus-Auswahl (Abo default) kommt aus dem SSR-checked-State.
       const baseSize = sizeGroup.querySelector('.lt-size__input:checked:not(:disabled)')
         || sizeGroup.querySelector('.lt-size__input:not(:disabled)');
       if (baseSize) {
         baseSize.checked = true;
-        applySize(baseSize, false);
+        applySize(baseSize);
       }
     }
     // --------------------------------------------------------------------
@@ -2103,7 +2136,8 @@
   opacity: 0.65;
 }
 
-/* Größen-Auswahl — segmentierte Pills (flat, wie Buy-Box-Karten) */
+/* Größen-Auswahl — segmentierte Pills (flat, wie Buy-Box-Karten), als eigene Zone
+   VOR den Kaufoption-Karten: immer sichtbar, unabhängig vom gewählten Modus */
 .lt-size {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -2111,17 +2145,7 @@
   margin-top: var(--space-5);
   margin-bottom: var(--space-4);
 }
-/* Größenauswahl sitzt IN der Einmalkauf-Karte → erst sichtbar wenn Einmalkauf gewählt, vom Kartenrand eingerückt */
 .lt-bb-card--once { cursor: pointer; }
-.lt-bb-card--once .lt-size { margin: 2px var(--space-4) var(--space-4); }
-.lt-bb-card--once:not(.is-selected) .lt-size { display: none; }
-/* Streichpreis-Zeile auch ohne compare (30 g) reservieren → kein Höhen-Sprung beim Größenwechsel.
-   display:block schlägt bewusst die globale .lt-bb-card__compare:empty{display:none} UND das per JS
-   gesetzte [hidden] (compareEl.hidden=true bei 30 g). :has(.lt-size)-Scope NICHT entfernen. */
-.lt-bb-card--once:has(.lt-size) .lt-bb-card__compare {
-  display: block;
-  min-height: 1.4em;
-}
 .lt-size__pill {
   position: relative;
   display: flex;
@@ -2529,12 +2553,6 @@
       "id": "cancel_popup_body",
       "label": "Abo-Kündigung — Popup-Inhalt",
       "info": "Wenn ausgefüllt: Abo-Vorteil 2 wird klickbar und öffnet dieses Popup."
-    },
-    {
-      "type": "text",
-      "id": "bb_size_hint",
-      "label": "Größen-Hinweis unter Buy-Box",
-      "info": "Nur bei Produkten mit mehreren Größen. Klick öffnet den Einmalkauf mit Größenauswahl."
     },
     {
       "type": "header",
