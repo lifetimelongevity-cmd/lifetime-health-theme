@@ -113,6 +113,7 @@ Appstle – Abo-Plan „NMN Pulver" (lifetime-nmn)
 1) Feste Abo-Preise je Variante: 30 g 29,90 · 60 g 53,90 · 90 g 71,90 € (nicht Prozent)
 2) Alle drei Varianten (30/60/90 g) abonnierbar
 3) Lieferintervalle nur alle 2/4/6 Monate, KEIN monatlich; Default 30→2, 60→4, 90→6
+   Plan-Namen MIT Monatszahl („Alle 2 Monate" usw.) — die Buybox mappt Größe→Takt über die Zahl im Namen
 4) Bestehende aktive Abos NICHT ändern
 5) Abo-Lieferungen versandkostenfrei
 Timing: mit Theme-Push (~heute) zusammen aktivieren.
