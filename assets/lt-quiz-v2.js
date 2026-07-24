@@ -680,9 +680,9 @@
       const dAbs = Math.abs(bioAge.delta);
       const dUnit = dAbs === 1 ? 'Jahr' : 'Jahre';
       if (deltaEl) {
-        if (bioAge.direction === 'up') deltaEl.innerHTML = 'Geschätzt rund <strong>' + dAbs + '&nbsp;' + dUnit + '</strong> über deinem Pass-Alter.';
-        else if (bioAge.direction === 'down') deltaEl.innerHTML = 'Geschätzt rund <strong>' + dAbs + '&nbsp;' + dUnit + '</strong> unter deinem Pass-Alter.';
-        else deltaEl.textContent = 'Geschätzt im Einklang mit deinem Pass-Alter.';
+        if (bioAge.direction === 'up') deltaEl.innerHTML = 'Geschätzt, nicht gemessen: rund <strong>' + dAbs + '&nbsp;' + dUnit + '</strong> über deinem Pass-Alter.';
+        else if (bioAge.direction === 'down') deltaEl.innerHTML = 'Geschätzt, nicht gemessen: rund <strong>' + dAbs + '&nbsp;' + dUnit + '</strong> unter deinem Pass-Alter.';
+        else deltaEl.textContent = 'Geschätzt, nicht gemessen: im Einklang mit deinem Pass-Alter.';
       }
 
       // Skala-Zielposition (24-Jahre-Fenster, Pass = Mitte 50 %)
