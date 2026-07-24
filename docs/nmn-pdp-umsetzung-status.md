@@ -71,8 +71,11 @@ Die drei Live-Änderungen müssen zusammen passieren, sonst Mischzustand auf bez
    mit dem nächsten Theme-Push. **Versandrichtlinie: aktualisiert (BJ, 24.07., per API
    verifiziert)** — neue Fassung nennt 4,90/49 € DE, 8,90/59 € AT/CH/NL/IT und die
    Abo-Versandbefreiung ab Lieferung 1.
-3. **Claude, auf BJ-Signal:** compare-at auf den 3 NMN-Varianten entfernen (= Sale-Ende).
-4. **BJ:** Branch `feat/nmn-abo-groessen-2026-07-24` previewen, mergen, Theme via Theme Manager pushen.
+3. ~~**Claude:** compare-at entfernen.~~ **ERLEDIGT 24.07. auf BJ-Go, verifiziert:** alle drei
+   compare-at leer, Zahlpreise 33,90/59,90/80,90 € unverändert = reguläre Preise. Rollback-Werte
+   siehe unten. **Bis zum Theme-Push zeigt die Live-PDP noch den alten Promo-Banner (15 %,
+   Countdown) ohne Streichpreise → Push zügig.**
+4. **BJ (JETZT):** Branch `feat/nmn-abo-groessen-2026-07-24` mergen, Theme via Theme Manager pushen.
 5. **Gemeinsam:** Live-QA (Checkliste unten).
 
 Falls Shopify-Token nur lesen kann (Memory `shopify-admin-write-path`): Schritte 2–3 gibt Claude als
