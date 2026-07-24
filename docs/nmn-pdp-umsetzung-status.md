@@ -133,9 +133,10 @@ zeigt die 30-g-Abo-Karte den Sale-Bezug (24 %); bis zur Appstle-Umstellung sind 
   (`DiscountCodeNode/2358693790071`), 10 % nur auf den AGE & DNA-Test, einmal pro Kunde,
   kombinierbar mit Versandrabatten. **PFLICHT-To-do (BJ): Zustellung einbauen** — Snippet für die
   Bestellbestätigung (Shopify Admin → Einstellungen → Benachrichtigungen → Bestellbestätigung)
-  steht im Chat-Protokoll 24.07. **BJ-Entscheid: erstmal nur WILLKOMMEN10 in die Mail**, das
-  Dossier ist zurückgestellt — Perk 4 entsprechend gekürzt auf „Zur ersten Lieferung: 10 % auf
-  den AGE & DNA-Test". Dossier-Zeile (Perk + Mail) erst ergänzen, wenn die PDF-Zustellung steht.
+  **ERLEDIGT: Mail-Block ist eingebaut (BJ, 24.07. abends)** — nur WILLKOMMEN10, das Dossier ist
+  zurückgestellt (Perk 4 entsprechend gekürzt); Dossier-Zeile in Perk + Mail erst ergänzen, wenn
+  die PDF-Zustellung steht. Damit ist die Einlösekette komplett: PDP-Perk → Code → Mail.
+  Zweiter Push 24.07. abends ist live verifiziert (Störer, Klarna-Pill, Perk 4).
 - Fokus-Konsolidierung (BJ-Entscheid): EIN Störer, „Willkommens-Vorteil" solid auf der Oberkante
   der Abo-Karte (`bb_sub_flag`); der 90-g-Pill-Störer „Bester Grundpreis" wurde wieder entfernt.
 
