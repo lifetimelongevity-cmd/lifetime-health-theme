@@ -13,11 +13,11 @@ sobald das Paket live und QA-bestätigt ist.
 
 ## Stand in einem Satz
 
-Appstle ist umgestellt und wirkt bereits live (drei Größen-Gruppen, feste Preise, Takt 2/4/6).
-Theme-Code: Items 6–8 auf `main`, Items 10 + 11 auf `feat/nmn-abo-groessen-2026-07-24` (Preview
-durch BJ offen), beides noch nicht gepusht. Es fehlt das restliche Go-Live-Fenster: Versandprofil,
-compare-at raus, Merge + Theme-Push — zeitnah, weil Live-Abo-Preis (29,90 €) und Live-Sale-Optik
-jetzt gemischt sind.
+**LIVE seit 24.07. abends, QA grün.** Das komplette Paket ist deployed: Items 6–8, neue Buybox
+(Größe in beiden Modi, Deep-Link → Abo, Takt je Größe), Appstle-Größen-Abos, Versandmodell
+(Profil + Auto-Discount + Richtlinie + Theme-Copy), Sale-Ende. Live-QA per curl bestanden
+(Buybox-Daten, Deep-Link-SSR, Supplement-Pillen, Cart-Bar 49 €). Offen nur noch: manuelle
+Checkout-Testbestellung (BJ) und Merchant-Center-Re-Check ~26.07.
 
 ## Was LIVE ist (Stand 24.07. nachmittags)
 
@@ -77,7 +77,13 @@ Die drei Live-Änderungen müssen zusammen passieren, sonst Mischzustand auf bez
    Countdown) ohne Streichpreise → Push zügig.**
 4. ~~Branch mergen~~ **Merge auf main erledigt (Claude, 24.07., `496fd0c` + Format-Fix `33b4045`).**
    Syntax-/Schema-/JSON-Checks grün, Design-Review durch. **BJ (JETZT): Theme via Theme Manager pushen.**
-5. **Gemeinsam:** Live-QA (Checkliste unten).
+5. **Live-QA (24.07., per curl auf der Live-Seite): BESTANDEN.** Kein Banner/Countdown/
+   Streichpreis, Abo-Karte 29,90 € mit Plan „Alle 2 Monate", Pills mit data-sub-price/-plan-id je
+   Größe (53,90/„Alle 4 Monate", 71,90/„Alle 6 Monate"), Grundpreise zweistellig, „spart
+   7,90/20,80 €", Once-Subline 49 €, Deep-Link `?variant=60g` → Abo bleibt Default mit 60-g-Daten
+   im SSR, Supplement-PDPs zeigen „Versandkostenfrei ab 49 €", Cart-Bar rechnet 49 €.
+   **Manuell offen (BJ):** eine Checkout-Testbestellung (unter 49 € → 4,90 €; mit Abo →
+   Rabattzeile „Gratisversand im Abo", 0 € Versand) + kurzer Mobile-Blick echtes Handy.
 
 Falls Shopify-Token nur lesen kann (Memory `shopify-admin-write-path`): Schritte 2–3 gibt Claude als
 Admin-Klicks/curl aus, BJ führt sie aus.
