@@ -129,7 +129,14 @@ zeigt die 30-g-Abo-Karte den Sale-Bezug (24 %); bis zur Appstle-Umstellung sind 
   4/6-Monats-Takt und englisch), Ziel „Alle 4 Monate" / „Alle 6 Monate". Kundensichtbar in Cart,
   Checkout, Bestellbestätigung und Kundenkonto. Der 30-g-Plan heißt bereits korrekt „Alle 2 Monate".
   (Die Buybox mappt seit `ab65c0c` NICHT mehr über Namen — rein kosmetisch/kundenseitig.)
-- Punkt 5 (Abo versandkostenfrei) prüfen, auch für Rebills.
+- Punkt 5 (Abo versandkostenfrei): **Appstle kann nur die Folgelieferungen befreien** (ab
+  Lieferung 2, weil Appstle nur die Rebills selbst erzeugt; die Erstbestellung läuft durch den
+  normalen Shopify-Checkout mit Versandprofil). Lösung für Lieferung 1: **automatischer Rabatt
+  „Kostenloser Versand" mit Kaufart „Abonnement"** (nativ, kein Plus; API-Felder
+  `appliesOnSubscription: true`, `appliesOnOneTimePurchase: false`, alle Zahlungen). Kein solcher
+  Rabatt existiert bisher (geprüft 24.07.; die Codes `ltfreeshipping`/`XVDJQPFEHTWB` gelten nur
+  für Einmalkauf). **ACHTUNG: Versandfalle ist seit der Appstle-Umstellung live offen** — 30-g-Abo
+  29,90 € liegt unter der 30-€-Gratisgrenze → 5,50 € Versand auf die erste Abo-Lieferung.
 
 ## Harte Rahmenbedingungen
 
