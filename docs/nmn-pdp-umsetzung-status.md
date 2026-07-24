@@ -75,7 +75,8 @@ Die drei Live-Änderungen müssen zusammen passieren, sonst Mischzustand auf bez
    compare-at leer, Zahlpreise 33,90/59,90/80,90 € unverändert = reguläre Preise. Rollback-Werte
    siehe unten. **Bis zum Theme-Push zeigt die Live-PDP noch den alten Promo-Banner (15 %,
    Countdown) ohne Streichpreise → Push zügig.**
-4. **BJ (JETZT):** Branch `feat/nmn-abo-groessen-2026-07-24` mergen, Theme via Theme Manager pushen.
+4. ~~Branch mergen~~ **Merge auf main erledigt (Claude, 24.07., `496fd0c` + Format-Fix `33b4045`).**
+   Syntax-/Schema-/JSON-Checks grün, Design-Review durch. **BJ (JETZT): Theme via Theme Manager pushen.**
 5. **Gemeinsam:** Live-QA (Checkliste unten).
 
 Falls Shopify-Token nur lesen kann (Memory `shopify-admin-write-path`): Schritte 2–3 gibt Claude als
