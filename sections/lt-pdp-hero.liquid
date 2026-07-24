@@ -497,8 +497,18 @@
         {%- endcapture -%}
 
         {%- if section.settings.show_rating -%}
+        {%- if lt_count > 0 -%}
+          {%- assign lt_star_val = lt_rating -%}
+        {%- else -%}
+          {%- assign lt_star_val = 4.7 -%}
+        {%- endif -%}
+        {%- assign lt_star_pct = lt_star_val | times: 20 | round: 1 -%}
+        {%- assign lt_star_label = lt_star_val | round: 1 | replace: '.', ',' -%}
         <button type="button" class="lt-pdp-hero__rating lt-hero-stars" data-lt-reviews-scroll>
-          <span class="lt-pdp-hero__stars">★★★★★</span>
+          <span class="lt-pdp-hero__stars" role="img" aria-label="{{ lt_star_label }} von 5 Sternen">
+            <span class="lt-pdp-hero__stars-empty" aria-hidden="true">★★★★★</span>
+            <span class="lt-pdp-hero__stars-full" aria-hidden="true" style="width: {{ lt_star_pct }}%">★★★★★</span>
+          </span>
           <span class="lt-pdp-hero__score">
             {%- if lt_count > 0 -%}
               {{ lt_rating | round: 1 | replace: '.', ',' }}

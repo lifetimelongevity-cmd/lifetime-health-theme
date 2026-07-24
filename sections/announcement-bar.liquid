@@ -71,7 +71,16 @@
 
           <div class="announcement-bar__slider" data-js-slider>
             {%- for block in section.blocks -%}
-              {%- assign ann_text = block.settings.text
+              {%- comment -%}
+                Auf Produktseiten überschreibt der optionale product_text den Standardtext.
+                Löst das Doppel-Rating (Shop-Rating im Bar vs. Produktrating in der PDP)
+                zugunsten eines Kaufgrunds. Leer = Standardverhalten auch auf Produktseiten.
+              {%- endcomment -%}
+              {%- assign ann_source = block.settings.text -%}
+              {%- if template contains 'product' and block.settings.product_text != blank -%}
+                {%- assign ann_source = block.settings.product_text -%}
+              {%- endif -%}
+              {%- assign ann_text = ann_source
                   | replace: '[rating]', ann_loox_rating
                   | replace: '[count]', ann_loox_count -%}
               <span class="announcement" {{ block.shopify_attributes }}>
@@ -225,6 +234,13 @@
           "id": "text",
           "label": "t:sections.local-extra-words.sections.announcement-bar.blocks.content.settings.text",
           "default": "Write an important announcement here"
+        },
+        {
+          "type": "text",
+          "id": "product_text",
+          "label": "Produktseiten-Text",
+          "info": "Nur auf Produktseiten sichtbar, ersetzt den Text oben. Leer lassen = Standardtext (mit [rating]/[count]) auch auf Produktseiten.",
+          "default": "Lieferung in 2–3 Werktagen · Kauf auf Rechnung (Klarna) · 30 Tage Geld-zurück-Garantie"
         },
         {
           "type": "url",
