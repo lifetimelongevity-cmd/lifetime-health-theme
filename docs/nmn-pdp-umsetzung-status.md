@@ -13,16 +13,22 @@ sobald das Paket live und QA-bestätigt ist.
 
 ## Stand in einem Satz
 
-Theme-Code für Items 6–8 ist auf `main` committet, **aber noch nirgends live**: kein Theme-Push,
-keine Shopify-Admin-Änderung, keine Appstle-Änderung. Items 10 + 11 sind gebaut und liegen auf
-`feat/nmn-abo-groessen-2026-07-24` (Preview durch BJ offen). Go-Live ist ein koordiniertes
-Fenster, das noch aussteht.
+Appstle ist umgestellt und wirkt bereits live (drei Größen-Gruppen, feste Preise, Takt 2/4/6).
+Theme-Code: Items 6–8 auf `main`, Items 10 + 11 auf `feat/nmn-abo-groessen-2026-07-24` (Preview
+durch BJ offen), beides noch nicht gepusht. Es fehlt das restliche Go-Live-Fenster: Versandprofil,
+compare-at raus, Merge + Theme-Push — zeitnah, weil Live-Abo-Preis (29,90 €) und Live-Sale-Optik
+jetzt gemischt sind.
 
-## Was LIVE ist: nichts davon
+## Was LIVE ist (Stand 24.07. nachmittags)
 
-- Theme: die 3 Commits sind **lokal**, nicht via Theme Manager gepusht. Live läuft weiter der alte Stand.
+- Theme: Commits sind **lokal**, nicht via Theme Manager gepusht. Live läuft weiter der alte Stand.
 - Shopify Admin: unverändert. Streichpreise (compare-at) stehen noch, Sale läuft.
-- Appstle: unverändert. Abo rechnet weiter 30,51 €, nur 30 g abonnierbar.
+- **Appstle: UMGESTELLT und live** (BJ, 24.07., per API verifiziert): drei größenspezifische
+  Gruppen „NMN 30/60/90 g" mit festen Preisen 29,90/53,90/71,90 € und Takt 2/4/6 Monate, je genau
+  einer Variante zugeordnet. Alte „Spar-Abo"-Gruppe (10 %) ist vom NMN-Produkt entfernt (Gruppe
+  existiert weiter für andere Produkte). Nebenwirkung auf die Live-PDP: die alte Buybox zieht den
+  Abo-Preis aus der Allocation → 30-g-Abo zeigt live bereits 29,90 € statt 30,51 €. Kein kaputter
+  Zustand, aber ein Grund, das Go-Live-Fenster zeitnah zu schließen.
 - Merchant-Center-Check läuft noch bis ~26.07.
 
 ## Committet auf main (nicht gepusht)
@@ -55,10 +61,11 @@ untracked herum. Gehören NICHT zum Theme (SwiftUI-Spiel-Demo), nicht committen,
 
 Die drei Live-Änderungen müssen zusammen passieren, sonst Mischzustand auf bezahlter PDP.
 
-1. **BJ/Appstle:** Brief abarbeiten (siehe unten). Preise, Kadenzen, Abo-Versand-frei.
+1. ~~**BJ/Appstle:** Brief abarbeiten.~~ **ERLEDIGT 24.07.** (Restpunkte: Plan-Namen 60/90 g,
+   Versandfrei-Bestätigung — siehe unten). Preise/Kadenzen wirken bereits live.
 2. **Claude, auf BJ-Signal:** Versandprofil setzen (DE 49 €, 4,90 €; AT/CH/NL 59 €).
 3. **Claude, auf BJ-Signal:** compare-at auf den 3 NMN-Varianten entfernen (= Sale-Ende).
-4. **BJ:** Theme via Theme Manager pushen.
+4. **BJ:** Branch `feat/nmn-abo-groessen-2026-07-24` previewen, mergen, Theme via Theme Manager pushen.
 5. **Gemeinsam:** Live-QA (Checkliste unten).
 
 Falls Shopify-Token nur lesen kann (Memory `shopify-admin-write-path`): Schritte 2–3 gibt Claude als
@@ -79,9 +86,10 @@ Was gebaut wurde (`sections/lt-pdp-hero.liquid` + `templates/product.nmn-pulver.
 - Abo-Preis je Größe aus `variant.selling_plan_allocations.first.price` als `data-sub-price` je
   Pill (Fallback `price × lt_sub_mult / 100`). Abo-Badge/-Streichpreis rechnen gegen den
   Einmalpreis derselben Größe.
-- Liefertakt je Größe: kleinste Größe → kürzestes Intervall, Index-Mapping über die Monatszahl im
-  Plan-Namen. **Appstle-Pläne müssen die Zahl im Namen tragen** („Alle 2/4/6 Monate"). Bei nur
-  einem Plan und auf allen Nicht-Size-PDPs unverändert `ltPlans[0]`.
+- Liefertakt + Abo-Preis je Größe direkt aus der Varianten-Allocation (`data-plan-id` je Pill,
+  Commit `ab65c0c`, ersetzt das frühere Namens-Mapping). Selektion über die Allocation mit fester
+  Preis-Policy, damit eine parallel liegende Prozent-Gruppe nie fälschlich greift. Auf allen
+  Nicht-Size-PDPs unverändert `ltPlans[0]`.
 - Item 11: Deep-Link (`?variant=`) wählt nur noch die Größe vor, Abo bleibt Default; der
   Einmalpreis (= Feed-Preis) bleibt auf der Einmal-Karte sichtbar.
 - Pills zeigen Mengenvorteil in Euro („spart 7,90 / 20,80 €") statt Aktionsersparnis; Grundpreis
@@ -107,17 +115,21 @@ zeigt die 30-g-Abo-Karte den Sale-Bezug (24 %); bis zur Appstle-Umstellung sind 
 - Zone ACHNLIT: Gratis-Schwelle 99,01 → 59 €
 - Abo-Lieferungen generell versandfrei: über Appstle (native Delivery-Profiles können „nur Abo" nicht)
 
-**Appstle-Brief (fertig, zum Abschicken):**
+**Appstle-Brief — Status 24.07. (per API verifiziert):**
 ```
-Appstle – Abo-Plan „NMN Pulver" (lifetime-nmn)
-1) Feste Abo-Preise je Variante: 30 g 29,90 · 60 g 53,90 · 90 g 71,90 € (nicht Prozent)
-2) Alle drei Varianten (30/60/90 g) abonnierbar
-3) Lieferintervalle nur alle 2/4/6 Monate, KEIN monatlich; Default 30→2, 60→4, 90→6
-   Plan-Namen MIT Monatszahl („Alle 2 Monate" usw.) — die Buybox mappt Größe→Takt über die Zahl im Namen
-4) Bestehende aktive Abos NICHT ändern
-5) Abo-Lieferungen versandkostenfrei
-Timing: mit Theme-Push (~heute) zusammen aktivieren.
+1) Feste Abo-Preise 29,90 / 53,90 / 71,90 €        ERLEDIGT
+2) Alle drei Varianten abonnierbar                  ERLEDIGT (je Größe eigene Gruppe)
+3) Intervalle 2/4/6 Monate, kein monatlich          ERLEDIGT (Takt hängt an der Gruppe je Größe)
+4) Bestehende aktive Abos nicht ändern              unberührt (Contracts snapshotten Konditionen)
+5) Abo-Lieferungen versandkostenfrei                OFFEN — in Appstle bestätigen/testen
 ```
+
+**Appstle-Restpunkte (BJ, vor oder mit dem Go-Live-Fenster):**
+- Plan-Namen der 60-/90-g-Gruppen umbenennen: heute „Monthly Subscription" (sachlich falsch bei
+  4/6-Monats-Takt und englisch), Ziel „Alle 4 Monate" / „Alle 6 Monate". Kundensichtbar in Cart,
+  Checkout, Bestellbestätigung und Kundenkonto. Der 30-g-Plan heißt bereits korrekt „Alle 2 Monate".
+  (Die Buybox mappt seit `ab65c0c` NICHT mehr über Namen — rein kosmetisch/kundenseitig.)
+- Punkt 5 (Abo versandkostenfrei) prüfen, auch für Rebills.
 
 ## Harte Rahmenbedingungen
 
