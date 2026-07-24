@@ -619,6 +619,7 @@
             assign bb_b2 = section.settings.bb_benefit_2 | default: 'Jederzeit kündbar'
             assign bb_b3 = section.settings.bb_benefit_3 | default: 'Willkommens-Angebote zur ersten Lieferung'
             assign bb_b4 = section.settings.bb_benefit_4
+            assign bb_sub_flag = section.settings.bb_sub_flag
             if section.settings.bb_sub1_subline != blank
               assign bb_sub1_sub = section.settings.bb_sub1_subline
             else
@@ -720,25 +721,13 @@
               assign lt_disc = section.settings.sub_discount_percent | default: 10
               assign lt_sub_mult = 100 | minus: lt_disc
               # Default-Größe = kleinste Gramm-Variante (nicht stur variants.first → robust gegen Umsortierung)
-              # Nebenbei: Variante mit dem besten Einmal-Grundpreis für den Pill-Störer „Bester
-              # Grundpreis" (belegbar, §6 nmn-angebotsarchitektur; die Abo-Staffel ist gleichgerichtet,
-              # die Aussage gilt daher in beiden Modi)
               assign lt_abo_variant = product.variants.first
               assign lt_abo_min = 9999999
-              assign lt_best_unit = 999999999
-              assign lt_best_unit_variant_id = 0
               for v in product.variants
                 assign vg = v.title | replace: ' ', '' | replace: 'g', '' | replace: 'G', '' | times: 1
                 if vg > 0 and vg < lt_abo_min
                   assign lt_abo_min = vg
                   assign lt_abo_variant = v
-                endif
-                if vg > 0
-                  assign v_unit = v.price | times: 1000 | divided_by: vg
-                  if v_unit < lt_best_unit
-                    assign lt_best_unit = v_unit
-                    assign lt_best_unit_variant_id = v.id
-                  endif
                 endif
               endfor
               # Deep-Link (?variant=, z. B. GMC-Shopping-Klick) → Größe vorwählen, Abo bleibt Default;
@@ -814,9 +803,6 @@
                     {%- comment -%} Nur die Menge, keine Preise: Grundpreis/Ersparnis hängen am Modus (Abo vs. einmalig)
                         und stehen deshalb ausschließlich in den Karten, die beim Größenwechsel live mitgehen.
                         Zwei Grundpreis-Basen gleichzeitig (Pill einmalig, Karte Abo) wirkten widersprüchlich. {%- endcomment -%}
-                    {%- if variant.id == lt_best_unit_variant_id -%}
-                      <span class="lt-size__flag">Bester Grundpreis</span>
-                    {%- endif -%}
                     <span class="lt-size__name">{{ variant.title | escape }}</span>
                   </label>
                 {%- endfor -%}
@@ -835,6 +821,9 @@
                 data-lt-bb-card
                 data-bb-kind="sub"
               >
+                {%- if bb_sub_flag != blank -%}
+                  <span class="lt-bb-card__flag">{{ bb_sub_flag | escape }}</span>
+                {%- endif -%}
                 <input
                   type="radio"
                   class="lt-bb-card__input"
@@ -2221,26 +2210,24 @@
   text-align: center;
   transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
 }
-/* Dimming auf dem Namen statt der ganzen Pille: opacity auf dem Container würde den
-   „Bester Grundpreis"-Störer mitdimmen (Kinder können nie heller sein als ihr Elternelement) */
-.lt-size__pill:not(.is-selected) .lt-size__name { opacity: 0.6; }
-.no-touchevents .lt-size__pill:not(.is-selected):hover .lt-size__name { opacity: 0.85; }
-/* Störer „Bester Grundpreis": gleiche Badge-Sprache wie .lt-bb-card__badge--strong,
-   mittig über der Oberkante der Pille */
-.lt-size__flag {
+.lt-size__pill:not(.is-selected) { opacity: 0.6; }
+.no-touchevents .lt-size__pill:not(.is-selected):hover { opacity: 0.85; }
+/* Der EINE Störer der Buybox: sitzt auf der Abo-Karte (Fokus 30-g-Abo, keine konkurrierende
+   Lenkung auf den Pills). Badge-Sprache wie .lt-bb-card__badge--strong, auf der Oberkante links */
+.lt-bb-card--sub { position: relative; }
+.lt-bb-card__flag {
   position: absolute;
-  top: -9px;
-  left: 50%;
-  transform: translateX(-50%);
+  top: -10px;
+  left: var(--space-4);
   white-space: nowrap;
   font-size: 10px;
   font-weight: 600;
+  letter-spacing: 0.02em;
   line-height: 1;
-  padding: 3px 7px;
+  padding: 4px 8px;
   border-radius: 4px;
-  background: color-mix(in srgb, var(--lt-success-text, #3b6d11) 12%, var(--lt-surface, #fff));
-  color: var(--lt-success-text, #3b6d11);
-  border: 1px solid color-mix(in srgb, var(--lt-success-text, #3b6d11) 30%, transparent);
+  background: var(--lt-success-text, #3b6d11);
+  color: white;
 }
 .lt-size__pill.is-selected {
   background: #fff;
@@ -2608,6 +2595,12 @@
       "id": "bb_benefit_4",
       "label": "Abo-Vorteil 4 (optional, z. B. Willkommens-Deal)",
       "info": "Nur ausgefüllt sichtbar. Versprechen hier müssen operativ eingelöst werden (z. B. Rabattcode in der Bestellbestätigung)."
+    },
+    {
+      "type": "text",
+      "id": "bb_sub_flag",
+      "label": "Abo-Karte — Störer auf der Oberkante (optional)",
+      "info": "Der eine Blickfang der Buybox, z. B. Willkommens-Vorteil. Nur ausgefüllt sichtbar."
     },
     {
       "type": "image_picker",
