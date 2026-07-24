@@ -14,7 +14,11 @@ if ( typeof ShippingNotice !== 'function' ) {
       const freeShippingRemaining = cartTotal - freeShippingThreshold;
 			
       let cartSliderWidth = 0;
-      if ( freeShippingRemaining < 0 ) {
+      // Abo im Warenkorb → Bestellung versandfrei (Auto-Discount), Schwellen-Rechnung entfällt
+      if ( this.getAttribute('data-has-subscription') === 'true' ) {
+        this.querySelector('[data-js-free-shipping-text]').innerHTML = window.KROWN.settings.locales.shipping_notice_free_with_subscription || window.KROWN.settings.locales.shipping_notice_eligible_for_free;
+        cartSliderWidth = 100;
+      } else if ( freeShippingRemaining < 0 ) {
         this.querySelector('[data-js-free-shipping-text]').innerHTML = window.KROWN.settings.locales.shipping_notice_remaining_to_free.replace('{{ remaining_amount }}', this._formatMoney(Math.abs(freeShippingRemaining), KROWN.settings.shop_money_format));
         cartSliderWidth = 100 - (Math.abs(freeShippingRemaining) * 100 / freeShippingThreshold);
       } else {

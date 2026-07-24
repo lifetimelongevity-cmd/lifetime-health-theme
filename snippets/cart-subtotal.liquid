@@ -19,11 +19,22 @@
 	{%- if type == 'page' -%}
 
 		{%- if settings.cart_free_shipping -%}
+			{%- liquid
+				# Abo im Warenkorb → Bestellung ist versandfrei (Auto-Discount "Gratisversand im Abo")
+				assign cart_has_sub = false
+				for item in cart.items
+					if item.selling_plan_allocation
+						assign cart_has_sub = true
+						break
+					endif
+				endfor
+			-%}
 			<div class="sidebar-widget sidebar-widget--outline gutter-regular margin-bottom--regular">
 				<div class="sidebar-widget__content">
 					<shipping-notice
 						data-free-shipping="{{ settings.cart_free_shipping_amount | times: 100 }}"
 						data-cart-total="{{ cart.total_price }}"
+						data-has-subscription="{{ cart_has_sub }}"
 					>
 						<span data-js-free-shipping-text></span>
 						<span class="cart-notice__slider">
