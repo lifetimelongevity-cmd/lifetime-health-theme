@@ -396,18 +396,22 @@
                     {{ section.settings.founder_title | default: 'Chefarzt Neurologie · Chief Scientific Officer LIFETIME' | escape }}
                   </p>
                 </div>
-                <div class="lt-founder-seal" aria-label="Wissenschaftlich geprüft">
+                <div class="lt-founder-seal" aria-label="Laborgeprüft">
                   <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <path d="M10 2L3 5v6c0 4 3 7 7 7 s7-3 7-7V5L10 2Z" stroke="currentColor" stroke-width="1.2" fill="none"></path>
                     <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
                   </svg>
                 </div>
               </div>
+              {%- assign lt_creds = section.settings.founder_creds | default: 'Chefarzt Neurologie, Spiegel Bestseller, 20+ Jahre Forschung' | split: ',' -%}
+              {%- if lt_creds.size > 0 -%}
               <div class="lt-founder-credentials">
-                <span class="lt-founder-cred">Chefarzt Neurologie</span>
-                <span class="lt-founder-cred">Spiegel Bestseller</span>
-                <span class="lt-founder-cred">20+ Jahre Forschung</span>
+                {%- for cred in lt_creds -%}
+                  {%- assign cred_t = cred | strip -%}
+                  {%- if cred_t != blank -%}<span class="lt-founder-cred">{{ cred_t | escape }}</span>{%- endif -%}
+                {%- endfor -%}
               </div>
+              {%- endif -%}
             </div>
           {%- endif -%}
         {%- endcapture -%}
@@ -1325,11 +1329,11 @@
       return (cents / 100).toFixed(2).replace('.', ',') + ' €';
     }
 
-    // grams>0 → €/g (reiner Preis-pro-Gramm, keine Verzehr-/Dosis-/Dauer-Aussage); sonst Legacy €/Tag
+    // grams>0 → €/100 g (PAngV-Grundpreis, keine Verzehr-/Dosis-/Dauer-Aussage); sonst Legacy €/Tag
     function formatUnit(cents, grams, qty) {
       if (grams > 0) {
-        const perGram = (cents / 100) / grams;
-        return perGram.toFixed(2).replace('.', ',') + ' €/g';
+        const per100 = ((cents / 100) / grams) * 100;
+        return per100.toFixed(2).replace('.', ',') + ' €/100 g';
       }
       const totalDays = Math.max(1, supplyDays * Math.max(1, qty || 1));
       const perDay = (cents / 100) / totalDays;
@@ -1437,9 +1441,11 @@
           // → zeigt den echten Doppelrabatt (Sale + Abo). Sonst: klassisch Abo-Ersparnis vs. Einmalkauf.
           const subRegular = baseComparePrice > 0 ? baseComparePrice : 0;
           const subSaleActive = subRegular > subC;
+          // Ohne Sale: echter Abo-Vorteil gegen den Einmalpreis derselben Größe (self-correcting,
+          // sobald Appstle feste Preise liefert). badgeDiscountPct nur als Fallback, falls onceC fehlt.
           const pct = subSaleActive
             ? savingsPct(subRegular, subC)
-            : (badgeDiscountPct > 0 ? badgeDiscountPct : savingsPct(onceC, subC));
+            : (savingsPct(onceC, subC) || badgeDiscountPct);
           const subCmp = subSaleActive ? subRegular : onceC;
           subCards.push({ card, badgeEl, pct });
 
@@ -1546,7 +1552,7 @@
 
       var atcTextEl = section.querySelector('[data-js-product-add-to-cart-text]');
       var atcLabel =
-        (isSub ? 'Abo' : 'Einmalig') + ': ' + formatPrice(currentCents) + ' — Jetzt kaufen →';
+        (isSub ? 'Abo starten' : 'Einmalig kaufen') + ', ' + formatPrice(currentCents);
       if (atcTextEl) {
         atcTextEl.textContent = atcLabel;
       }
@@ -2727,6 +2733,13 @@
       "id": "founder_title",
       "label": "Titel / Rolle",
       "default": "Chefarzt Neurologie · Chief Scientific Officer LIFETIME"
+    },
+    {
+      "type": "text",
+      "id": "founder_creds",
+      "label": "Credential-Chips (kommagetrennt)",
+      "info": "Leer lassen blendet die Chips aus. Doppelungen zu Titel/Logo-Leiste vermeiden.",
+      "default": "Chefarzt Neurologie, Spiegel Bestseller, 20+ Jahre Forschung"
     },
     {
       "type": "header",

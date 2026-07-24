@@ -229,11 +229,18 @@ je Größe, siehe §5.
 
 **Labels:** 90 g trägt "Bester Grundpreis" (nachrechenbar), 60 g trägt "Empfohlen" oder nichts.
 
-**Lieferrhythmus** skaliert mit der Größe, Default proportional (30 g alle 2 Monate, 60 g alle 4,
-90 g alle 6), frei änderbar. Formulierung als Lieferrhythmus, nicht als Reichweite, weil jede
-Reichweitenangabe eine Verzehrmenge unterstellt.
+**Lieferrhythmus** skaliert mit der Größe. Angebotene Intervalle nur **alle 2, 4 und 6 Monate**,
+Default je Größe vorgewählt (30 g alle 2, 60 g alle 4, 90 g alle 6). **Kein monatliches Intervall**:
+Bei ~500 mg/Tag reicht schon 30 g etwa 2 Monate, monatlich würde also selbst beim kleinsten Beutel
+doppelt liefern und Stornos erzeugen. Zu kurze Intervalle (Überlieferung) sind schädlicher als zu
+lange, weil sichtbarer Überschuss direkt zur Kündigung führt, deshalb keine Option unter dem
+Verbrauch. Der passende Default muss still gesetzt sein, ohne Begründungstext daneben, weil jede
+Reichweitenangabe eine Verzehrmenge unterstellt (Novel-Food). Formulierung als Lieferrhythmus, nie
+als Reichweite.
 
 ## 7 Versandmodell
+
+**Bestätigt (BJ 2026-07-24).**
 
 | | Regel |
 |---|---|
