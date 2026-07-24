@@ -741,8 +741,17 @@
                 assign lt_active_variant = lt_preselect_variant
               endif
               assign lt_abo_grams = lt_active_variant.title | replace: ' ', '' | replace: 'g', '' | replace: 'G', '' | times: 1
-              # Abo-Preis aus der echten Selling-Plan-Allocation (Appstle), Fallback price × (100 − Rabatt)
+              # Abo-Preis + Plan aus der Allocation mit FESTER Preis-Policy (größenspezifische
+              # Appstle-Gruppen „NMN 30/60/90 g", je Variante genau eine). Solange die alte
+              # 10-%-Gruppe „Spar-Abo" zusätzlich auf dem Produkt liegt, wäre .first mehrdeutig.
+              # Fallback: erste Allocation, sonst price × (100 − Rabatt).
               assign lt_abo_alloc = lt_active_variant.selling_plan_allocations.first
+              for alloc in lt_active_variant.selling_plan_allocations
+                if alloc.selling_plan.price_adjustments.first.value_type == 'price'
+                  assign lt_abo_alloc = alloc
+                  break
+                endif
+              endfor
               if lt_abo_alloc
                 assign lt_abo_sub = lt_abo_alloc.price
               else
@@ -758,8 +767,15 @@
                   {%- liquid
                     assign v_compare = variant.compare_at_price | default: 0
                     assign v_grams = variant.title | replace: ' ', '' | replace: 'g', '' | replace: 'G', '' | times: 1
-                    # Fester Abo-Preis je Größe aus der Selling-Plan-Allocation, Fallback price × (100 − Rabatt)
+                    # Abo-Preis + Plan je Größe aus der Allocation mit FESTER Preis-Policy
+                    # (siehe Kommentar oben bei lt_abo_alloc), Fallback price × (100 − Rabatt)
                     assign v_alloc = variant.selling_plan_allocations.first
+                    for alloc in variant.selling_plan_allocations
+                      if alloc.selling_plan.price_adjustments.first.value_type == 'price'
+                        assign v_alloc = alloc
+                        break
+                      endif
+                    endfor
                     if v_alloc
                       assign v_sub = v_alloc.price
                     else
@@ -781,6 +797,7 @@
                       data-variant-id="{{ variant.id }}"
                       data-once-price="{{ variant.price }}"
                       data-sub-price="{{ v_sub }}"
+                      data-plan-id="{% if v_alloc %}{{ v_alloc.selling_plan.id }}{% endif %}"
                       data-compare-price="{{ v_compare }}"
                       data-grams="{{ v_grams }}"
                       data-size-short="{{ variant.title | escape }}"
@@ -816,6 +833,7 @@
                   {%- if lt_show_sizes -%}
                   data-once-price="{{ lt_active_variant.price }}"
                   data-sub-price="{{ lt_abo_sub }}"
+                  data-plan-id="{% if lt_abo_alloc %}{{ lt_abo_alloc.selling_plan.id }}{% endif %}"
                   data-variant-id="{{ lt_active_variant.id }}"
                   data-grams="{{ lt_abo_grams }}"
                   data-size-short="{{ lt_active_variant.title | escape }}"
@@ -1324,26 +1342,6 @@
     const plansData = section.querySelector('#lt-selling-plans-data');
     const ltPlans = plansData ? JSON.parse(plansData.textContent).plans : [];
 
-    // Liefertakt je Größe: kleinste Größe → kürzestes Intervall (Index-Mapping über die nach
-    // Monaten sortierten Pläne, Monatszahl aus dem Plan-Namen, z. B. "Alle 2 Monate"). Ohne
-    // Größen-Selector oder mit nur einem Plan bleibt es beim bisherigen ltPlans[0]-Verhalten.
-    function ltPlanMonths(plan) {
-      const m = String((plan && plan.name) || '').match(/\d+/);
-      return m ? parseInt(m[0], 10) : 9999;
-    }
-    const ltPlansAsc = ltPlans.slice().sort((a, b) => ltPlanMonths(a) - ltPlanMonths(b));
-    const ltSizeGramsAsc = Array.from(
-      section.querySelectorAll('[data-lt-size-group] .lt-size__input'),
-      inp => parseInt(inp.dataset.grams, 10) || 0
-    ).sort((a, b) => a - b);
-    function planIdForGrams(grams) {
-      if (!ltPlans.length) return '';
-      if (!ltSizeGramsAsc.length || ltPlansAsc.length === 1) return String(ltPlans[0].id);
-      let idx = ltSizeGramsAsc.indexOf(grams);
-      if (idx < 0) idx = 0;
-      if (idx >= ltPlansAsc.length) idx = ltPlansAsc.length - 1;
-      return String(ltPlansAsc[idx].id);
-    }
 
     const planInput = section.querySelector('#lt-selling-plan-input');
     const quantityInput = section.querySelector('[data-lt-quantity-input]');
@@ -1569,8 +1567,10 @@
       if (variantInput && input.dataset.variantId) variantInput.value = input.dataset.variantId;
       if (quantityInput) quantityInput.value = String(qty);
       if (planInput) {
-        planInput.value = isSub && ltPlans.length
-          ? planIdForGrams(parseInt(input.dataset.grams, 10) || 0)
+        // Plan je Größe kommt aus der Varianten-Allocation (data-plan-id, größenspezifische
+        // Appstle-Gruppen mit Takt 2/4/6 Monate); ohne Größen-Selector Fallback ltPlans[0].
+        planInput.value = isSub
+          ? (input.dataset.planId || (ltPlans.length ? String(ltPlans[0].id) : ''))
           : '';
       }
       if (mainPrice) mainPrice.textContent = formatPrice(currentCents);
@@ -1660,7 +1660,10 @@
       });
       // compare-at nur auf den Einmalkauf; die Abo-Karte rechnet gegen den Einmalpreis derselben Größe
       if (onceRadio) onceRadio.dataset.comparePrice = sizeInput.dataset.comparePrice || '0';
-      if (subRadio) subRadio.dataset.subPrice = sizeInput.dataset.subPrice || '0';
+      if (subRadio) {
+        subRadio.dataset.subPrice = sizeInput.dataset.subPrice || '0';
+        subRadio.dataset.planId = sizeInput.dataset.planId || '';
+      }
       if (appstleWidget && sizeInput.dataset.variantId) {
         appstleWidget.setAttribute('data-variant-id', sizeInput.dataset.variantId);
       }
