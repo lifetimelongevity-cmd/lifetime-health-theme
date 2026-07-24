@@ -804,8 +804,9 @@
                       {% unless variant.available %}disabled{% endunless %}
                     >
                     <span class="lt-size__name">{{ variant.title | escape }}</span>
-                    {%- if v_grams > 0 -%}<span class="lt-size__unit">{{ variant.price | times: 100 | divided_by: v_grams | money_without_trailing_zeros }}/100 g</span>{%- endif -%}
-                    <span class="lt-size__save">{%- if v_bundle_ref > variant.price -%}spart {{ v_bundle_ref | minus: variant.price | money_without_trailing_zeros }}{%- endif -%}</span>
+                    {%- comment -%} money (nicht without_trailing_zeros): Karten-JS formatiert immer zweistellig, 113,00 statt 113 {%- endcomment -%}
+                    {%- if v_grams > 0 -%}<span class="lt-size__unit">{{ variant.price | times: 100 | divided_by: v_grams | money }}/100 g</span>{%- endif -%}
+                    <span class="lt-size__save">{%- if v_bundle_ref > variant.price -%}spart {{ v_bundle_ref | minus: variant.price | money }}{%- endif -%}</span>
                   </label>
                 {%- endfor -%}
               </div>
