@@ -13,9 +13,10 @@ sobald das Paket live und QA-bestätigt ist.
 
 ## Stand in einem Satz
 
-Theme-Code für Items 6–8 ist auf `main` committet (3 Commits vor origin), **aber noch nirgends
-live**: kein Theme-Push, keine Shopify-Admin-Änderung, keine Appstle-Änderung. Items 10 + 11 sind
-noch nicht gebaut. Go-Live ist ein koordiniertes Fenster, das noch aussteht.
+Theme-Code für Items 6–8 ist auf `main` committet, **aber noch nirgends live**: kein Theme-Push,
+keine Shopify-Admin-Änderung, keine Appstle-Änderung. Items 10 + 11 sind gebaut und liegen auf
+`feat/nmn-abo-groessen-2026-07-24` (Preview durch BJ offen). Go-Live ist ein koordiniertes
+Fenster, das noch aussteht.
 
 ## Was LIVE ist: nichts davon
 
@@ -63,26 +64,33 @@ Die drei Live-Änderungen müssen zusammen passieren, sonst Mischzustand auf bez
 Falls Shopify-Token nur lesen kann (Memory `shopify-admin-write-path`): Schritte 2–3 gibt Claude als
 Admin-Klicks/curl aus, BJ führt sie aus.
 
-## Offene Bauarbeit: Items 10 + 11 (Branch, PREVIEW-pflichtig)
+## Items 10 + 11: GEBAUT auf Branch, PREVIEW offen (24.07.)
 
-**Noch nicht gebaut.** Macht 60/90 g abonnierbar + Deep-Link → Abo. Der konversionsstärkste Teil,
-hier NICHT previewbar in der Session → auf eigenem Branch bauen, BJ previewt vor Merge/Push.
+**Gebaut und committet auf `feat/nmn-abo-groessen-2026-07-24` (Commit `80dd831`), nicht auf main.**
+BJ previewt vor Merge/Push (Theme Manager: Branch auschecken, danach zwingend zurück auf main,
+sonst kann ein Auto-Push die ungetestete Buybox live schieben).
 
-Betroffen: `sections/lt-pdp-hero.liquid`
-- Abo-Karte ist per Min-Gramm-Schleife auf die kleinste Variante gepinnt (~Z. 717–726). Auflösen.
-- `applySize()` (~Z. 1611) schreibt Größe nur auf die Einmal-Karte, Kommentar „Abo-Karte bleibt 30 g".
-  Muss auf BEIDE Karten schreiben und die aktuell gewählte Karte neu syncen, nicht Einmalkauf erzwingen.
-- Größen-Change-Listener (~Z. 1660) ruft `applySize(this, true)` → auf `false`/kein-Force ändern.
-- Größen-Pills brauchen `data-sub-price` je Variante aus `variant.selling_plan_allocations.first.price`
-  (Fallback `variant.price × lt_sub_mult / 100`), damit die Abo-Karte den festen Abo-Preis je Größe zeigt.
-- CSS: `.lt-bb-card--once:not(.is-selected) .lt-size { display:none }` (~Z. 2111) entfernen, sonst ist
-  der Größenselektor im Abo-Modus unsichtbar. ACHTUNG Dimming: Größen-Pills dürfen nicht mitgedimmt
-  werden, wenn die Einmal-Karte nicht selektiert ist → Opacity-Override prüfen ODER Selektor über beide
-  Karten ziehen (§6 „erst Größe, dann Modus"). Genau das ist der Preview-Punkt.
-- Item 11: Deep-Link (`lt_deeplinked`, ~Z. 735–770) darf Größe vorwählen, aber Abo als Default lassen,
-  statt auf Einmalkauf zu schalten. ERST nach Item 10 sicher (sonst Feed-Preis ≠ Landingpage-Preis).
-- QA-Risiko Selling Plan: `syncFromCard` nutzt `ltPlans[0].id`. Prüfen, ob je Variante derselbe Plan
-  gilt (Appstle 1 Gruppe, per-Variante-Preis = ok; per-Variante-Pläne = anpassen).
+Was gebaut wurde (`sections/lt-pdp-hero.liquid` + `templates/product.nmn-pulver.json`):
+- Größen-Selector als eigene Zone VOR den beiden Kaufoption-Karten (§6 „erst Größe, dann Modus",
+  die im Preview-Punkt genannte strukturelle Variante statt Opacity-Overrides). Immer sichtbar,
+  kein Dimming-Konflikt, `bb_size_hint` (Render, JS, Schema) entfernt.
+- `applySize()` schreibt die Größe auf BEIDE Karten und synct die aktive Karte neu; Größenklick
+  erzwingt keinen Einmalkauf mehr. Min-Gramm-Schleife bestimmt nur noch den 30-g-Default.
+- Abo-Preis je Größe aus `variant.selling_plan_allocations.first.price` als `data-sub-price` je
+  Pill (Fallback `price × lt_sub_mult / 100`). Abo-Badge/-Streichpreis rechnen gegen den
+  Einmalpreis derselben Größe.
+- Liefertakt je Größe: kleinste Größe → kürzestes Intervall, Index-Mapping über die Monatszahl im
+  Plan-Namen. **Appstle-Pläne müssen die Zahl im Namen tragen** („Alle 2/4/6 Monate"). Bei nur
+  einem Plan und auf allen Nicht-Size-PDPs unverändert `ltPlans[0]`.
+- Item 11: Deep-Link (`?variant=`) wählt nur noch die Größe vor, Abo bleibt Default; der
+  Einmalpreis (= Feed-Preis) bleibt auf der Einmal-Karte sichtbar.
+- Pills zeigen Mengenvorteil in Euro („spart 7,90 / 20,80 €") statt Aktionsersparnis; Grundpreis
+  €/100 g bleibt. Once-Subline „Versandkostenfrei ab 49 €" rendert wieder. Template: Abo-Karte
+  heißt „Im Abo" + Subline „Lieferrhythmus frei wählbar" (statt fix „Alle 2 Monate").
+
+Bekannte Preview-Artefakte (self-correcting im Go-Live-Fenster): solange compare-at gesetzt ist,
+zeigt die 30-g-Abo-Karte den Sale-Bezug (24 %); bis zur Appstle-Umstellung sind Abo-Preise noch
+10-%-Krummpreise (30,51 € statt 29,90 €).
 
 ## Exakte Live-Aktionen (Werte)
 
