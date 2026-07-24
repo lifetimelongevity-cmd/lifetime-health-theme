@@ -117,6 +117,22 @@ Bekannte Preview-Artefakte (self-correcting im Go-Live-Fenster): solange compare
 zeigt die 30-g-Abo-Karte den Sale-Bezug (24 %); bis zur Appstle-Umstellung sind Abo-Preise noch
 10-%-Krummpreise (30,51 € statt 29,90 €).
 
+## Nachschärfungen 24.07. abends (BJ-Feedback + Erstkauf-Fokus)
+
+- Pills nur noch Menge (30/60/90 g) + Störer „Bester Grundpreis" auf der 90-g-Pille; Abo-Subline
+  = echter Liefertakt je Größe; Einmalkauf-Subline dynamisch (unter 49 € „zzgl. 4,90 € Versand",
+  darüber „Versandkostenfrei"). aria-live am CTA-Text.
+- **Fokus-Entscheid: 30-g-Abo ist der Default-Fokus** (niedrigste Hürde 29,90 € versandfrei,
+  höchster Jahreswert 179,40 € bei 6 Touchpoints, knappste Deckung = geringstes
+  Überlieferungs-/Kündigungsrisiko, bester Umsatz je Gramm). 90 g = Selbstläufer-Segment über
+  den Grundpreis-Störer, 60 g ohne Förderung, Einmalkauf = Fallback mit Versand-Malus.
+- Erstkauf-Enabler: Trust-Pill 3 „Kauf auf Rechnung (Klarna)" (Klarna in enabled_payment_types
+  verifiziert) + Abo-Perk 4 Willkommens-Deal „Zur ersten Lieferung: Forschungsdossier (PDF) und
+  10 % auf den AGE & DNA-Test" (neues Setting bb_benefit_4, nur bei NMN gefüllt).
+- **PFLICHT-To-do (BJ, vor/mit dem nächsten Push): Einlösung des Willkommens-Deals sicherstellen.**
+  Dossier-PDF-Zustellung + Test-Rabattcode (z. B. per Bestellbestätigungs-Mail an Abo-Erstbesteller).
+  Ein beworbener, nicht eingelöster Vorteil wäre wettbewerbsrechtlich angreifbar und tötet Vertrauen.
+
 ## Exakte Live-Aktionen (Werte)
 
 **compare-at entfernen (Sale-Ende), Rollback-Werte notiert:**

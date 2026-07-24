@@ -618,6 +618,7 @@
             assign bb_b1 = section.settings.bb_benefit_1 | default: 'Gratis Versand bei Abo-Lieferungen'
             assign bb_b2 = section.settings.bb_benefit_2 | default: 'Jederzeit kündbar'
             assign bb_b3 = section.settings.bb_benefit_3 | default: 'Willkommens-Angebote zur ersten Lieferung'
+            assign bb_b4 = section.settings.bb_benefit_4
             if section.settings.bb_sub1_subline != blank
               assign bb_sub1_sub = section.settings.bb_sub1_subline
             else
@@ -926,6 +927,26 @@
                       {%- endif -%}
                       <span>{{ bb_b3 | escape }}</span>
                     </span>
+                    {%- if bb_b4 != blank -%}
+                      <span class="lt-bb-card__perk">
+                        {%- if section.settings.bb_perk_4_icon != blank -%}
+                          {{
+                            section.settings.bb_perk_4_icon
+                            | image_url: width: 56
+                            | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
+                          }}
+                        {%- else -%}
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                            <path d="M2.25 6.25h9.5v6H2.25v-6Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"></path>
+                            <path d="M1.75 4h10.5v2.25H1.75V4Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"></path>
+                            <path d="M7 4v8.25" stroke="currentColor" stroke-width="1.1"></path>
+                            <path d="M7 4S6.4 1.9 4.9 1.9c-.9 0-1.4.5-1.4 1.05C3.5 3.6 4.4 4 7 4Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"></path>
+                            <path d="M7 4s.6-2.1 2.1-2.1c.9 0 1.4.5 1.4 1.05C10.5 3.6 9.6 4 7 4Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"></path>
+                          </svg>
+                        {%- endif -%}
+                        <span>{{ bb_b4 | escape }}</span>
+                      </span>
+                    {%- endif -%}
                   </span>
                 </span>
               </label>
@@ -2581,6 +2602,17 @@
       "type": "image_picker",
       "id": "bb_perk_3_icon",
       "label": "Abo-Vorteil 3 — Icon (optional)"
+    },
+    {
+      "type": "text",
+      "id": "bb_benefit_4",
+      "label": "Abo-Vorteil 4 (optional, z. B. Willkommens-Deal)",
+      "info": "Nur ausgefüllt sichtbar. Versprechen hier müssen operativ eingelöst werden (z. B. Rabattcode in der Bestellbestätigung)."
+    },
+    {
+      "type": "image_picker",
+      "id": "bb_perk_4_icon",
+      "label": "Abo-Vorteil 4 — Icon (optional)"
     },
     {
       "type": "text",
