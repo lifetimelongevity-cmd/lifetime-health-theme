@@ -10,6 +10,17 @@
   Horizontales Padding kommt vom Sidebar-System (.sidebar__body > *).
 */
 
+/* Drawer-Höhe voll nutzen: Body wird Flex-Container (Klasse in header.liquid),
+   die Karten wachsen nicht, aber die Zeilen rutschen ans Ende Richtung CTA */
+.sidebar__body--menu-cards {
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar__body--menu-cards .lt-menu-cards {
+  flex: 1 1 auto;
+}
+
 .lt-menu-cards {
   display: flex;
   flex-direction: column;
@@ -29,12 +40,17 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
-  padding: var(--space-4) var(--space-5);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-5);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   background: var(--color-surface-secondary);
   color: inherit;
   text-decoration: none;
+}
+
+/* Produktkarten-Titel eine Stufe größer als Kacheln/Zeilen (18/16/14) */
+.lt-menu-cards__card .lt-menu-cards__title {
+  font-size: var(--text-body-lg);
 }
 
 .lt-menu-cards__card--dark {
@@ -62,12 +78,22 @@
   color: var(--color-text-on-dark-muted);
 }
 
-.lt-menu-cards__img {
+/* Bild-Kachel: heller Rahmen um den Produktshot, funktioniert auf hell
+   und dunkel (Fotos haben weißen/hellen Hintergrund) */
+.lt-menu-cards__media {
   flex: 0 0 auto;
-  width: 56px;
-  height: 56px;
-  object-fit: contain;
+  width: 76px;
+  height: 76px;
   border-radius: var(--radius-sm);
+  background: var(--color-surface-primary);
+  overflow: hidden;
+}
+
+.lt-menu-cards__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .lt-menu-cards__duo {
@@ -107,15 +133,18 @@
   }
 }
 
+/* margin-top:auto schiebt die Zeilen im gestreckten Body Richtung CTA;
+   ohne Reststrecke kollabiert es auf 0 */
 .lt-menu-cards__rows {
-  margin-top: var(--space-1);
+  margin-top: auto;
+  padding-top: var(--space-2);
 }
 
 .lt-menu-cards__row {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-1);
+  padding: var(--space-4) var(--space-1);
   color: inherit;
   text-decoration: none;
 }

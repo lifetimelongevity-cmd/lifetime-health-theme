@@ -151,15 +151,25 @@
     max-width: none;
   }
 
-  /* Die Kennzahlen stapeln in der rechten Spalte. Nebeneinander waere jede
-     Spalte so schmal, dass ein Wert wie "bis −100 %" in Zahlengroesse
-     umbricht. Gestapelt bilden die Zahlen eine linksbuendige Spalte, die sich
-     wie eine Tabelle lesen laesst, und die Beschreibung bekommt Zeilenlaenge.
-     (0,2,0) schlaegt .mg-card--with-source (0,1,0). */
-  .mg-layout--split .mg-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
+}
 
+/* Die Kennzahlen stapeln in der Split-Variante immer: drei in zwei Spalten
+   lassen unter 980px eine Waise in Zeile zwei stehen, und in der rechten
+   Spalte waere jede von drei Spalten so schmal, dass ein Wert wie
+   "bis −100 %" in Zahlengroesse umbricht. Nur fuer die Split-Variante, damit
+   die AGE&DNA-PDP mit ihrem eigenen Kennzahlen-Satz unberuehrt bleibt.
+   (0,2,0) schlaegt .mg-grid (0,1,0). */
+.mg-layout--split .mg-grid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+/* Erst ab 1080px Zahl links, Beschreibung rechts. Bei 980px blieben neben der
+   380px-Textspalte und der 18rem-Zahlenspalte nur rund 150px fuer die
+   Beschreibung, die dann fuenfzeilig neben einer 52px-Zahl lief. Darunter
+   bleiben die Karten in ihrer normalen Form, Zahl ueber Text.
+   (0,2,0) schlaegt .mg-card--with-source (0,1,0). */
+@media (min-width: 1080px) {
   .mg-layout--split .mg-card {
     display: grid;
     grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
@@ -172,17 +182,6 @@
 
   .mg-layout--split .mg-text {
     margin-top: 0;
-  }
-}
-
-/* Drei Kennzahlen in zwei Spalten lassen unter 980px eine Waise in Zeile zwei
-   stehen. Nur fuer die Split-Variante gestapelt, damit die AGE&DNA-PDP mit
-   ihrem eigenen Kennzahlen-Satz unberuehrt bleibt. Die Modifier-Klasse haengt
-   am Wrapper und gilt auf allen Breiten, auch dort, wo das Grid selbst noch
-   nicht greift. (0,2,0) schlaegt .mg-grid (0,1,0). */
-@media (max-width: 979px) {
-  .mg-layout--split .mg-grid {
-    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -211,7 +210,7 @@
 .mg-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-3);
+  gap: 10px;
 }
 
 /* Card */

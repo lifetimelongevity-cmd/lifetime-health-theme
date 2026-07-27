@@ -57,6 +57,10 @@
   unless section.settings.rail_last_open
     assign crs_nf_rail_pre_open = 0
   endunless
+  assign crs_nf_rail_aria = section.settings.rail_aria_label | strip
+  if crs_nf_rail_aria == '__none__' or crs_nf_rail_aria == blank
+    assign crs_nf_rail_aria = 'Stand des EU-Zulassungsverfahrens'
+  endif
 -%}
 {% style %}
   #section-{{ section.id }} {
@@ -119,7 +123,7 @@
         Die datierte Fassung mit Quellen bleibt im Accordion darunter.
       {%- endcomment -%}
       {%- if crs_nf_rail_last > 0 -%}
-        <ol class="cnf-rail" role="list" aria-label="{{ section.settings.rail_aria_label | default: 'Stand des EU-Zulassungsverfahrens' | escape }}">
+        <ol class="cnf-rail" role="list" aria-label="{{ crs_nf_rail_aria | escape }}">
           {%- for rail_i in (1..3) -%}
             {%- assign rail_lk = 'rail_' | append: rail_i | append: '_label' -%}
             {%- assign rail_mk = 'rail_' | append: rail_i | append: '_meta' -%}
@@ -358,7 +362,7 @@
   top: 10px;
   left: 30px;
   right: calc(-1 * var(--space-4));
-  border-top: 1.5px solid var(--crs-rule, rgba(38, 37, 30, 0.34));
+  border-top: 1.5px solid var(--crs-rule, rgba(38, 37, 30, 0.52));
 }
 
 .cnf-rail__step--to-open::after {
@@ -393,7 +397,7 @@
 
 .cnf-rail__step--open .cnf-rail__node {
   border-style: dashed;
-  border-color: var(--crs-rule, rgba(38, 37, 30, 0.34));
+  border-color: var(--crs-rule, rgba(38, 37, 30, 0.52));
   background: transparent;
 }
 
@@ -627,7 +631,7 @@
     left: 10px;
     right: auto;
     border-top: 0;
-    border-left: 1.5px solid var(--crs-rule, rgba(38, 37, 30, 0.34));
+    border-left: 1.5px solid var(--crs-rule, rgba(38, 37, 30, 0.52));
   }
 
   .cnf-rail__step--to-open::after {

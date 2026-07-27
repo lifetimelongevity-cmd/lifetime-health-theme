@@ -24,6 +24,17 @@
   # buendige Headline kippt optisch dagegen. Opt-in, weil dieselbe Section
   # auf index.json, quiz-age, meine-routine und der AGE&DNA-PDP laeuft.
   assign crs_lg_center_desktop = section.settings.center_head_desktop
+  # Die 4-up-Breitenformel gilt nur dort, wo auch wirklich ein Logo unter
+  # Desktop wegfaellt. Ohne diese Klammer wuerde sie auf index.json,
+  # quiz-age, meine-routine und der AGE&DNA-PDP die 5er-Reihe zwischen 481
+  # und 532px von 3+2 auf 4+1 umbrechen, also genau auf die Waise, die sie
+  # hier verhindern soll.
+  assign crs_lg_four_up = false
+  for lg_block in section.blocks
+    if lg_block.settings.hide_below_desktop
+      assign crs_lg_four_up = true
+    endif
+  endfor
 -%}
 {% style %}
   #section-{{ section.id }} {
@@ -60,7 +71,7 @@
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
-      <ul class="lg-grid" role="list">
+      <ul class="lg-grid{% if crs_lg_four_up %} lg-grid--four-up{% endif %}" role="list">
         {%- for block in section.blocks -%}
           <li class="lg-card{% if block.settings.hide_below_desktop %} lg-card--hide-below-desktop{% endif %}" {{ block.shopify_attributes }}>
             {%- if block.settings.url != blank -%}
@@ -206,14 +217,20 @@
   }
 }
 
-/* 22vw ignorierte das Container-Padding und liess vier Karten zwischen ca.
-   481 und 510px um wenige Pixel ueberlaufen. calc(25% - gap) rechnet gegen die
-   echte Zeilenbreite und passt damit immer. Ueber 560px liefert die Formel
-   praktisch dieselben Werte wie vorher, die Deckelung bei 10rem bleibt. */
 @media (max-width: 1024px) {
   .lg-card {
-    width: min(10rem, calc(25% - var(--space-2)));
+    width: min(10rem, 22vw);
     height: 4.5rem;
+  }
+
+  /* Nur fuer Leisten, die unter Desktop auf vier Logos gehen. 22vw rechnet
+     gegen den Viewport und ignoriert das Container-Padding, dadurch brechen
+     vier Karten unter 533px auf 3+1 um. calc(25% - gap) rechnet gegen die
+     echte Zeilenbreite und passt immer. Ueber 600px liefern beide Formeln
+     praktisch dieselben Werte, die Deckelung bei 10rem bleibt.
+     (0,2,0) schlaegt .lg-card (0,1,0). */
+  .lg-grid--four-up .lg-card {
+    width: min(10rem, calc(25% - var(--space-2)));
   }
 }
 
