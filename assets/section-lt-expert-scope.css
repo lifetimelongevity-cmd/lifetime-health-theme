@@ -1,0 +1,149 @@
+/*
+  LIFETIME — section-lt-expert-scope.css
+  Umfang und Grenzen der fachlichen Prüfung, zwei gleichwertige Spalten.
+  Karten-, Grid- und Surface-Regeln 1:1 aus dem approved Example
+  `_examples/assets/section-benefits.css` (weiße Karte auf warmem Grund,
+  --radius-md, padding --space-5, shadow-sm, gap --space-5).
+  Header-Typografie kommt aus crs-heading-stack.
+  Token-Referenzen: design-governance §3, §4, §5 (Card Info).
+*/
+
+/* ── Section shell ──────────────────────────────────────────── */
+.lt-escope {
+  background-color: var(--color-surface-secondary);
+  padding-top: var(--space-9);
+  padding-bottom: var(--space-9);
+}
+
+.lt-escope__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.lt-escope__header {
+  max-width: 640px;
+  margin-bottom: var(--space-6);
+}
+
+/* ── Grid ───────────────────────────────────────────────────── */
+/*
+  DECISION: 2 Spalten, gleiche Breite. Die Grenze der Rolle bekommt exakt
+  so viel Fläche wie ihr Umfang — das ist die inhaltliche Aussage der Section.
+  align-items:stretch (Default) hält beide Karten auf gleicher Höhe (§8).
+*/
+.lt-escope__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+}
+
+/* ── Karte (card-info) ──────────────────────────────────────── */
+.lt-escope__card {
+  background-color: var(--color-surface-primary);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+}
+
+.lt-escope__card-title {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+}
+
+.lt-escope__card-intro {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
+/* ── Liste ──────────────────────────────────────────────────── */
+.lt-escope__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lt-escope__item {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: var(--space-3);
+  align-items: start;
+}
+
+/*
+  DECISION: Marker als 20px-Symbol ohne Farbfläche. Die Icon-Pocket aus
+  card-info bleibt hier weg — sechs Taschen in zwei Spalten würden die
+  Karte zum Raster machen und vom Text ablenken.
+  Zwei Farben, kein drittes Akzentsignal: teal-dark für „gehört dazu",
+  muted für „gehört nicht dazu".
+*/
+.lt-escope__marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.lt-escope__marker svg {
+  width: 16px;
+  height: 16px;
+}
+
+.lt-escope__marker--yes {
+  color: var(--color-teal-dark);
+}
+
+.lt-escope__marker--no {
+  color: var(--color-text-muted);
+}
+
+.lt-escope__text {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-primary);
+}
+
+/* ── Schlusszeile ───────────────────────────────────────────── */
+.lt-escope__footnote {
+  max-width: 640px;
+  margin: var(--space-6) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media screen and (max-width: 768px) {
+  .lt-escope {
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-8);
+  }
+
+  .lt-escope__container {
+    padding: 0 var(--space-4);
+  }
+
+  .lt-escope__grid {
+    grid-template-columns: 1fr;
+  }
+}

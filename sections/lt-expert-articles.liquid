@@ -1,0 +1,208 @@
+{% comment %}
+  ───────────────────────────────────────────────────────────────────────────
+  LIFETIME — LT Expert Articles (geprüfte Beiträge)
+  ───────────────────────────────────────────────────────────────────────────
+  Zweck: die Prüfrolle belegbar machen. Die Liste zeigt genau die Artikel,
+  die den Reviewer in der Byline führen, und ist damit gegenprüfbar.
+  Briefing: docs/briefing-expertenseite-aerzte.md §3.1, Zeile „Geprüfte Beiträge".
+
+  Quelle ist das Artikel-Metafeld `custom.reviewer_name`, dieselbe Quelle, aus
+  der `sections/lt-article.liquid` die Byline zieht. Damit kann die Liste nicht
+  von der Byline abweichen. Ein Artikel ohne dieses Metafeld erscheint hier
+  nicht, auch wenn sein Template den Reviewer über Section-Settings setzt.
+  Das ist Absicht: die Liste soll eher zu kurz als zu lang sein.
+
+  §12 Build Spec:
+  - Surface:          --color-surface-primary (hell) — Alternation nach der
+                      warmen Scope-Section
+  - Section label:    Kicker via heading-stack
+  - Dominant element: Section-Headline (--text-h1 via headline_lg)
+  - Heading size:     --text-h1 Section, --text-section Zeilentitel
+  - Content pattern:  Link-Liste, 2 Spalten. Bewusst keine Bildkarten:
+                      bei 7 bis 20 Einträgen wird ein Bildraster zur zweiten
+                      Blog-Übersicht und nimmt der Seite den Dokumentcharakter.
+  - CTA:              keiner
+  - Removed:          Cover-Bilder, Excerpts, „Alle Artikel"-Button, Tags
+  - Quality move:     Jede Zeile trägt das Prüfdatum (`custom.reviewed_date`,
+                      sonst das Veröffentlichungsdatum). Damit wird aus einer
+                      Linkliste ein Prüfprotokoll.
+
+  Die Schlussnotiz darunter ist bewusst keine eigene Section: ein Absatz
+  rechtfertigt keinen eigenen Rhythmusschritt (§11).
+{% endcomment %}
+
+{{ 'section-lt-expert-articles.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign lea_blog = blogs[section.settings.blog]
+  assign lea_key = section.settings.metafield_key | default: 'reviewer_name'
+  assign lea_filter = section.settings.reviewer_filter | default: '' | strip
+-%}
+
+{%- capture lea_rows -%}
+  {%- for art in lea_blog.articles limit: 50 -%}
+    {%- assign lea_reviewer = art.metafields.custom[lea_key].value | default: '' | strip -%}
+    {%- if lea_reviewer != blank -%}
+      {%- assign lea_match = true -%}
+      {%- if lea_filter != blank and lea_reviewer != lea_filter -%}
+        {%- assign lea_match = false -%}
+      {%- endif -%}
+      {%- if lea_match -%}
+        {%- comment -%}
+          Das Prüfdatum kommt nur aus `custom.reviewed_date`. Fehlt es, wird
+          das Veröffentlichungsdatum gezeigt UND als solches benannt. Ein
+          Publikationsdatum als „geprüft am" auszugeben wäre eine Behauptung
+          über einen Vorgang, für den es kein Datum gibt.
+        {%- endcomment -%}
+        {%- assign lea_reviewed = art.metafields.custom.reviewed_date.value -%}
+        {%- if lea_reviewed != blank -%}
+          {%- assign lea_date = lea_reviewed -%}
+          {%- assign lea_prefix = section.settings.date_prefix -%}
+        {%- else -%}
+          {%- assign lea_date = art.published_at -%}
+          {%- assign lea_prefix = section.settings.date_prefix_fallback -%}
+        {%- endif -%}
+        <li class="lt-earts__item">
+          <a class="lt-earts__link" href="{{ art.url }}">
+            <span class="lt-earts__title">{{ art.title | escape }}</span>
+            <span class="lt-earts__meta">
+              {%- if lea_prefix != blank -%}
+                {{ lea_prefix | escape }}
+              {%- endif -%}
+              <time datetime="{{ lea_date | date: '%Y-%m-%d' }}">{{ lea_date | date: '%d.%m.%Y' }}</time>
+            </span>
+          </a>
+        </li>
+      {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+{%- assign lea_has_rows = lea_rows | strip -%}
+
+{%- if lea_has_rows != blank -%}
+  <section class="lt-earts">
+    <div class="lt-earts__container">
+
+      {% render 'section-heading-crs',
+        heading: section.settings.heading,
+        subheading: section.settings.subheading,
+        kicker: section.settings.kicker,
+        align: 'left',
+        headline_lg: true,
+        heading_tag: 'h2',
+        extra_class: 'lt-earts__header'
+      %}
+
+      <ul class="lt-earts__list" role="list">
+        {{ lea_rows }}
+      </ul>
+
+      {%- if section.settings.note_text != blank -%}
+        <div class="lt-earts__note">
+          {%- if section.settings.note_title != blank -%}
+            <p class="lt-earts__note-title">{{ section.settings.note_title | escape }}</p>
+          {%- endif -%}
+          <p class="lt-earts__note-text">{{ section.settings.note_text | escape }}</p>
+          {%- if section.settings.note_link_label != blank and section.settings.note_link_url != blank -%}
+            <a class="lt-earts__note-link" href="{{ section.settings.note_link_url }}">
+              {{ section.settings.note_link_label | escape }}
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+    </div>
+  </section>
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "LT Expert Articles",
+  "tag": "section",
+  "class": "lt-expert-articles-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Geprüfte Beiträge"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Headline",
+      "default": "Diese Beiträge sind durch die Prüfung gegangen"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Untertitel"
+    },
+    {
+      "type": "header",
+      "content": "Quelle"
+    },
+    {
+      "type": "blog",
+      "id": "blog",
+      "label": "Blog"
+    },
+    {
+      "type": "text",
+      "id": "metafield_key",
+      "label": "Metafeld-Key im Namespace custom",
+      "default": "reviewer_name",
+      "info": "Artikel ohne dieses Metafeld erscheinen nicht."
+    },
+    {
+      "type": "text",
+      "id": "reviewer_filter",
+      "label": "Nur diesen Reviewer zeigen",
+      "info": "Leer = alle Artikel mit gesetztem Metafeld. Muss exakt passen."
+    },
+    {
+      "type": "text",
+      "id": "date_prefix",
+      "label": "Vor dem Datum, mit Prüfdatum",
+      "default": "Geprüft",
+      "info": "Gilt nur, wenn der Artikel custom.reviewed_date gesetzt hat."
+    },
+    {
+      "type": "text",
+      "id": "date_prefix_fallback",
+      "label": "Vor dem Datum, ohne Prüfdatum",
+      "default": "Veröffentlicht"
+    },
+    {
+      "type": "header",
+      "content": "Schlussnotiz"
+    },
+    {
+      "type": "text",
+      "id": "note_title",
+      "label": "Titel"
+    },
+    {
+      "type": "textarea",
+      "id": "note_text",
+      "label": "Text"
+    },
+    {
+      "type": "text",
+      "id": "note_link_label",
+      "label": "Link-Text"
+    },
+    {
+      "type": "url",
+      "id": "note_link_url",
+      "label": "Link-Ziel"
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Expert Articles"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,457 @@
+{% comment %}
+  ───────────────────────────────────────────────────────────────────────────
+  LIFETIME — LT Expert Profile (Autoritätsseite /pages/aerzte)
+  ───────────────────────────────────────────────────────────────────────────
+  Zweck: eine benannte Person als *auflösbare Entität* etablieren, nicht als
+  Qualifikations-Badge. Sichtbarer Steckbrief + `Person`-JSON-LD mit stabiler
+  `@id`, damit `reviewedBy` aus den Artikeln (snippets/microdata-schema.liquid)
+  darauf zeigen kann.
+  Briefing: docs/briefing-expertenseite-aerzte.md §3.
+
+  §12 Build Spec:
+  - Surface:          --color-surface-primary (hell, klinisch) — Seitenauftakt
+  - Section label:    Kicker pro Person („Ärztliche Leitung") via heading-stack
+  - Dominant element: der Name (--text-h1 via headline_lg)
+  - Heading size:     --text-h1; erste Person h1, weitere h2
+                      (bzw. alle h2, wenn ein Section-Titel gesetzt ist)
+  - Content pattern:  Split 2fr/3fr (Porträt | Inhalt) — bestehendes
+                      Theme-Muster aus `sections/lt-science-limmroth.liquid`,
+                      hier auf heller Fläche und ohne Buch-/Zitat-Block.
+                      Darunter: Fakten-`dl` (2 Spalten) + Profil-Links.
+  - Card count:       keine Karten — die Seite ist ein Dokument, kein Raster
+  - CTA:              keiner. Autoritätsseite, kein Conversion-Moment.
+  - Removed:          Zitat (wörtliche Rede nur mit Freigabe, Briefing §6),
+                      Buch-Block und Kennzahlen-Row (Angaben unverifiziert),
+                      Teal-Akzente, farbige Left-Borders.
+  - Quality move:     Die Fakten stehen als Steckbrief-`dl` unter dem Namen,
+                      nicht als Fließtext. Das liest sich wie ein Klinikprofil
+                      und nicht wie Marketing. Die Profil-Links schließen die
+                      Komposition und sind zugleich `sameAs` im Schema, also
+                      genau der Punkt, an dem die Person auflösbar wird.
+
+  ── Wahrhaftigkeit ────────────────────────────────────────────────────────
+  Alle Faktenfelder sind ohne Schema-Default. Was nicht im Template gesetzt
+  ist, erscheint nicht. Es gibt bewusst keinen stillen Fallback auf
+  Beispieldaten (vgl. Memory `reference_lt_pdp_hero_hardcoded_price`,
+  `reference_lt_hp_cta_close_price_defaults`).
+  `sameAs` enthält nur die Profil-Links, die im Template stehen. Keine URL
+  raten, nur verifizierte Ziele eintragen.
+{% endcomment %}
+
+{{ 'section-lt-expert-profile.css' | asset_url | stylesheet_tag }}
+
+{%- liquid
+  assign lep_section_title = section.settings.section_title | default: '' | strip
+  assign lep_person_blocks = section.blocks | where: 'type', 'person'
+-%}
+
+<section class="lt-exp">
+  <div class="lt-exp__container">
+
+    {%- if lep_section_title != blank -%}
+      {% render 'section-heading-crs',
+        heading: lep_section_title,
+        subheading: section.settings.section_intro,
+        kicker: section.settings.section_kicker,
+        align: 'left',
+        headline_lg: true,
+        heading_tag: 'h1',
+        extra_class: 'lt-exp__section-head'
+      %}
+    {%- endif -%}
+
+    {%- for block in lep_person_blocks -%}
+      {%- liquid
+        assign lep_name = block.settings.name | default: '' | strip
+
+        comment
+          Erste Person trägt die h1, sofern die Section keinen eigenen Titel
+          hat. Sonst bleibt die h1 beim Section-Titel und alle Personen sind h2.
+        endcomment
+        assign lep_tag = 'h2'
+        if forloop.first and lep_section_title == blank
+          assign lep_tag = 'h1'
+        endif
+
+        assign lep_anchor = block.settings.schema_anchor | default: block.id | handleize
+      -%}
+
+      {%- if lep_name != blank -%}
+        <article class="lt-exp__person" id="{{ lep_anchor }}" {{ block.shopify_attributes }}>
+
+          <div class="lt-exp__visual">
+            {%- if block.settings.photo != blank -%}
+              {{
+                block.settings.photo
+                | image_url: width: 800
+                | image_tag:
+                  widths: '400, 600, 800',
+                  sizes: '(max-width: 768px) 100vw, 420px',
+                  loading: 'eager',
+                  class: 'lt-exp__photo',
+                  alt: lep_name
+              }}
+            {%- else -%}
+              <div class="lt-exp__photo-placeholder" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+            {%- endif -%}
+          </div>
+
+          <div class="lt-exp__content">
+
+            {% render 'section-heading-crs',
+              heading: lep_name,
+              subheading: block.settings.role_line,
+              kicker: block.settings.kicker,
+              align: 'left',
+              headline_lg: true,
+              heading_tag: lep_tag,
+              extra_class: 'lt-exp__head'
+            %}
+
+            {%- if block.settings.body != blank -%}
+              <div class="lt-exp__body rte">{{ block.settings.body }}</div>
+            {%- endif -%}
+
+            {%- liquid
+              assign lep_has_facts = false
+              for i in (1..4)
+                assign lep_l_key = 'fact_' | append: i | append: '_label'
+                assign lep_v_key = 'fact_' | append: i | append: '_value'
+                if block.settings[lep_l_key] != blank and block.settings[lep_v_key] != blank
+                  assign lep_has_facts = true
+                endif
+              endfor
+            -%}
+
+            {%- if lep_has_facts -%}
+              <dl class="lt-exp__facts">
+                {%- for i in (1..4) -%}
+                  {%- assign lep_l_key = 'fact_' | append: i | append: '_label' -%}
+                  {%- assign lep_v_key = 'fact_' | append: i | append: '_value' -%}
+                  {%- if block.settings[lep_l_key] != blank and block.settings[lep_v_key] != blank -%}
+                    <div class="lt-exp__fact">
+                      <dt class="lt-exp__fact-label">{{ block.settings[lep_l_key] | escape }}</dt>
+                      <dd class="lt-exp__fact-value">{{ block.settings[lep_v_key] | escape }}</dd>
+                    </div>
+                  {%- endif -%}
+                {%- endfor -%}
+              </dl>
+            {%- endif -%}
+
+            {%- liquid
+              assign lep_has_links = false
+              for i in (1..4)
+                assign lep_ll_key = 'link_' | append: i | append: '_label'
+                assign lep_lu_key = 'link_' | append: i | append: '_url'
+                if block.settings[lep_ll_key] != blank and block.settings[lep_lu_key] != blank
+                  assign lep_has_links = true
+                endif
+              endfor
+            -%}
+
+            {%- if lep_has_links -%}
+              <div class="lt-exp__links">
+                {%- if block.settings.links_label != blank -%}
+                  <p class="lt-exp__links-label">{{ block.settings.links_label | escape }}</p>
+                {%- endif -%}
+                <ul class="lt-exp__links-list" role="list">
+                  {%- for i in (1..4) -%}
+                    {%- assign lep_ll_key = 'link_' | append: i | append: '_label' -%}
+                    {%- assign lep_lu_key = 'link_' | append: i | append: '_url' -%}
+                    {%- if block.settings[lep_ll_key] != blank and block.settings[lep_lu_key] != blank -%}
+                      <li>
+                        <a
+                          class="lt-exp__link"
+                          href="{{ block.settings[lep_lu_key] }}"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >{{ block.settings[lep_ll_key] | escape }}</a>
+                      </li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+
+          </div>
+        </article>
+
+        {%- comment -%}
+          Person-Knoten. Stabile @id = kanonische Seiten-URL + Anker, damit
+          `reviewedBy` aus den Artikeln darauf zeigen kann. `worksFor` verweist
+          auf die bestehende Organization-@id aus snippets/microdata-schema.liquid,
+          es wird bewusst keine zweite Organization angelegt.
+        {%- endcomment -%}
+        {%- liquid
+          assign lep_person_id = canonical_url | split: '?' | first | append: '#' | append: lep_anchor
+          assign lep_org_id = shop.url | append: '/#organization'
+          assign lep_knows = block.settings.knows_about | default: '' | strip
+          assign lep_affiliation = block.settings.affiliation_name | default: '' | strip
+        -%}
+        <script type="application/ld+json">
+          {
+            "@context": "https://schema.org",
+            "@type": "Person",
+            "@id": {{ lep_person_id | json }},
+            "name": {{ lep_name | json }},
+            "url": {{ lep_person_id | json }}
+            {%- if block.settings.job_title != blank -%}
+              , "jobTitle": {{ block.settings.job_title | json }}
+            {%- endif -%}
+            {%- if block.settings.schema_description != blank -%}
+              , "description": {{ block.settings.schema_description | json }}
+            {%- endif -%}
+            {%- if block.settings.photo != blank -%}
+              , "image": {{ block.settings.photo | image_url: width: 800 | prepend: 'https:' | json }}
+            {%- endif -%}
+            , "worksFor": { "@id": {{ lep_org_id | json }} }
+            {%- if lep_affiliation != blank -%}
+              , "affiliation": {
+                  "@type": "MedicalOrganization",
+                  "name": {{ lep_affiliation | json }}
+                  {%- if block.settings.affiliation_url != blank -%}
+                    , "url": {{ block.settings.affiliation_url | json }}
+                  {%- endif -%}
+                }
+            {%- endif -%}
+            {%- if lep_knows != blank -%}
+              , "knowsAbout": [
+                {%- assign lep_knows_list = lep_knows | split: ',' -%}
+                {%- for k in lep_knows_list -%}
+                  {{ k | strip | json }}{% unless forloop.last %}, {% endunless %}
+                {%- endfor -%}
+              ]
+            {%- endif -%}
+            {%- if lep_has_links -%}
+              , "sameAs": [
+                {%- assign lep_same_first = true -%}
+                {%- for i in (1..4) -%}
+                  {%- assign lep_ll_key = 'link_' | append: i | append: '_label' -%}
+                  {%- assign lep_lu_key = 'link_' | append: i | append: '_url' -%}
+                  {%- if block.settings[lep_ll_key] != blank and block.settings[lep_lu_key] != blank -%}
+                    {%- unless lep_same_first %}, {% endunless -%}
+                    {{ block.settings[lep_lu_key] | json }}
+                    {%- assign lep_same_first = false -%}
+                  {%- endif -%}
+                {%- endfor -%}
+              ]
+            {%- endif -%}
+          }
+        </script>
+      {%- endif -%}
+    {%- endfor -%}
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LT Expert Profile",
+  "tag": "section",
+  "class": "lt-expert-profile-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section-Titel (optional)"
+    },
+    {
+      "type": "text",
+      "id": "section_kicker",
+      "label": "Kicker"
+    },
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Titel",
+      "info": "Leer lassen bei nur einer Person. Dann trägt der Name die h1."
+    },
+    {
+      "type": "textarea",
+      "id": "section_intro",
+      "label": "Untertitel"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "person",
+      "name": "Person",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Kopf"
+        },
+        {
+          "type": "image_picker",
+          "id": "photo",
+          "label": "Porträt"
+        },
+        {
+          "type": "text",
+          "id": "kicker",
+          "label": "Kicker",
+          "info": "Micro-Label über dem Namen, z. B. Ärztliche Leitung."
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "info": "Voller Name inklusive Titel. Ohne Namen wird nichts gerendert."
+        },
+        {
+          "type": "text",
+          "id": "role_line",
+          "label": "Rollenzeile"
+        },
+        {
+          "type": "richtext",
+          "id": "body",
+          "label": "Beschreibung",
+          "info": "Rollenbeschreibung in LIFETIME-Stimme. Keine wörtliche Rede ohne Freigabe."
+        },
+        {
+          "type": "header",
+          "content": "Steckbrief"
+        },
+        {
+          "type": "text",
+          "id": "fact_1_label",
+          "label": "Fakt 1: Label"
+        },
+        {
+          "type": "text",
+          "id": "fact_1_value",
+          "label": "Fakt 1: Wert"
+        },
+        {
+          "type": "text",
+          "id": "fact_2_label",
+          "label": "Fakt 2: Label"
+        },
+        {
+          "type": "text",
+          "id": "fact_2_value",
+          "label": "Fakt 2: Wert"
+        },
+        {
+          "type": "text",
+          "id": "fact_3_label",
+          "label": "Fakt 3: Label"
+        },
+        {
+          "type": "text",
+          "id": "fact_3_value",
+          "label": "Fakt 3: Wert"
+        },
+        {
+          "type": "text",
+          "id": "fact_4_label",
+          "label": "Fakt 4: Label"
+        },
+        {
+          "type": "text",
+          "id": "fact_4_value",
+          "label": "Fakt 4: Wert"
+        },
+        {
+          "type": "header",
+          "content": "Profile extern (= sameAs im Schema)"
+        },
+        {
+          "type": "text",
+          "id": "links_label",
+          "label": "Label über den Links"
+        },
+        {
+          "type": "text",
+          "id": "link_1_label",
+          "label": "Link 1: Text"
+        },
+        {
+          "type": "url",
+          "id": "link_1_url",
+          "label": "Link 1: URL"
+        },
+        {
+          "type": "text",
+          "id": "link_2_label",
+          "label": "Link 2: Text"
+        },
+        {
+          "type": "url",
+          "id": "link_2_url",
+          "label": "Link 2: URL"
+        },
+        {
+          "type": "text",
+          "id": "link_3_label",
+          "label": "Link 3: Text"
+        },
+        {
+          "type": "url",
+          "id": "link_3_url",
+          "label": "Link 3: URL"
+        },
+        {
+          "type": "text",
+          "id": "link_4_label",
+          "label": "Link 4: Text"
+        },
+        {
+          "type": "url",
+          "id": "link_4_url",
+          "label": "Link 4: URL"
+        },
+        {
+          "type": "header",
+          "content": "Person-Schema (JSON-LD)"
+        },
+        {
+          "type": "text",
+          "id": "schema_anchor",
+          "label": "Anker der @id",
+          "info": "Ergibt die stabile @id: Seiten-URL + # + Anker. Nie ändern, sobald verlinkt."
+        },
+        {
+          "type": "text",
+          "id": "job_title",
+          "label": "jobTitle"
+        },
+        {
+          "type": "textarea",
+          "id": "schema_description",
+          "label": "description",
+          "info": "Ein Satz, nur fürs Schema. Keine Wirkaussage."
+        },
+        {
+          "type": "text",
+          "id": "affiliation_name",
+          "label": "affiliation: Einrichtung",
+          "info": "Nur eintragen, wenn exakt verifiziert."
+        },
+        {
+          "type": "url",
+          "id": "affiliation_url",
+          "label": "affiliation: URL"
+        },
+        {
+          "type": "text",
+          "id": "knows_about",
+          "label": "knowsAbout",
+          "info": "Kommagetrennt."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Expert Profile",
+      "blocks": [{ "type": "person" }]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,215 @@
+/*
+  LIFETIME — section-lt-expert-profile.css
+  Autoritätsseite /pages/aerzte, Personen-Steckbrief.
+  Split 2fr/3fr übernommen aus `sections/lt-science-limmroth.liquid`,
+  hier auf heller Fläche (§6 Surface Selection) und ohne Buch-/Zitat-Block.
+  Typografie des Kopfs kommt vollständig aus crs-heading-stack
+  (assets/crs-section-headings.css, global in layout/theme.liquid geladen);
+  hier nur Maß und Abstand. Token-Referenzen: design-governance §3, §4, §5.
+*/
+
+/* ── Section shell ──────────────────────────────────────────── */
+/* Seitenauftakt → Hero-Padding (§4 Section Padding: 120 / 80 mobil). */
+.lt-exp {
+  background-color: var(--color-surface-primary);
+  padding-top: var(--space-10);
+  padding-bottom: var(--space-10);
+}
+
+.lt-exp__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.lt-exp__section-head {
+  max-width: 640px;
+  margin-bottom: var(--space-6);
+}
+
+/* ── Person ─────────────────────────────────────────────────── */
+/*
+  DECISION: Split 2fr/3fr, align-items:start statt center.
+  Die rechte Spalte ist deutlich höher als das Porträt (Kopf + Text +
+  Steckbrief + Links); zentriert würde das Bild in der Mitte „schweben".
+*/
+.lt-exp__person {
+  display: grid;
+  grid-template-columns: 2fr 3fr;
+  gap: var(--space-8);
+  align-items: start;
+}
+
+/* Weitere Personen: voller Section-Abstand, kein Trennstrich (§11). */
+.lt-exp__person + .lt-exp__person {
+  margin-top: var(--space-9);
+}
+
+/* ── Porträt ────────────────────────────────────────────────── */
+/*
+  DECISION: 4/5 Hochformat (§ Image technical rules), --radius-md,
+  object-position mit Gesichts-Bias wie im approved expert-profile-Pattern.
+*/
+.lt-exp__photo,
+.lt-exp__photo-placeholder {
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-md);
+  display: block;
+}
+
+.lt-exp__photo {
+  height: auto;
+  object-fit: cover;
+  object-position: center 25%;
+}
+
+.lt-exp__photo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-surface-secondary);
+  color: var(--color-text-muted);
+}
+
+/* ── Inhalt ─────────────────────────────────────────────────── */
+.lt-exp__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.lt-exp__head {
+  max-width: 640px;
+}
+
+.lt-exp__body {
+  max-width: 640px;
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
+.lt-exp__body > p {
+  margin: 0 0 var(--space-4);
+}
+
+.lt-exp__body > p:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Steckbrief ─────────────────────────────────────────────── */
+/*
+  DECISION: dl im 2er-Raster statt Fließtext oder Karte. Ein Klinikprofil
+  liest sich als Datensatz; Karten würden hier ein Raster suggerieren, das
+  die Seite nicht hat. Keine Trennlinien (§11), Trennung über Abstand.
+*/
+.lt-exp__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin: 0;
+  padding: 0;
+}
+
+.lt-exp__fact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.lt-exp__fact-label {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.lt-exp__fact-value {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  color: var(--color-text-primary);
+}
+
+/* ── Externe Profile (= sameAs) ─────────────────────────────── */
+.lt-exp__links-label {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.lt-exp__links-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) var(--space-5);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lt-exp__link {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-text-primary);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-border-default);
+  padding-bottom: 2px;
+  transition: border-color var(--ease-default);
+}
+
+.lt-exp__link:hover {
+  border-bottom-color: var(--color-text-primary);
+}
+
+/* ── Responsive ─────────────────────────────────────────────── */
+@media screen and (max-width: 1024px) {
+  .lt-exp__person {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-7);
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .lt-exp {
+    padding-top: var(--space-9);
+    padding-bottom: var(--space-9);
+  }
+
+  .lt-exp__container {
+    padding: 0 var(--space-4);
+  }
+
+  .lt-exp__person {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+
+  /*
+    DECISION: Auf Mobil wird das Porträt vom Hochformat zum ruhigen
+    Querformat. Ein 4/5-Bild in voller Spaltenbreite schiebt den Namen
+    sonst unter die Falz.
+  */
+  .lt-exp__photo,
+  .lt-exp__photo-placeholder {
+    aspect-ratio: 3 / 2;
+    object-position: center 20%;
+  }
+
+  .lt-exp__facts {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+}
