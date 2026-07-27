@@ -19,6 +19,10 @@
   if section.settings.heading_size == 'product_title'
     assign crs_h_headline_lg = true
   endif
+  assign crs_h_headline_md = false
+  if section.settings.heading_size == 'feature'
+    assign crs_h_headline_md = true
+  endif
   assign fg_single_frame_media = section.settings.single_frame_media
 -%}
 {% style %}
@@ -64,7 +68,7 @@
 
       <div class="fg-content">
         {%- if crs_fg_kicker != blank or crs_fg_head != blank or crs_fg_sub != blank -%}
-          <div class="fg-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+          <div class="fg-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_h_headline_md %} crs-heading-stack--headline-md{% endif %}">
             {%- if crs_fg_kicker != blank -%}
               <p class="crs-heading-stack__kicker">{{ crs_fg_kicker | escape }}</p>
             {%- endif -%}
@@ -406,6 +410,7 @@
       "label": "Überschrift Größe",
       "options": [
         { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "feature", "label": "Mittel (Section-Headline)" },
         { "value": "product_title", "label": "Wie Produkttitel" }
       ],
       "default": "section",

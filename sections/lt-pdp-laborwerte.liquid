@@ -74,6 +74,22 @@
     assign lw_sub = ''
   endif
 
+  # Fliesstext gehoert NICHT in crs-heading-stack__pair (docs/section-heading-stack.md).
+  # Laengere Erklaerungen laufen ueber `intro` unterhalb des Heading-Stacks.
+  assign lw_intro = section.settings.intro | strip
+  if lw_intro == '__none__'
+    assign lw_intro = ''
+  endif
+
+  assign lw_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign lw_headline_lg = true
+  endif
+  assign lw_headline_md = false
+  if section.settings.heading_size == 'feature'
+    assign lw_headline_md = true
+  endif
+
   assign lw_meta_lab    = section.settings.lab_name | strip
   assign lw_meta_accred = section.settings.lab_accreditation | strip
   assign lw_batch       = section.settings.batch | strip
@@ -109,7 +125,7 @@
   <div class="ltlw__container">
 
     {%- if lw_kicker != blank or lw_head != blank or lw_sub != blank -%}
-      <div class="ltlw__header crs-heading-stack crs-heading-stack--align-{{ lw_align }}">
+      <div class="ltlw__header{% if lw_intro != blank %} ltlw__header--with-intro{% endif %} crs-heading-stack crs-heading-stack--align-{{ lw_align }}{% if lw_headline_lg %} crs-heading-stack--headline-lg{% elsif lw_headline_md %} crs-heading-stack--headline-md{% endif %}">
         {%- if lw_kicker != blank -%}
           <p class="crs-heading-stack__kicker">{{ lw_kicker | escape }}</p>
         {%- endif -%}
@@ -124,6 +140,10 @@
           </div>
         {%- endif -%}
       </div>
+    {%- endif -%}
+
+    {%- if lw_intro != blank -%}
+      <p class="ltlw__intro">{{ lw_intro | escape | newline_to_br }}</p>
     {%- endif -%}
 
     <div class="ltlw__layout{% if section.settings.report_image != blank %} ltlw__layout--with-proof{% endif %}">
@@ -176,10 +196,7 @@
             <summary class="ltlw__summary">
               <span class="ltlw__summary-text">{{ section.settings.details_label | default: 'Einzelwerte anzeigen' | escape }}</span>
               <span class="ltlw__summary-icon" aria-hidden="true">
-                <svg viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg" focusable="false">
-                  <path d="M1 1.5L6 6.5L11 1.5" stroke="currentColor" stroke-width="1.4"
-                        stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                {% render 'crs-chevron' %}
               </span>
             </summary>
 
@@ -274,6 +291,22 @@
 
 .ltlw__header {
   margin-bottom: var(--space-7);
+}
+
+.ltlw__header--with-intro {
+  margin-bottom: var(--space-4);
+}
+
+/* Section-Description: bewusst ausserhalb des Heading-Stacks, damit Titel und
+   Subline ein Block bleiben und Fliesstext nicht auf Headline-Groesse laeuft. */
+.ltlw__intro {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--ltlw-text-muted, rgba(38, 37, 30, 0.7));
+  max-width: 62ch;
+  margin: 0 0 var(--space-7);
 }
 
 /* Layout: Werte links, Beleg rechts.
@@ -416,7 +449,7 @@
 
 .ltlw__summary-icon {
   display: inline-flex;
-  width: 12px; /* intrinsic: Chevron-Breite, kein Layout-Token */
+  width: 15px; /* intrinsic: Chevron-Breite, kein Layout-Token */
   color: var(--ltlw-icon, rgba(38, 37, 30, 0.52));
   transition: transform var(--ease-default);
 }
@@ -657,6 +690,17 @@
       "default": "left"
     },
     {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "feature", "label": "Mittel (Section-Headline)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section"
+    },
+    {
       "type": "text",
       "id": "kicker",
       "label": "Kicker",
@@ -675,7 +719,14 @@
       "id": "subheading",
       "label": "Unterüberschrift",
       "default": "Jede Charge wird unabhängig im Labor geprüft. Das sind die Werte, die dabei herauskommen.",
-      "info": "__none__ = ausblenden"
+      "info": "__none__ = ausblenden. Kurz halten, läuft auf Headline-Größe."
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Einleitungstext (optional)",
+      "default": "__none__",
+      "info": "__none__ = ausblenden. Für längere Erklärungen statt Unterüberschrift."
     },
     {
       "type": "header",

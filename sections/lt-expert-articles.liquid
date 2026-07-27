@@ -6,11 +6,17 @@
   die den Reviewer in der Byline führen, und ist damit gegenprüfbar.
   Briefing: docs/briefing-expertenseite-aerzte.md §3.1, Zeile „Geprüfte Beiträge".
 
-  Quelle ist das Artikel-Metafeld `custom.reviewer_name`, dieselbe Quelle, aus
-  der `sections/lt-article.liquid` die Byline zieht. Damit kann die Liste nicht
-  von der Byline abweichen. Ein Artikel ohne dieses Metafeld erscheint hier
-  nicht, auch wenn sein Template den Reviewer über Section-Settings setzt.
-  Das ist Absicht: die Liste soll eher zu kurz als zu lang sein.
+  Quelle ist der Blog. Die Byline-Konvention gilt für den gesamten
+  Longevity-Blog (Memory `blog-byline`, `docs/nmn-blog-geo/redaktionsplan.md`
+  Schritt 6): jeder Artikel nennt Autor und fachlichen Prüfer, gesetzt über
+  die Section-Settings des Artikel-Templates.
+
+  Deshalb wird hier NICHT über ein Artikel-Metafeld gefiltert. Die Metafelder
+  `custom.author_name` / `custom.reviewer_name` überschreiben die
+  Template-Settings still und sind als Byline-Quelle bewusst nicht in Gebrauch.
+  Wer trotzdem filtern will, etwa sobald ein zweiter Prüfer dazukommt, setzt
+  `metafield_key` plus `reviewer_filter`. Dann erscheinen nur Artikel, die das
+  Metafeld tragen.
 
   §12 Build Spec:
   - Surface:          --color-surface-primary (hell) — Alternation nach der
@@ -35,45 +41,47 @@
 
 {%- liquid
   assign lea_blog = blogs[section.settings.blog]
-  assign lea_key = section.settings.metafield_key | default: 'reviewer_name'
+  assign lea_key = section.settings.metafield_key | default: '' | strip
   assign lea_filter = section.settings.reviewer_filter | default: '' | strip
 -%}
 
 {%- capture lea_rows -%}
   {%- for art in lea_blog.articles limit: 50 -%}
-    {%- assign lea_reviewer = art.metafields.custom[lea_key].value | default: '' | strip -%}
-    {%- if lea_reviewer != blank -%}
-      {%- assign lea_match = true -%}
-      {%- if lea_filter != blank and lea_reviewer != lea_filter -%}
+    {%- assign lea_match = true -%}
+    {%- if lea_key != blank -%}
+      {%- assign lea_reviewer = art.metafields.custom[lea_key].value | default: '' | strip -%}
+      {%- if lea_reviewer == blank -%}
+        {%- assign lea_match = false -%}
+      {%- elsif lea_filter != blank and lea_reviewer != lea_filter -%}
         {%- assign lea_match = false -%}
       {%- endif -%}
-      {%- if lea_match -%}
-        {%- comment -%}
-          Das Prüfdatum kommt nur aus `custom.reviewed_date`. Fehlt es, wird
-          das Veröffentlichungsdatum gezeigt UND als solches benannt. Ein
-          Publikationsdatum als „geprüft am" auszugeben wäre eine Behauptung
-          über einen Vorgang, für den es kein Datum gibt.
-        {%- endcomment -%}
-        {%- assign lea_reviewed = art.metafields.custom.reviewed_date.value -%}
-        {%- if lea_reviewed != blank -%}
-          {%- assign lea_date = lea_reviewed -%}
-          {%- assign lea_prefix = section.settings.date_prefix -%}
-        {%- else -%}
-          {%- assign lea_date = art.published_at -%}
-          {%- assign lea_prefix = section.settings.date_prefix_fallback -%}
-        {%- endif -%}
-        <li class="lt-earts__item">
-          <a class="lt-earts__link" href="{{ art.url }}">
-            <span class="lt-earts__title">{{ art.title | escape }}</span>
-            <span class="lt-earts__meta">
-              {%- if lea_prefix != blank -%}
-                {{ lea_prefix | escape }}
-              {%- endif -%}
-              <time datetime="{{ lea_date | date: '%Y-%m-%d' }}">{{ lea_date | date: '%d.%m.%Y' }}</time>
-            </span>
-          </a>
-        </li>
+    {%- endif -%}
+    {%- if lea_match -%}
+      {%- comment -%}
+        Das Prüfdatum kommt nur aus `custom.reviewed_date`. Fehlt es, wird das
+        Veröffentlichungsdatum gezeigt UND als solches benannt. Ein
+        Publikationsdatum als „geprüft am" auszugeben wäre eine Behauptung über
+        einen Vorgang, für den es kein Datum gibt.
+      {%- endcomment -%}
+      {%- assign lea_reviewed = art.metafields.custom.reviewed_date.value -%}
+      {%- if lea_reviewed != blank -%}
+        {%- assign lea_date = lea_reviewed -%}
+        {%- assign lea_prefix = section.settings.date_prefix -%}
+      {%- else -%}
+        {%- assign lea_date = art.published_at -%}
+        {%- assign lea_prefix = section.settings.date_prefix_fallback -%}
       {%- endif -%}
+      <li class="lt-earts__item">
+        <a class="lt-earts__link" href="{{ art.url }}">
+          <span class="lt-earts__title">{{ art.title | escape }}</span>
+          <span class="lt-earts__meta">
+            {%- if lea_prefix != blank -%}
+              {{ lea_prefix | escape }}
+            {%- endif -%}
+            <time datetime="{{ lea_date | date: '%Y-%m-%d' }}">{{ lea_date | date: '%d.%m.%Y' }}</time>
+          </span>
+        </a>
+      </li>
     {%- endif -%}
   {%- endfor -%}
 {%- endcapture -%}
@@ -151,15 +159,14 @@
     {
       "type": "text",
       "id": "metafield_key",
-      "label": "Metafeld-Key im Namespace custom",
-      "default": "reviewer_name",
-      "info": "Artikel ohne dieses Metafeld erscheinen nicht."
+      "label": "Optional filtern nach Metafeld",
+      "info": "Leer = alle Artikel des Blogs. Key im Namespace custom."
     },
     {
       "type": "text",
       "id": "reviewer_filter",
-      "label": "Nur diesen Reviewer zeigen",
-      "info": "Leer = alle Artikel mit gesetztem Metafeld. Muss exakt passen."
+      "label": "Nur diesen Wert zeigen",
+      "info": "Nur wirksam mit Metafeld oben. Muss exakt passen."
     },
     {
       "type": "text",

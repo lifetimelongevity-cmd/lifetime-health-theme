@@ -16,6 +16,10 @@
   if section.settings.heading_size == 'product_title'
     assign crs_h_headline_lg = true
   endif
+  assign crs_h_headline_md = false
+  if section.settings.heading_size == 'feature'
+    assign crs_h_headline_md = true
+  endif
 -%}
 {% style %}
   #section-{{ section.id }} {
@@ -38,7 +42,7 @@
       {%- comment -%} Left: sticky heading {%- endcomment -%}
       <div class="faq-left">
         {%- if crs_faq_kicker != blank or crs_faq_head != blank or crs_faq_sub != blank -%}
-          <div class="faq-left-inner crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+          <div class="faq-left-inner crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_h_headline_md %} crs-heading-stack--headline-md{% endif %}">
             {%- if crs_faq_kicker != blank -%}
               <p class="crs-heading-stack__kicker">{{ crs_faq_kicker | escape }}</p>
             {%- endif -%}
@@ -67,7 +71,7 @@
               aria-controls="faq-panel-{{ section.id }}-{{ forloop.index }}"
             >
               <span class="faq-question-text">{{ block.settings.question | escape }}</span>
-              <span class="faq-toggle" aria-hidden="true">↓</span>
+              <span class="faq-toggle" aria-hidden="true">{% render 'crs-chevron', class: 'faq-toggle-icon' %}</span>
             </button>
             <div
               class="faq-panel"
@@ -184,12 +188,21 @@
 }
 
 .faq-toggle {
-  font-size: 16px;
   color: var(--crs-text-ter, rgba(38,37,30,0.4));
   flex-shrink: 0;
-  transition: transform 0.2s ease;
   line-height: 1;
-  display: inline-block;
+  display: inline-flex;
+}
+
+/* Rotation statt Zeichentausch — gleicher Mechanismus wie in crs-novel-food
+   und lt-pdp-laborwerte. */
+.faq-toggle-icon {
+  display: block;
+  transition: transform 0.2s ease;
+}
+
+.faq-question[aria-expanded='true'] .faq-toggle-icon {
+  transform: rotate(180deg);
 }
 
 /* Panel */
@@ -255,27 +268,23 @@
     var expanded = btn.getAttribute('aria-expanded') === 'true';
     var panelId = btn.getAttribute('aria-controls');
     var panel = panelById(section, panelId);
-    var toggle = btn.querySelector('.faq-toggle');
 
     buttons.forEach(function (other) {
       if (other !== btn) {
         other.setAttribute('aria-expanded', 'false');
         var otherId = other.getAttribute('aria-controls');
         var otherPanel = panelById(section, otherId);
-        var otherToggle = other.querySelector('.faq-toggle');
         if (otherPanel) otherPanel.classList.remove('is-open');
-        if (otherToggle) otherToggle.textContent = '↓';
       }
     });
 
+    /* Der Chevron dreht sich per CSS über [aria-expanded]. Kein Zeichentausch. */
     if (!expanded) {
       btn.setAttribute('aria-expanded', 'true');
       if (panel) panel.classList.add('is-open');
-      if (toggle) toggle.textContent = '↑';
     } else {
       btn.setAttribute('aria-expanded', 'false');
       if (panel) panel.classList.remove('is-open');
-      if (toggle) toggle.textContent = '↓';
     }
   });
 })();
@@ -354,6 +363,7 @@
       "label": "Überschrift Größe",
       "options": [
         { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "feature", "label": "Mittel (Section-Headline)" },
         { "value": "product_title", "label": "Wie Produkttitel" }
       ],
       "default": "section",

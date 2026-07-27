@@ -15,9 +15,19 @@
   if crs_eq_sub == '__none__'
     assign crs_eq_sub = ''
   endif
+  # Fliesstext gehoert NICHT in crs-heading-stack__pair (docs/section-heading-stack.md).
+  # Laengere Einordnungen laufen ueber `intro` unterhalb des Heading-Stacks.
+  assign crs_eq_intro = section.settings.intro | strip
+  if crs_eq_intro == '__none__'
+    assign crs_eq_intro = ''
+  endif
   assign crs_h_headline_lg = false
   if section.settings.heading_size == 'product_title'
     assign crs_h_headline_lg = true
+  endif
+  assign crs_h_headline_md = false
+  if section.settings.heading_size == 'feature'
+    assign crs_h_headline_md = true
   endif
 -%}
 {% style %}
@@ -37,7 +47,7 @@
   <div class="eq-container">
 
     {%- if crs_eq_kicker != blank or crs_eq_head != blank or crs_eq_sub != blank -%}
-      <div class="eq-section-head crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+      <div class="eq-section-head{% if crs_eq_intro != blank %} eq-section-head--with-intro{% endif %} crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_h_headline_md %} crs-heading-stack--headline-md{% endif %}">
         {%- if crs_eq_kicker != blank -%}
           <p class="crs-heading-stack__kicker">{{ crs_eq_kicker | escape }}</p>
         {%- endif -%}
@@ -52,6 +62,10 @@
           </div>
         {%- endif -%}
       </div>
+    {%- endif -%}
+
+    {%- if crs_eq_intro != blank -%}
+      <p class="eq-section-intro">{{ crs_eq_intro | escape | newline_to_br }}</p>
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
@@ -108,6 +122,22 @@
 
 .eq-section-head {
   margin-bottom: var(--space-7);
+}
+
+/* Section-Description: bewusst ausserhalb des Heading-Stacks, damit Titel und
+   Subline ein Block bleiben und Fliesstext nicht auf Headline-Groesse laeuft. */
+.eq-section-head--with-intro {
+  margin-bottom: var(--space-4);
+}
+
+.eq-section-intro {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+  max-width: 62ch;
+  margin: 0 0 var(--space-7);
 }
 
 .eq-grid {
@@ -292,6 +322,7 @@
       "label": "Überschrift Größe",
       "options": [
         { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "feature", "label": "Mittel (Section-Headline)" },
         { "value": "product_title", "label": "Wie Produkttitel" }
       ],
       "default": "section",
@@ -316,7 +347,14 @@
       "id": "subheading",
       "label": "Unterüberschrift (optional)",
       "default": "__none__",
-      "info": "__none__ = ausblenden (Theme-Editor)"
+      "info": "__none__ = ausblenden (Theme-Editor). Kurz halten, läuft auf Headline-Größe."
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Einleitungstext (optional)",
+      "default": "__none__",
+      "info": "__none__ = ausblenden. Für längere Einordnungen statt Unterüberschrift."
     }
   ],
   "blocks": [

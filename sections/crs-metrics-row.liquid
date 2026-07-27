@@ -15,9 +15,19 @@
   if crs_mg_sub == '__none__'
     assign crs_mg_sub = ''
   endif
+  # Fliesstext gehoert NICHT in crs-heading-stack__pair (docs/section-heading-stack.md).
+  # Laengere Einordnungen laufen ueber `intro` unterhalb des Heading-Stacks.
+  assign crs_mg_intro = section.settings.intro | strip
+  if crs_mg_intro == '__none__'
+    assign crs_mg_intro = ''
+  endif
   assign crs_h_headline_lg = false
   if section.settings.heading_size == 'product_title'
     assign crs_h_headline_lg = true
+  endif
+  assign crs_h_headline_md = false
+  if section.settings.heading_size == 'feature'
+    assign crs_h_headline_md = true
   endif
 -%}
 {% style %}
@@ -37,7 +47,7 @@
   <div class="mg-container">
 
     {%- if crs_mg_kicker != blank or crs_mg_head != blank or crs_mg_sub != blank -%}
-      <div class="mg-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+      <div class="mg-header{% if crs_mg_intro != blank %} mg-header--with-intro{% endif %} crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_h_headline_md %} crs-heading-stack--headline-md{% endif %}">
         {%- if crs_mg_kicker != blank -%}
           <p class="crs-heading-stack__kicker">{{ crs_mg_kicker | escape }}</p>
         {%- endif -%}
@@ -54,17 +64,32 @@
       </div>
     {%- endif -%}
 
+    {%- if crs_mg_intro != blank -%}
+      <p class="mg-intro">{{ crs_mg_intro | escape | newline_to_br }}</p>
+    {%- endif -%}
+
     {%- if section.blocks.size > 0 -%}
       <div class="mg-grid">
         {%- for block in section.blocks -%}
-          <div class="mg-card" {{ block.shopify_attributes }}>
+          <div class="mg-card{% if block.settings.source != blank %} mg-card--with-source{% endif %}" {{ block.shopify_attributes }}>
             <div class="mg-number">{{ block.settings.number | escape }}</div>
-            {%- if block.settings.description != blank -%}
-              <div class="mg-desc">{{ block.settings.description | escape }}</div>
+            {%- if block.settings.description != blank or block.settings.source != blank -%}
+              <div class="mg-text">
+                {%- if block.settings.description != blank -%}
+                  <div class="mg-desc">{{ block.settings.description | escape }}</div>
+                {%- endif -%}
+                {%- if block.settings.source != blank -%}
+                  <div class="mg-source">{{ block.settings.source | escape }}</div>
+                {%- endif -%}
+              </div>
             {%- endif -%}
           </div>
         {%- endfor -%}
       </div>
+    {%- endif -%}
+
+    {%- if section.settings.note != blank -%}
+      <p class="mg-note">{{ section.settings.note }}</p>
     {%- endif -%}
 
   </div>
@@ -88,6 +113,22 @@
 /* Header */
 .mg-header {
   margin-bottom: var(--space-7);
+}
+
+.mg-header--with-intro {
+  margin-bottom: var(--space-4);
+}
+
+/* Section-Description: bewusst ausserhalb des Heading-Stacks, damit Titel und
+   Subline ein Block bleiben und Fliesstext nicht auf Headline-Groesse laeuft. */
+.mg-intro {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+  max-width: 62ch;
+  margin: 0 0 var(--space-7);
 }
 
 /* Grid */
@@ -120,13 +161,53 @@
   color: var(--crs-text, #26251e);
 }
 
+/* Text block (pushed to the bottom of the card) */
+.mg-text {
+  margin-top: auto;
+}
+
 /* Description */
 .mg-desc {
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
   color: var(--crs-text, #26251e);
-  margin-top: auto;
+}
+
+/* Source / method line */
+.mg-source {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+  margin-top: var(--space-2);
+}
+
+/* Cards carrying a source line need room to breathe */
+.mg-card--with-source {
+  aspect-ratio: auto;
+  min-height: 220px;
+}
+
+/* Note below the grid */
+.mg-note {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+  margin: var(--space-5) 0 0;
+}
+
+.mg-note a {
+  color: var(--color-teal);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--color-gray-400);
+  transition: color 0.15s ease, text-decoration-color 0.15s ease;
+}
+
+.mg-note a:hover {
+  color: var(--color-teal-dark);
+  text-decoration-color: var(--color-teal-dark);
 }
 
 /* Tablet — 2 columns */
@@ -232,6 +313,7 @@
       "label": "Überschrift Größe",
       "options": [
         { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "feature", "label": "Mittel (Section-Headline)" },
         { "value": "product_title", "label": "Wie Produkttitel" }
       ],
       "default": "section",
@@ -256,7 +338,20 @@
       "id": "subheading",
       "label": "Unterüberschrift (optional)",
       "default": "__none__",
-      "info": "__none__ = ausblenden (Theme-Editor)"
+      "info": "__none__ = ausblenden (Theme-Editor). Kurz halten, läuft auf Headline-Größe."
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Einleitungstext (optional)",
+      "default": "__none__",
+      "info": "__none__ = ausblenden. Für längere Einordnungen statt Unterüberschrift."
+    },
+    {
+      "type": "inline_richtext",
+      "id": "note",
+      "label": "Fußnote unter den Kennzahlen (optional)",
+      "info": "Für Quellenangabe oder fachliche Zeichnung. Leer lassen = ausblenden."
     }
   ],
   "blocks": [
@@ -275,6 +370,12 @@
           "id": "description",
           "label": "Beschreibung",
           "default": "bestätigte NMN-Reinheit"
+        },
+        {
+          "type": "text",
+          "id": "source",
+          "label": "Quelle / Methode (optional)",
+          "info": "Kleine Zeile unter der Beschreibung, z. B. Labor und Messmethode."
         }
       ]
     }

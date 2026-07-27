@@ -193,13 +193,26 @@
     docs/nmn-blog-geo/redaktionsplan.md (Schritt 6). Ohne Namen kein Knoten,
     Platzhalter-Credentials werden nie gerendert.
 
-    "url" erscheint automatisch, sobald die Seite /pages/aerzte existiert. Solange sie
-    fehlt, bleibt das Feld weg, damit das Schema nicht auf einen 404 zeigt.
+    "@id" und "url" erscheinen automatisch, sobald die Seite /pages/aerzte existiert.
+    Solange sie fehlt, bleiben beide Felder weg, damit das Schema nicht auf einen 404
+    zeigt. Die "@id" ist der eigentliche Punkt: erst sie verbindet diesen Knoten mit dem
+    Person-Knoten auf /pages/aerzte (sections/lt-expert-profile.liquid, Anker aus
+    `schema_anchor`). Ohne sie waere `reviewedBy` nur eine namensgleiche Person mit
+    einer URL-Eigenschaft, kein Verweis auf eine aufloesbare Entitaet.
+
+    Der Anker muss mit `schema_anchor` im Person-Block uebereinstimmen. Beide Seiten
+    sind ueber docs/limmroth-faktenblatt.md dokumentiert. Weicht er ab, mergen die
+    Knoten nicht, und das faellt in keinem Validator auf.
   {%- endcomment -%}
   {%- liquid
     assign lt_reviewer = article.metafields.custom.reviewer_name.value | default: 'Prof. Dr. med. Volker Limmroth'
     assign lt_reviewer_role = article.metafields.custom.reviewer_credential.value | default: 'Chefarzt Neurologie, Chief Scientific Officer LIFETIME'
+    assign lt_reviewer_anchor = article.metafields.custom.reviewer_anchor.value | default: 'limmroth'
     assign lt_expert_page = pages['aerzte']
+    if lt_expert_page != blank
+      assign lt_expert_url = shop.url | append: lt_expert_page.url
+      assign lt_expert_node = lt_expert_url | append: '#' | append: lt_reviewer_anchor
+    endif
   -%}
   {%- if lt_reviewer != blank -%}
     <script type="application/ld+json">
@@ -208,12 +221,13 @@
         "@id": {{ article.url | append: '#article' | json }},
         "reviewedBy": {
           "@type": "Person",
+          {%- if lt_expert_page != blank -%}
+            "@id": {{ lt_expert_node | json }},
+            "url": {{ lt_expert_node | json }},
+          {%- endif -%}
           "name": {{ lt_reviewer | json }}
           {%- if lt_reviewer_role != blank -%}
             , "jobTitle": {{ lt_reviewer_role | json }}
-          {%- endif -%}
-          {%- if lt_expert_page != blank -%}
-            , "url": {{ shop.url | append: lt_expert_page.url | json }}
           {%- endif -%}
         }
       }

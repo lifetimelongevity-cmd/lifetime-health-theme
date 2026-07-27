@@ -17,6 +17,10 @@
   align         (string)  — 'left' | 'center' | 'right'. Default 'left'.
   on_dark       (bool)    — true → adds `--on-dark` modifier for dark surfaces.
   headline_lg   (bool)    — true → adds `--headline-lg` modifier (--text-h1 sizing).
+                            Dem echten H1 der Seite vorbehalten.
+  headline_md   (bool)    — true → adds `--headline-md` modifier (--text-h2 sizing).
+                            Standard für Content-Sections. Wird ignoriert, wenn
+                            headline_lg gesetzt ist.
   heading_tag   (string)  — 'h1' | 'h2' | 'h3' | 'h4'. Default 'h2'.
   extra_class   (string)  — optional additional class on the outer wrapper
                             (e.g. `lt-pdp-final-cta__intro` for section-scoped CSS).
@@ -60,7 +64,7 @@
 -%}
 
 {%- if _crs_heading != blank or _crs_sub != blank or _crs_kicker != blank -%}
-  <div class="{% if _crs_extra != blank %}{{ _crs_extra }} {% endif %}crs-heading-stack crs-heading-stack--align-{{ _crs_align }}{% if on_dark %} crs-heading-stack--on-dark{% endif %}{% if headline_lg %} crs-heading-stack--headline-lg{% endif %}{% if _crs_modifier != blank %} crs-heading-stack--{{ _crs_modifier }}{% endif %}">
+  <div class="{% if _crs_extra != blank %}{{ _crs_extra }} {% endif %}crs-heading-stack crs-heading-stack--align-{{ _crs_align }}{% if on_dark %} crs-heading-stack--on-dark{% endif %}{% if headline_lg %} crs-heading-stack--headline-lg{% elsif headline_md %} crs-heading-stack--headline-md{% endif %}{% if _crs_modifier != blank %} crs-heading-stack--{{ _crs_modifier }}{% endif %}">
     {%- if _crs_kicker != blank -%}
       <p class="crs-heading-stack__kicker">{{ _crs_kicker | escape }}</p>
     {%- endif -%}

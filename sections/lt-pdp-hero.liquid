@@ -1303,10 +1303,15 @@
           >
         {%- endif -%}
         <div class="lt-sticky-atc__meta">
-          <span class="lt-sticky-atc__title">{{ product.title | escape }}</span>
-          {%- if section.settings.sticky_atc_subline != blank -%}
-            <span class="lt-sticky-atc__subline" data-lt-sticky-atc-subline>{{ section.settings.sticky_atc_subline | escape }}</span>
-          {%- endif -%}
+          {%- comment -%}
+            Einzeilige Namenszeile: Produkt + aktive Größe. Die frühere
+            zweizeilig geclampte Marketing-Subline ist raus, sie hat die Leiste
+            auf 101px getrieben und Content dauerhaft verdeckt.
+          {%- endcomment -%}
+          <span class="lt-sticky-atc__name">
+            <span class="lt-sticky-atc__title">{{ product.title | escape }}</span>
+            <span class="lt-sticky-atc__size" data-lt-sticky-atc-subline hidden></span>
+          </span>
           <div class="lt-sticky-atc__price" data-js-atc-price>
             <span class="sticky-add-to-cart__price-original text-weight--bold">
               {{ current_variant.price | money | append: iso_code }}
@@ -1463,13 +1468,19 @@
       if (hidden) hidden.innerHTML = wrapped;
     }
 
-    // Sticky-Subline: Größen-Label der AKTIVEN Auswahl voranstellen. Sticky liegt nach
-    // Upgrade an <body> → document-weit suchen. Basis-Text einmalig cachen (kein Doppeln).
+    // Sticky-Größenchip: zeigt NUR das Label der aktiven Auswahl (z.B. "30 g"),
+    // damit die Leiste einzeilig bleibt. Sticky liegt nach Upgrade an <body>
+    // → document-weit suchen.
     function updateStickySubline(short) {
       const el = document.querySelector('#lt-sticky-atc [data-lt-sticky-atc-subline]');
       if (!el) return;
-      if (stickySublineBase === null) stickySublineBase = el.textContent.trim();
-      if (short) el.textContent = stickySublineBase ? (short + ' · ' + stickySublineBase) : short;
+      if (short) {
+        el.textContent = short;
+        el.hidden = false;
+      } else {
+        el.textContent = '';
+        el.hidden = true;
+      }
     }
 
     function savingsPct(onceC, subC) {
@@ -1688,7 +1699,6 @@
     const sizeGroup = section.querySelector('[data-lt-size-group]');
     const variantInput = section.querySelector('[data-lt-variant-input]');
     const appstleWidget = section.querySelector('#lt-appstle-widget');
-    let stickySublineBase = null; // SSR-Subline-Text, einmalig gecacht (sonst doppeltes Voranstellen)
 
     function applySize(sizeInput) {
       if (!sizeInput) return;
@@ -2968,13 +2978,6 @@
       "id": "show_sticky_atc",
       "label": "Sticky ATC anzeigen",
       "default": true
-    },
-    {
-      "type": "text",
-      "id": "sticky_atc_subline",
-      "label": "Sticky ATC Unterzeile",
-      "info": "Text unter dem Produkttitel im Sticky-Bar (z. B. Versand/Garantie). Leer lassen zum Ausblenden. Bearbeiten: Section „LT — PDP Hero“ → Sticky ATC.",
-      "default": "Versandkostenfrei ab 49 € · 30-Tage Garantie"
     },
     {
       "type": "checkbox",

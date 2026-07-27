@@ -13,6 +13,10 @@
   if section.settings.heading_size == 'product_title'
     assign crs_h_headline_lg = true
   endif
+  assign crs_h_headline_md = false
+  if section.settings.heading_size == 'feature'
+    assign crs_h_headline_md = true
+  endif
 
   assign active_col_idx = section.settings.active_column_index | plus: 0
   if active_col_idx < 1
@@ -44,6 +48,8 @@
     --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.42 }};
     --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
     --crs-accent:   {{ section.settings.color_accent | default: '#65c0b6' }};
+    --crs-primary:  {{ section.settings.color_primary | default: '#364f56' }};
+    --crs-border-strong: {{ section.settings.color_text | color_modify: 'alpha', 0.16 }};
     --lct-pt:       {{ section.settings.padding_top }}px;
     --lct-pb:       {{ section.settings.padding_bottom }}px;
   }
@@ -53,7 +59,7 @@
   <div class="tl-container lct-container">
 
     {%- if crs_lct_kicker != blank or crs_lct_head != blank or crs_lct_sub != blank -%}
-      <div class="tl-header lct-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+      <div class="tl-header lct-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_h_headline_md %} crs-heading-stack--headline-md{% endif %}">
         {%- if crs_lct_kicker != blank -%}
           <p class="crs-heading-stack__kicker">{{ crs_lct_kicker | escape }}</p>
         {%- endif -%}
@@ -284,14 +290,17 @@
   gap: 4px;
 }
 
-/* Active header: white bg + accent top/side borders + room for badge */
+/* Active header: white bg + neutraler 1px-Rahmen, Mint nur als 3px-Marker oben.
+   Dunkelpetrol ist Primaerfarbe, Mint bleibt dezentes Highlight — deshalb
+   traegt Mint hier nur noch die Oberkante und die Haken, nicht die ganze
+   Spaltenkontur. */
 .lct-cell--head.is-active {
   background: #fff;
   padding-top: 40px;
   box-shadow:
-    inset  2px 0 0 var(--crs-accent, #65c0b6),
-    inset -2px 0 0 var(--crs-accent, #65c0b6),
-    inset  0  2px 0 var(--crs-accent, #65c0b6);
+    inset  1px 0 0 var(--crs-border-strong, rgba(38, 37, 30, 0.16)),
+    inset -1px 0 0 var(--crs-border-strong, rgba(38, 37, 30, 0.16)),
+    inset  0  3px 0 var(--crs-accent, #65c0b6);
 }
 
 .lct-head-img { display: flex; max-height: 28px; }
@@ -311,7 +320,7 @@
   top: 10px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--crs-accent, #65c0b6);
+  background: var(--crs-primary, #364f56);
   color: #fff;
   font-size: 9px;
   font-weight: 700;
@@ -356,8 +365,8 @@
 .lct-cell--group-filler.is-active {
   background: #fff;
   box-shadow:
-    inset  2px 0 0 var(--crs-accent, #65c0b6),
-    inset -2px 0 0 var(--crs-accent, #65c0b6);
+    inset  1px 0 0 var(--crs-border-strong, rgba(38, 37, 30, 0.16)),
+    inset -1px 0 0 var(--crs-border-strong, rgba(38, 37, 30, 0.16));
 }
 
 /* ── Row label ── */
@@ -377,16 +386,16 @@
 .lct-cell--data.is-active {
   background: #fff;
   box-shadow:
-    inset  2px 0 0 var(--crs-accent, #65c0b6),
-    inset -2px 0 0 var(--crs-accent, #65c0b6);
+    inset  1px 0 0 var(--crs-border-strong, rgba(38, 37, 30, 0.16)),
+    inset -1px 0 0 var(--crs-border-strong, rgba(38, 37, 30, 0.16));
 }
 
-/* Close accent column at the bottom */
+/* Close the highlighted column at the bottom */
 .lct-row--data:last-of-type .lct-cell--data.is-active {
   box-shadow:
-    inset  2px 0 0 var(--crs-accent, #65c0b6),
-    inset -2px 0 0 var(--crs-accent, #65c0b6),
-    inset  0 -2px 0 var(--crs-accent, #65c0b6);
+    inset  1px 0 0 var(--crs-border-strong, rgba(38, 37, 30, 0.16)),
+    inset -1px 0 0 var(--crs-border-strong, rgba(38, 37, 30, 0.16)),
+    inset  0 -1px 0 var(--crs-border-strong, rgba(38, 37, 30, 0.16));
 }
 
 .lct-cell--cross:not(.is-active) { background: var(--crs-bg, #f7f7f4); }
@@ -527,8 +536,15 @@
     {
       "type": "color",
       "id": "color_accent",
-      "label": "Akzentfarbe (Empfohlen-Spalte)",
-      "default": "#65c0b6"
+      "label": "Akzentfarbe (Marker + Haken)",
+      "default": "#65c0b6",
+      "info": "Mint bleibt dezentes Highlight: Oberkante der Spalte und Haken."
+    },
+    {
+      "type": "color",
+      "id": "color_primary",
+      "label": "Primärfarbe (Empfohlen-Badge)",
+      "default": "#364f56"
     },
     {
       "type": "header",
@@ -575,6 +591,7 @@
       "label": "Überschrift Größe",
       "options": [
         { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "feature", "label": "Mittel (Section-Headline)" },
         { "value": "product_title", "label": "Wie Produkttitel" }
       ],
       "default": "section"

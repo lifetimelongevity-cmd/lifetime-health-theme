@@ -13,6 +13,10 @@
   if section.settings.heading_size == 'product_title'
     assign crs_nf_headline_lg = true
   endif
+  assign crs_nf_headline_md = false
+  if section.settings.heading_size == 'feature'
+    assign crs_nf_headline_md = true
+  endif
 
   assign crs_nf_link_label = section.settings.link_label | strip
   assign crs_nf_link_url = section.settings.link_url | strip
@@ -34,7 +38,7 @@
 <div class="cnf-section" id="section-{{ section.id }}">
   <div class="cnf-container">
 
-    <div class="cnf-head crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_nf_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+    <div class="cnf-head crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_nf_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_nf_headline_md %} crs-heading-stack--headline-md{% endif %}">
       {%- if crs_nf_kicker != blank -%}
         <p class="crs-heading-stack__kicker">{{ crs_nf_kicker | escape }}</p>
       {%- endif -%}
@@ -83,9 +87,7 @@
         <details class="cnf-reg">
           <summary class="cnf-reg__summary">
             <span class="cnf-reg__summary-label">{{ section.settings.status_title | default: 'Regulatorischer Stand' | escape }}</span>
-            <svg class="cnf-reg__chevron" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-              <path d="M4 6l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+            {% render 'crs-chevron', class: 'cnf-reg__chevron' %}
           </summary>
           <div class="cnf-reg__body">
             <ol class="cnf-status__list" role="list">
@@ -440,6 +442,7 @@
       "label": "Überschrift Größe",
       "options": [
         { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "feature", "label": "Mittel (Section-Headline)" },
         { "value": "product_title", "label": "Wie Produkttitel" }
       ],
       "default": "section",
