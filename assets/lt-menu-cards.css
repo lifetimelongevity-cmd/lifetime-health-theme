@@ -2,9 +2,13 @@
   LIFETIME — Mobile Menü-Karten (#site-menu-sidebar)
 
   Karten-Drawer nach IM8-Muster statt Linkliste: eine dunkle Hero-Karte
-  (AGE&DNA-Test), eine helle Produktkarte, Trust-Duo im Card-Info-Muster,
-  ruhige Text-Zeilen, ein Pill-CTA sticky im Sidebar-Footer. Hero-Karte und
-  CTA sind die einzigen dunklen Flächen und zeigen auf dasselbe Ziel.
+  (AGE&DNA-Test), zwei helle Karten im selben Muster, ruhige Text-Zeilen,
+  ein Pill-CTA sticky im Sidebar-Footer. Hero-Karte und CTA sind die
+  einzigen dunklen Flächen und zeigen auf dasselbe Ziel.
+
+  Revision 27.07.2026: Trust-Duo (halbbreite Kacheln mit Icon) entfallen,
+  siehe Kopf von snippets/lt-menu-cards.liquid. Das zugehörige CSS
+  (__duo, __tile, __tile-icon) ist mitgelöscht.
 
   Alle Werte über Tokens aus docs/design-governance.md §3 (theme.css :root).
   Horizontales Padding kommt vom Sidebar-System (.sidebar__body > *).
@@ -96,45 +100,26 @@
   object-fit: cover;
 }
 
-.lt-menu-cards__duo {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-3);
-}
-
-/* Eine Kachel allein spannt über die volle Breite, statt eine leere Rasterhälfte
-   neben sich stehen zu lassen. */
-.lt-menu-cards__duo--single {
-  grid-template-columns: 1fr;
-}
-
-.lt-menu-cards__tile {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-3);
-  padding: var(--space-4);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-primary);
-  color: inherit;
-  text-decoration: none;
-}
-
-.lt-menu-cards__tile-icon {
+/* Icon-Variante derselben Kachel für Karten ohne Produktbild.
+   Benefit-Fläche + Teal ist die Icon-Behandlung aus dem Card-Info-Muster
+   (design-components.mdc), hier nur auf die 76px-Kachel skaliert. So liest
+   sich der Slot als Icon und nicht als Foto, das nicht geladen hat. */
+.lt-menu-cards__media--icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px; /* kompakte Drawer-Variante des 48px-Card-Info-Icons */
-  height: 40px;
-  border-radius: var(--radius-sm);
   background: var(--color-surface-benefit);
+}
+
+/* Die Farbe muss auf das SVG selbst, nicht nur auf die Kachel: die PDP-Regel
+   `.lt-trust-icon { color: var(--lt-muted) }` setzt sie direkt am Element und
+   schlägt damit jede Vererbung vom Elternteil. */
+.lt-menu-cards__media--icon .lt-trust-icon {
   color: var(--color-teal-dark);
 }
 
 @media (hover: hover) {
-  .lt-menu-cards__card:not(.lt-menu-cards__card--dark):hover,
-  .lt-menu-cards__tile:hover {
+  .lt-menu-cards__card:not(.lt-menu-cards__card--dark):hover {
     border-color: var(--color-border-strong);
   }
 }
