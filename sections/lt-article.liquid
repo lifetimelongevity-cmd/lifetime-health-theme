@@ -66,6 +66,14 @@
   assign cta_before_index = section.settings.cta_after_section | plus: 1
 
   assign first_tag = article.tags | first
+
+  # "Stand"-Datum: gepflegtes Prüfdatum schlägt Veröffentlichungsdatum.
+  # Monatsname deutsch ausgeschrieben (das %B-Format folgt der Shop-Locale nicht
+  # zuverlässig), Jahr über den date-Filter.
+  assign stand_date = mf.reviewed_date.value | default: article.published_at
+  assign de_months = 'Januar,Februar,März,April,Mai,Juni,Juli,August,September,Oktober,November,Dezember' | split: ','
+  assign stand_month_index = stand_date | date: '%m' | plus: 0 | minus: 1
+  assign stand_month = de_months[stand_month_index]
 -%}
 
 {%- capture inline_cta -%}
@@ -83,8 +91,27 @@
   </aside>
 {%- endcapture -%}
 
+{%- comment -%}
+  TOC-Einträge einmal bauen, zweimal ausgeben: mobil als aufklappbare Box im
+  Lesefluss, ab 1024px als sticky Sidebar links (blog-design-best-practices §2).
+  Immer genau eine der beiden Varianten ist sichtbar, die andere steht auf
+  display:none und fällt damit auch aus dem Accessibility-Tree.
+{%- endcomment -%}
+{%- capture toc_items -%}
+  {%- assign toc_title_dc = section.settings.toc_title | default: 'Inhaltsverzeichnis' | downcase -%}
+  {%- for part in h2_parts offset: 1 -%}
+    {%- assign heading_html = part | split: '</h2>' | first -%}
+    {%- assign heading_text = heading_html | prepend: '<h2' | append: '</h2>' | strip_html | strip -%}
+    {%- assign heading_text_dc = heading_text | downcase -%}
+    {%- comment -%} Alt-Artikel haben teils ein manuelles "Inhaltsverzeichnis"-H2 im Body — nicht als eigenen Sprungpunkt listen (forloop.index bleibt synchron zu den Content-Ankern). {%- endcomment -%}
+    {%- unless heading_text_dc == toc_title_dc -%}
+      <li><a href="#abschnitt-{{ forloop.index }}">{{ heading_text }}</a></li>
+    {%- endunless -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
 <article class="lt-article">
-  <div class="lt-article__shell">
+  <div class="lt-article__shell{% if show_toc %} lt-article__shell--with-rail{% endif %}">
 
     {%- if section.settings.show_breadcrumb and blog != blank -%}
       <nav class="lt-article__breadcrumb" aria-label="Breadcrumb">
@@ -92,40 +119,37 @@
       </nav>
     {%- endif -%}
 
+    <div class="lt-article__layout{% if show_toc %} lt-article__layout--with-rail{% endif %}">
+      <div class="lt-article__col">
+
     <header class="lt-article__header">
-      <p class="lt-article__meta">
-        {%- if first_tag != blank -%}
-          <a class="lt-article__meta-tag" href="{{ blog.url }}/tagged/{{ first_tag | handleize }}">{{ first_tag | escape }}</a>
-          <span aria-hidden="true">&middot;</span>
-        {%- endif -%}
-        {%- if section.settings.show_reading_time -%}
-          <span>{{ reading_minutes }} Min. Lesezeit</span>
-          <span aria-hidden="true">&middot;</span>
-        {%- endif -%}
-        <time datetime="{{ article.published_at | date: '%Y-%m-%d' }}">{{ article.published_at | date: '%d.%m.%Y' }}</time>
-      </p>
+      {%- if first_tag != blank -%}
+        <p class="lt-article__kicker">
+          <a href="{{ blog.url }}/tagged/{{ first_tag | handleize }}">{{ first_tag | escape }}</a>
+        </p>
+      {%- endif -%}
 
       <h1 class="lt-article__title">{{ article.title | escape }}</h1>
 
-      {%- if author_name != blank or reviewer_name != blank or mf.reviewed_date.value != blank -%}
-        <div class="lt-article__byline">
-          {%- if author_name != blank -%}
-            <p>
-              Geschrieben von <strong>{{ author_name | escape }}</strong>
-              {%- if author_credential != blank %}, {{ author_credential | escape }}{% endif -%}
-            </p>
-          {%- endif -%}
-          {%- if reviewer_name != blank -%}
-            <p>
-              Medizinisch gepr&uuml;ft von <strong>{{ reviewer_name | escape }}</strong>
-              {%- if reviewer_credential != blank %}, {{ reviewer_credential | escape }}{% endif -%}
-            </p>
-          {%- endif -%}
-          {%- if mf.reviewed_date.value != blank -%}
-            <p>Aktualisiert am <time datetime="{{ mf.reviewed_date.value | date: '%Y-%m-%d' }}">{{ mf.reviewed_date.value | date: '%d.%m.%Y' }}</time></p>
-          {%- endif -%}
-        </div>
-      {%- endif -%}
+      <p class="lt-article__meta">
+        <span>Stand: <time datetime="{{ stand_date | date: '%Y-%m-%d' }}">{{ stand_month }} {{ stand_date | date: '%Y' }}</time></span>
+        {%- if author_name != blank -%}
+          <span aria-hidden="true">&middot;</span>
+          <span>Von <strong>{{ author_name | escape }}</strong>
+            {%- if author_credential != blank %}, {{ author_credential | escape }}{% endif -%}
+          </span>
+        {%- endif -%}
+        {%- if reviewer_name != blank -%}
+          <span aria-hidden="true">&middot;</span>
+          <span>Fachlich gepr&uuml;ft von <strong>{{ reviewer_name | escape }}</strong>
+            {%- if reviewer_credential != blank %}, {{ reviewer_credential | escape }}{% endif -%}
+          </span>
+        {%- endif -%}
+        {%- if section.settings.show_reading_time -%}
+          <span aria-hidden="true">&middot;</span>
+          <span>{{ reading_minutes }} Min. Lesezeit</span>
+        {%- endif -%}
+      </p>
     </header>
 
     {%- if mf.takeaways.value != blank -%}
@@ -163,18 +187,7 @@
     {%- if show_toc -%}
       <details class="lt-article__toc" data-lt-toc>
         <summary>{{ section.settings.toc_title | escape }}</summary>
-        <ol>
-          {%- assign toc_title_dc = section.settings.toc_title | default: 'Inhaltsverzeichnis' | downcase -%}
-          {%- for part in h2_parts offset: 1 -%}
-            {%- assign heading_html = part | split: '</h2>' | first -%}
-            {%- assign heading_text = heading_html | prepend: '<h2' | append: '</h2>' | strip_html | strip -%}
-            {%- assign heading_text_dc = heading_text | downcase -%}
-            {%- comment -%} Alt-Artikel haben teils ein manuelles "Inhaltsverzeichnis"-H2 im Body — nicht als eigenen Sprungpunkt listen (forloop.index bleibt synchron zu den Content-Ankern). {%- endcomment -%}
-            {%- unless heading_text_dc == toc_title_dc -%}
-              <li><a href="#abschnitt-{{ forloop.index }}">{{ heading_text }}</a></li>
-            {%- endunless -%}
-          {%- endfor -%}
-        </ol>
+        <ol>{{ toc_items }}</ol>
       </details>
     {%- endif -%}
 
@@ -232,6 +245,18 @@
       </div>
     {%- endif -%}
 
+      </div>
+
+      {%- if show_toc -%}
+        <aside class="lt-article__rail">
+          <nav class="lt-article__toc-rail" aria-label="{{ section.settings.toc_title | escape }}" data-lt-toc>
+            <p class="lt-article__toc-rail-title">{{ section.settings.toc_title | escape }}</p>
+            <ol>{{ toc_items }}</ol>
+          </nav>
+        </aside>
+      {%- endif -%}
+    </div>
+
   </div>
 </article>
 
@@ -256,6 +281,45 @@
   padding: 0 var(--space-5);
 }
 
+/* ── Zweispalten-Layout mit Sticky-TOC (ab 1024px) ──
+   Rail und Textspalte liegen in derselben Grid-Zeile. Die Rail wird dadurch
+   auf volle Zeilenhöhe gestreckt, und das sticky Element darin begleitet den
+   gesamten Artikel. Darunter greift keine Grid-Regel, die Rail ist versteckt
+   und das inline aufklappbare TOC übernimmt. */
+
+.lt-article__rail {
+  display: none;
+}
+
+@media screen and (min-width: 1024px) {
+  .lt-article__shell--with-rail {
+    max-width: 1120px;
+  }
+
+  .lt-article__layout--with-rail {
+    display: grid;
+    grid-template-columns: 232px minmax(0, 680px);
+    gap: var(--space-8);
+    justify-content: center;
+  }
+
+  .lt-article__layout--with-rail .lt-article__col {
+    grid-column: 2;
+    min-width: 0;
+  }
+
+  .lt-article__layout--with-rail .lt-article__rail {
+    display: block;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  /* Inline-TOC weicht der Rail. */
+  .lt-article__layout--with-rail .lt-article__toc {
+    display: none;
+  }
+}
+
 .lt-article__breadcrumb {
   margin-bottom: var(--space-6);
 }
@@ -271,8 +335,26 @@
   color: var(--color-text-primary);
 }
 
+.lt-article__kicker {
+  margin: 0 0 var(--space-3);
+}
+
+.lt-article__kicker a {
+  color: var(--color-text-secondary);
+  font-family: var(--font-body);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  text-transform: uppercase;
+  font-size: var(--text-micro);
+  letter-spacing: 0.08em;
+}
+
+.lt-article__kicker a:hover {
+  color: var(--color-text-primary);
+}
+
 .lt-article__meta {
-  margin: 0 0 var(--space-4);
+  margin: var(--space-4) 0 0;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
@@ -282,14 +364,9 @@
   color: var(--color-text-secondary);
 }
 
-.lt-article__meta-tag {
+.lt-article__meta strong {
   color: var(--color-text-primary);
   font-weight: var(--weight-semibold);
-  text-decoration: none;
-  text-transform: uppercase;
-  font-size: var(--text-micro);
-  letter-spacing: 0.08em;
-  align-self: center;
 }
 
 .lt-article__title {
@@ -300,27 +377,6 @@
   font-weight: var(--weight-regular);
   line-height: var(--leading-heading);
   color: var(--color-text-primary);
-}
-
-.lt-article__byline {
-  margin-top: var(--space-4);
-  padding-top: var(--space-4);
-  border-top: 1px solid var(--color-border-default);
-  display: grid;
-  gap: var(--space-1);
-}
-
-.lt-article__byline p {
-  margin: 0;
-  font-family: var(--font-body);
-  font-size: var(--text-body-sm);
-  line-height: var(--leading-body);
-  color: var(--color-text-secondary);
-}
-
-.lt-article__byline strong {
-  color: var(--color-text-primary);
-  font-weight: var(--weight-semibold);
 }
 
 .lt-article__takeaways {
@@ -367,6 +423,48 @@
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
   padding: var(--space-4) var(--space-5);
+}
+
+.lt-article__toc-rail {
+  position: sticky;
+  top: 96px; /* intentional: sticky Header (64px) + Luft, gleicher Offset wie scroll-margin-top */
+}
+
+.lt-article__toc-rail-title {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.lt-article__toc-rail ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-3);
+  counter-reset: none;
+}
+
+.lt-article__toc-rail ol a {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  display: block;
+}
+
+.lt-article__toc-rail ol a:hover {
+  color: var(--color-text-primary);
+}
+
+.lt-article__toc-rail ol a[aria-current='true'] {
+  color: var(--color-text-primary);
+  font-weight: var(--weight-semibold);
 }
 
 .lt-article__toc summary {
@@ -675,20 +773,65 @@
 
 {% javascript %}
 (function () {
-  var toc = document.querySelector('[data-lt-toc]');
-  if (!toc) return;
+  var tocs = document.querySelectorAll('[data-lt-toc]');
+  if (!tocs.length) return;
 
-  toc.addEventListener('click', function (event) {
-    var link = event.target.closest('a[href^="#"]');
-    if (!link) return;
-    var target = document.getElementById(link.getAttribute('href').slice(1));
-    if (!target) return;
-    event.preventDefault();
-    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    history.pushState(null, '', link.getAttribute('href'));
-    if (window.matchMedia('(max-width: 767px)').matches) {
-      toc.removeAttribute('open');
-    }
+  Array.prototype.forEach.call(tocs, function (toc) {
+    toc.addEventListener('click', function (event) {
+      var link = event.target.closest('a[href^="#"]');
+      if (!link) return;
+      var target = document.getElementById(link.getAttribute('href').slice(1));
+      if (!target) return;
+      event.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      history.pushState(null, '', link.getAttribute('href'));
+      // Nur die aufklappbare Variante schließt sich nach dem Sprung.
+      if (toc.tagName === 'DETAILS') toc.removeAttribute('open');
+    });
+  });
+
+  // Scroll-Spy: hebt in der Sidebar den Abschnitt hervor, der gerade gelesen wird.
+  var rail = document.querySelector('.lt-article__toc-rail');
+  if (!rail || !('IntersectionObserver' in window)) return;
+
+  var links = rail.querySelectorAll('a[href^="#abschnitt-"]');
+  if (!links.length) return;
+
+  var linkFor = {};
+  var targets = [];
+  Array.prototype.forEach.call(links, function (link) {
+    var el = document.getElementById(link.getAttribute('href').slice(1));
+    if (!el) return;
+    linkFor[el.id] = link;
+    targets.push(el);
+  });
+  if (!targets.length) return;
+
+  var visible = {};
+  var observer = new IntersectionObserver(
+    function (entries) {
+      entries.forEach(function (entry) {
+        visible[entry.target.id] = entry.isIntersecting;
+      });
+
+      var current = null;
+      targets.forEach(function (el) {
+        if (!current && visible[el.id]) current = el.id;
+      });
+      // Zwischen zwei Abschnitten ist nichts sichtbar — dann bleibt die
+      // letzte Markierung stehen, statt kurz ganz zu verschwinden.
+      if (!current) return;
+
+      Array.prototype.forEach.call(links, function (link) {
+        link.removeAttribute('aria-current');
+      });
+      if (linkFor[current]) linkFor[current].setAttribute('aria-current', 'true');
+    },
+    { rootMargin: '-96px 0px -70% 0px' }
+  );
+
+  targets.forEach(function (el) {
+    observer.observe(el);
   });
 })();
 {% endjavascript %}

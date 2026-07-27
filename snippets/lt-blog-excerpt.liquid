@@ -1,0 +1,52 @@
+{% comment %}
+  ───────────────────────────────────────────────────────────────────────────
+  LIFETIME — Blog-Excerpt für Karten (Blog-Index, Related)
+  ───────────────────────────────────────────────────────────────────────────
+  Liefert einen sauberen Ein-Absatz-Teaser. Ersetzt das direkte
+  `article.excerpt_or_content | strip_html`, das zwei Probleme hatte:
+
+  1. Ohne gepflegten Auszug fällt Shopify auf `article.content` zurück. Unsere
+     Artikel starten mit der Byline-Zeile („Autor: … · Fachlich geprüft von …"),
+     die dann als Teaser-Anfang erscheint.
+  2. `strip_html` setzt zwischen Blockelementen keinen Trenner, Byline und
+     erster Absatz laufen deshalb zu einem Fließtext zusammen.
+
+  Dieses Snippet nimmt den ersten inhaltlichen Absatz und überspringt
+  Byline-, Bild- und Leer-Blöcke.
+
+  ── Parameter ──────────────────────────────────────────────────────────────
+  article  (object)  — Artikel-Objekt (Pflicht).
+  words    (number)  — Wortgrenze für truncatewords. Default 28.
+{% endcomment %}
+
+{%- liquid
+  assign excerpt_words = words | default: 28
+
+  if article.excerpt != blank
+    assign excerpt_source = article.excerpt
+  else
+    assign excerpt_source = article.content
+  endif
+
+  assign excerpt_text = ''
+  assign excerpt_chunks = excerpt_source | split: '</p>'
+
+  comment
+    Kein break/continue im liquid-Tag (siehe shopify-rules §5), deshalb
+    Guard über `if excerpt_text == blank`.
+  endcomment
+  for chunk in excerpt_chunks
+    if excerpt_text == blank
+      assign candidate = chunk | strip_html | strip
+      assign candidate_dc = candidate | downcase
+      unless candidate == blank or candidate_dc contains 'fachlich geprüft' or candidate_dc contains 'autor:'
+        assign excerpt_text = candidate
+      endunless
+    endif
+  endfor
+
+  if excerpt_text == blank
+    assign excerpt_text = excerpt_source | strip_html | strip
+  endif
+-%}
+{{- excerpt_text | truncatewords: excerpt_words -}}

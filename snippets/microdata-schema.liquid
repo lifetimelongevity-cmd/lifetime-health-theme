@@ -117,6 +117,35 @@
 
 {%- if request.page_type == 'product' -%}
   <script type="application/ld+json">{{ product | structured_data }}</script>
+
+  {%- comment -%}
+    Begleitknoten fuer die Bewertung.
+    Der structured_data-Filter nimmt keine Parameter und gibt kein aggregateRating aus,
+    deshalb wird es hier ueber dieselbe @id nachgeliefert.
+    Bewusst OHNE @type: der Filter liefert je nach Produkt "Product" (eine Variante) oder
+    "ProductGroup" (mehrere Varianten), ein fest verdrahteter Typ wuerde dort kollidieren.
+    Bewusst OHNE einzelne review-Knoten: die Loox-Volltexte enthalten Wirkaussagen, die
+    auf einer Novel-Food-Seite nicht maschinenlesbar ausgezeichnet werden duerfen.
+  {%- endcomment -%}
+  {%- liquid
+    assign lt_rating = product.metafields.loox.avg_rating.value | default: 0 | plus: 0
+    assign lt_count = product.metafields.loox.num_reviews.value | default: 0 | plus: 0
+  -%}
+  {%- if lt_rating > 0 and lt_count > 0 -%}
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org/",
+        "@id": {{ product.url | append: '#product' | json }},
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": {{ lt_rating }},
+          "ratingCount": {{ lt_count }},
+          "bestRating": 5,
+          "worstRating": 1
+        }
+      }
+    </script>
+  {%- endif -%}
 {%- elsif request.page_type == 'article' -%}
   <script type="application/ld+json">{{ article | structured_data }}</script>
 {%- endif -%}
