@@ -83,6 +83,67 @@
   max-width: 640px;
 }
 
+/* ── Zahlenreihe ────────────────────────────────────────────── */
+/*
+  DECISION (27.07.2026): Die Zahlen stehen VOR der Prosa und sind das dominante
+  Element der Person-Karte. Vorher lagen dieselben Angaben als Fließtextzeilen
+  im Steckbrief zwei Bildschirme weiter unten. Größe zwischen h2 und display,
+  nicht --text-stat: das ist laut design-components.mdc dem stat-callout auf
+  dunkler Fläche vorbehalten, hier steht sie auf Weiß.
+  Trennung über eine Haarlinie statt über eine Karte, die Section hat kein Raster.
+*/
+.lt-exp__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+  margin: 0 0 var(--space-6);
+  padding: 0;
+}
+
+.lt-exp__stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.lt-exp__stat-value {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(var(--text-h2), 5vw, var(--text-h1));
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-stat);
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.lt-exp__stat-label {
+  margin: var(--space-2) 0 0;
+  padding-top: var(--space-2);
+  border-top: 1px solid var(--color-border-default);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: var(--leading-tight);
+  color: var(--color-text-muted);
+}
+
+/* ── Kernsatz ───────────────────────────────────────────────── */
+/*
+  DECISION: groß gesetzt, aber ohne Anführungszeichen und ohne Zuschreibung.
+  Siehe Kommentar in sections/lt-expert-profile.liquid.
+*/
+.lt-exp__statement {
+  max-width: 24ch;
+  margin: 0 0 var(--space-5);
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--color-text-primary);
+}
+
 .lt-exp__body {
   max-width: 640px;
   font-family: var(--font-body);
@@ -172,6 +233,30 @@
 
 .lt-exp__link:hover {
   border-bottom-color: var(--color-text-primary);
+}
+
+/*
+  DECISION (27.07.2026): Pill-Variante. Die sechs Ziele sind bekannte deutsche
+  Institutionen und damit auf einen Blick lesbar — als sechs untereinander
+  stehende unterstrichene Zeilen war das verschenkt. Muster ist der bestehende
+  PDP-Trust-Strip: Border, --radius-full, umbrechend, kein Horizontal-Scroll.
+*/
+.lt-exp__links-list--pills {
+  gap: var(--space-2);
+}
+
+.lt-exp__links-list--pills .lt-exp__link {
+  display: inline-block;
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  padding: 6px var(--space-3);
+  color: var(--color-text-secondary);
+  transition: border-color var(--ease-default), color var(--ease-default);
+}
+
+.lt-exp__links-list--pills .lt-exp__link:hover {
+  border-color: var(--color-text-primary);
+  color: var(--color-text-primary);
 }
 
 /* ── Prüfumfang ─────────────────────────────────────────────── */
@@ -296,6 +381,16 @@
   .lt-exp__facts {
     grid-template-columns: 1fr;
     gap: var(--space-4);
+  }
+
+  /*
+    Die Zahlenreihe bleibt auch auf Mobil dreispaltig: untereinander gestapelt
+    wären es wieder drei Textzeilen, und genau das soll sie ersetzen. Bei 375px
+    trägt clamp() die Größe nach unten, das Label bricht auf zwei Zeilen.
+  */
+  .lt-exp__stats {
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
   }
 
   .lt-exp__scope {

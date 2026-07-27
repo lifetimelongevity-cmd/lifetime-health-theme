@@ -56,7 +56,7 @@
 
     {%- comment -%}=== Blocks — Pillar + Expert (mixed) ==={%- endcomment -%}
     {%- if section.blocks.size > 0 -%}
-      <div class="sci__grid">
+      <div class="sci__grid{% if section.blocks.size == 1 %} sci__grid--single{% endif %}">
         {%- for block in section.blocks -%}
 
           {%- if block.type == 'science_pillar' -%}
@@ -210,6 +210,18 @@
   grid-template-columns: 1fr 1.8fr 1fr;
   gap: var(--space-5);
   margin-bottom: var(--space-9);   /* 80px before CTA */
+}
+
+/*
+  DECISION (27.07.2026): Bleibt nur ein Block übrig — auf /pages/science sind die
+  beiden Pillar-Karten entfallen, weil sie 60 Wörter Selbstbeschreibung ohne Beleg
+  waren — dann kein einsames Kärtchen in Spalte 1, sondern eine zentrierte Fläche.
+  Das dominante Element der Section ist dann das Gesicht, nicht das Raster.
+  Doppelte Klasse, damit die Media-Queries weiter unten nicht zurücksetzen.
+*/
+.sci__grid.sci__grid--single {
+  grid-template-columns: minmax(0, 46rem);
+  justify-content: center;
 }
 
 /* — Card base (glass morphism on dark) — */

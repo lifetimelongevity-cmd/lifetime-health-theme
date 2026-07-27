@@ -74,7 +74,57 @@
       </header>
     {%- endif -%}
 
-    {%- if has_main_blocks -%}
+    {%- comment -%}
+      Variante "cards": ein Wort trägt den Vergleich (HEUTE / IMMER / JAHRE).
+      Gebaut nach dem approved card-info-Muster (_examples/sections/benefits.liquid):
+      weiße Karte auf warmer Fläche, --radius-md, --shadow-sm.
+      Abweichung mit Absicht: dominantes Element ist nicht der Kartentitel, sondern
+      das Schlagwort. Deshalb steht der Name darunter als Micro-Label.
+      Der is_lifetime-Haken wird hier zum sichtbaren Ja/Nein-Marker; in der
+      Variante "panels" schaltet derselbe Haken zwischen dunkler Fläche und
+      Kontext-Absatz. Marker-SVGs sind dieselben wie in lt-expert-profile,
+      damit die Seite nur eine Icon-Familie hat.
+    {%- endcomment -%}
+    {%- if section.settings.layout_variant == 'cards' -%}
+      <div class="science-msmt__cards">
+        {%- for block in section.blocks -%}
+          <article class="science-msmt__card" {{ block.shopify_attributes }}>
+            {%- if block.settings.keyword != blank -%}
+              <p class="science-msmt__card-word">{{ block.settings.keyword | escape }}</p>
+            {%- endif -%}
+            {%- if block.settings.label != blank -%}
+              <p class="science-msmt__card-name">{{ block.settings.label | escape }}</p>
+            {%- endif -%}
+            {%- if block.settings.strength != blank -%}
+              <p class="science-msmt__card-desc">{{ block.settings.strength | escape }}</p>
+            {%- endif -%}
+            {%- if block.settings.is_lifetime -%}
+              {%- if section.settings.tag_yes_label != blank -%}
+                <p class="science-msmt__card-tag science-msmt__card-tag--yes">
+                  <span class="science-msmt__card-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M20 6 9 17l-5-5"/>
+                    </svg>
+                  </span>
+                  {{ section.settings.tag_yes_label | escape }}
+                </p>
+              {%- endif -%}
+            {%- else -%}
+              {%- if section.settings.tag_no_label != blank -%}
+                <p class="science-msmt__card-tag science-msmt__card-tag--no">
+                  <span class="science-msmt__card-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 12h14"/>
+                    </svg>
+                  </span>
+                  {{ section.settings.tag_no_label | escape }}
+                </p>
+              {%- endif -%}
+            {%- endif -%}
+          </article>
+        {%- endfor -%}
+      </div>
+    {%- elsif has_main_blocks -%}
       <div class="science-msmt__main-shell">
         <div class="science-msmt__main-topline">
           {%- if section.settings.main_col_label != blank -%}
@@ -112,7 +162,11 @@
       </div>
     {%- endif -%}
 
-    {%- if has_context_blocks -%}
+    {%- comment -%}
+      In der Karten-Variante trägt jeder Block schon eine eigene Karte, der
+      Kontext-Absatz würde denselben Text ein zweites Mal zeigen.
+    {%- endcomment -%}
+    {%- if has_context_blocks and section.settings.layout_variant != 'cards' -%}
       <div class="science-msmt__context-copy">
         <p class="science-msmt__context-copy-label">{{ section.settings.context_col_label | default: 'Im Unterschied zu Blutmarkern' | escape }}</p>
         {%- for block in section.blocks -%}
@@ -151,6 +205,90 @@
 
   .science-msmt__header.crs-heading-stack--align-center {
     margin-inline: auto;
+  }
+
+  /* ─── VARIANTE "CARDS" ─── */
+  .science-msmt__cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  .science-msmt__card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background: var(--color-surface-primary, #ffffff);
+    border-radius: var(--radius-md);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /*
+    Das Schlagwort ist das dominante Element der Karte, nicht der Name der
+    Messebene. clamp() hält es auf Mobil unter der Spaltenbreite.
+  */
+  .science-msmt__card-word {
+    font-family: var(--font-heading);
+    font-size: clamp(var(--text-h3), 4.5vw, var(--text-h1));
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-stat);
+    letter-spacing: -0.01em;
+    color: var(--sm-text, #26251e);
+    margin: 0;
+  }
+
+  .science-msmt__card-name {
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--sm-text-muted, rgba(38, 37, 30, 0.38));
+    margin: var(--space-2) 0 0;
+  }
+
+  .science-msmt__card-desc {
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-relaxed);
+    color: var(--sm-text-sec, rgba(38, 37, 30, 0.6));
+    margin: var(--space-3) 0 0;
+  }
+
+  .science-msmt__card-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px; /* unter --space-2, sonst löst sich das Icon vom Label */
+    margin: var(--space-4) 0 0;
+    padding: 4px var(--space-3);
+    border-radius: var(--radius-full);
+    font-family: var(--font-body);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .science-msmt__card-tag--yes {
+    background: var(--color-surface-benefit, #e6f4f1);
+    color: var(--color-teal-dark, #4a8c85);
+  }
+
+  .science-msmt__card-tag--no {
+    background: var(--sm-card-bg, #f2f1ed);
+    color: var(--sm-text-muted, rgba(38, 37, 30, 0.38));
+  }
+
+  .science-msmt__card-mark {
+    display: inline-flex;
+    width: 13px;
+    height: 13px;
+  }
+
+  .science-msmt__card-mark svg {
+    width: 100%;
+    height: 100%;
   }
 
   .science-msmt__col-label {
@@ -309,6 +447,17 @@
     }
   }
 
+  /*
+    Die drei Karten bleiben bis 767px nebeneinander: der Vergleich lebt davon,
+    dass man HEUTE / IMMER / JAHRE in einem Blick sieht. Erst darunter gestapelt.
+  */
+  @media screen and (max-width: 767px) {
+    .science-msmt__cards {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+  }
+
   @media screen and (max-width: 767px) {
     .science-msmt__container {
       padding-inline: var(--space-4);
@@ -403,6 +552,33 @@
     },
     {
       "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout_variant",
+      "label": "Darstellung",
+      "options": [
+        { "value": "panels", "label": "Dunkle Hauptflaeche + Kontext-Absatz" },
+        { "value": "cards", "label": "Wortkarten (ein Schlagwort je Ebene)" }
+      ],
+      "default": "panels",
+      "info": "Wortkarten: jeder Block wird eine Karte, der LIFETIME-Haken wird zum sichtbaren Ja/Nein-Marker. Der Kontext-Absatz entfaellt dann."
+    },
+    {
+      "type": "text",
+      "id": "tag_yes_label",
+      "label": "Marker bei LIFETIME-Ebenen",
+      "default": "LIFETIME"
+    },
+    {
+      "type": "text",
+      "id": "tag_no_label",
+      "label": "Marker bei den anderen",
+      "default": "nicht bei LIFETIME"
+    },
+    {
+      "type": "header",
       "content": "Inhalt"
     },
     {
@@ -475,6 +651,12 @@
           "label": "LIFETIME-Instrument (rechte Spalte)",
           "default": false,
           "info": "Aktiviert: Erscheint in der dunklen LIFETIME-Hauptfläche rechts."
+        },
+        {
+          "type": "text",
+          "id": "keyword",
+          "label": "Schlagwort (nur Variante Wortkarten)",
+          "info": "Ein Wort, das die Antwort dieser Messebene traegt, z. B. HEUTE, IMMER, JAHRE."
         },
         {
           "type": "text",

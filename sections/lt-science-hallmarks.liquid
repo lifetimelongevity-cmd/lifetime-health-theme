@@ -55,6 +55,41 @@
   endfor
 
   assign shm_is_expanded = section.settings.show_expanded_default | default: false
+
+  comment
+    Nummernbereiche je Kategorie, aus den Block-Zählungen abgeleitet (01–05 / 06–08 / 09–12).
+    Sie ersetzen die früheren Deko-Icons auf den Kacheln: das Icon war Dekoration, der
+    Bereich sagt, wie viele Mechanismen in der Kategorie stecken.
+    Alles rechnet sich selbst, ein 13. Hallmark verschiebt Bereiche und Toggle-Label mit.
+  endcomment
+  assign shm_total = shm_cat0_count | plus: shm_cat1_count | plus: shm_cat2_count
+  assign shm_counts = shm_cat0_count | append: ',' | append: shm_cat1_count | append: ',' | append: shm_cat2_count | split: ','
+  assign shm_ranges = ''
+  assign shm_running = 0
+  for shm_c in shm_counts
+    assign shm_c_num = shm_c | times: 1
+    if shm_c_num > 0
+      assign shm_from = shm_running | plus: 1
+      assign shm_to = shm_running | plus: shm_c_num
+      if shm_from < 10
+        assign shm_from = shm_from | prepend: '0'
+      endif
+      if shm_to < 10
+        assign shm_to = shm_to | prepend: '0'
+      endif
+      assign shm_ranges = shm_ranges | append: shm_from | append: '–' | append: shm_to
+      assign shm_running = shm_running | plus: shm_c_num
+    endif
+    assign shm_ranges = shm_ranges | append: '|'
+  endfor
+  assign shm_ranges = shm_ranges | split: '|'
+
+  comment
+    Toggle-Beschriftungen: früher im Script hardcodiert ("Alle 12 Mechanismen ansehen"),
+    dadurch bei jeder Änderung der Block-Anzahl still falsch. Jetzt Settings mit {count}.
+  endcomment
+  assign shm_label_more = section.settings.toggle_label_more | default: 'Alle {count} Mechanismen ansehen ↓' | replace: '{count}', shm_total
+  assign shm_label_less = section.settings.toggle_label_less | default: 'Weniger anzeigen ↑'
 -%}
 
 {% style %}
@@ -79,6 +114,13 @@
         {%- if hallmarks_kicker != blank -%}
           <p class="crs-heading-stack__kicker">{{ hallmarks_kicker | escape }}</p>
         {%- endif -%}
+        {%- comment -%}
+          Numeral-Auftakt: die Zahl ist die Überschrift, nicht ein Satz über die Zahl.
+          Steht bewusst außerhalb von __pair, damit der Heading-Stack unberührt bleibt.
+        {%- endcomment -%}
+        {%- if section.settings.show_count_numeral and shm_total > 0 -%}
+          <p class="science-hallmarks__numeral">{{ shm_total }}</p>
+        {%- endif -%}
         <div class="crs-heading-stack__pair">
           {%- if hallmarks_heading != blank -%}
             <h2 class="crs-heading-stack__title">{{ hallmarks_heading | escape | newline_to_br }}</h2>
@@ -96,11 +138,9 @@
 
         {%- if shm_cat0_name != blank -%}
           <div class="science-hallmarks__tile">
-            <div class="science-hallmarks__tile-icon">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polygon points="13,2 5,13 11,13 11,22 19,11 13,11"/>
-              </svg>
-            </div>
+            {%- if shm_ranges[0] != blank -%}
+              <p class="science-hallmarks__tile-range">{{ shm_ranges[0] }}</p>
+            {%- endif -%}
             <h3 class="science-hallmarks__tile-name">{{ shm_cat0_name | escape }}</h3>
             {%- if shm_cat0_desc != blank -%}
               <p class="science-hallmarks__tile-desc">{{ shm_cat0_desc | escape }}</p>
@@ -110,11 +150,9 @@
 
         {%- if shm_cat1_name != blank -%}
           <div class="science-hallmarks__tile">
-            <div class="science-hallmarks__tile-icon">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M12 3L5 6.5V12C5 16.2 8.2 19.5 12 21C15.8 19.5 19 16.2 19 12V6.5L12 3Z"/>
-              </svg>
-            </div>
+            {%- if shm_ranges[1] != blank -%}
+              <p class="science-hallmarks__tile-range">{{ shm_ranges[1] }}</p>
+            {%- endif -%}
             <h3 class="science-hallmarks__tile-name">{{ shm_cat1_name | escape }}</h3>
             {%- if shm_cat1_desc != blank -%}
               <p class="science-hallmarks__tile-desc">{{ shm_cat1_desc | escape }}</p>
@@ -124,12 +162,9 @@
 
         {%- if shm_cat2_name != blank -%}
           <div class="science-hallmarks__tile">
-            <div class="science-hallmarks__tile-icon">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <polyline points="2,7 8,14 13.5,9.5 22,18"/>
-                <polyline points="15.5,18 22,18 22,11.5"/>
-              </svg>
-            </div>
+            {%- if shm_ranges[2] != blank -%}
+              <p class="science-hallmarks__tile-range">{{ shm_ranges[2] }}</p>
+            {%- endif -%}
             <h3 class="science-hallmarks__tile-name">{{ shm_cat2_name | escape }}</h3>
             {%- if shm_cat2_desc != blank -%}
               <p class="science-hallmarks__tile-desc">{{ shm_cat2_desc | escape }}</p>
@@ -146,13 +181,15 @@
         type="button"
         class="science-hallmarks__toggle ltw-btn ltw-btn--ghost"
         data-hallmarks-toggle
+        data-label-more="{{ shm_label_more | escape }}"
+        data-label-less="{{ shm_label_less | escape }}"
         aria-expanded="{{ shm_is_expanded }}"
         aria-controls="hallmarks-drawer-{{ section.id }}"
       >
         {%- if shm_is_expanded -%}
-          Weniger anzeigen ↑
+          {{ shm_label_less | escape }}
         {%- else -%}
-          Alle 12 Mechanismen ansehen ↓
+          {{ shm_label_more | escape }}
         {%- endif -%}
       </button>
     </div>
@@ -239,17 +276,19 @@
   if (!toggle || !drawer) return;
 
   var expanded = drawer.dataset.expanded === 'true';
+  var labelMore = toggle.dataset.labelMore || toggle.textContent;
+  var labelLess = toggle.dataset.labelLess || 'Weniger anzeigen';
 
   function update(open) {
     expanded = open;
     if (open) {
       drawer.style.maxHeight = drawer.scrollHeight + 'px';
       toggle.setAttribute('aria-expanded', 'true');
-      toggle.textContent = 'Weniger anzeigen ↑';
+      toggle.textContent = labelLess;
     } else {
       drawer.style.maxHeight = '0px';
       toggle.setAttribute('aria-expanded', 'false');
-      toggle.textContent = 'Alle 12 Mechanismen ansehen ↓';
+      toggle.textContent = labelMore;
     }
   }
 
@@ -290,6 +329,21 @@
     margin-inline: auto;
   }
 
+  /* ─── NUMERAL-AUFTAKT ─── */
+  .science-hallmarks__numeral {
+    font-family: var(--font-heading);
+    /* Fest --text-display: es sind nie mehr als zwei, drei Zeichen, ein clamp()
+       hätte die Zahl auf Mobil nur unnötig auf h1 heruntergezogen.
+       --text-stat bleibt laut design-components.mdc dem stat-callout auf
+       dunkler Fläche vorbehalten. */
+    font-size: var(--text-display);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-stat);
+    letter-spacing: -0.02em;
+    color: var(--science-hallmarks-text, #26251e);
+    margin: 0 0 var(--space-2);
+  }
+
   /* ─── CATEGORY TILES ─── */
   .science-hallmarks__tiles {
     display: grid;
@@ -307,10 +361,15 @@
     gap: var(--space-3);
   }
 
-  .science-hallmarks__tile-icon {
-    display: flex;
-    align-items: center;
+  .science-hallmarks__tile-range {
+    font-family: var(--font-heading);
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-stat);
+    letter-spacing: -0.01em;
     color: var(--science-hallmarks-text-muted, rgba(38, 37, 30, 0.35));
+    margin: 0;
+    font-variant-numeric: tabular-nums;
   }
 
   .science-hallmarks__tile-name {
@@ -622,6 +681,26 @@
       "id": "source_text",
       "label": "Quellenzeile",
       "default": "Quelle: Lopez-Otin et al., Cell 2023"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_count_numeral",
+      "label": "Anzahl gross ueber der Ueberschrift zeigen",
+      "default": false,
+      "info": "Zaehlt die Hallmark-Bloecke selbst. Die Ueberschrift sollte die Zahl dann nicht wiederholen."
+    },
+    {
+      "type": "text",
+      "id": "toggle_label_more",
+      "label": "Button zugeklappt",
+      "default": "Alle {count} Mechanismen ansehen ↓",
+      "info": "{count} wird durch die Anzahl der Hallmark-Bloecke ersetzt."
+    },
+    {
+      "type": "text",
+      "id": "toggle_label_less",
+      "label": "Button aufgeklappt",
+      "default": "Weniger anzeigen ↑"
     },
     {
       "type": "checkbox",

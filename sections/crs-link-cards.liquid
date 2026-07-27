@@ -68,7 +68,12 @@
                   aria-haspopup="dialog"
                   aria-controls="crs-lc-dialog-{{ section.id }}-{{ block.id }}"
                 >
-                  {{ block.settings.link_label | escape }}&nbsp;↗
+                  {%- comment -%}
+                    Kein ↗ am Popup-Trigger: der Pfeil verspricht, die Seite zu verlassen,
+                    tatsächlich öffnet sich ein Dialog auf derselben Seite. Er bleibt den
+                    echten Fremdlinks vorbehalten.
+                  {%- endcomment -%}
+                  {{ block.settings.link_label | escape }}
                 </button>
               </div>
               <dialog
@@ -96,14 +101,25 @@
                 </div>
               </dialog>
             {%- elsif block.settings.link_url != blank and block.settings.link_label != blank -%}
+              {%- comment -%}
+                Neuer Tab und ↗ nur bei echten Fremdzielen. Vorher bekam jeder Link
+                target="_blank" plus Pfeil, auch ein interner /pages/-Link — der öffnet
+                dann grundlos einen Tab und verspricht optisch, die Seite zu verlassen.
+              {%- endcomment -%}
+              {%- liquid
+                assign lc_is_external = false
+                if block.settings.link_url contains '://'
+                  unless block.settings.link_url contains request.host
+                    assign lc_is_external = true
+                  endunless
+                endif
+              -%}
               <div class="lc-card-footer">
                 <a
                   href="{{ block.settings.link_url }}"
                   class="lc-link"
-                  {% unless block.settings.link_url contains 'javascript' %}
-                    target="_blank" rel="noopener noreferrer"
-                  {% endunless %}
-                >{{ block.settings.link_label | escape }}&nbsp;↗</a>
+                  {% if lc_is_external %}target="_blank" rel="noopener noreferrer"{% endif %}
+                >{{ block.settings.link_label | escape }}{% if lc_is_external %}&nbsp;↗{% endif %}</a>
               </div>
             {%- endif -%}
           </div>

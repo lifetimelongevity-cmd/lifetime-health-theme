@@ -119,6 +119,51 @@
               extra_class: 'lt-exp__head'
             %}
 
+            {%- comment -%}
+              Zahlenreihe vor der Prosa. Wer auf diese Seite kommt, entscheidet in
+              Sekunden, ob die Person echt und qualifiziert ist — das entscheidet ein
+              Gesicht, ein Credential und eine Zahl, nicht ein Absatz.
+              Bewusst absolute Werte (Jahreszahl, Gesamtzahl), keine rollenden Angaben:
+              "seit 17 Jahren" war schon einmal still veraltet, siehe
+              docs/limmroth-faktenblatt.md §4.
+              Das Label muss das Fachgebiet nennen, sonst liest sich eine grosse
+              Publikationszahl auf einer Longevity-Seite als Longevity-Forschung.
+            {%- endcomment -%}
+            {%- liquid
+              assign lep_has_stats = false
+              for i in (1..3)
+                assign lep_sv_key = 'stat_' | append: i | append: '_value'
+                assign lep_sl_key = 'stat_' | append: i | append: '_label'
+                if block.settings[lep_sv_key] != blank and block.settings[lep_sl_key] != blank
+                  assign lep_has_stats = true
+                endif
+              endfor
+            -%}
+
+            {%- if lep_has_stats -%}
+              <dl class="lt-exp__stats">
+                {%- for i in (1..3) -%}
+                  {%- assign lep_sv_key = 'stat_' | append: i | append: '_value' -%}
+                  {%- assign lep_sl_key = 'stat_' | append: i | append: '_label' -%}
+                  {%- if block.settings[lep_sv_key] != blank and block.settings[lep_sl_key] != blank -%}
+                    <div class="lt-exp__stat">
+                      <dt class="lt-exp__stat-value">{{ block.settings[lep_sv_key] | escape }}</dt>
+                      <dd class="lt-exp__stat-label">{{ block.settings[lep_sl_key] | escape }}</dd>
+                    </div>
+                  {%- endif -%}
+                {%- endfor -%}
+              </dl>
+            {%- endif -%}
+
+            {%- comment -%}
+              Kernsatz. Bewusst OHNE Anfuehrungszeichen und ohne Zuschreibung: das ist
+              LIFETIME-Text ueber die Person, kein Zitat von ihr. Die Wortlaut-Freigabe
+              ist laut Faktenblatt §7 offen, ein Pull-Quote wuerde ihr Worte zuschreiben.
+            {%- endcomment -%}
+            {%- if block.settings.statement != blank -%}
+              <p class="lt-exp__statement">{{ block.settings.statement | escape }}</p>
+            {%- endif -%}
+
             {%- if block.settings.body != blank -%}
               <div class="lt-exp__body rte">{{ block.settings.body }}</div>
             {%- endif -%}
@@ -170,7 +215,7 @@
                 {%- if block.settings.links_label != blank -%}
                   <p class="lt-exp__links-label">{{ block.settings.links_label | escape }}</p>
                 {%- endif -%}
-                <ul class="lt-exp__links-list" role="list">
+                <ul class="lt-exp__links-list{% if section.settings.links_style == 'pills' %} lt-exp__links-list--pills{% endif %}" role="list">
                   {%- for i in (1..6) -%}
                     {%- assign lep_ll_key = 'link_' | append: i | append: '_label' -%}
                     {%- assign lep_lu_key = 'link_' | append: i | append: '_url' -%}
@@ -388,6 +433,21 @@
       "type": "textarea",
       "id": "scope_footnote",
       "label": "Schlusszeile"
+    },
+    {
+      "type": "header",
+      "content": "Darstellung"
+    },
+    {
+      "type": "select",
+      "id": "links_style",
+      "label": "Beleg-Links",
+      "options": [
+        { "value": "list", "label": "Liste (unterstrichen)" },
+        { "value": "pills", "label": "Pill-Reihe" }
+      ],
+      "default": "list",
+      "info": "Pill-Reihe nur mit kurzen Labels sinnvoll, also Institutionsnamen statt Satz."
     }
   ],
   "blocks": [
@@ -444,6 +504,54 @@
           "type": "text",
           "id": "role_line",
           "label": "Rollenzeile"
+        },
+        {
+          "type": "header",
+          "content": "Zahlen (stehen vor der Biografie)"
+        },
+        {
+          "type": "paragraph",
+          "content": "Nur absolute, nachpruefbare Werte: Jahreszahl, Gesamtzahl, Anzahl. Keine rollenden Angaben wie 'seit 17 Jahren', die veralten still. Das Label muss das Fachgebiet nennen."
+        },
+        {
+          "type": "text",
+          "id": "stat_1_value",
+          "label": "Zahl 1"
+        },
+        {
+          "type": "text",
+          "id": "stat_1_label",
+          "label": "Label 1"
+        },
+        {
+          "type": "text",
+          "id": "stat_2_value",
+          "label": "Zahl 2"
+        },
+        {
+          "type": "text",
+          "id": "stat_2_label",
+          "label": "Label 2"
+        },
+        {
+          "type": "text",
+          "id": "stat_3_value",
+          "label": "Zahl 3"
+        },
+        {
+          "type": "text",
+          "id": "stat_3_label",
+          "label": "Label 3"
+        },
+        {
+          "type": "header",
+          "content": "Kernsatz"
+        },
+        {
+          "type": "text",
+          "id": "statement",
+          "label": "Kernsatz",
+          "info": "Wird gross gesetzt, aber ohne Anfuehrungszeichen. Kein Zitat der Person, sondern LIFETIME-Text ueber sie."
         },
         {
           "type": "richtext",
