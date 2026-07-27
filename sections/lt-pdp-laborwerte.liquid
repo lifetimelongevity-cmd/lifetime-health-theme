@@ -11,12 +11,16 @@
   ist nur ein Nachweis, den ein Dritter nachrechnen kann.
 
   ENTSCHEIDUNGEN (§12 Build-Prozess)
-  - Surface        : color_bg #f7f7f4, wie alle Nachbar-Sections der NMN-PDP
-                     (crs-metrics-row, crs-feature-grid, lt-comparison-table).
-                     Kein Alternieren, die PDP fährt durchgehend Paper.
+  - Surface        : ÜBERHOLT seit 2026-07-27. Die NMN-PDP alterniert jetzt
+                     #f7f7f4 / #f2f1ed, damit die Sections überhaupt als
+                     getrennte Blöcke lesbar sind. Diese Section steht auf
+                     #f2f1ed mit weissen Karten. Die Fläche kommt aus dem
+                     Template, nicht aus dieser Section.
   - Dominant       : die zwei Prüfwerte. Alles andere ist visuell untergeordnet.
-  - Heading        : crs-heading-stack, Standardgröße. Diese Section belegt,
-                     sie behauptet nicht, also kein --text-h1.
+  - Heading        : crs-heading-stack mit `heading_size: feature` (--text-h2,
+                     28px). --text-h1 bleibt dem echten H1 der Seite vorbehalten,
+                     aber die frühere Standardgröße (20px) war von Fliesstext
+                     nicht zu unterscheiden.
   - Content-Muster : 2 Wert-Karten (card-info-Logik) + Meta-Zeile + Beleg-
                      Thumbnail + aufklappbare Detailtabelle.
   - CTA            : keiner. Ein Textlink auf den Prüfbericht, mehr nicht.
@@ -28,13 +32,14 @@
                      prüfen kann. Genau das können Fälschungen nicht liefern.
 
   SCHRIFTGRÖSSEN (bewusste Abweichung, dokumentiert)
-  Sichtbar sind 56 / 28 / 20 / 14 / 12, also fünf Stufen. Die Regel in
-  design-components.mdc nennt drei. Drei sind hier nicht erreichbar: 20px
-  (Titel) und 12px (Kicker) kommen aus dem geteilten crs-heading-stack und
-  sind nicht sektionslokal steuerbar. Das genehmigte Referenzmuster
-  _examples/sections/stat-callout.liquid liegt bei derselben Stufenzahl, und
-  _examples/ rangiert laut CLAUDE.md über .cursor/rules/. Sektionslokal sind
-  es drei: 56/28 (die zwei Prüfwerte, eine Rolle) und 14 mit 12 als Caption.
+  Sichtbar sind 56 / 28 / 16 / 14, also vier Stufen. Die Regel in
+  design-components.mdc nennt drei. Seit 2026-07-27 ist der Kicker weg und
+  der Titel läuft auf 28px (`heading_size: feature`), damit fallen die alten
+  20px und 12px raus. 16px ist der `intro`-Absatz unter dem Heading-Stack.
+  Das genehmigte Referenzmuster _examples/sections/stat-callout.liquid liegt
+  bei derselben Stufenzahl, und _examples/ rangiert laut CLAUDE.md über
+  .cursor/rules/. Sektionslokal sind es drei: 56/28 (die zwei Prüfwerte, eine
+  Rolle) und 14 als Caption.
 
   PROGRESSIVE DISCLOSURE (wichtig, nicht wegoptimieren)
   Die Einzelwerte stehen in <details>. Zugeklappt für den Kunden, der sie
@@ -116,8 +121,8 @@
     --ltlw-icon:     {{ section.settings.color_text | color_modify: 'alpha', 0.52 }};
     --ltlw-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.10 }};
     --ltlw-rule:     {{ section.settings.color_text | color_modify: 'alpha', 0.07 }};
-    padding-top:     {{ section.settings.padding_top }}px;
-    padding-bottom:  {{ section.settings.padding_bottom }}px;
+    padding-top:     min({{ section.settings.padding_top }}px, 15vw);
+    padding-bottom:  min({{ section.settings.padding_bottom }}px, 15vw);
   }
 {%- endstyle -%}
 

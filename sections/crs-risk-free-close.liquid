@@ -25,6 +25,12 @@
   if crs_rfc_sub == '__none__'
     assign crs_rfc_sub = ''
   endif
+  # Fliesstext gehoert NICHT in crs-heading-stack__pair (docs/section-heading-stack.md).
+  # Laengere Garantie-Erklaerungen laufen ueber `intro` unterhalb des Heading-Stacks.
+  assign crs_rfc_intro = section.settings.intro | strip
+  if crs_rfc_intro == '__none__'
+    assign crs_rfc_intro = ''
+  endif
   assign crs_h_headline_lg = false
   if section.settings.heading_size == 'product_title'
     assign crs_h_headline_lg = true
@@ -47,8 +53,8 @@
     --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
     --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
     --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
-    padding-top:    {{ section.settings.padding_top }}px;
-    padding-bottom: {{ section.settings.padding_bottom }}px;
+    padding-top:    min({{ section.settings.padding_top }}px, 15vw);
+    padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
     background:     var(--crs-bg);
   }
   {%- if template.suffix == 'nmn-pulver' -%}
@@ -102,6 +108,10 @@
               </div>
             {%- endif -%}
           </div>
+        {%- endif -%}
+
+        {%- if crs_rfc_intro != blank -%}
+          <p class="rfc-intro">{{ crs_rfc_intro | escape | newline_to_br }}</p>
         {%- endif -%}
 
         {%- if crs_rfc_price != blank -%}
@@ -265,6 +275,18 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
+}
+
+/* Section-Description: bewusst ausserhalb des Heading-Stacks, damit Titel und
+   Subline ein Block bleiben und Fliesstext nicht auf Headline-Groesse laeuft. */
+.rfc-intro {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+  max-width: 62ch;
+  margin: 0;
 }
 
 .rfc-copy--align-left {
@@ -502,6 +524,13 @@
       "label": "Unterüberschrift (optional)",
       "default": "Im Abo sparst du 10 %, bekommst gratis Versand und kannst jederzeit pausieren oder kündigen. Kein Risiko, voller Effekt.",
       "info": "__none__ = ausblenden (Theme-Editor)"
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Einleitungstext (optional)",
+      "default": "__none__",
+      "info": "__none__ = ausblenden. Für längere Erklärungen statt Unterüberschrift."
     },
     {
       "type": "text",

@@ -1,0 +1,59 @@
+{% comment %}
+  ───────────────────────────────────────────────────────────────────────────
+  LIFETIME — Trust-Icon nach Bedeutung (lt-pdp-hero)
+  ───────────────────────────────────────────────────────────────────────────
+  Vorher waren die vier Trust-Icons positionell hartcodiert: Slot 1 immer
+  Lieferwagen, Slot 2 immer Uhr, Slot 3 immer Blatt, Slot 4 immer Kolben.
+  Sobald eine PDP die Zeilen anders belegt, passt das Icon nicht mehr zum
+  Text. Auf der NMN-PDP stand dadurch eine Uhr neben "Ohne Zusätze und
+  Trägerstoffe" und ein Blatt neben "Kauf auf Rechnung (Klarna)".
+
+  Dieses Snippet wählt das Icon über einen Namen. Die Defaults der Section
+  bilden weiter die alte Reihenfolge ab, damit bestehende PDPs sich nicht
+  verändern.
+
+  ── Parameter ──────────────────────────────────────────────────────────────
+  name  (string) — delivery | leaf | invoice | lab | clock | shield | refresh
+  size  (number) — Kantenlänge in px. Default 18.
+{% endcomment %}
+
+{%- liquid
+  assign _ti_name = name | default: 'shield'
+  assign _ti_size = size | default: 18
+-%}
+<svg
+  class="lt-trust-icon"
+  width="{{ _ti_size }}"
+  height="{{ _ti_size }}"
+  viewBox="0 0 18 18"
+  fill="none"
+  aria-hidden="true"
+  focusable="false"
+>
+  {%- case _ti_name -%}
+    {%- when 'delivery' -%}
+      <path d="M10.5 5H2.75v7.25h1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M10.5 7.25h2.7l2.05 2.5v2.5h-1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path>
+      <circle cx="6" cy="12.25" r="1.25" stroke="currentColor" stroke-width="1.3"></circle>
+      <circle cx="12.4" cy="12.25" r="1.25" stroke="currentColor" stroke-width="1.3"></circle>
+    {%- when 'leaf' -%}
+      <path d="M8.2 14.5a5.5 5.5 0 0 1-.95-10.9c4.45-.85 5.6-1.3 7.15-3.1.75 1.5 1.35 3.1 1.35 5.85 0 4.5-3.85 8.15-7.55 8.15Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M2.5 15.5c0-2.4 1.6-4.15 4.2-4.65 1.9-.35 3.75-1.35 4.5-2.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+    {%- when 'invoice' -%}
+      <path d="M4 2.25h7.5l2.5 2.5v11l-2 -1.1-2 1.1-2-1.1-2 1.1-2-1.1-2 1.1v-13Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M6 6.5h4M6 9h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+    {%- when 'lab' -%}
+      <path d="M10.5 2.25v4.2c0 .25.07.5.2.72l3.6 6.35a1.5 1.5 0 0 1-1.3 2.23H5a1.5 1.5 0 0 1-1.3-2.23l3.6-6.35c.13-.22.2-.47.2-.72v-4.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M6.5 2.25h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+      <path d="M5.4 11.25h7.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+    {%- when 'clock' -%}
+      <circle cx="9" cy="9" r="7" stroke="currentColor" stroke-width="1.2"></circle>
+      <path d="M9 5v4l2.8 1.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+    {%- when 'refresh' -%}
+      <path d="M15 9a6 6 0 1 1-1.9-4.4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
+      <path d="M15 2.5V5.5h-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+    {%- else -%}
+      <path d="M9 2 3.5 4.25v4.1c0 3.4 2.3 6.4 5.5 7.4 3.2-1 5.5-4 5.5-7.4v-4.1L9 2Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+      <path d="M6.6 8.8 8.3 10.5l3.1-3.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
+  {%- endcase -%}
+</svg>

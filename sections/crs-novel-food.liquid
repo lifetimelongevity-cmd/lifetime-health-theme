@@ -9,6 +9,20 @@
   endif
   assign crs_nf_head = section.settings.heading | strip
   assign crs_nf_sub = section.settings.subheading | strip
+  # Ohne diese Guards wuerde der Sentinel woertlich rendern — die Nachbar-
+  # Sections haben sie, hier fehlten sie.
+  if crs_nf_head == '__none__'
+    assign crs_nf_head = ''
+  endif
+  if crs_nf_sub == '__none__'
+    assign crs_nf_sub = ''
+  endif
+  # Fliesstext gehoert NICHT in crs-heading-stack__pair (docs/section-heading-stack.md).
+  # Laengere Einordnungen laufen ueber `intro` unterhalb des Heading-Stacks.
+  assign crs_nf_intro = section.settings.intro | strip
+  if crs_nf_intro == '__none__'
+    assign crs_nf_intro = ''
+  endif
   assign crs_nf_headline_lg = false
   if section.settings.heading_size == 'product_title'
     assign crs_nf_headline_lg = true
@@ -30,15 +44,15 @@
     --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
     --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
     --crs-hairline: {{ section.settings.color_text | color_modify: 'alpha', 0.14 }};
-    padding-top:    {{ section.settings.padding_top }}px;
-    padding-bottom: {{ section.settings.padding_bottom }}px;
+    padding-top:    min({{ section.settings.padding_top }}px, 15vw);
+    padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
   }
 {% endstyle %}
 
 <div class="cnf-section" id="section-{{ section.id }}">
   <div class="cnf-container">
 
-    <div class="cnf-head crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_nf_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_nf_headline_md %} crs-heading-stack--headline-md{% endif %}">
+    <div class="cnf-head{% if crs_nf_intro != blank %} cnf-head--with-intro{% endif %} crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_nf_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_nf_headline_md %} crs-heading-stack--headline-md{% endif %}">
       {%- if crs_nf_kicker != blank -%}
         <p class="crs-heading-stack__kicker">{{ crs_nf_kicker | escape }}</p>
       {%- endif -%}
@@ -53,6 +67,10 @@
         </div>
       {%- endif -%}
     </div>
+
+    {%- if crs_nf_intro != blank -%}
+      <p class="cnf-intro">{{ crs_nf_intro | escape | newline_to_br }}</p>
+    {%- endif -%}
 
     <div class="cnf-card">
 
@@ -154,6 +172,22 @@
 .cnf-head {
   margin-bottom: 28px;
   max-width: 44ch;
+}
+
+.cnf-head--with-intro {
+  margin-bottom: var(--space-4);
+}
+
+/* Section-Description: bewusst ausserhalb des Heading-Stacks, damit Titel und
+   Subline ein Block bleiben und Fliesstext nicht auf Headline-Groesse laeuft. */
+.cnf-intro {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.62));
+  max-width: 62ch;
+  margin: 0 0 28px;
 }
 
 .cnf-card {
@@ -465,7 +499,15 @@
       "type": "textarea",
       "id": "subheading",
       "label": "Unterüberschrift",
-      "default": "Auf dem Beutel steht \"nicht zum Verzehr\". Das hat einen Grund."
+      "default": "Auf dem Beutel steht \"nicht zum Verzehr\". Das hat einen Grund.",
+      "info": "Kurz halten, läuft auf Headline-Größe."
+    },
+    {
+      "type": "textarea",
+      "id": "intro",
+      "label": "Einleitungstext (optional)",
+      "default": "__none__",
+      "info": "__none__ = ausblenden. Für längere Einordnungen statt Unterüberschrift."
     },
     {
       "type": "header",

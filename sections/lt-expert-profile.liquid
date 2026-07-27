@@ -17,12 +17,18 @@
   - Content pattern:  Split 2fr/3fr (Porträt | Inhalt) — bestehendes
                       Theme-Muster aus `sections/lt-science-limmroth.liquid`,
                       hier auf heller Fläche und ohne Buch-/Zitat-Block.
-                      Darunter: Fakten-`dl` (2 Spalten) + Profil-Links.
+                      Darunter: Fakten-`dl` (2 Spalten) + Profil-Links,
+                      darunter der Prüfumfang als zwei schlichte Listen.
   - Card count:       keine Karten — die Seite ist ein Dokument, kein Raster
   - CTA:              keiner. Autoritätsseite, kein Conversion-Moment.
   - Removed:          Zitat (wörtliche Rede nur mit Freigabe, Briefing §6),
                       Buch-Block und Kennzahlen-Row (Angaben unverifiziert),
                       Teal-Akzente, farbige Left-Borders.
+  - Revision 27.07.:  Der Prüfumfang lag zuerst in einer eigenen Section
+                      (`lt-expert-scope`, Kartenraster auf warmer Fläche). Das
+                      war ein zweiter Rhythmusschritt für Inhalt, der zum
+                      Steckbrief gehört, und widersprach der Card-count-Zeile
+                      oben. Jetzt hier drin, ohne Karten und ohne eigene h2.
   - Quality move:     Die Fakten stehen als Steckbrief-`dl` unter dem Namen,
                       nicht als Fließtext. Das liest sich wie ein Klinikprofil
                       und nicht wie Marketing. Die Profil-Links schließen die
@@ -187,6 +193,81 @@
         </article>
 
         {%- comment -%}
+          Umfang und Grenzen der Prüfrolle. Sitzt bewusst IN dieser Section und
+          nicht in einer eigenen: es ist eine Beschreibung der Rolle, keine
+          zweite Aussage. Als eigene Section (bis 27.07.2026 `lt-expert-scope`)
+          war es ein Kartenraster auf warmer Fläche und damit ein zweiter
+          Rhythmusschritt für Inhalt, der zum Steckbrief gehört. Dazu kam ein
+          Widerspruch zur Spec oben, die „kein Raster" verlangt.
+
+          Kein eigener h2 hier: eine zweite 36px-Überschrift würde mit dem Namen
+          konkurrieren. Die beiden Spaltentitel tragen den Kontext.
+
+          Marker-Icons sind funktional, nicht dekorativ: sie kodieren
+          „gehört dazu" gegen „gehört nicht dazu". Deshalb bleiben sie trotz §11.
+        {%- endcomment -%}
+        {%- liquid
+          # Nur unter der ersten Person ausgeben. Liquid kennt keine
+          # Operator-Praezedenz, deshalb als eigenes Flag statt als and/or-Kette.
+          assign lep_includes = section.blocks | where: 'type', 'include'
+          assign lep_excludes = section.blocks | where: 'type', 'exclude'
+          assign lep_scope_size = lep_includes.size | plus: lep_excludes.size
+          assign lep_show_scope = false
+          if forloop.first
+            if lep_scope_size > 0
+              assign lep_show_scope = true
+            endif
+          endif
+        -%}
+        {%- if lep_show_scope -%}
+          <div class="lt-exp__scope">
+            {%- if lep_includes.size > 0 -%}
+              <div class="lt-exp__scope-col">
+                {%- if section.settings.include_title != blank -%}
+                  <h3 class="lt-exp__scope-title">{{ section.settings.include_title | escape }}</h3>
+                {%- endif -%}
+                <ul class="lt-exp__scope-list" role="list">
+                  {%- for b in lep_includes -%}
+                    <li class="lt-exp__scope-item" {{ b.shopify_attributes }}>
+                      <span class="lt-exp__marker lt-exp__marker--yes" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M20 6 9 17l-5-5"/>
+                        </svg>
+                      </span>
+                      <span class="lt-exp__scope-text">{{ b.settings.text | escape }}</span>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+
+            {%- if lep_excludes.size > 0 -%}
+              <div class="lt-exp__scope-col">
+                {%- if section.settings.exclude_title != blank -%}
+                  <h3 class="lt-exp__scope-title">{{ section.settings.exclude_title | escape }}</h3>
+                {%- endif -%}
+                <ul class="lt-exp__scope-list" role="list">
+                  {%- for b in lep_excludes -%}
+                    <li class="lt-exp__scope-item" {{ b.shopify_attributes }}>
+                      <span class="lt-exp__marker lt-exp__marker--no" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M5 12h14"/>
+                        </svg>
+                      </span>
+                      <span class="lt-exp__scope-text">{{ b.settings.text | escape }}</span>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+          </div>
+
+          {%- if section.settings.scope_footnote != blank -%}
+            <p class="lt-exp__footnote">{{ section.settings.scope_footnote | escape }}</p>
+          {%- endif -%}
+        {%- endif -%}
+
+        {%- comment -%}
           Person-Knoten. Stabile @id = kanonische Seiten-URL + Anker, damit
           `reviewedBy` aus den Artikeln darauf zeigen kann. `worksFor` verweist
           auf die bestehende Organization-@id aus snippets/microdata-schema.liquid,
@@ -286,9 +367,54 @@
       "type": "textarea",
       "id": "section_intro",
       "label": "Untertitel"
+    },
+    {
+      "type": "header",
+      "content": "Umfang der Prüfung"
+    },
+    {
+      "type": "text",
+      "id": "include_title",
+      "label": "Titel linke Spalte",
+      "default": "Das geht durch die Prüfung"
+    },
+    {
+      "type": "text",
+      "id": "exclude_title",
+      "label": "Titel rechte Spalte",
+      "default": "Das ist nicht Teil der Prüfung"
+    },
+    {
+      "type": "textarea",
+      "id": "scope_footnote",
+      "label": "Schlusszeile"
     }
   ],
   "blocks": [
+    {
+      "type": "include",
+      "name": "Geprüft",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Zeile",
+          "default": "Inhalte vor der Veröffentlichung"
+        }
+      ]
+    },
+    {
+      "type": "exclude",
+      "name": "Nicht geprüft",
+      "settings": [
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Zeile",
+          "default": "Keine individuelle Beratung"
+        }
+      ]
+    },
     {
       "type": "person",
       "name": "Person",

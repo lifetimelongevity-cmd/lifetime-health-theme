@@ -255,6 +255,10 @@
         {%- assign lt_trust_3 = section.settings.trust_3 | default: '>1.000 Kund:innen vertrauen LIFETIME' -%}
         {%- comment -%}trust_4 (optional, conditional render) — added 2026-04-27{%- endcomment -%}
         {%- assign lt_trust_4 = section.settings.trust_4 | strip -%}
+        {%- assign lt_trust_1_icon_name = section.settings.trust_1_icon_name | default: 'delivery' -%}
+        {%- assign lt_trust_2_icon_name = section.settings.trust_2_icon_name | default: 'clock' -%}
+        {%- assign lt_trust_3_icon_name = section.settings.trust_3_icon_name | default: 'leaf' -%}
+        {%- assign lt_trust_4_icon_name = section.settings.trust_4_icon_name | default: 'lab' -%}
         {%- assign lt_pill_1_label = section.settings.pill_1_label | default: '1 Monat' -%}
         {%- assign lt_pill_1_qty = section.settings.pill_1_quantity | default: 1 -%}
         {%- comment -%} Preis IMMER dynamisch aus der echten Variante (kein Hardcode) — 2026-07-18 {%- endcomment -%}
@@ -286,12 +290,7 @@
                   | image_tag: loading: 'lazy', class: 'lt-trust-icon-img', alt: ''
                 }}
               {%- else -%}
-                <svg class="lt-trust-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                  <path d="M10.5 5H2.75v7.25h1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path>
-                  <path d="M10.5 7.25h2.7l2.05 2.5v2.5h-1.4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"></path>
-                  <circle cx="6" cy="12.25" r="1.25" stroke="currentColor" stroke-width="1.3"></circle>
-                  <circle cx="12.4" cy="12.25" r="1.25" stroke="currentColor" stroke-width="1.3"></circle>
-                </svg>
+                {% render 'lt-trust-icon', name: lt_trust_1_icon_name %}
               {%- endif -%}
               <span>{{ lt_trust_1 }}</span>
             </div>
@@ -303,10 +302,7 @@
                   | image_tag: loading: 'lazy', class: 'lt-trust-icon-img', alt: ''
                 }}
               {%- else -%}
-                <svg class="lt-trust-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-                  <circle cx="8" cy="8" r="6.25" stroke="currentColor" stroke-width="1.2"></circle>
-                  <path d="M8 4.5V8l2.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
+                {% render 'lt-trust-icon', name: lt_trust_2_icon_name %}
               {%- endif -%}
               <span>{{ lt_trust_2 }}</span>
             </div>
@@ -318,10 +314,7 @@
                   | image_tag: loading: 'lazy', class: 'lt-trust-icon-img', alt: ''
                 }}
               {%- else -%}
-                <svg class="lt-trust-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                  <path d="M8.2 14.5a5.5 5.5 0 0 1-.95-10.9c4.45-.85 5.6-1.3 7.15-3.1.75 1.5 1.35 3.1 1.35 5.85 0 4.5-3.85 8.15-7.55 8.15Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
-                  <path d="M2.5 15.5c0-2.4 1.6-4.15 4.2-4.65 1.9-.35 3.75-1.35 4.5-2.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
-                </svg>
+                {% render 'lt-trust-icon', name: lt_trust_3_icon_name %}
               {%- endif -%}
               <span>{{ lt_trust_3 }}</span>
             </div>
@@ -334,11 +327,7 @@
                     | image_tag: loading: 'lazy', class: 'lt-trust-icon-img', alt: ''
                   }}
                 {%- else -%}
-                  <svg class="lt-trust-icon" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                    <path d="M10.5 2.25v4.2c0 .25.07.5.2.72l3.6 6.35a1.5 1.5 0 0 1-1.3 2.23H5a1.5 1.5 0 0 1-1.3-2.23l3.6-6.35c.13-.22.2-.47.2-.72v-4.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"></path>
-                    <path d="M6.5 2.25h5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
-                    <path d="M5.4 11.25h7.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"></path>
-                  </svg>
+                  {% render 'lt-trust-icon', name: lt_trust_4_icon_name %}
                 {%- endif -%}
                 {%- if section.settings.trust_4_popup_body != blank -%}
                   <button type="button" class="lt-pdp-hero__trust-link" data-crs-dialog-open aria-haspopup="dialog" aria-controls="crs-lt-hero-trust4-{{ section.id }}">{{ lt_trust_4 }}</button>
@@ -2197,11 +2186,17 @@
   margin-top: 12px;
 }
 
+/* Entsättigt. Die Shopify-Logos bringen sonst sechs Fremdfarben (AMEX-Blau,
+   Klarna-Pink, Mastercard-Orange, PayPal-Blau, Shop-Lila, UnionPay-Rot) auf
+   eine Seite, die sonst nur Petrol, Mint und Neutraltöne führt. Als Graustufe
+   erfüllen sie ihre Aufgabe (Zahlarten belegen) ohne die lauteste Fläche der
+   PDP zu sein. */
 .lt-payment-icon {
-  height: 24px;
+  height: 22px;
   width: auto;
   border-radius: 3px;
-  opacity: 0.65;
+  filter: grayscale(1);
+  opacity: 0.5;
 }
 
 /* Größen-Auswahl — segmentierte Pills (flat, wie Buy-Box-Karten), als eigene Zone
@@ -2717,6 +2712,22 @@
       "label": "Trust-Zeile 1 — Icon (optional)"
     },
     {
+      "type": "select",
+      "id": "trust_1_icon_name",
+      "label": "Trust-Zeile 1 — Icon-Motiv",
+      "info": "Nur wirksam, wenn kein eigenes Bild gesetzt ist. Motiv zum Text passend wählen.",
+      "options": [
+        { "value": "delivery", "label": "Lieferung" },
+        { "value": "leaf", "label": "Rein / ohne Zusätze" },
+        { "value": "invoice", "label": "Rechnung / Zahlung" },
+        { "value": "lab", "label": "Labor / Forschung" },
+        { "value": "clock", "label": "Zeit" },
+        { "value": "refresh", "label": "Rückgabe / Garantie" },
+        { "value": "shield", "label": "Geprüft / Schutz" }
+      ],
+      "default": "delivery"
+    },
+    {
       "type": "text",
       "id": "trust_2",
       "label": "Trust-Zeile 2",
@@ -2726,6 +2737,22 @@
       "type": "image_picker",
       "id": "trust_2_icon",
       "label": "Trust-Zeile 2 — Icon (optional)"
+    },
+    {
+      "type": "select",
+      "id": "trust_2_icon_name",
+      "label": "Trust-Zeile 2 — Icon-Motiv",
+      "info": "Nur wirksam, wenn kein eigenes Bild gesetzt ist. Motiv zum Text passend wählen.",
+      "options": [
+        { "value": "delivery", "label": "Lieferung" },
+        { "value": "leaf", "label": "Rein / ohne Zusätze" },
+        { "value": "invoice", "label": "Rechnung / Zahlung" },
+        { "value": "lab", "label": "Labor / Forschung" },
+        { "value": "clock", "label": "Zeit" },
+        { "value": "refresh", "label": "Rückgabe / Garantie" },
+        { "value": "shield", "label": "Geprüft / Schutz" }
+      ],
+      "default": "clock"
     },
     {
       "type": "text",
@@ -2739,6 +2766,22 @@
       "label": "Trust-Zeile 3 — Icon (optional)"
     },
     {
+      "type": "select",
+      "id": "trust_3_icon_name",
+      "label": "Trust-Zeile 3 — Icon-Motiv",
+      "info": "Nur wirksam, wenn kein eigenes Bild gesetzt ist. Motiv zum Text passend wählen.",
+      "options": [
+        { "value": "delivery", "label": "Lieferung" },
+        { "value": "leaf", "label": "Rein / ohne Zusätze" },
+        { "value": "invoice", "label": "Rechnung / Zahlung" },
+        { "value": "lab", "label": "Labor / Forschung" },
+        { "value": "clock", "label": "Zeit" },
+        { "value": "refresh", "label": "Rückgabe / Garantie" },
+        { "value": "shield", "label": "Geprüft / Schutz" }
+      ],
+      "default": "leaf"
+    },
+    {
       "type": "text",
       "id": "trust_4",
       "label": "Trust-Zeile 4 (optional)",
@@ -2748,6 +2791,22 @@
       "type": "image_picker",
       "id": "trust_4_icon",
       "label": "Trust-Zeile 4 — Icon (optional)"
+    },
+    {
+      "type": "select",
+      "id": "trust_4_icon_name",
+      "label": "Trust-Zeile 4 — Icon-Motiv",
+      "info": "Nur wirksam, wenn kein eigenes Bild gesetzt ist. Motiv zum Text passend wählen.",
+      "options": [
+        { "value": "delivery", "label": "Lieferung" },
+        { "value": "leaf", "label": "Rein / ohne Zusätze" },
+        { "value": "invoice", "label": "Rechnung / Zahlung" },
+        { "value": "lab", "label": "Labor / Forschung" },
+        { "value": "clock", "label": "Zeit" },
+        { "value": "refresh", "label": "Rückgabe / Garantie" },
+        { "value": "shield", "label": "Geprüft / Schutz" }
+      ],
+      "default": "lab"
     },
     {
       "type": "text",
