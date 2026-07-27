@@ -85,19 +85,16 @@
           </div>
         {%- endif -%}
 
-        {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
-          <div class="fg-actions">
-            <a href="{{ section.settings.cta_url }}" class="fg-cta">
-              {{ section.settings.cta_label | escape }}
-            </a>
-          </div>
-        {%- endif -%}
-
         {%- if section.blocks.size > 0 -%}
           <div class="fg-grid fg-grid--cols-{{ section.settings.columns }}{% if section.settings.image != blank or section.settings.image_url != blank %} fg-grid--with-media{% endif %}">
             {%- for block in section.blocks -%}
               {%- assign fg_popup_plain = block.settings.popup_body | default: '' | strip_html | strip -%}
               <div class="fg-card" {{ block.shopify_attributes }}>
+                {%- if block.settings.icon_name != blank and block.settings.icon_name != 'none' -%}
+                  <span class="fg-card-icon" aria-hidden="true">
+                    {% render 'lt-trust-icon', name: block.settings.icon_name, size: 22 %}
+                  </span>
+                {%- endif -%}
                 {%- if block.settings.title != blank -%}
                   <h3 class="fg-card-title">{{ block.settings.title | escape }}</h3>
                 {%- endif -%}
@@ -143,6 +140,14 @@
                 {%- endif -%}
               </div>
             {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+          <div class="fg-actions">
+            <a href="{{ section.settings.cta_url }}" class="fg-cta">
+              {{ section.settings.cta_label | escape }}
+            </a>
           </div>
         {%- endif -%}
       </div>
@@ -282,6 +287,14 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+/* Icon je Karte — vorher waren es reine Textkarten, waehrend das genehmigte
+   card-info-Muster in _examples/sections/benefits.liquid Icons vorsieht. */
+.fg-card-icon {
+  display: inline-flex;
+  margin-bottom: var(--space-3);
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
 }
 
 .fg-card-title {
@@ -498,6 +511,22 @@
       "type": "feature",
       "name": "Feature",
       "settings": [
+        {
+          "type": "select",
+          "id": "icon_name",
+          "label": "Icon",
+          "options": [
+            { "value": "none", "label": "Kein Icon" },
+            { "value": "shield", "label": "Geprüft / Schutz" },
+            { "value": "lab", "label": "Labor / Forschung" },
+            { "value": "leaf", "label": "Rein / ohne Zusätze" },
+            { "value": "delivery", "label": "Lieferung" },
+            { "value": "invoice", "label": "Rechnung / Zahlung" },
+            { "value": "refresh", "label": "Rückgabe / Garantie" },
+            { "value": "clock", "label": "Zeit" }
+          ],
+          "default": "none"
+        },
         {
           "type": "text",
           "id": "title",

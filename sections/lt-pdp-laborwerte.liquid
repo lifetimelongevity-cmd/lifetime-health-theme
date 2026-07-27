@@ -103,6 +103,20 @@
   assign lw_expert      = section.settings.expert | strip
   assign lw_batch_hint  = section.settings.batch_hint | strip
   assign lw_img_alt     = section.settings.report_image_alt | strip
+
+  # Provenienz als ein String zusammensetzen. Ein Leerzeichen zwischen zwei
+  # Liquid-Tags im Markup wurde weggekuerzt, daraus wurde "Mainz.DAkkS-...".
+  assign lw_prov_parts = ''
+  if lw_meta_lab != blank
+    assign lw_prov_parts = lw_meta_lab
+  endif
+  if lw_meta_accred != blank
+    if lw_prov_parts != blank
+      assign lw_prov_parts = lw_prov_parts | append: ' '
+    endif
+    assign lw_prov_parts = lw_prov_parts | append: lw_meta_accred
+  endif
+  assign lw_provenance_text = lw_prov_parts | strip | escape
   if lw_img_alt == blank
     assign lw_img_alt = 'Prüfbericht des Labors zur abgebildeten Charge'
   endif
@@ -161,17 +175,14 @@
             <p class="ltlw-value__label">{{ section.settings.value_primary_label | escape }}</p>
           </div>
           <div class="ltlw-value">
-            <p class="ltlw-value__figure ltlw-value__figure--word">{{ section.settings.value_secondary | escape }}</p>
+            <p class="ltlw-value__figure">{{ section.settings.value_secondary | escape }}</p>
             <p class="ltlw-value__label">{{ section.settings.value_secondary_label | escape }}</p>
           </div>
         </div>
 
         {%- if lw_meta_lab != blank or lw_meta_accred != blank -%}
           <p class="ltlw__provenance">
-            {%- if lw_meta_lab != blank -%}{{ lw_meta_lab | escape }}{%- endif -%}
-            {%- if lw_meta_accred != blank -%}
-              {% if lw_meta_lab != blank %} {% endif %}{{ lw_meta_accred | escape }}
-            {%- endif -%}
+            {{- lw_provenance_text -}}
             {%- if lw_expert != blank -%}
               <span class="ltlw__provenance-expert">{{ lw_expert | escape }}</span>
             {%- endif -%}
@@ -181,13 +192,13 @@
         {%- if lw_batch != blank or lw_tested_on != blank or lw_method != blank -%}
           <ul class="ltlw__facts">
             {%- if lw_batch != blank -%}
-              <li class="ltlw__fact">Charge {{ lw_batch | escape }}</li>
+              <li class="ltlw__fact"><span class="ltlw__fact-label">Charge</span><span class="ltlw__fact-value">{{ lw_batch | escape }}</span></li>
             {%- endif -%}
             {%- if lw_tested_on != blank -%}
-              <li class="ltlw__fact">Geprüft am {{ lw_tested_on | escape }}</li>
+              <li class="ltlw__fact"><span class="ltlw__fact-label">Geprüft am</span><span class="ltlw__fact-value">{{ lw_tested_on | escape }}</span></li>
             {%- endif -%}
             {%- if lw_method != blank -%}
-              <li class="ltlw__fact">Methode {{ lw_method | escape }}</li>
+              <li class="ltlw__fact"><span class="ltlw__fact-label">Methode</span><span class="ltlw__fact-value">{{ lw_method | escape }}</span></li>
             {%- endif -%}
           </ul>
         {%- endif -%}
@@ -261,8 +272,12 @@
                  href="{{ section.settings.report_url }}"
                  target="_blank"
                  rel="noopener noreferrer">
-                {{ section.settings.report_link_label | default: 'Vollständigen Prüfbericht ansehen' | escape }}
-                <span aria-hidden="true">&rarr;</span>
+                {%- comment -%}
+                  Geschuetztes Leerzeichen vor dem Pfeil: sonst bricht er auf
+                  eine eigene Zeile.
+                {%- endcomment -%}
+                {{- section.settings.report_link_label | default: 'Vollständigen Prüfbericht ansehen' | escape -}}
+                &nbsp;<span aria-hidden="true">&rarr;</span>
               </a>
             </figcaption>
           {%- endif -%}
@@ -360,14 +375,6 @@
   color: var(--ltlw-text, #26251e);
 }
 
-/* Der zweite Wert ist eine Wortgruppe ("unter der Bestimmungsgrenze"), keine Zahl.
-   Auf Stat-Größe würde er umbrechen und die Karten optisch entkoppeln. */
-.ltlw-value__figure--word {
-  font-size: var(--text-h2);
-  line-height: var(--leading-heading);
-  letter-spacing: -0.01em;
-}
-
 /* Stat-Callout-Spec: Label ist --text-body-sm, nicht --text-body.
    Hält die Section zugleich bei drei Größenstufen. */
 .ltlw-value__label {
@@ -404,10 +411,24 @@
   list-style: none;
 }
 
+/* Label und Wert liefen vorher in einer Groesse und Farbe, das Raster brach
+   ungleich um. Jetzt Label zurueckgenommen, Wert traegt das Gewicht. */
 .ltlw__fact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
   font-family: var(--font-body);
-  font-size: var(--text-body-sm);
   line-height: var(--leading-tight);
+}
+
+.ltlw__fact-label {
+  font-size: var(--text-micro);
+  color: var(--ltlw-text-muted, rgba(38, 37, 30, 0.7));
+}
+
+.ltlw__fact-value {
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
   color: var(--ltlw-text, #26251e);
 }
 
@@ -539,6 +560,7 @@
 .ltlw__proof {
   margin: 0;
   width: 300px;
+  max-width: 100%;
 }
 
 /* Das Blatt liegt auf der Fläche. Weißer Grund und ein sehr flacher
@@ -590,9 +612,11 @@
     gap: var(--space-6);
   }
 
-  /* Beleg unter die Werte, linksbündig statt gestreckt */
+  /* Beleg unter die Werte. Volle Spaltenbreite: bei 260px auf einem 375er
+     Viewport war das Dokument weder lesbar noch als Element ausbalanciert,
+     es hing links in der Flaeche. */
   .ltlw__proof {
-    width: 260px;
+    width: 100%;
   }
 }
 

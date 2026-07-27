@@ -88,7 +88,11 @@
     {%- endfor -%}
 
     {%- if cr_has_reviews -%}
-      <ul class="cr-track" role="list">
+      {%- assign cr_review_count = 0 -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'review' -%}{%- assign cr_review_count = cr_review_count | plus: 1 -%}{%- endif -%}
+      {%- endfor -%}
+      <ul class="cr-track" role="list" data-cr-track>
         {%- for block in section.blocks -%}
           {%- if block.type == 'review' -%}
             {%- assign cr_rating = block.settings.rating | default: 5 -%}
@@ -153,6 +157,16 @@
         {%- endfor -%}
       </ul>
 
+      {%- comment -%}
+        Der Track hatte keinerlei Hinweis, dass es mehr Karten gibt: keine
+        Pfeile, keine Dots, keinen Zaehler. Nur der angeschnittene Kartenrand.
+      {%- endcomment -%}
+      {%- if cr_review_count > 1 -%}
+        <p class="cr-progress" data-cr-progress aria-live="polite">
+          <span data-cr-progress-current>1</span> von {{ cr_review_count }}
+        </p>
+      {%- endif -%}
+
       {%- comment -%} ── Optional CTA ───────────────────────────────── {%- endcomment -%}
       {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
         <div class="cr-cta-wrap">
@@ -203,23 +217,43 @@
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-bottom: var(--space-6);
+  font-size: var(--text-body-sm);
 }
 
+/* Ohne Pill-Rahmen. Die Elemente sind <span>, nicht klickbar. Als umrandete
+   Chips lasen sie sich als Filter, den man betaetigen kann, und liefen damit
+   ins Leere. Jetzt als reine Themen-Auszeichnung. */
 .cr-pill {
   display: inline-flex;
   align-items: center;
   font-family: var(--font-body);
   font-size: var(--text-body-sm);
-  font-weight: var(--weight-medium);
+  font-weight: var(--weight-regular);
   line-height: var(--leading-tight);
   color: var(--cr-text-sec);
   background: transparent;
-  border: 1px solid var(--cr-border);
-  border-radius: var(--radius-full);
-  padding: 5px var(--space-3);
+  border: 0;
+  padding: 0;
   white-space: nowrap;
   cursor: default;
   user-select: none;
+}
+
+/* Trennzeichen zwischen den Themen, damit sie ohne Rahmen nicht verschwimmen */
+.cr-pill + .cr-pill::before {
+  content: '·';
+  margin-right: var(--space-2);
+  color: var(--cr-text-ter, rgba(38, 37, 30, 0.4));
+}
+
+/* Zaehler unter dem Track. Bewusst Text und kein Dot-Cluster: bei acht Karten
+   werden Dots zu Konfetti, "3 von 8" bleibt bei jeder Anzahl lesbar. */
+.cr-progress {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--cr-text-sec);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Scroll track ─────────────────────────────────────────── */
@@ -684,3 +718,45 @@
   ]
 }
 {% endschema %}
+
+{% javascript %}
+(function () {
+  function bind(root) {
+    var track = root.querySelector('[data-cr-track]');
+    var out = root.querySelector('[data-cr-progress-current]');
+    if (!track || !out || track.__crBound) return;
+    track.__crBound = true;
+
+    var raf = null;
+    function update() {
+      raf = null;
+      var cards = track.children;
+      if (!cards.length) return;
+      var mid = track.scrollLeft + track.clientWidth / 2;
+      var idx = 0;
+      for (var i = 0; i < cards.length; i++) {
+        var c = cards[i];
+        if (c.offsetLeft <= mid && c.offsetLeft + c.offsetWidth > mid) { idx = i; break; }
+        if (c.offsetLeft <= mid) idx = i;
+      }
+      out.textContent = String(idx + 1);
+    }
+
+    track.addEventListener('scroll', function () {
+      if (raf === null) raf = requestAnimationFrame(update);
+    }, { passive: true });
+    update();
+  }
+
+  function init() {
+    document.querySelectorAll('.cr-section, [id^="shopify-section"]').forEach(bind);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+  document.addEventListener('shopify:section:load', init);
+})();
+{% endjavascript %}

@@ -318,8 +318,13 @@
               {%- endif -%}
               <span>{{ lt_trust_3 }}</span>
             </div>
+            {%- comment -%}
+              Slot 4 traegt die Novel-Food-Einordnung. Als gleichrangiger
+              Trust-Bullet ging sie zwischen Versand und Zahlart unter.
+              Deshalb abgesetzt als Fussnote, nicht als vierter Vorteil.
+            {%- endcomment -%}
             {%- if lt_trust_4 != blank -%}
-              <div class="lt-pdp-hero__trust-item">
+              <div class="lt-pdp-hero__trust-item lt-pdp-hero__trust-item--note">
                 {%- if section.settings.trust_4_icon != blank -%}
                   {{
                     section.settings.trust_4_icon
@@ -385,22 +390,23 @@
                     {{ section.settings.founder_title | default: 'Chefarzt Neurologie · Chief Scientific Officer LIFETIME' | escape }}
                   </p>
                 </div>
-                <div class="lt-founder-seal" aria-label="Laborgeprüft">
-                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M10 2L3 5v6c0 4 3 7 7 7 s7-3 7-7V5L10 2Z" stroke="currentColor" stroke-width="1.2" fill="none"></path>
-                    <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"></path>
-                  </svg>
+                  {%- comment -%}
+                    Credentials sitzen in der Meta-Spalte, nicht mehr in einem
+                    eigenen Band darunter. Dort stand ein einzelner Chip in
+                    sonst leerer Flaeche. Das Deko-Siegel rechts ist entfallen,
+                    es trug keine Information, die die Rolle daneben nicht hat.
+                  {%- endcomment -%}
+                  {%- assign lt_creds = section.settings.founder_creds | default: 'Chefarzt Neurologie, Spiegel Bestseller, 20+ Jahre Forschung' | split: ',' -%}
+                  {%- if lt_creds.size > 0 -%}
+                    <div class="lt-founder-credentials">
+                      {%- for cred in lt_creds -%}
+                        {%- assign cred_t = cred | strip -%}
+                        {%- if cred_t != blank -%}<span class="lt-founder-cred">{{ cred_t | escape }}</span>{%- endif -%}
+                      {%- endfor -%}
+                    </div>
+                  {%- endif -%}
                 </div>
               </div>
-              {%- assign lt_creds = section.settings.founder_creds | default: 'Chefarzt Neurologie, Spiegel Bestseller, 20+ Jahre Forschung' | split: ',' -%}
-              {%- if lt_creds.size > 0 -%}
-              <div class="lt-founder-credentials">
-                {%- for cred in lt_creds -%}
-                  {%- assign cred_t = cred | strip -%}
-                  {%- if cred_t != blank -%}<span class="lt-founder-cred">{{ cred_t | escape }}</span>{%- endif -%}
-                {%- endfor -%}
-              </div>
-              {%- endif -%}
             </div>
           {%- endif -%}
         {%- endcapture -%}
@@ -506,7 +512,11 @@
             {%- endif -%}
           </span>
           <span class="lt-pdp-hero__count">
-            ·
+            {%- comment -%}
+              Trennzeichen mit geschuetztem Leerzeichen. Die Whitespace-Kontrolle
+              der Liquid-Tags hat vorher "4,7 ·229" ohne Abstand erzeugt.
+            {%- endcomment -%}
+            &middot;&nbsp;
             {%- if lt_count > 0 -%}
               {{ lt_count }} Produktbewertungen
             {%- else -%}
@@ -1858,6 +1868,16 @@
 }
 
 /* Inline-Dialog-Trigger (Trust-4) — wirkt wie verlinkter Text, nicht wie Button */
+/* Compliance-Fussnote: abgesetzt von den drei Vorteils-Zeilen darueber, damit
+   sie nicht als vierter Vorteil gelesen wird. Trennung ueber Weissraum und
+   eine neutrale Haarlinie, nicht ueber Farbe. */
+.lt-pdp-hero__trust-item--note {
+  margin-top: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--lt-border, rgba(38, 37, 30, 0.1));
+  font-size: var(--text-body-sm);
+}
+
 .lt-pdp-hero__trust-link {
   appearance: none;
   -webkit-appearance: none;
