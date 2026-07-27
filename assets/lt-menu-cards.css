@@ -1,0 +1,166 @@
+/*
+  LIFETIME — Mobile Menü-Karten (#site-menu-sidebar)
+
+  Karten-Drawer nach IM8-Muster statt Linkliste: eine dunkle Hero-Karte
+  (AGE&DNA-Test), eine helle Produktkarte, Trust-Duo im Card-Info-Muster,
+  ruhige Text-Zeilen, ein Pill-CTA sticky im Sidebar-Footer. Hero-Karte und
+  CTA sind die einzigen dunklen Flächen und zeigen auf dasselbe Ziel.
+
+  Alle Werte über Tokens aus docs/design-governance.md §3 (theme.css :root).
+  Horizontales Padding kommt vom Sidebar-System (.sidebar__body > *).
+*/
+
+.lt-menu-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+  padding-bottom: var(--space-4);
+  font-family: var(--font-body);
+}
+
+/* .sidebar svg * erzwingt fill auf allen Pfaden — Outline-Icons freistellen */
+#site-menu-sidebar .lt-menu-cards svg * {
+  fill: none;
+}
+
+.lt-menu-cards__card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-secondary);
+  color: inherit;
+  text-decoration: none;
+}
+
+.lt-menu-cards__card--dark {
+  background: var(--color-surface-dark);
+  border-color: var(--color-surface-dark);
+  color: var(--color-text-on-dark);
+}
+
+.lt-menu-cards__title {
+  display: block;
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+}
+
+.lt-menu-cards__sub {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+}
+
+.lt-menu-cards__card--dark .lt-menu-cards__sub {
+  color: var(--color-text-on-dark-muted);
+}
+
+.lt-menu-cards__img {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+}
+
+.lt-menu-cards__duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.lt-menu-cards__tile {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-primary);
+  color: inherit;
+  text-decoration: none;
+}
+
+.lt-menu-cards__tile-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px; /* kompakte Drawer-Variante des 48px-Card-Info-Icons */
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-benefit);
+  color: var(--color-teal-dark);
+}
+
+@media (hover: hover) {
+  .lt-menu-cards__card:not(.lt-menu-cards__card--dark):hover,
+  .lt-menu-cards__tile:hover {
+    border-color: var(--color-border-strong);
+  }
+}
+
+.lt-menu-cards__rows {
+  margin-top: var(--space-1);
+}
+
+.lt-menu-cards__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-1);
+  color: inherit;
+  text-decoration: none;
+}
+
+.lt-menu-cards__row + .lt-menu-cards__row {
+  border-top: 1px solid var(--color-border-default);
+}
+
+.lt-menu-cards__row-text {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.lt-menu-cards__row .lt-menu-cards__sub {
+  margin-top: 0;
+}
+
+.lt-menu-cards__chevron {
+  flex: 0 0 auto;
+  color: var(--color-text-muted);
+}
+
+/* CTA sticky am Drawer-Ende; .sidebar scrollt selbst, daher sticky bottom */
+.site-menu-sidebar-footer--cards {
+  position: sticky;
+  bottom: 0;
+  background: var(--color-background-main);
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.lt-menu-cards__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 100%;
+  min-height: 48px;
+  padding: 14px var(--space-6); /* 14px: Button-Spec-Padding, kein Token-Äquivalent */
+  border-radius: var(--radius-full);
+  background: var(--color-cta-bg);
+  color: var(--color-cta-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  text-align: center;
+  text-decoration: none;
+}

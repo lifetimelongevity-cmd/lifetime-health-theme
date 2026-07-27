@@ -21,8 +21,18 @@
                      28px). --text-h1 bleibt dem echten H1 der Seite vorbehalten,
                      aber die frühere Standardgröße (20px) war von Fliesstext
                      nicht zu unterscheiden.
-  - Content-Muster : 2 Wert-Karten (card-info-Logik) + Meta-Zeile + Beleg-
-                     Thumbnail + aufklappbare Detailtabelle.
+  - Content-Muster : ÜBERARBEITET 2026-07-27. Links 2 Wert-Karten UNTEREINANDER
+                     (Zahl links, Beschriftung rechts, gemeinsame Zahlenspalte)
+                     + eine kurze Fakten-Zeile (Labor · Charge · Prüfdatum ·
+                     Methode) + ein Aufklapp-Bereich. Rechts der Beleg.
+                     Vorher standen die Karten nebeneinander und darunter vier
+                     Absätze Fließtext: zwei ungleich lange Beschriftungen in
+                     gleich breiten Karten und eine Textwand, die den Beleg
+                     rechts optisch erschlagen hat.
+  - Subtraktion    : `intro` gestrichen (Heading-Stack sagt es bereits), die
+                     Subline entdoppelt (sie wiederholte die GMP-Karte weiter
+                     oben), Akkreditierung / Unterzeichner / Chargen-Hinweis
+                     aus der Dauerfläche ins Accordion.
   - CTA            : keiner. Ein Textlink auf den Prüfbericht, mehr nicht.
                      Die Section soll Vertrauen abbauen helfen, nicht verkaufen.
   - Subtraktion    : keine Icons, die den Text wiederholen; keine Trennlinien;
@@ -97,6 +107,10 @@
 
   assign lw_meta_lab    = section.settings.lab_name | strip
   assign lw_meta_accred = section.settings.lab_accreditation | strip
+  assign lw_lab_short   = section.settings.lab_short | strip
+  if lw_lab_short == '__none__'
+    assign lw_lab_short = ''
+  endif
   assign lw_batch       = section.settings.batch | strip
   assign lw_tested_on   = section.settings.tested_on | strip
   assign lw_method      = section.settings.method | strip
@@ -119,6 +133,14 @@
   assign lw_provenance_text = lw_prov_parts | strip | escape
   if lw_img_alt == blank
     assign lw_img_alt = 'Prüfbericht des Labors zur abgebildeten Charge'
+  endif
+
+  # Das Accordion traegt seit 2026-07-27 nicht nur die Einzelwerte, sondern
+  # auch Akkreditierung, Unterzeichner und Chargen-Hinweis. Sichtbar bleiben
+  # die zwei Werte und eine Fakten-Zeile, alles andere ist Tiefe auf Abruf.
+  assign lw_has_details = false
+  if section.blocks.size > 0 or lw_meta_lab != blank or lw_meta_accred != blank or lw_expert != blank or lw_batch_hint != blank
+    assign lw_has_details = true
   endif
 -%}
 
@@ -180,17 +202,11 @@
           </div>
         </div>
 
-        {%- if lw_meta_lab != blank or lw_meta_accred != blank -%}
-          <p class="ltlw__provenance">
-            {{- lw_provenance_text -}}
-            {%- if lw_expert != blank -%}
-              <span class="ltlw__provenance-expert">{{ lw_expert | escape }}</span>
-            {%- endif -%}
-          </p>
-        {%- endif -%}
-
-        {%- if lw_batch != blank or lw_tested_on != blank or lw_method != blank -%}
+        {%- if lw_lab_short != blank or lw_batch != blank or lw_tested_on != blank or lw_method != blank -%}
           <ul class="ltlw__facts">
+            {%- if lw_lab_short != blank -%}
+              <li class="ltlw__fact"><span class="ltlw__fact-label">Labor</span><span class="ltlw__fact-value">{{ lw_lab_short | escape }}</span></li>
+            {%- endif -%}
             {%- if lw_batch != blank -%}
               <li class="ltlw__fact"><span class="ltlw__fact-label">Charge</span><span class="ltlw__fact-value">{{ lw_batch | escape }}</span></li>
             {%- endif -%}
@@ -203,19 +219,29 @@
           </ul>
         {%- endif -%}
 
-        {%- if lw_batch_hint != blank -%}
-          <p class="ltlw__hint">{{ lw_batch_hint | escape }}</p>
-        {%- endif -%}
-
-        {%- if section.blocks.size > 0 -%}
+        {%- if lw_has_details -%}
           <details class="ltlw__details">
             <summary class="ltlw__summary">
-              <span class="ltlw__summary-text">{{ section.settings.details_label | default: 'Einzelwerte anzeigen' | escape }}</span>
+              <span class="ltlw__summary-text">{{ section.settings.details_label | default: 'Einzelwerte und Prüfdetails' | escape }}</span>
               <span class="ltlw__summary-icon" aria-hidden="true">
                 {% render 'crs-chevron' %}
               </span>
             </summary>
 
+            {%- if lw_meta_lab != blank or lw_meta_accred != blank or lw_expert != blank -%}
+              <p class="ltlw__provenance">
+                {{- lw_provenance_text -}}
+                {%- if lw_expert != blank -%}
+                  <span class="ltlw__provenance-expert">{{ lw_expert | escape }}</span>
+                {%- endif -%}
+              </p>
+            {%- endif -%}
+
+            {%- if lw_batch_hint != blank -%}
+              <p class="ltlw__hint">{{ lw_batch_hint | escape }}</p>
+            {%- endif -%}
+
+            {%- if section.blocks.size > 0 -%}
             <div class="ltlw__table-wrap">
               <table class="ltlw-table">
                 <caption class="ltlw-table__caption">
@@ -243,6 +269,7 @@
                 </tbody>
               </table>
             </div>
+            {%- endif -%}
 
             {%- if section.settings.details_note != blank -%}
               <p class="ltlw__note">{{ section.settings.details_note | escape }}</p>
@@ -260,8 +287,8 @@
               | image_url: width: 760
               | image_tag:
                 loading: 'lazy',
-                widths: '260, 380, 520, 760',
-                sizes: '(max-width: 900px) 60vw, 300px',
+                widths: '340, 520, 680, 760',
+                sizes: '(max-width: 480px) 92vw, (max-width: 979px) 420px, 340px',
                 alt: lw_img_alt,
                 class: 'ltlw__proof-img'
             }}
@@ -341,8 +368,10 @@
   align-items: start;
 }
 
+/* 340px statt 300px: der Beleg ist das Element, das die rechte Spalte traegt.
+   Wer die Breite aendert, muss den sizes-Hint am <img> mitziehen. */
 .ltlw__layout--with-proof {
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 340px);
 }
 
 .ltlw__main {
@@ -351,9 +380,12 @@
 
 /* ---------- Wertepaar: das dominante Element ---------- */
 
+/* Untereinander statt nebeneinander. Nebeneinander standen zwei sehr
+   ungleich lange Beschriftungen in gleich breiten Karten, die zweite lief
+   dreizeilig, die erste einzeilig — das war die Schieflage der Section. */
 .ltlw__values {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-4);
 }
 
@@ -363,6 +395,27 @@
   border: 1px solid var(--ltlw-border, rgba(38, 37, 30, 0.10));
   border-radius: var(--radius-md);
   padding: var(--space-5);
+}
+
+/* Ab Desktop Zahl links, Beschriftung rechts. Die feste Zahlenspalte laesst
+   die beiden Werte untereinander fluchten, sodass sie als eine Messreihe
+   gelesen werden und nicht als zwei Kacheln. 15rem fasst den laengsten Wert
+   ("> 99,9 %" auf --text-stat) mit Reserve.
+   1080px und nicht 980px: erst dort bleiben neben der 340px-Belegspalte und
+   der Zahlenspalte noch ueber 300px fuer die Beschriftung. Bei 980px waeren es
+   183px und "Schwermetalle unter der Bestimmungsgrenze" liefe dreizeilig neben
+   einer 56px-Zahl. */
+@media (min-width: 1080px) {
+  .ltlw-value {
+    display: grid;
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: center;
+  }
+
+  .ltlw-value__label {
+    margin-top: 0;
+  }
 }
 
 .ltlw-value__figure {
@@ -405,8 +458,8 @@
 .ltlw__facts {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-2) var(--space-5);
-  margin: var(--space-4) 0 0;
+  gap: var(--space-4) var(--space-5);
+  margin: var(--space-5) 0 0;
   padding: 0;
   list-style: none;
 }
@@ -554,13 +607,12 @@
 
 /* ---------- Beleg ---------- */
 
-/* 300px ist kein Zufallswert: identisch mit dem sizes-Hint am <img> weiter
-   oben. Wer die Breite ändert, muss sizes mitziehen, sonst wählt der Browser
-   die falsche Auflösung. Gilt ebenso für die 260px im Tablet-Block. */
+/* Die Breite kommt jetzt aus dem Grid-Track (340px), nicht mehr aus der
+   Figure. Wer den Track ändert, muss den sizes-Hint am <img> mitziehen,
+   sonst wählt der Browser die falsche Auflösung. */
 .ltlw__proof {
   margin: 0;
-  width: 300px;
-  max-width: 100%;
+  width: 100%;
 }
 
 /* Das Blatt liegt auf der Fläche. Weißer Grund und ein sehr flacher
@@ -606,41 +658,34 @@
 
 /* ---------- Tablet ---------- */
 
-@media (max-width: 900px) {
+/* 979px statt 900px: dieselbe Grenze, an der crs-novel-food und
+   crs-metrics-row auf einspaltig zurueckfallen. Zwischen 901 und 979 blieb
+   sonst eine 500px-Inhaltsspalte neben dem Beleg stehen. */
+@media (max-width: 979px) {
   .ltlw__layout {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
   }
 
-  /* Beleg unter die Werte. Volle Spaltenbreite: bei 260px auf einem 375er
-     Viewport war das Dokument weder lesbar noch als Element ausbalanciert,
-     es hing links in der Flaeche. */
+  /* Beleg unter die Werte. Volle Spaltenbreite, aber gedeckelt: bei 220px auf
+     einem 375er Viewport war das Dokument weder lesbar noch als Element
+     ausbalanciert, ungedeckelt liefe es auf einem 979er Viewport dagegen auf
+     939px Blattbreite hinaus. */
   .ltlw__proof {
     width: 100%;
+    max-width: 420px;
   }
 }
 
 /* ---------- Mobile ---------- */
 
 @media (max-width: 640px) {
-  .ltlw__values {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .ltlw-value__figure {
     font-size: var(--text-display);
   }
 
   .ltlw-value__figure--word {
     font-size: var(--text-h3);
-  }
-
-  .ltlw__facts {
-    gap: var(--space-4) var(--space-5);
-  }
-
-  .ltlw__proof {
-    width: 220px; /* intentional: kleinste sinnvolle Lesbarkeit des Belegs auf Mobil */
   }
 }
 
@@ -747,8 +792,8 @@
       "type": "textarea",
       "id": "subheading",
       "label": "Unterüberschrift",
-      "default": "Jede Charge wird unabhängig im Labor geprüft. Das sind die Werte, die dabei herauskommen.",
-      "info": "__none__ = ausblenden. Kurz halten, läuft auf Headline-Größe."
+      "default": "Die Werte aus der Charge in deinem Beutel.",
+      "info": "__none__ = ausblenden. Kurz halten, läuft auf Headline-Größe. Nicht wiederholen, was weiter oben schon steht."
     },
     {
       "type": "textarea",
@@ -788,6 +833,13 @@
     {
       "type": "header",
       "content": "Herkunft der Prüfung"
+    },
+    {
+      "type": "text",
+      "id": "lab_short",
+      "label": "Labor (Kurzform, sichtbar)",
+      "default": "Limbach Analytics, Mainz",
+      "info": "Steht in der Fakten-Zeile unter den Werten. __none__ = ausblenden. Die volle Angabe mit Akkreditierung liegt im Aufklapp-Bereich."
     },
     {
       "type": "text",
@@ -866,7 +918,8 @@
       "type": "text",
       "id": "details_label",
       "label": "Aufklapp-Beschriftung",
-      "default": "Einzelwerte anzeigen"
+      "default": "Einzelwerte und Prüfdetails",
+      "info": "Der Aufklapp-Bereich trägt Akkreditierung, Unterzeichner, Chargen-Hinweis und die Messwert-Tabelle."
     },
     {
       "type": "textarea",

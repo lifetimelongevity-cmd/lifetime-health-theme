@@ -262,7 +262,7 @@
 /* Grid */
 .fg-grid {
   display: grid;
-  gap: 10px;
+  gap: var(--space-3);
   align-items: stretch;
 }
 
@@ -274,21 +274,30 @@
   grid-template-columns: repeat(2, 1fr);
 }
 
-/* Card */
+/* Card
+   13.4/15px und 102.4px waren aus einem Screenshot zurueckgerechnet. Auf
+   Karten, die ueber die halbe Seitenbreite laufen, wirkte das Padding wie ein
+   Fehler: viel Flaeche, kaum Innenabstand. Jetzt Tokens. 132px ist die
+   intrinsische Mindesthoehe fuer Titel plus zweizeilige Beschreibung, kein
+   Layout-Token. */
 .fg-card {
   box-sizing: border-box;
   background: var(--crs-card-bg, #f2f1ed);
   border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.05));
   border-radius: 4px;
-  padding: 13.4px 15px 15px;
-  min-height: 102.4px;
+  padding: var(--space-5);
+  min-height: 132px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-2);
 }
 
+/* Der Systemschrift-Stack war ein Fremdkoerper: die Beschreibung darunter
+   laeuft in --font-body, der Titel lief in SF/Segoe. Gleiche Groesse, gleiches
+   Gewicht, Unterschied nur ueber die Farbe — dasselbe Prinzip wie im
+   Heading-Stack. !important bleibt, sonst greifen die globalen h3-Regeln. */
 .fg-card-title {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif !important;
+  font-family: var(--font-body) !important;
   font-size: 16px !important;
   font-weight: 400 !important;
   line-height: 1.4 !important;

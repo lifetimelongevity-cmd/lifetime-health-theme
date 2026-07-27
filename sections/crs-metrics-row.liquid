@@ -29,6 +29,12 @@
   if section.settings.heading_size == 'feature'
     assign crs_h_headline_md = true
   endif
+  # Zweispaltig ist Opt-in: dieselbe Section laeuft auch auf der AGE&DNA-PDP,
+  # wo die volle Breite ueber drei Kennzahlen richtig bleibt.
+  assign crs_mg_split = false
+  if section.settings.layout_variant == 'split'
+    assign crs_mg_split = true
+  endif
 -%}
 {% style %}
   #section-{{ section.id }} {
@@ -45,6 +51,8 @@
 
 <div class="mg-section" id="section-{{ section.id }}">
   <div class="mg-container">
+   <div class="mg-layout{% if crs_mg_split %} mg-layout--split{% endif %}">
+    <div class="mg-aside">
 
     {%- if crs_mg_kicker != blank or crs_mg_head != blank or crs_mg_sub != blank -%}
       <div class="mg-header{% if crs_mg_intro != blank %} mg-header--with-intro{% endif %} crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_h_headline_md %} crs-heading-stack--headline-md{% endif %}">
@@ -67,6 +75,9 @@
     {%- if crs_mg_intro != blank -%}
       <p class="mg-intro">{{ crs_mg_intro | escape | newline_to_br }}</p>
     {%- endif -%}
+
+    </div>
+    <div class="mg-main">
 
     {%- if section.blocks.size > 0 -%}
       <div class="mg-grid">
@@ -92,6 +103,8 @@
       <p class="mg-note">{{ section.settings.note }}</p>
     {%- endif -%}
 
+    </div>
+   </div>
   </div>
 </div>
 
@@ -108,6 +121,69 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 20px;
+}
+
+/* Grundzustand einspaltig: reine Bloecke, die Abstaende kommen weiter aus
+   .mg-header / .mg-intro. Zweispaltig nur per Modifier. */
+.mg-layout {
+  display: block;
+}
+
+@media (min-width: 980px) {
+  .mg-layout--split {
+    display: grid;
+    grid-template-columns: minmax(260px, 380px) minmax(0, 1fr);
+    gap: var(--space-7);
+    align-items: start;
+  }
+
+  .mg-layout--split .mg-header,
+  .mg-layout--split .mg-header--with-intro {
+    margin-bottom: 0;
+  }
+
+  .mg-layout--split .mg-header--with-intro {
+    margin-bottom: var(--space-4);
+  }
+
+  .mg-layout--split .mg-intro {
+    margin-bottom: 0;
+    max-width: none;
+  }
+
+  /* Die Kennzahlen stapeln in der rechten Spalte. Nebeneinander waere jede
+     Spalte so schmal, dass ein Wert wie "bis −100 %" in Zahlengroesse
+     umbricht. Gestapelt bilden die Zahlen eine linksbuendige Spalte, die sich
+     wie eine Tabelle lesen laesst, und die Beschreibung bekommt Zeilenlaenge.
+     (0,2,0) schlaegt .mg-card--with-source (0,1,0). */
+  .mg-layout--split .mg-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mg-layout--split .mg-card {
+    display: grid;
+    grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+    gap: var(--space-5);
+    align-items: center;
+    aspect-ratio: auto;
+    min-height: 0;
+    padding: var(--space-5);
+  }
+
+  .mg-layout--split .mg-text {
+    margin-top: 0;
+  }
+}
+
+/* Drei Kennzahlen in zwei Spalten lassen unter 980px eine Waise in Zeile zwei
+   stehen. Nur fuer die Split-Variante gestapelt, damit die AGE&DNA-PDP mit
+   ihrem eigenen Kennzahlen-Satz unberuehrt bleibt. Die Modifier-Klasse haengt
+   am Wrapper und gilt auf allen Breiten, auch dort, wo das Grid selbst noch
+   nicht greift. (0,2,0) schlaegt .mg-grid (0,1,0). */
+@media (max-width: 979px) {
+  .mg-layout--split .mg-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* Header */
@@ -135,7 +211,7 @@
 .mg-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 /* Card */
@@ -291,6 +367,21 @@
       "step": 8,
       "unit": "px",
       "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout_variant",
+      "label": "Aufbau",
+      "options": [
+        { "value": "stacked", "label": "Untereinander (Überschrift über den Kennzahlen)" },
+        { "value": "split", "label": "Zweispaltig (Überschrift links, Kennzahlen rechts)" }
+      ],
+      "default": "stacked",
+      "info": "Zweispaltig greift ab 980px und stapelt die Kennzahlen mit der Zahl links. Darunter läuft die Section immer untereinander."
     },
     {
       "type": "header",

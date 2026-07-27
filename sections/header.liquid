@@ -472,6 +472,9 @@
   </div>
 
   <div class="sidebar__body">
+    {%- if section.settings.enable_menu_cards -%}
+      {%- render 'lt-menu-cards', s: section.settings -%}
+    {%- else -%}
     <mobile-navigation>
       <div class="site-nav style--sidebar">
         <div class="site-nav-container">
@@ -575,9 +578,15 @@
         </div>
       </div>
     </mobile-navigation>
+    {%- endif -%}
   </div>
 
-  <div class="sidebar__footer site-menu-sidebar-footer">
+  <div class="sidebar__footer site-menu-sidebar-footer {% if section.settings.enable_menu_cards %} site-menu-sidebar-footer--cards {% endif %}">
+    {%- if section.settings.enable_menu_cards and section.settings.mc_cta_label != blank and section.settings.mc_cta_url != blank -%}
+      <a class="lt-menu-cards__cta" href="{{ section.settings.mc_cta_url }}">
+        {{- section.settings.mc_cta_label | escape -}}
+      </a>
+    {%- endif -%}
     {%- liquid
       if section.settings.show_social_icons
         render 'social-icons'
@@ -978,6 +987,158 @@
       "id": "show_social_icons",
       "label": "t:sections.local-extra-words.sections.announcement-bar.settings.social.label",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "Mobiles Karten-Menü"
+    },
+    {
+      "type": "paragraph",
+      "content": "Ersetzt die Linkliste im mobilen Menü durch Karten. Einträge ohne Titel oder Link werden ausgeblendet."
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_menu_cards",
+      "label": "Karten-Menü aktivieren",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "mc_hero_title",
+      "label": "Hero-Karte: Titel",
+      "default": "AGE & DNA-Test",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "text",
+      "id": "mc_hero_sub",
+      "label": "Hero-Karte: Untertitel",
+      "default": "Dein biologisches Alter, bestimmt im Labor",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "url",
+      "id": "mc_hero_url",
+      "label": "Hero-Karte: Link",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "mc_hero_image",
+      "label": "Hero-Karte: Bild",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "text",
+      "id": "mc_card2_title",
+      "label": "Karte 2: Titel",
+      "default": "NMN Pulver",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "text",
+      "id": "mc_card2_sub",
+      "label": "Karte 2: Untertitel",
+      "default": "Uthever, jede Charge laborgeprüft",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "url",
+      "id": "mc_card2_url",
+      "label": "Karte 2: Link",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "image_picker",
+      "id": "mc_card2_image",
+      "label": "Karte 2: Bild",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "text",
+      "id": "mc_tile1_title",
+      "label": "Kachel 1: Titel",
+      "default": "Wissenschaft",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "text",
+      "id": "mc_tile1_sub",
+      "label": "Kachel 1: Untertitel",
+      "default": "Studienlage und Methode",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "url",
+      "id": "mc_tile1_url",
+      "label": "Kachel 1: Link",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "text",
+      "id": "mc_tile2_title",
+      "label": "Kachel 2: Titel",
+      "default": "Ärztliche Leitung",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "text",
+      "id": "mc_tile2_sub",
+      "label": "Kachel 2: Untertitel",
+      "default": "Prof. Dr. med. Volker Limmroth",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "url",
+      "id": "mc_tile2_url",
+      "label": "Kachel 2: Link",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "text",
+      "id": "mc_quiz_title",
+      "label": "Quiz-Zeile: Titel",
+      "default": "Was passt zu mir?",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "text",
+      "id": "mc_quiz_sub",
+      "label": "Quiz-Zeile: Untertitel",
+      "default": "Empfehlung in 2 Minuten",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "url",
+      "id": "mc_quiz_url",
+      "label": "Quiz-Zeile: Link",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "text",
+      "id": "mc_blog_title",
+      "label": "Blog-Zeile: Titel",
+      "default": "Longevity-Blog",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "url",
+      "id": "mc_blog_url",
+      "label": "Blog-Zeile: Link",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "text",
+      "id": "mc_cta_label",
+      "label": "CTA: Label",
+      "default": "Biologisches Alter ermitteln",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
+    },
+    {
+      "type": "url",
+      "id": "mc_cta_url",
+      "label": "CTA: Link",
+      "visible_if": "{{ section.settings.enable_menu_cards }}"
     }
   ],
   "blocks": [

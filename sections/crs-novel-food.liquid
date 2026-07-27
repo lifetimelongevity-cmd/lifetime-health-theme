@@ -34,6 +34,29 @@
 
   assign crs_nf_link_label = section.settings.link_label | strip
   assign crs_nf_link_url = section.settings.link_url | strip
+
+  # Zweispaltig ist Opt-in: dieselbe Section laeuft auch auf
+  # /pages/nmn-deutschland, wo die einspaltige Lesefassung richtig bleibt.
+  assign crs_nf_split = false
+  if section.settings.layout_variant == 'split'
+    assign crs_nf_split = true
+  endif
+
+  # Zulassungspfad: der letzte gefuellte Schritt ist der offene. Index vorab
+  # bestimmen, damit die gestrichelte Verbindung an der richtigen Stelle sitzt
+  # und eine spaetere Zulassung nur ein Haken im Theme-Editor ist.
+  assign crs_nf_rail_last = 0
+  for rail_i in (1..3)
+    assign rail_key = 'rail_' | append: rail_i | append: '_label'
+    assign rail_val = section.settings[rail_key] | strip
+    if rail_val != blank and rail_val != '__none__'
+      assign crs_nf_rail_last = rail_i
+    endif
+  endfor
+  assign crs_nf_rail_pre_open = crs_nf_rail_last | minus: 1
+  unless section.settings.rail_last_open
+    assign crs_nf_rail_pre_open = 0
+  endunless
 -%}
 {% style %}
   #section-{{ section.id }} {
@@ -44,6 +67,13 @@
     --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
     --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
     --crs-hairline: {{ section.settings.color_text | color_modify: 'alpha', 0.14 }};
+    /* Nicht-Text-UI (Knoten und Verbindungen im Zulassungspfad) braucht 3:1.
+       0.14 traegt eine Deko-Linie, aber keine bedeutungstragende Grafik:
+       auf #f7f7f4 sind das 1.3:1, bei 0.34 erst 2.03:1. 0.52 erreicht 3.23:1. */
+    --crs-rule:     {{ section.settings.color_text | color_modify: 'alpha', 0.52 }};
+    /* Die Nachbarwerte 0.62 / 0.4 fallen bei Fliesstext durch AA (4.30:1 bzw.
+       2.6:1). Neu gebaute Textebenen laufen deshalb auf 0.70 = 5.50:1. */
+    --crs-muted:    {{ section.settings.color_text | color_modify: 'alpha', 0.70 }};
     padding-top:    min({{ section.settings.padding_top }}px, 15vw);
     padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
   }
@@ -51,6 +81,8 @@
 
 <div class="cnf-section" id="section-{{ section.id }}">
   <div class="cnf-container">
+   <div class="cnf-layout{% if crs_nf_split %} cnf-layout--split{% endif %}">
+    <div class="cnf-aside">
 
     <div class="cnf-head{% if crs_nf_intro != blank %} cnf-head--with-intro{% endif %} crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_nf_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_nf_headline_md %} crs-heading-stack--headline-md{% endif %}">
       {%- if crs_nf_kicker != blank -%}
@@ -72,11 +104,53 @@
       <p class="cnf-intro">{{ crs_nf_intro | escape | newline_to_br }}</p>
     {%- endif -%}
 
+    </div>
+
     <div class="cnf-card">
 
       {%- comment -%} Scannable core — stance + proof chips {%- endcomment -%}
       {%- if section.settings.body_1 != blank -%}
         <p class="cnf-lead">{{ section.settings.body_1 | escape | newline_to_br }}</p>
+      {%- endif -%}
+
+      {%- comment -%}
+        Zulassungspfad. Die Grafik traegt die Einordnung, damit sie nicht als
+        Fliesstext gelesen werden muss: zwei erledigte Stationen, eine offene.
+        Die datierte Fassung mit Quellen bleibt im Accordion darunter.
+      {%- endcomment -%}
+      {%- if crs_nf_rail_last > 0 -%}
+        <ol class="cnf-rail" role="list" aria-label="{{ section.settings.rail_aria_label | default: 'Stand des EU-Zulassungsverfahrens' | escape }}">
+          {%- for rail_i in (1..3) -%}
+            {%- assign rail_lk = 'rail_' | append: rail_i | append: '_label' -%}
+            {%- assign rail_mk = 'rail_' | append: rail_i | append: '_meta' -%}
+            {%- assign rail_lv = section.settings[rail_lk] | strip -%}
+            {%- assign rail_mv = section.settings[rail_mk] | strip -%}
+            {%- if rail_lv == '__none__' -%}{%- assign rail_lv = '' -%}{%- endif -%}
+            {%- if rail_mv == '__none__' -%}{%- assign rail_mv = '' -%}{%- endif -%}
+            {%- if rail_lv != blank -%}
+              {%- assign rail_is_open = false -%}
+              {%- if section.settings.rail_last_open and rail_i == crs_nf_rail_last -%}
+                {%- assign rail_is_open = true -%}
+              {%- endif -%}
+              <li class="cnf-rail__step {% if rail_is_open %}cnf-rail__step--open{% else %}cnf-rail__step--done{% endif %}{% if rail_i == crs_nf_rail_pre_open %} cnf-rail__step--to-open{% endif %}">
+                <span class="cnf-rail__node" aria-hidden="true">
+                  {%- unless rail_is_open -%}
+                    <svg viewBox="0 0 16 16" fill="none" focusable="false"><path d="M3.6 8.4l2.9 2.9 5.9-6.5" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  {%- endunless -%}
+                </span>
+                {%- comment -%}
+                  Der Status steckt sonst nur im gestrichelten Ring und in der
+                  Farbe. Ohne diese Zeile bekommt ein Screenreader die
+                  Kernaussage der Grafik ("Zulassung steht aus") nicht.
+                {%- endcomment -%}
+                <span class="cnf-rail__label">{{ rail_lv | escape }}<span class="visually-hidden">, {% if rail_is_open %}noch offen{% else %}abgeschlossen{% endif %}</span></span>
+                {%- if rail_mv != blank -%}
+                  <span class="cnf-rail__meta">{{ rail_mv | escape }}</span>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ol>
       {%- endif -%}
 
       {%- if section.settings.chip_1 != blank or section.settings.chip_2 != blank or section.settings.chip_3 != blank -%}
@@ -149,6 +223,7 @@
       {%- endif -%}
 
     </div>
+   </div>
   </div>
 </div>
 
@@ -167,6 +242,44 @@
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 20px;
+}
+
+/* Grundzustand einspaltig: der Wrapper ist ein reiner Block, die Abstaende
+   kommen weiter aus .cnf-head / .cnf-intro. Zweispaltig wird nur per
+   Modifier zugeschaltet. */
+.cnf-layout {
+  display: block;
+}
+
+@media (min-width: 980px) {
+  .cnf-layout--split {
+    display: grid;
+    grid-template-columns: minmax(260px, 380px) minmax(0, 1fr);
+    gap: var(--space-7);
+    align-items: start;
+  }
+
+  /* In der Spalte tragen die Abstaende das Grid, nicht die Margins. */
+  .cnf-layout--split .cnf-head,
+  .cnf-layout--split .cnf-head--with-intro {
+    margin-bottom: 0;
+    max-width: none;
+  }
+
+  .cnf-layout--split .cnf-head--with-intro {
+    margin-bottom: var(--space-4);
+  }
+
+  .cnf-layout--split .cnf-intro {
+    margin-bottom: 0;
+    max-width: none;
+  }
+
+  /* Ohne Deckel fuellt die Karte die rechte Spalte statt bei 780px zu enden
+     und rechts einen toten Streifen zu lassen. */
+  .cnf-layout--split .cnf-card {
+    max-width: none;
+  }
 }
 
 .cnf-head {
@@ -209,6 +322,98 @@
   font-size: 1.0625rem;
   line-height: 1.6;
   color: var(--crs-text, #26251e);
+}
+
+/* ---------- Zulassungspfad ----------
+   Informationsgrafik, keine Dekoration: zwei erledigte Stationen mit Haken,
+   eine offene mit gestricheltem Ring, dazwischen die Verbindung. Der Weg zur
+   offenen Station ist gestrichelt, weil er noch nicht gegangen ist. */
+.cnf-rail {
+  box-sizing: border-box;
+  list-style: none;
+  margin: 0;
+  padding: var(--space-5);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-4);
+  background: var(--crs-bg, #f7f7f4);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  border-radius: 4px;
+}
+
+.cnf-rail__step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding-top: 34px;
+}
+
+/* Verbindung zur naechsten Station. Sie laeuft ueber den Grid-gap hinweg bis
+   an die Kante der Folgespalte, dort beginnt der naechste Knoten. */
+.cnf-rail__step::after {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 30px;
+  right: calc(-1 * var(--space-4));
+  border-top: 1.5px solid var(--crs-rule, rgba(38, 37, 30, 0.34));
+}
+
+.cnf-rail__step--to-open::after {
+  border-top-style: dashed;
+}
+
+.cnf-rail__step:last-child::after {
+  display: none;
+}
+
+.cnf-rail__node {
+  position: absolute;
+  top: 0;
+  left: 0;
+  box-sizing: border-box;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--crs-text, #26251e);
+  background: var(--crs-text, #26251e);
+  color: var(--crs-bg, #f7f7f4);
+}
+
+.cnf-rail__node svg {
+  width: 13px;
+  height: 13px;
+  display: block;
+}
+
+.cnf-rail__step--open .cnf-rail__node {
+  border-style: dashed;
+  border-color: var(--crs-rule, rgba(38, 37, 30, 0.34));
+  background: transparent;
+}
+
+.cnf-rail__label {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  color: var(--crs-text, #26251e);
+}
+
+.cnf-rail__step--open .cnf-rail__label {
+  color: var(--crs-muted, rgba(38, 37, 30, 0.70));
+}
+
+.cnf-rail__meta {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-body);
+  color: var(--crs-muted, rgba(38, 37, 30, 0.70));
 }
 
 /* Core — proof chips */
@@ -400,11 +605,43 @@
   .cnf-reg__chevron { transition: none; }
 }
 
+/* Der Pfad kippt in die Senkrechte, bevor die drei Spalten so schmal werden,
+   dass jedes Label vierzeilig umbricht. */
+@media (max-width: 760px) {
+  .cnf-rail {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .cnf-rail__step {
+    padding: 0 0 var(--space-5) 34px;
+  }
+
+  .cnf-rail__step:last-child {
+    padding-bottom: 0;
+  }
+
+  .cnf-rail__step::after {
+    top: 26px;
+    bottom: -3px;
+    left: 10px;
+    right: auto;
+    border-top: 0;
+    border-left: 1.5px solid var(--crs-rule, rgba(38, 37, 30, 0.34));
+  }
+
+  .cnf-rail__step--to-open::after {
+    border-top-style: solid;
+    border-left-style: dashed;
+  }
+}
+
 /* Responsive — mobile */
 @media (max-width: 640px) {
   .cnf-head { margin-bottom: 20px; }
   .cnf-card { padding: 32px 22px; gap: 20px; }
   .cnf-lead { font-size: 1rem; }
+  .cnf-rail { padding: var(--space-4); }
 }
 {% endstylesheet %}
 
@@ -459,6 +696,21 @@
       "step": 8,
       "unit": "px",
       "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "layout_variant",
+      "label": "Aufbau",
+      "options": [
+        { "value": "stacked", "label": "Untereinander (Überschrift über der Karte)" },
+        { "value": "split", "label": "Zweispaltig (Überschrift links, Karte rechts)" }
+      ],
+      "default": "stacked",
+      "info": "Zweispaltig greift ab 980px, darunter läuft die Section immer untereinander."
     },
     {
       "type": "header",
@@ -522,6 +774,64 @@
       "id": "body_1",
       "label": "Kernsatz",
       "default": "NMN ist in der EU rechtlich ein Sonderfall, und statt das im Kleingedruckten zu verstecken, erklären wir es offen. Für dich heißt das vor allem: wir belegen, was belegbar ist, statt Wirkung zu versprechen."
+    },
+    {
+      "type": "header",
+      "content": "Zulassungspfad (Grafik, immer sichtbar)"
+    },
+    {
+      "type": "text",
+      "id": "rail_aria_label",
+      "label": "Beschreibung für Screenreader",
+      "default": "Stand des EU-Zulassungsverfahrens"
+    },
+    {
+      "type": "checkbox",
+      "id": "rail_last_open",
+      "label": "Letzte Station ist noch offen",
+      "default": true,
+      "info": "Zeichnet die letzte Station als offenen Ring mit gestrichelter Verbindung. Abwählen, sobald die Zulassung vorliegt."
+    },
+    {
+      "type": "text",
+      "id": "rail_1_label",
+      "label": "Station 1",
+      "default": "__none__",
+      "info": "__none__ = Grafik ausblenden"
+    },
+    {
+      "type": "text",
+      "id": "rail_1_meta",
+      "label": "Station 1 — Zusatz",
+      "default": "__none__"
+    },
+    {
+      "type": "text",
+      "id": "rail_2_label",
+      "label": "Station 2",
+      "default": "__none__"
+    },
+    {
+      "type": "text",
+      "id": "rail_2_meta",
+      "label": "Station 2 — Zusatz",
+      "default": "__none__"
+    },
+    {
+      "type": "text",
+      "id": "rail_3_label",
+      "label": "Station 3",
+      "default": "__none__"
+    },
+    {
+      "type": "text",
+      "id": "rail_3_meta",
+      "label": "Station 3 — Zusatz",
+      "default": "__none__"
+    },
+    {
+      "type": "header",
+      "content": "Belege (Chips)"
     },
     {
       "type": "text",

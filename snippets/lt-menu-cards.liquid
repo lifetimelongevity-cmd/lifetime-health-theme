@@ -1,0 +1,157 @@
+{% comment %}
+  ───────────────────────────────────────────────────────────────────────────
+  LIFETIME — Mobile Menü-Karten (Drawer #site-menu-sidebar)
+  ───────────────────────────────────────────────────────────────────────────
+  Ersetzt die Linkliste im mobilen Menü durch ein Karten-Menü nach dem
+  IM8-Muster (ein Tap = eine Zielseite), ergänzt um das AG1-Muster
+  (Trust-Seiten sichtbar im Hauptmenü). Referenz-Recherche 2026-07-27:
+  IM8 (Karten-Menü), AG1 (Trust-Menü + 1 CTA), Avea (Quiz im Menü).
+
+  §12-Entscheidungen:
+  - Surface: Drawer weiß (Theme), Hero-Karte --color-surface-dark (einzige
+    dunkle Fläche im Body), Karte 2 --color-surface-secondary, Duo weiß.
+  - Dominantes Element: Hero-Karte (AGE&DNA-Test, Kauf-Priorität €349).
+  - CTA: genau einer, Pill, sticky im Sidebar-Footer, gleiches Ziel wie
+    Hero-Karte. Dunkle Klammer oben/unten, dazwischen ruhig.
+  - Subtraktion: keine Icons auf Produktkarten (optionales Produktbild
+    stattdessen), keine Chevrons auf Karten, Zeilen ohne Deko-Icons.
+  - Icons: nur im Trust-Duo, über bestehenden Mechanismus lt-trust-icon
+    (lab, stethoscope), Card-Info-Muster (Benefit-Fläche + Teal).
+
+  Karten ohne Titel oder Link werden nicht gerendert. Der CTA wird direkt
+  in sections/header.liquid im .sidebar__footer gerendert (sticky).
+
+  ── Parameter ──────────────────────────────────────────────────────────────
+  s  (object) — section.settings des Headers (mc_*-Settings + Flags)
+{% endcomment %}
+
+{{ 'lt-menu-cards.css' | asset_url | stylesheet_tag }}
+
+<nav class="lt-menu-cards" aria-label="Hauptmenü">
+  {%- if s.mc_hero_title != blank and s.mc_hero_url != blank -%}
+    <a class="lt-menu-cards__card lt-menu-cards__card--dark" href="{{ s.mc_hero_url }}">
+      <span>
+        <span class="lt-menu-cards__title">{{ s.mc_hero_title | escape }}</span>
+        {%- if s.mc_hero_sub != blank -%}
+          <span class="lt-menu-cards__sub">{{ s.mc_hero_sub | escape }}</span>
+        {%- endif -%}
+      </span>
+      {%- if s.mc_hero_image != blank -%}
+        <img
+          class="lt-menu-cards__img"
+          src="{{ s.mc_hero_image | image_url: width: 112 }}"
+          alt=""
+          width="56"
+          height="56"
+          loading="lazy"
+        >
+      {%- endif -%}
+    </a>
+  {%- endif -%}
+
+  {%- if s.mc_card2_title != blank and s.mc_card2_url != blank -%}
+    <a class="lt-menu-cards__card" href="{{ s.mc_card2_url }}">
+      <span>
+        <span class="lt-menu-cards__title">{{ s.mc_card2_title | escape }}</span>
+        {%- if s.mc_card2_sub != blank -%}
+          <span class="lt-menu-cards__sub">{{ s.mc_card2_sub | escape }}</span>
+        {%- endif -%}
+      </span>
+      {%- if s.mc_card2_image != blank -%}
+        <img
+          class="lt-menu-cards__img"
+          src="{{ s.mc_card2_image | image_url: width: 112 }}"
+          alt=""
+          width="56"
+          height="56"
+          loading="lazy"
+        >
+      {%- endif -%}
+    </a>
+  {%- endif -%}
+
+  {%- liquid
+    assign show_tile1 = false
+    assign show_tile2 = false
+    if s.mc_tile1_title != blank and s.mc_tile1_url != blank
+      assign show_tile1 = true
+    endif
+    if s.mc_tile2_title != blank and s.mc_tile2_url != blank
+      assign show_tile2 = true
+    endif
+  -%}
+
+  {%- if show_tile1 or show_tile2 -%}
+    <div class="lt-menu-cards__duo">
+      {%- if show_tile1 -%}
+        <a class="lt-menu-cards__tile" href="{{ s.mc_tile1_url }}">
+          <span class="lt-menu-cards__tile-icon">
+            {%- render 'lt-trust-icon', name: 'lab', size: 20 -%}
+          </span>
+          <span>
+            <span class="lt-menu-cards__title">{{ s.mc_tile1_title | escape }}</span>
+            {%- if s.mc_tile1_sub != blank -%}
+              <span class="lt-menu-cards__sub">{{ s.mc_tile1_sub | escape }}</span>
+            {%- endif -%}
+          </span>
+        </a>
+      {%- endif -%}
+      {%- if show_tile2 -%}
+        <a class="lt-menu-cards__tile" href="{{ s.mc_tile2_url }}">
+          <span class="lt-menu-cards__tile-icon">
+            {%- render 'lt-trust-icon', name: 'stethoscope', size: 20 -%}
+          </span>
+          <span>
+            <span class="lt-menu-cards__title">{{ s.mc_tile2_title | escape }}</span>
+            {%- if s.mc_tile2_sub != blank -%}
+              <span class="lt-menu-cards__sub">{{ s.mc_tile2_sub | escape }}</span>
+            {%- endif -%}
+          </span>
+        </a>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+
+  <div class="lt-menu-cards__rows">
+    {%- if s.mc_quiz_title != blank and s.mc_quiz_url != blank -%}
+      <a class="lt-menu-cards__row" href="{{ s.mc_quiz_url }}">
+        <span class="lt-menu-cards__row-text">
+          <span class="lt-menu-cards__title">{{ s.mc_quiz_title | escape }}</span>
+          {%- if s.mc_quiz_sub != blank -%}
+            <span class="lt-menu-cards__sub">{{ s.mc_quiz_sub | escape }}</span>
+          {%- endif -%}
+        </span>
+        {%- render 'lt-menu-cards-chevron' -%}
+      </a>
+    {%- endif -%}
+
+    {%- if s.mc_blog_title != blank and s.mc_blog_url != blank -%}
+      <a class="lt-menu-cards__row" href="{{ s.mc_blog_url }}">
+        <span class="lt-menu-cards__row-text">
+          <span class="lt-menu-cards__title">{{ s.mc_blog_title | escape }}</span>
+        </span>
+        {%- render 'lt-menu-cards-chevron' -%}
+      </a>
+    {%- endif -%}
+
+    {%- if shop.customer_accounts_enabled -%}
+      <a
+        class="lt-menu-cards__row"
+        href="
+          {%- liquid
+            if customer
+              echo routes.account_url
+            else
+              echo routes.account_login_url
+            endif
+          -%}
+        "
+      >
+        <span class="lt-menu-cards__row-text">
+          <span class="lt-menu-cards__title">{{ 'general.breadcrumb.account.title' | t }}</span>
+        </span>
+        {%- render 'lt-menu-cards-chevron' -%}
+      </a>
+    {%- endif -%}
+  </div>
+</nav>

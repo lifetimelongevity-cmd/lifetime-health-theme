@@ -20,6 +20,10 @@
   if section.settings.heading_size == 'feature'
     assign crs_h_headline_md = true
   endif
+  # Presse-Leiste: die Logo-Reihe ist per Flex immer zentriert. Eine links-
+  # buendige Headline kippt optisch dagegen. Opt-in, weil dieselbe Section
+  # auf index.json, quiz-age, meine-routine und der AGE&DNA-PDP laeuft.
+  assign crs_lg_center_desktop = section.settings.center_head_desktop
 -%}
 {% style %}
   #section-{{ section.id }} {
@@ -38,7 +42,7 @@
   <div class="lg-container">
 
     {%- if crs_lg_kicker != blank or crs_lg_head != blank or crs_lg_sub != blank -%}
-      <div class="lg-section-head crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_h_headline_md %} crs-heading-stack--headline-md{% endif %}">
+      <div class="lg-section-head{% if crs_lg_center_desktop %} lg-section-head--center-desktop{% endif %} crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_h_headline_md %} crs-heading-stack--headline-md{% endif %}">
         {%- if crs_lg_kicker != blank -%}
           <p class="crs-heading-stack__kicker">{{ crs_lg_kicker | escape }}</p>
         {%- endif -%}
@@ -58,7 +62,7 @@
     {%- if section.blocks.size > 0 -%}
       <ul class="lg-grid" role="list">
         {%- for block in section.blocks -%}
-          <li class="lg-card" {{ block.shopify_attributes }}>
+          <li class="lg-card{% if block.settings.hide_below_desktop %} lg-card--hide-below-desktop{% endif %}" {{ block.shopify_attributes }}>
             {%- if block.settings.url != blank -%}
               <a href="{{ block.settings.url }}" class="lg-card-link" aria-label="{{ block.settings.alt | escape }}" target="_blank" rel="noopener">
             {%- endif -%}
@@ -104,6 +108,19 @@
 
 .lg-section-head {
   margin-bottom: var(--space-7);
+}
+
+/* Dokumentierte Ausnahme zur linksbuendigen Heading-Regel, nur fuer die
+   Presse-Leiste: die Logo-Reihe ist ein zentrierter Flex-Block, gegen den eine
+   linke Headline sichtbar kippt. 481px ist genau die Grenze, ab der die Logos
+   diese zentrierte Reihe bilden — darunter fuellt das 2x2 die volle Breite und
+   eine linke Headline steht richtig. (0,2,0) schlaegt crs-heading-stack--align-*
+   (0,1,0) unabhaengig von der Reihenfolge der gebuendelten Stylesheets. */
+@media (min-width: 481px) {
+  .lg-section-head.lg-section-head--center-desktop {
+    text-align: center;
+    align-items: center;
+  }
 }
 
 /* Logos — zentriert (flex), unabhängig von der Anzahl */
@@ -179,9 +196,23 @@
   line-height: 1.3;
 }
 
+/* Einzelne Logos unter Desktop ausblenden. Fuenf Logos brechen im Tablet-
+   Bereich zu 4+1 um, und ein einzelner Nachzuegler in Zeile zwei ist die
+   unruhigste aller Varianten. Vier passen in eine Zeile, unter 480px in ein
+   sauberes 2x2. */
+@media (max-width: 900px) {
+  .lg-card--hide-below-desktop {
+    display: none;
+  }
+}
+
+/* 22vw ignorierte das Container-Padding und liess vier Karten zwischen ca.
+   481 und 510px um wenige Pixel ueberlaufen. calc(25% - gap) rechnet gegen die
+   echte Zeilenbreite und passt damit immer. Ueber 560px liefert die Formel
+   praktisch dieselben Werte wie vorher, die Deckelung bei 10rem bleibt. */
 @media (max-width: 1024px) {
   .lg-card {
-    width: min(10rem, 22vw);
+    width: min(10rem, calc(25% - var(--space-2)));
     height: 4.5rem;
   }
 }
@@ -298,6 +329,13 @@
       "label": "Unterüberschrift (optional)",
       "default": "__none__",
       "info": "__none__ = ausblenden (Theme-Editor)"
+    },
+    {
+      "type": "checkbox",
+      "id": "center_head_desktop",
+      "label": "Überschrift ab Desktop zentrieren",
+      "default": false,
+      "info": "Ausnahme für die Presse-Leiste: die Logo-Reihe ist immer zentriert. Mobil bleibt die Überschrift linksbündig."
     }
   ],
   "blocks": [
@@ -320,6 +358,13 @@
           "type": "url",
           "id": "url",
           "label": "Link (optional)"
+        },
+        {
+          "type": "checkbox",
+          "id": "hide_below_desktop",
+          "label": "Unter Desktop ausblenden",
+          "default": false,
+          "info": "Für das fünfte Logo, damit im Tablet- und Mobilbereich vier Logos in einer Zeile stehen."
         }
       ]
     }
