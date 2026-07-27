@@ -116,7 +116,37 @@
 </script>
 
 {%- if request.page_type == 'product' -%}
-  <script type="application/ld+json">{{ product | structured_data }}</script>
+  {%- comment -%}
+    NMN wird zu Forschungs- und Analysezwecken abgegeben und ist nicht zum Verzehr bestimmt.
+    Der structured_data-Filter uebernimmt die Shopify-Taxonomie-Kategorie ungefiltert; sie
+    lautet dort aus Feed-Gruenden "Vitamine & Nahrungsergaenzungsmittel" und wuerde das Produkt
+    maschinenlesbar als Lebensmittel auszeichnen. Die Kategorie wird deshalb nur fuer dieses
+    Produkt aus dem JSON-LD entfernt. Die Kategorie am Produkt selbst bleibt unveraendert,
+    damit der Merchant-Center-Feed nicht bricht.
+    Entfernt wird per split/join, weil Liquid kein JSON parsen kann. Der Guard auf size == 2
+    stellt sicher, dass genau ein "category"-Feld existiert; sonst bleibt der Output unberuehrt.
+  {%- endcomment -%}
+  {%- liquid
+    capture lt_sd
+      echo product | structured_data
+    endcapture
+    if product.handle == 'lifetime-nmn'
+      assign lt_sd_parts = lt_sd | split: '"category":"'
+      if lt_sd_parts.size == 2
+        assign lt_sd_tail = lt_sd_parts[1] | split: '","'
+        assign lt_sd_rest = ''
+        for lt_part in lt_sd_tail offset: 1
+          if forloop.first
+            assign lt_sd_rest = lt_part
+          else
+            assign lt_sd_rest = lt_sd_rest | append: '","' | append: lt_part
+          endif
+        endfor
+        assign lt_sd = lt_sd_parts[0] | append: '"' | append: lt_sd_rest
+      endif
+    endif
+  -%}
+  <script type="application/ld+json">{{ lt_sd }}</script>
 
   {%- comment -%}
     Begleitknoten fuer die Bewertung.

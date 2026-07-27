@@ -1,0 +1,376 @@
+{% comment %}
+  ───────────────────────────────────────────────────────────────────────────
+  LT Blog Cards — manuell kuratierte Artikel-Karten für Page-Templates
+  ───────────────────────────────────────────────────────────────────────────
+  §12 Build Spec:
+  • Zweck: Hub-Seiten (z. B. /pages/nmn-deutschland) verlinken einen festen
+    Satz Blogartikel. `lt-article-related` kann das nicht, die Section ist
+    `enabled_on: article` und zieht automatisch aus `blog.articles`.
+  • Content-Pattern: card-info × 3 (Bild + Tag-Label + Titel + Datum),
+    Karte 1:1 aus `lt-article-related` übernommen, damit Blogkarten überall
+    im Theme gleich aussehen.
+  • Surface/Padding: über Settings steuerbar (crs-Konvention), weil Hub-Seiten
+    ihren Hintergrundrhythmus selbst setzen.
+  • Dominantes Element: Section-Heading via `section-heading-crs` (kanonisch).
+  • Subtraction: kein Excerpt (Titel + Tag reichen zum Scannen), kein
+    "Alle Artikel"-Button, keine Card-CTAs. Die Karte ist die Handlung.
+  • Links bleiben intern im selben Tab (bewusster Unterschied zu
+    `crs-link-cards`, das für externe Quellen `target="_blank"` setzt).
+{% endcomment %}
+
+{%- liquid
+  assign lbc_align = section.settings.content_align | default: 'left'
+  if lbc_align != 'left' and lbc_align != 'center' and lbc_align != 'right'
+    assign lbc_align = 'left'
+  endif
+
+  assign lbc_kicker = section.settings.kicker | strip
+  if lbc_kicker == '__none__'
+    assign lbc_kicker = ''
+  endif
+
+  assign lbc_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign lbc_headline_lg = true
+  endif
+-%}
+
+{% style %}
+  #section-{{ section.id }} {
+    --crs-bg:       {{ section.settings.color_bg }};
+    --crs-card-bg:  {{ section.settings.color_card_bg }};
+    --crs-text:     {{ section.settings.color_text }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<div class="lbc-section" id="section-{{ section.id }}">
+  <div class="lbc-container">
+
+    {% render 'section-heading-crs',
+      heading: section.settings.heading,
+      subheading: section.settings.subheading,
+      kicker: lbc_kicker,
+      align: lbc_align,
+      headline_lg: lbc_headline_lg,
+      heading_tag: 'h2',
+      extra_class: 'lbc-head'
+    %}
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="lbc-grid">
+        {%- for block in section.blocks -%}
+          {%- assign lbc_article = block.settings.article -%}
+          {%- if lbc_article != blank -%}
+            <a class="lbc-card" href="{{ lbc_article.url }}" {{ block.shopify_attributes }}>
+              {%- if lbc_article.image != blank -%}
+                <div class="lbc-card__image">
+                  {{-
+                    lbc_article.image
+                    | image_url: width: 800
+                    | image_tag:
+                      widths: '400, 600, 800',
+                      sizes: '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 380px',
+                      loading: 'lazy',
+                      alt: lbc_article.image.alt
+                  -}}
+                </div>
+              {%- endif -%}
+              <div class="lbc-card__body">
+                {%- assign lbc_tag = block.settings.label | strip -%}
+                {%- if lbc_tag == blank -%}
+                  {%- assign lbc_tag = lbc_article.tags | first -%}
+                {%- endif -%}
+                {%- if lbc_tag != blank -%}
+                  <p class="lbc-card__tag">{{ lbc_tag | escape }}</p>
+                {%- endif -%}
+
+                {%- assign lbc_title = block.settings.title | strip -%}
+                {%- if lbc_title == blank -%}
+                  {%- assign lbc_title = lbc_article.title -%}
+                {%- endif -%}
+                <p class="lbc-card__title">{{ lbc_title | escape }}</p>
+
+                {%- if block.settings.description != blank -%}
+                  <p class="lbc-card__desc">{{ block.settings.description | escape }}</p>
+                {%- endif -%}
+
+                <p class="lbc-card__meta">
+                  <time datetime="{{ lbc_article.published_at | date: '%Y-%m-%d' }}">
+                    {{- lbc_article.published_at | date: '%d.%m.%Y' -}}
+                  </time>
+                </p>
+              </div>
+            </a>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+  </div>
+</div>
+
+{% stylesheet %}
+/* ===================================================
+   LT Blog Cards — lt-blog-cards.liquid
+   =================================================== */
+
+.lbc-section {
+  background: var(--crs-bg, #ffffff);
+}
+
+.lbc-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+@media screen and (max-width: 749px) {
+  .lbc-container {
+    padding: 0 var(--space-4);
+  }
+}
+
+.lbc-head {
+  max-width: 42rem;
+  margin-bottom: var(--space-6);
+}
+
+.lbc-head.crs-heading-stack--align-center {
+  margin-inline: auto;
+}
+
+.lbc-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5);
+  align-items: stretch;
+}
+
+.lbc-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--crs-card-bg, #f7f7f4);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  text-decoration: none;
+  height: 100%;
+  transition: box-shadow var(--ease-default);
+}
+
+.lbc-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.lbc-card__image {
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+}
+
+.lbc-card__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lbc-card__body {
+  flex: 1;
+  padding: var(--space-5);
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+}
+
+.lbc-card__tag {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+}
+
+.lbc-card__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  color: var(--crs-text, #26251e);
+}
+
+.lbc-card__desc {
+  margin: 0;
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+}
+
+.lbc-card__meta {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.4));
+}
+
+@media screen and (max-width: 1024px) {
+  .lbc-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media screen and (max-width: 640px) {
+  .lbc-grid {
+    grid-template-columns: 1fr;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT Blog Cards",
+  "tag": "section",
+  "class": "lt-blog-cards-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Überschrift"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Titel",
+      "default": "Alles im Detail"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Untertitel",
+      "default": "Kurzer erklärender Text über den Karten."
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung (Überschrift)",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" },
+        { "value": "right", "label": "Rechts" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "section",
+      "info": "Zeilenumbruch: Enter in Titel/Untertitel."
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker (optional)",
+      "default": "__none__",
+      "info": "__none__ = ausblenden"
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Seiten-Hintergrund",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Karten-Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "card",
+      "name": "Artikel",
+      "settings": [
+        {
+          "type": "article",
+          "id": "article",
+          "label": "Blogartikel"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel überschreiben",
+          "info": "Leer = Artikeltitel"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Tag überschreiben",
+          "info": "Leer = erster Tag des Artikels"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Kurzbeschreibung",
+          "info": "Optional. Leer = nur Titel und Datum."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Blog Cards",
+      "blocks": [
+        { "type": "card" },
+        { "type": "card" },
+        { "type": "card" }
+      ]
+    }
+  ]
+}
+{% endschema %}

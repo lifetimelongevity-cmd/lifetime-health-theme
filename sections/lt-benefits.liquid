@@ -21,6 +21,13 @@
 
 {{ 'section-lt-benefits.css' | asset_url | stylesheet_tag }}
 
+{%- liquid
+  assign ltb_headline_lg = true
+  if section.settings.heading_size == 'section'
+    assign ltb_headline_lg = false
+  endif
+-%}
+
 <section class="lt-benefits">
   <div class="lt-benefits__container">
 
@@ -28,7 +35,7 @@
       heading: section.settings.title,
       kicker: section.settings.kicker,
       align: section.settings.content_align,
-      headline_lg: true,
+      headline_lg: ltb_headline_lg,
       heading_tag: 'h2',
       extra_class: 'lt-benefits__header'
     %}
@@ -87,6 +94,16 @@
         { "value": "center", "label": "Zentriert" }
       ],
       "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift Größe",
+      "options": [
+        { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "product_title", "label": "Wie Produkttitel" }
+      ],
+      "default": "product_title"
     },
     {
       "type": "url",
