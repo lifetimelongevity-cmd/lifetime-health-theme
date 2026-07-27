@@ -145,11 +145,16 @@
 
             {%- liquid
               assign lep_has_links = false
-              for i in (1..4)
+              assign lep_has_sameas = false
+              for i in (1..6)
                 assign lep_ll_key = 'link_' | append: i | append: '_label'
                 assign lep_lu_key = 'link_' | append: i | append: '_url'
+                assign lep_ls_key = 'link_' | append: i | append: '_sameas'
                 if block.settings[lep_ll_key] != blank and block.settings[lep_lu_key] != blank
                   assign lep_has_links = true
+                  if block.settings[lep_ls_key]
+                    assign lep_has_sameas = true
+                  endif
                 endif
               endfor
             -%}
@@ -160,7 +165,7 @@
                   <p class="lt-exp__links-label">{{ block.settings.links_label | escape }}</p>
                 {%- endif -%}
                 <ul class="lt-exp__links-list" role="list">
-                  {%- for i in (1..4) -%}
+                  {%- for i in (1..6) -%}
                     {%- assign lep_ll_key = 'link_' | append: i | append: '_label' -%}
                     {%- assign lep_lu_key = 'link_' | append: i | append: '_url' -%}
                     {%- if block.settings[lep_ll_key] != blank and block.settings[lep_lu_key] != blank -%}
@@ -227,13 +232,20 @@
                 {%- endfor -%}
               ]
             {%- endif -%}
-            {%- if lep_has_links -%}
+            {%- comment -%}
+              sameAs enthält nur sichtbare Links, damit maschinenlesbar nichts
+              behauptet wird, was die Seite nicht auch zeigt. Der Haken pro Link
+              nimmt Ziele heraus, die zwar nützlich sind, aber keine Identität
+              belegen (eine PubMed-Suchabfrage ist kein Personendatensatz).
+            {%- endcomment -%}
+            {%- if lep_has_sameas -%}
               , "sameAs": [
                 {%- assign lep_same_first = true -%}
-                {%- for i in (1..4) -%}
+                {%- for i in (1..6) -%}
                   {%- assign lep_ll_key = 'link_' | append: i | append: '_label' -%}
                   {%- assign lep_lu_key = 'link_' | append: i | append: '_url' -%}
-                  {%- if block.settings[lep_ll_key] != blank and block.settings[lep_lu_key] != blank -%}
+                  {%- assign lep_ls_key = 'link_' | append: i | append: '_sameas' -%}
+                  {%- if block.settings[lep_ll_key] != blank and block.settings[lep_lu_key] != blank and block.settings[lep_ls_key] -%}
                     {%- unless lep_same_first %}, {% endunless -%}
                     {{ block.settings[lep_lu_key] | json }}
                     {%- assign lep_same_first = false -%}
@@ -359,7 +371,7 @@
         },
         {
           "type": "header",
-          "content": "Profile extern (= sameAs im Schema)"
+          "content": "Externe Profile"
         },
         {
           "type": "text",
@@ -377,6 +389,13 @@
           "label": "Link 1: URL"
         },
         {
+          "type": "checkbox",
+          "id": "link_1_sameas",
+          "label": "Link 1 als sameAs",
+          "default": true,
+          "info": "Nur für Ziele, die die Person belegen. Keine Suchabfragen."
+        },
+        {
           "type": "text",
           "id": "link_2_label",
           "label": "Link 2: Text"
@@ -385,6 +404,12 @@
           "type": "url",
           "id": "link_2_url",
           "label": "Link 2: URL"
+        },
+        {
+          "type": "checkbox",
+          "id": "link_2_sameas",
+          "label": "Link 2 als sameAs",
+          "default": true
         },
         {
           "type": "text",
@@ -397,6 +422,12 @@
           "label": "Link 3: URL"
         },
         {
+          "type": "checkbox",
+          "id": "link_3_sameas",
+          "label": "Link 3 als sameAs",
+          "default": true
+        },
+        {
           "type": "text",
           "id": "link_4_label",
           "label": "Link 4: Text"
@@ -405,6 +436,44 @@
           "type": "url",
           "id": "link_4_url",
           "label": "Link 4: URL"
+        },
+        {
+          "type": "checkbox",
+          "id": "link_4_sameas",
+          "label": "Link 4 als sameAs",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "link_5_label",
+          "label": "Link 5: Text"
+        },
+        {
+          "type": "url",
+          "id": "link_5_url",
+          "label": "Link 5: URL"
+        },
+        {
+          "type": "checkbox",
+          "id": "link_5_sameas",
+          "label": "Link 5 als sameAs",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "link_6_label",
+          "label": "Link 6: Text"
+        },
+        {
+          "type": "url",
+          "id": "link_6_url",
+          "label": "Link 6: URL"
+        },
+        {
+          "type": "checkbox",
+          "id": "link_6_sameas",
+          "label": "Link 6 als sameAs",
+          "default": true
         },
         {
           "type": "header",
