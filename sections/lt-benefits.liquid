@@ -26,14 +26,29 @@
   if section.settings.heading_size == 'section'
     assign ltb_headline_lg = false
   endif
+
+  comment
+    __none__ = ausblenden, wie in den crs-Sections. Ohne diesen Strip müsste
+    man das Feld im Template löschen, und dann greift der Schema-Default.
+  endcomment
+  assign ltb_kicker = section.settings.kicker | strip
+  if ltb_kicker == '__none__'
+    assign ltb_kicker = ''
+  endif
 -%}
+
+{% style %}
+  #shopify-section-{{ section.id }} .lt-benefits {
+    background-color: {{ section.settings.color_bg | default: '#f6f4f1' }};
+  }
+{% endstyle %}
 
 <section class="lt-benefits">
   <div class="lt-benefits__container">
 
     {% render 'section-heading-crs',
       heading: section.settings.title,
-      kicker: section.settings.kicker,
+      kicker: ltb_kicker,
       align: section.settings.content_align,
       headline_lg: ltb_headline_lg,
       heading_tag: 'h2',
@@ -104,6 +119,12 @@
         { "value": "product_title", "label": "Wie Produkttitel" }
       ],
       "default": "product_title"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrund",
+      "default": "#f6f4f1"
     },
     {
       "type": "url",

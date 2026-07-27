@@ -39,6 +39,11 @@
   assign reviewer_name = mf.reviewer_name.value | default: section.settings.reviewer_name
   assign reviewer_credential = mf.reviewer_credential.value | default: section.settings.reviewer_credential
 
+  # Byline-Namen verlinken, sobald es eine Expertenseite gibt. Bis dahin bleiben sie
+  # reiner Text, damit die Byline nicht auf einen 404 zeigt. Kein Setting noetig:
+  # der Link erscheint automatisch mit dem Anlegen der Seite /pages/aerzte.
+  assign expert_page = pages['aerzte']
+
   assign word_count = article.content | strip_html | split: ' ' | size
   assign reading_minutes = word_count | divided_by: 180 | at_least: 1
 
@@ -135,13 +140,23 @@
         <span>Stand: <time datetime="{{ stand_date | date: '%Y-%m-%d' }}">{{ stand_month }} {{ stand_date | date: '%Y' }}</time></span>
         {%- if author_name != blank -%}
           <span aria-hidden="true">&middot;</span>
-          <span>Von <strong>{{ author_name | escape }}</strong>
+          <span>Von
+            {%- if expert_page != blank %}
+              <a class="lt-article__byline-link" href="{{ expert_page.url }}"><strong>{{ author_name | escape }}</strong></a>
+            {%- else %}
+              <strong>{{ author_name | escape }}</strong>
+            {%- endif -%}
             {%- if author_credential != blank %}, {{ author_credential | escape }}{% endif -%}
           </span>
         {%- endif -%}
         {%- if reviewer_name != blank -%}
           <span aria-hidden="true">&middot;</span>
-          <span>Fachlich gepr&uuml;ft von <strong>{{ reviewer_name | escape }}</strong>
+          <span>Fachlich gepr&uuml;ft von
+            {%- if expert_page != blank %}
+              <a class="lt-article__byline-link" href="{{ expert_page.url }}"><strong>{{ reviewer_name | escape }}</strong></a>
+            {%- else %}
+              <strong>{{ reviewer_name | escape }}</strong>
+            {%- endif -%}
             {%- if reviewer_credential != blank %}, {{ reviewer_credential | escape }}{% endif -%}
           </span>
         {%- endif -%}
@@ -367,6 +382,18 @@
 .lt-article__meta strong {
   color: var(--color-text-primary);
   font-weight: var(--weight-semibold);
+}
+
+/* Byline-Link: bewusst zurueckhaltend, die Byline ist Metazeile, kein CTA. */
+.lt-article__byline-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-default);
+  text-underline-offset: 0.2em;
+}
+
+.lt-article__byline-link:hover {
+  text-decoration-color: currentColor;
 }
 
 .lt-article__title {

@@ -12,6 +12,21 @@
     assign hp_headline_lg = true
   endif
 
+  assign hp_align = section.settings.content_align | default: 'center'
+  if hp_align != 'left' and hp_align != 'center'
+    assign hp_align = 'center'
+  endif
+
+  comment
+    Ohne Preisangabe entfällt die Buybox-Rahmung komplett. Sonst bliebe eine
+    leere 1fr-Spalte zwischen zwei Hairlines stehen und der Button rutschte
+    ohne Grund nach rechts.
+  endcomment
+  assign hp_has_price = false
+  if section.settings.price_display != blank or section.settings.price_fallback != blank or section.settings.price_subline != blank
+    assign hp_has_price = true
+  endif
+
   assign has_setting_trust = false
   if section.settings.trust_1 != blank or section.settings.trust_2 != blank or section.settings.trust_3 != blank or section.settings.trust_4 != blank
     assign has_setting_trust = true
@@ -38,8 +53,8 @@
 {% endstyle %}
 
 <section id="lt-hp-cta-close-{{ section.id }}" class="ctac">
-  <div class="ctac__container">
-    <div class="ctac__header crs-heading-stack crs-heading-stack--align-center{% if hp_headline_lg %} crs-heading-stack--headline-lg{% endif %} crs-heading-stack--on-dark crs-heading-stack--homepage-truth">
+  <div class="ctac__container ctac__container--align-{{ hp_align }}">
+    <div class="ctac__header crs-heading-stack crs-heading-stack--align-{{ hp_align }}{% if hp_headline_lg %} crs-heading-stack--headline-lg{% endif %} crs-heading-stack--on-dark crs-heading-stack--homepage-truth">
       {%- if section.settings.kicker != blank and section.settings.kicker != '__none__' -%}
         <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
       {%- endif -%}
@@ -53,35 +68,37 @@
       </div>
     </div>
 
-    {%- if section.settings.price_display != blank or section.settings.cta_label != blank or section.settings.price_fallback != blank -%}
+    {%- if hp_has_price -%}
       <div class="ctac__buybox">
-        {%- if section.settings.price_display != blank or section.settings.cta_label != blank -%}
-          <div class="ctac__buybox-row">
-            <div class="ctac__price-group">
-              {%- if section.settings.price_display != blank -%}
-                <p class="ctac__price-display">{{ section.settings.price_display | escape }}</p>
-              {%- elsif section.settings.price_fallback != blank -%}
-                <p class="ctac__price-display">{{ section.settings.price_fallback | escape }}</p>
-              {%- endif -%}
+        <div class="ctac__buybox-row">
+          <div class="ctac__price-group">
+            {%- if section.settings.price_display != blank -%}
+              <p class="ctac__price-display">{{ section.settings.price_display | escape }}</p>
+            {%- elsif section.settings.price_fallback != blank -%}
+              <p class="ctac__price-display">{{ section.settings.price_fallback | escape }}</p>
+            {%- endif -%}
 
-              {%- if section.settings.price_subline != blank -%}
-                <p class="ctac__price-subline ctac__price-subline--mobile">{{ section.settings.price_subline | escape }}</p>
-              {%- endif -%}
-            </div>
-
-            {%- if section.settings.cta_label != blank -%}
-              <a href="{{ section.settings.cta_url | default: '/products/lifetime-age-dna' }}" class="ctac__cta-primary">
-                {{ section.settings.cta_label | escape }}
-              </a>
+            {%- if section.settings.price_subline != blank -%}
+              <p class="ctac__price-subline ctac__price-subline--mobile">{{ section.settings.price_subline | escape }}</p>
             {%- endif -%}
           </div>
 
-          {%- if section.settings.price_subline != blank -%}
-            <p class="ctac__price-subline ctac__price-subline--desktop">{{ section.settings.price_subline | escape }}</p>
+          {%- if section.settings.cta_label != blank -%}
+            <a href="{{ section.settings.cta_url | default: '/products/lifetime-age-dna' }}" class="ctac__cta-primary">
+              {{ section.settings.cta_label | escape }}
+            </a>
           {%- endif -%}
-        {%- elsif section.settings.price_fallback != blank -%}
-          <p class="ctac__price-fallback">{{ section.settings.price_fallback | escape }}</p>
+        </div>
+
+        {%- if section.settings.price_subline != blank -%}
+          <p class="ctac__price-subline ctac__price-subline--desktop">{{ section.settings.price_subline | escape }}</p>
         {%- endif -%}
+      </div>
+    {%- elsif section.settings.cta_label != blank -%}
+      <div class="ctac__cta-solo">
+        <a href="{{ section.settings.cta_url | default: '/products/lifetime-age-dna' }}" class="ctac__cta-primary">
+          {{ section.settings.cta_label | escape }}
+        </a>
       </div>
     {%- endif -%}
 
@@ -131,6 +148,20 @@
   flex-direction: column;
   gap: var(--space-5);
   text-align: center;
+}
+
+.ctac__container--align-left {
+  text-align: start;
+}
+
+/* Ohne Preis trägt der Button allein, ohne Buybox-Rahmen und ohne leere Spalte. */
+.ctac__cta-solo {
+  display: flex;
+  justify-content: center;
+}
+
+.ctac__container--align-left .ctac__cta-solo {
+  justify-content: flex-start;
 }
 
 @supports (padding: max(0px)) {
@@ -349,6 +380,16 @@
     {
       "type": "header",
       "content": "Inhalt"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung",
+      "options": [
+        { "value": "center", "label": "Zentriert" },
+        { "value": "left", "label": "Links" }
+      ],
+      "default": "center"
     },
     {
       "type": "select",
