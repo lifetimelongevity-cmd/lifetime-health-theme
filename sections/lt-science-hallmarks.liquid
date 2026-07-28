@@ -105,7 +105,17 @@
   }
 {% endstyle %}
 
-<section class="science-hallmarks" id="section-{{ section.id }}">
+{%- comment -%}
+  Optionale Anker-ID (28.07.): macht den Abschnitt adressierbar und für ein
+  Inhaltsverzeichnis ansprechbar. Ohne Wert bleibt die bisherige ID erhalten.
+{%- endcomment -%}
+{%- liquid
+  assign sec_anchor = section.settings.anchor_id
+  if sec_anchor == blank
+    assign sec_anchor = 'section-' | append: section.id
+  endif
+-%}
+<section class="science-hallmarks" id="{{ sec_anchor }}">
   <div class="science-hallmarks__container">
 
     {%- comment -%} Section header — unchanged {%- endcomment -%}
@@ -586,6 +596,12 @@
   "tag": "section",
   "class": "lt-science-hallmarks",
   "settings": [
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "Anker-ID",
+      "info": "Ohne Wert bleibt die automatische ID."
+    },
     {
       "type": "header",
       "content": "Farben"

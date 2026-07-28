@@ -1,0 +1,325 @@
+{% comment %}
+  LIFETIME — Science Scope
+  ───────────────────────
+  Abschnitt „Was du bekommst" auf der Seite Wissenschaft.
+  Briefing: `docs/briefing-science-hub.md` §Struktur 4.
+
+  Warum eine eigene Section und kein `lt-stat-callout`:
+  Das Stat-Callout ist laut eigener Build-Spec fest auf die dunkle Fläche
+  gesetzt und bewusst ohne CTA gebaut. Hier braucht es beides andersherum,
+  hell und mit Link auf die Reports-Seite. Und die Zahl allein beantwortet
+  „was du bekommst" nicht, deshalb machen die Beispiel-Reports sie konkret.
+  Ein Bento wäre laut Briefing Recycling, kein Design.
+
+  §12 Build Spec:
+  - Surface:          hell (#f2f1ed), Rhythmus-Gegenstück zum Hero
+  - Dominant element: die Zahl (--text-stat, auf Desktop --text-display+)
+  - Content pattern:  Zahl + Beispielliste + ein CTA
+  - Removed:          Kacheln, Icons, Trennlinien
+{% endcomment %}
+
+{%- liquid
+  assign scope_anchor = section.settings.anchor_id
+  if scope_anchor == blank
+    assign scope_anchor = 'section-' | append: section.id
+  endif
+
+  assign scope_has_cta = false
+  if section.settings.cta_label != blank
+    assign scope_has_cta = true
+  endif
+-%}
+
+{% style %}
+  #{{ scope_anchor }} {
+    --scp-bg:    {{ section.settings.color_bg | default: '#f2f1ed' }};
+    --scp-text:  {{ section.settings.color_text | default: '#26251e' }};
+    --scp-chip:  {{ section.settings.color_chip_bg | default: '#f7f7f4' }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<section id="{{ scope_anchor }}" class="scp">
+  <div class="scp__container">
+    {% render 'section-heading-crs',
+      heading: section.settings.heading,
+      subheading: section.settings.subheading,
+      kicker: section.settings.kicker,
+      align: 'left',
+      headline_md: true,
+      extra_class: 'scp__intro'
+    %}
+
+    <div class="scp__body">
+      <div class="scp__figure">
+        <p class="scp__number">{{ section.settings.number | escape }}</p>
+        {%- if section.settings.number_label != blank -%}
+          <p class="scp__number-label">{{ section.settings.number_label | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      <div class="scp__detail">
+        {%- if section.blocks.size > 0 -%}
+          <ul class="scp__examples" role="list">
+            {%- for block in section.blocks -%}
+              {%- if block.settings.label != blank -%}
+                <li class="scp__example" {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+
+        {%- if section.settings.note != blank -%}
+          <p class="scp__note">{{ section.settings.note | escape }}</p>
+        {%- endif -%}
+
+        {%- if scope_has_cta -%}
+          <div class="scp__actions">
+            <a
+              href="{{ section.settings.cta_url | default: '#' | escape }}"
+              class="button button--solid button--icon"
+            >
+              <span aria-hidden="true" class="button__icon">
+                {%- render 'theme-symbols', icon: 'arrow-right' -%}
+              </span>
+              <span>{{ section.settings.cta_label | escape }}</span>
+            </a>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% stylesheet %}
+/* ================================================================
+   lt-science-scope — „Was du bekommst"
+   §3 Tokens, §6 Typografie. Die Zahl ist das schwerste Element.
+   ================================================================ */
+
+.scp {
+  background: var(--scp-bg, #f2f1ed);
+  color: var(--scp-text, #26251e);
+  --crs-text: var(--scp-text);
+}
+
+.scp__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+.scp__intro {
+  margin-bottom: var(--space-7);
+}
+
+.scp__intro .crs-heading-stack__subtitle {
+  max-width: 52ch;
+}
+
+.scp__body {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media screen and (min-width: 900px) {
+  .scp__body {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    gap: var(--space-8);
+  }
+}
+
+/* — Die Zahl — */
+.scp__figure {
+  min-width: 0;
+}
+
+.scp__number {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-stat);
+  line-height: var(--leading-stat);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+}
+
+@media screen and (min-width: 900px) {
+  .scp__number {
+    font-size: 88px;
+  }
+}
+
+.scp__number-label {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  opacity: 0.6;
+  max-width: 24ch;
+}
+
+/* — Beispiele — */
+.scp__detail {
+  min-width: 0;
+}
+
+.scp__examples {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.scp__example {
+  background: var(--scp-chip, #f7f7f4);
+  border-radius: var(--radius-full);
+  padding: var(--space-2) var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+}
+
+.scp__note {
+  margin: var(--space-5) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  opacity: 0.7;
+  max-width: 56ch;
+}
+
+.scp__actions {
+  margin-top: var(--space-6);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+/* Siehe `lt-science-proof-hero`: die globalen Button-Modifier hängen an den
+   Combine-Farbschema-Variablen, die eine LT-Section nicht setzt. */
+.scp__actions .button {
+  margin: 0;
+}
+
+.scp__actions .button--solid {
+  background: var(--color-dark);
+  border-color: var(--color-dark);
+  color: var(--color-white);
+}
+
+.scp__actions .button--solid span {
+  color: var(--color-white);
+}
+
+.scp__actions .button--solid .button__icon svg path {
+  fill: var(--color-white);
+}
+
+@media screen and (max-width: 899px) {
+  .scp__container {
+    padding: 0 var(--space-4);
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Science Scope",
+  "tag": "section",
+  "class": "lt-science-scope",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "Anker-ID",
+      "info": "Ohne Wert bleibt die automatische ID."
+    },
+    { "type": "header", "content": "Überschrift" },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "Was du bekommst"
+    },
+    {
+      "type": "textarea",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Der Test endet nicht mit einer Zahl."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subline",
+      "info": "Ein kurzer Satz."
+    },
+    { "type": "header", "content": "Zahl" },
+    {
+      "type": "text",
+      "id": "number",
+      "label": "Zahl",
+      "default": "187"
+    },
+    {
+      "type": "text",
+      "id": "number_label",
+      "label": "Bezeichnung unter der Zahl",
+      "default": "Reports in 22 Kategorien"
+    },
+    { "type": "header", "content": "Text und Button" },
+    {
+      "type": "textarea",
+      "id": "note",
+      "label": "Erläuterung",
+      "info": "Optional, ein Satz."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button",
+      "default": "Alle 187 Reports ansehen"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Button: Link"
+    },
+    { "type": "header", "content": "Farben und Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#f2f1ed" },
+    { "type": "color", "id": "color_chip_bg", "label": "Fläche Beispiele", "default": "#f7f7f4" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 160, "step": 8, "default": 80 },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 160, "step": 8, "default": 80 }
+  ],
+  "blocks": [
+    {
+      "type": "example",
+      "name": "Beispiel-Report",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Name des Reports",
+          "default": "Körperalter"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "Science Scope",
+      "blocks": [
+        { "type": "example" },
+        { "type": "example" },
+        { "type": "example" }
+      ]
+    }
+  ]
+}
+{% endschema %}

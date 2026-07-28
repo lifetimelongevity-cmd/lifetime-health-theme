@@ -1,10 +1,9 @@
 /*
   LIFETIME — Mobile Menü-Karten (#site-menu-sidebar)
 
-  Karten-Drawer nach IM8-Muster statt Linkliste: eine dunkle Hero-Karte
-  (AGE&DNA-Test), zwei helle Karten im selben Muster, ruhige Text-Zeilen,
-  ein Pill-CTA sticky im Sidebar-Footer. Hero-Karte und CTA sind die
-  einzigen dunklen Flächen und zeigen auf dasselbe Ziel.
+  Karten-Drawer nach IM8-Muster statt Linkliste: zwei gleichwertige
+  Produktkarten, ein schmaler Shop-Textlink, ruhige Text-Zeilen und ein
+  Pill-CTA sticky im Sidebar-Footer. Der CTA ist die einzige dunkle Fläche.
 
   Revision 27.07.2026: Trust-Duo (halbbreite Kacheln mit Icon) entfallen,
   siehe Kopf von snippets/lt-menu-cards.liquid. Das zugehörige CSS
@@ -57,12 +56,6 @@
   font-size: var(--text-body-lg);
 }
 
-.lt-menu-cards__card--dark {
-  background: var(--color-surface-dark);
-  border-color: var(--color-surface-dark);
-  color: var(--color-text-on-dark);
-}
-
 .lt-menu-cards__title {
   display: block;
   font-size: var(--text-body);
@@ -76,10 +69,6 @@
   font-size: var(--text-body-sm);
   line-height: var(--leading-body);
   color: var(--color-text-secondary);
-}
-
-.lt-menu-cards__card--dark .lt-menu-cards__sub {
-  color: var(--color-text-on-dark-muted);
 }
 
 /* Bild-Kachel: heller Rahmen um den Produktshot, funktioniert auf hell
@@ -119,15 +108,32 @@
 }
 
 @media (hover: hover) {
-  .lt-menu-cards__card:not(.lt-menu-cards__card--dark):hover {
+  .lt-menu-cards__card:hover {
     border-color: var(--color-border-strong);
   }
 }
 
-/* margin-top:auto schiebt die Zeilen im gestreckten Body Richtung CTA;
-   ohne Reststrecke kollabiert es auf 0 */
+/* Schmaler Shop-Einstieg unter den Karten. Optisch leicht, Tap-Ziel trotzdem
+   48px hoch, damit er auf dem Daumen sicher trifft. */
+.lt-menu-cards__textlink {
+  display: flex;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 var(--space-1);
+  /* hebt den Flex-Gap auf, damit der Link an den Karten hängt und nicht
+     zwischen Karten und Zeilen schwebt; das Tap-Ziel bleibt 48px */
+  margin-top: calc(var(--space-3) * -1);
+  margin-bottom: calc(var(--space-2) * -1);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-tight);
+  color: var(--color-text-secondary);
+  text-decoration: underline;
+  text-underline-offset: 3px; /* intentional: Unterstrich frei von Unterlängen */
+}
+
+/* Zeilen schließen direkt an die Karten an. Vorher schob margin-top:auto sie
+   ans Drawer-Ende; bei wenigen Einträgen riss das eine Leerfläche in die Mitte. */
 .lt-menu-cards__rows {
-  margin-top: auto;
   padding-top: var(--space-2);
 }
 

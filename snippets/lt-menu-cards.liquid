@@ -8,11 +8,12 @@
   IM8 (Karten-Menü), AG1 (Trust-Menü + 1 CTA), Avea (Quiz im Menü).
 
   §12-Entscheidungen:
-  - Surface: Drawer weiß (Theme), Hero-Karte --color-surface-dark (einzige
-    dunkle Fläche im Body), Karte 2 und 3 --color-surface-secondary.
-  - Dominantes Element: Hero-Karte (AGE&DNA-Test, Kauf-Priorität €349).
+  - Surface: Drawer weiß (Theme), beide Produktkarten --color-surface-secondary.
+    Rev. 28.07.: Die Hero-Karte war dunkel und damit dominant. BJ-Entscheid:
+    Test und NMN sind gleichwertige Einstiege, also gleiche Fläche.
+  - Dominantes Element: der CTA, die einzige dunkle Fläche im Drawer.
   - CTA: genau einer, Pill, sticky im Sidebar-Footer, gleiches Ziel wie
-    Hero-Karte. Dunkle Klammer oben/unten, dazwischen ruhig.
+    Hero-Karte, und die einzige dunkle Fläche der Ansicht.
   - Subtraktion: keine Icons auf Karten (optionales Bild stattdessen),
     keine Chevrons auf Karten, Zeilen ohne Deko-Icons.
 
@@ -36,10 +37,9 @@
 <nav class="lt-menu-cards" aria-label="Hauptmenü">
   {%- comment -%}
     Drei gleich gebaute Karten in einer Schleife statt dreimal dasselbe Markup.
-    Einziger Unterschied ist die dunkle Fläche der Hero-Karte.
     Eine Karte ohne Bild rendert nur Titel und Untertitel, das Layout trägt das.
   {%- endcomment -%}
-  {%- assign mc_cards = 'hero,card2,card3' | split: ',' -%}
+  {%- assign mc_cards = 'hero,card2' | split: ',' -%}
   {%- for mc_key in mc_cards -%}
     {%- liquid
       assign mc_t = 'mc_' | append: mc_key | append: '_title'
@@ -50,7 +50,7 @@
     -%}
     {%- if s[mc_t] != blank and s[mc_u] != blank -%}
       <a
-        class="lt-menu-cards__card{% if mc_key == 'hero' %} lt-menu-cards__card--dark{% endif %}"
+        class="lt-menu-cards__card"
         href="{{ s[mc_u] }}"
       >
         <span>
@@ -83,7 +83,38 @@
     {%- endif -%}
   {%- endfor -%}
 
+  {%- comment -%}
+    Shop-Einstieg (Rev. 28.07. abends): bewusst KEINE Zeile und keine Karte,
+    sondern ein schmaler Textlink direkt unter den Produktkarten. Er schließt
+    die Sackgasse zu den übrigen Produkten, ohne den Rang einer Story-Stufe zu
+    beanspruchen. Nur dieser eine Einstieg: alle 22 /collections/-URLs rendern
+    dieselben Produkte, Kategorie-Deeplinks wären Attrappen.
+  {%- endcomment -%}
+  {%- if s.mc_shop_title != blank and s.mc_shop_url != blank -%}
+    <a class="lt-menu-cards__textlink" href="{{ s.mc_shop_url }}">
+      {{- s.mc_shop_title | escape -}}
+    </a>
+  {%- endif -%}
+
   <div class="lt-menu-cards__rows">
+    {%- comment -%}
+      Wissenschaft steht als erste Zeile, nicht mehr als dritte Karte. Als Karte
+      brauchte sie ein Bild; das dort gesetzte Limmroth-Porträt neben dem Wort
+      Forschung las sich als Longevity-Forscher und ist faktisch nicht gedeckt.
+      Als Zeile trägt der Eintrag seine Aussage ohne Bild.
+    {%- endcomment -%}
+    {%- if s.mc_science_title != blank and s.mc_science_url != blank -%}
+      <a class="lt-menu-cards__row" href="{{ s.mc_science_url }}">
+        <span class="lt-menu-cards__row-text">
+          <span class="lt-menu-cards__title">{{ s.mc_science_title | escape }}</span>
+          {%- if s.mc_science_sub != blank -%}
+            <span class="lt-menu-cards__sub">{{ s.mc_science_sub | escape }}</span>
+          {%- endif -%}
+        </span>
+        {%- render 'lt-menu-cards-chevron' -%}
+      </a>
+    {%- endif -%}
+
     {%- if s.mc_quiz_title != blank and s.mc_quiz_url != blank -%}
       <a class="lt-menu-cards__row" href="{{ s.mc_quiz_url }}">
         <span class="lt-menu-cards__row-text">
@@ -96,10 +127,56 @@
       </a>
     {%- endif -%}
 
+    {%- comment -%}
+      Reports-Zeile (28.07.): beantwortet die 349-Euro-Frage mit zählbarer
+      Substanz. Das Sublabel „Alle 187 Reports im Überblick" ist nur zulässig,
+      solange die Zielseite /pages/was-ist-enthalten die Zahl in der H1 trägt.
+      Bei Änderung des Report-Umfangs zuerst das Sublabel nachziehen.
+    {%- endcomment -%}
+    {%- if s.mc_reports_title != blank and s.mc_reports_url != blank -%}
+      <a class="lt-menu-cards__row" href="{{ s.mc_reports_url }}">
+        <span class="lt-menu-cards__row-text">
+          <span class="lt-menu-cards__title">{{ s.mc_reports_title | escape }}</span>
+          {%- if s.mc_reports_sub != blank -%}
+            <span class="lt-menu-cards__sub">{{ s.mc_reports_sub | escape }}</span>
+          {%- endif -%}
+        </span>
+        {%- render 'lt-menu-cards-chevron' -%}
+      </a>
+    {%- endif -%}
+
+    {%- comment -%}
+      Blog-Sublabel „Artikel, fachlich geprüft" (28.07.): trägt den
+      Limmroth-Trust beiläufig über die Artikel-Bylines, gemäß BJ-Entscheid
+      vom 27.07. (kein eigener Ärzte-Menüpunkt). Die Prüf-Botschaft gehört
+      nur an diese eine Zeile, nicht zusätzlich an andere Einträge.
+    {%- endcomment -%}
     {%- if s.mc_blog_title != blank and s.mc_blog_url != blank -%}
       <a class="lt-menu-cards__row" href="{{ s.mc_blog_url }}">
         <span class="lt-menu-cards__row-text">
           <span class="lt-menu-cards__title">{{ s.mc_blog_title | escape }}</span>
+          {%- if s.mc_blog_sub != blank -%}
+            <span class="lt-menu-cards__sub">{{ s.mc_blog_sub | escape }}</span>
+          {%- endif -%}
+        </span>
+        {%- render 'lt-menu-cards-chevron' -%}
+      </a>
+    {%- endif -%}
+
+    {%- comment -%}
+      Guide-Zeile (28.07.): steht bewusst UNTER dem Blog. Beide sagen „hier
+      lernst du", der Blog ist das laufende Format, der Guide das einmalige.
+      Umgekehrte Reihenfolge würde die zwei Wissens-Einträge gegeneinander
+      stellen. Ziel /pages/longevity ist am 28.07. redaktionell saniert
+      (Hype-Copy und Emojis raus, Byline rein), vorher war es nicht menüfähig.
+    {%- endcomment -%}
+    {%- if s.mc_guide_title != blank and s.mc_guide_url != blank -%}
+      <a class="lt-menu-cards__row" href="{{ s.mc_guide_url }}">
+        <span class="lt-menu-cards__row-text">
+          <span class="lt-menu-cards__title">{{ s.mc_guide_title | escape }}</span>
+          {%- if s.mc_guide_sub != blank -%}
+            <span class="lt-menu-cards__sub">{{ s.mc_guide_sub | escape }}</span>
+          {%- endif -%}
         </span>
         {%- render 'lt-menu-cards-chevron' -%}
       </a>

@@ -1,0 +1,293 @@
+{% comment %}
+  LIFETIME — Science Split
+  ────────────────────────
+  Wiederverwendbarer Split: Copy (Heading 28px + Subline + Fliesstext + optionaler
+  CTA) auf der einen, ein Motiv (Bild oder SVG-Infografik) auf der anderen Seite.
+  Auf /pages/science zweimal genutzt: Epigenetik-Erklaerung (App-Motiv) und
+  Longevity/Gesundheitsspanne (Luecke-Grafik). Bild-Seite pro Instanz wechselbar,
+  damit die beiden Splits im Wechsel stehen.
+
+  §12 Build Spec:
+  - Surface:         hell/warm, im Flaechenrhythmus der Seite
+  - Dominant:        die Ueberschrift (headline_md = --text-h2, 28px, wie NMN-PDP)
+  - Content pattern: Split 1/1, Copy + Media-Box (--radius-lg, Motiv zentriert)
+  - Heading:         section-heading-crs, headline_md
+{% endcomment %}
+
+{%- liquid
+  assign sp_anchor = section.settings.anchor_id
+  if sp_anchor == blank
+    assign sp_anchor = 'section-' | append: section.id
+  endif
+
+  assign sp_align = section.settings.content_align | default: 'left'
+  if sp_align != 'left' and sp_align != 'center' and sp_align != 'right'
+    assign sp_align = 'left'
+  endif
+
+  assign sp_img_src = ''
+  assign sp_img_asset = section.settings.image_asset | strip
+  if sp_img_asset != blank
+    if sp_img_asset contains '://'
+      assign sp_img_src = sp_img_asset
+    else
+      assign sp_img_src = sp_img_asset | asset_url
+    endif
+  endif
+
+  assign sp_img_alt = section.settings.image_alt | default: ''
+
+  assign sp_has_cta = false
+  if section.settings.cta_label != blank and section.settings.cta_url != blank
+    assign sp_has_cta = true
+  endif
+  assign sp_cta_class = 'lts-cta lts-cta--solid'
+  if section.settings.cta_style == 'soft'
+    assign sp_cta_class = 'lts-cta lts-cta--soft'
+  endif
+-%}
+
+{% style %}
+  #{{ sp_anchor }} {
+    --lts-bg:       {{ section.settings.color_bg | default: '#f7f7f4' }};
+    --lts-text:     {{ section.settings.color_text | default: '#26251e' }};
+    --lts-media-bg: {{ section.settings.media_bg | default: '#f2f1ed' }};
+    --crs-text:     {{ section.settings.color_text | default: '#26251e' }};
+    --crs-text-sec: {{ section.settings.color_text | default: '#26251e' | color_modify: 'alpha', 0.6 }};
+    --crs-text-ter: {{ section.settings.color_text | default: '#26251e' | color_modify: 'alpha', 0.4 }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<section id="{{ sp_anchor }}" class="lts{% if section.settings.image_side == 'left' %} lts--img-left{% endif %}">
+  <div class="lts__container">
+    <div class="lts__copy">
+      {% render 'section-heading-crs',
+        heading: section.settings.heading,
+        subheading: section.settings.subheading,
+        kicker: section.settings.kicker,
+        align: sp_align,
+        headline_md: true,
+        extra_class: 'lts__intro'
+      %}
+
+      {%- if section.settings.body != blank -%}
+        <div class="lts__body rte">{{ section.settings.body }}</div>
+      {%- endif -%}
+
+      {%- if sp_has_cta -%}
+        <div class="lts__actions">
+          <a href="{{ section.settings.cta_url }}" class="{{ sp_cta_class }}">
+            {{ section.settings.cta_label | escape }}
+          </a>
+        </div>
+      {%- endif -%}
+    </div>
+
+    <figure class="lts__media">
+      <div class="lts__media-box">
+        {%- if sp_img_src != blank -%}
+          <img src="{{ sp_img_src }}" alt="{{ sp_img_alt | escape }}" class="lts__media-img" loading="lazy">
+        {%- elsif section.settings.image != blank -%}
+          {{ section.settings.image | image_url: width: 1000 | image_tag: loading: 'lazy', class: 'lts__media-img', alt: sp_img_alt }}
+        {%- endif -%}
+      </div>
+      {%- if section.settings.caption != blank -%}
+        <figcaption class="lts__caption">{{ section.settings.caption | escape }}</figcaption>
+      {%- endif -%}
+    </figure>
+  </div>
+</section>
+
+{% stylesheet %}
+.lts {
+  background: var(--lts-bg, #f7f7f4);
+  color: var(--lts-text, #26251e);
+}
+
+.lts__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-7);
+  align-items: center;
+}
+
+@media screen and (min-width: 900px) {
+  .lts__container {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+  }
+  /* Motiv nach links: nur auf Desktop, Reihenfolge im Fluss bleibt Copy zuerst. */
+  .lts--img-left .lts__media {
+    order: -1;
+  }
+}
+
+.lts__copy {
+  min-width: 0;
+}
+
+.lts__intro {
+  margin-bottom: var(--space-5);
+}
+
+.lts__intro .crs-heading-stack__subtitle {
+  max-width: 46ch;
+}
+
+.lts__body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
+  max-width: 54ch;
+}
+
+.lts__body p {
+  margin: 0 0 var(--space-4);
+}
+
+.lts__body p:last-child {
+  margin-bottom: 0;
+}
+
+.lts__actions {
+  margin-top: var(--space-6);
+}
+
+.lts-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 0 22px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  text-decoration: none;
+  border: 1px solid var(--color-dark);
+}
+
+.lts-cta--solid {
+  background: var(--color-dark);
+  border-color: var(--color-dark);
+  color: var(--color-white);
+}
+
+.lts-cta--soft {
+  background: transparent;
+  color: var(--lts-text, #26251e);
+  border-color: color-mix(in srgb, var(--lts-text, #26251e) 22%, transparent);
+}
+
+.no-touchevents .lts-cta:hover {
+  opacity: 0.92;
+}
+
+/* — Media — */
+.lts__media {
+  margin: 0;
+  min-width: 0;
+}
+
+.lts__media-box {
+  background: var(--lts-media-bg, #f2f1ed);
+  border-radius: var(--radius-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+}
+
+.lts__media-img {
+  display: block;
+  max-width: 100%;
+  max-height: 440px;
+  width: auto;
+  height: auto;
+}
+
+.lts__caption {
+  margin-top: var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--lts-text, #26251e);
+  opacity: 0.55;
+  max-width: 44ch;
+}
+
+@media screen and (max-width: 899px) {
+  .lts__container {
+    padding: 0 var(--space-4);
+  }
+  .lts__media-box {
+    padding: var(--space-5);
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Science Split",
+  "tag": "section",
+  "class": "lt-science-split",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anker-ID", "info": "Ohne Wert bleibt die automatische ID." },
+    { "type": "header", "content": "Text" },
+    { "type": "text", "id": "kicker", "label": "Kicker (optional)" },
+    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Überschrift" },
+    { "type": "textarea", "id": "subheading", "label": "Subline (ein Satz)" },
+    { "type": "richtext", "id": "body", "label": "Fließtext", "default": "<p>Kurzer erklärender Absatz.</p>" },
+    { "type": "header", "content": "Button (optional)" },
+    { "type": "text", "id": "cta_label", "label": "Button-Text" },
+    { "type": "url", "id": "cta_url", "label": "Button-Link" },
+    {
+      "type": "select", "id": "cta_style", "label": "Button-Stil",
+      "options": [
+        { "value": "solid", "label": "Dunkel gefüllt" },
+        { "value": "soft", "label": "Zurückhaltend (Outline)" }
+      ],
+      "default": "soft"
+    },
+    { "type": "header", "content": "Motiv" },
+    {
+      "type": "text", "id": "image_asset", "label": "Bild/SVG aus Theme-Assets oder URL",
+      "info": "Dateiname eines Theme-Assets (z. B. science-healthspan-luecke.svg) oder eine vollständige URL. Vorrang vor dem Bild-Picker."
+    },
+    { "type": "image_picker", "id": "image", "label": "Bild (Alternative zum Feld oben)" },
+    { "type": "text", "id": "image_alt", "label": "Alt-Text" },
+    { "type": "text", "id": "caption", "label": "Bildunterschrift (optional)" },
+    {
+      "type": "select", "id": "image_side", "label": "Motiv-Seite (Desktop)",
+      "options": [
+        { "value": "right", "label": "Rechts" },
+        { "value": "left", "label": "Links" }
+      ],
+      "default": "right"
+    },
+    { "type": "header", "content": "Ausrichtung" },
+    {
+      "type": "select", "id": "content_align", "label": "Ausrichtung Überschrift",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" }
+      ],
+      "default": "left"
+    },
+    { "type": "header", "content": "Farben und Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#f7f7f4" },
+    { "type": "color", "id": "media_bg", "label": "Motiv-Fläche", "default": "#f2f1ed" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 }
+  ],
+  "presets": [{ "name": "Science Split" }]
+}
+{% endschema %}

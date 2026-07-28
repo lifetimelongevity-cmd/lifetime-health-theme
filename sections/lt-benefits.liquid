@@ -23,8 +23,12 @@
 
 {%- liquid
   assign ltb_headline_lg = true
+  assign ltb_headline_md = false
   if section.settings.heading_size == 'section'
     assign ltb_headline_lg = false
+  elsif section.settings.heading_size == 'feature'
+    assign ltb_headline_lg = false
+    assign ltb_headline_md = true
   endif
 
   comment
@@ -48,9 +52,11 @@
 
     {% render 'section-heading-crs',
       heading: section.settings.title,
+      subheading: section.settings.subheading,
       kicker: ltb_kicker,
       align: section.settings.content_align,
       headline_lg: ltb_headline_lg,
+      headline_md: ltb_headline_md,
       heading_tag: 'h2',
       extra_class: 'lt-benefits__header'
     %}
@@ -101,6 +107,12 @@
       "default": "Was macht LIFETIME einzigartig?"
     },
     {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading (optional)",
+      "info": "Bildet mit dem Heading einen Block. Leer = keine Subline."
+    },
+    {
       "type": "select",
       "id": "content_align",
       "label": "Ausrichtung Header",
@@ -116,6 +128,7 @@
       "label": "Überschrift Größe",
       "options": [
         { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "feature", "label": "Mittel (28px)" },
         { "value": "product_title", "label": "Wie Produkttitel" }
       ],
       "default": "product_title"

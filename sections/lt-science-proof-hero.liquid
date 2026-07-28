@@ -1,0 +1,330 @@
+{% comment %}
+  LIFETIME — Science Proof Hero
+  ─────────────────────────────
+  Auftakt der Seite Wissenschaft (`/pages/science`). Ersetzt dort den
+  redaktionellen `lt-science-hero`, weil dessen Layout weder einen CTA noch
+  einen Produktbezug tragen kann. Briefing: `docs/briefing-science-hub.md`.
+
+  §12 Build Spec:
+  - Surface:          hell (#f7f7f4), Panel eine Stufe wärmer (#f2f1ed)
+  - Dominant element: H1 (headline_lg, dem echten Seiten-H1 vorbehalten)
+  - Content pattern:  Split 6/5, Text links, Geräte-Ausschnitt rechts
+  - CTA:              primär im Hero, weil die Seite auf den Test führt
+  - Visual:           echter App-Screenshot, unten angeschnitten (Device-Peek).
+                      Das Asset `lt-report-app-snps.png` ist der freigestellte
+                      Ausschnitt aus `app-snps-close.png`, schwarze Fläche via
+                      Flood-Fill entfernt, 720×620 (2× bei ~360px Anzeige).
+  - Caption:          Pflicht. Ohne sie liest sich der SNP-Screen als Deko
+                      statt als Beleg.
+{% endcomment %}
+
+{%- liquid
+  assign sph_anchor = section.settings.anchor_id
+  if sph_anchor == blank
+    assign sph_anchor = 'section-' | append: section.id
+  endif
+
+  assign sph_alt = section.settings.image_alt
+  if sph_alt == blank and section.settings.image != blank
+    assign sph_alt = section.settings.image.alt
+  endif
+  if sph_alt == blank
+    assign sph_alt = 'Auswertung genetischer Marker in der LIFETIME-App'
+  endif
+
+  assign sph_has_cta = false
+  if section.settings.cta_label != blank
+    assign sph_has_cta = true
+  endif
+  assign sph_has_cta_2 = false
+  if section.settings.cta_2_label != blank
+    assign sph_has_cta_2 = true
+  endif
+-%}
+
+{% style %}
+  #{{ sph_anchor }} {
+    --sph-bg:      {{ section.settings.color_bg | default: '#f7f7f4' }};
+    --sph-panel:   {{ section.settings.color_panel | default: '#f2f1ed' }};
+    --sph-text:    {{ section.settings.color_text | default: '#26251e' }};
+    padding-top:    {{ section.settings.padding_top }}px;
+    padding-bottom: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<section id="{{ sph_anchor }}" class="sph">
+  <div class="sph__container">
+    <div class="sph__content">
+      {% render 'section-heading-crs',
+        heading: section.settings.headline,
+        subheading: section.settings.subheading,
+        kicker: section.settings.kicker,
+        align: 'left',
+        headline_lg: true,
+        heading_tag: 'h1',
+        extra_class: 'sph__intro'
+      %}
+
+      {%- if sph_has_cta or sph_has_cta_2 -%}
+        <div class="sph__actions">
+          {%- if sph_has_cta -%}
+            <a
+              href="{{ section.settings.cta_url | default: '#' | escape }}"
+              class="button button--solid button--icon"
+            >
+              <span aria-hidden="true" class="button__icon">
+                {%- render 'theme-symbols', icon: 'arrow-right' -%}
+              </span>
+              <span>{{ section.settings.cta_label | escape }}</span>
+            </a>
+          {%- endif -%}
+          {%- if sph_has_cta_2 -%}
+            <a
+              href="{{ section.settings.cta_2_url | default: '#' | escape }}"
+              class="button button--outline button--icon"
+            >
+              <span aria-hidden="true" class="button__icon">
+                {%- render 'theme-symbols', icon: 'arrow-right' -%}
+              </span>
+              <span>{{ section.settings.cta_2_label | escape }}</span>
+            </a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+    </div>
+
+    <figure class="sph__media">
+      <div class="sph__panel">
+        {%- if section.settings.image != blank -%}
+          {{
+            section.settings.image
+            | image_url: width: 720
+            | image_tag: loading: 'eager', class: 'sph__device', alt: sph_alt
+          }}
+        {%- else -%}
+          <img
+            src="{{ 'lt-report-app-snps.png' | asset_url }}"
+            alt="{{ sph_alt | escape }}"
+            class="sph__device"
+            width="720"
+            height="620"
+            loading="eager"
+          >
+        {%- endif -%}
+      </div>
+      {%- if section.settings.caption != blank -%}
+        <figcaption class="sph__caption">{{ section.settings.caption | escape }}</figcaption>
+      {%- endif -%}
+    </figure>
+  </div>
+</section>
+
+{% stylesheet %}
+/* ================================================================
+   lt-science-proof-hero — Auftakt Seite Wissenschaft
+   §3 Tokens, §4 Layout (Split 6/5), §6 Typografie
+   ================================================================ */
+
+.sph {
+  background: var(--sph-bg, #f7f7f4);
+  color: var(--sph-text, #26251e);
+  --crs-text: var(--sph-text);
+}
+
+.sph__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-7);
+  align-items: center;
+}
+
+@media screen and (min-width: 900px) {
+  .sph__container {
+    grid-template-columns: 6fr 5fr;
+    gap: var(--space-8);
+  }
+}
+
+/* — Textspalte — */
+.sph__content {
+  min-width: 0;
+}
+
+.sph__intro .crs-heading-stack__subtitle {
+  max-width: 46ch;
+}
+
+.sph__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+/* Die globalen `.button--solid` / `--outline` hängen an den Farbschema-
+   Variablen der Combine-Sections (`--color-text-main`), die eine LT-Section
+   nicht setzt. Deshalb wird die Farbgebung hier lokal gebunden, wie in
+   `lt-science-bento` — dort allerdings mit Hex, hier über Tokens. */
+.sph__actions .button {
+  margin: 0;
+}
+
+.sph__actions .button--solid {
+  background: var(--color-dark);
+  border-color: var(--color-dark);
+  color: var(--color-white);
+}
+
+.sph__actions .button--solid span {
+  color: var(--color-white);
+}
+
+.sph__actions .button--solid .button__icon svg path {
+  fill: var(--color-white);
+}
+
+.sph__actions .button--outline {
+  background: transparent;
+  border-color: color-mix(in srgb, var(--sph-text, #26251e) 22%, transparent);
+  color: var(--sph-text, #26251e);
+}
+
+.sph__actions .button--outline span {
+  color: var(--sph-text, #26251e);
+}
+
+.sph__actions .button--outline .button__icon svg path {
+  fill: var(--sph-text, #26251e);
+}
+
+.no-touchevents .sph__actions .button--outline:hover {
+  border-color: color-mix(in srgb, var(--sph-text, #26251e) 45%, transparent);
+}
+
+/* — Gerät — */
+.sph__media {
+  margin: 0;
+  min-width: 0;
+}
+
+.sph__panel {
+  background: var(--sph-panel, #f2f1ed);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  /* Porträt-Fläche: das Bild füllt die Karte randlos (kein Device-Peek). */
+  aspect-ratio: 4 / 5;
+}
+
+.sph__device {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Auf das Gesicht ausgerichtet (rechts oben im Motiv). */
+  object-position: 62% 26%;
+}
+
+.sph__caption {
+  margin-top: var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--sph-text, #26251e);
+  opacity: 0.55;
+  max-width: 44ch;
+}
+
+@media screen and (max-width: 899px) {
+  .sph__container {
+    padding: 0 var(--space-4);
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Science Proof Hero",
+  "tag": "section",
+  "class": "lt-science-proof-hero",
+  "settings": [
+    {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "Anker-ID",
+      "info": "Ohne Wert bleibt die automatische ID."
+    },
+    { "type": "header", "content": "Text" },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "default": "AGE & DNA-Test"
+    },
+    {
+      "type": "textarea",
+      "id": "headline",
+      "label": "Headline",
+      "default": "Wir messen, was tatsächlich altert."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subline",
+      "info": "Ein kurzer Satz. Alles Längere gehört in einen eigenen Abschnitt.",
+      "default": "Aus einer Speichelprobe von zu Hause, ausgewertet im akkreditierten Labor."
+    },
+    { "type": "header", "content": "Buttons" },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Primärer Button",
+      "default": "Zum AGE & DNA-Test"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Primärer Button: Link"
+    },
+    {
+      "type": "text",
+      "id": "cta_2_label",
+      "label": "Sekundärer Button",
+      "info": "Leer lassen, wenn nur ein Button gebraucht wird."
+    },
+    {
+      "type": "url",
+      "id": "cta_2_url",
+      "label": "Sekundärer Button: Link"
+    },
+    { "type": "header", "content": "Bild" },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Bild",
+      "info": "Ohne Auswahl läuft der freigestellte App-Ausschnitt aus den Theme-Assets."
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Bild Alt-Text"
+    },
+    {
+      "type": "text",
+      "id": "caption",
+      "label": "Bildunterschrift",
+      "info": "Ordnet den Screenshot ein. Ohne sie wirkt er dekorativ.",
+      "default": "Genetische Marker in der LIFETIME-App, jeweils mit Referenz-ID zur öffentlichen NCBI-Datenbank."
+    },
+    { "type": "header", "content": "Farben und Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#f7f7f4" },
+    { "type": "color", "id": "color_panel", "label": "Bildfläche", "default": "#f2f1ed" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 160, "step": 8, "default": 80 },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 160, "step": 8, "default": 80 }
+  ],
+  "presets": [{ "name": "Science Proof Hero" }]
+}
+{% endschema %}

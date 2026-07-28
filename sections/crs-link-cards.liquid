@@ -10,8 +10,11 @@
     assign crs_lc_kicker = ''
   endif
   assign crs_h_headline_lg = false
+  assign crs_h_headline_md = false
   if section.settings.heading_size == 'product_title'
     assign crs_h_headline_lg = true
+  elsif section.settings.heading_size == 'feature'
+    assign crs_h_headline_md = true
   endif
 -%}
 {% style %}
@@ -27,10 +30,20 @@
   }
 {% endstyle %}
 
-<div class="lc-section" id="section-{{ section.id }}">
+{%- comment -%}
+  Optionale Anker-ID (28.07.): macht den Abschnitt adressierbar und für ein
+  Inhaltsverzeichnis ansprechbar. Ohne Wert bleibt die bisherige ID erhalten.
+{%- endcomment -%}
+{%- liquid
+  assign sec_anchor = section.settings.anchor_id
+  if sec_anchor == blank
+    assign sec_anchor = 'section-' | append: section.id
+  endif
+-%}
+<div class="lc-section" id="{{ sec_anchor }}">
   <div class="lc-container">
     {%- if crs_lc_kicker != blank or crs_lc_head != blank or crs_lc_sub != blank -%}
-      <header class="lc-section-head crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+      <header class="lc-section-head crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_h_headline_md %} crs-heading-stack--headline-md{% endif %}">
         {%- if crs_lc_kicker != blank -%}
           <p class="crs-heading-stack__kicker">{{ crs_lc_kicker | escape }}</p>
         {%- endif -%}
@@ -248,6 +261,12 @@
   "class": "crs-link-cards",
   "settings": [
     {
+      "type": "text",
+      "id": "anchor_id",
+      "label": "Anker-ID",
+      "info": "Ohne Wert bleibt die automatische ID."
+    },
+    {
       "type": "header",
       "content": "Überschrift"
     },
@@ -280,6 +299,7 @@
       "label": "Überschrift Größe",
       "options": [
         { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "feature", "label": "Mittel (28px)" },
         { "value": "product_title", "label": "Wie Produkttitel" }
       ],
       "default": "section",

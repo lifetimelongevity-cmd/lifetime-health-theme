@@ -19,6 +19,7 @@
   assign crs_rfc_badge = section.settings.badge_text | strip
   assign crs_rfc_price = section.settings.price_fallback | strip
   assign crs_rfc_cta = section.settings.cta_label | strip
+  assign crs_rfc_cta_2 = section.settings.cta_2_label | strip
   if crs_rfc_kicker == '__none__'
     assign crs_rfc_kicker = ''
   endif
@@ -58,8 +59,20 @@
     background:     var(--crs-bg);
   }
   {%- if template.suffix == 'nmn-pulver' -%}
+    {%- comment -%} Freigestellte NMN-Dose: contain, damit sie ganz in der Karte steht. {%- endcomment -%}
     #section-{{ section.id }} .rfc-image {
       object-fit: contain;
+    }
+  {%- endif -%}
+  {%- if template.suffix == 'science' -%}
+    {%- comment -%}
+      /pages/science: die AGE&DNA-Grafik ist ein quadratisches Vollbild-Motiv.
+      Quadratische Karte + cover fuellt randlos ohne Beschnitt (contain wuerde
+      seitlich letterboxen). Badge ist auf dieser Seite bewusst aus, das Motiv
+      beschriftet sich mit AGE&DNA und eurofins selbst.
+    {%- endcomment -%}
+    #section-{{ section.id }} .rfc-media-card {
+      aspect-ratio: 1 / 1;
     }
   {%- endif -%}
 {% endstyle %}
@@ -138,16 +151,30 @@
           </ul>
         {%- endif -%}
 
-        {%- if crs_rfc_cta != blank -%}
-          {%- if section.settings.cta_url != blank -%}
-            <a href="{{ section.settings.cta_url }}" class="rfc-cta">
-              {{ crs_rfc_cta | escape }}
-            </a>
-          {%- else -%}
-            <button type="button" class="rfc-cta" data-rfc-scroll>
-              {{ crs_rfc_cta | escape }}
-            </button>
-          {%- endif -%}
+        {%- if crs_rfc_cta != blank or crs_rfc_cta_2 != blank -%}
+          <div class="rfc-actions">
+            {%- if crs_rfc_cta != blank -%}
+              {%- if section.settings.cta_url != blank -%}
+                <a href="{{ section.settings.cta_url }}" class="rfc-cta">
+                  {{ crs_rfc_cta | escape }}
+                </a>
+              {%- else -%}
+                <button type="button" class="rfc-cta" data-rfc-scroll>
+                  {{ crs_rfc_cta | escape }}
+                </button>
+              {%- endif -%}
+            {%- endif -%}
+            {%- comment -%}
+              Weicher Pfad (28.07.): optionaler Zweit-Link neben dem Kauf-CTA,
+              damit Seiten mit Beratungsbedarf das Quiz danebenstellen können.
+              Ohne Label bleibt die Section unverändert.
+            {%- endcomment -%}
+            {%- if crs_rfc_cta_2 != blank and section.settings.cta_2_url != blank -%}
+              <a href="{{ section.settings.cta_2_url }}" class="rfc-cta rfc-cta--soft">
+                {{ crs_rfc_cta_2 | escape }}
+              </a>
+            {%- endif -%}
+          </div>
         {%- endif -%}
       </div>
     </div>
@@ -376,6 +403,17 @@
   transform: translateY(-1px);
   opacity: 0.92;
 }
+.rfc-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+.rfc-cta--soft {
+  background: transparent;
+  color: var(--crs-text, #26251e);
+  border-color: color-mix(in srgb, var(--crs-text, #26251e) 22%, transparent);
+}
 
 .rfc-cta:focus-visible {
   outline: none;
@@ -557,6 +595,17 @@
       "id": "cta_url",
       "label": "CTA-Zielseite",
       "info": "Wenn gesetzt: direkter Link statt Scroll-Button. Für page-Templates pflicht."
+    },
+    {
+      "type": "text",
+      "id": "cta_2_label",
+      "label": "Zweit-CTA (weicher Pfad)",
+      "info": "Optional, zum Beispiel das Quiz. Leer lassen, wenn nur der Kauf-CTA stehen soll."
+    },
+    {
+      "type": "url",
+      "id": "cta_2_url",
+      "label": "Zweit-CTA: Zielseite"
     }
   ],
   "blocks": [
