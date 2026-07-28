@@ -55,6 +55,16 @@
   if section.settings.show_toc and chapter_count >= 3
     assign show_toc = true
   endif
+
+  # Ein Feld, zwei Verwendungen: sichtbares "Stand"-Datum und dateModified im
+  # Schema. Monatsname deutsch ausgeschrieben, weil %B der Shop-Locale nicht
+  # zuverlaessig folgt. Gleiches Muster wie in lt-article.
+  assign stand_date = section.settings.stand_date
+  assign de_months = 'Januar,Februar,März,April,Mai,Juni,Juli,August,September,Oktober,November,Dezember' | split: ','
+  assign stand_month_index = stand_date | date: '%m' | plus: 0 | minus: 1
+  assign stand_month = de_months[stand_month_index]
+  assign stand_year = stand_date | date: '%Y'
+  assign stand_iso = stand_date | date: '%Y-%m-%d'
 -%}
 
 {%- comment -%}
@@ -109,11 +119,11 @@
             erscheinen nur, wenn ein Name gepflegt ist. Nie Platzhalter rendern.
           {%- endcomment -%}
           <p class="lt-guide__meta">
-            {%- if section.settings.stand != blank -%}
-              <span>Stand: {{ section.settings.stand | escape }}</span>
+            {%- if stand_month != blank -%}
+              <span>Stand: <time datetime="{{ stand_iso }}">{{ stand_month }} {{ stand_year }}</time></span>
             {%- endif -%}
             {%- if author_name != blank -%}
-              {%- if section.settings.stand != blank %}<span aria-hidden="true">&middot;</span>{% endif -%}
+              {%- if stand_month != blank %}<span aria-hidden="true">&middot;</span>{% endif -%}
               <span>Von
                 {%- if expert_page != blank %}
                   <a class="lt-guide__byline-link" href="{{ expert_page.url }}"><strong>{{ author_name | escape }}</strong></a>
@@ -338,6 +348,9 @@
       {%- endif -%}
       {%- if page.published_at != blank -%}
         "datePublished": {{ page.published_at | date: '%Y-%m-%d' | json }},
+      {%- endif -%}
+      {%- if stand_month != blank -%}
+        "dateModified": {{ stand_iso | json }},
       {%- endif -%}
       {%- if author_name != blank -%}
         "author": {
@@ -996,8 +1009,9 @@
     },
     {
       "type": "text",
-      "id": "stand",
-      "label": "Stand (z. B. Juli 2026)"
+      "id": "stand_date",
+      "label": "Stand",
+      "info": "Format JJJJ-MM-TT. Wird als „Juli 2026\" angezeigt und als dateModified ausgegeben."
     },
     {
       "type": "text",
