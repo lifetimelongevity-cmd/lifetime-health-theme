@@ -1,0 +1,1204 @@
+{% comment %}
+  ───────────────────────────────────────────────────────────────────────────
+  LT Guide — Longform-Guide mit Sticky-Inhaltsverzeichnis links
+  Produktiv auf /pages/longevity ("Longevity Blueprint").
+  ───────────────────────────────────────────────────────────────────────────
+  §12-Spec:
+  • Surface: --color-paper (Off-White), wie sections/lt-article.liquid. Panels
+    (Schritte, ruhiger CTA) auf --color-surface-primary mit Hairline-Border.
+    Genau ein dunkler Bruch pro Seite: der Abschluss-CTA.
+  • Dominantes Element: der Guide-Titel (H1), danach je Kapitel dessen H2.
+  • Content-Pattern: Longform-Editorial. Messmaß 680px, Rail 232px ab 1024px.
+    Die Werte sind absichtlich identisch mit lt-article, damit Blog und Guide
+    sich wie dieselbe Familie lesen.
+  • Heading: bewusst NICHT crs-heading-stack. Guide-Titel, Kapitelköpfe und
+    Standfirst sind Artikel-Content, kein Section-Header. Gleiche Begründung
+    und gleicher Präzedenzfall wie in lt-article; docs/section-heading-stack.md
+    regelt Section-Header, nicht Fließtext-Hierarchien.
+  • Subtraction gegenüber dem Vorgängerbau (slideshow + rich-text +
+    lt-guide-toc + 10 × lt-longevity-chapter):
+      – Kapitel-Kicker raus. „Level I: Longevity-Grundlagen" stand zehnmal auf
+        der Seite. Die Information trägt jetzt einmal der Level-Trenner.
+      – Akkordeons um zweisätzige Tipps raus. 30 von 30 Praxis-Schritten waren
+        eingeklappt, das war der größte Teil des Guides.
+      – Vertrauens-Chips („Fachlich geprüft") raus, das sagt die Byline.
+      – Sticky-Top-Leiste mit Fortschrittsbalken raus, sie konkurrierte mit dem
+        ohnehin sticky Site-Header.
+  • Quality Move: Kapitelnummern, Inhaltsverzeichnis, Lesezeit und das
+    Article-JSON-LD entstehen vollständig aus den Blöcken. Ein Kapitel
+    ergänzen heißt: einen Block ergänzen, sonst nichts.
+
+  Blocktypen (flache Liste, Reihenfolge = Seitenreihenfolge):
+    level   → Trenner, gruppiert zugleich die Einträge im Inhaltsverzeichnis
+    chapter → Kapitel; alle folgenden tip-Blöcke gehören zu diesem Kapitel
+    tip     → Praxis-Schritt innerhalb des vorangehenden Kapitels
+    cta     → Einschub (quiet) bzw. Abschluss (emphasis)
+
+  Block-Budget: Shopify erlaubt 50 Blöcke pro Section. Live belegt sind 44
+  (2 level + 10 chapter + 30 tip + 2 cta). Wer mehr als ein weiteres Kapitel
+  mit drei Schritten braucht, teilt den Guide auf zwei Sections auf.
+{% endcomment %}
+
+{%- liquid
+  assign author_name = section.settings.author_name
+  assign reviewer_name = section.settings.reviewer_name
+  assign expert_page = pages['aerzte']
+
+  assign chapter_count = 0
+  for block in section.blocks
+    if block.type == 'chapter'
+      assign chapter_count = chapter_count | plus: 1
+    endif
+  endfor
+
+  assign show_toc = false
+  if section.settings.show_toc and chapter_count >= 3
+    assign show_toc = true
+  endif
+-%}
+
+{%- comment -%}
+  Lesezeit aus dem tatsächlichen Text der Blöcke, nicht aus einem gepflegten
+  Feld. 180 Wörter/Minute wie in lt-article (DE-Lesegeschwindigkeit).
+{%- endcomment -%}
+{%- capture guide_text -%}
+  {{ section.settings.intro }}
+  {%- for block in section.blocks -%}
+    {{ block.settings.intro }} {{ block.settings.body }} {{ block.settings.text }} {{ block.settings.standfirst }}
+  {%- endfor -%}
+{%- endcapture -%}
+{%- liquid
+  assign guide_words = guide_text | strip_html | split: ' ' | size
+  assign reading_minutes = guide_words | divided_by: 180 | at_least: 1
+-%}
+
+{%- comment -%}
+  Inhaltsverzeichnis einmal bauen, zweimal ausgeben: mobil als aufklappbare
+  Box im Lesefluss, ab 1024px als sticky Rail links. Immer genau eine der
+  beiden Varianten ist sichtbar, die andere steht auf display:none und fällt
+  damit auch aus dem Accessibility-Tree.
+{%- endcomment -%}
+{%- capture toc_items -%}
+  {%- for block in section.blocks -%}
+    {%- case block.type -%}
+      {%- when 'level' -%}
+        {%- if block.settings.label != blank -%}
+          <li class="lt-guide__toc-group">{{ block.settings.label | escape }}</li>
+        {%- endif -%}
+      {%- when 'chapter' -%}
+        {%- assign chapter_anchor = block.settings.anchor_id | default: block.id -%}
+        <li><a href="#{{ chapter_anchor | escape }}">{{ block.settings.heading | escape }}</a></li>
+    {%- endcase -%}
+  {%- endfor -%}
+{%- endcapture -%}
+
+<div class="lt-guide">
+  <div class="lt-guide__shell{% if show_toc %} lt-guide__shell--with-rail{% endif %}">
+    <div class="lt-guide__layout{% if show_toc %} lt-guide__layout--with-rail{% endif %}">
+      <div class="lt-guide__col">
+
+        <header class="lt-guide__header">
+          <h1 class="lt-guide__title">{{ section.settings.heading | escape }}</h1>
+
+          {%- if section.settings.standfirst != blank -%}
+            <p class="lt-guide__standfirst">{{ section.settings.standfirst | escape }}</p>
+          {%- endif -%}
+
+          {%- comment -%}
+            E-E-A-T-Regel aus docs/blog-design-best-practices.md §4: Byline-Zeilen
+            erscheinen nur, wenn ein Name gepflegt ist. Nie Platzhalter rendern.
+          {%- endcomment -%}
+          <p class="lt-guide__meta">
+            {%- if section.settings.stand != blank -%}
+              <span>Stand: {{ section.settings.stand | escape }}</span>
+            {%- endif -%}
+            {%- if author_name != blank -%}
+              {%- if section.settings.stand != blank %}<span aria-hidden="true">&middot;</span>{% endif -%}
+              <span>Von
+                {%- if expert_page != blank %}
+                  <a class="lt-guide__byline-link" href="{{ expert_page.url }}"><strong>{{ author_name | escape }}</strong></a>
+                {%- else %}
+                  <strong>{{ author_name | escape }}</strong>
+                {%- endif -%}
+                {%- if section.settings.author_credential != blank %}, {{ section.settings.author_credential | escape }}{% endif -%}
+              </span>
+            {%- endif -%}
+            {%- if reviewer_name != blank -%}
+              <span aria-hidden="true">&middot;</span>
+              <span>Fachlich gepr&uuml;ft von
+                {%- if expert_page != blank %}
+                  <a class="lt-guide__byline-link" href="{{ expert_page.url }}"><strong>{{ reviewer_name | escape }}</strong></a>
+                {%- else %}
+                  <strong>{{ reviewer_name | escape }}</strong>
+                {%- endif -%}
+                {%- if section.settings.reviewer_credential != blank %}, {{ section.settings.reviewer_credential | escape }}{% endif -%}
+              </span>
+            {%- endif -%}
+            {%- if section.settings.show_reading_time -%}
+              <span aria-hidden="true">&middot;</span>
+              <span>{{ reading_minutes }} Min. Lesezeit</span>
+            {%- endif -%}
+          </p>
+
+          {%- if section.settings.image != blank -%}
+            <figure class="lt-guide__figure lt-guide__figure--hero">
+              {{-
+                section.settings.image
+                | image_url: width: 1440
+                | image_tag:
+                  widths: '600, 900, 1200, 1440',
+                  sizes: '(max-width: 1023px) 100vw, 680px',
+                  loading: 'eager',
+                  fetchpriority: 'high',
+                  alt: section.settings.image.alt
+              -}}
+            </figure>
+          {%- endif -%}
+
+          {%- if section.settings.intro != blank -%}
+            <div class="lt-guide__prose lt-guide__prose--intro rte remove-empty-space">
+              {{ section.settings.intro }}
+            </div>
+          {%- endif -%}
+        </header>
+
+        {%- if show_toc -%}
+          <details class="lt-guide__toc" data-lt-guide-toc>
+            <summary>{{ section.settings.toc_title | escape }}</summary>
+            <ul role="list">{{ toc_items }}</ul>
+          </details>
+        {%- endif -%}
+
+        {%- comment -%}
+          Flache Blockliste in eine geschachtelte Struktur übersetzen: ein
+          chapter-Block öffnet ein Kapitel, die folgenden tip-Blöcke laufen in
+          dessen Schritt-Panel. Jeder Block, der kein tip ist, schließt zuerst
+          das offene Panel und das offene Kapitel.
+        {%- endcomment -%}
+        {%- assign chapter_open = false -%}
+        {%- assign steps_open = false -%}
+        {%- assign chapter_no = 0 -%}
+
+        {%- for block in section.blocks -%}
+          {%- case block.type -%}
+
+            {%- when 'tip' -%}
+              {%- if chapter_open -%}
+                {%- unless steps_open -%}
+                  {%- assign steps_open = true -%}
+                  <ol class="lt-guide__steps">
+                {%- endunless -%}
+                {%- liquid
+                  assign tip_external = false
+                  if block.settings.link_url contains '://'
+                    unless block.settings.link_url contains 'lifetime-health.de'
+                      assign tip_external = true
+                    endunless
+                  endif
+                -%}
+                <li class="lt-guide__step" {{ block.shopify_attributes }}>
+                  <div class="lt-guide__step-body">
+                    <p class="lt-guide__step-title">{{ block.settings.title | escape }}</p>
+                    <div class="lt-guide__step-text rte remove-empty-space">{{ block.settings.body }}</div>
+                    {%- if block.settings.link_label != blank and block.settings.link_url != blank -%}
+                      <a
+                        class="lt-guide__step-link"
+                        href="{{ block.settings.link_url }}"
+                        {% if tip_external %}target="_blank" rel="noopener noreferrer"{% endif %}
+                      >{{ block.settings.link_label | escape }}</a>
+                    {%- endif -%}
+                  </div>
+                </li>
+              {%- endif -%}
+
+            {%- else -%}
+              {%- if steps_open -%}
+                </ol>
+                {%- assign steps_open = false -%}
+              {%- endif -%}
+              {%- if chapter_open -%}
+                </section>
+                {%- assign chapter_open = false -%}
+              {%- endif -%}
+
+              {%- if block.type == 'level' -%}
+                <div class="lt-guide__level" {{ block.shopify_attributes }}>
+                  {%- if block.settings.label != blank -%}
+                    <p class="lt-guide__level-label">{{ block.settings.label | escape }}</p>
+                  {%- endif -%}
+                  {%- if block.settings.title != blank -%}
+                    <p class="lt-guide__level-title">{{ block.settings.title | escape }}</p>
+                  {%- endif -%}
+                  {%- if block.settings.text != blank -%}
+                    <div class="lt-guide__prose rte remove-empty-space">{{ block.settings.text }}</div>
+                  {%- endif -%}
+                </div>
+
+              {%- elsif block.type == 'cta' -%}
+                <aside
+                  class="lt-guide__cta lt-guide__cta--{{ block.settings.style }}"
+                  aria-label="{{ block.settings.heading | escape }}"
+                  {{ block.shopify_attributes }}
+                >
+                  <p class="lt-guide__cta-title">{{ block.settings.heading | escape }}</p>
+                  {%- if block.settings.text != blank -%}
+                    <p class="lt-guide__cta-text">{{ block.settings.text | escape }}</p>
+                  {%- endif -%}
+                  {%- if block.settings.button_label != blank and block.settings.button_url != blank -%}
+                    <a class="lt-guide__cta-btn" href="{{ block.settings.button_url }}">
+                      {{- block.settings.button_label | escape -}}
+                    </a>
+                  {%- endif -%}
+                </aside>
+
+              {%- elsif block.type == 'chapter' -%}
+                {%- liquid
+                  assign chapter_open = true
+                  assign chapter_no = chapter_no | plus: 1
+                  assign chapter_anchor = block.settings.anchor_id | default: block.id
+                  assign chapter_label = chapter_no
+                  if chapter_no < 10
+                    assign chapter_label = chapter_no | prepend: '0'
+                  endif
+                -%}
+                <section id="{{ chapter_anchor | escape }}" class="lt-guide__chapter" {{ block.shopify_attributes }}>
+                  <p class="lt-guide__chapter-num">Kapitel {{ chapter_label }}</p>
+                  <h2 class="lt-guide__chapter-title">{{ block.settings.heading | escape }}</h2>
+                  {%- if block.settings.standfirst != blank -%}
+                    <p class="lt-guide__chapter-standfirst">{{ block.settings.standfirst | escape }}</p>
+                  {%- endif -%}
+
+                  {%- if block.settings.image != blank -%}
+                    <figure class="lt-guide__figure">
+                      {{-
+                        block.settings.image
+                        | image_url: width: 1200
+                        | image_tag:
+                          widths: '480, 680, 960, 1200',
+                          sizes: '(max-width: 1023px) 100vw, 680px',
+                          loading: 'lazy',
+                          alt: block.settings.image.alt
+                      -}}
+                    </figure>
+                  {%- endif -%}
+
+                  {%- if block.settings.intro != blank -%}
+                    <div class="lt-guide__prose rte remove-empty-space">{{ block.settings.intro }}</div>
+                  {%- endif -%}
+                {%- endif -%}
+
+          {%- endcase -%}
+        {%- endfor -%}
+
+        {%- if steps_open -%}</ol>{%- endif -%}
+        {%- if chapter_open -%}</section>{%- endif -%}
+
+      </div>
+
+      {%- if show_toc -%}
+        <aside class="lt-guide__rail">
+          <nav class="lt-guide__toc-rail" aria-label="{{ section.settings.toc_title | escape }}" data-lt-guide-toc>
+            <p class="lt-guide__toc-rail-title">{{ section.settings.toc_title | escape }}</p>
+            <ul class="lt-guide__toc-list" role="list">{{ toc_items }}</ul>
+          </nav>
+        </aside>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{%- comment -%}
+  Article-Knoten für die Guide-Seite. Für Pages liefert das Theme sonst nur
+  WebSite/Organization/BreadcrumbList (snippets/microdata-schema.liquid), der
+  Guide selbst ist maschinenlesbar bisher gar nicht vorhanden.
+
+  `reviewedBy` zeigt über dieselbe @id-Konvention wie die Blog-Artikel auf den
+  Person-Knoten von /pages/aerzte (sections/lt-expert-profile.liquid, Anker aus
+  `schema_anchor`). Weicht der Anker ab, mergen die Knoten nicht, und das fällt
+  in keinem Validator auf. Ohne die Seite bleiben @id und url weg, damit das
+  Schema nicht auf einen 404 zeigt.
+{%- endcomment -%}
+{%- if section.settings.schema_enable and section.settings.heading != blank -%}
+  {%- liquid
+    assign guide_url = shop.url | append: page.url
+    if expert_page != blank
+      assign expert_node = shop.url | append: expert_page.url | append: '#' | append: section.settings.reviewer_anchor
+    endif
+  -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "@id": {{ guide_url | append: '#guide' | json }},
+      "mainEntityOfPage": {{ guide_url | json }},
+      "url": {{ guide_url | json }},
+      "headline": {{ section.settings.heading | json }},
+      {%- if section.settings.standfirst != blank -%}
+        "description": {{ section.settings.standfirst | json }},
+      {%- endif -%}
+      {%- if page.published_at != blank -%}
+        "datePublished": {{ page.published_at | date: '%Y-%m-%d' | json }},
+      {%- endif -%}
+      {%- if author_name != blank -%}
+        "author": {
+          "@type": "Person",
+          "name": {{ author_name | json }}
+          {%- if expert_page != blank -%}
+            , "url": {{ shop.url | append: expert_page.url | json }}
+          {%- endif -%}
+        },
+      {%- endif -%}
+      {%- if reviewer_name != blank -%}
+        "reviewedBy": {
+          "@type": "Person",
+          {%- if expert_page != blank -%}
+            "@id": {{ expert_node | json }},
+            "url": {{ expert_node | json }},
+          {%- endif -%}
+          "name": {{ reviewer_name | json }}
+          {%- if section.settings.reviewer_credential != blank -%}
+            , "jobTitle": {{ section.settings.reviewer_credential | json }}
+          {%- endif -%}
+        },
+      {%- endif -%}
+      "publisher": { "@id": {{ shop.url | append: '/#organization' | json }} }
+    }
+  </script>
+{%- endif -%}
+
+{% stylesheet %}
+.lt-guide {
+  /* Warm-Editorial-Palette, identisch zu lt-article und nur hier remapped:
+     Off-White-Paper statt Weiß, weiches Ink statt reinem Schwarz. Der Rest des
+     Themes bleibt unberührt. --color-surface-primary bleibt bewusst Weiß, die
+     Schritt- und CTA-Panels setzen sich damit sichtbar vom Papier ab. */
+  --color-text-primary: var(--color-ink);
+  --color-text-secondary: var(--color-ink-muted);
+  background: var(--color-paper);
+  padding: var(--space-9) 0;
+}
+
+.lt-guide__shell {
+  /* 680px Messmaß = 60–75 Zeichen/Zeile, plus seitliches Padding.
+     Gleiche Werte wie lt-article, damit Blog und Guide dieselbe Spalte teilen. */
+  max-width: 768px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+/* ── Zweispalten-Layout mit Sticky-Rail (ab 1024px) ──
+   Rail und Textspalte liegen in derselben Grid-Zeile. Die Rail wird dadurch auf
+   volle Zeilenhöhe gestreckt, und das sticky Element darin begleitet den ganzen
+   Guide. Darunter greift keine Grid-Regel: die Rail ist versteckt und das inline
+   aufklappbare Inhaltsverzeichnis übernimmt. */
+
+.lt-guide__rail {
+  display: none;
+}
+
+@media screen and (min-width: 1024px) {
+  .lt-guide__shell--with-rail {
+    max-width: 1120px;
+  }
+
+  .lt-guide__layout--with-rail {
+    display: grid;
+    grid-template-columns: 232px minmax(0, 680px);
+    gap: var(--space-8);
+    justify-content: center;
+  }
+
+  .lt-guide__layout--with-rail .lt-guide__col {
+    grid-column: 2;
+    min-width: 0;
+  }
+
+  .lt-guide__layout--with-rail .lt-guide__rail {
+    display: block;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .lt-guide__layout--with-rail .lt-guide__toc {
+    display: none;
+  }
+}
+
+/* ── Kopf ── */
+
+.lt-guide__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(var(--text-h2), 5vw, var(--text-display));
+  letter-spacing: -0.02em;
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+}
+
+.lt-guide__standfirst {
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+}
+
+.lt-guide__meta {
+  margin: var(--space-5) 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+}
+
+.lt-guide__meta strong {
+  color: var(--color-text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+/* Byline-Link: zurückhaltend, die Byline ist Metazeile, kein CTA. */
+.lt-guide__byline-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--color-border-default);
+  text-underline-offset: 0.2em;
+}
+
+.lt-guide__byline-link:hover {
+  text-decoration-color: currentColor;
+}
+
+/* ── Fließtext ── */
+
+.lt-guide__prose {
+  margin-top: var(--space-6);
+  font-family: var(--font-body);
+  font-size: var(--text-article);
+  line-height: var(--leading-relaxed);
+  /* Prosa bewusst etwas grauer als reines Ink, Überschriften bleiben auf vollem
+     Ink für die Hierarchie. Gleiche Mischung wie lt-article. */
+  color: color-mix(in srgb, var(--color-ink) 65%, var(--color-ink-muted));
+}
+
+.lt-guide__prose p {
+  margin: 0 0 var(--space-5);
+}
+
+.lt-guide__prose p:last-child {
+  margin-bottom: 0;
+}
+
+.lt-guide__prose a {
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px; /* intentional: sub-token, wie lt-article-Fließtextlinks */
+}
+
+.lt-guide__prose ul,
+.lt-guide__prose ol {
+  margin: 0 0 var(--space-5);
+  padding-left: var(--space-5);
+}
+
+.lt-guide__prose li {
+  margin-bottom: var(--space-2);
+}
+
+/* ── Inhaltsverzeichnis: mobil aufklappbar ── */
+
+.lt-guide__toc {
+  margin-top: var(--space-7);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
+}
+
+.lt-guide__toc summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-primary);
+}
+
+.lt-guide__toc summary::-webkit-details-marker {
+  display: none;
+}
+
+.lt-guide__toc summary::after {
+  content: '+';
+  font-size: var(--text-body-lg);
+  color: var(--color-text-secondary);
+  line-height: 1; /* single glyph, no leading needed */
+}
+
+.lt-guide__toc[open] summary::after {
+  content: '\2212'; /* minus sign */
+}
+
+.lt-guide__toc ul {
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.lt-guide__toc a {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px; /* intentional: sub-token, wie lt-article-TOC */
+}
+
+/* ── Inhaltsverzeichnis: Sticky-Rail ab 1024px ── */
+
+.lt-guide__toc-rail {
+  position: sticky;
+  top: 96px; /* intentional: sticky Header (64px) + Luft, gleicher Offset wie scroll-margin-top */
+  max-height: calc(100vh - 128px);
+  overflow-y: auto;
+}
+
+.lt-guide__toc-rail-title {
+  margin: 0 0 var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.lt-guide__toc-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.lt-guide__toc-list a {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+  text-decoration: none;
+}
+
+.lt-guide__toc-list a:hover {
+  color: var(--color-text-primary);
+}
+
+.lt-guide__toc-list a[aria-current='true'] {
+  color: var(--color-text-primary);
+  font-weight: var(--weight-semibold);
+}
+
+/* Gruppenzeile im Inhaltsverzeichnis: kein Sprungziel, nur Gliederung. */
+.lt-guide__toc-group {
+  margin-top: var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.lt-guide__toc-group:first-child {
+  margin-top: 0;
+}
+
+/* ── Level-Trenner ── */
+
+.lt-guide__level {
+  margin-top: var(--space-9);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.lt-guide__level-label {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.lt-guide__level-title {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+}
+
+.lt-guide__level .lt-guide__prose {
+  margin-top: var(--space-3);
+}
+
+/* ── Kapitel ── */
+
+.lt-guide__chapter {
+  margin-top: var(--space-8);
+  scroll-margin-top: 96px; /* intentional: sticky Header (64px) + Luft, gleicher Offset wie die Rail */
+}
+
+.lt-guide__chapter-num {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.lt-guide__chapter-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+}
+
+.lt-guide__chapter-standfirst {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+}
+
+.lt-guide__figure {
+  margin: var(--space-6) 0 0;
+}
+
+.lt-guide__figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+/* ── Praxis-Schritte ──
+   Ein Panel statt drei Karten: die drei Schritte gehören inhaltlich zusammen und
+   lesen sich als ein Objekt ruhiger als als drei konkurrierende Kacheln. Die
+   Nummern kommen aus einem CSS-Counter, damit kein Redaktionsschritt sie pflegen
+   und beim Umsortieren nachziehen muss. */
+
+.lt-guide__steps {
+  margin: var(--space-6) 0 0;
+  padding: 0 var(--space-5);
+  list-style: none;
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  counter-reset: lt-guide-step;
+}
+
+.lt-guide__step {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr);
+  gap: var(--space-4);
+  padding: var(--space-5) 0;
+}
+
+.lt-guide__step + .lt-guide__step {
+  border-top: 1px solid var(--color-border-default);
+}
+
+.lt-guide__step::before {
+  counter-increment: lt-guide-step;
+  content: counter(lt-guide-step, decimal-leading-zero);
+  font-family: var(--font-heading);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.lt-guide__step-title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+  color: var(--color-text-primary);
+}
+
+.lt-guide__step-text {
+  margin-top: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
+.lt-guide__step-text p {
+  margin: 0 0 var(--space-3);
+}
+
+.lt-guide__step-text p:last-child {
+  margin-bottom: 0;
+}
+
+.lt-guide__step-link {
+  display: inline-block;
+  margin-top: var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px; /* intentional: sub-token, wie lt-article-Fließtextlinks */
+}
+
+/* ── CTA ──
+   quiet = Einschub im Lesefluss, emphasis = Abschluss. Genau ein emphasis-Block
+   pro Seite, das ist der einzige dunkle Bruch im Guide. */
+
+.lt-guide__cta {
+  margin: var(--space-8) 0 0;
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+.lt-guide__cta--quiet {
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+}
+
+.lt-guide__cta--emphasis {
+  background: var(--color-surface-dark);
+}
+
+.lt-guide__cta-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-heading);
+  color: var(--color-text-primary);
+}
+
+.lt-guide__cta-text {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
+.lt-guide__cta-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--space-6);
+  min-height: 48px; /* intentional: Button-Spec aus design-components.mdc */
+  padding: 14px var(--space-6); /* intentional: Button-Spec 14px 32px */
+  border-radius: var(--radius-full);
+  background: var(--color-cta-bg);
+  color: var(--color-cta-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  transition: opacity var(--ease-default);
+}
+
+.lt-guide__cta-btn:hover,
+.lt-guide__cta-btn:focus-visible {
+  opacity: 0.9;
+}
+
+.lt-guide__cta--emphasis .lt-guide__cta-title {
+  color: var(--color-text-on-dark);
+}
+
+.lt-guide__cta--emphasis .lt-guide__cta-text {
+  color: var(--color-text-on-dark-muted);
+}
+
+/* outline-inverted auf dunkler Fläche, gleiche Werte wie lt-hp-science.
+   Die weißen rgba-Werte sind die in docs/section-heading-stack.md freigegebene
+   Ausnahme für Ränder auf dunklen Flächen. */
+.lt-guide__cta--emphasis .lt-guide__cta-btn {
+  background: transparent;
+  color: var(--color-text-on-dark);
+  border: 1.5px solid rgba(255, 255, 255, 0.5); /* intentional: sub-token, wie lt-hp-science */
+  transition: background var(--ease-default), border-color var(--ease-default);
+}
+
+.lt-guide__cta--emphasis .lt-guide__cta-btn:hover,
+.lt-guide__cta--emphasis .lt-guide__cta-btn:focus-visible {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.75);
+}
+
+/* ── Mobil ── */
+
+@media screen and (max-width: 767px) {
+  .lt-guide {
+    padding: var(--space-7) 0 var(--space-8);
+  }
+
+  .lt-guide__chapter {
+    margin-top: var(--space-7);
+  }
+
+  .lt-guide__chapter-title {
+    font-size: var(--text-h3);
+  }
+
+  .lt-guide__standfirst,
+  .lt-guide__chapter-standfirst {
+    font-size: var(--text-body);
+  }
+
+  .lt-guide__level {
+    margin-top: var(--space-8);
+  }
+
+  .lt-guide__steps {
+    padding: 0 var(--space-4);
+  }
+
+  .lt-guide__step {
+    grid-template-columns: 28px minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+
+  .lt-guide__cta {
+    padding: var(--space-5);
+  }
+}
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  var tocs = document.querySelectorAll('[data-lt-guide-toc]');
+  if (!tocs.length) return;
+
+  Array.prototype.forEach.call(tocs, function (toc) {
+    toc.addEventListener('click', function (event) {
+      var link = event.target.closest('a[href^="#"]');
+      if (!link) return;
+      var target = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
+      if (!target) return;
+      event.preventDefault();
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      history.pushState(null, '', link.getAttribute('href'));
+      // Nur die aufklappbare Variante schließt sich nach dem Sprung.
+      if (toc.tagName === 'DETAILS') toc.removeAttribute('open');
+    });
+  });
+
+  // Scroll-Spy: hebt in der Rail das Kapitel hervor, das gerade gelesen wird.
+  var rail = document.querySelector('.lt-guide__toc-rail');
+  if (!rail || !('IntersectionObserver' in window)) return;
+
+  var links = rail.querySelectorAll('a[href^="#"]');
+  if (!links.length) return;
+
+  var linkFor = {};
+  var targets = [];
+  Array.prototype.forEach.call(links, function (link) {
+    var el = document.getElementById(decodeURIComponent(link.getAttribute('href').slice(1)));
+    if (!el) return;
+    linkFor[el.id] = link;
+    targets.push(el);
+  });
+  if (!targets.length) return;
+
+  var visible = {};
+  var observer = new IntersectionObserver(
+    function (entries) {
+      entries.forEach(function (entry) {
+        visible[entry.target.id] = entry.isIntersecting;
+      });
+
+      var current = null;
+      targets.forEach(function (el) {
+        if (!current && visible[el.id]) current = el.id;
+      });
+      // Zwischen zwei Kapiteln ist nichts sichtbar. Dann bleibt die letzte
+      // Markierung stehen, statt kurz ganz zu verschwinden.
+      if (!current) return;
+
+      Array.prototype.forEach.call(links, function (link) {
+        link.removeAttribute('aria-current');
+      });
+      if (linkFor[current]) linkFor[current].setAttribute('aria-current', 'true');
+    },
+    { rootMargin: '-96px 0px -70% 0px' }
+  );
+
+  targets.forEach(function (el) {
+    observer.observe(el);
+  });
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "LT Guide",
+  "tag": "section",
+  "class": "lt-guide-section",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Guide-Titel (H1)",
+      "default": "Longevity Blueprint"
+    },
+    {
+      "type": "text",
+      "id": "standfirst",
+      "label": "Untertitel",
+      "default": "Zehn Kapitel zu den Hebeln, die gesundes Altern nachweislich beeinflussen."
+    },
+    {
+      "type": "richtext",
+      "id": "intro",
+      "label": "Einleitung",
+      "default": "<p>Zum Thema Longevity erscheinen laufend neue Erkenntnisse, und die wenigsten Menschen haben Zeit, sich durch Studien zu arbeiten.</p>"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Titelbild (optional)"
+    },
+    {
+      "type": "header",
+      "content": "Byline"
+    },
+    {
+      "type": "text",
+      "id": "stand",
+      "label": "Stand (z. B. Juli 2026)"
+    },
+    {
+      "type": "text",
+      "id": "author_name",
+      "label": "Autor (Name)"
+    },
+    {
+      "type": "text",
+      "id": "author_credential",
+      "label": "Autor (Qualifikation)"
+    },
+    {
+      "type": "text",
+      "id": "reviewer_name",
+      "label": "Fachlich geprüft von (Name)"
+    },
+    {
+      "type": "text",
+      "id": "reviewer_credential",
+      "label": "Reviewer (Qualifikation)"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_reading_time",
+      "label": "Lesezeit anzeigen",
+      "default": true
+    },
+    {
+      "type": "header",
+      "content": "Inhaltsverzeichnis"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_toc",
+      "label": "Inhaltsverzeichnis anzeigen (ab 3 Kapiteln)",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "toc_title",
+      "label": "Titel des Inhaltsverzeichnisses",
+      "default": "Inhalt"
+    },
+    {
+      "type": "header",
+      "content": "Structured Data"
+    },
+    {
+      "type": "checkbox",
+      "id": "schema_enable",
+      "label": "Article-JSON-LD ausgeben",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "reviewer_anchor",
+      "label": "Anker des Reviewers auf /pages/aerzte",
+      "default": "limmroth",
+      "info": "Muss mit schema_anchor im Person-Block von lt-expert-profile übereinstimmen, sonst mergen die Knoten nicht."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "level",
+      "name": "Level-Trenner",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Label",
+          "default": "Level I"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel",
+          "default": "Grundlagen"
+        },
+        {
+          "type": "richtext",
+          "id": "text",
+          "label": "Kurzbeschreibung",
+          "default": "<p>Die Hebel, die im Alltag am meisten ausmachen.</p>"
+        }
+      ]
+    },
+    {
+      "type": "chapter",
+      "name": "Kapitel",
+      "settings": [
+        {
+          "type": "text",
+          "id": "anchor_id",
+          "label": "Anker-ID",
+          "default": "kapitel-schlaf",
+          "info": "Sprungziel des Inhaltsverzeichnisses. Nie ändern, sobald extern verlinkt."
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Kapitel-Titel (H2)",
+          "default": "Priorisiere deinen Schlaf"
+        },
+        {
+          "type": "text",
+          "id": "standfirst",
+          "label": "Vorspann (ein Satz)",
+          "default": "Schlaf ist unverzichtbar für Regeneration, kognitive Leistung und gesundes Altern."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Kapitelbild"
+        },
+        {
+          "type": "richtext",
+          "id": "intro",
+          "label": "Fließtext",
+          "default": "<p>Schlaf ist kein passiver Zustand, sondern ein biologisches Reparaturfenster.</p>"
+        }
+      ]
+    },
+    {
+      "type": "tip",
+      "name": "Schritt",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel",
+          "default": "Etabliere einen festen Schlafrhythmus"
+        },
+        {
+          "type": "richtext",
+          "id": "body",
+          "label": "Text",
+          "default": "<p>Gehe jeden Tag zur gleichen Zeit ins Bett und stehe zur gleichen Zeit auf.</p>"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link-Label (optional)",
+          "default": "Quelle ansehen"
+        },
+        {
+          "type": "url",
+          "id": "link_url",
+          "label": "Link-Ziel (optional)"
+        }
+      ]
+    },
+    {
+      "type": "cta",
+      "name": "CTA",
+      "settings": [
+        {
+          "type": "select",
+          "id": "style",
+          "label": "Variante",
+          "options": [
+            { "value": "quiet", "label": "Ruhig (heller Einschub)" },
+            { "value": "emphasis", "label": "Abschluss (dunkel)" }
+          ],
+          "default": "quiet"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Headline",
+          "default": "Womit fängst du an?"
+        },
+        {
+          "type": "textarea",
+          "id": "text",
+          "label": "Text",
+          "default": "Das Quiz ordnet in zwei Minuten ein, welcher Hebel bei dir zuerst zählt."
+        },
+        {
+          "type": "text",
+          "id": "button_label",
+          "label": "Button-Label",
+          "default": "Quiz starten"
+        },
+        {
+          "type": "url",
+          "id": "button_url",
+          "label": "Button-Ziel"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 50,
+  "presets": [
+    {
+      "name": "LT Guide",
+      "blocks": [
+        { "type": "level" },
+        { "type": "chapter" },
+        { "type": "tip" }
+      ]
+    }
+  ]
+}
+{% endschema %}
