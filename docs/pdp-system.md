@@ -1,208 +1,147 @@
-# PDP System — LIFETIME
-
-Distilled from the implemented NMN PDP (`templates/product.13_3_nmn.json`).
-This is the live system, not theory.
-
+---
+status: living
+last_review: 2026-07-28
+canonical_for: pdp-section-system und live-reihenfolge
 ---
 
-## Active Section Order (13 sections)
+# PDP-System (Ist-Zustand)
 
-| # | Section type | Role | Stage |
-|---|---|---|---|
-| 1 | `lt-pdp-hero` | Hero + buybox | Attention + Action |
-| 2 | `crs-logo-garden` | Media legitimacy | Trust |
-| 3 | `crs-metrics-row` | Quantified proof | Trust |
-| 4 | `crs-feature-grid` | Outcome benefits | Understanding |
-| 5 | `lt-comparison-table` | Quality differentiation | Trust |
-| 6 | `crs-timeline` | Expectation management | Personal relevance |
-| 7 | `crs-knowledge-base` | Science + mechanism | Understanding → Trust |
-| 8 | `crs-expert-quotes` | Expert authority | Trust |
-| 9 | `crs-link-cards` | Study references | Trust |
-| 10 | `crs-social-quotes` | Customer proof | Trust |
-| 11 | `crs-risk-free-close` | Final CTA | Action |
-| 12 | `crs-faq-accordion` | Risk reduction | Risk reduction |
-| 13 | `apps` | Loox reviews widget | Trust |
+Diese Datei beschreibt, welche Sections die beiden Live-PDPs tatsächlich rendern und welche
+Rolle jede Section im Kaufprozess übernimmt. Sie ist aus `templates/product.nmn-pulver.json`
+und `templates/product.age-dna-test.json` abgeleitet und am 2026-07-28 per `curl` gegen die
+Live-Seiten geprüft. Wer eine PDP umbaut, prüft zuerst hier die Reihenfolge, dann das Template,
+niemals eine ältere Beschreibung.
 
-Disabled (present but inactive): `crs-guarantee-block`, `main-product`
+## Journey-Modell
 
----
+Das Modell aus `.cursor/rules/pdp-architecture.mdc` gilt unverändert: Aufmerksamkeit,
+Verständnis, persönliche Relevanz, Vertrauen, Risikoreduktion, Handlung. Eine Section bedient
+genau eine Stufe. Die Reihenfolge der Stufen ist nicht die Reihenfolge der Sections: beide PDPs
+starten mit Aufmerksamkeit und Handlung gleichzeitig (Hero plus Buybox plus Sticky-ATC) und
+staffeln danach Verständnis, Vertrauen und Risikoreduktion, bis der Close die Handlung
+wiederholt.
 
-## Section Roles
+## PDP NMN (`/products/lifetime-nmn`)
 
-### 1 — lt-pdp-hero
-The primary conversion zone. Everything needed for a first-time visitor to decide.
+Template: `templates/product.nmn-pulver.json` (Suffix `nmn-pulver`, nicht aus dem Slug ableitbar).
+11 Einträge in `order`, davon 1 deaktiviert.
 
-**Structure (top to bottom in the right column):**
-- Rating row: stars + review count
-- H1 headline
-- Tagline / subheadline
-- Benefit bullets (3 outcome statements)
-- Buy box: subscription (default-selected) / one-time toggle
-- Trust pills (wrapping row)
-- Sticky ATC bar (mobile, activated on scroll)
-- Doctor badge + guarantee badge
+| # | Section-Key | Typ (`sections/*.liquid`) | Stufe | Rolle |
+|---|---|---|---|---|
+| 1 | `main` | `lt-pdp-hero` | Aufmerksamkeit + Handlung | Hero, Größenwahl, Abo/Einmal-Buybox, Trust-Zeilen, Sticky-ATC |
+| 2 | `logo_garden` | `crs-logo-garden` | Vertrauen | Medienlogos (RTL, KStA, SWR1, SAT.1, maxima) |
+| 3 | `novel_food` | `crs-novel-food` | Risikoreduktion | Novel-Food-Status, Stand des EU-Verfahrens, Forschungszweck |
+| 4 | `feature_grid` | `crs-feature-grid` | Verständnis | Vier Unterscheidungsmerkmale (Rohstoff, GMP, wissenschaftliche Leitung, Firmensitz) |
+| 5 | `nmn_marktbefund` | `crs-metrics-row` | Vertrauen | Marktbefund NUS/GeroScience 2024 plus eigener Messwert |
+| 6 | `nmn_laborwerte` | `lt-pdp-laborwerte` | Vertrauen | Chargen-Messwerte, Labor, Akkreditierung, Prüfbericht-Link |
+| 7 | `lt_comparison_table` | `lt-comparison-table` | Vertrauen | Abgrenzung LIFETIME gegen typische Anbieter, sechs Zeilen |
+| 8 | `customer_reviews_nmn` | `crs-customer-reviews` | Vertrauen | 8 Reviews plus 5 Themen-Pills, sichtbar 4 |
+| 9 | `risk_free_close` | `crs-risk-free-close` | Handlung | Abo-Close mit vier Trust-Zeilen und Preiszeile |
+| 10 | `faq_accordion` | `crs-faq-accordion` | Risikoreduktion | 9 Fragen, Novel Food an Position 1 |
+| 11 | `main_product_hidden` | `main-product` | keine | `"disabled": true`, rendert nicht (siehe unten) |
 
-**Buybox rules:**
-- Subscription is the primary option, selected by default
-- One-time purchase is the secondary option — "flexible entry, no commitment"
-- One badge per option. No claim stacking.
-- CTA support text: reassurance only — delivery, cancellation, guarantee. No new product arguments.
+Auf dieser PDP trägt keine Section die Stufe „persönliche Relevanz". Das ist der einzige
+strukturelle Unterschied zur AGE&DNA-PDP, der nicht aus dem Produkt folgt.
 
-**Current guarantee:** 30-Tage Geld-zurück-Garantie (first order only).
+## PDP AGE&DNA-Test (`/products/lifetime-age-dna`)
 
-### 2 — crs-logo-garden
-Media appearances. RTL, SAT.1, SWR1, Spiegel.
-Establishes brand credibility before any product argument is made.
-Compact section. No copy beyond logo row and a single credibility line.
+Template: `templates/product.age-dna-test.json`. 14 Einträge in `order`, davon 1 deaktiviert.
 
-### 3 — crs-metrics-row
-Numbers as proof. Purity %, star rating, review count, years of research, or similar.
-Dominant element: the stat number. Label is subordinate.
-On dark surface: stat number white, label muted.
+| # | Section-Key | Typ (`sections/*.liquid`) | Stufe | Rolle |
+|---|---|---|---|---|
+| 1 | `main` | `lt-pdp-hero` | Aufmerksamkeit + Handlung | Hero, Einmalkauf-Buybox (kein Abo-Toggle), Trust-Zeilen, Sticky-ATC |
+| 2 | `logo_garden` | `crs-logo-garden` | Vertrauen | Medienlogos, kompakter gesetzt als auf der NMN-PDP |
+| 3 | `process_steps` | `lt-pdp-process-steps` | Verständnis | Ablauf in 4 Schritten, Kit bis Ergebnis |
+| 4 | `metrics_row` | `crs-metrics-row` | Verständnis | Umfang in Zahlen (187 DNA-Reports, 10 CpG-Gene, 5 Epigenetik-Reports) |
+| 5 | `feature_grid` | `crs-feature-grid` | Verständnis | 6 Leistungskarten inklusive App und AI Health Coach |
+| 6 | `report_preview` | `lt-pdp-report-preview` | Persönliche Relevanz | App-Visual mit 4 Callouts, Retest-Hinweis |
+| 7 | `expert_quotes` | `crs-expert-quotes` | Vertrauen | Limmroth, Horvath, Sinclair mit Quellenangabe |
+| 8 | `comparison_table` | `lt-comparison-table` | Vertrauen | Abgrenzung gegen Standard-Blutbild und Consumer-Tests |
+| 9 | `customer_reviews_test` | `crs-customer-reviews` | Vertrauen | 8 Reviews plus 5 Themen-Pills, sichtbar 4 |
+| 10 | `ideal_candidate` | `lt-pdp-ideal-candidate` | Persönliche Relevanz | 5 Passungs-Profile plus 2 Ausschlüsse |
+| 11 | `faq_accordion` | `crs-faq-accordion` | Risikoreduktion | 11 Fragen (Probe, Datenschutz, Diagnose-Abgrenzung, Retest) |
+| 12 | `risk_free_close` | `crs-risk-free-close` | Handlung | Close mit sechs Trust-Zeilen |
+| 13 | `loox_reviews` | `apps` | Vertrauen | Loox-Widget, bewusst hinter dem Close |
+| 14 | `main_product_hidden` | `main-product` | keine | `"disabled": true`, rendert nicht |
 
-### 4 — crs-feature-grid
-Outcome-focused benefits in card-info grid (not ingredient features).
-3–4 cards. Each card: one outcome, not a mechanism.
-Pattern: icon → title → 1–2 sentence description.
+Unterschied in der Schlusslogik: NMN schließt mit `risk_free_close` vor der FAQ, AGE&DNA stellt
+die FAQ davor und hängt das Loox-Widget hinter den Close. Wer eine der beiden PDPs angleicht,
+sollte das bewusst tun, nicht nebenbei.
 
-### 5 — lt-comparison-table
-LIFETIME vs. generic: purity, certification, testing, guarantee.
-Differentiates on quality signals, not price.
-Binary checkmarks. No prose.
+## Konvention `main_product_hidden`
 
-### 6 — crs-timeline
-"Was kannst du erwarten?" — 4 time steps.
-Manages the "when will I feel something?" objection.
-Last step reinforces continuity: NAD+ falls back to baseline within 4 weeks of stopping.
-This section is the primary argument for subscription over one-time.
+Beide Templates führen die Theme-Section `main-product` unter dem Key `main_product_hidden`
+mit `"disabled": true`. Sie rendert nicht, die Live-Seiten enthalten keine
+`shopify-section-...__main_product_hidden`-ID. Der komplette Kaufpfad (Preis, Varianten,
+Warenkorb-Form) läuft über `lt-pdp-hero`.
 
-### 7 — crs-knowledge-base
-NAD+ mechanism, aging context, study references, expert endorsement.
-Combines science explanation with credibility signal (Prof. Dr. med. Volker Limmroth).
-Quote from expert is present — used only as verified attribution, not testimonial.
+- Der Eintrag bleibt als Parkplatz für Produkt-Blöcke stehen (Rating-Snippet, Titel, bei NMN
+  zusätzlich der Appstle-App-Block und `buy_buttons` mit abgeschalteter Optik).
+- Nicht löschen, ohne vorher zu prüfen, ob ein App-Block darin noch gebraucht wird.
+- Dieselbe Konvention gilt in `templates/product.json` und
+  `templates/product.lifetime-age-folgetest.json`. Die älteren Supplement-Templates
+  (`product.01_tmg.json` bis `product.12_nad-liposomal-2.json`) folgen ihr **nicht**, dort ist
+  `main_product_hidden` aktiv und rendert.
 
-### 8 — crs-expert-quotes
-Expert advisor card. Credentials, title, endorsement line.
-No unverified claims. Credential-first, quote-second.
+## Preisquelle (häufige Fehlannahme)
 
-### 9 — crs-link-cards
-Links to actual study references. Anchors the science claims made in sections 6–8.
-For the visitor who needs to verify before buying.
+`lt-pdp-hero` liest die Preise seit dem 2026-07-18 immer aus der echten Variante
+(`lt_variant_1.price` beziehungsweise die gewählte Größe), nicht aus den Settings. Die Settings
+`pill_1_once_price_cents` und `pill_1_sub_price_cents` stehen zwar noch im Schema und in allen
+Templates, werden aber im Liquid nirgends mehr gelesen. Beispiel NMN: Template sagt `3990`, live
+ausgeliefert wird `data-once-price="3390"` aus der 30-g-Variante. Preise also im Shopify-Produkt
+ändern, nicht im Template. Die Versandschwelle 49 € ist dagegen wirklich hardcodiert in
+`sections/lt-pdp-hero.liquid` (SSR und JS, `>= 4900`).
 
-### 10 — crs-social-quotes
-Customer review quotes. Not star-only ratings — actual text quotes.
-Complement to the Loox app section (section 13).
+## Buybox- und Heading-Logik (gilt für beide PDPs)
 
-### 11 — crs-risk-free-close
-Final CTA section. Repeats the headline argument, lists 3 key reassurances (checkmarks), primary CTA button, secondary text link to one-time option.
-Closes the page before FAQ deflects final intent.
+- `show_subscription_toggle` steuert die Abo-Auswahl. NMN: `true`, die Abo-Karte ist
+  vorausgewählt. AGE&DNA: `false`, es rendert nur die Einmalkauf-Karte, ohne ODER-Trenner und
+  ohne Appstle-Widget.
+- `show_size_selector` greift nur, wenn das Produkt mehr als eine Variante hat. NMN: `true`
+  (30/60/90 g), Default ist die kleinste Gramm-Variante, ein `?variant=`-Deep-Link wählt die
+  Größe vor. AGE&DNA: nicht gesetzt.
+- Trust-Zeilen `trust_1` bis `trust_4` sind frei belegbar, `trust_4` ist optional und kann ein
+  Popup öffnen (`trust_4_popup_title` / `trust_4_popup_body`, auf der NMN-PDP der
+  Novel-Food-Hinweis).
+- In `crs-risk-free-close` ist `price_fallback` nur der serverseitige Platzhalter. Ein Skript in
+  der Section überschreibt die Zeile mit dem aktuellen Preis aus der Buybox, sobald eine
+  Abo-Karte auf der Seite existiert.
+- In allen `crs-*`-Sections blendet der Wert `__none__` ein Feld aus (`kicker`, `subheading`,
+  `intro`). Leerstring ist nicht dasselbe, siehe `docs/section-heading-stack.md`.
 
-### 12 — crs-faq-accordion
-Risk reduction. Addresses: Novel Food status, results timeline, usage, cancellation, Uthever® certification, legality, supply duration, guarantee scope.
-Novel Food answer must appear as question 1 — legal and compliance requirement.
+## Prüfmethode
 
-### 13 — apps
-Loox review widget. Third-party social proof aggregation.
-Position is after FAQ — supporting proof, not primary conversion.
+Reihenfolge aus dem Template neu ableiten (der Kommentar-Header vor dem JSON muss weg):
 
----
-
-## Proof Architecture
-
-The trust-building sequence is front-loaded and layered:
-
+```bash
+python3 - <<'PY'
+import re, json, pathlib
+for f in ['templates/product.nmn-pulver.json', 'templates/product.age-dna-test.json']:
+    t = json.loads(re.sub(r'^\s*/\*.*?\*/', '', pathlib.Path(f).read_text(), flags=re.S))
+    print('==', f, len(t['order']), 'Sections')
+    for i, key in enumerate(t['order'], 1):
+        s = t['sections'][key]
+        print(f"{i:2} {key:24} {s['type']:24} {'DISABLED' if s.get('disabled') else ''}")
+PY
 ```
-Media trust (section 2)
-  → Quantified proof (section 3)
-    → Benefit claims (section 4)
-      → Quality differentiation (section 5)
-        → Timeline / continuity argument (section 6)
-          → Science + expert authority (sections 7–9)
-            → Social proof (sections 10, 13)
-              → Final action (section 11)
+
+Gegen die Live-Seite prüfen (zeigt die tatsächlich gerenderten Sections in Reihenfolge):
+
+```bash
+curl -sS https://www.lifetime-health.de/products/lifetime-nmn \
+  | grep -o 'id="shopify-section-[a-zA-Z_0-9-]*"'
 ```
 
-Each layer assumes the previous has landed. Do not reorder without a conversion-specific reason.
+Template-Zuordnung nie aus dem Dateinamen raten, sondern am Produkt bestätigen
+(Shopify-MCP oder Admin-GraphQL):
 
----
-
-## Headline + Subheadline Logic
-
-The hero headline and tagline are a single visual unit. Not two separate blocks.
-
-**Rules (from implemented PDP):**
-- Headline: `--text-h1` (36px), `--font-heading`, `--weight-bold`, `--leading-heading` (1.15)
-- Tagline/subheadline: same font, smaller size (`--text-body-lg` or `--text-section`), `--weight-regular`, `--color-text-secondary` — differentiated by visual weight and opacity, not a dramatic size drop
-- Spacing between headline and subheadline: `--space-2` to `--space-3` — tight, like a natural line break within a single block, not a section gap
-- Both lines should share a similar visual width — if the tagline runs significantly longer or shorter than the headline, break or trim it to match
-- Max-width on the text column: controlled to prevent wide runaway lines. Not `100%` on desktop. Typically matches the buybox column width.
-- Do not center-align the PDP hero text. Left-aligned in the right column.
-
-**Current NMN headline pair:**
+```graphql
+query { product(id: "gid://shopify/Product/...") { handle templateSuffix } }
 ```
-Der tägliche NAD⁺-Baustein gegen das biologische Altern deiner Zellen.
-Entwickelt von Ärzten. Unabhängig laborgeprüft. Jede Charge öffentlich einsehbar.
-```
-Both lines are roughly the same visual width at the implemented column size. This is intentional.
 
----
+## Neue PDP anlegen
 
-## CTA Button Logic
-
-- Background: `var(--color-dark)` (#364F56) — dark teal, not sand
-- Text: `var(--color-white)`
-- Shape: `var(--radius-full)` (pill)
-- Height: min-height 48px; full-width inside the buybox zone
-- One primary CTA per viewport. Secondary link option in text, not a second button.
-- Label is action + price inline: "Abo starten — 34,90 €/Monat" (not just "Jetzt kaufen")
-
----
-
-## Subscription Framing
-
-Subscription is the primary option and is pre-selected. Its messaging logic:
-- Role: effortless continuity ("wird automatisch Teil deiner Routine")
-- Savings stated as a %, not a promise
-- Control reassurance: adjustable, pauseable, cancellable at any time
-- One badge. No stacking with popularity or recommendation claims.
-
-One-time purchase is secondary:
-- Role: flexible entry ("einmal ausprobieren, ohne Bindung")
-- Framed as a trial path, not a downgrade
-
----
-
-## Reusable vs. Product-Specific
-
-**Reuse across products (structure is fixed):**
-- Section order (all 13 positions)
-- Section types (all `crs-*` and `lt-*` types)
-- Padding / spacing values
-- `crs-guarantee-block` structure (disabled but available)
-- `crs-logo-garden` logos (same media partners)
-
-**Update per product:**
-- All headline, tagline, and bullet copy in `lt-pdp-hero`
-- Metrics in `crs-metrics-row`
-- Feature cards in `crs-feature-grid`
-- Comparison table rows in `lt-comparison-table`
-- Timeline steps in `crs-timeline`
-- Science content in `crs-knowledge-base`
-- Expert credentials in `crs-expert-quotes`
-- Study links in `crs-link-cards`
-- Review quotes in `crs-social-quotes`
-- FAQ questions + answers in `crs-faq-accordion`
-- Pricing, pack options, guarantee duration, trust pills in `lt-pdp-hero` settings
-
-See `docs/lt-pdp-template-notes.md` for the complete per-product field checklist.
-
----
-
-## Adding a New Section
-
-1. Identify which psychological stage it serves (see `.cursor/rules/pdp-architecture.mdc`)
-2. Confirm it does not duplicate an existing section's job
-3. Check `order` array count — max 25 total
-4. Check schema `name` ≤ 25 chars
-5. Reference closest approved example in `_examples/`
-6. Build, then run visual QA from `.cursor/rules/design-components.mdc` §8
+Feldweise Checkliste, Duplizier-Vorlage und Push-Workflow stehen in
+`docs/lt-pdp-template-notes.md`. Plattformgrenzen: maximal 25 Sections im `order`-Array,
+Schema-`name` maximal 25 Zeichen.

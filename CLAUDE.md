@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-06-15
+last_review: 2026-07-28
 canonical_for: shopify-theme-orientation
 ---
 
@@ -49,7 +49,7 @@ shopify theme list      # List available themes
 
 1. **Layouts** (`/layout/`): HTML wrapper (`theme.liquid` is entry point)
 2. **Templates** (`/templates/`): JSON files declaring sections per page type
-3. **Sections** (`/sections/`): Reusable components (117 files); Liquid + `{% schema %}`
+3. **Sections** (`/sections/`): Reusable components (~200 files, zählen mit `ls sections/ | wc -l`); Liquid + `{% schema %}`
 4. **Snippets** (`/snippets/`): Stateless partials via `{% render 'snippet-name' %}`
 5. **Blocks** (`/blocks/`): Nested components within sections
 
@@ -87,6 +87,8 @@ Read `_examples/README.md` before building any section. Approved reference imple
 | `_examples/sections/stat-callout.liquid` | stat-callout | numbers/proof sections |
 | `_examples/sections/reviews.liquid` | card-review × 3 | testimonial sections |
 | `_examples/sections/quote.liquid` | quote-block | expert/testimonial emphasis |
+| `_examples/sections/expert-profile.liquid` | expert-profile | person/authority pages |
+| `_examples/sections/team-grid.liquid` | team-grid | team/people grids |
 
 For PDP work the visual north star is `_examples/pdp-reference.html` (approved mobile PDP): match its visual quality, spacing rhythm, component structure, and token usage.
 
