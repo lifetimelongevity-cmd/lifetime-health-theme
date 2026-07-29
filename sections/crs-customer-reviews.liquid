@@ -313,6 +313,98 @@
   </div>
 </div>
 
+{%- comment -%}
+  ── Review-Knoten fuers JSON-LD ────────────────────────────────────────────
+  BJ-Entscheid 2026-07-29: Die Bewertungstexte werden maschinenlesbar
+  ausgezeichnet. Das ersetzt die frueher gegenteilige Notiz in
+  snippets/microdata-schema.liquid, die dort nachgezogen ist.
+
+  WARUM HIER UND NICHT IM LAYOUT-SNIPPET
+  Google verlangt, dass ausgezeichnete Bewertungen auf derselben Seite sichtbar
+  sind. `microdata-schema.liquid` laeuft auf jeder Produktseite, auch auf denen
+  ohne Review-Section; von dort ausgezeichnete Bewertungen waeren unsichtbar
+  ausgezeichnet und damit ein Richtlinienverstoss. Der Knoten haengt deshalb an
+  der Section, die sie rendert, und wird ueber dieselbe `@id` an den
+  Product-Knoten geheftet wie das `aggregateRating`.
+
+  CLAIM-FILTER, NUR FUER DIE LOOX-QUELLE
+  Sichtbar bleibt jede Bewertung, die heute schon sichtbar ist. Ausgezeichnet
+  wird eine Teilmenge davon, und zwar ohne die mit Wirkbezug. Eine Teilmenge
+  ist nach den Google-Richtlinien zulaessig (sichtbar ohne Markup ja, Markup
+  ohne sichtbar nein). Der Grund ist VO (EG) 1924/2006 Art. 1 Abs. 2: eine
+  ausgezeichnete Kundenaussage wird dem Anbieter als eigene kommerzielle
+  Kommunikation zugerechnet. „Bin mit der Wirkung sehr zufrieden" (NAD⁺) oder
+  „bin mit der Wirkung zufrieden" (Resveratrol) waeren damit Wirkaussagen von
+  LIFETIME. Der Filter faellt bewusst konservativ aus; „wirkt hochwertig" faellt
+  mit raus. Ein falsch aussortierter Treffer kostet Reichweite, ein falsch
+  ausgezeichneter kostet mehr.
+
+  Fuer die Block-Quelle greift der Filter nicht: die Bloecke sind von Hand
+  kuratiert und tragen zusaetzlich eine echte Einzelbewertung, also auch
+  `reviewRating`. Nur die sind damit ueberhaupt Rich-Snippet-faehig. Die
+  Loox-Quelle liefert `author` und `reviewBody` ohne Rating, weil das Metafeld
+  keine Einzelbewertung traegt. Ein erfundener Fuenf-Sterne-Default waere die
+  Alternative gewesen und kommt nicht in Frage.
+{%- endcomment -%}
+
+{%- liquid
+  assign cr_ld_ok = false
+  if product != blank and product.url != blank
+    assign cr_ld_ok = true
+  endif
+-%}
+
+{%- if cr_ld_ok -%}
+  {%- capture cr_ld_items -%}
+    {%- if cr_source == 'loox' -%}
+      {%- assign cr_claim_stems = 'wirkung,wirkt,wirksam,energie,fitter,spüre,spürbar,gespürt,schmerz,schlaf,blutdruck,cholesterin,falten,gelenk,abnehm,heilt,geheilt,krank,immunsystem,konzentration,biologisches alter,jünger,verjüng,libido,verdau' | split: ',' -%}
+      {%- for cr_ld_name in cr_loox_name_list -%}
+        {%- liquid
+          assign cr_ld_body = cr_loox_text_list[forloop.index0] | strip
+          assign cr_ld_probe = cr_ld_body | downcase
+          assign cr_ld_blocked = false
+          for stem in cr_claim_stems
+            if cr_ld_probe contains stem
+              assign cr_ld_blocked = true
+              break
+            endif
+          endfor
+        -%}
+        {%- unless cr_ld_blocked -%}
+          {"@type":"Review","author":{"@type":"Person","name":{{ cr_ld_name | json }}},"reviewBody":{{ cr_ld_body | json }}}@@LDITEM@@
+        {%- endunless -%}
+      {%- endfor -%}
+    {%- elsif cr_has_reviews -%}
+      {%- for block in section.blocks -%}
+        {%- if block.type == 'review' and block.settings.text != blank -%}
+          {%- assign cr_ld_rating = block.settings.rating | default: 5 -%}
+          {"@type":"Review","author":{"@type":"Person","name":{{ block.settings.name | default: 'Kundin oder Kunde' | json }}},"reviewBody":{{ block.settings.text | strip | json }},"reviewRating":{"@type":"Rating","ratingValue":{{ cr_ld_rating }},"bestRating":5,"worstRating":1}}@@LDITEM@@
+        {%- endif -%}
+      {%- endfor -%}
+    {%- endif -%}
+  {%- endcapture -%}
+
+  {%- comment -%}
+    Trennzeichen statt nachlaufender Kommas. Der naheliegende Weg, jedes Element
+    mit einem Komma zu beenden und das letzte hinterher abzuschneiden, ist hier
+    eine Falle: Liquids `split` verwirft das leere Endelement, `split: '},' |
+    join: '},'` frisst deshalb die schliessende Klammer des letzten Objekts mit.
+    Genau dieselbe Eigenschaft macht das Trennzeichen sauber: das leere Element
+    hinter dem letzten `@@LDITEM@@` faellt weg, `join: ','` setzt die Kommas
+    danach nur noch zwischen die Elemente.
+  {%- endcomment -%}
+  {%- assign cr_ld_items = cr_ld_items | split: '@@LDITEM@@' | join: ',' | strip -%}
+  {%- if cr_ld_items != blank -%}
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org/",
+        "@id": {{ product.url | append: '#product' | json }},
+        "review": [{{ cr_ld_items }}]
+      }
+    </script>
+  {%- endif -%}
+{%- endif -%}
+
 {% stylesheet %}
 /* ============================================================
    Customer Reviews — crs-customer-reviews.liquid
