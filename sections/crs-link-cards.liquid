@@ -16,9 +16,20 @@
   elsif section.settings.heading_size == 'feature'
     assign crs_h_headline_md = true
   endif
+
+  comment
+    Anker-ID muss VOR dem style-Block stehen: der Wrapper rendert id="{{ sec_anchor }}",
+    und der Selektor unten muss dieselbe ID treffen. Solange hier hart
+    "#section-<id>" stand, fielen padding_top/padding_bottom ersatzlos weg,
+    sobald anchor_id gesetzt war (die Karten stiessen dann direkt an den Footer).
+  endcomment
+  assign sec_anchor = section.settings.anchor_id
+  if sec_anchor == blank
+    assign sec_anchor = 'section-' | append: section.id
+  endif
 -%}
 {% style %}
-  #section-{{ section.id }} {
+  #{{ sec_anchor }} {
     --crs-bg:       {{ section.settings.color_bg }};
     --crs-card-bg:  {{ section.settings.color_card_bg }};
     --crs-text:     {{ section.settings.color_text }};
@@ -33,13 +44,8 @@
 {%- comment -%}
   Optionale Anker-ID (28.07.): macht den Abschnitt adressierbar und für ein
   Inhaltsverzeichnis ansprechbar. Ohne Wert bleibt die bisherige ID erhalten.
+  Zugewiesen wird sie oben vor dem style-Block, siehe Kommentar dort.
 {%- endcomment -%}
-{%- liquid
-  assign sec_anchor = section.settings.anchor_id
-  if sec_anchor == blank
-    assign sec_anchor = 'section-' | append: section.id
-  endif
--%}
 <div class="lc-section" id="{{ sec_anchor }}">
   <div class="lc-container">
     {%- if crs_lc_kicker != blank or crs_lc_head != blank or crs_lc_sub != blank -%}
