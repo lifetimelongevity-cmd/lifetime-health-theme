@@ -1,0 +1,575 @@
+{%- comment -%}
+  ===================================================================
+  LIFETIME PDP — Wirkprinzip  ·  lt-pdp-wirkprinzip.liquid
+  ===================================================================
+
+  ZWECK
+  Erklaert in hoechstens drei Stufen, was der Stoff im Koerper tut.
+  Ersetzt die `rich-text`-Lexikonbloecke im Bestand, die zwischen 313
+  und 822 Zeichen lang sind und den Kaufpfad mit Biochemie-Unterricht
+  unterbrechen (CaAKG: 616 Zeichen Citratzyklus, danach 822 Zeichen
+  Krebs-Zyklus; Spermidin: 313 Zeichen Polyamin plus 550 Zeichen
+  Autophagie).
+
+  Die Begrenzung auf drei Stufen mit je einem Satz IST der Zweck der
+  Section, nicht ihre Einschraenkung. Wer mehr braucht, braucht keinen
+  laengeren Block, sondern einen Blogartikel und einen Link.
+
+  COMPLIANCE, VOR DEM BEFUELLEN LESEN
+  Das ist die Section, in der gesundheitsbezogene Angaben am ehesten
+  entstehen. VO (EG) 1924/2006 Art. 10(1): eine Wirkaussage ist nur
+  zulaessig, wenn sie in der Unionsliste steht und wortlautnah verwendet
+  wird, unabhaengig davon ob Studien existieren. Krankheitsbezug
+  (Art. 7 LMIV) gar nicht erst thematisieren.
+
+  Erwartungswert laut Briefing §5.4: fuer Spermidin, Resveratrol, CaAKG,
+  Fisetin und NAD⁺ existiert KEIN zugelassener Claim. Fuer diese Produkte
+  beschreibt die Section den Stoff und seine Rolle im Stoffwechsel, ohne
+  ihm eine Wirkung zuzuschreiben. Wo kein zulaessiger Claim vorliegt und
+  auch keine claimfreie Beschreibung traegt, bleibt die Section weg.
+  Sie ist optional, nicht Pflicht.
+
+  ENTSCHEIDUNGEN (§12 Build-Prozess)
+  - Stufen ohne Karten : nur Whitespace und ein duenner Zahl-Indikator.
+                         Drei Karten haetten drei kurze Saetze zu drei
+                         Objekten aufgeblasen und ihnen mehr Gewicht
+                         gegeben als der Aussage.
+  - <ol> statt <div>   : die Stufen sind eine Reihenfolge, keine Liste
+                         gleichrangiger Punkte. Screenreader sagen die
+                         Position an, ohne dass die Zahl doppelt im Text
+                         steht. Die sichtbare Zahl kommt aus einem
+                         CSS-Counter, nicht aus dem Markup.
+  - Zwei Spalten       : nur wenn wirklich ein Bild gesetzt ist. Ohne Bild
+                         faellt die Section auf eine Spalte zurueck, statt
+                         eine leere Spalte samt gap stehen zu lassen.
+  - Bildquelle doppelt : `image` (image_picker) UND `image_url` (rohe
+                         CDN-URL). SVGs liegen in Shopify als GenericFile
+                         und erscheinen im image_picker nicht. Ohne das
+                         Textfeld waeren genau die markenkonformen
+                         SVG-Infografiken nicht einsetzbar.
+  - Quellenzeile       : `source_label` + `source_url`, ein Textlink unter
+                         den Stufen. Eine benannte Quelle traegt mehr als
+                         jedes Vertrauens-Adjektiv, und Extraktoren lesen
+                         sie mit.
+  - Subtraktion        : kein CTA, kein Badge, keine Icons je Stufe.
+
+  ABWEICHUNG VOM BRIEFING (dokumentiert)
+  Das Briefing verlangt `stage_body` "hart auf etwa 120 Zeichen begrenzt".
+  Hart abgeschnitten wird hier nichts: eine stillschweigend gekuerzte
+  Aussage auf einer Live-Seite ist schlimmer als eine zu lange. Stattdessen
+  ist das Feld ein einzeiliges `text`-Input statt einer Textarea, und der
+  Korridor steht im `info`. Wer mehr schreibt, sieht es beim Tippen.
+
+  SCHRIFTGROESSEN
+  Sektionslokal drei Stufen: --text-h2 (Heading-Stack), --text-body
+  (Stufentext), --text-body-sm (Stufenlabel, Quellenzeile).
+
+  ABHAENGIGKEITEN
+  - snippets/section-heading-crs.liquid
+  - assets/crs-section-headings.css (in layout/theme.liquid eingebunden)
+  - Tokens aus assets/theme.css :root
+
+  Angelegt 2026-07-29.
+{%- endcomment -%}
+
+{%- liquid
+  assign wp_align = section.settings.content_align | default: 'left'
+  unless wp_align == 'left' or wp_align == 'center' or wp_align == 'right'
+    assign wp_align = 'left'
+  endunless
+
+  assign wp_kicker = section.settings.kicker | strip
+  assign wp_head   = section.settings.heading | strip
+  assign wp_sub    = section.settings.subheading | strip
+  if wp_kicker == '__none__'
+    assign wp_kicker = ''
+  endif
+  if wp_head == '__none__'
+    assign wp_head = ''
+  endif
+  if wp_sub == '__none__'
+    assign wp_sub = ''
+  endif
+
+  assign wp_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign wp_headline_lg = true
+  endif
+  assign wp_headline_md = false
+  if section.settings.heading_size == 'feature'
+    assign wp_headline_md = true
+  endif
+
+  assign wp_img_url = section.settings.image_url | strip
+  if wp_img_url == '__none__'
+    assign wp_img_url = ''
+  endif
+  assign wp_img_alt = section.settings.image_alt | strip
+  if wp_img_alt == '__none__'
+    assign wp_img_alt = ''
+  endif
+
+  # image_picker gewinnt, wenn gesetzt. image_url traegt die SVGs.
+  assign wp_has_media = false
+  if section.settings.image != blank or wp_img_url != blank
+    assign wp_has_media = true
+  endif
+
+  assign wp_media_pos = section.settings.media_position | default: 'right'
+  unless wp_media_pos == 'left' or wp_media_pos == 'right'
+    assign wp_media_pos = 'right'
+  endunless
+
+  assign wp_src_label = section.settings.source_label | strip
+  if wp_src_label == '__none__'
+    assign wp_src_label = ''
+  endif
+  assign wp_src_url = section.settings.source_url | strip
+
+  # Nur Stufen mit echtem Text zaehlen. Ein im Editor angelegter, leerer
+  # Block darf keine Nummer bekommen.
+  assign wp_stage_count = 0
+  for block in section.blocks
+    assign wp_s_body = block.settings.stage_body | strip
+    assign wp_s_label = block.settings.stage_label | strip
+    if wp_s_body == '__none__'
+      assign wp_s_body = ''
+    endif
+    if wp_s_label == '__none__'
+      assign wp_s_label = ''
+    endif
+    if wp_s_body != blank or wp_s_label != blank
+      assign wp_stage_count = wp_stage_count | plus: 1
+    endif
+  endfor
+
+  assign wp_render = false
+  if wp_stage_count > 0
+    assign wp_render = true
+  endif
+-%}
+
+{%- if wp_render -%}
+{%- style -%}
+  #section-{{ section.id }} {
+    --ltwp-bg:   {{ section.settings.color_bg }};
+    --ltwp-text: {{ section.settings.color_text }};
+    /* 0.72 haelt auf #f7f7f4 wie auf #f2f1ed 4.5:1. Nicht weiter aufhellen. */
+    --ltwp-text-muted: {{ section.settings.color_text | color_modify: 'alpha', 0.72 }};
+    /* Der Zahl-Indikator ist dekorativ, die Position steht im <ol>. */
+    --ltwp-numeral:    {{ section.settings.color_text | color_modify: 'alpha', 0.38 }};
+    --ltwp-rule:       {{ section.settings.color_text | color_modify: 'alpha', 0.10 }};
+    --ltwp-media-bg:   {{ section.settings.color_card_bg }};
+    padding-top:    min({{ section.settings.padding_top }}px, 15vw);
+    padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
+  }
+{%- endstyle -%}
+
+<div class="ltwp" id="section-{{ section.id }}">
+  <div class="ltwp__container">
+    <div class="ltwp__layout{% if wp_has_media %} ltwp__layout--with-media ltwp__layout--media-{{ wp_media_pos }}{% endif %}">
+
+      <div class="ltwp__main">
+        {%- render 'section-heading-crs',
+          heading: wp_head,
+          subheading: wp_sub,
+          kicker: wp_kicker,
+          align: wp_align,
+          headline_lg: wp_headline_lg,
+          headline_md: wp_headline_md,
+          extra_class: 'ltwp__header'
+        -%}
+
+        <ol class="ltwp__stages">
+          {%- for block in section.blocks -%}
+            {%- liquid
+              assign s_label = block.settings.stage_label | strip
+              assign s_body  = block.settings.stage_body | strip
+              if s_label == '__none__'
+                assign s_label = ''
+              endif
+              if s_body == '__none__'
+                assign s_body = ''
+              endif
+            -%}
+            {%- if s_label != blank or s_body != blank -%}
+              <li class="ltwp-stage" {{ block.shopify_attributes }}>
+                {%- if s_label != blank -%}
+                  <p class="ltwp-stage__label">{{ s_label | escape }}</p>
+                {%- endif -%}
+                {%- if s_body != blank -%}
+                  <p class="ltwp-stage__body">{{ s_body | escape }}</p>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ol>
+
+        {%- if wp_src_label != blank -%}
+          <p class="ltwp__source">
+            {%- if wp_src_url != blank -%}
+              <a class="ltwp__source-link" href="{{ wp_src_url }}" target="_blank" rel="noopener noreferrer">{{ wp_src_label | escape }}</a>
+            {%- else -%}
+              {{ wp_src_label | escape }}
+            {%- endif -%}
+          </p>
+        {%- endif -%}
+      </div>
+
+      {%- if wp_has_media -%}
+        <div class="ltwp__media">
+          {%- if section.settings.image != blank -%}
+            {{ section.settings.image
+               | image_url: width: 900
+               | image_tag:
+                 loading: 'lazy',
+                 sizes: '(min-width: 900px) 42vw, 100vw',
+                 widths: '400, 600, 900',
+                 alt: wp_img_alt,
+                 class: 'ltwp__media-img' }}
+          {%- else -%}
+            {%- comment -%}
+              Rohe CDN-URL, typischerweise ein SVG. Kein srcset moeglich, weil
+              Shopify GenericFiles nicht ueber image_url transformiert.
+            {%- endcomment -%}
+            <img class="ltwp__media-img" src="{{ wp_img_url }}" alt="{{ wp_img_alt | escape }}" loading="lazy" decoding="async">
+          {%- endif -%}
+        </div>
+      {%- endif -%}
+
+    </div>
+  </div>
+</div>
+{%- endif -%}
+
+{% stylesheet %}
+/* ===================================================
+   LIFETIME PDP — Wirkprinzip · lt-pdp-wirkprinzip.liquid
+   Max. drei nummerierte Stufen, optional mit Bildflaeche
+   =================================================== */
+
+.ltwp {
+  background: var(--ltwp-bg, #f7f7f4);
+  color: var(--ltwp-text, #26251e);
+}
+
+/* 1280px/20px byte-identisch mit lt-pdp-laborwerte und lt-pdp-produktfakten
+   auf derselben PDP. Flaechenbuendigkeit schlaegt die 1200/24 der Governance. */
+.ltwp__container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* Einspaltig als Grundzustand. Die zweite Spalte kommt nur per Modifier,
+   sonst bliebe ohne Bild eine leere Spalte samt gap stehen. */
+.ltwp__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .ltwp__layout--with-media {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
+    gap: var(--space-8);
+  }
+
+  /* Reihenfolge im DOM bleibt Text zuerst: die Stufen sind der Inhalt,
+     das Bild illustriert sie. Umgestellt wird nur visuell. */
+  .ltwp__layout--media-left .ltwp__main {
+    order: 2;
+  }
+
+  .ltwp__layout--media-left .ltwp__media {
+    order: 1;
+  }
+}
+
+.ltwp__header {
+  margin-bottom: var(--space-6);
+}
+
+.ltwp__stages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  counter-reset: ltwp-stage;
+}
+
+.ltwp-stage {
+  counter-increment: ltwp-stage;
+  position: relative;
+  padding-left: var(--space-7);
+}
+
+.ltwp-stage + .ltwp-stage {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--ltwp-rule, rgba(38, 37, 30, 0.1));
+}
+
+/* Duenner Zahl-Indikator, rein dekorativ. Die Reihenfolge traegt das <ol>. */
+.ltwp-stage::before {
+  content: counter(ltwp-stage);
+  position: absolute;
+  left: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--leading-body);
+  color: var(--ltwp-numeral, rgba(38, 37, 30, 0.38));
+}
+
+.ltwp-stage + .ltwp-stage::before {
+  top: var(--space-5);
+}
+
+.ltwp-stage__label {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+  color: var(--ltwp-text, #26251e);
+  margin: 0 0 var(--space-2);
+}
+
+.ltwp-stage__body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--ltwp-text, #26251e);
+  margin: 0;
+  max-width: 52ch;
+}
+
+.ltwp__source {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--ltwp-text-muted, rgba(38, 37, 30, 0.72));
+  margin: var(--space-6) 0 0;
+}
+
+/* Teal ist im System Links vorbehalten, hier also zulaessig. */
+.ltwp__source-link {
+  color: var(--color-teal);
+  text-underline-offset: 2px;
+}
+
+.ltwp__media {
+  background: var(--ltwp-media-bg, #f2f1ed);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ltwp__media-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  border-radius: var(--radius-md);
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT Wirkprinzip",
+  "tag": "section",
+  "class": "shopify-section--lt-pdp-wirkprinzip",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Flächen"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Fläche hinter dem Bild",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Überschrift"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "info": "__none__ blendet den Kicker aus. Standard ist ohne Kicker.",
+      "default": "__none__"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Was der Stoff im Körper tut"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Unterzeile",
+      "info": "Genau ein Satz. Läuft in derselben Größe wie die Überschrift, nur gedämpft.",
+      "default": "__none__"
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Größe der Überschrift",
+      "options": [
+        {
+          "value": "section",
+          "label": "Standard"
+        },
+        {
+          "value": "feature",
+          "label": "Feature (--text-h2)"
+        },
+        {
+          "value": "product_title",
+          "label": "Produkttitel (--text-h1)"
+        }
+      ],
+      "default": "feature"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung",
+      "options": [
+        {
+          "value": "left",
+          "label": "Links"
+        },
+        {
+          "value": "center",
+          "label": "Zentriert"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Bild"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Bild"
+    },
+    {
+      "type": "text",
+      "id": "image_url",
+      "label": "Bild-URL (für SVG)",
+      "info": "SVGs liegen in Shopify als GenericFile und erscheinen oben nicht in der Auswahl. Hier die rohe CDN-URL einsetzen. Wird ignoriert, wenn oben ein Bild gewählt ist.",
+      "default": "__none__"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Bildbeschreibung",
+      "info": "Beschreibt, was die Grafik zeigt. Leer lassen, wenn die Grafik rein dekorativ ist.",
+      "default": "__none__"
+    },
+    {
+      "type": "select",
+      "id": "media_position",
+      "label": "Bildposition ab 900px",
+      "options": [
+        {
+          "value": "right",
+          "label": "Rechts"
+        },
+        {
+          "value": "left",
+          "label": "Links"
+        }
+      ],
+      "default": "right"
+    },
+    {
+      "type": "header",
+      "content": "Quelle"
+    },
+    {
+      "type": "text",
+      "id": "source_label",
+      "label": "Quellenangabe",
+      "info": "Zum Beispiel „EFSA-Gutachten, Mai 2026“. __none__ blendet die Zeile aus.",
+      "default": "__none__"
+    },
+    {
+      "type": "url",
+      "id": "source_url",
+      "label": "Link zur Quelle"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "stage",
+      "name": "Stufe",
+      "settings": [
+        {
+          "type": "text",
+          "id": "stage_label",
+          "label": "Bezeichnung der Stufe",
+          "info": "Zwei bis vier Wörter. __none__ blendet die Bezeichnung aus.",
+          "default": "__none__"
+        },
+        {
+          "type": "text",
+          "id": "stage_body",
+          "label": "Ein Satz",
+          "info": "Genau ein Satz, Zielkorridor 80 bis 120 Zeichen. Keine gesundheitsbezogene Angabe ohne zugelassenen Claim-Wortlaut, siehe VO (EG) 1924/2006 Art. 10(1).",
+          "default": "__none__"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 3,
+  "presets": [
+    {
+      "name": "LT Wirkprinzip"
+    }
+  ]
+}
+{% endschema %}
