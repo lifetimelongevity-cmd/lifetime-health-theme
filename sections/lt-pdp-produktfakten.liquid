@@ -1,0 +1,691 @@
+{%- comment -%}
+  ===================================================================
+  LIFETIME PDP — Produktfakten  ·  lt-pdp-produktfakten.liquid
+  ===================================================================
+
+  ZWECK
+  Traegt die Pflichtangaben nach LMIV und NemV sichtbar auf der Seite:
+  Naehrwerte je Portion, Zutaten, Verzehrempfehlung und den gesetzlichen
+  Hinweis. Bisher liegen diese Angaben in `collapsible_tab`-Blocks der
+  `main-product`-Section, also hinter Akkordeons und nur solange
+  `main_product_hidden` nicht deaktiviert ist. Rund 7 KB einzigartiger
+  Text je Seite ohne jeden Fallback.
+
+  Gate G2 aus docs/briefing-pdp-refit.md: `main_product_hidden` darf erst
+  auf `"disabled": true` gehen, wenn diese Section auf derselben Seite live
+  ist UND Zutaten, Naehrwerte und Verzehrempfehlung dort sichtbar
+  gegengeprueft wurden.
+
+  ENTSCHEIDUNGEN (§12 Build-Prozess)
+  - Kein Accordion   : bewusst. Die Angaben sind Pflicht und sollen ohne
+                       Interaktion lesbar sein. Ein Akkordeon waere zudem
+                       genau der Zustand, aus dem diese Section herausfuehrt.
+  - Eine Flaeche     : die drei Spalten stehen auf EINER Karte, nicht auf
+                       drei. Drei Karten haetten drei ungleich lange Inhalte
+                       in gleich hohe Rahmen gezwungen.
+  - Spaltenzahl      : datengesteuert ueber `data-ltpf-cols`, nicht
+                       repeat(3, 1fr). Ein Pulver ohne Naehrwerttabelle
+                       fuellt nur zwei Gruppen, ein hartes Dreierraster
+                       liesse dort eine leere Spalte samt gap stehen.
+  - Naehrwerte       : <table> mit <th scope="row">, optisch nur 1px-Regeln,
+                       keine Rahmen. Eine Naehrwerttabelle IST tabellarische
+                       Information; <dl> haette die dritte Spalte (% NRV)
+                       nicht sauber tragen koennen. Screenreader und
+                       Extraktoren bekommen die Zeilenzuordnung geschenkt.
+  - Spaltenlabels    : als Settings, nicht hartcodiert. Der Bestand nennt
+                       dieselbe Angabe mal "Naehrwerte" (Spermidin), mal
+                       "Naehrstoffe" (Kreatin, D3K2). Die Section erzwingt
+                       hier keine Vereinheitlichung, sie ermoeglicht sie.
+  - NRV-Fussnote     : erscheint nur, wenn mindestens ein Block einen
+                       NRV-Wert traegt. Sonst stuende eine Erklaerung ohne
+                       erklaerten Gegenstand auf der Seite.
+  - Subtraktion      : kein Beschreibungsfeld. Die "Beschreibung"-Tabs im
+                       Bestand tragen die Wirk- und Krankheitsclaims
+                       (D3K2: "K2 sorgt dafuer, dass Calcium in die Knochen
+                       gelangt, nicht in die Gefaesse"). Ein Feld dafuer
+                       haette diese Copy nur umgezogen statt sie zu klaeren.
+  - Subtraktion      : keine Icons, kein CTA, kein Badge. Die Section
+                       informiert, sie verkauft nicht.
+
+  ABWEICHUNG VOM BRIEFING (dokumentiert)
+  Zusaetzlich zu den vier Briefing-Settings gibt es `package_label`. Jedes
+  Bestandsprodukt nennt den Packungsinhalt ("Eine Packung enthaelt 60
+  Kapseln"), und ohne eigenes Feld waere diese Angabe beim Umzug aus den
+  Tabs verloren gegangen.
+
+  NICHT FUER NMN
+  Verzehrempfehlung und NemV-Hinweis gelten fuer Nahrungsergaenzungsmittel.
+  NMN wird als Forschungschemikalie abgegeben (siehe CLAUDE.md, Entscheid
+  2026-07-23) und bekommt diese Section nicht.
+
+  SCHRIFTGROESSEN
+  Sektionslokal drei Stufen: --text-h2 (Heading-Stack), --text-body
+  (Spaltenlabels und Inhalt), --text-body-sm (Portionsangabe, NRV-Fussnote,
+  Rechtshinweis).
+
+  ABHAENGIGKEITEN
+  - snippets/section-heading-crs.liquid
+  - assets/crs-section-headings.css (in layout/theme.liquid eingebunden)
+  - Tokens aus assets/theme.css :root
+
+  Angelegt 2026-07-29.
+{%- endcomment -%}
+
+{%- liquid
+  assign pf_align = section.settings.content_align | default: 'left'
+  unless pf_align == 'left' or pf_align == 'center' or pf_align == 'right'
+    assign pf_align = 'left'
+  endunless
+
+  assign pf_kicker = section.settings.kicker | strip
+  assign pf_head   = section.settings.heading | strip
+  assign pf_sub    = section.settings.subheading | strip
+  if pf_kicker == '__none__'
+    assign pf_kicker = ''
+  endif
+  if pf_head == '__none__'
+    assign pf_head = ''
+  endif
+  if pf_sub == '__none__'
+    assign pf_sub = ''
+  endif
+
+  assign pf_headline_lg = false
+  if section.settings.heading_size == 'product_title'
+    assign pf_headline_lg = true
+  endif
+  assign pf_headline_md = false
+  if section.settings.heading_size == 'feature'
+    assign pf_headline_md = true
+  endif
+
+  assign pf_serving     = section.settings.serving_label | strip
+  assign pf_package     = section.settings.package_label | strip
+  assign pf_ingredients = section.settings.ingredients_text | strip
+  assign pf_intake      = section.settings.intake_text | strip
+  assign pf_legal       = section.settings.legal_note | strip
+  assign pf_nrv_note    = section.settings.nrv_note | strip
+
+  assign pf_label_nutrients   = section.settings.nutrients_label | strip
+  assign pf_label_ingredients = section.settings.ingredients_label | strip
+  assign pf_label_intake      = section.settings.intake_label | strip
+
+  # `__none__` blendet aus. Nicht ueberall im Theme abgefangen (Briefing §7.6),
+  # deshalb hier fuer jedes Textfeld explizit.
+  if pf_serving == '__none__'
+    assign pf_serving = ''
+  endif
+  if pf_package == '__none__'
+    assign pf_package = ''
+  endif
+  if pf_ingredients == '__none__'
+    assign pf_ingredients = ''
+  endif
+  if pf_intake == '__none__'
+    assign pf_intake = ''
+  endif
+  if pf_legal == '__none__'
+    assign pf_legal = ''
+  endif
+  if pf_nrv_note == '__none__'
+    assign pf_nrv_note = ''
+  endif
+
+  # Traegt mindestens ein Block einen NRV-Wert? Steuert Kopfzeile und Fussnote.
+  # `__none__` zaehlt nicht als Wert, sonst stuende eine leere NRV-Spalte da.
+  assign pf_has_nrv = false
+  for block in section.blocks
+    assign pf_nrv_val = block.settings.nrv | strip
+    if pf_nrv_val != blank and pf_nrv_val != '__none__'
+      assign pf_has_nrv = true
+      break
+    endif
+  endfor
+
+  # Spaltenzahl aus den tatsaechlich gefuellten Gruppen, nicht aus einem
+  # festen Raster. Siehe ENTSCHEIDUNGEN oben.
+  # Nur Bloecke mit echter Bezeichnung zaehlen. Ein leerer Block, den jemand im
+  # Editor angelegt und nicht gefuellt hat, darf keine Spalte aufziehen.
+  assign pf_nutrient_count = 0
+  for block in section.blocks
+    assign pf_n_name = block.settings.name | strip
+    if pf_n_name != blank and pf_n_name != '__none__'
+      assign pf_nutrient_count = pf_nutrient_count | plus: 1
+    endif
+  endfor
+
+  assign pf_cols = 0
+  assign pf_has_nutrients = false
+  if pf_nutrient_count > 0
+    assign pf_has_nutrients = true
+    assign pf_cols = pf_cols | plus: 1
+  endif
+  assign pf_has_ingredients = false
+  if pf_ingredients != blank
+    assign pf_has_ingredients = true
+    assign pf_cols = pf_cols | plus: 1
+  endif
+  assign pf_has_intake = false
+  if pf_intake != blank or pf_legal != blank
+    assign pf_has_intake = true
+    assign pf_cols = pf_cols | plus: 1
+  endif
+-%}
+
+{%- if pf_cols > 0 -%}
+{%- style -%}
+  #section-{{ section.id }} {
+    --ltpf-bg:      {{ section.settings.color_bg }};
+    --ltpf-card-bg: {{ section.settings.color_card_bg }};
+    --ltpf-text:    {{ section.settings.color_text }};
+    /* 0.72 statt 0.6: auf #f7f7f4 wie auf #f2f1ed bleibt der Wert ueber 4.5:1.
+       Die aelteren Sections fahren 0.6/0.4 und fallen damit durch AA. */
+    --ltpf-text-muted: {{ section.settings.color_text | color_modify: 'alpha', 0.72 }};
+    --ltpf-rule:       {{ section.settings.color_text | color_modify: 'alpha', 0.10 }};
+    padding-top:    min({{ section.settings.padding_top }}px, 15vw);
+    padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
+  }
+{%- endstyle -%}
+
+<div class="ltpf" id="section-{{ section.id }}">
+  <div class="ltpf__container">
+
+    {%- render 'section-heading-crs',
+      heading: pf_head,
+      subheading: pf_sub,
+      kicker: pf_kicker,
+      align: pf_align,
+      headline_lg: pf_headline_lg,
+      headline_md: pf_headline_md,
+      extra_class: 'ltpf__header'
+    -%}
+
+    <div class="ltpf__panel">
+      <div class="ltpf__grid" data-ltpf-cols="{{ pf_cols }}">
+
+        {%- if pf_has_nutrients -%}
+          <div class="ltpf__col">
+            {%- if pf_label_nutrients != blank -%}
+              <h3 class="ltpf__col-label">{{ pf_label_nutrients | escape }}</h3>
+            {%- endif -%}
+
+            <table class="ltpf-nutri">
+              {%- if pf_serving != blank -%}
+                <caption class="ltpf-nutri__caption">{{ pf_serving | escape }}</caption>
+              {%- endif -%}
+              {%- if pf_has_nrv -%}
+                <thead>
+                  <tr>
+                    <th scope="col" class="ltpf-nutri__head ltpf-nutri__head--name">
+                      <span class="ltpf-visually-hidden">Nährstoff</span>
+                    </th>
+                    <th scope="col" class="ltpf-nutri__head ltpf-nutri__head--amount">Menge</th>
+                    <th scope="col" class="ltpf-nutri__head ltpf-nutri__head--nrv">% NRV</th>
+                  </tr>
+                </thead>
+              {%- endif -%}
+              <tbody>
+                {%- for block in section.blocks -%}
+                  {%- liquid
+                    # Schema-Defaults duerfen nach Shopify nicht leer sein, deshalb
+                    # traegt jedes Feld `__none__` als "nicht gesetzt". Ohne diese
+                    # Guards stuende der Platzhalter woertlich in der Tabelle.
+                    assign n_name   = block.settings.name | strip
+                    assign n_amount = block.settings.amount | strip
+                    assign n_nrv    = block.settings.nrv | strip
+                    if n_name == '__none__'
+                      assign n_name = ''
+                    endif
+                    if n_amount == '__none__'
+                      assign n_amount = ''
+                    endif
+                    if n_nrv == '__none__'
+                      assign n_nrv = ''
+                    endif
+                  -%}
+                  {%- if n_name != blank -%}
+                    <tr class="ltpf-nutri__row" {{ block.shopify_attributes }}>
+                      <th scope="row" class="ltpf-nutri__name">{{ n_name | escape }}</th>
+                      <td class="ltpf-nutri__amount">{{ n_amount | escape }}</td>
+                      {%- if pf_has_nrv -%}
+                        <td class="ltpf-nutri__nrv">
+                          {%- if n_nrv != blank -%}
+                            {{ n_nrv | escape }}
+                          {%- else -%}
+                            <span class="ltpf-nutri__nrv-empty" aria-label="kein Referenzwert festgelegt">&ndash;</span>
+                          {%- endif -%}
+                        </td>
+                      {%- endif -%}
+                    </tr>
+                  {%- endif -%}
+                {%- endfor -%}
+              </tbody>
+            </table>
+
+            {%- if pf_package != blank -%}
+              <p class="ltpf__note">{{ pf_package | escape }}</p>
+            {%- endif -%}
+
+            {%- if pf_has_nrv and pf_nrv_note != blank -%}
+              <p class="ltpf__note">{{ pf_nrv_note | escape }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- if pf_has_ingredients -%}
+          <div class="ltpf__col">
+            {%- if pf_label_ingredients != blank -%}
+              <h3 class="ltpf__col-label">{{ pf_label_ingredients | escape }}</h3>
+            {%- endif -%}
+            <p class="ltpf__body">{{ pf_ingredients | escape | newline_to_br }}</p>
+          </div>
+        {%- endif -%}
+
+        {%- if pf_has_intake -%}
+          <div class="ltpf__col">
+            {%- if pf_label_intake != blank -%}
+              <h3 class="ltpf__col-label">{{ pf_label_intake | escape }}</h3>
+            {%- endif -%}
+            {%- if pf_intake != blank -%}
+              <p class="ltpf__body">{{ pf_intake | escape | newline_to_br }}</p>
+            {%- endif -%}
+            {%- if pf_legal != blank -%}
+              <p class="ltpf__legal">{{ pf_legal | escape | newline_to_br }}</p>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
+
+      </div>
+    </div>
+
+  </div>
+</div>
+{%- endif -%}
+
+{% stylesheet %}
+/* ===================================================
+   LIFETIME PDP — Produktfakten · lt-pdp-produktfakten.liquid
+   LMIV-/NemV-Pflichtangaben, dreispaltig auf einer Flaeche
+   =================================================== */
+
+.ltpf {
+  background: var(--ltpf-bg, #f7f7f4);
+  color: var(--ltpf-text, #26251e);
+}
+
+/* 1280px/20px byte-identisch mit lt-pdp-laborwerte und den crs-Sections
+   derselben PDP. Flaechenbuendigkeit zum direkten Nachbarn schlaegt die
+   1200/24 aus der Governance. */
+.ltpf__container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.ltpf__header {
+  margin-bottom: var(--space-6);
+}
+
+.ltpf__panel {
+  background: var(--ltpf-card-bg, #f2f1ed);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+}
+
+@media (min-width: 900px) {
+  .ltpf__panel {
+    padding: var(--space-7);
+  }
+}
+
+/* Grundzustand einspaltig. Die Spaltenzahl kommt aus data-ltpf-cols, damit
+   eine nicht gefuellte Gruppe keine leere Spalte samt gap hinterlaesst. */
+.ltpf__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+}
+
+@media (min-width: 900px) {
+  .ltpf__grid[data-ltpf-cols="2"] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-7);
+  }
+
+  .ltpf__grid[data-ltpf-cols="3"] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-7);
+  }
+}
+
+.ltpf__col-label {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+  color: var(--ltpf-text, #26251e);
+  margin: 0 0 var(--space-3);
+}
+
+.ltpf__body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--ltpf-text, #26251e);
+  margin: 0;
+}
+
+.ltpf__body + .ltpf__legal {
+  margin-top: var(--space-4);
+}
+
+.ltpf__legal,
+.ltpf__note {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--ltpf-text-muted, rgba(38, 37, 30, 0.72));
+  margin: 0;
+}
+
+.ltpf__note {
+  margin-top: var(--space-4);
+}
+
+/* Naehrwerte: Tabellensemantik, aber optisch nur Zeilenregeln.
+   Keine Rahmen, kein Zebra, keine Kopfzeilen-Flaeche. */
+.ltpf-nutri {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+}
+
+.ltpf-nutri__caption {
+  caption-side: top;
+  text-align: left;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  color: var(--ltpf-text-muted, rgba(38, 37, 30, 0.72));
+  padding: 0 0 var(--space-3);
+}
+
+.ltpf-nutri__head {
+  text-align: right;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  color: var(--ltpf-text-muted, rgba(38, 37, 30, 0.72));
+  padding: 0 0 var(--space-2);
+  border-bottom: 1px solid var(--ltpf-rule, rgba(38, 37, 30, 0.1));
+}
+
+.ltpf-nutri__head--name {
+  text-align: left;
+}
+
+.ltpf-nutri__row + .ltpf-nutri__row .ltpf-nutri__name,
+.ltpf-nutri__row + .ltpf-nutri__row .ltpf-nutri__amount,
+.ltpf-nutri__row + .ltpf-nutri__row .ltpf-nutri__nrv {
+  border-top: 1px solid var(--ltpf-rule, rgba(38, 37, 30, 0.1));
+}
+
+.ltpf-nutri__name {
+  text-align: left;
+  font-weight: var(--weight-regular);
+  color: var(--ltpf-text, #26251e);
+  padding: var(--space-3) var(--space-3) var(--space-3) 0;
+}
+
+.ltpf-nutri__amount,
+.ltpf-nutri__nrv {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--ltpf-text, #26251e);
+  padding: var(--space-3) 0;
+}
+
+.ltpf-nutri__nrv {
+  padding-left: var(--space-3);
+}
+
+.ltpf-nutri__nrv-empty {
+  color: var(--ltpf-text-muted, rgba(38, 37, 30, 0.72));
+}
+
+.ltpf-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT Produktfakten",
+  "tag": "section",
+  "class": "shopify-section--lt-pdp-produktfakten",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Flächen"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_card_bg",
+      "label": "Fläche der Faktenkarte",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 4,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Überschrift"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "info": "__none__ blendet den Kicker aus. Standard ist ohne Kicker.",
+      "default": "__none__"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Was drin ist"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Unterzeile",
+      "info": "Genau ein Satz. Läuft in derselben Größe wie die Überschrift, nur gedämpft.",
+      "default": "Die vollständigen Angaben zu Zusammensetzung und Einnahme."
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Größe der Überschrift",
+      "options": [
+        {
+          "value": "section",
+          "label": "Standard"
+        },
+        {
+          "value": "feature",
+          "label": "Feature (--text-h2)"
+        },
+        {
+          "value": "product_title",
+          "label": "Produkttitel (--text-h1)"
+        }
+      ],
+      "default": "feature"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung",
+      "options": [
+        {
+          "value": "left",
+          "label": "Links"
+        },
+        {
+          "value": "center",
+          "label": "Zentriert"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Nährwerte"
+    },
+    {
+      "type": "text",
+      "id": "nutrients_label",
+      "label": "Spaltenüberschrift",
+      "info": "__none__ blendet die Spaltenüberschrift aus.",
+      "default": "Nährwerte"
+    },
+    {
+      "type": "text",
+      "id": "serving_label",
+      "label": "Bezugsgröße",
+      "info": "Worauf sich die Werte beziehen, zum Beispiel „pro Portion (2 Kapseln)“.",
+      "default": "pro Portion (2 Kapseln)"
+    },
+    {
+      "type": "text",
+      "id": "package_label",
+      "label": "Packungsinhalt",
+      "info": "Zum Beispiel „Eine Packung enthält 60 Kapseln“. __none__ blendet die Zeile aus.",
+      "default": "__none__"
+    },
+    {
+      "type": "text",
+      "id": "nrv_note",
+      "label": "Fußnote zum NRV",
+      "info": "Erscheint nur, wenn mindestens ein Nährwert einen NRV-Wert trägt.",
+      "default": "% NRV = Prozent des Nährstoffbezugswerts nach VO (EU) Nr. 1169/2011."
+    },
+    {
+      "type": "header",
+      "content": "Zutaten"
+    },
+    {
+      "type": "text",
+      "id": "ingredients_label",
+      "label": "Spaltenüberschrift",
+      "info": "__none__ blendet die Spaltenüberschrift aus.",
+      "default": "Zutaten"
+    },
+    {
+      "type": "textarea",
+      "id": "ingredients_text",
+      "label": "Zutatenliste",
+      "info": "Fließtext in absteigender Gewichtsreihenfolge. Allergene hervorheben, zum Beispiel Weizen.",
+      "default": "__none__"
+    },
+    {
+      "type": "header",
+      "content": "Verzehrempfehlung"
+    },
+    {
+      "type": "text",
+      "id": "intake_label",
+      "label": "Spaltenüberschrift",
+      "info": "__none__ blendet die Spaltenüberschrift aus.",
+      "default": "Verzehrempfehlung"
+    },
+    {
+      "type": "textarea",
+      "id": "intake_text",
+      "label": "Verzehrempfehlung",
+      "info": "Pflicht nach NemV für Nahrungsergänzungsmittel. Nicht für NMN, das als Forschungschemikalie abgegeben wird.",
+      "default": "__none__"
+    },
+    {
+      "type": "textarea",
+      "id": "legal_note",
+      "label": "Gesetzlicher Hinweis",
+      "default": "Nahrungsergänzungsmittel sind kein Ersatz für eine ausgewogene und abwechslungsreiche Ernährung und eine gesunde Lebensweise. Außerhalb der Reichweite von kleinen Kindern aufbewahren."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "nutrient",
+      "name": "Nährwert",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Bezeichnung",
+          "info": "Leer oder __none__ lässt die Zeile weg.",
+          "default": "__none__"
+        },
+        {
+          "type": "text",
+          "id": "amount",
+          "label": "Menge",
+          "info": "Zum Beispiel „10 mg“ oder „50 µg (2.000 I.E.)“.",
+          "default": "__none__"
+        },
+        {
+          "type": "text",
+          "id": "nrv",
+          "label": "% NRV",
+          "info": "Leer lassen, wenn kein Referenzwert festgelegt ist.",
+          "default": "__none__"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "LT Produktfakten"
+    }
+  ]
+}
+{% endschema %}
