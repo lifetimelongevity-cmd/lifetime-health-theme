@@ -16,6 +16,10 @@
   if section.settings.heading_size == 'product_title'
     assign crs_h_headline_lg = true
   endif
+  assign crs_h_headline_md = false
+  if section.settings.heading_size == 'feature'
+    assign crs_h_headline_md = true
+  endif
   assign ic_excl_heading = section.settings.exclusion_heading | strip
   assign ic_has_exclusions = false
   for block in section.blocks
@@ -42,7 +46,7 @@
   <div class="ic-container">
 
     {%- if ic_kicker != blank or ic_head != blank or ic_sub != blank -%}
-      <div class="ic-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+      <div class="ic-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_h_headline_md %} crs-heading-stack--headline-md{% endif %}">
         {%- if ic_kicker != blank -%}
           <p class="crs-heading-stack__kicker">{{ ic_kicker | escape }}</p>
         {%- endif -%}

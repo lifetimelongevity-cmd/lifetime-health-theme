@@ -17,7 +17,7 @@
       {%- if template contains 'search' -%}
         {{ search.terms | replace: '*', '' | split: ' AND ' | last }} - {{ shop.name | escape }}
       {%- else -%}
-        {{ page_title }}{% if current_tags %}{% assign meta_tags = current_tags | join: ', ' %} &ndash; {{ 'general.meta.tags' | t: tags: meta_tags }}{% endif %}{% if current_page != 1 %} &ndash; {{ 'general.meta.page' | t: page: current_page }}{% endif %}{% unless page_title contains shop.name %} &ndash; {{ shop.name | escape }}{% endunless %}
+        {{ page_title }}{% if current_tags %}{% assign meta_tags = current_tags | join: ', ' %} &ndash; {{ 'general.meta.tags' | t: tags: meta_tags }}{% endif %}{% if current_page != 1 %} &ndash; {{ 'general.meta.page' | t: page: current_page }}{% endif %}{% unless page_title contains 'LIFETIME' %} &ndash; {{ shop.name | escape }}{% endunless %}
       {%- endif -%}
     {%- endcapture -%}
   
@@ -25,6 +25,17 @@
   
     {%- if page_description -%}
       <meta name="description" content="{{ page_description | escape }}">
+    {%- endif -%}
+
+    {%- if request.page_type == 'page' -%}
+      {%- if page.handle == 'testintern'
+        or page.handle == 'agedna-details-genetik'
+        or page.handle == 'stack-2026-04'
+        or page.handle == 'dsgvo-datenschutzanfragen'
+        or page.handle == 'personal-data-requests'
+      -%}
+        <meta name="robots" content="noindex,follow">
+      {%- endif -%}
     {%- endif -%}
   
     {%- liquid

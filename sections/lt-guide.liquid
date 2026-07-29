@@ -278,7 +278,24 @@
                     <p class="lt-guide__chapter-standfirst">{{ block.settings.standfirst | escape }}</p>
                   {%- endif -%}
 
-                  {%- if block.settings.image != blank -%}
+                  {%- comment -%}
+                    SVG-Infografiken liegen in Shopify Files als generische Datei und
+                    tauchen deshalb im Bild-Picker nicht auf: `illustration` hält
+                    darum die rohe CDN-URL, genau wie die Grafiken im Blog. Der
+                    image_picker bleibt als Fallback für Fotos erhalten.
+                  {%- endcomment -%}
+                  {%- if block.settings.illustration != blank -%}
+                    <figure class="lt-guide__figure lt-guide__figure--illustration">
+                      <img
+                        src="{{ block.settings.illustration }}"
+                        alt="{{ block.settings.illustration_alt | escape }}"
+                        width="1200"
+                        height="675"
+                        loading="lazy"
+                        decoding="async"
+                      >
+                    </figure>
+                  {%- elsif block.settings.image != blank -%}
                     <figure class="lt-guide__figure">
                       {{-
                         block.settings.image
@@ -712,6 +729,14 @@
   border-radius: var(--radius-md);
 }
 
+/* Infografiken bringen ihr eigenes Seitenverhältnis mit und dürfen nie
+   beschnitten werden: `cover` würde bei jeder Abweichung Beschriftung
+   abschneiden. width/height am <img> halten den Platz trotzdem frei. */
+.lt-guide__figure--illustration img {
+  aspect-ratio: auto;
+  object-fit: contain;
+}
+
 /* ── Praxis-Schritte ──
    Ein Panel statt drei Karten: die drei Schritte gehören inhaltlich zusammen und
    lesen sich als ein Objekt ruhiger als als drei konkurrierende Kacheln. Die
@@ -1133,6 +1158,18 @@
           "id": "standfirst",
           "label": "Vorspann (ein Satz)",
           "default": "Schlaf ist unverzichtbar für Regeneration, kognitive Leistung und gesundes Altern."
+        },
+        {
+          "type": "text",
+          "id": "illustration",
+          "label": "Illustration (Datei-URL)",
+          "info": "CDN-URL einer SVG-Infografik aus Shopify Files, 1200×675. Hat Vorrang vor dem Kapitelbild. SVGs lassen sich nicht über den Bild-Picker wählen."
+        },
+        {
+          "type": "textarea",
+          "id": "illustration_alt",
+          "label": "Alt-Text der Illustration",
+          "info": "Beschreibt den Inhalt der Grafik. Pflicht, sobald eine Illustration gesetzt ist."
         },
         {
           "type": "image_picker",
