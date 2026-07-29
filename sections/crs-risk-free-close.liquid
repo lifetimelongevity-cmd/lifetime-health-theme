@@ -58,19 +58,29 @@
     padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
     background:     var(--crs-bg);
   }
-  {%- if template.suffix == 'nmn-pulver' -%}
-    {%- comment -%} Freigestellte NMN-Dose: contain, damit sie ganz in der Karte steht. {%- endcomment -%}
+  {%- comment -%}
+    Bis 29.07.2026 haben hier zwei `template.suffix`-Zweige gestanden, einer fuer
+    `nmn-pulver` und einer fuer `science`. Beide beschrieben eine Bildeigenschaft,
+    keine Seiteneigenschaft, und waeren mit jeder weiteren PDP mitgewachsen. Jetzt
+    steuern zwei Settings dasselbe:
+
+    image_fit = contain   fuer freigestellte Motive (NMN-Dose): das Bild steht
+                          ganz in der Karte statt angeschnitten zu werden.
+    media_ratio = square  fuer quadratische Vollbild-Motive (AGE&DNA-Grafik auf
+                          /pages/science): quadratische Karte plus cover fuellt
+                          randlos ohne Beschnitt, contain wuerde seitlich
+                          letterboxen.
+
+    Aus dem alten science-Zweig mit uebernommen, damit die Begruendung nicht
+    verloren geht: dass /pages/science `badge_text` leer laesst, ist Absicht.
+    Das Motiv beschriftet sich mit AGE&DNA und eurofins selbst.
+  {%- endcomment -%}
+  {%- if section.settings.image_fit == 'contain' -%}
     #section-{{ section.id }} .rfc-image {
       object-fit: contain;
     }
   {%- endif -%}
-  {%- if template.suffix == 'science' -%}
-    {%- comment -%}
-      /pages/science: die AGE&DNA-Grafik ist ein quadratisches Vollbild-Motiv.
-      Quadratische Karte + cover fuellt randlos ohne Beschnitt (contain wuerde
-      seitlich letterboxen). Badge ist auf dieser Seite bewusst aus, das Motiv
-      beschriftet sich mit AGE&DNA und eurofins selbst.
-    {%- endcomment -%}
+  {%- if section.settings.media_ratio == 'square' -%}
     #section-{{ section.id }} .rfc-media-card {
       aspect-ratio: 1 / 1;
     }
@@ -543,6 +553,28 @@
       "id": "image_alt",
       "label": "Bild Alt-Text",
       "default": "Produktbild"
+    },
+    {
+      "type": "select",
+      "id": "image_fit",
+      "label": "Bildskalierung",
+      "options": [
+        { "value": "cover", "label": "Füllend (Beschnitt erlaubt)" },
+        { "value": "contain", "label": "Ganz sichtbar (freigestelltes Motiv)" }
+      ],
+      "default": "cover",
+      "info": "Freigestellte Dosen und Verpackungen brauchen \"Ganz sichtbar\"."
+    },
+    {
+      "type": "select",
+      "id": "media_ratio",
+      "label": "Bildformat",
+      "options": [
+        { "value": "wide", "label": "Quer (6:5)" },
+        { "value": "square", "label": "Quadratisch (1:1)" }
+      ],
+      "default": "wide",
+      "info": "Quadratisch nur bei quadratischen Vollbild-Motiven. Mobil ist die Karte immer quadratisch."
     },
     {
       "type": "text",

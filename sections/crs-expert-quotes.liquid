@@ -69,7 +69,7 @@
     {%- endif -%}
 
     {%- if section.blocks.size > 0 -%}
-      <div class="eq-grid">
+      <div class="eq-grid" data-count="{{ section.blocks.size }}">
         {%- for block in section.blocks -%}
           <div class="eq-card" {{ block.shopify_attributes }}>
 
@@ -144,6 +144,26 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-3);
+}
+
+/* Ein einzelnes belegtes Zitat ist bei den Supplement-PDPs der Regelfall, drei
+   sind die Ausnahme. Ueber die volle Containerbreite liefe ein Zitat auf rund
+   90 Zeichen Zeilenlaenge, deshalb bekommen eine und zwei Karten eine feste
+   Breite statt einer gestreckten Spur. Die Werte sind aus der Lesebreite
+   gerechnet, die das Theme fuer Fliesstext ansetzt (62ch, siehe .eq-section-
+   intro): 34rem abzueglich 2x var(--space-5) Innenabstand ergibt rund 66
+   Zeichen, 30rem rund 58. Zum Vergleich das Dreierraster: rund 47.
+   Die Reihe bleibt dadurch kurz statt aufgeblasen, buendig links wie der
+   Rest der Seite. Nur ab 1025px, darunter stapelt der Breakpoint weiter
+   unten ohnehin einspaltig. */
+@media (min-width: 1025px) {
+  .eq-grid[data-count="1"] {
+    grid-template-columns: minmax(0, 34rem);
+  }
+
+  .eq-grid[data-count="2"] {
+    grid-template-columns: repeat(2, minmax(0, 30rem));
+  }
 }
 
 .eq-card {

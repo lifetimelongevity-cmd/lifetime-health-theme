@@ -80,7 +80,7 @@
     <div class="mg-main">
 
     {%- if section.blocks.size > 0 -%}
-      <div class="mg-grid">
+      <div class="mg-grid" data-count="{{ section.blocks.size }}">
         {%- for block in section.blocks -%}
           <div class="mg-card{% if block.settings.source != blank %} mg-card--with-source{% endif %}" {{ block.shopify_attributes }}>
             <div class="mg-number">{{ block.settings.number | escape }}</div>
@@ -158,8 +158,10 @@
    Spalte waere jede von drei Spalten so schmal, dass ein Wert wie
    "bis −100 %" in Zahlengroesse umbricht. Nur fuer die Split-Variante, damit
    die AGE&DNA-PDP mit ihrem eigenen Kennzahlen-Satz unberuehrt bleibt.
-   (0,2,0) schlaegt .mg-grid (0,1,0). */
-.mg-layout--split .mg-grid {
+   [data-count] steht hier nur wegen der Spezifitaet: (0,3,0) schlaegt die
+   Ein- und Zwei-Zahlen-Raster unten (0,2,0), die sonst spaeter im Quelltext
+   gewinnen wuerden. Das Attribut sitzt immer am Grid, matcht also immer. */
+.mg-layout--split .mg-grid[data-count] {
   grid-template-columns: minmax(0, 1fr);
   gap: var(--space-3);
 }
@@ -211,6 +213,22 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
+}
+
+/* Drei belegbare Zahlen sind der Ausnahmefall, nicht die Regel: die meisten
+   Supplements tragen eine oder zwei Zahlen mit Quellenzeile. Ein hartes
+   Dreierraster liesse dort Luecken stehen. Die Karten behalten in allen drei
+   Faellen dieselbe Breite, damit eine Zwei-Zahlen-Reihe nicht wie ein
+   aufgeblasenes Dreierraster aussieht, sondern wie eine kurze Reihe.
+   Nur ab 1025px: darunter uebernehmen die Breakpoints weiter unten. */
+@media (min-width: 1025px) {
+  .mg-grid[data-count="1"] {
+    grid-template-columns: minmax(0, 26rem);
+  }
+
+  .mg-grid[data-count="2"] {
+    grid-template-columns: repeat(2, minmax(0, 26rem));
+  }
 }
 
 /* Card */
