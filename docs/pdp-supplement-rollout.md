@@ -197,13 +197,44 @@ die Loox-Oberfläche zu öffnen.
 „n. v." heißt: `loox.reviews` ist auf dem Produkt nicht befüllt, die Texte sind
 über die Admin-API nicht abrufbar. Die Zählung muss dann in Loox selbst passieren.
 
-**Ergebnis: G3a hält bei keinem der zehn Wellen-Produkte.** Für alle bleibt die
-bestehende Loox-App-Section die Review-Fläche. Sie rendert die echten Bewertungen,
-aktualisiert sich selbst und braucht keine Pflege. Ihr Nachteil ist bekannt und
-in Kauf genommen: Sie rendert clientseitig, im ausgelieferten HTML stehen 582 Byte
-Container und kein Bewertungstext. Für Suchsysteme und Sprachmodelle ist die Seite
-damit reviewlos. Der `aggregateRating`-Knoten im JSON-LD steht davon unabhängig
-serverseitig und trägt 4,9 bei 9 Bewertungen.
+**Ergebnis: G3a hält bei keinem der zehn Wellen-Produkte.** Von Hand gepflegte
+Review-Blöcke gibt es also nirgends.
+
+**Das heißt seit dem 2026-07-29 nicht mehr, dass die Seite reviewlos ist.**
+`crs-customer-reviews` hat ein zweites Setting bekommen, `review_source`:
+
+| Wert | Verhalten |
+|---|---|
+| `blocks` (Default) | wie bisher, gepflegte Review-Blöcke. So laufen beide Nordsterne weiter. |
+| `loox` | liest die Volltexte serverseitig aus dem Metafeld `loox.reviews` und rendert sie in denselben Karten |
+
+Damit steht auf jeder Supplement-PDP der echte Bewertungstext im ausgelieferten
+HTML, ohne dass jemand ihn abschreibt und ohne dass er veraltet. Vorher rendert
+die Loox-App-Section clientseitig: 582 Byte leerer Container, kein Bewertungstext,
+für Suchsysteme und Sprachmodelle war die Seite reviewlos.
+
+Drei Entscheidungen dabei, die beim Rollout nicht aufzuweichen sind:
+
+- **Keine Sterne je Karte.** Das Metafeld trägt keine Einzelbewertung. Ein
+  Fünf-Sterne-Default wäre erfunden. Stattdessen steht der echte Schnitt einmal
+  über dem Track (`4,9 aus 9 Bewertungen`).
+- **Kein Verifiziert-Badge.** Loox sammelt nur nach Kauf, aus dem Metafeld geht
+  das aber nicht hervor. Was nicht in den Daten steht, wird nicht behauptet.
+- **Keine einzelnen `Review`-Knoten im JSON-LD.** Die Entscheidung dagegen steht
+  begründet in `snippets/microdata-schema.liquid` und bleibt bestehen. Der
+  `aggregateRating`-Knoten dort ist davon unberührt.
+
+Im Template gehört `customer_reviews` an Position 7, die Loox-App-Section bleibt
+mit `"disabled": true` daneben stehen, damit die App-Block-Referenz umkehrbar ist.
+Was dabei verloren geht: Foto-Bewertungen. Das Metafeld trägt keine Bildquellen.
+Wenn ein Produkt Foto-Reviews hat, ist das gegen den Sichtbarkeitsgewinn
+abzuwägen.
+
+**Offene Entscheidung für BJ:** Ob die Bewertungstexte zusätzlich als
+`Review`-Knoten ins JSON-LD sollen. Das wäre der größte GEO-Hebel, macht aber
+Sätze wie „Bin mit der Wirkung sehr zufrieden" maschinenlesbar dem Produkt
+zugeordnet. Nach dem Compliance-Aufräumen vom 29.07. wäre das ein Rückschritt in
+der Sache, deshalb nicht eigenmächtig gebaut.
 
 **Die zweite Bedingung von G3a ist wichtiger als die erste.** Wer eine Loox-
 Bewertung in einen Template-Block kopiert, macht sie zur eigenen kommerziellen

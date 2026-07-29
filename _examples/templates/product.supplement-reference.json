@@ -17,7 +17,12 @@
  * ZWEI STELLEN, DIE HIER FEHLEN UND PRO PRODUKT ERGAENZT WERDEN:
  *  1. Die Loox-App-Section (Reviews). Sie traegt eine produkt-
  *     spezifische App-Block-ID und wird aus dem Bestands-Template
- *     uebernommen, nicht von hier kopiert.
+ *     uebernommen, nicht von hier kopiert, dann auf
+ *     "disabled": true gesetzt. Ihre sichtbare Rolle uebernimmt
+ *     customer_reviews mit review_source "loox": dieselben
+ *     Bewertungen, aber serverseitig im HTML statt clientseitig.
+ *     Die App-Section bleibt im Template, damit die App-Block-
+ *     Referenz umkehrbar bleibt.
  *  2. main-product als "main_product_hidden" mit "disabled": true.
  *     Ebenfalls aus dem Bestands-Template uebernehmen, weil dort
  *     App-Bloecke haengen. Gate G2 beachten: erst abschalten, wenn
@@ -25,8 +30,8 @@
  *
  * Reihenfolge im "order" danach:
  *   main, logo_garden, feature_grid, wirkprinzip, produktfakten,
- *   comparison_table, <loox>, risk_free_close, faq_accordion,
- *   main_product_hidden
+ *   comparison_table, customer_reviews, <loox, disabled>,
+ *   risk_free_close, faq_accordion, main_product_hidden
  * ------------------------------------------------------------
  */
 {
@@ -594,6 +599,26 @@
         "heading": "Häufige Fragen",
         "subheading": "__none__"
       }
+    },
+    "customer_reviews": {
+      "type": "crs-customer-reviews",
+      "settings": {
+        "color_bg": "#f7f7f4",
+        "color_card_bg": "#f2f1ed",
+        "color_text": "#26251e",
+        "padding_top": 80,
+        "padding_bottom": 80,
+        "content_align": "left",
+        "heading_size": "feature",
+        "kicker": "__none__",
+        "heading": "<< 20-40 Zeichen, z.B. Was Kundinnen und Kunden schreiben >>",
+        "subheading": "__none__",
+        "cta_label": "",
+        "cta_url": "",
+        "visible_count": "3",
+        "review_source": "loox",
+        "loox_max": 8
+      }
     }
   },
   "order": [
@@ -603,6 +628,7 @@
     "wirkprinzip",
     "produktfakten",
     "comparison_table",
+    "customer_reviews",
     "risk_free_close",
     "faq_accordion"
   ]

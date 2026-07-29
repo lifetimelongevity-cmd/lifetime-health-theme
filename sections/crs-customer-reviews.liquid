@@ -21,6 +21,80 @@
     assign cr_headline_md = true
   endif
   assign cr_visible = section.settings.visible_count | default: 4
+
+  # ── Loox-Quelle ───────────────────────────────────────────────────────────
+  # Warum: Die Loox-App-Section rendert clientseitig. Im ausgelieferten HTML
+  # stehen rund 580 Byte leerer Container und kein einziger Bewertungstext.
+  # Fuer Suchmaschinen und Sprachmodelle ist jede Supplement-PDP damit
+  # bewertungslos, obwohl echte Bewertungen vorliegen.
+  #
+  # Loox legt die Volltexte im Metafeld `loox.reviews` ab, genau zu diesem
+  # Zweck, allerdings in einem `display:none`-Container. Versteckter Text ist
+  # keine Loesung: er wird abgewertet und niemand liest ihn. Diese Section
+  # rendert die Texte deshalb sichtbar und markenkonform in denselben Karten,
+  # die auch manuell gepflegte Bewertungen benutzen.
+  #
+  # Bewusst NICHT gemacht: einzelne `Review`-Knoten im JSON-LD. Die Entscheidung
+  # dagegen steht begruendet in snippets/microdata-schema.liquid und bleibt
+  # bestehen. Der `aggregateRating`-Knoten dort ist davon unberuehrt.
+  #
+  # Keine Sterne je Karte: das Metafeld traegt keine Einzelbewertung. Ein
+  # Fuenf-Sterne-Default oder der aufs Einzelurteil gemuenzte Produktschnitt
+  # waere erfunden. Stattdessen steht der echte Schnitt einmal ueber dem Track.
+  #
+  # Kein Verifiziert-Badge: Loox sammelt zwar nur nach Kauf, aus dem Metafeld
+  # selbst geht das aber nicht hervor. Was nicht in den Daten steht, wird nicht
+  # behauptet.
+  #
+  # Angelegt 2026-07-29.
+  assign cr_source = section.settings.review_source | default: 'blocks'
+  assign cr_loox_max = section.settings.loox_max | default: 8
+  assign cr_loox_rating = product.metafields.loox.avg_rating.value | default: 0 | plus: 0
+  assign cr_loox_count = product.metafields.loox.num_reviews.value | default: 0 | plus: 0
+
+  assign cr_loox_names = ''
+  assign cr_loox_texts = ''
+  assign cr_loox_used = 0
+
+  if cr_source == 'loox'
+    assign cr_loox_raw = product.metafields.loox.reviews | default: ''
+    assign cr_loox_chunks = cr_loox_raw | split: '<div class="review">'
+    for chunk in cr_loox_chunks offset: 1
+      if cr_loox_used >= cr_loox_max
+        break
+      endif
+
+      assign cr_t_parts = chunk | split: '<div class="review_text">'
+      assign cr_t = ''
+      if cr_t_parts.size > 1
+        assign cr_t = cr_t_parts[1] | split: '</div>' | first | strip
+      endif
+
+      # Loox schreibt "Kein Kommentar" in jede Bewertung ohne Text. Auf einen
+      # Bindestrich laeuft dasselbe hinaus. Beides ergibt keine Karte.
+      assign cr_t_down = cr_t | downcase
+      if cr_t == blank or cr_t_down == 'kein kommentar' or cr_t == '-'
+        continue
+      endif
+
+      assign cr_n_parts = chunk | split: '<div class="name">'
+      assign cr_n = ''
+      if cr_n_parts.size > 1
+        assign cr_n = cr_n_parts[1] | split: '</div>' | first | strip
+      endif
+      if cr_n == blank
+        assign cr_n = 'Kundin oder Kunde'
+      endif
+
+      # Trennzeichen, die in keinem Namen und keinem Bewertungstext vorkommen.
+      assign cr_loox_names = cr_loox_names | append: cr_n | append: '||'
+      assign cr_loox_texts = cr_loox_texts | append: cr_t | append: '||'
+      assign cr_loox_used = cr_loox_used | plus: 1
+    endfor
+  endif
+
+  assign cr_loox_name_list = cr_loox_names | split: '||'
+  assign cr_loox_text_list = cr_loox_texts | split: '||'
 -%}
 
 {% style %}
@@ -87,7 +161,66 @@
       {%- endif -%}
     {%- endfor -%}
 
-    {%- if cr_has_reviews -%}
+    {%- comment -%}
+      Loox-Zweig. Steht vor dem Block-Zweig, damit `review_source: "loox"` die
+      Quelle eindeutig festlegt und nicht beide Listen nebeneinander rendern.
+      Ohne verwertbare Bewertung rendert der Zweig nichts, die Section faellt
+      dann auf ihren Heading-Stack zusammen.
+    {%- endcomment -%}
+    {%- if cr_source == 'loox' -%}
+      {%- if cr_loox_used > 0 -%}
+
+        {%- if cr_loox_rating > 0 and cr_loox_count > 0 -%}
+          {%- assign cr_loox_score = cr_loox_rating | round: 1 | replace: '.', ',' -%}
+          {%- assign cr_loox_stars = cr_loox_rating | round: 0 -%}
+          <p class="cr-aggregate">
+            <span class="cr-stars" role="img" aria-label="{{ cr_loox_score }} von 5 Sternen">
+              {%- for i in (1..5) -%}
+                {%- if i <= cr_loox_stars -%}
+                  <svg class="cr-star cr-star--filled" width="14" height="14" viewBox="0 0 14 13" fill="none" aria-hidden="true">
+                    <path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/>
+                  </svg>
+                {%- else -%}
+                  <svg class="cr-star cr-star--empty" width="14" height="14" viewBox="0 0 14 13" fill="none" aria-hidden="true">
+                    <path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" stroke="currentColor" stroke-width="0.9" fill="none"/>
+                  </svg>
+                {%- endif -%}
+              {%- endfor -%}
+            </span>
+            <span class="cr-aggregate__value">{{ cr_loox_score }}</span>
+            <span class="cr-aggregate__count">aus {{ cr_loox_count }} Bewertungen</span>
+          </p>
+        {%- endif -%}
+
+        <ul class="cr-track" role="list" data-cr-track>
+          {%- for cr_name in cr_loox_name_list -%}
+            <li class="cr-card">
+              <p class="cr-text">{{ cr_loox_text_list[forloop.index0] | escape | newline_to_br }}</p>
+              <div class="cr-author">
+                <div class="cr-author-top">
+                  <span class="cr-name">{{ cr_name | escape }}</span>
+                </div>
+              </div>
+            </li>
+          {%- endfor -%}
+        </ul>
+
+        {%- if cr_loox_used > 1 -%}
+          <p class="cr-progress" data-cr-progress aria-live="polite">
+            <span data-cr-progress-current>1</span> von {{ cr_loox_used }}
+          </p>
+        {%- endif -%}
+
+        {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+          <div class="cr-cta-wrap">
+            <a href="{{ section.settings.cta_url }}" class="cr-cta-link">
+              {{ section.settings.cta_label | escape }}
+            </a>
+          </div>
+        {%- endif -%}
+
+      {%- endif -%}
+    {%- elsif cr_has_reviews -%}
       {%- assign cr_review_count = 0 -%}
       {%- for block in section.blocks -%}
         {%- if block.type == 'review' -%}{%- assign cr_review_count = cr_review_count | plus: 1 -%}{%- endif -%}
@@ -298,6 +431,26 @@
   align-items: center;
   gap: 3px; /* intentional: tighter than --space-1 (4px) — stars read as a unit */
   flex-shrink: 0;
+}
+
+/* Aggregat-Zeile ueber dem Track. Erscheint nur im Loox-Zweig, weil dort keine
+   Einzelbewertung je Karte vorliegt und der Schnitt die einzige echte Zahl ist. */
+.cr-aggregate {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-5);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--cr-text-sec);
+}
+
+.cr-aggregate__value {
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--cr-text);
 }
 
 .cr-star {
@@ -582,6 +735,31 @@
       ],
       "default": "4",
       "info": "Überzählige Karten sind per horizontalem Scroll erreichbar."
+    },
+    {
+      "type": "header",
+      "content": "Quelle der Bewertungen"
+    },
+    {
+      "type": "select",
+      "id": "review_source",
+      "label": "Woher die Bewertungen kommen",
+      "options": [
+        { "value": "blocks", "label": "Gepflegte Blöcke unten" },
+        { "value": "loox", "label": "Loox-Metafeld (serverseitig)" }
+      ],
+      "default": "blocks",
+      "info": "Loox rendert sonst clientseitig, im ausgelieferten HTML steht dann kein Bewertungstext. Diese Option liest die Volltexte aus dem Metafeld loox.reviews und rendert sie sichtbar. Bewertungen ohne Text werden ausgelassen. Sterne je Karte gibt es dabei nicht, das Metafeld trägt keine Einzelbewertung."
+    },
+    {
+      "type": "range",
+      "id": "loox_max",
+      "label": "Maximale Anzahl aus Loox",
+      "min": 3,
+      "max": 20,
+      "step": 1,
+      "default": 8,
+      "info": "Greift nur bei der Loox-Quelle."
     }
   ],
   "blocks": [
