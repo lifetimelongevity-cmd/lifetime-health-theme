@@ -676,6 +676,75 @@
 
         {%- if lt_show_sub or section.settings.show_price_standalone -%}
           <div class="lt-purchase-block">
+            {%- comment -%}
+              Quiz-Vorteil: startet mit [hidden] und wird nur eingeblendet, wenn der Besucher
+              ueber die Quiz-Ergebnisseite kam (?qz=1, danach in localStorage gemerkt).
+              Der Rabatt selbst haengt am Code in ?discount=, den Shopify in den Warenkorb legt.
+              Laeuft die Frist ab, verschwindet das Banner und die Merkung wird geloescht.
+            {%- endcomment -%}
+            {%- if section.settings.quiz_promo_enable and section.settings.quiz_promo_title != blank -%}
+              <div class="lt-promo-banner lt-promo-banner--quiz" role="note" data-lt-quiz-promo hidden>
+                <span class="lt-promo-banner__tag">{{ section.settings.quiz_promo_tag | default: 'Quiz-Vorteil' | escape }}</span>
+                <span class="lt-promo-banner__text">
+                  <span class="lt-promo-banner__title">{{ section.settings.quiz_promo_title | escape }}</span>
+                  {%- if section.settings.quiz_promo_note != blank -%}
+                    <span class="lt-promo-banner__note">{{ section.settings.quiz_promo_note | escape }}</span>
+                  {%- endif -%}
+                  {%- if section.settings.quiz_promo_deadline != blank -%}
+                    <span class="lt-promo-banner__timer" data-lt-quiz-deadline="{{ section.settings.quiz_promo_deadline | escape }}">
+                      {{ section.settings.quiz_promo_timer_label | default: 'Endet in' | escape }} <strong data-lt-quiz-countdown>–</strong>
+                    </span>
+                  {%- endif -%}
+                </span>
+              </div>
+              <script>
+                (function () {
+                  var banner = document.currentScript.previousElementSibling;
+                  if (!banner) return;
+                  var KEY = 'lt_quiz_promo';
+                  var timer = banner.querySelector('[data-lt-quiz-deadline]');
+                  var out = timer ? timer.querySelector('[data-lt-quiz-countdown]') : null;
+                  var deadline = timer ? new Date(timer.getAttribute('data-lt-quiz-deadline')).getTime() : NaN;
+
+                  function forget() { try { localStorage.removeItem(KEY); } catch (e) {} }
+
+                  function cameFromQuiz() {
+                    try {
+                      if (new URLSearchParams(window.location.search).get('qz') === '1') {
+                        localStorage.setItem(KEY, '1');
+                        return true;
+                      }
+                      return localStorage.getItem(KEY) === '1';
+                    } catch (e) { return false; }
+                  }
+
+                  var over = !isNaN(deadline) && deadline - Date.now() <= 0;
+                  if (over) { forget(); return; }
+                  if (!cameFromQuiz()) return;
+
+                  banner.hidden = false;
+                  if (isNaN(deadline) || !out) return;
+
+                  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+                  var iv = setInterval(tick, 1000);
+                  function tick() {
+                    var diff = deadline - Date.now();
+                    if (diff <= 0) {
+                      banner.hidden = true;
+                      forget();
+                      clearInterval(iv);
+                      return;
+                    }
+                    var d = Math.floor(diff / 86400000);
+                    var h = Math.floor((diff % 86400000) / 3600000);
+                    var m = Math.floor((diff % 3600000) / 60000);
+                    var s = Math.floor((diff % 60000) / 1000);
+                    out.textContent = (d > 0 ? d + ' T ' : '') + pad(h) + ':' + pad(m) + ':' + pad(s);
+                  }
+                  tick();
+                })();
+              </script>
+            {%- endif -%}
             {%- if section.settings.show_promo_banner and section.settings.promo_banner_title != blank -%}
               <div class="lt-promo-banner" role="note">
                 <span class="lt-promo-banner__tag">{{ section.settings.promo_banner_tag | default: 'Aktion' | escape }}</span>
