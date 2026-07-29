@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-07-28
+last_review: 2026-07-29
 canonical_for: neues-produkt-pdp-onboarding
 ---
 
@@ -14,11 +14,23 @@ was pro Produkt anzufassen ist.
 
 | Fall | Vorlage |
 |---|---|
-| Supplement oder Pulver mit Abo, mit oder ohne Größenvarianten | `templates/product.nmn-pulver.json` |
+| Nahrungsergänzungsmittel mit Abo | `_examples/templates/product.supplement-reference.json` |
+| NMN oder ein anderes Produkt mit Forschungs-Frame | `templates/product.nmn-pulver.json` |
 | Einmalkauf ohne Abo (Diagnostik, Test, Kit) | `templates/product.age-dna-test.json` |
+
+Seit dem 2026-07-29 ist die erste Zeile der Normalfall. Das Referenz-Template ist aus dem
+Phase-3-Piloten `templates/product.02_spermidin.json` abgeleitet, enthält alle Schema-Settings
+explizit und markiert produktindividuelle Werte als `<< … >>`. Es liegt in `_examples/` und wird
+von Shopify nicht ausgeliefert. Korridore: `pdp-copy-deck.md`. Hero-Matrix und Gate-Liste:
+`pdp-supplement-rollout.md`.
+
+`product.nmn-pulver.json` bleibt der Maßstab für Copy-Disziplin, ist als Kopiervorlage für ein
+Nahrungsergänzungsmittel aber falsch: es trägt `crs-novel-food`, den Forschungs-Frame und
+bewusst **keine** Verzehrempfehlung. Für ein Nahrungsergänzungsmittel ist die nach NemV Pflicht.
 
 Die älteren Supplement-Templates (`product.01_tmg.json` bis `product.12_nad-liposomal-2.json`)
 sind **kein** Muster: sie fahren einen älteren, kürzeren Stack und rendern `main-product` aktiv.
+`product.02_spermidin.json` ist die Ausnahme, es ist seit dem 2026-07-29 umgebaut.
 
 Sections, die nicht zum Produkt passen, aus `sections` **und** `order` löschen, sonst bleibt eine
 Waise im JSON. Besonders `novel_food` (`crs-novel-food`) und `nmn_laborwerte`

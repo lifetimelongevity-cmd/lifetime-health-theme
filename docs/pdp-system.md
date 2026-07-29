@@ -1,16 +1,16 @@
 ---
 status: living
-last_review: 2026-07-28
+last_review: 2026-07-29
 canonical_for: pdp-section-system und live-reihenfolge
 ---
 
 # PDP-System (Ist-Zustand)
 
-Diese Datei beschreibt, welche Sections die beiden Live-PDPs tatsächlich rendern und welche
-Rolle jede Section im Kaufprozess übernimmt. Sie ist aus `templates/product.nmn-pulver.json`
-und `templates/product.age-dna-test.json` abgeleitet und am 2026-07-28 per `curl` gegen die
-Live-Seiten geprüft. Wer eine PDP umbaut, prüft zuerst hier die Reihenfolge, dann das Template,
-niemals eine ältere Beschreibung.
+Diese Datei beschreibt, welche Sections die Live-PDPs tatsächlich rendern und welche
+Rolle jede Section im Kaufprozess übernimmt. Sie ist aus `templates/product.nmn-pulver.json`,
+`templates/product.age-dna-test.json` und seit dem 2026-07-29 `templates/product.02_spermidin.json`
+abgeleitet und per `curl` gegen die Live-Seiten geprüft. Wer eine PDP umbaut, prüft zuerst hier
+die Reihenfolge, dann das Template, niemals eine ältere Beschreibung.
 
 ## Journey-Modell
 
@@ -67,6 +67,36 @@ Template: `templates/product.age-dna-test.json`. 14 Einträge in `order`, davon 
 Unterschied in der Schlusslogik: NMN schließt mit `risk_free_close` vor der FAQ, AGE&DNA stellt
 die FAQ davor und hängt das Loox-Widget hinter den Close. Wer eine der beiden PDPs angleicht,
 sollte das bewusst tun, nicht nebenbei.
+
+## PDP Spermidin (`/products/spermidin-kapseln`)
+
+Template: `templates/product.02_spermidin.json` (Suffix `02_spermidin`). Seit dem 2026-07-29 der
+**Referenzfall für Supplements** und die Vorlage für die Wellen W1–W3. 10 Einträge in `order`,
+davon 1 deaktiviert.
+
+| # | Section-Key | Typ (`sections/*.liquid`) | Stufe | Rolle |
+|---|---|---|---|---|
+| 1 | `main` | `lt-pdp-hero` | Aufmerksamkeit + Handlung | Hero, Abo/Einmal-Buybox, vier Trust-Zeilen, Sticky-ATC. `trust_4` trägt den Allergenhinweis mit Popup |
+| 2 | `logo_garden` | `crs-logo-garden` | Vertrauen | Medienlogos wie NMN |
+| 3 | `feature_grid` | `crs-feature-grid` | Verständnis | Vier Unterscheidungsmerkmale, zweispaltig |
+| 4 | `wirkprinzip` | `lt-pdp-wirkprinzip` | Verständnis | Drei Stufen: Vorkommen, Rohstoff, Standardisierung. Claimfrei, ohne Bild |
+| 5 | `produktfakten` | `lt-pdp-produktfakten` | Risikoreduktion | LMIV/NemV-Pflichtangaben dreispaltig: Gehalt, Zutaten, Verzehrempfehlung |
+| 6 | `comparison_table` | `lt-comparison-table` | Vertrauen | Abgrenzung gegen typische Anbieter, sechs Zeilen |
+| 7 | `1721223701af92f7b4` | `apps` | Vertrauen | Loox-Widget, rendert clientseitig |
+| 8 | `risk_free_close` | `crs-risk-free-close` | Handlung | Abo-Close mit vier Trust-Zeilen |
+| 9 | `faq_accordion` | `crs-faq-accordion` | Risikoreduktion | 10 Fragen, Rohstoff/Allergen/Zielgruppe auf den Positionen 1 bis 3 |
+| 10 | `main_product_hidden` | `main-product` | keine | `"disabled": true`, rendert nicht |
+
+Die Kette folgt der NMN-Schlusslogik (Close vor FAQ), nicht der von AGE&DNA. Sie ist bewusst
+kürzer als beide Nordsterne: die vier optionalen Beweis-Slots (`lt-pdp-laborwerte`,
+`crs-metrics-row`, `crs-expert-quotes`, `crs-customer-reviews`) fallen an Gate G3 aus, weil für
+Supplements weder Prüfbericht noch belegte Zahl noch produktbezogenes Limmroth-Statement noch
+genug substanzielle Loox-Bewertungen existieren. Die Begründung je Produkt steht in
+`pdp-supplement-rollout.md`.
+
+Die Loox-Section hat keine Farb-Settings und erbt den Body-Hintergrund `#f7f7f4`. Sie steht
+deshalb an Position 7, wo die Flächen-Alternation ohnehin `#f7f7f4` verlangt. Verschiebt man
+sie, kippt der Rhythmus.
 
 ## Konvention `main_product_hidden`
 

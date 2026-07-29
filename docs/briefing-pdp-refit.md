@@ -13,27 +13,106 @@ Ist-Stand verifiziert am 2026-07-29 gegen Repo, Shopify-Admin-API und Live-Seite
 
 ---
 
-## Stand der Umsetzung (Stand 2026-07-29, 15:30)
+## Stand der Umsetzung (Stand 2026-07-29, 16:25)
 
 | Phase | Status |
 |---|---|
 | **0** Nordsterne festnageln | **fertig**, `992c1a0`. Nicht 21, sondern **54** geerbte Werte, weil auch `crs-logo-garden`, `lt-comparison-table`, `crs-metrics-row`, `crs-expert-quotes` und `crs-risk-free-close` erbten. |
 | **1** Cross-Cutting-Fixes im Hero | **fertig und live verifiziert**, `b7dc4e1`. Alle sechs. Zusätzlich `compareAtPrice` bei den acht Produkten auf `null` (Shopify-Daten, erledigt). |
-| **2** Sections generalisieren + zwei neue bauen | **halb fertig.** Beide neuen Sections stehen und sind gerendert geprüft. Die sechs Generalisierungen aus §6.2 stehen noch aus. |
-| **3** Pilot | offen |
+| **2** Sections generalisieren + zwei neue bauen | **fertig**, 2026-07-29. Beide neuen Sections stehen, die sechs Generalisierungen aus §6.2 und die `heading_size`-Schemalücke sind erledigt und gerendert geprüft. |
+| **3** Pilot Spermidin | **fertig und live**, 2026-07-29. `product.02_spermidin.json` komplett umgebaut, in zwei Schritten gepusht (Gate G2), alle vier Artefakte geliefert. |
 | **4–6** | offen |
 
-### Was Phase 2 noch offen hat
+### Was Phase 3 gebaut hat (2026-07-29)
 
-- §6.2: `crs-metrics-row` (hartes Dreierraster), `crs-expert-quotes` (Single-Quote),
-  `crs-feature-grid` (englische Boilerplate-Defaults „Dedicated guidance"),
-  `crs-risk-free-close` (`template.suffix`-Zweige), `lt-pdp-laborwerte` (Schema-`name`).
-- `heading_size: "feature"` ist in `lt-pdp-process-steps`, `lt-pdp-report-preview` und
-  `lt-pdp-ideal-candidate` **nur im Liquid** ergänzt, die Select-Option fehlt im Schema.
-  Das AGE&DNA-Template setzt den Wert bereits. Rendert korrekt, aber der Theme-Editor
-  kann ihn beim nächsten Speichern still zurücksetzen.
+Reine Template- plus Doku-Session, kein Code-Edit. G6 eingehalten.
 
-### Drei Korrekturen an diesem Briefing
+`/products/spermidin-kapseln` läuft jetzt auf der Kette aus §3.1: 8 statt vorher 5 sichtbaren
+Content-Sections, `main_product_hidden` deaktiviert, `text-columns-icons`, drei `rich-text`
+und `product-recommendations` entfernt.
+
+**Die drei offenen Kennzeichnungspunkte sind mit dem Umbau geschlossen.** Sie waren der Grund,
+Spermidin als Piloten zu nehmen, und sie fielen in `lt-pdp-produktfakten` von selbst mit an.
+Vorher standen alle drei live bei null Treffern.
+
+| Punkt | Rechtsgrundlage | Wo es jetzt steht |
+|---|---|---|
+| Allergen Weizen | LMIV Art. 21 Abs. 1 lit. a, Anhang II Nr. 1 | Zutatenverzeichnis in GROSSBUCHSTABEN (`Spermidin-reicher WEIZENkeimextrakt`) plus eigener Satz „Enthält WEIZEN (Gluten)." |
+| Allergen vor Vertragsschluss | LMIV Art. 14 Abs. 1 lit. a (Fernabsatz) | zusätzlich als vierte Trust-Zeile im Hero, direkt an der Buy-Box, mit Popup |
+| Zielgruppe, Ausschluss Schwangere/Stillende | verbindliche Zulassungsbedingung, DVO (EU) 2018/1023 | Verzehrempfehlung: „Für Erwachsene. Nicht geeignet für Schwangere und Stillende." plus FAQ |
+| Zugelassene Bezeichnung | Unionsliste, DVO (EU) 2017/2470 | erste Zutat, Vergleichstabelle Zeile 1, FAQ 1. Vorher stand dort „Spermidin (aus Weizenkeim-Extrakt)", was isoliertes Spermidin suggeriert. Isoliert ist nicht zugelassen, nur der Extrakt. |
+
+Alle drei erscheinen jeweils an mehr als einer Stelle, live verifiziert:
+`Spermidin-reicher` 7×, `Schwangere und Stillende` 5×, Weizen/Gluten in Zutatenliste, Trust-Zeile,
+Popup und FAQ.
+
+**Zusätzlich gestrichen (Gate G4):** Der `collapsible_tab` „Beschreibung" trug vier nicht
+zugelassene gesundheitsbezogene Angaben („Aktivierung der Autophagie", „Erhaltung der zellulären
+Funktion", „zelluläre Erneuerung", „mitochondriale Gesundheit"), der `rich-text`-Block
+„Was ist Autophagie?" den Satz „Indem Autophagie unterstützt wird, kann der Körper die Zellen
+länger gesund halten". Live sind jetzt null Treffer auf „Autophagie".
+
+**Die Dosis ist unangetastet.** 2 Kapseln, 10 mg. BJ-Entscheid vom 29.07., siehe unten.
+
+### Die vier Artefakte
+
+| Artefakt | Datei |
+|---|---|
+| Referenz-Template | `_examples/templates/product.supplement-reference.json` plus Zeile in `_examples/README.md` |
+| Copy-Deck | `docs/pdp-copy-deck.md` |
+| Hero-Setting-Matrix | `docs/pdp-supplement-rollout.md` Teil 1 |
+| Gate-Liste je Produkt | `docs/pdp-supplement-rollout.md` Teil 2 |
+
+### Fünf Korrekturen an diesem Briefing aus Phase 3
+
+5. **§9 Phase 3 unterschätzt die Hero-Matrix.** „Die rund 65 Keys sind über alle
+   Supplement-Templates identisch" stimmt nicht. Von 112 Schema-Settings sind über die zehn
+   Wellen-Templates **50 identisch**, **25 produktindividuell** und **37 auf keinem einzigen
+   Template gesetzt**. Und von den 50 identischen sind **13 uniform falsch**: der Pilot weicht
+   dort bewusst ab (u. a. `show_badge`, `show_benefits_icons`, `founder_endorsed`, der komplette
+   `stack_*`-Block). Tabelle in `pdp-supplement-rollout.md`.
+6. **`loox.num_reviews` ist als Gate-Kriterium untauglich.** Spermidin hat neun Bewertungen bei
+   4,9. Davon vier „Kein Kommentar", zwei reine Lieferkommentare, eines „Vielen Dank!". Übrig
+   bleiben zwei mit Produktbezug. Die Volltexte stehen im Metafeld `loox.reviews` und sind über
+   die Admin-API auswertbar, ohne Loox zu öffnen. Gemessen hält G3a bei **keinem** der zehn
+   Wellen-Produkte. Zweite, härtere Bedingung: wer eine Loox-Bewertung in einen Template-Block
+   kopiert, macht sie zur eigenen kommerziellen Kommunikation (VO (EG) 1924/2006 Art. 1 Abs. 2).
+   Sätze wie „Bin mit der Wirkung sehr zufrieden" dürfen deshalb nicht übernommen werden.
+7. **G3b, G3c und G3d halten ebenfalls bei keinem Wellen-Produkt.** Der Filestore enthält genau
+   zwei Prüfbericht-PDFs, beide NMN. Damit ist die Kette für W1–W3 fix und identisch mit der des
+   Piloten: neun sichtbare Sections, keine optionalen Beweis-Slots.
+8. **Das Longevity-101-PDF existiert.** `ebook-lifetime-longevity-101.pdf`, 3,1 MB, seit
+   2024-07-04 im Filestore. `bb_benefit_3` „Inkl. Longevity 101 als PDF" auf zehn Live-PDPs ist
+   also ein echter Perk und wurde beim Umbau nicht gestrichen, sondern auf `bb_benefit_4`
+   verschoben.
+9. **Der `legal_note`-Default von `lt-pdp-produktfakten` ist unvollständig.** Er trägt zwei der
+   drei NemV-Pflichtsätze; „Die angegebene empfohlene tägliche Verzehrmenge darf nicht
+   überschritten werden" (NemV § 4 Abs. 2 Nr. 3) fehlt. Im Piloten pro Template ergänzt. Der
+   Schema-Default sollte in einer Code-Session nachgezogen werden, dann greift Gate G1.
+
+### Was Phase 2 gebaut hat (2026-07-29)
+
+Reine Code-Session plus drei minimale Template-Pins (Begründung unten).
+
+| Datei | Änderung |
+|---|---|
+| `crs-metrics-row` | `data-count` am `.mg-grid`; ab 1025px eigene Raster für eine und zwei Zahlen (`26rem` bzw. `2 × 26rem`). Drei Zahlen bleiben auf `repeat(3, 1fr)`. Die Kartenbreite ist in allen drei Fällen gleich, weil `.mg-card` mit `aspect-ratio: 16/9` die Höhe an die Breite koppelt: gestreckte 1fr-Spuren hätten aus zwei Zahlen zwei riesige Leerkästen gemacht. |
+| `crs-metrics-row` | Split-Regel auf `.mg-layout--split .mg-grid[data-count]` gehoben. Sie stand mit (0,2,0) auf gleicher Spezifität wie die neuen Count-Regeln und wäre als frühere Quellzeile unterlegen. Betraf die NMN-PDP direkt. |
+| `crs-expert-quotes` | `data-count` am `.eq-grid`; ab 1025px `34rem` für ein Zitat, `2 × 30rem` für zwei. Aus der Lesebreite gerechnet, die das Theme für Fließtext ansetzt (62ch): rund 66 bzw. 58 Zeichen, Dreierraster rund 47. Über die volle Breite lief ein Zitat auf rund 90 Zeichen. |
+| `crs-feature-grid` | Block-Defaults „Dedicated guidance" und „Deploy AI at scale with professional expertise." entfernt. Kein `default`-Key statt Leerstring, weil Shopify Leerstring-Defaults ablehnt. Beide Felder sind im Liquid `!= blank`-geguarded (`:93`, `:96`), ein neuer Block bleibt also einfach leer. |
+| `crs-risk-free-close` | Beide `template.suffix`-Zweige durch Settings ersetzt: `image_fit` (cover\|contain) und `media_ratio` (wide\|square). Siehe Korrektur 4. |
+| `lt-pdp-laborwerte` | Schema-`name` und Preset-`name` von „NMN PDP Laborwerte" auf „LT Laborwerte". |
+| `lt-pdp-process-steps`, `lt-pdp-report-preview`, `lt-pdp-ideal-candidate` | Select-Option `"feature"` nachgerüstet, Wortlaut `"Mittel (Section-Headline)"` wie in den 13 anderen Sections. `default` bleibt `"section"`. |
+
+**Verifikation.** `shopify theme dev` plus `curl` auf `/products/lifetime-nmn`, `/pages/science`,
+`/products/lifetime-age-dna`, `/pages/was-ist-enthalten`, jeweils gegen die vorher
+geholte Live-Fassung diffed: alle vier HTTP 200, gerenderte `.rfc-*`-Overrides
+**identisch**, null Liquid-Fehler, null `__none__`, null englische Boilerplate.
+Die Ein- und Zwei-Karten-Raster hat kein Live-Zustand, sie sind gegen das kompilierte
+`styles.css` in einer Harness bei 1280px und 375px geprüft: kein Overflow
+(`scrollWidth == clientWidth == 375`).
+
+### Vier Korrekturen an diesem Briefing
 
 1. **§6.3 unterschätzt den Umbau.** Die `rich-text`-Blöcke tragen drei Rollen, nicht eine:
    Lexikon (→ `lt-pdp-wirkprinzip`), Qualitätssicherung (263 Zeichen, wortgleich über
@@ -48,15 +127,108 @@ Ist-Stand verifiziert am 2026-07-29 gegen Repo, Shopify-Admin-API und Live-Seite
    der Arbeit sechs neue `quiz_promo_*`-Settings ins Hero-Schema; die NMN-PDP erbte
    sofort still `quiz_promo_title` „10 % auf deinen AGE & DNA-Test". Nach **jedem** fremden
    Eingriff in ein gemeinsames Section-Schema neu festnageln (`378f861`).
+4. **§6.2 unterschätzt `crs-risk-free-close`.** Die Zeile verlangt „die zwei
+   `template.suffix`-Zweige durch ein Setting `image_fit` (cover|contain) ersetzen".
+   Ein Setting reicht nicht: die beiden Zweige beschreiben **zwei verschiedene
+   CSS-Eigenschaften**. `nmn-pulver` setzt `object-fit: contain` auf `.rfc-image`,
+   `science` setzt `aspect-ratio: 1 / 1` auf `.rfc-media-card` (Grundwert 6/5). Es
+   braucht also `image_fit` **und** `media_ratio`. Wer nur `image_fit` baut, kippt
+   `/pages/science` still auf 6:5 und beschneidet das quadratische Motiv.
+   Der dritte Zweig auf `:3` (`template.suffix == 'age-dna-landing'`) ist **kein**
+   Style-Zweig, sondern ein Produkt-Fallback für eine Landingpage. Er bleibt stehen.
+
+### Abweichung von G6 in dieser Session, bewusst
+
+G6 sagt „Code-Edits und Template-Edits nie in derselben Session". G1 sagt, vor jeder
+Default-Änderung den bisher geerbten Wert explizit in die Templates eintragen. Beim
+`crs-risk-free-close`-Umbau schließen die beiden sich aus: die Suffix-Zweige waren die
+einzige Quelle für „NMN = contain" und „science = quadratisch". Ohne Pin hätten beide
+Seiten sichtbar gekippt. G1 gewinnt, weil das Auslassen live sichtbar gewesen wäre.
+
+Umgesetzt als drei Ein-Zeilen-Pins, ganz zum Schluss geschrieben, jeder danach per
+`git status` und JSON-Parse geprüft:
+
+| Template | Pin | Grund |
+|---|---|---|
+| `product.nmn-pulver.json` | `image_fit: "contain"`, `media_ratio: "wide"` | erhält den alten `nmn-pulver`-Zweig |
+| `page.science.json` | `image_fit: "cover"`, `media_ratio: "square"` | erhält den alten `science`-Zweig |
+| `product.age-dna-test.json` | `image_fit: "cover"`, `media_ratio: "wide"` | kein Zweig aktiv, aber Nordstern: Phase-0-Regel, jedes Schema-Setting explizit |
+
+`page.whats-inside.json` ist **nicht** gepinnt und erbt beide Defaults. Das entspricht
+dem heutigen Live-Zustand, ist aber nach §7.5 eine offene stille Vererbung.
+
+### Entschieden am 2026-07-29
+
+**Spermidin bleibt bei 2 Kapseln, also 10 mg Spermidin pro Tagesportion.** BJ-Entscheid,
+getroffen in Kenntnis des Befunds. Das ist eine bewusste Abweichung, kein Versehen, und
+wird **nicht eigenmäßig „korrigiert"** — dieselbe Regel wie bei der NMN-Kategorie-
+Inkonsistenz vom 23.07. (siehe `../CLAUDE.md` § Drift-Zonen).
+
+Der Befund, gegen den entschieden wurde, zur Aktenlage: die Novel-Food-Zulassung für
+Spermidin-reichen Weizenkeimextrakt nennt als Verwendungsbedingung max. 6 mg/Tag.
+10 mg sind 167 % davon. Die Dosis steht an vier Stellen in `product.02_spermidin.json`
+(Zeilen 366, 454, 473, 585) sowie in den Bundles `bundle-cell-renewal` (zusätzlich in der
+Shopify-`descriptionHtml`) und `cell-detox-bundle`. **Vorbehalt:** EUR-Lex war bei der
+Prüfung nicht erreichbar (HTTP 202, leerer Body), der Primärtext stammt aus der
+legislation.gov.uk-Spiegelung, deren UK-Fassungen zusätzlich „revoked" sind. Mehrere
+unabhängige Sekundärquellen nennen 6 mg. Für eine Behördenauseinandersetzung sollte der
+konsolidierte EU-Eintrag einmal im Original gesichtet werden.
+
+**Erledigt am 2026-07-29:** Das falsche `glutenfrei`-Metaobjekt am Produkt
+`spermidin-kapseln` ist entfernt (Metafield `35055314042980`, Wert jetzt nur noch
+`["gid://shopify/Metaobject/414203773303"]` = vegan). Es hing auf einem Produkt aus
+Weizenkeim-Extrakt. Rollback-Wert:
+`["gid://shopify/Metaobject/414203773303","gid://shopify/Metaobject/414203838839"]`.
+Dasselbe Label hängt pauschal an zehn weiteren aktiven Produkten, dort ungeprüft.
 
 ### Offene Entscheidungen für BJ
 
 - „Spiegel Bestseller" steht weiter auf der AGE&DNA-PDP (Template setzt den Wert explizit).
-  13 andere PDPs haben ihn durch Phase 1 verloren. Unbelegt laut `limmroth-faktenblatt.md`.
-- Pilot Spermidin bringt die Compliance-Frage mit (10 mg gegen zulässige 6 mg, fehlender
-  Weizen-Allergenhinweis). Wer sie aus dem Piloten heraushalten will, nimmt Kreatin.
+  13 andere PDPs haben ihn durch Phase 1 verloren. Kein Beleg für eine SPIEGEL-Notierung
+  gefunden (Ullstein-Buchseite nennt keine Platzierung, die Autorenseite trägt nur ein
+  generisches Verlags-Label). Verschärfend: das Logo darunter ist die Wortmarke **maxima**,
+  nicht SPIEGEL, und steht unter der H2 „Bekannt aus". Live auf drei Flächen: AGE&DNA-PDP
+  (2×), `/pages/quiz-age` (1×), `page.meine-routine.json` per `?view=` (1×).
+- ~~Weizen-/Glutenhinweis, Zielgruppen-Ausschluss, zugelassene Bezeichnung auf der
+  Spermidin-PDP~~ **erledigt am 2026-07-29 mit Phase 3**, siehe oben. Alle drei stehen live an
+  mehreren Stellen.
+- **Etikett gegen Website abgleichen.** Die Online-Zutatenliste nennt jetzt die zugelassene
+  Bezeichnung „Spermidin-reicher Weizenkeimextrakt" und hebt das Allergen hervor. Ob das
+  physische Etikett dasselbe sagt, ist ungeprüft. Bis dahin weichen Packung und Website
+  voneinander ab. Beim nächsten Druck angleichen.
+- `/pages/stack-builder` trägt live weiterhin einen Krankheitsbezug zu Spermidin („fehlerhafte
+  Proteine sammeln sich an (siehe Alzheimer, Parkinson)"), hartkodiert in
+  `sections/lt-stack-builder.liquid`. Härter als alles, was je auf der PDP stand. **Offen**,
+  weil es ein Code-Edit ist und G6 ihn nicht in dieselbe Session lässt wie den Template-Umbau.
+  Gehört als erstes in die nächste Code-Session.
+- **Zehn Live-PDPs versprechen „Inkl. Longevity 101 als PDF" im Abo.** Das PDF existiert. Ob es
+  im Abo tatsächlich ausgeliefert wird, ist nicht verifiziert. Wenn nicht, ist es auf zehn
+  Seiten ein unerfülltes Versprechen.
 - NAD⁺ hält Verzehrempfehlung und Qualitätstext in Metafeldern (`custom.verzehrempfehlung`,
   `custom.qualitat_produktion`), die übrigen 17 Produkte nicht. Werte müssen ins Template.
+  **Korrektur:** es sind drei Metafelder, `custom.kurzname` wird ebenfalls gelesen und
+  trägt live eine H2. `produktbullet_1..3` gelten nicht als tot, sie rendern live auf
+  `bundle-cell-renewal`.
+
+### Nebenbefunde aus Phase 2, außerhalb des Auftrags
+
+Nicht angefasst, weil §6.2 sie nicht nennt. Alle vier sind derselbe Fehlertyp wie die
+Boilerplate-Defaults: Inhalt, den niemand geschrieben hat und der still ausgeliefert wird.
+
+- **`presets` tragen Fremd- und Produktinhalte.** `crs-feature-grid` liefert sechs
+  NMN-Karten („Uthever® Rohstoff", „>99,9% Reinheit"), `crs-expert-quotes` zwei englische
+  Sinclair-/Huberman-Zitate plus einen Limmroth-Eintrag als „In-House Neurologe" statt der
+  vollen Form. Wer eine dieser Sections im Theme-Editor auf eine Supplement-PDP zieht,
+  bekommt sie befüllt. Gleiche Wirkung wie „Dedicated guidance", nur auf Deutsch.
+- **`sections/ss-hero-pro.liquid` hat kein parsbares `{% schema %}`** (Trailing Comma).
+  Einzige Section im Repo, bei der das so ist, schon bei `db96951`. Relevant für W2/W3,
+  weil NAD⁺ zwei `ss-*`-Sections trägt.
+- **`templates/page.testimonials.json:337`** hält `"layout": "grid-4 grid-portable-3
+  grid-lap-2 grid-tiny-1"` für `featured-collection`, ein Wert, den das Schema nicht
+  anbietet. Genau der Fehlertyp, den die `heading_size`-Lücke hatte, nur auf einer Page.
+- **`docs/briefing-expertenseite-aerzte.md:120` und `:143`** behaupten, `crs-expert-quotes`
+  stehe in `product.nmn-pulver.json`. Tut es nicht, die NMN-PDP hat elf Sections und keine
+  davon ist diese.
 
 ---
 
@@ -351,12 +523,15 @@ Der Schema-Default von `founder_creds` behauptet „Spiegel Bestseller" und wird
 
 ### 6.2 Vor dem Rollout zu generalisieren
 
+**Erledigt am 2026-07-29.** Tabelle bleibt als Beschreibung des Zielzustands stehen,
+der Umsetzungsbericht steht oben unter „Was Phase 2 gebaut hat".
+
 | Section | Was | Warum |
 |---|---|---|
 | `crs-metrics-row` | `repeat(3, 1fr)` durch `data-count`-gesteuertes 1/2/3-Raster ersetzen | Supplements liefern selten drei belegbare Zahlen |
 | `crs-expert-quotes` | Single-Quote-Variante ermöglichen | dito |
 | `crs-feature-grid` | englische Block-Defaults „Dedicated guidance" / „Deploy AI at scale with professional expertise." entfernen | Fremd-Boilerplate publiziert sich still |
-| `crs-risk-free-close` | die zwei `template.suffix`-Zweige durch ein Setting `image_fit` (cover\|contain) ersetzen | wächst sonst auf 16 Zweige |
+| `crs-risk-free-close` | die zwei `template.suffix`-Zweige durch **zwei** Settings ersetzen, `image_fit` (cover\|contain) und `media_ratio` (wide\|square) | wächst sonst auf 16 Zweige. Ein Setting reicht nicht, die Zweige setzen zwei verschiedene Eigenschaften, siehe Korrektur 4 |
 | `lt-pdp-laborwerte` | Schema-`name` von `NMN PDP Laborwerte` auf `LT Laborwerte` | Section ist nicht NMN-spezifisch, `name` max 25 Zeichen |
 | `lt-pdp-process-steps`, `lt-pdp-report-preview`, `lt-pdp-ideal-candidate` | `heading_size`-Option `"feature"` nachrüsten | fällt sonst still zurück |
 

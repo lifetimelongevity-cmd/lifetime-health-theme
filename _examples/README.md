@@ -46,6 +46,18 @@ Hinweis zu den zwei neuesten Patterns (expert-profile, team-grid): Section-Heade
 
 ---
 
+## Approved Template Reference
+
+| Datei | Für | Abgeleitet aus |
+|---|---|---|
+| `templates/product.supplement-reference.json` | jede Supplement-PDP der Wellen W1–W3 | Phase-3-Pilot `templates/product.02_spermidin.json`, 2026-07-29 |
+
+Kopieren nach `templates/product.<suffix>.json`, alle `<< … >>`-Platzhalter ersetzen, dann Loox-Section und `main_product_hidden` aus dem Bestands-Template übernehmen. Der Kommentarblock oben in der Datei nennt die Prüfschritte. Korridore: `docs/pdp-copy-deck.md`. Hero-Matrix und Gate-Liste: `docs/pdp-supplement-rollout.md`.
+
+Diese Datei liegt bewusst in `_examples/` und wird von Shopify nicht ausgeliefert.
+
+---
+
 ## Page-Rhythmus dieser Sections
 
 ```
