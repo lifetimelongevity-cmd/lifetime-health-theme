@@ -250,7 +250,7 @@
       </div>
 
       <div class="lt-pdp-hero__content lt-hero-text element--is-sticky">
-        {%- assign lt_trust_1 = section.settings.trust_1 | default: '30-Tage Geld-zurück-Garantie — kein Formular, kein Aufwand' -%}
+        {%- assign lt_trust_1 = section.settings.trust_1 | default: '30-Tage Geld-zurück-Garantie, kein Formular, kein Aufwand' -%}
         {%- assign lt_trust_2 = section.settings.trust_2 | default: 'Versandkostenfrei ab 49 € · Laborgeprüft · Vegan' -%}
         {%- assign lt_trust_3 = section.settings.trust_3 | default: '>1.000 Kund:innen vertrauen LIFETIME' -%}
         {%- comment -%}trust_4 (optional, conditional render) — added 2026-04-27{%- endcomment -%}
@@ -396,7 +396,12 @@
                     als den Viewport gemacht — die ganze Seite bekam dadurch
                     horizontalen Ueberlauf.
                   {%- endcomment -%}
-                  {%- assign lt_creds = section.settings.founder_creds | default: 'Chefarzt Neurologie, Spiegel Bestseller, 20+ Jahre Forschung' | split: ',' -%}
+                  {%- comment -%}
+                    Kein Fallback-Wert. Unbelegte Credentials, insbesondere "Spiegel Bestseller",
+                    erschienen sonst auf jeder PDP, die das Feld nicht setzt. Leeres Feld = keine
+                    Chips. Belegte Chips werden pro Template gesetzt. 2026-07-29
+                  {%- endcomment -%}
+                  {%- assign lt_creds = section.settings.founder_creds | split: ',' -%}
                   {%- if lt_creds.size > 0 -%}
                     <div class="lt-founder-credentials">
                       {%- for cred in lt_creds -%}
@@ -491,37 +496,26 @@
           {%- endif -%}
         {%- endcapture -%}
 
-        {%- if section.settings.show_rating -%}
-        {%- if lt_count > 0 -%}
-          {%- assign lt_star_val = lt_rating -%}
-        {%- else -%}
-          {%- assign lt_star_val = 4.7 -%}
-        {%- endif -%}
-        {%- assign lt_star_pct = lt_star_val | times: 20 | round: 1 -%}
-        {%- assign lt_star_label = lt_star_val | round: 1 | replace: '.', ',' -%}
+        {%- comment -%}
+          Rating nur mit echten Loox-Bewertungen. Kein Platzhalter-Fallback:
+          erfundene Sterne und Bewertungszahlen sind irrefuehrende Werbung (UWG).
+          Bei lt_count == 0 faellt die ganze Zeile weg. — 2026-07-29
+        {%- endcomment -%}
+        {%- if section.settings.show_rating and lt_count > 0 -%}
+        {%- assign lt_star_pct = lt_rating | times: 20 | round: 1 -%}
+        {%- assign lt_star_label = lt_rating | round: 1 | replace: '.', ',' -%}
         <button type="button" class="lt-pdp-hero__rating lt-hero-stars" data-lt-reviews-scroll>
           <span class="lt-pdp-hero__stars" role="img" aria-label="{{ lt_star_label }} von 5 Sternen">
             <span class="lt-pdp-hero__stars-empty" aria-hidden="true">★★★★★</span>
             <span class="lt-pdp-hero__stars-full" aria-hidden="true" style="width: {{ lt_star_pct }}%">★★★★★</span>
           </span>
-          <span class="lt-pdp-hero__score">
-            {%- if lt_count > 0 -%}
-              {{ lt_rating | round: 1 | replace: '.', ',' }}
-            {%- else -%}
-              4,7
-            {%- endif -%}
-          </span>
+          <span class="lt-pdp-hero__score">{{ lt_star_label }}</span>
           <span class="lt-pdp-hero__count">
             {%- comment -%}
               Trennzeichen mit geschuetztem Leerzeichen. Die Whitespace-Kontrolle
               der Liquid-Tags hat vorher "4,7 ·229" ohne Abstand erzeugt.
             {%- endcomment -%}
-            &middot;&nbsp;
-            {%- if lt_count > 0 -%}
-              {{ lt_count }} Produktbewertungen
-            {%- else -%}
-              227 Produktbewertungen
-            {%- endif -%}
+            &middot;&nbsp;{{ lt_count }} Produktbewertungen
           </span>
         </button>
         {%- endif -%}
@@ -1057,21 +1051,39 @@
             <input type="hidden" name="id" value="{% if lt_show_sizes %}{{ lt_active_variant.id }}{% else %}{{ lt_variant_1.id }}{% endif %}" data-lt-variant-input>
             <input type="hidden" name="quantity" value="1" data-lt-quantity-input>
             <input type="hidden" id="lt-selling-plan-input" name="selling_plan" value="">
+            {%- liquid
+              # Ausverkauft muss am Button ankommen, nicht nur als CSS-Klasse. Vorher trug der Hero
+              # bei Bestand 0 weiter das Kauf-Label und blieb absendbar, waehrend der Combine-Button
+              # darunter korrekt "Ausverkauft" zeigte (live auf /products/astaxanthin-kapseln).
+              # Der Groessenpfad ist unkritisch: ausverkaufte Groessen sind als Radio disabled,
+              # eine waehlbare Groesse ist damit immer lieferbar. 2026-07-29
+              assign lt_atc_available = current_variant.available
+              if lt_show_sizes
+                assign lt_atc_available = lt_active_variant.available
+              endif
+              assign lt_atc_label = lt_primary_cta_label
+              assign lt_atc_aria = lt_primary_cta_aria
+              unless lt_atc_available
+                assign lt_atc_label = 'Ausverkauft'
+                assign lt_atc_aria = 'Ausverkauft'
+              endunless
+            -%}
             <div class="product__cart-functions">
               <div class="flex-buttons">
                 <button
                   id="lt-hero-atc"
                   type="submit"
                   name="add"
-                  class="add-to-cart button button--solid button--product button--loader button--move lt-pdp-hero__atc {% if lt_show_sizes %}{% unless lt_active_variant.available %}disabled{% endunless %}{% else %}{% unless current_variant.available %}disabled{% endunless %}{% endif %}"
+                  class="add-to-cart button button--solid button--product button--loader button--move lt-pdp-hero__atc{% unless lt_atc_available %} disabled{% endunless %}"
+                  {% unless lt_atc_available %}disabled data-lt-sold-out{% endunless %}
                   data-js-product-add-to-cart
                   data-main-product-add-to-cart
-                  aria-label="{{ lt_primary_cta_aria | escape }}"
+                  aria-label="{{ lt_atc_aria | escape }}"
                 >
                   {%- comment -%} aria-live: der CTA-Text trägt die konsolidierte Auswahl (Modus + Preis)
                       und sagt Screenreadern damit jeden Größen-/Moduswechsel genau einmal an {%- endcomment -%}
                   <span class="button__text" data-js-product-add-to-cart-text aria-live="polite">
-                    {{ lt_primary_cta_label | escape }}
+                    {{ lt_atc_label | escape }}
                   </span>
                   <span class="button__preloader">
                     <svg class="button__preloader-element" viewBox="25 25 50 50">
@@ -1088,7 +1100,7 @@
         {%- if lt_show_sub and section.settings.cancel_popup_body != blank -%}
           {%- assign lt_show_cancel_after_cta = true -%}
         {%- endif -%}
-        {%- assign lt_guarantee_line = section.settings.guarantee_text | default: 'Das 30-Tage-Zell-Versprechen — kein Formular, kein Aufwand' -%}
+        {%- assign lt_guarantee_line = section.settings.guarantee_text | default: 'Das 30-Tage-Zell-Versprechen, kein Formular, kein Aufwand' -%}
         {%- assign lt_guarantee_popup_plain = section.settings.guarantee_popup_body | default: '' | strip_html | strip -%}
         {%- if lt_show_cancel_after_cta or section.settings.show_guarantee_badge -%}
           <div class="lt-pdp-hero__post-cta">
@@ -1527,7 +1539,10 @@
           // Bei aktivem Sale (compare-at gesetzt) bezieht sich das Abo auf den Normalpreis
           // → zeigt den echten Doppelrabatt (Sale + Abo). Sonst: klassisch Abo-Ersparnis vs. Einmalkauf.
           const subRegular = baseComparePrice > 0 ? baseComparePrice : 0;
-          const subSaleActive = subRegular > subC;
+          // Gegen den EINMALPREIS pruefen, nicht gegen den Abo-Preis: der liegt konstruktiv
+          // 10 % darunter, damit war die Bedingung bei compare_at == price immer wahr und der
+          // Chip kippte ohne echten Rabatt von gruen auf rot. 2026-07-29
+          const subSaleActive = subRegular > onceC;
           // Ohne Sale: echter Abo-Vorteil gegen den Einmalpreis derselben Größe (self-correcting,
           // sobald Appstle feste Preise liefert). badgeDiscountPct nur als Fallback, falls onceC fehlt.
           const pct = subSaleActive
@@ -1642,13 +1657,16 @@
       });
 
       var atcTextEl = section.querySelector('[data-js-product-add-to-cart-text]');
+      var atcBtn = section.querySelector('#lt-hero-atc');
+      // Bei ausverkaufter Variante bleibt das SSR-Label "Ausverkauft" stehen. Ohne diesen
+      // Guard schreibt der Sync sofort wieder ein Kauf-Label darueber. 2026-07-29
+      var atcSoldOut = atcBtn ? atcBtn.hasAttribute('data-lt-sold-out') : false;
       var atcLabel =
         (isSub ? 'Abo starten' : 'Einmalig kaufen') + ', ' + formatPrice(currentCents);
-      if (atcTextEl) {
+      if (atcTextEl && !atcSoldOut) {
         atcTextEl.textContent = atcLabel;
       }
-      var atcBtn = section.querySelector('#lt-hero-atc');
-      if (atcBtn) {
+      if (atcBtn && !atcSoldOut) {
         atcBtn.setAttribute('aria-label', atcLabel.replace(' →', ''));
       }
     }
@@ -1740,6 +1758,14 @@
         pill.classList.toggle('is-selected', on);
         if (inp) inp.checked = on;
       });
+      // Ausverkaufte Groessen sind als Radio disabled, eine waehlbare Groesse ist also
+      // lieferbar: ATC wieder freigeben, falls die SSR-Groesse ausverkauft war. 2026-07-29
+      const atcBtnSize = section.querySelector('#lt-hero-atc');
+      if (atcBtnSize && atcBtnSize.hasAttribute('data-lt-sold-out')) {
+        atcBtnSize.removeAttribute('data-lt-sold-out');
+        atcBtnSize.removeAttribute('disabled');
+        atcBtnSize.classList.remove('disabled');
+      }
       const activeCard = section.querySelector('.lt-bb-card__input:checked')?.closest('[data-lt-bb-card]');
       if (activeCard) {
         syncFromCard(activeCard);
@@ -2449,7 +2475,7 @@
       "type": "text",
       "id": "hero_bullet_1",
       "label": "Bullet 1",
-      "default": "Uthever® NMN mit >99,9 % Reinheit — Rohstoff laborgeprüft in Deutschland"
+      "default": "Uthever® NMN mit >99,9 % Reinheit, Rohstoff laborgeprüft in Deutschland"
     },
     {
       "type": "image_picker",
@@ -2460,7 +2486,7 @@
       "type": "text",
       "id": "hero_bullet_2",
       "label": "Bullet 2",
-      "default": "GMP & HACCP — arztgeführtes Unternehmen aus Berlin"
+      "default": "GMP & HACCP, arztgeführtes Unternehmen aus Berlin"
     },
     {
       "type": "image_picker",
@@ -2519,7 +2545,7 @@
       "type": "text",
       "id": "benefit_1_text",
       "label": "Benefit 1",
-      "default": ">99,9 % NMN-Reinheit — unabhängig laborgeprüft in Deutschland"
+      "default": ">99,9 % NMN-Reinheit, unabhängig laborgeprüft in Deutschland"
     },
     {
       "type": "image_picker",
@@ -2693,7 +2719,7 @@
       "max": 50,
       "step": 1,
       "unit": "%",
-      "default": 15
+      "default": 10
     },
     {
       "type": "checkbox",
@@ -2724,7 +2750,7 @@
       "type": "text",
       "id": "trust_1",
       "label": "Trust-Zeile 1",
-      "default": "30-Tage Geld-zurück-Garantie — kein Formular, kein Aufwand"
+      "default": "30-Tage Geld-zurück-Garantie, kein Formular, kein Aufwand"
     },
     {
       "type": "image_picker",
@@ -2866,7 +2892,7 @@
       "type": "text",
       "id": "guarantee_text",
       "label": "Garantie-Zeile unter CTA (sichtbarer Text)",
-      "default": "Das 30-Tage-Zell-Versprechen — kein Formular, kein Aufwand"
+      "default": "Das 30-Tage-Zell-Versprechen, kein Formular, kein Aufwand"
     },
     {
       "type": "image_picker",
@@ -2885,7 +2911,7 @@
       "id": "guarantee_popup_body",
       "label": "Garantie — Popup-Inhalt",
       "info": "Wenn ausgefüllt: Zeile unter dem CTA wird klickbar.",
-      "default": "<p>Du hast 30 Tage Zeit, unser Produkt zu testen. Wenn du nicht überzeugt bist, erstatten wir den Kaufpreis — ohne Formular, ohne Kleingedrucktes. Schreib uns einfach an <a href=\"mailto:team@lifetime-health.de\">team@lifetime-health.de</a>.</p>"
+      "default": "<p>Du hast 30 Tage Zeit, unser Produkt zu testen. Wenn du nicht überzeugt bist, erstatten wir den Kaufpreis, ohne Formular, ohne Kleingedrucktes. Schreib uns einfach an <a href=\"mailto:team@lifetime-health.de\">team@lifetime-health.de</a>.</p>"
     },
     {
       "type": "image_picker",
@@ -2920,8 +2946,7 @@
       "type": "text",
       "id": "founder_creds",
       "label": "Credential-Chips (kommagetrennt)",
-      "info": "Leer lassen blendet die Chips aus. Doppelungen zu Titel/Logo-Leiste vermeiden.",
-      "default": "Chefarzt Neurologie, Spiegel Bestseller, 20+ Jahre Forschung"
+      "info": "Leer lassen blendet die Chips aus. Ohne Default, damit keine Seite unbelegte Credentials erbt: belegte Chips werden pro Template gesetzt."
     },
     {
       "type": "header",
