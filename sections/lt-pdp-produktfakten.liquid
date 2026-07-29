@@ -209,6 +209,12 @@
               <h3 class="ltpf__col-label">{{ pf_label_nutrients | escape }}</h3>
             {%- endif -%}
 
+            {%- comment -%}
+              Eigener Scroll-Container: eine lange Naehrstoffbezeichnung neben zwei
+              nowrap-Spalten darf bei 375px die ganze Seite schieben, nicht nur sich
+              selbst. Abnahmekriterium §10: keine horizontale Scrollleiste.
+            {%- endcomment -%}
+            <div class="ltpf__table-wrap">
             <table class="ltpf-nutri">
               {%- if pf_serving != blank -%}
                 <caption class="ltpf-nutri__caption">{{ pf_serving | escape }}</caption>
@@ -261,6 +267,7 @@
                 {%- endfor -%}
               </tbody>
             </table>
+            </div>
 
             {%- if pf_package != blank -%}
               <p class="ltpf__note">{{ pf_package | escape }}</p>
@@ -392,6 +399,12 @@
 
 .ltpf__note {
   margin-top: var(--space-4);
+}
+
+/* Breiter Inhalt scrollt in seinem eigenen Container, nie die Seite. */
+.ltpf__table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Naehrwerte: Tabellensemantik, aber optisch nur Zeilenregeln.
