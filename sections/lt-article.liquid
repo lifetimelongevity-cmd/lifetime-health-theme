@@ -39,8 +39,9 @@
   assign reviewer_name = mf.reviewer_name.value | default: section.settings.reviewer_name
   assign reviewer_credential = mf.reviewer_credential.value | default: section.settings.reviewer_credential
 
-  # Byline-Namen verlinken, sobald es eine Expertenseite gibt. Bis dahin bleiben sie
-  # reiner Text, damit die Byline nicht auf einen 404 zeigt. Kein Setting noetig:
+  # Nur den Reviewer-Namen (Limmroth) auf die Expertenseite verlinken, sobald es sie
+  # gibt. Bis dahin bleibt er reiner Text, damit die Byline nicht auf einen 404 zeigt.
+  # Der Autor (Benedikt Junker) bleibt bewusst unverlinkt. Kein Setting noetig:
   # der Link erscheint automatisch mit dem Anlegen der Seite /pages/aerzte.
   assign expert_page = pages['aerzte']
 
@@ -141,11 +142,7 @@
         {%- if author_name != blank -%}
           <span aria-hidden="true">&middot;</span>
           <span>Von
-            {%- if expert_page != blank %}
-              <a class="lt-article__byline-link" href="{{ expert_page.url }}"><strong>{{ author_name | escape }}</strong></a>
-            {%- else %}
-              <strong>{{ author_name | escape }}</strong>
-            {%- endif -%}
+            <strong>{{ author_name | escape }}</strong>
             {%- if author_credential != blank %}, {{ author_credential | escape }}{% endif -%}
           </span>
         {%- endif -%}
