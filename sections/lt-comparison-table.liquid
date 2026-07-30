@@ -207,9 +207,9 @@
 }
 
 .lct-container.tl-container {
-  max-width: 1100px;
+  max-width: var(--lt-page-max, 1280px);
   margin: 0 auto;
-  padding: 0 var(--space-5, 16px);
+  padding: 0 var(--lt-page-gutter, 16px);
 }
 
 .lct-header.tl-header {
@@ -219,10 +219,16 @@
 
 /* ── Outer wrap: single element that clips background colours at the radius.
       Badge is inside the header cell (positive top offset) so nothing is clipped. ── */
+/* Der Container laeuft seit 30.07. auf der Seitenbreite, damit die Ueberschrift
+   auf derselben linken Kante sitzt wie jede andere Section. Schmal bleibt nur
+   die Tabelle selbst: 1100px waren als Lesebreite gesetzt, nicht als
+   Seitenbreite. Linksbuendig (kein `margin: 0 auto`), sonst wandert die Kante
+   an genau der Stelle wieder weg, an der sie gerade geradegezogen wurde. */
 .lct-outer-wrap {
   border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
   border-radius: 14px;
   overflow: hidden;
+  max-width: 1100px;
 }
 
 /* ── Scroll wrap ── */
@@ -458,19 +464,23 @@
     min-width: 284px;
   }
 
-  /* Silbentrennung statt harter Umbrueche mitten im Wort. Zeilenhoehen
-     gleichen sich ueber das Grid ohnehin an (.lct-row nutzt display:contents),
-     eine Mindesthoehe waere hier nur zusaetzliche Hoehe ohne Nutzen.
-     Auch auf der Label-Spalte: dort stehen die laengsten Woerter der Tabelle
-     ("Wissenschaftliche Begleitung", "Laborpruefung (Pruefbericht)").
-     hyphenate-limit-chars haelt Zwei-Buchstaben-Fragmente heraus. */
+  /* Silbentrennung: `manual`, NICHT `auto`.
+     `hyphens: auto` braucht das Trennwoerterbuch der Sprache. Wo es fehlt —
+     eingebettete und headless Chromium-Builds liefern es per Component Updater
+     nach und haben es oft nicht — trennt Chrome nicht etwa gar nicht, sondern
+     faellt auf zeichenweises Brechen zurueck. Gemessen am Dev-Server wurde
+     daraus "Weizenkeimext|rakt" und "Wissenschaftlic|he", und der Fallback
+     ueberstimmt sogar gesetzte Soft Hyphens.
+     `manual` rendert auf jeder Engine gleich und bricht genau dort, wo im
+     Template ein Soft Hyphen (U+00AD) steht. Die langen Komposita tragen ihn:
+     "Weizenkeim­extrakt", "Wissen­schaftliche". Bei den uebrigen Zellen passt
+     nach der Spaltenkorrektur oben jedes Wort in seine Spalte, gemessen.
+     `overflow-wrap: break-word` aus der Basisregel bleibt als Netz fuer neue,
+     noch laengere Begriffe. Wer eines ergaenzt, setzt den Soft Hyphen mit. */
   .lct-cell-text,
   .lct-label-text {
-    hyphens: auto;
-    -webkit-hyphens: auto;
-    hyphenate-limit-chars: 8 4 3;
-    -webkit-hyphenate-limit-before: 4;
-    -webkit-hyphenate-limit-after: 3;
+    hyphens: manual;
+    -webkit-hyphens: manual;
   }
 }
 

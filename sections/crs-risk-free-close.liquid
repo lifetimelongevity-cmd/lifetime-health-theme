@@ -89,7 +89,7 @@
 
 <div class="rfc-section" id="section-{{ section.id }}">
   <div class="rfc-container">
-    <div class="rfc-grid">
+    <div class="rfc-grid{% if section.settings.mobile_media_order == 'after_copy' %} rfc-grid--mobile-media-last{% endif %}">
       <div class="rfc-media">
         <div class="rfc-media-card">
           {%- if crs_rfc_image != blank -%}
@@ -114,7 +114,7 @@
         </div>
       </div>
 
-      <div class="rfc-copy rfc-copy--align-{{ crs_h_align }}">
+      <div class="rfc-copy rfc-copy--align-{{ crs_h_align }}{% if section.settings.offer_emphasis %} rfc-copy--offer{% endif %}">
         {%- if crs_rfc_kicker != blank or crs_rfc_head != blank or crs_rfc_sub != blank -%}
           <div class="crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_h_headline_md %} crs-heading-stack--headline-md{% endif %}">
             {%- if crs_rfc_kicker != blank -%}
@@ -246,9 +246,9 @@
 }
 
 .rfc-container {
-  max-width: 1200px;
+  max-width: var(--lt-page-max, 1280px);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--lt-page-gutter, 16px);
 }
 
 .rfc-grid {
@@ -356,6 +356,37 @@
   color: var(--crs-text, #26251e);
 }
 
+/*
+  Angebots-Betonung, Setting `offer_emphasis`, Default aus.
+
+  Ohne den Modifier war die Rangfolge nach visuellem Gewicht: 28px-Ueberschrift,
+  16px-Fliesstext, 15px-Trust-Zeilen, dann Preis 18px und Button-Label 14px. Das
+  Element, auf das die ganze Section hinarbeitet, war ihr leisestes. Mit dem
+  Modifier steht der Preis auf 24px und der Button auf 16px, beide bleiben im
+  Body-Font.
+
+  Damit ist auch der Kommentar zwei Regeln weiter oben eingeordnet, nicht
+  widerrufen: er lehnt --text-h3 in der *Headline-Schrift* ab, weil das eine
+  zweite Ueberschrift ergibt. Genau das passiert hier nicht, --font-body und
+  --font-heading sind zwei Familien. Wer die Regel spaeter zurueckdreht, muss
+  diesen Unterschied entkraeften, nicht den alten Kommentar zitieren.
+*/
+.rfc-copy--offer .rfc-price {
+  font-family: var(--font-body);
+  font-size: var(--text-h3);
+  font-variant-numeric: tabular-nums;
+}
+
+.rfc-copy--offer .rfc-trust-item {
+  font-size: var(--text-body-sm);
+}
+
+.rfc-copy--offer .rfc-cta {
+  font-size: var(--text-body);
+  min-height: 52px;
+  padding: 0 26px;
+}
+
 .rfc-trust-list {
   list-style: none;
   display: grid;
@@ -442,6 +473,30 @@
 
   .rfc-copy {
     order: 2;
+  }
+
+  /*
+    Setting `mobile_media_order`, Default `first` gleich dem Verhalten oben.
+
+    Mit `after_copy` beginnt die Section mobil mit ihrer Ueberschrift statt mit
+    einem Quadrat, das der Nutzer als Galerie-Slide schon gesehen hat. Die
+    Modifier-Selektoren gewinnen mit (0,2,0) gegen die (0,1,0) darueber, die
+    Reihenfolge im Stylesheet reicht dafuer nicht.
+
+    Achtung beim Format: der `media_ratio == square`-Zweig im {% style %}-Block
+    schreibt `#section-<id> .rfc-media-card` und schlaegt jeden Klassen-Modifier.
+    Betrifft heute nur /pages/science.
+  */
+  .rfc-grid--mobile-media-last .rfc-media {
+    order: 2;
+  }
+
+  .rfc-grid--mobile-media-last .rfc-copy {
+    order: 1;
+  }
+
+  .rfc-grid--mobile-media-last .rfc-media-card {
+    aspect-ratio: 6 / 5;
   }
 
   .rfc-badge {
@@ -575,6 +630,24 @@
       ],
       "default": "wide",
       "info": "Quadratisch nur bei quadratischen Vollbild-Motiven. Mobil ist die Karte immer quadratisch."
+    },
+    {
+      "type": "select",
+      "id": "mobile_media_order",
+      "label": "Bildposition mobil",
+      "options": [
+        { "value": "first", "label": "Über der Überschrift" },
+        { "value": "after_copy", "label": "Unter dem Text" }
+      ],
+      "default": "first",
+      "info": "„Unter dem Text\" auf Produktseiten, deren Galerie dasselbe Motiv schon gezeigt hat."
+    },
+    {
+      "type": "checkbox",
+      "id": "offer_emphasis",
+      "label": "Preis und Button betonen",
+      "default": false,
+      "info": "Hebt Preis auf 24px und Button-Label auf 16px. Für Sections, die den Kauf abschließen."
     },
     {
       "type": "text",

@@ -49,6 +49,7 @@
   # Angelegt 2026-07-29.
   assign cr_source = section.settings.review_source | default: 'blocks'
   assign cr_loox_max = section.settings.loox_max | default: 8
+  assign cr_loox_min_chars = section.settings.loox_min_chars | default: 0
   assign cr_loox_rating = product.metafields.loox.avg_rating.value | default: 0 | plus: 0
   assign cr_loox_count = product.metafields.loox.num_reviews.value | default: 0 | plus: 0
 
@@ -77,6 +78,25 @@
         continue
       endif
 
+      # Mindestlaenge, Default 0 gleich dem Verhalten bis 30.07.
+      #
+      # Der Filter oben faengt nur die leeren Bewertungen ab, nicht die
+      # inhaltsleeren. "Vielen Dank!" ist ein echter Text und ergibt trotzdem
+      # eine Karte, die nichts belegt. Eine Section aus solchen Karten kostet
+      # mehr Vertrauen, als sie bringt: sie stellt eine Buehne auf und liefert
+      # nichts darauf. Lieber drei tragende Zitate und der echte Schnitt
+      # darueber als acht Karten, von denen fuenf Fuellmaterial sind.
+      #
+      # Bewusst eine Laengenschwelle und keine Wortliste: eine Blockliste
+      # ("danke", "top", …) muesste gepflegt werden und trifft irgendwann eine
+      # echte Bewertung. Die Schwelle ist grob, aber ehrlich begruendbar.
+      if cr_loox_min_chars > 0
+        assign cr_t_len = cr_t | size
+        if cr_t_len < cr_loox_min_chars
+          continue
+        endif
+      endif
+
       assign cr_n_parts = chunk | split: '<div class="name">'
       assign cr_n = ''
       if cr_n_parts.size > 1
@@ -95,6 +115,21 @@
 
   assign cr_loox_name_list = cr_loox_names | split: '||'
   assign cr_loox_text_list = cr_loox_texts | split: '||'
+
+  # Kartenzahl je Quelle, einmal berechnet. Die Bedienleiste unter dem Track
+  # (Zaehler plus zwei Pfeile) wird fuer beide Zweige aus derselben Zahl gebaut,
+  # damit das Markup nur an einer Stelle steht.
+  assign cr_block_count = 0
+  for block in section.blocks
+    if block.type == 'review'
+      assign cr_block_count = cr_block_count | plus: 1
+    endif
+  endfor
+  if cr_source == 'loox'
+    assign cr_total = cr_loox_used
+  else
+    assign cr_total = cr_block_count
+  endif
 -%}
 
 {% style %}
@@ -106,10 +141,50 @@
     --cr-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.66 }};
     --cr-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
     --cr-visible:  {{ cr_visible }};
+    {%- comment -%}
+      Bewertungstext lief als einziger Fliesstext der PDP auf 14px, waehrend jeder
+      andere Fliesstext 16px hat. Das Setting hebt ihn dort, wo die Bewertungen
+      das Argument tragen sollen; Default bleibt 14px, damit die anderen
+      Templates unveraendert rendern.
+    {%- endcomment -%}
+    {%- if section.settings.text_size == 'md' -%}
+      --cr-text-size: var(--text-body);
+    {%- else -%}
+      --cr-text-size: var(--text-body-sm);
+    {%- endif -%}
     padding-top:    min({{ section.settings.padding_top }}px, 15vw);
     padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
   }
 {% endstyle %}
+
+{%- comment -%}
+  Bedienleiste unter dem Track. Vorher stand dort nur „1 von 5" als Text: keine
+  Pfeile, keine Dots, `scrollbar-width: none`, und der angeschnittene Rand rechts
+  war mit rund 24px genau so breit wie das Kartenpadding, konnte also nie ein
+  Zeichen zeigen. Auf Zeigergeraeten gab es damit ueberhaupt keine Bedienung.
+  Der Zaehler bleibt als aria-live-Label, die Pfeile kommen daneben.
+{%- endcomment -%}
+{%- capture cr_controls -%}
+  {%- if cr_total > 1 -%}
+    <div class="cr-controls">
+      <p class="cr-progress" data-cr-progress aria-live="polite">
+        <span data-cr-progress-current>1</span> von {{ cr_total }}
+      </p>
+      <div class="cr-nav">
+        <button type="button" class="cr-nav-btn" data-cr-prev aria-label="Vorherige Bewertung">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M10 3.5 5.5 8l4.5 4.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button type="button" class="cr-nav-btn" data-cr-next aria-label="Nächste Bewertung">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M6 3.5 10.5 8 6 12.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  {%- endif -%}
+{%- endcapture -%}
 
 <div class="cr-section" id="section-{{ section.id }}">
   <div class="cr-container">
@@ -205,11 +280,7 @@
           {%- endfor -%}
         </ul>
 
-        {%- if cr_loox_used > 1 -%}
-          <p class="cr-progress" data-cr-progress aria-live="polite">
-            <span data-cr-progress-current>1</span> von {{ cr_loox_used }}
-          </p>
-        {%- endif -%}
+        {{ cr_controls }}
 
         {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
           <div class="cr-cta-wrap">
@@ -221,10 +292,6 @@
 
       {%- endif -%}
     {%- elsif cr_has_reviews -%}
-      {%- assign cr_review_count = 0 -%}
-      {%- for block in section.blocks -%}
-        {%- if block.type == 'review' -%}{%- assign cr_review_count = cr_review_count | plus: 1 -%}{%- endif -%}
-      {%- endfor -%}
       <ul class="cr-track" role="list" data-cr-track>
         {%- for block in section.blocks -%}
           {%- if block.type == 'review' -%}
@@ -290,15 +357,7 @@
         {%- endfor -%}
       </ul>
 
-      {%- comment -%}
-        Der Track hatte keinerlei Hinweis, dass es mehr Karten gibt: keine
-        Pfeile, keine Dots, keinen Zaehler. Nur der angeschnittene Kartenrand.
-      {%- endcomment -%}
-      {%- if cr_review_count > 1 -%}
-        <p class="cr-progress" data-cr-progress aria-live="polite">
-          <span data-cr-progress-current>1</span> von {{ cr_review_count }}
-        </p>
-      {%- endif -%}
+      {{ cr_controls }}
 
       {%- comment -%} ── Optional CTA ───────────────────────────────── {%- endcomment -%}
       {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
@@ -426,9 +485,9 @@
 }
 
 .cr-container {
-  max-width: 1280px;
+  max-width: var(--lt-page-max, 1280px);
   margin: 0 auto;
-  padding: 0 var(--space-5);
+  padding: 0 var(--lt-page-gutter, 16px);
 }
 
 /* ── Section header ───────────────────────────────────────── */
@@ -466,12 +525,61 @@
 
 /* Zaehler unter dem Track. Bewusst Text und kein Dot-Cluster: bei acht Karten
    werden Dots zu Konfetti, "3 von 8" bleibt bei jeder Anzahl lesbar. */
+.cr-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
 .cr-progress {
-  margin: var(--space-3) 0 0;
+  margin: 0;
   font-family: var(--font-body);
   font-size: var(--text-body-sm);
   color: var(--cr-text-sec);
   font-variant-numeric: tabular-nums;
+}
+
+.cr-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-shrink: 0;
+}
+
+/* 44px: Tap-Ziel nach WCAG 2.2 SC 2.5.8 (Minimum 24px) mit Reserve, gleiche
+   Groesse wie die uebrigen Icon-Buttons im Theme. Monochrom outline, damit die
+   Bedienung nicht mit dem CTA der Section konkurriert. */
+.cr-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--cr-border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--cr-text);
+  cursor: pointer;
+  transition: border-color var(--ease-default), background var(--ease-default), opacity var(--ease-default);
+}
+
+.cr-nav-btn:hover {
+  border-color: var(--cr-text-sec);
+}
+
+.cr-nav-btn:focus-visible {
+  outline: 2px solid var(--cr-text);
+  outline-offset: 2px;
+}
+
+/* Am Anfang bzw. Ende des Tracks: sichtbar, aber erkennbar nicht bedienbar.
+   Ausblenden waere ein Layoutsprung bei jedem Wisch. */
+.cr-nav-btn[disabled] {
+  opacity: 0.35;
+  cursor: default;
 }
 
 /* ── Scroll track ─────────────────────────────────────────── */
@@ -561,7 +669,7 @@
 /* ── Review text ──────────────────────────────────────────── */
 .cr-text {
   font-family: var(--font-body);
-  font-size: var(--text-body-sm);
+  font-size: var(--cr-text-size, var(--text-body-sm));
   line-height: var(--leading-body);
   color: var(--cr-text);
   margin: 0;
@@ -681,9 +789,16 @@
 }
 
 @media (max-width: 640px) {
+  /*
+    Mobil war der Faktor 1.15. Auf 390px Geraetebreite ergab das rund 294px
+    Kartenbreite und einen sichtbaren Rest von rund 24px, also exakt die Breite
+    des Kartenpaddings: der Peek konnte konstruktionsbedingt nie ein Zeichen
+    zeigen und las als abgeschnittene leere Flaeche. 1.35 laesst rund 50px
+    Textflaeche der naechsten Karte stehen, damit ist der Anschnitt als Satz
+    erkennbar und nicht als Fehler.
+  */
   .cr-card {
-    /* Mobile: show ~1.15 cards — strong peek communicates scroll */
-    flex: 0 0 calc((100% + var(--space-5)) / 1.15 - var(--space-5));
+    flex: 0 0 calc((100% + var(--space-5)) / 1.35 - var(--space-5));
     min-width: 0;
   }
 
@@ -829,6 +944,17 @@
       "info": "Überzählige Karten sind per horizontalem Scroll erreichbar."
     },
     {
+      "type": "select",
+      "id": "text_size",
+      "label": "Größe des Bewertungstexts",
+      "options": [
+        { "value": "sm", "label": "14 px (Standard)" },
+        { "value": "md", "label": "16 px, wie der übrige Fließtext" }
+      ],
+      "default": "sm",
+      "info": "16 px, wenn die Bewertungen auf dieser Seite ein tragendes Argument sind."
+    },
+    {
       "type": "header",
       "content": "Quelle der Bewertungen"
     },
@@ -852,6 +978,17 @@
       "step": 1,
       "default": 8,
       "info": "Greift nur bei der Loox-Quelle."
+    },
+    {
+      "type": "range",
+      "id": "loox_min_chars",
+      "label": "Mindestlänge einer Bewertung",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "Z.",
+      "default": 0,
+      "info": "0 lässt jede Bewertung mit Text durch. Höhere Werte blenden Einwortbewertungen wie „Vielen Dank!\" aus, die eine Karte füllen, ohne etwas zu belegen."
     }
   ],
   "blocks": [
@@ -990,6 +1127,18 @@
     if (!track || !out || track.__crBound) return;
     track.__crBound = true;
 
+    var prev = root.querySelector('[data-cr-prev]');
+    var next = root.querySelector('[data-cr-next]');
+
+    // Schrittweite = eine Karte plus Gap. Aus dem DOM gelesen statt aus dem CSS
+    // gespiegelt, damit die drei Breakpoints der Kartenformel nicht zweimal
+    // gepflegt werden muessen.
+    function step() {
+      var cards = track.children;
+      if (cards.length < 2) return track.clientWidth;
+      return cards[1].offsetLeft - cards[0].offsetLeft;
+    }
+
     var raf = null;
     function update() {
       raf = null;
@@ -1003,11 +1152,28 @@
         if (c.offsetLeft <= mid) idx = i;
       }
       out.textContent = String(idx + 1);
+
+      // 1px Toleranz: scrollLeft ist bei fraktionalen Kartenbreiten nicht ganzzahlig.
+      var max = track.scrollWidth - track.clientWidth;
+      if (prev) prev.disabled = track.scrollLeft <= 1;
+      if (next) next.disabled = track.scrollLeft >= max - 1;
     }
 
     track.addEventListener('scroll', function () {
       if (raf === null) raf = requestAnimationFrame(update);
     }, { passive: true });
+
+    if (prev) {
+      prev.addEventListener('click', function () {
+        track.scrollBy({ left: -step(), behavior: 'smooth' });
+      });
+    }
+    if (next) {
+      next.addEventListener('click', function () {
+        track.scrollBy({ left: step(), behavior: 'smooth' });
+      });
+    }
+
     update();
   }
 

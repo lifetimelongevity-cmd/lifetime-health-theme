@@ -99,10 +99,15 @@
   background: var(--lt-bg);
 }
 
+/* Container-Geometrie kommt aus den Tokens in theme.css, damit Hero und die
+   acht Content-Sections darunter auf derselben linken Kante sitzen. Vorher
+   1200px hier gegen 1280px in den Sections: bei 1440px Viewport sprang die
+   Kante zwischen Hero und Section um 40px. Der Mobile-Override unten setzt das
+   vertikale Padding neu, die seitlichen Werte laufen ueber denselben Gutter. */
 .lt-pdp-hero__container {
-  max-width: 1200px;
+  max-width: var(--lt-page-max, 1280px);
   margin: 0 auto;
-  padding: var(--space-9) var(--space-5) var(--space-8);
+  padding: var(--space-9) var(--lt-page-gutter, 24px) var(--space-8);
 }
 
 .lt-pdp-hero {
@@ -229,12 +234,69 @@
     display: block !important;
   }
 
-  .lt-pdp-hero .css-slider-dot-navigation .css-slider-dot {
-    background: var(--lt-border);
+  /*
+    Galerie-Bedienung mobil. Vorher: eine zusammenhaengende 150x6px-Leiste, je
+    Segment 30x6px ohne Abstand. Das las als Fortschrittsbalken statt als
+    Bedienelement und verfehlte WCAG 2.2 SC 2.5.8 (24x24px) deutlich.
+
+    Zwei Fallen, beide teuer bezahlt:
+
+    1. Spezifitaet. Die Regeln hier hingen an `.lt-pdp-hero .css-slider-dot-
+       navigation .css-slider-dot` (0,3,0) und verloren gegen
+       component-slider.css (0,4,0), waren also toter Code. `:not()` steuert
+       die Spezifitaet seines Arguments bei. Die Farbe der Punkte NACH dem
+       aktiven kommt dort sogar aus (0,6,0) und braucht deshalb den
+       `.active ~`-Zweig, sonst bleibt die Fortschrittsbalken-Optik.
+
+    2. Layout. Der Punkt bleibt inline-block im Flow des Themes, der Abstand
+       kommt aus `margin-right`, NICHT aus `display: flex` plus `gap`. Ein
+       Flex-Container an dieser Stelle, ebenso ein explizites `height`, laesst
+       die Leiste am Geraet unsichtbar werden, obwohl `getBoundingClientRect`
+       weiter 24x6 und eine deckende Hintergrundfarbe meldet. Das ist im
+       Screenshot verifiziert, nicht nur berechnet: die vier Varianten mit
+       Flex-Container oder gesetzter Hoehe rendern gar keine Punkte mehr.
+       Wer hier aufraeumen will, prueft am Screenshot, nicht am DevTools-Wert.
+
+    Das Tap-Ziel liegt im ::after (24 breit, 44 hoch), nicht in der sichtbaren
+    Geometrie: der Punkt selbst soll klein bleiben. `overflow` muss dafuer von
+    hidden (Theme, fuer die Autoplay-Animation) auf visible.
+  */
+  .lt-pdp-hero .css-slider:not(.css-slider--overlay-navigation) .css-slider-dot-navigation .css-slider-dot,
+  .lt-pdp-hero .css-slider:not(.css-slider--overlay-navigation) .css-slider-dot-navigation .css-slider-dot:first-child,
+  .lt-pdp-hero .css-slider:not(.css-slider--overlay-navigation) .css-slider-dot-navigation .css-slider-dot:last-child,
+  .lt-pdp-hero .css-slider:not(.css-slider--overlay-navigation) .css-slider-dot-navigation .css-slider-dot.active ~ .css-slider-dot {
+    width: 24px;
+    max-width: none;
+    margin-right: var(--space-2);
+    border-radius: var(--radius-full);
+    /*
+      Nicht --lt-border (Alpha 0.10, rund 1,15:1 auf #f7f7f4). Als einzige
+      Bedienung der Galerie faellt der Punkt unter WCAG 1.4.11 (3:1 fuer
+      Bedienelemente), nicht unter die Text-Regel. Alpha 0.5 auf der Textfarbe
+      ergibt rund 3:1 und bleibt trotzdem klar leiser als der aktive Punkt.
+    */
+    background: var(--lt-text);
+    opacity: 0.5;
+    overflow: visible;
+    position: relative;
   }
 
-  .lt-pdp-hero .css-slider-dot-navigation .css-slider-dot.active {
+  .lt-pdp-hero .css-slider:not(.css-slider--overlay-navigation) .css-slider-dot-navigation .css-slider-dot:last-child {
+    margin-right: 0;
+  }
+
+  .lt-pdp-hero .css-slider:not(.css-slider--overlay-navigation) .css-slider-dot-navigation .css-slider-dot::after {
+    content: '';
+    position: absolute;
+    inset: -19px 0;
+  }
+
+  .lt-pdp-hero .css-slider:not(.css-slider--overlay-navigation) .css-slider-dot-navigation .css-slider-dot.active,
+  .lt-pdp-hero .css-slider:not(.css-slider--overlay-navigation) .css-slider-dot-navigation .css-slider-dot.active:first-child,
+  .lt-pdp-hero .css-slider:not(.css-slider--overlay-navigation) .css-slider-dot-navigation .css-slider-dot.active:not(:first-child) {
     background: var(--lt-text);
+    border-radius: var(--radius-full);
+    opacity: 1;
   }
 }
 
@@ -759,9 +821,9 @@
    liegt permanent über dem Content, jede zusätzliche Zeile ist verdeckter
    Inhalt. Deshalb Namenszeile einzeilig, keine geclampte Subline. */
 .lt-sticky-atc__inner {
-  max-width: 1200px;
+  max-width: var(--lt-page-max, 1280px);
   margin: 0 auto;
-  padding: 8px 20px;
+  padding: 8px var(--lt-page-gutter, 24px);
   display: flex;
   align-items: center;
   justify-content: space-between;

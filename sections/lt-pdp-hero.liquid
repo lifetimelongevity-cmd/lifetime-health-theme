@@ -25,6 +25,38 @@
   assign default_to_first_variant = true
   assign gallery_layout = 'one-col slider'
   assign gallery_mobile_width = 100
+
+  # Galerie-Format. Quadrat war hier hart verdrahtet und ist der teuerste
+  # Einzelposten oberhalb des Falzes: 378px Slide-Hoehe auf 390px Viewport, in
+  # denen die freigestellte Dose rund ein Drittel belegt, also rund 126px Dose
+  # auf 378px Flaeche.
+  #
+  # Wichtig, weil es beim ersten Anlauf falsch herum lief: Hochformat 4:5 macht
+  # den Rahmen **hoeher**, nicht flacher. Gemessen auf 390px ging der erste
+  # Preis dadurch von 776px auf 866px, also in die falsche Richtung. Das Format
+  # allein loest nichts, es kommt auf die Kombination an:
+  #
+  #   Asset 4:5 und eng beschnitten  ->  Dose gross bei wenig Rahmenhoehe
+  #   Rahmen mobil flacher (4:3)     ->  Kaufzone rueckt hoch
+  #
+  # `object-fit: contain` (theme.css setzt es per !important auf
+  # `lazy-image--fit`) skaliert das 4:5-Asset im flacheren Rahmen auf dessen
+  # Hoehe und zentriert es. Die seitlichen Raender sind kein Letterbox-Fehler,
+  # weil die Slide-Flaeche `--lt-surface` traegt und die Assets exakt auf
+  # diesem Ton liegen. Wer Assets mit abweichendem Hintergrund einsetzt,
+  # bekommt hier eine sichtbare Kante.
+  #
+  # Deshalb Select statt globalem Wechsel, Default bleibt das Quadrat: die
+  # anderen 15 PDPs fahren quadratische Katalogfotos, die im Hochformat nur
+  # kleiner wuerden.
+  #
+  # Ganzzahlige 1 im Default-Zweig ist Absicht: das Snippet rechnet
+  # `100 | divided_by: aspect_ratio`, und 1.0 wuerde "100.0%" statt "100%"
+  # schreiben. Render-identisch, aber ein unnoetiger Diff auf 15 PDPs.
+  assign gallery_ratio = 1
+  if section.settings.gallery_ratio == 'portrait_4_5' or section.settings.gallery_ratio == 'portrait_compact'
+    assign gallery_ratio = 0.8
+  endif
   assign lt_variant_1 = current_variant
   assign lt_variant_3 = blank
   assign lt_variant_6 = blank
@@ -99,7 +131,7 @@
   <div class="lt-pdp-hero__container">
     <product-page
       id="product-{{ section.id }}"
-      class="lt-pdp-hero"
+      class="lt-pdp-hero{% if section.settings.gallery_ratio == 'portrait_compact' %} lt-pdp-hero--gallery-compact{% endif %}"
       data-collection="{{ collection.handle }}"
       data-id="{{ product.id }}"
       data-availability="{{ product.available }}"
@@ -133,7 +165,7 @@
                 {%- unless settings.product_card_fallback_image == blank -%}
                   {%- render 'product-media',
                     fallback: true,
-                    aspect_ratio: 1,
+                    aspect_ratio: gallery_ratio,
                     fit: true,
                     layout: gallery_layout,
                     desktop_width: 'one-half',
@@ -153,7 +185,7 @@
                     enable_zoom: false,
                     loop: false,
                     index: forloop.index0,
-                    aspect_ratio: 1,
+                    aspect_ratio: gallery_ratio,
                     fit: true,
                     layout: gallery_layout,
                     desktop_width: 'one-half',
@@ -251,9 +283,15 @@
       </div>
 
       <div class="lt-pdp-hero__content lt-hero-text element--is-sticky">
-        {%- assign lt_trust_1 = section.settings.trust_1 | default: '30-Tage Geld-zurück-Garantie, kein Formular, kein Aufwand' -%}
-        {%- assign lt_trust_2 = section.settings.trust_2 | default: 'Versandkostenfrei ab 49 € · Laborgeprüft · Vegan' -%}
-        {%- assign lt_trust_3 = section.settings.trust_3 | default: '>1.000 Kund:innen vertrauen LIFETIME' -%}
+        {%- comment -%}
+          Kein `| default:` — der Filter greift auch beim Leerstring. Solange er drin
+          stand, holte ein bewusst geleertes Trust-Feld den Alt-Text zurück, statt die
+          Zeile zu entfernen. Templates ohne diese Settings bekommen weiterhin den
+          Schema-Default; leer heißt jetzt: Zeile fällt weg (Gate unten).
+        {%- endcomment -%}
+        {%- assign lt_trust_1 = section.settings.trust_1 | strip -%}
+        {%- assign lt_trust_2 = section.settings.trust_2 | strip -%}
+        {%- assign lt_trust_3 = section.settings.trust_3 | strip -%}
         {%- comment -%}trust_4 (optional, conditional render) — added 2026-04-27{%- endcomment -%}
         {%- assign lt_trust_4 = section.settings.trust_4 | strip -%}
         {%- assign lt_trust_1_icon_name = section.settings.trust_1_icon_name | default: 'delivery' -%}
@@ -282,43 +320,50 @@
 
         {%- comment -%}Reusable blocks — captured early so they can be placed before or after CTA depending on lt_show_sub{%- endcomment -%}
         {%- capture lt_trust_block -%}
+          {%- if lt_trust_1 != blank or lt_trust_2 != blank or lt_trust_3 != blank or lt_trust_4 != blank -%}
           <div class="lt-pdp-hero__trust lt-trust">
-            <div class="lt-pdp-hero__trust-item">
-              {%- if section.settings.trust_1_icon != blank -%}
-                {{
-                  section.settings.trust_1_icon
-                  | image_url: width: 72
-                  | image_tag: loading: 'lazy', class: 'lt-trust-icon-img', alt: ''
-                }}
-              {%- else -%}
-                {% render 'lt-trust-icon', name: lt_trust_1_icon_name %}
-              {%- endif -%}
-              <span>{{ lt_trust_1 }}</span>
-            </div>
-            <div class="lt-pdp-hero__trust-item">
-              {%- if section.settings.trust_2_icon != blank -%}
-                {{
-                  section.settings.trust_2_icon
-                  | image_url: width: 64
-                  | image_tag: loading: 'lazy', class: 'lt-trust-icon-img', alt: ''
-                }}
-              {%- else -%}
-                {% render 'lt-trust-icon', name: lt_trust_2_icon_name %}
-              {%- endif -%}
-              <span>{{ lt_trust_2 }}</span>
-            </div>
-            <div class="lt-pdp-hero__trust-item">
-              {%- if section.settings.trust_3_icon != blank -%}
-                {{
-                  section.settings.trust_3_icon
-                  | image_url: width: 72
-                  | image_tag: loading: 'lazy', class: 'lt-trust-icon-img', alt: ''
-                }}
-              {%- else -%}
-                {% render 'lt-trust-icon', name: lt_trust_3_icon_name %}
-              {%- endif -%}
-              <span>{{ lt_trust_3 }}</span>
-            </div>
+            {%- if lt_trust_1 != blank -%}
+              <div class="lt-pdp-hero__trust-item">
+                {%- if section.settings.trust_1_icon != blank -%}
+                  {{
+                    section.settings.trust_1_icon
+                    | image_url: width: 72
+                    | image_tag: loading: 'lazy', class: 'lt-trust-icon-img', alt: ''
+                  }}
+                {%- else -%}
+                  {% render 'lt-trust-icon', name: lt_trust_1_icon_name %}
+                {%- endif -%}
+                <span>{{ lt_trust_1 }}</span>
+              </div>
+            {%- endif -%}
+            {%- if lt_trust_2 != blank -%}
+              <div class="lt-pdp-hero__trust-item">
+                {%- if section.settings.trust_2_icon != blank -%}
+                  {{
+                    section.settings.trust_2_icon
+                    | image_url: width: 64
+                    | image_tag: loading: 'lazy', class: 'lt-trust-icon-img', alt: ''
+                  }}
+                {%- else -%}
+                  {% render 'lt-trust-icon', name: lt_trust_2_icon_name %}
+                {%- endif -%}
+                <span>{{ lt_trust_2 }}</span>
+              </div>
+            {%- endif -%}
+            {%- if lt_trust_3 != blank -%}
+              <div class="lt-pdp-hero__trust-item">
+                {%- if section.settings.trust_3_icon != blank -%}
+                  {{
+                    section.settings.trust_3_icon
+                    | image_url: width: 72
+                    | image_tag: loading: 'lazy', class: 'lt-trust-icon-img', alt: ''
+                  }}
+                {%- else -%}
+                  {% render 'lt-trust-icon', name: lt_trust_3_icon_name %}
+                {%- endif -%}
+                <span>{{ lt_trust_3 }}</span>
+              </div>
+            {%- endif -%}
             {%- comment -%}
               Slot 4 traegt die Novel-Food-Einordnung. Als gleichrangiger
               Trust-Bullet ging sie zwischen Versand und Zahlart unter.
@@ -343,6 +388,7 @@
               </div>
             {%- endif -%}
           </div>
+          {%- endif -%}
           {%- if section.settings.trust_4_popup_body != blank -%}
             <dialog id="crs-lt-hero-trust4-{{ section.id }}" class="crs-micro-dialog" aria-modal="true" aria-labelledby="crs-lt-hero-trust4-title-{{ section.id }}">
               <div class="crs-micro-dialog__inner">
@@ -625,9 +671,17 @@
             if bb_supply_days == blank
               assign bb_supply_days = 30
             endif
-            assign bb_b1 = section.settings.bb_benefit_1 | default: 'Gratis Versand bei Abo-Lieferungen'
-            assign bb_b2 = section.settings.bb_benefit_2 | default: 'Jederzeit kündbar'
-            assign bb_b3 = section.settings.bb_benefit_3 | default: 'Willkommens-Angebote zur ersten Lieferung'
+            comment
+              Kein `| default:` — analog zu bb_or_label oben. Der Filter greift auch
+              beim Leerstring, ein bewusst geleertes Feld hätte also den Alt-Text
+              zurückgeholt statt die Zeile zu entfernen. Templates, die die Settings
+              gar nicht führen, bekommen weiterhin den Schema-Default (geprüft:
+              product.12_nad-liposomal-2.json ist der einzige solche Fall).
+              Die Perk-Zeilen 1 bis 3 sind unten wie Zeile 4 auf `!= blank` gegated.
+            endcomment
+            assign bb_b1 = section.settings.bb_benefit_1
+            assign bb_b2 = section.settings.bb_benefit_2
+            assign bb_b3 = section.settings.bb_benefit_3
             assign bb_b4 = section.settings.bb_benefit_4
             comment
               Icon-Motiv je Abo-Vorteil, analog zu den Trust-Zeilen. Vorher waren die
@@ -960,42 +1014,48 @@
                     </span>
                   </span>
                   <span class="lt-bb-card__perks">
-                    <span class="lt-bb-card__perk">
-                      {%- if section.settings.bb_perk_1_icon != blank -%}
-                        {{
-                          section.settings.bb_perk_1_icon
-                          | image_url: width: 56
-                          | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
-                        }}
-                      {%- else -%}
-                        {% render 'lt-trust-icon', name: bb_perk_1_icon_name, size: 14 %}
-                      {%- endif -%}
-                      <span>{{ bb_b1 | escape }}</span>
-                    </span>
-                    <span class="lt-bb-card__perk">
-                      {%- if section.settings.bb_perk_2_icon != blank -%}
-                        {{
-                          section.settings.bb_perk_2_icon
-                          | image_url: width: 56
-                          | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
-                        }}
-                      {%- else -%}
-                        {% render 'lt-trust-icon', name: bb_perk_2_icon_name, size: 14 %}
-                      {%- endif -%}
-                      <span>{{ bb_b2 | escape }}</span>
-                    </span>
-                    <span class="lt-bb-card__perk">
-                      {%- if section.settings.bb_perk_3_icon != blank -%}
-                        {{
-                          section.settings.bb_perk_3_icon
-                          | image_url: width: 56
-                          | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
-                        }}
-                      {%- else -%}
-                        {% render 'lt-trust-icon', name: bb_perk_3_icon_name, size: 14 %}
-                      {%- endif -%}
-                      <span>{{ bb_b3 | escape }}</span>
-                    </span>
+                    {%- if bb_b1 != blank -%}
+                      <span class="lt-bb-card__perk">
+                        {%- if section.settings.bb_perk_1_icon != blank -%}
+                          {{
+                            section.settings.bb_perk_1_icon
+                            | image_url: width: 56
+                            | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
+                          }}
+                        {%- else -%}
+                          {% render 'lt-trust-icon', name: bb_perk_1_icon_name, size: 14 %}
+                        {%- endif -%}
+                        <span>{{ bb_b1 | escape }}</span>
+                      </span>
+                    {%- endif -%}
+                    {%- if bb_b2 != blank -%}
+                      <span class="lt-bb-card__perk">
+                        {%- if section.settings.bb_perk_2_icon != blank -%}
+                          {{
+                            section.settings.bb_perk_2_icon
+                            | image_url: width: 56
+                            | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
+                          }}
+                        {%- else -%}
+                          {% render 'lt-trust-icon', name: bb_perk_2_icon_name, size: 14 %}
+                        {%- endif -%}
+                        <span>{{ bb_b2 | escape }}</span>
+                      </span>
+                    {%- endif -%}
+                    {%- if bb_b3 != blank -%}
+                      <span class="lt-bb-card__perk">
+                        {%- if section.settings.bb_perk_3_icon != blank -%}
+                          {{
+                            section.settings.bb_perk_3_icon
+                            | image_url: width: 56
+                            | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
+                          }}
+                        {%- else -%}
+                          {% render 'lt-trust-icon', name: bb_perk_3_icon_name, size: 14 %}
+                        {%- endif -%}
+                        <span>{{ bb_b3 | escape }}</span>
+                      </span>
+                    {%- endif -%}
                     {%- if bb_b4 != blank -%}
                       <span class="lt-bb-card__perk">
                         {%- if section.settings.bb_perk_4_icon != blank -%}
@@ -1935,6 +1995,28 @@
   transform: scale(var(--lt-gallery-fill, 1));
 }
 
+/* Galerie-Format `portrait_compact`: der Rahmen laeuft auf Desktop im
+   Assetformat 4:5 und wird mobil auf 4:3 gedrueckt.
+
+   Warum mobil flacher und nicht ueberall: auf Desktop steht die Galerie neben
+   der Buy-Box, Hoehe kostet dort nichts und traegt das Produkt. Mobil steht
+   sie ueber allem, jeder Pixel Rahmenhoehe schiebt Preis und Button nach
+   unten. Gemessen auf 390px: erster Preis 866px zu 666px, Button 1109px zu
+   909px.
+
+   Das Motiv bleibt dabei gross, weil das Asset eng beschnitten ist: die Dose
+   fuellt rund 85 Prozent der Assethoehe, gerendert also rund 265px gegen rund
+   126px im alten quadratischen Katalogfoto.
+
+   `!important` ist hier kein Spezifitaetstrick, sondern Pflicht: die Hoehe
+   steht als Inline-`padding-top` am Element (snippets/product-media.liquid),
+   und ein Inline-Style ist ohne !important nicht ueberschreibbar. */
+@media (max-width: 767px) {
+  .lt-pdp-hero--gallery-compact .product-gallery-item {
+    padding-top: 75% !important;
+  }
+}
+
 /* Purchase block — handled below (white surface + border) */
 
 /* Direct price display — no-subscription mode */
@@ -2333,6 +2415,16 @@
   font-size: 12px;
 }
 
+/* Der Streichpreis erbt aus der Theme-Basis `del { opacity: 0.54 }`. Zusammen
+   mit --lt-muted (Alpha 0.72) landet er bei 2.3:1 und ist damit genau die
+   Zahl, an der die Ersparnis haengt, kaum lesbar. Die Zuruecknahme leisten
+   Schriftgrad (13px gegen 20px) und Durchstreichung bereits.
+   Die Basisregel gilt theme-weit fuer jedes <del> und ist hier bewusst nur
+   fuer die Buybox aufgehoben, nicht global. */
+.lt-bb-card__compare {
+  opacity: 1;
+}
+
 /* Hover-Affordanz ohne Deckkraft: die Kante zieht an, der Text bleibt lesbar. */
 .no-touchevents .lt-bb-card:not(.is-selected):hover {
   border-color: color-mix(in srgb, var(--lt-primary-dark, #364f56) 45%, transparent);
@@ -2527,6 +2619,18 @@
     {
       "type": "header",
       "content": "Galerie"
+    },
+    {
+      "type": "select",
+      "id": "gallery_ratio",
+      "label": "Bildformat",
+      "options": [
+        { "value": "square", "label": "Quadrat (1:1)" },
+        { "value": "portrait_4_5", "label": "Hochformat (4:5)" },
+        { "value": "portrait_compact", "label": "Hochformat, mobil flacher" }
+      ],
+      "default": "square",
+      "info": "Nur mit Produktmedien im Format 4:5 und mit dem Motiv randlos im Bild. „Mobil flacher\" zieht Preis und Button rund 200px nach oben und ist die Einstellung für Produktseiten."
     },
     {
       "type": "range",
