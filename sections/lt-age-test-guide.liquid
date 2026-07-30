@@ -4,10 +4,19 @@
   Zitierfähiger Antwortkern für /pages/biologisches-alter-testen.
 
   §12 Build Spec:
-  - Surface:          weiß → warm → weiß → warm → weiß
-  - Dominant element: direkte Antwort im ersten Abschnitt
-  - Heading size:     --text-h2, über section-heading-crs
+  - Surface:          A → B → A → dunkel → B, Flächen kommen aus den Settings
+                      (vorher weiß/#f6f4f1 im Wechsel, ein 1,10:1-Schritt und
+                      damit unsichtbar; Haus-Paar ist #f7f7f4/#f2f1ed wie auf
+                      /pages/science)
+  - Dominant element: direkte Antwort im ersten Abschnitt, eine Stufe unter dem
+                      Abschnittstitel (--text-h3 gegen --text-h2)
+  - Heading size:     --text-h2 für die vier Kapitel, --text-section für die
+                      Quellen (Service-Rang), alles über section-heading-crs
   - Content pattern:  redaktionelles Methoden-Ledger statt Kartenraster
+  - Karten:           weiß, und nur dort wo Text führt (Antwort, Kriterien).
+                      Ledger- und Quellenzeilen bleiben Haarlinien ohne Fläche.
+  - Turn:             der fit-Block trägt die dunkle Fläche, weil dort die Seite
+                      von neutraler Information auf das eigene Angebot umschaltet
   - CTA:              Quiz primär, PDP als untergeordneter Textlink
   - Removed:          Wettbewerberpreise, Empfehlungs-Badge, dekorative Icons
   - Quality move:     nummerierte Methoden-Zeilen mit expliziter Aussagegrenze
@@ -21,7 +30,19 @@
   assign atg_sources = section.blocks | where: 'type', 'source'
 -%}
 
-<div class="atg">
+{% style %}
+  #section-{{ section.id }} {
+    --atg-surface-a:    {{ section.settings.color_bg }};
+    --atg-surface-b:    {{ section.settings.color_bg_alt }};
+    --atg-surface-turn: {{ section.settings.color_bg_turn }};
+    --atg-card-bg:      {{ section.settings.color_card_bg }};
+    --atg-turn-text:    {{ section.settings.color_turn_text }};
+    --atg-turn-text-sec:{{ section.settings.color_turn_text | color_modify: 'alpha', 0.72 }};
+    --atg-turn-border:  {{ section.settings.color_turn_text | color_modify: 'alpha', 0.18 }};
+  }
+{% endstyle %}
+
+<div class="atg" id="section-{{ section.id }}">
   <section class="atg__answer">
     <div class="atg__container atg__answer-grid">
       {% render 'section-heading-crs',
@@ -112,7 +133,7 @@
     </section>
   {%- endif -%}
 
-  <section class="atg__fit">
+  <section class="atg__fit atg__fit--turn">
     <div class="atg__container atg__fit-grid">
       {% render 'section-heading-crs',
         heading: section.settings.fit_heading,
@@ -120,6 +141,7 @@
         kicker: section.settings.fit_kicker,
         align: 'left',
         headline_md: true,
+        on_dark: true,
         heading_tag: 'h2',
         extra_class: 'atg__fit-heading'
       %}
@@ -146,12 +168,15 @@
   </section>
 
   {%- if atg_sources.size > 0 -%}
-    <section class="atg__sources" aria-labelledby="atg-sources-{{ section.id }}">
+    <section class="atg__sources" aria-label="{{ section.settings.sources_heading | escape }}">
       <div class="atg__container atg__sources-grid">
         <div>
-          <h2 class="atg__sources-heading" id="atg-sources-{{ section.id }}">
-            {{ section.settings.sources_heading | escape }}
-          </h2>
+          {% render 'section-heading-crs',
+            heading: section.settings.sources_heading,
+            align: 'left',
+            heading_tag: 'h2',
+            extra_class: 'atg__sources-heading'
+          %}
           {%- if section.settings.sources_intro != blank -%}
             <p class="atg__sources-intro">{{ section.settings.sources_intro | escape }}</p>
           {%- endif -%}
@@ -183,6 +208,13 @@
   "tag": "section",
   "class": "lt-age-test-guide",
   "settings": [
+    { "type": "header", "content": "Flächen" },
+    { "type": "color", "id": "color_bg", "label": "Fläche A (Antwort, Kriterien)", "default": "#f2f1ed" },
+    { "type": "color", "id": "color_bg_alt", "label": "Fläche B (Methoden, Quellen)", "default": "#f7f7f4" },
+    { "type": "color", "id": "color_card_bg", "label": "Kartenfläche", "default": "#ffffff" },
+    { "type": "color", "id": "color_bg_turn", "label": "Fläche Einordnung (dunkel)", "default": "#364f56" },
+    { "type": "color", "id": "color_turn_text", "label": "Text auf dunkler Fläche", "default": "#ffffff" },
+
     { "type": "header", "content": "Direkte Antwort" },
     { "type": "text", "id": "answer_kicker", "label": "Kicker", "default": "Kurz erklärt" },
     { "type": "textarea", "id": "answer_heading", "label": "Überschrift", "default": "Was misst ein Test zum biologischen Alter?" },

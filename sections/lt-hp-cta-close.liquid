@@ -45,6 +45,7 @@
     --ctac-text-muted: {{ section.settings.color_text | default: '#f7f7f4' | color_modify: 'alpha', 0.68 }};
     --ctac-border: {{ section.settings.color_text | default: '#f7f7f4' | color_modify: 'alpha', 0.12 }};
     --ctac-accent: {{ section.settings.color_accent | default: '#65c0b6' }};
+    --ctac-accent-text: {{ section.settings.color_accent_text | default: '#ffffff' }};
     background: var(--ctac-bg);
     color: var(--ctac-text);
     padding-top: {{ section.settings.padding_top | default: 80 }}px;
@@ -164,6 +165,16 @@
   justify-content: flex-start;
 }
 
+/* Der Modifier deckte vorher nur text-align und cta-solo ab. Sekundärer CTA
+   und Trust-Row blieben zentriert und brachen die linke Kante. */
+.ctac__container--align-left .ctac__cta-secondary {
+  align-self: start;
+}
+
+.ctac__container--align-left .ctac__trust-row {
+  justify-content: flex-start;
+}
+
 @supports (padding: max(0px)) {
   .ctac__container {
     padding-inline-start: max(var(--gutter-container), env(safe-area-inset-left));
@@ -247,7 +258,7 @@
   width: 100%;
   background: var(--ctac-accent);
   border: 1px solid var(--ctac-accent);
-  color: var(--color-white);
+  color: var(--ctac-accent-text);
 }
 
 .ctac__cta-primary:hover,
@@ -376,6 +387,13 @@
       "id": "color_accent",
       "label": "CTA-Akzent",
       "default": "#65c0b6"
+    },
+    {
+      "type": "color",
+      "id": "color_accent_text",
+      "label": "CTA-Text auf Akzent",
+      "info": "Weiß auf dem Marken-Teal ergibt 2,2:1. #26251e ergibt 7,0:1 bei gleichem Teal.",
+      "default": "#ffffff"
     },
     {
       "type": "header",

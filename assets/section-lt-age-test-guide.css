@@ -8,17 +8,33 @@
   padding-inline: var(--space-5);
 }
 
+/* Flächenwechsel A → B → A → dunkel → B. Die vier hellen Werte des Themes
+   liegen alle innerhalb von 1,13:1, eine Section-Kante ist über Farbe allein
+   also nie sichtbar. Den Rhythmus tragen deshalb der dunkle Einordnungs-Block,
+   die Abstände und die Karten, nicht der Hell-Hell-Wechsel. */
 .atg__answer,
-.atg__criteria,
-.atg__sources {
+.atg__criteria {
   padding-block: var(--space-9);
-  background: var(--color-surface-primary);
+  background: var(--atg-surface-a);
 }
 
-.atg__methods,
-.atg__fit {
+.atg__methods {
   padding-block: var(--space-9);
-  background: var(--color-surface-secondary);
+  background: var(--atg-surface-b);
+}
+
+/* Quellen sind Service-Rang: weniger Luft als die vier Kapitel. */
+.atg__sources {
+  padding-block: var(--space-8);
+  background: var(--atg-surface-b);
+}
+
+/* Der Wendepunkt der Seite: hier wechselt sie von neutraler Information auf
+   das eigene Angebot. Mehr Luft als die Kapitel, damit die Kante trägt. */
+.atg__fit {
+  padding-block: var(--space-10);
+  background: var(--atg-surface-turn);
+  color: var(--atg-turn-text);
 }
 
 .atg__answer-grid,
@@ -31,10 +47,12 @@
   align-items: start;
 }
 
+/* Textführende Inhaltskarte: heller als ihre Fläche, nicht dunkler. */
 .atg__answer-copy {
   padding: var(--space-6);
+  border: 1px solid var(--color-border-default);
   border-radius: var(--radius-lg);
-  background: var(--color-surface-secondary);
+  background: var(--atg-card-bg);
 }
 
 .atg__eyebrow,
@@ -49,10 +67,12 @@
   color: var(--color-text-muted);
 }
 
+/* Eine Stufe unter dem Abschnittstitel (--text-h2). Vorher gleich groß, dadurch
+   stand die Antwort im Rang neben der Überschrift statt darunter. */
 .atg__lead {
   margin: var(--space-4) 0 0;
   font-family: var(--font-heading);
-  font-size: var(--text-h2);
+  font-size: var(--text-h3);
   font-weight: var(--weight-medium);
   line-height: var(--leading-heading);
   color: var(--color-text-primary);
@@ -151,10 +171,11 @@
   color: var(--color-text-secondary);
 }
 
+/* Vorher sticky, aber nur auf zwei von vier baugleichen Rastern. Auf einer
+   Seite dieser Länge löst das ein Springen an jeder Abschnittskante aus. */
 .atg__criteria-heading,
 .atg__fit-heading {
-  position: sticky;
-  top: var(--space-10);
+  position: static;
 }
 
 .atg__criteria-list {
@@ -170,7 +191,7 @@
   padding: var(--space-5);
   border: 1px solid var(--color-border-default);
   border-radius: var(--radius-md);
-  background: var(--color-surface-primary);
+  background: var(--atg-card-bg);
 }
 
 .atg__criterion-text {
@@ -179,6 +200,14 @@
 
 .atg__fit-copy {
   min-width: 0;
+}
+
+/* Zeilenlänge deckeln: auf 1440 lief der Fließtext hier auf 84–94 Zeichen.
+   58ch rendert als ~72 Zeichen, die ch-Einheit ist die Breite der Null und
+   damit breiter als der Schnitt deutscher Prosa. */
+.atg__fit-body,
+.atg__disclosure {
+  max-width: 58ch;
 }
 
 .atg__fit-body p {
@@ -236,13 +265,10 @@
   opacity: 0.9;
 }
 
+/* Typografie liegt jetzt in section-heading-crs (Service-Rang, --text-section).
+   Hier nur noch Abstand, siehe Snippet-Doku. */
 .atg__sources-heading {
   margin: 0;
-  font-family: var(--font-heading);
-  font-size: var(--text-h3);
-  font-weight: var(--weight-bold);
-  line-height: var(--leading-heading);
-  color: var(--color-text-primary);
 }
 
 .atg__sources-intro {
@@ -272,7 +298,36 @@
 
 .atg__source span {
   display: block;
+  max-width: 58ch;
   margin-top: var(--space-2);
+}
+
+/* ── Einordnung auf dunkler Fläche ───────────────────────────────────────── */
+
+.atg__fit--turn .atg__fit-body,
+.atg__fit--turn .atg__fit-body p {
+  color: var(--atg-turn-text-sec);
+}
+
+.atg__fit--turn .atg__fit-body a {
+  color: var(--atg-turn-text);
+  text-underline-offset: var(--space-2);
+}
+
+.atg__fit--turn .atg__disclosure {
+  border-top-color: var(--atg-turn-border);
+  color: var(--atg-turn-text-sec);
+}
+
+/* Teal-Pille mit dunklem Text: 7,0:1 gegen 2,2:1 bei weißem Text. */
+.atg__fit--turn .atg__primary-cta {
+  border-color: var(--color-teal);
+  color: var(--color-ink);
+  background: var(--color-teal);
+}
+
+.atg__fit--turn .atg__secondary-cta {
+  color: var(--atg-turn-text);
 }
 
 @media screen and (max-width: 899px) {
@@ -280,12 +335,19 @@
     padding-inline: var(--space-4);
   }
 
+  /* Rhythmus auch mobil erhalten: Kapitel, Service knapper, Wendepunkt weiter. */
   .atg__answer,
   .atg__criteria,
-  .atg__sources,
-  .atg__methods,
-  .atg__fit {
+  .atg__methods {
     padding-block: var(--space-8);
+  }
+
+  .atg__sources {
+    padding-block: var(--space-7);
+  }
+
+  .atg__fit {
+    padding-block: var(--space-9);
   }
 
   .atg__answer-grid,
@@ -313,10 +375,6 @@
 @media screen and (max-width: 639px) {
   .atg__answer-copy {
     padding: var(--space-5);
-  }
-
-  .atg__lead {
-    font-size: var(--text-h3);
   }
 
   .atg__method-facts,
