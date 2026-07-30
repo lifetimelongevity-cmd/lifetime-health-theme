@@ -8,13 +8,18 @@
   §12 Build Spec:
   - Surface:          hell (#f7f7f4), Panel eine Stufe wärmer (#f2f1ed)
   - Dominant element: H1 (headline_lg, dem echten Seiten-H1 vorbehalten)
-  - Content pattern:  Split 6/5, Text links, Geräte-Ausschnitt rechts
+  - Content pattern:  Split 3/2, Text links, flaches Bild rechts. Raster und
+                      Bildformat sind identisch zu `lt-science-hero` (siehe
+                      Kollektions-Hero), damit beide Hero-Varianten dasselbe
+                      Bildmaß tragen: ~435 × 290 px bei 1200er Container.
   - CTA:              primär im Hero, weil die Seite auf den Test führt
-  - Visual:           echter App-Screenshot, unten angeschnitten (Device-Peek).
-                      Das Asset `lt-report-app-snps.png` ist der freigestellte
-                      Ausschnitt aus `app-snps-close.png`, schwarze Fläche via
-                      Flood-Fill entfernt, 720×620 (2× bei ~360px Anzeige).
-  - Caption:          Pflicht. Ohne sie liest sich der SNP-Screen als Deko
+  - Visual:           Foto füllt die Fläche randlos (`media_fit: cover`).
+                      Für Infografiken `media_fit: contain`, dann steht das
+                      SVG vollständig auf der Panel-Fläche.
+                      Das Fallback-Asset `lt-report-app-snps.png` ist der
+                      freigestellte Ausschnitt aus `app-snps-close.png`,
+                      schwarze Fläche via Flood-Fill entfernt, 720×620.
+  - Caption:          Pflicht. Ohne sie liest sich das Motiv als Deko
                       statt als Beleg.
 {% endcomment %}
 
@@ -30,6 +35,26 @@
   endif
   if sph_alt == blank
     assign sph_alt = 'Auswertung genetischer Marker in der LIFETIME-App'
+  endif
+
+  comment
+    Theme-Asset oder volle URL, Vorrang vor dem Bild-Picker. Nötig für SVGs:
+    die liegen in Shopify Files als generische Datei und erscheinen nicht im
+    Bild-Picker (gleiches Muster wie `image_asset` in `lt-science-split`).
+  endcomment
+  assign sph_img_src = ''
+  assign sph_img_asset = section.settings.image_asset | strip
+  if sph_img_asset != blank
+    if sph_img_asset contains '://'
+      assign sph_img_src = sph_img_asset
+    else
+      assign sph_img_src = sph_img_asset | asset_url
+    endif
+  endif
+
+  assign sph_panel_class = 'sph__panel'
+  if section.settings.media_fit == 'contain'
+    assign sph_panel_class = 'sph__panel sph__panel--contain'
   endif
 
   assign sph_has_cta = false
@@ -94,11 +119,13 @@
     </div>
 
     <figure class="sph__media">
-      <div class="sph__panel">
-        {%- if section.settings.image != blank -%}
+      <div class="{{ sph_panel_class }}">
+        {%- if sph_img_src != blank -%}
+          <img src="{{ sph_img_src }}" alt="{{ sph_alt | escape }}" class="sph__device" loading="eager">
+        {%- elsif section.settings.image != blank -%}
           {{
             section.settings.image
-            | image_url: width: 720
+            | image_url: width: 900
             | image_tag: loading: 'eager', class: 'sph__device', alt: sph_alt
           }}
         {%- else -%}
@@ -143,7 +170,9 @@
 
 @media screen and (min-width: 900px) {
   .sph__container {
-    grid-template-columns: 6fr 5fr;
+    /* Identisch zu `lt-science-hero`: 3fr/2fr bei space-8 Spalte ergibt im
+       1200er Container eine Bildspalte von ~435px. */
+    grid-template-columns: 3fr 2fr;
     gap: var(--space-8);
   }
 }
@@ -214,8 +243,8 @@
   background: var(--sph-panel, #f2f1ed);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  /* Porträt-Fläche: das Bild füllt die Karte randlos (kein Device-Peek). */
-  aspect-ratio: 4 / 5;
+  /* Flache Fläche, Maß wie im Kollektions-Hero. */
+  aspect-ratio: 3 / 2;
 }
 
 .sph__device {
@@ -223,8 +252,15 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Auf das Gesicht ausgerichtet (rechts oben im Motiv). */
+  /* Greift nur beim Fallback-Asset. Bilder aus dem Picker bringen ihren
+     eigenen Fokuspunkt als Inline-Style mit und überschreiben das hier. */
   object-position: 62% 26%;
+}
+
+/* Infografik: vollständig sichtbar auf der Panel-Fläche statt beschnitten. */
+.sph__panel--contain .sph__device {
+  object-fit: contain;
+  object-position: center;
 }
 
 .sph__caption {
@@ -301,10 +337,27 @@
     },
     { "type": "header", "content": "Bild" },
     {
+      "type": "text",
+      "id": "image_asset",
+      "label": "Bild/SVG aus Theme-Assets oder URL",
+      "info": "Dateiname eines Theme-Assets (z. B. age-test-zwei-zahlen.svg) oder eine vollständige URL. Vorrang vor dem Bild-Picker."
+    },
+    {
       "type": "image_picker",
       "id": "image",
-      "label": "Bild",
+      "label": "Bild (Alternative zum Feld oben)",
       "info": "Ohne Auswahl läuft der freigestellte App-Ausschnitt aus den Theme-Assets."
+    },
+    {
+      "type": "select",
+      "id": "media_fit",
+      "label": "Bild in der Fläche",
+      "info": "Fotos füllen die Fläche. Infografiken brauchen „vollständig zeigen“, sonst werden sie beschnitten.",
+      "options": [
+        { "value": "cover", "label": "Fläche füllen (Foto)" },
+        { "value": "contain", "label": "Vollständig zeigen (Infografik)" }
+      ],
+      "default": "cover"
     },
     {
       "type": "text",

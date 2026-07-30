@@ -24,7 +24,6 @@
 {% style %}
   #section-{{ section.id }} {
     --crs-bg:       {{ section.settings.color_bg }};
-    --crs-card-bg:  {{ section.settings.color_card_bg }};
     --crs-text:     {{ section.settings.color_text }};
     --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.72 }};
     --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.66 }};
@@ -185,10 +184,17 @@
   font-weight: 400;
   line-height: 1.5;
   color: var(--crs-text, #26251e);
+  /* Lesemass, siehe .faq-answer p */
+  max-width: var(--lt-measure, 32rem);
 }
 
 .faq-toggle {
-  color: var(--crs-text-ter, rgba(38,37,30,0.4));
+  /* Fallback auf dem Stand des Style-Blocks oben (Alpha 0,66). Vorher stand
+     hier 0,4, ein Rest vom WCAG-Durchgang am 29.07., der nur den Style-Block
+     nachgezogen hat. Gerendert hat der Fallback nie, gelesen wurde er trotzdem:
+     er hat den Chevron dieser Section als 1.4.11-Verstoss erscheinen lassen.
+     Der echte Verstoss sass in crs-novel-food. */
+  color: var(--crs-text-ter, rgba(38,37,30,0.66));
   flex-shrink: 0;
   line-height: 1;
   display: inline-flex;
@@ -225,8 +231,17 @@
   font-size: 16px;
   font-weight: 400;
   line-height: 1.65;
-  color: var(--crs-text-sec, rgba(38,37,30,0.6));
+  color: var(--crs-text-sec, rgba(38,37,30,0.72));
   margin: 0;
+  /*
+    Die Spalte ist auf Desktop 616px breit, das sind gemessene 86 Zeichen und
+    liegt ueber dem Korridor von 45 bis 75. Zwischen 768 und 1024px ist das
+    Layout einspaltig und die Zeile wird noch laenger. Gedeckelt wird deshalb
+    der Text, nicht der 1280er-Container: der laeuft absichtlich auf
+    --lt-page-max und haelt die linke Kante mit den Nachbar-Sections zusammen.
+    Auf Telefonen ist der Deckel wirkungslos, die Spalte ist dort schmaler.
+  */
+  max-width: var(--lt-measure, 32rem);
 }
 
 /* Mobile — stack */
@@ -304,12 +319,6 @@
       "type": "color",
       "id": "color_bg",
       "label": "Seiten-Hintergrund",
-      "default": "#f2f1ed"
-    },
-    {
-      "type": "color",
-      "id": "color_card_bg",
-      "label": "Karten-Hintergrund",
       "default": "#f2f1ed"
     },
     {
