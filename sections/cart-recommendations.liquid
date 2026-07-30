@@ -1,4 +1,16 @@
-{%- if recommendations.performed and recommendations.products_count > 0 -%}
+{%- liquid
+  # Auto-Empfehlungen können Produkte ausspielen, die im Erstkauf-Kontext schaden
+  # (z. B. der günstigere AGE-Folgetest neben dem Ersttest). Blockliste kommt aus
+  # den Theme-Einstellungen, damit sie im Editor sichtbar und prüfbar bleibt. 2026-07-30
+  assign lt_rec_exclude = settings.cart_recommendations_exclude | default: '' | remove: ' ' | split: ','
+  assign lt_rec_kept = 0
+  for lt_rec_product in recommendations.products
+    unless lt_rec_exclude contains lt_rec_product.handle
+      assign lt_rec_kept = lt_rec_kept | plus: 1
+    endunless
+  endfor
+-%}
+{%- if recommendations.performed and lt_rec_kept > 0 -%}
   <div class="cart-recommendations-sidebar" data-js-cart-recommendations-performed>
     <div class="text-weight--medium gutter-bottom--small gutter-top--small">
       {{ settings.cart_recommendations_heading }}
@@ -15,6 +27,7 @@
     >
       <div class="grid grid--slider grid-2 grid--align-items-stretch" style="--col-gap:20px">
         {%- for product in recommendations.products -%}
+          {%- if lt_rec_exclude contains product.handle -%}{%- continue -%}{%- endif -%}
           <div class="product-item" data-js-product-item>
             <a href="{{ product.url }}">
               {%- liquid

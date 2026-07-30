@@ -316,7 +316,13 @@
         {%- endif -%}
         {%- assign lt_primary_cta_label = section.settings.cta_label | default: 'Jetzt kaufen →' -%}
         {%- assign lt_primary_cta_aria = lt_primary_cta_label | replace: '→', '' | strip -%}
-        {%- assign lt_sticky_cta_label = section.settings.cta_label | default: 'In den Warenkorb' -%}
+        {%- comment -%}
+          Bis 2026-07-30 lasen beide Labels aus `cta_label`, das es im Schema gar nicht gab.
+          Der Verweis lief also immer ins Leere und beide Beschriftungen waren faktisch
+          hartcodiert. Jetzt zwei eigene Settings, damit der Haupt-Button benennbar wird,
+          ohne den Sticky-Button auf allen anderen PDPs mitzuziehen.
+        {%- endcomment -%}
+        {%- assign lt_sticky_cta_label = section.settings.sticky_cta_label | default: 'In den Warenkorb' -%}
 
         {%- comment -%}Reusable blocks — captured early so they can be placed before or after CTA depending on lt_show_sub{%- endcomment -%}
         {%- capture lt_trust_block -%}
@@ -1303,6 +1309,10 @@
               {{ type | payment_type_svg_tag: class: 'lt-payment-icon' }}
             {%- endfor -%}
           </div>
+        {%- endif -%}
+        {%- assign lt_payment_note = section.settings.payment_note | strip -%}
+        {%- if lt_payment_note != blank -%}
+          <p class="lt-payment-note">{{ lt_payment_note | escape }}</p>
         {%- endif -%}
 
         <script>
@@ -2466,6 +2476,16 @@
   opacity: 0.5;
 }
 
+/* Benennt die eine Zahlart, die das Zögern beim hohen Einmalbetrag adressiert
+   (Rechnungskauf), statt sie nur als graues Logo anzudeuten. Gleiche Größe und
+   Farbe wie der Größen-Hinweis, damit die Zone unter dem CTA eine Stimme hat. */
+.lt-payment-note {
+  margin: var(--space-1) 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: var(--lt-muted);
+}
+
 /* Größen-Auswahl — segmentierte Pills (flat, wie Buy-Box-Karten), als eigene Zone
    VOR den Kaufoption-Karten: immer sichtbar, unabhängig vom gewählten Modus */
 .lt-size {
@@ -3257,6 +3277,12 @@
       "default": "Das 30-Tage-Zell-Versprechen, kein Formular, kein Aufwand"
     },
     {
+      "type": "text",
+      "id": "payment_note",
+      "label": "Zahlungshinweis unter Zahlarten-Icons",
+      "info": "Nur belegbare Aussagen zu tatsächlich aktiven Zahlarten (z. B. Rechnungskauf mit Klarna). Leer = keine Zeile."
+    },
+    {
       "type": "image_picker",
       "id": "guarantee_badge_icon",
       "label": "Garantie — Schild-Icon (optional, sonst SVG)"
@@ -3434,6 +3460,23 @@
       "label": "Du zahlst heute — Label",
       "info": "Wird nur bei show_price_standalone: false angezeigt (no-sub Modus). Leer lassen = Zeile wird nicht gerendert. Standard: Du zahlst heute",
       "default": "Du zahlst heute"
+    },
+    {
+      "type": "header",
+      "content": "Button-Beschriftung"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Haupt-Button",
+      "info": "Der Button legt in den Warenkorb, er führt nicht direkt zum Checkout. Beschriftung entsprechend wählen.",
+      "default": "Jetzt kaufen →"
+    },
+    {
+      "type": "text",
+      "id": "sticky_cta_label",
+      "label": "Sticky-Button",
+      "default": "In den Warenkorb"
     },
     {
       "type": "header",
