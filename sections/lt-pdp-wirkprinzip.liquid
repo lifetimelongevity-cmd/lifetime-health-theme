@@ -150,8 +150,28 @@
 -%}
 
 {%- if wp_render -%}
+{%- liquid
+  assign wp_dark = false
+  if section.settings.surface == 'dark'
+    assign wp_dark = true
+  endif
+-%}
 {%- style -%}
   #section-{{ section.id }} {
+  {%- if wp_dark -%}
+    /* Dunkle Zaesur. Gemessen auf --color-dark (#364f56): Weiss deckend 8,72:1,
+       Alpha 0.72 ergibt 5,45:1 und Alpha 0.66 ergibt 4,87:1, beide halten AA.
+       Teal faellt mit 4,05:1 durch und ist deshalb hier nicht die Linkfarbe. */
+    --ltwp-bg:   var(--color-dark);
+    --ltwp-text: var(--color-text-on-dark);
+    --ltwp-text-muted: rgba(255, 255, 255, 0.72);
+    --ltwp-numeral:    rgba(255, 255, 255, 0.55);
+    --ltwp-rule:       rgba(255, 255, 255, 0.18);
+    /* Helle Bildkarte auf dunkler Flaeche, 8,1:1 Trennung. */
+    --ltwp-media-bg:   var(--color-light-warm);
+    --ltwp-link:       var(--color-text-on-dark);
+    --ltwp-link-underline: rgba(255, 255, 255, 0.5);
+  {%- else -%}
     --ltwp-bg:   {{ section.settings.color_bg }};
     --ltwp-text: {{ section.settings.color_text }};
     /* 0.72 haelt auf #f7f7f4 wie auf #f2f1ed 4.5:1. Nicht weiter aufhellen. */
@@ -160,6 +180,15 @@
     --ltwp-numeral:    {{ section.settings.color_text | color_modify: 'alpha', 0.38 }};
     --ltwp-rule:       {{ section.settings.color_text | color_modify: 'alpha', 0.10 }};
     --ltwp-media-bg:   {{ section.settings.color_card_bg }};
+    --ltwp-link:       var(--color-teal);
+    --ltwp-link-underline: currentColor;
+  {%- endif -%}
+    /* Der Heading-Stack liest --crs-*, nicht --ltwp-*. Ohne diese drei Zeilen
+       zieht das H2 seine Farbe aus dem CSS-Fallback #26251e und ignoriert
+       color_text komplett, auf dunkler Flaeche also unlesbar. */
+    --crs-text:     var(--ltwp-text);
+    --crs-text-sec: var(--ltwp-text-muted);
+    --crs-text-ter: var(--ltwp-text-muted);
     padding-top:    min({{ section.settings.padding_top }}px, 15vw);
     padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
   }
@@ -274,6 +303,10 @@
   .ltwp__layout--with-media {
     grid-template-columns: minmax(0, 1fr) minmax(0, 0.85fr);
     gap: var(--space-8);
+    /* Zentriert schwebte die Bildspalte zwischen beiden Kanten und liess unten
+       ein Loch, in das die letzte Stufe allein hineinlief. `stretch` fuellt die
+       Zeilenhoehe; das Bild bleibt mittig, weil .ltwp__media selbst flext. */
+    align-items: stretch;
   }
 
   /* Reihenfolge im DOM bleibt Text zuerst: die Stufen sind der Inhalt,
@@ -355,16 +388,24 @@
   margin: var(--space-6) 0 0;
 }
 
-/* Teal ist im System Links vorbehalten, hier also zulaessig. */
+/* Teal ist im System Links vorbehalten, auf heller Flaeche also zulaessig.
+   Auf --color-dark ergibt Teal nur 4,05:1 und faellt bei --text-body-sm unter
+   AA, deshalb schaltet --ltwp-link dort auf Weiss und die Unterstreichung
+   traegt die Link-Semantik. */
 .ltwp__source-link {
-  color: var(--color-teal);
+  color: var(--ltwp-link, var(--color-teal));
+  text-decoration-color: var(--ltwp-link-underline, currentColor);
   text-underline-offset: 2px;
 }
 
+/* Ohne Innenabstand, damit das Bild seinen Rahmen fuellt. Mit Padding sassen
+   zwei gerundete Formen ineinander und die Ecke des Bildes lief nicht mit der
+   des Rahmens; mobil kostete das zusaetzlich 48px Hoehe. Die Flaeche bleibt als
+   Grund fuer Bilder mit transparentem oder abweichendem Hintergrund. */
 .ltwp__media {
   background: var(--ltwp-media-bg, #f2f1ed);
   border-radius: var(--radius-lg);
-  padding: var(--space-5);
+  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -375,7 +416,6 @@
   width: 100%;
   height: auto;
   max-width: 100%;
-  border-radius: var(--radius-md);
 }
 {% endstylesheet %}
 
@@ -388,6 +428,17 @@
     {
       "type": "header",
       "content": "Flächen"
+    },
+    {
+      "type": "select",
+      "id": "surface",
+      "label": "Flächenmodus",
+      "info": "Dunkel setzt die Section auf die Marken-Petrolfläche und ignoriert die drei Farbfelder darunter. Als bewusste Zäsur gedacht, maximal einmal pro Seite.",
+      "options": [
+        { "value": "light", "label": "Hell (Farbfelder unten)" },
+        { "value": "dark", "label": "Dunkel (Petrol)" }
+      ],
+      "default": "light"
     },
     {
       "type": "color",

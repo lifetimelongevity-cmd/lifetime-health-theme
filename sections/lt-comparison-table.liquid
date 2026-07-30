@@ -44,8 +44,8 @@
     --crs-bg:       {{ section.settings.color_bg }};
     --crs-card-bg:  {{ section.settings.color_card_bg }};
     --crs-text:     {{ section.settings.color_text }};
-    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.62 }};
-    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.42 }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.72 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.66 }};
     --crs-border:   {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
     --crs-accent:   {{ section.settings.color_accent | default: '#65c0b6' }};
     --crs-primary:  {{ section.settings.color_primary | default: '#364f56' }};
@@ -438,16 +438,39 @@
     gap: 3px;
   }
   .lct-cell-icon svg { width: 18px; height: 18px; }
-  .lct-cell-text { font-size: 11px; }
-  .lct-label-text { font-size: 11px; }
+
+  /* 11px war unter der Lesbarkeitsgrenze fuer laufenden Text und liess die
+     Tabelle wie eine Fussnote aussehen. 12.5px reiht sich unter die 13px des
+     Tablet-Breakpoints ein. Die Spalten holen sich den Platz dafuer unten. */
+  .lct-cell-text { font-size: 12.5px; }
+  .lct-label-text { font-size: 12.5px; }
   .lct-cell--label { padding: 10px 8px; }
+
+  /* Zwei-Spalten-Tabelle: die Label-Spalte gibt Breite ab. Sie stand auf
+     minmax(110px, 1.4fr) und bekam damit ~40 % der 343px, die auf einem
+     390px-Geraet uebrig bleiben — die Datenspalten hatten danach 89px Inhalt,
+     zu wenig fuer Begriffe wie "Weizenkeimextrakt". Die neuen Basiswerte
+     (92+96+96 = 284px) bleiben unter der Viewport-Breite, die Tabelle scrollt
+     also weiterhin nicht. Drei- und Vierspalter bleiben unberuehrt: dort ist
+     der horizontale Scroll die richtige Antwort, nicht schmalere Spalten. */
+  .lct-grid[data-cols="2"] {
+    grid-template-columns: minmax(92px, 1.15fr) repeat(2, minmax(96px, 1fr));
+    min-width: 284px;
+  }
 
   /* Silbentrennung statt harter Umbrueche mitten im Wort. Zeilenhoehen
      gleichen sich ueber das Grid ohnehin an (.lct-row nutzt display:contents),
-     eine Mindesthoehe waere hier nur zusaetzliche Hoehe ohne Nutzen. */
-  .lct-cell-text {
+     eine Mindesthoehe waere hier nur zusaetzliche Hoehe ohne Nutzen.
+     Auch auf der Label-Spalte: dort stehen die laengsten Woerter der Tabelle
+     ("Wissenschaftliche Begleitung", "Laborpruefung (Pruefbericht)").
+     hyphenate-limit-chars haelt Zwei-Buchstaben-Fragmente heraus. */
+  .lct-cell-text,
+  .lct-label-text {
     hyphens: auto;
     -webkit-hyphens: auto;
+    hyphenate-limit-chars: 8 4 3;
+    -webkit-hyphenate-limit-before: 4;
+    -webkit-hyphenate-limit-after: 3;
   }
 }
 

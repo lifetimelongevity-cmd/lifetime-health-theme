@@ -66,13 +66,14 @@
     --lt-surface:      {{ section.settings.color_card_bg }};
     --lt-border:       {{ section.settings.color_text | color_modify: 'alpha', 0.1 }};
     --lt-text:         {{ section.settings.color_text }};
-    --lt-muted:        {{ section.settings.color_text | color_modify: 'alpha', 0.55 }};
+    --lt-muted:        {{ section.settings.color_text | color_modify: 'alpha', 0.72 }};
     --lt-cta-bg:       var(--color-dark);
     --lt-cta-hover:    var(--color-dark);
     --lt-primary:      {{ section.settings.color_text }};
     --lt-primary-dark: {{ section.settings.color_text }};
     --lt-success-bg:   {{ section.settings.color_text | color_modify: 'alpha', 0.06 }};
     --lt-success-text: {{ section.settings.color_text }};
+    --lt-gallery-fill: {{ section.settings.gallery_fill | default: 100 | times: 0.01 }};
     --lt-radius-sm:    4px;
     --lt-radius-md:    4px;
     --lt-radius-lg:    4px;
@@ -613,7 +614,13 @@
           {%- liquid
             assign bb_sub1_title = section.settings.bb_sub1_title | default: 'Einzel-Abo'
             assign bb_once_title = section.settings.bb_once_title | default: 'Einmaliger Kauf'
-            assign bb_or_label = section.settings.bb_or_label | default: 'ODER'
+            comment
+              Kein `| default:` — der Filter ersetzt auch den leeren String und macht
+              damit ein bewusstes Leeren des Feldes unmöglich. Templates, die das
+              Setting gar nicht führen, erhalten weiterhin den Schema-Default 'ODER'.
+              Leer heißt: kein Trenner (die zwei Karten unterscheiden sich ohnehin).
+            endcomment
+            assign bb_or_label = section.settings.bb_or_label
             assign bb_supply_days = lt_variant_1.metafields.custom.supply_days.value | default: section.settings.bb_supply_days_fallback | default: 30
             if bb_supply_days == blank
               assign bb_supply_days = 30
@@ -622,6 +629,19 @@
             assign bb_b2 = section.settings.bb_benefit_2 | default: 'Jederzeit kündbar'
             assign bb_b3 = section.settings.bb_benefit_3 | default: 'Willkommens-Angebote zur ersten Lieferung'
             assign bb_b4 = section.settings.bb_benefit_4
+            comment
+              Icon-Motiv je Abo-Vorteil, analog zu den Trust-Zeilen. Vorher waren die
+              vier SVGs positionell hartcodiert: Slot 1 immer Lieferwagen, Slot 2 immer
+              Kreispfeil, Slot 3 immer Dokument, Slot 4 immer Geschenk. Sobald eine PDP
+              die Zeilen anders belegt, passt das Motiv nicht mehr zum Text — auf NMN
+              und Spermidin stand ein Lieferwagen neben "Jederzeit kündbar".
+              Die Defaults bilden die alte Reihenfolge ab, damit die zehn PDPs auf den
+              gemeinsamen Gleisen unverändert rendern.
+            endcomment
+            assign bb_perk_1_icon_name = section.settings.bb_perk_1_icon_name | default: 'delivery'
+            assign bb_perk_2_icon_name = section.settings.bb_perk_2_icon_name | default: 'refresh'
+            assign bb_perk_3_icon_name = section.settings.bb_perk_3_icon_name | default: 'document'
+            assign bb_perk_4_icon_name = section.settings.bb_perk_4_icon_name | default: 'gift'
             assign bb_sub_flag = section.settings.bb_sub_flag
             if section.settings.bb_sub1_subline != blank
               assign bb_sub1_sub = section.settings.bb_sub1_subline
@@ -881,7 +901,7 @@
               </div>
             {%- endif -%}
             <div
-              class="lt-bb"
+              class="lt-bb{% if bb_or_label == blank %} lt-bb--no-or{% endif %}"
               data-lt-buy-box
               data-supply-days="{{ bb_supply_days | plus: 0 }}"
               data-discount-pct="{{ section.settings.sub_discount_percent | default: 10 }}"
@@ -948,12 +968,7 @@
                           | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
                         }}
                       {%- else -%}
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                          <path d="M8.25 4H2.25v5.5H3.4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path>
-                          <path d="M8.25 5.75h2.1l1.55 1.9V9.5h-1.05" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path>
-                          <circle cx="4.8" cy="9.5" r="0.95" stroke="currentColor" stroke-width="1.1"></circle>
-                          <circle cx="9.6" cy="9.5" r="0.95" stroke="currentColor" stroke-width="1.1"></circle>
-                        </svg>
+                        {% render 'lt-trust-icon', name: bb_perk_1_icon_name, size: 14 %}
                       {%- endif -%}
                       <span>{{ bb_b1 | escape }}</span>
                     </span>
@@ -965,10 +980,7 @@
                           | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
                         }}
                       {%- else -%}
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                          <path d="M2.25 7a4.75 4.75 0 1 0 1.4-3.36L2.25 5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path>
-                          <path d="M2.25 2.5V5h2.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path>
-                        </svg>
+                        {% render 'lt-trust-icon', name: bb_perk_2_icon_name, size: 14 %}
                       {%- endif -%}
                       <span>{{ bb_b2 | escape }}</span>
                     </span>
@@ -980,11 +992,7 @@
                           | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
                         }}
                       {%- else -%}
-                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                          <path d="M4.25 1.75h4.1L11 4.4v7.85H4.25V1.75Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"></path>
-                          <path d="M8.35 1.75V4.4H11" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"></path>
-                          <path d="M5.8 7.1h3.4M5.8 9.25h3.4" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"></path>
-                        </svg>
+                        {% render 'lt-trust-icon', name: bb_perk_3_icon_name, size: 14 %}
                       {%- endif -%}
                       <span>{{ bb_b3 | escape }}</span>
                     </span>
@@ -997,13 +1005,7 @@
                             | image_tag: loading: 'lazy', class: 'lt-bb-card__perk-icon', alt: ''
                           }}
                         {%- else -%}
-                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                            <path d="M2.25 6.25h9.5v6H2.25v-6Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"></path>
-                            <path d="M1.75 4h10.5v2.25H1.75V4Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"></path>
-                            <path d="M7 4v8.25" stroke="currentColor" stroke-width="1.1"></path>
-                            <path d="M7 4S6.4 1.9 4.9 1.9c-.9 0-1.4.5-1.4 1.05C3.5 3.6 4.4 4 7 4Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"></path>
-                            <path d="M7 4s.6-2.1 2.1-2.1c.9 0 1.4.5 1.4 1.05C10.5 3.6 9.6 4 7 4Z" stroke="currentColor" stroke-width="1.1" stroke-linejoin="round"></path>
-                          </svg>
+                          {% render 'lt-trust-icon', name: bb_perk_4_icon_name, size: 14 %}
                         {%- endif -%}
                         <span>{{ bb_b4 | escape }}</span>
                       </span>
@@ -1012,11 +1014,13 @@
                 </span>
               </label>
 
-              <div class="lt-bb__or" role="presentation">
-                <span class="lt-bb__or-line" aria-hidden="true"></span>
-                <span class="lt-bb__or-text">{{ bb_or_label | escape }}</span>
-                <span class="lt-bb__or-line" aria-hidden="true"></span>
-              </div>
+              {%- if bb_or_label != blank -%}
+                <div class="lt-bb__or" role="presentation">
+                  <span class="lt-bb__or-line" aria-hidden="true"></span>
+                  <span class="lt-bb__or-text">{{ bb_or_label | escape }}</span>
+                  <span class="lt-bb__or-line" aria-hidden="true"></span>
+                </div>
+              {%- endif -%}
 
               <div class="lt-bb-card lt-bb-card--once" data-lt-bb-card data-bb-kind="once">
                 <input
@@ -1914,6 +1918,23 @@
   border-radius: 4px !important;
 }
 
+/* Bildfläche der Galerie. Die Katalogfotos tragen ihren Hintergrund im JPEG.
+   Wo der nicht exakt der Sectionfläche entspricht (Spermidin läuft von
+   #f4f3ef oben nach #ffffff unten, die Section ist #f7f7f4), entsteht sonst
+   eine sichtbare Kante um das Bild. Eine eigene Fläche macht den Bildblock
+   zu einem gewollten Objekt statt zu einem Fehler. */
+.lt-pdp-hero .product-gallery-item {
+  background: var(--lt-surface);
+}
+
+/* Rahmenfüllung, gesteuert über das Setting `gallery_fill`. Der Slide hat
+   overflow:hidden, der Zoom verändert also nur den Bildausschnitt, nicht das
+   Layout. Default 1 = Originalzuschnitt, damit sich ohne gesetztes Setting
+   auf keiner PDP etwas ändert. */
+.lt-pdp-hero .product-gallery-item img {
+  transform: scale(var(--lt-gallery-fill, 1));
+}
+
 /* Purchase block — handled below (white surface + border) */
 
 /* Direct price display — no-subscription mode */
@@ -2281,24 +2302,63 @@
   color: var(--lt-text, #26251e);
 }
 
-/* Unselected cards — muted */
-.lt-bb-card:not(.is-selected) {
-  opacity: 0.6;
-  transition: opacity 0.15s ease;
+/* Kaufoptionen — Zustand ueber Typografie und Farbe, nicht ueber Deckkraft.
+   Vorher lag auf der abgewaehlten Karte `opacity: 0.6`. Das nahm sie zwar
+   zurueck, riss aber den Kontrast mit: der Titel (15px/600, Textfarbe) fiel auf
+   3.8:1, die Subline (--lt-muted, Alpha 0.72) auf 2.5:1, beides unter AA. Und
+   der Preis blieb in beiden Karten 20px/700 — der gewaehlte Preis war optisch
+   nicht der gewaehlte.
+   Jetzt traegt der Preis die Zustandsinformation: gewaehlt gross und in
+   Textfarbe, abgewaehlt kleiner, leichter und gedeckt. Rahmen und gefuellter
+   Radio bleiben die zweite und dritte Ebene. Alle Textfarben bleiben AA. */
+.lt-bb-card.is-selected .lt-bb-card__current {
+  font-size: 22px;
 }
 
-.lt-bb-card:not(.is-selected):hover {
-  opacity: 0.85;
+.lt-bb-card:not(.is-selected) .lt-bb-card__current {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--lt-muted, #525252);
 }
 
-/* Payment icons */
+.lt-bb-card__current {
+  transition: color 0.15s ease;
+}
+
+.lt-bb-card:not(.is-selected) .lt-bb-card__title {
+  font-weight: 500;
+}
+
+.lt-bb-card:not(.is-selected) .lt-bb-card__compare {
+  font-size: 12px;
+}
+
+/* Hover-Affordanz ohne Deckkraft: die Kante zieht an, der Text bleibt lesbar. */
+.no-touchevents .lt-bb-card:not(.is-selected):hover {
+  border-color: color-mix(in srgb, var(--lt-primary-dark, #364f56) 45%, transparent);
+}
+
+/* Mobil bleibt der gewaehlte Preis auf 20px: die Preisspalte teilt sich die
+   Zeile mit Titel, Spar-Badge und Subline, 22px draengen das Meta zu stark. */
+@media (max-width: 767px) {
+  .lt-bb-card.is-selected .lt-bb-card__current {
+    font-size: 20px;
+  }
+}
+
+/* Payment icons.
+   gap: 4px statt 6px, damit die neun Zahlarten auf einer 390px-Breite in EINE
+   Zeile passen (9 × 35px + 8 × 4px = 347px bei 358px Spaltenbreite). Mit 6px
+   bricht das letzte Icon um und steht als einzelne Waise in Zeile zwei.
+   Linksbündig, damit die Zone unter dem CTA dieselbe Kante hat wie die
+   Trust-Zeilen darunter statt drei verschiedene Ausrichtungen zu mischen. */
 .lt-payment-icons {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--space-1);
   align-items: center;
-  justify-content: center;
-  margin-top: 12px;
+  justify-content: flex-start;
+  margin-top: var(--space-3);
 }
 
 /* Entsättigt. Die Shopify-Logos bringen sonst sechs Fremdfarben (AMEX-Blau,
@@ -2463,6 +2523,21 @@
       "id": "color_text",
       "label": "Textfarbe",
       "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Galerie"
+    },
+    {
+      "type": "range",
+      "id": "gallery_fill",
+      "label": "Rahmenfüllung",
+      "info": "100 = Foto wie im Katalog. Höher zoomt im Rahmen und schneidet leeren Rand weg, ohne das Layout zu ändern. Für Fotos, bei denen das Produkt klein in der Mitte steht.",
+      "min": 100,
+      "max": 130,
+      "step": 2,
+      "unit": "%",
+      "default": 100
     },
     {
       "type": "header",
@@ -2753,14 +2828,68 @@
       "label": "Abo-Vorteil 1 — Icon (optional)"
     },
     {
+      "type": "select",
+      "id": "bb_perk_1_icon_name",
+      "label": "Abo-Vorteil 1 — Icon-Motiv",
+      "info": "Nur wirksam, wenn kein eigenes Bild gesetzt ist. Motiv zum Text passend wählen.",
+      "options": [
+        { "value": "delivery", "label": "Lieferung" },
+        { "value": "refresh", "label": "Kündigen / pausieren" },
+        { "value": "shield", "label": "Garantie / geprüft" },
+        { "value": "document", "label": "Dokument / PDF" },
+        { "value": "gift", "label": "Geschenk / Willkommens-Deal" },
+        { "value": "clock", "label": "Zeit" },
+        { "value": "invoice", "label": "Rechnung / Zahlung" },
+        { "value": "lab", "label": "Labor / Forschung" },
+        { "value": "leaf", "label": "Rein / ohne Zusätze" }
+      ],
+      "default": "delivery"
+    },
+    {
       "type": "image_picker",
       "id": "bb_perk_2_icon",
       "label": "Abo-Vorteil 2 — Icon (optional)"
     },
     {
+      "type": "select",
+      "id": "bb_perk_2_icon_name",
+      "label": "Abo-Vorteil 2 — Icon-Motiv",
+      "info": "Nur wirksam, wenn kein eigenes Bild gesetzt ist. Motiv zum Text passend wählen.",
+      "options": [
+        { "value": "delivery", "label": "Lieferung" },
+        { "value": "refresh", "label": "Kündigen / pausieren" },
+        { "value": "shield", "label": "Garantie / geprüft" },
+        { "value": "document", "label": "Dokument / PDF" },
+        { "value": "gift", "label": "Geschenk / Willkommens-Deal" },
+        { "value": "clock", "label": "Zeit" },
+        { "value": "invoice", "label": "Rechnung / Zahlung" },
+        { "value": "lab", "label": "Labor / Forschung" },
+        { "value": "leaf", "label": "Rein / ohne Zusätze" }
+      ],
+      "default": "refresh"
+    },
+    {
       "type": "image_picker",
       "id": "bb_perk_3_icon",
       "label": "Abo-Vorteil 3 — Icon (optional)"
+    },
+    {
+      "type": "select",
+      "id": "bb_perk_3_icon_name",
+      "label": "Abo-Vorteil 3 — Icon-Motiv",
+      "info": "Nur wirksam, wenn kein eigenes Bild gesetzt ist. Motiv zum Text passend wählen.",
+      "options": [
+        { "value": "delivery", "label": "Lieferung" },
+        { "value": "refresh", "label": "Kündigen / pausieren" },
+        { "value": "shield", "label": "Garantie / geprüft" },
+        { "value": "document", "label": "Dokument / PDF" },
+        { "value": "gift", "label": "Geschenk / Willkommens-Deal" },
+        { "value": "clock", "label": "Zeit" },
+        { "value": "invoice", "label": "Rechnung / Zahlung" },
+        { "value": "lab", "label": "Labor / Forschung" },
+        { "value": "leaf", "label": "Rein / ohne Zusätze" }
+      ],
+      "default": "document"
     },
     {
       "type": "text",
@@ -2778,6 +2907,24 @@
       "type": "image_picker",
       "id": "bb_perk_4_icon",
       "label": "Abo-Vorteil 4 — Icon (optional)"
+    },
+    {
+      "type": "select",
+      "id": "bb_perk_4_icon_name",
+      "label": "Abo-Vorteil 4 — Icon-Motiv",
+      "info": "Nur wirksam, wenn kein eigenes Bild gesetzt ist. Motiv zum Text passend wählen.",
+      "options": [
+        { "value": "delivery", "label": "Lieferung" },
+        { "value": "refresh", "label": "Kündigen / pausieren" },
+        { "value": "shield", "label": "Garantie / geprüft" },
+        { "value": "document", "label": "Dokument / PDF" },
+        { "value": "gift", "label": "Geschenk / Willkommens-Deal" },
+        { "value": "clock", "label": "Zeit" },
+        { "value": "invoice", "label": "Rechnung / Zahlung" },
+        { "value": "lab", "label": "Labor / Forschung" },
+        { "value": "leaf", "label": "Rein / ohne Zusätze" }
+      ],
+      "default": "gift"
     },
     {
       "type": "text",
