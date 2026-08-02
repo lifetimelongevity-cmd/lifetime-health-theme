@@ -89,6 +89,15 @@
                 {%- if block.settings.step_title != blank -%}
                   <h3 class="ps-step-title">{{ block.settings.step_title | escape }}</h3>
                 {%- endif -%}
+                {%- if block.settings.step_timeframe != blank -%}
+                  <span class="ps-timeframe">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    {{ block.settings.step_timeframe | escape }}
+                  </span>
+                {%- endif -%}
                 {%- if block.settings.step_body != blank -%}
                   <p class="ps-step-body">{{ block.settings.step_body | escape }}</p>
                 {%- endif -%}
@@ -266,6 +275,23 @@
   margin: 0 0 5px !important;
 }
 
+.ps-timeframe {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;                       /* intentional: between --space-1 and --space-2 */
+  margin-bottom: var(--space-2);
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  padding: 4px var(--space-3);    /* intentional: sub-token vertical for compact pill */
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  color: var(--color-text-secondary);
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .ps-step-body {
   font-size: 14px;
   font-weight: 400;
@@ -438,7 +464,13 @@
           "type": "textarea",
           "id": "step_body",
           "label": "Beschreibung",
-          "default": "Dein Testkit wird direkt nach Hause geliefert."
+          "info": "Kurz halten. Titel und Zeitmarke tragen den Schritt."
+        },
+        {
+          "type": "text",
+          "id": "step_timeframe",
+          "label": "Zeitmarke",
+          "info": "z. B. 2 Minuten. Leer lassen blendet die Pille aus."
         },
         {
           "type": "checkbox",
