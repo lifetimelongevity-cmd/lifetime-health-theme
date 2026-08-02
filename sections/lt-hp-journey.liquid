@@ -17,8 +17,11 @@
 
 {%- liquid
   assign hp_headline_lg = false
+  assign hp_headline_md = false
   if section.settings.heading_size == 'product_title'
     assign hp_headline_lg = true
+  elsif section.settings.heading_size == 'feature'
+    assign hp_headline_md = true
   endif
 -%}
 
@@ -30,8 +33,8 @@
     {%- if section.settings.color_text != blank -%}
     color: {{ section.settings.color_text }};
     --crs-text:     {{ section.settings.color_text }};
-    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
-    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.72 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.66 }};
     {%- endif -%}
     padding-top:    {{ section.settings.padding_top | default: 80 }}px;
     padding-bottom: {{ section.settings.padding_bottom | default: 80 }}px;
@@ -44,7 +47,7 @@
     {%- comment -%}=== Section Header ==={%- endcomment -%}
     {%- assign jrn_kicker = section.settings.kicker | strip -%}
     {%- assign jrn_sub = section.settings.subheading | strip -%}
-    <div class="jrn__header crs-heading-stack crs-heading-stack--align-center{% if hp_headline_lg %} crs-heading-stack--headline-lg{% endif %} crs-heading-stack--homepage-truth">
+    <div class="jrn__header crs-heading-stack crs-heading-stack--align-center{% if hp_headline_lg %} crs-heading-stack--headline-lg{% elsif hp_headline_md %} crs-heading-stack--headline-md{% endif %} crs-heading-stack--homepage-truth">
       {%- if jrn_kicker != blank and jrn_kicker != '__none__' -%}
         <p class="crs-heading-stack__kicker">{{ jrn_kicker | escape }}</p>
       {%- endif -%}
@@ -518,6 +521,7 @@
       "label": "Ueberschrift Groesse",
       "options": [
         { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "feature", "label": "Mittel (28px)" },
         { "value": "product_title", "label": "Wie Produkttitel" }
       ],
       "default": "section"
