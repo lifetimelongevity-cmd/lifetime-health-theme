@@ -299,18 +299,22 @@ Separat davon: Der Bestandsartikel `epigenetische-uhren-konnen-wir-das-altern-um
 
 ## 5. Übergabe-Prompt für das externe Recherche- und Schreibsystem
 
-Der Prompt ist bewusst kurz. Er funktioniert nur zusammen mit diesem Dokument, das vollständig
-mitgegeben wird.
+Der Prompt ist bewusst kurz. Er funktioniert nur zusammen mit diesem Dokument, das dem externen
+System vollständig vorliegen muss, egal ob als Datei-Upload, als eingefügter Text oder über
+Repo-Zugriff auf `docs/age-dna-geo/BRIEFINGS-age-cluster-2026-08-03.md`.
 
 ```text
 Du recherchierst und schreibst einen deutschsprachigen Fachartikel für den Longevity-Blog von
 LIFETIME Health, einer deutschen Marke für epigenetische Alterstests und Supplements.
 
-ARTIKEL: [A | B | C aus §1 bis §3 des angehängten Briefings auswählen]
+Dir liegt dazu das Dokument "BRIEFINGS: drei AGE&DNA-Spokes" vor.
 
-Das angehängte Briefing ist verbindlich. Lies zuerst §0 (Rahmen), dann den Abschnitt zu deinem
-Artikel. Die Compliance-Regeln in §0 sind nicht verhandelbar und haben Vorrang vor allem, was
-inhaltlich naheliegend wirkt.
+ARTIKEL: [A | B | C aus §1 bis §3 des Briefings auswählen]
+
+Das Briefing ist verbindlich. Lies zuerst §0 (Rahmen), dann den Abschnitt zu deinem Artikel.
+Die Compliance-Regeln in §0 sind nicht verhandelbar und haben Vorrang vor allem, was inhaltlich
+naheliegend wirkt. Wenn dir das Dokument nicht vorliegt, sage das und fordere es an, statt den
+Artikel aus eigenem Wissen zu schreiben.
 
 Arbeite in zwei Schritten und liefere beide Teile:
 
