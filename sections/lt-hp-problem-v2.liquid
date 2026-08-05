@@ -1,7 +1,18 @@
 {% comment %}
-  lt-hp-problem-v2 — Warum Messen Vergleich (V5 Light Panes)
-  Two side-by-side panes on warm surface: Krankheitsmedizin (muted, left)
-  vs Longevity-Diagnostik (emphasis, right). Numbered rows, Helvetica titles.
+  lt-hp-problem-v2 — Der blinde Fleck
+  Zwei Listen ueber dieselbe Person: was der Check-up zeigt (links, flach und
+  gedaempft) und was er nicht zeigt (rechts, als Karte). Die Zeilen sind
+  bewusst nicht 1:1 gepaart, deshalb keine Nummerierung.
+
+  Die rechte Spalte traegt beide Produktebenen und nennt echte Reportinhalte
+  statt Kategorien: Zeile 1 und 2 Epigenetik (biologisches Alter, Koerperalter
+  mit Hoer- und Gedaechtnisalter), Zeile 3 und 4 Genetik (Koffein & Fokus,
+  Vitamin D). Belegt in docs/age-dna-product-fact-sheet.md und
+  ../lifetime-produktdetails/produktdetails-age-dna-test.md.
+
+  Bewusst NICHT verwendet, obwohl im Reportumfang enthalten: Adipositas-Risiko,
+  Typ-2-Diabetes, Makuladegeneration, Katarakt, Glaukom, Muskelschwund. Das sind
+  praediktive Krankheitsaussagen und damit GenDG-Fläche.
 {% endcomment %}
 
 {% style %}
@@ -56,7 +67,6 @@
               {%- for block in section.blocks -%}
                 {%- if block.type == 'comparison_row' -%}
                   <li class="prob2__pane-item" {{ block.shopify_attributes }}>
-                    <span class="prob2__item-num">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
                     <span class="prob2__item-line">{{ block.settings.system_text | escape }}</span>
                   </li>
                 {%- endif -%}
@@ -89,7 +99,6 @@
               {%- for block in section.blocks -%}
                 {%- if block.type == 'comparison_row' -%}
                   <li class="prob2__pane-item" {{ block.shopify_attributes }}>
-                    <span class="prob2__item-num">{{ forloop.index | prepend: '0' | slice: -2, 2 }}</span>
                     <span class="prob2__item-line">{{ block.settings.longevity_text | escape }}</span>
                   </li>
                 {%- endif -%}
@@ -145,11 +154,13 @@
   margin: 0;
 }
 
+/* Lesemass in rem, nicht in ch: in Lato ist 1ch deutlich schmaler als ein
+   mittleres Zeichen (Faktor ~1,29), 32ch brachen die Subline mitten im Satz. */
 .prob2__title-block {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-width: 32ch;
+  max-width: 28rem;
   text-wrap: balance;
 }
 
@@ -211,15 +222,21 @@
   object-fit: cover;
 }
 
+/* Links tritt zurueck: kein Rahmen, keine Flaeche, buendig zum Textrand.
+   Rechts ist die Karte. Der frueher genutzte Fuellton allein trug nicht,
+   #F6F4F1 auf #FFFFFF sind unter 15 Werte pro Kanal und damit unsichtbar. */
 .prob2__pane--system {
   background: transparent;
-  border: 1px solid var(--color-border-default);
+  border: 0;
+  padding-left: 0;
+  padding-right: var(--space-5);
   color: var(--color-text-muted);
 }
 
 .prob2__pane--longevity {
   background: var(--color-surface-secondary);
-  border: 1px solid var(--color-border-subtle, var(--color-border-default));
+  border: 1px solid var(--color-border-default);
+  box-shadow: var(--shadow-sm);
   color: var(--prob2-text, var(--color-text-primary));
 }
 
@@ -230,10 +247,6 @@
   gap: 12px;
   padding-bottom: 14px;
   border-bottom: 1px solid var(--prob2-divider, var(--color-border-default));
-}
-
-.prob2__pane--longevity .prob2__pane-hd {
-  border-bottom-color: rgba(74, 140, 133, 0.35);
 }
 
 .prob2__pane-name {
@@ -265,8 +278,9 @@
   color: var(--color-text-muted);
 }
 
+/* Kein Teal als Textfarbe, siehe .cursor/rules/section-heading-stack.mdc. */
 .prob2__pane--longevity .prob2__pane-tag {
-  color: var(--color-teal-dark);
+  color: var(--prob2-text, var(--color-text-primary));
   opacity: 1;
 }
 
@@ -274,29 +288,28 @@
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
 }
 
+/* Haarlinien statt Nummern: geben den Zeilen Rhythmus, ohne eine
+   Zeile-fuer-Zeile-Entsprechung zwischen den Spalten zu behaupten. */
 .prob2__pane-item {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 14px;
-  align-items: baseline;
+  padding: 14px 0;
 }
 
-.prob2__item-num {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  color: currentColor;
-  opacity: 0.55;
-  padding-top: 3px;
+.prob2__pane-item:first-child {
+  padding-top: 0;
+}
+
+.prob2__pane-item:last-child {
+  padding-bottom: 0;
+}
+
+.prob2__pane-item + .prob2__pane-item {
+  border-top: 1px solid var(--prob2-divider, var(--color-border-default));
 }
 
 .prob2__item-line {
+  display: block;
   font-family: var(--font-heading);
   font-weight: 400;
   font-size: var(--text-body);
@@ -334,6 +347,12 @@
   .prob2__panes {
     grid-template-columns: 1fr;
   }
+
+  /* Einspaltig gibt es keine Nachbarspalte mehr, gegen die abgesetzt wird.
+     Ohne das enden die Linien links kuerzer als die Karte darunter. */
+  .prob2__pane--system {
+    padding-right: 0;
+  }
 }
 {% endstylesheet %}
 
@@ -352,15 +371,15 @@
     { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
 
     { "type": "header", "content": "Kopf" },
-    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Warum Messen vor Optimieren kommt" },
-    { "type": "text", "id": "headline", "label": "Headline", "default": "Du investierst bereits. Die Frage ist nur: in welche Richtung." },
-    { "type": "textarea", "id": "subheadline", "label": "Subheadline" },
+    { "type": "text", "id": "kicker", "label": "Kicker", "info": "Nur setzen, wenn er Information trägt, die die Headline nicht hat." },
+    { "type": "text", "id": "headline", "label": "Headline", "default": "Alles im Normbereich." },
+    { "type": "textarea", "id": "subheadline", "label": "Subheadline", "default": "Nur nicht, wie schnell du alterst und warum." },
 
     { "type": "header", "content": "Panes" },
-    { "type": "text", "id": "col_system_label", "label": "Linke Spalte – Name", "default": "Krankheitsmedizin" },
-    { "type": "text", "id": "system_tag", "label": "Linke Spalte – Tag", "default": "reaktiv" },
-    { "type": "text", "id": "col_longevity_label", "label": "Rechte Spalte – Name", "default": "Longevity-Diagnostik" },
-    { "type": "text", "id": "longevity_tag", "label": "Rechte Spalte – Tag", "default": "proaktiv" },
+    { "type": "text", "id": "col_system_label", "label": "Linke Spalte – Name", "default": "Was dein Check-up zeigt" },
+    { "type": "text", "id": "system_tag", "label": "Linke Spalte – Tag" },
+    { "type": "text", "id": "col_longevity_label", "label": "Rechte Spalte – Name", "default": "Was er nicht zeigt" },
+    { "type": "text", "id": "longevity_tag", "label": "Rechte Spalte – Tag" },
 
     { "type": "header", "content": "Bilder unter den Panes (optional)" },
     { "type": "paragraph", "content": "Atmosphärische Bilder, die unter dem jeweiligen Pane erscheinen. Wenn keines hochgeladen ist, rendert die Section ohne Bild. Empfehlung: ähnliche Lichtsetzung und Tonalität für beide Bilder, damit die Section visuell zusammenhängt." },
@@ -381,7 +400,7 @@
     },
 
     { "type": "header", "content": "Schluss-Note" },
-    { "type": "textarea", "id": "closing_note", "label": "Note", "default": "Kein Ersatz für deinen Arzt. Ein Ausgangspunkt, bevor er nötig wird." }
+    { "type": "textarea", "id": "closing_note", "label": "Note", "default": "Ergänzt deinen Check-up. Ersetzt ihn nicht." }
   ],
   "blocks": [
     {
@@ -389,18 +408,19 @@
       "name": "Vergleichs-Zeile",
       "limit": 6,
       "settings": [
-        { "type": "text", "id": "system_text", "label": "Links (System)", "default": "Wartet auf Diagnose" },
-        { "type": "text", "id": "longevity_text", "label": "Rechts (Longevity)", "default": "Zeigt Verlauf" }
+        { "type": "text", "id": "system_text", "label": "Links (bekannt)", "default": "Blutdruck, Cholesterin, Blutzucker" },
+        { "type": "text", "id": "longevity_text", "label": "Rechts (offen)", "default": "Ob dein Körper älter ist als dein Pass", "info": "Konkrete Reportinhalte nennen, keine Kategorien. Keine Krankheitsbilder, siehe Kommentar oben im File." }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Problem & Systemlücke",
+      "name": "Der blinde Fleck",
       "blocks": [
-        { "type": "comparison_row", "settings": { "system_text": "Wartet auf Diagnose", "longevity_text": "Zeigt Verlauf, bevor eine nötig ist" } },
-        { "type": "comparison_row", "settings": { "system_text": "Aktueller Status", "longevity_text": "Altersgeschwindigkeit im Zeitverlauf" } },
-        { "type": "comparison_row", "settings": { "system_text": "Behandelt Symptome", "longevity_text": "Ermöglicht aktive Prävention" } }
+        { "type": "comparison_row", "settings": { "system_text": "Blutdruck, Cholesterin, Blutzucker", "longevity_text": "Ob dein Körper älter ist als dein Pass" } },
+        { "type": "comparison_row", "settings": { "system_text": "Ob heute etwas aus dem Rahmen fällt", "longevity_text": "Wie alt Gehör und Gedächtnis sind" } },
+        { "type": "comparison_row", "settings": { "system_text": "Wie du dich gerade fühlst", "longevity_text": "Ob Kaffee dich wach oder nervös macht" } },
+        { "type": "comparison_row", "settings": { "system_text": "Was im Schnitt für alle gilt", "longevity_text": "Ob du mehr Vitamin D brauchst" } }
       ]
     }
   ]
