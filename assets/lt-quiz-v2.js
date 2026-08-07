@@ -117,6 +117,12 @@
   // der Submit weiter über Shopify /contact (s. submitQuizCustomer).
   // Trailing Slash bewusst: ohne ihn antwortet Klaviyo mit einem Redirect, und ein
   // Cross-Origin-Redirect auf ein POST verliert den Body.
+  // Seit dem Wechsel auf Single-Opt-in (BJ 07.08.) ist dieses Formular der EINZIGE Filter
+  // gegen Tippfehler und Fantasie-Adressen — vorher hat die unbestätigte DOI-Mail sie
+  // aussortiert. Deshalb echte Formatprüfung statt „enthält ein @": lokaler Teil, genau ein
+  // @, Domain mit Punkt und einer Endung aus mindestens zwei Buchstaben.
+  const EMAIL_RE = /^[^\s@]+@[^\s@.]+(\.[^\s@.]+)*\.[A-Za-zÄÖÜäöü]{2,}$/;
+
   const KLAVIYO_ENDPOINT = 'https://a.klaviyo.com/client/subscriptions/';
   // Klaviyo versioniert per Datum. Stand der Doku am 2026-08-06. Ältere Revisionen
   // laufen weiter, ein Wechsel gehört trotzdem geprüft, nicht geraten.
@@ -179,9 +185,12 @@
     };
   }
 
-  // Klaviyo Client-Subscribe. Der Endpoint respektiert die Opt-in-Einstellung der Liste:
-  // `Quiz-Leads` steht auf Double-Opt-in (BJ-Entscheid 06.08.), Klaviyo verschickt die
-  // Bestätigungsmail also selbst. Antwort ist 202 ohne Body.
+  // Klaviyo Client-Subscribe. Der Endpoint respektiert die Opt-in-Einstellung der LISTE,
+  // nicht diesen Code: `Quiz-Leads` steht seit BJ-Entscheid 07.08. auf **Single-Opt-in**,
+  // die Adresse ist also sofort abonniert und der Flow F2 startet unmittelbar. Es geht keine
+  // Bestätigungsmail raus. Würde die Liste in Klaviyo auf DOI gestellt, änderte sich das
+  // Verhalten hier ohne Code-Änderung — dann müssen die Texte im Result-Snippet mit.
+  // Antwort ist 202 ohne Body.
   async function subscribeToKlaviyo(cfg, email, properties) {
     const body = {
       data: {
@@ -195,9 +204,9 @@
                 email: email,
                 properties: properties,
                 // Nur der E-Mail-Kanal. Ohne dieses Objekt setzt Klaviyo Defaults.
-                // Bei einer Liste mit Double-Opt-in bedeutet SUBSCRIBED nicht „sofort
-                // eingetragen", sondern „Bestätigungsmail verschicken" — die Opt-in-
-                // Einstellung der Liste gewinnt. Genau so ist es gewollt.
+                // Bei Single-Opt-in trägt SUBSCRIBED die Adresse direkt ein, samt Zeitstempel
+                // und Quelle (`custom_source`) — das ist zugleich der Einwilligungs-Nachweis,
+                // den sonst die DOI-Bestätigung geliefert hätte.
                 subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } },
               },
             },
@@ -803,7 +812,7 @@
       const errorEl = form.querySelector('[data-result-error]');
       const email = emailEl ? emailEl.value.trim() : '';
 
-      if (!email || !email.includes('@')) {
+      if (!EMAIL_RE.test(email)) {
         // novalidate: ohne eigene Meldung passiert beim Klick sichtbar nichts
         if (errorEl) {
           errorEl.textContent = 'Bitte trag eine gültige E-Mail-Adresse ein.';
