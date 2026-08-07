@@ -25,10 +25,20 @@
 {%- comment -%} Sitelink-Alias: kurzes #quiz statt #shopify-section-template--...__quiz_v2 {%- endcomment -%}
 <a id="quiz" aria-hidden="true" tabindex="-1" style="display:block;scroll-margin-top:100px;"></a>
 
+{%- comment -%}
+  E-Mail-Gate → Klaviyo. Solange die Listen-ID leer ist, postet der Submit weiter auf
+  Shopify /contact (Fallback in assets/lt-quiz-v2.js). Sobald sie gefüllt ist, geht die
+  Adresse ausschließlich an Klaviyo — nie an beide, sonst laufen Quiz-Nurture (F2) und
+  Welcome (F3) parallel. Kontext: lifetime-klaviyo/flow-map.md § F2.
+{%- endcomment -%}
 <section
   class="lt-quiz"
   data-lt-quiz-v2
   data-section-id="{{ section.id }}"
+  data-klaviyo-company-id="{{ section.settings.klaviyo_company_id | escape }}"
+  data-klaviyo-list-id="{{ section.settings.klaviyo_list_id | escape }}"
+  data-klaviyo-source="{{ section.settings.klaviyo_source | escape }}"
+  data-plan-url="{{ section.settings.plan_url | escape }}"
 >
   {%- comment -%} Full-bleed Progress-Rail (außerhalb Container, edge-to-edge) {%- endcomment -%}
   <div class="lt-quiz__rail" aria-hidden="true">
@@ -240,6 +250,12 @@
   </div>
 </section>
 
+{%- comment -%}
+  Reihenfolge ist Pflicht: lt-quiz-needs.js definiert window.LIFETIME.QUIZ_NEEDS, das
+  lt-quiz-v2.js beim Start liest. Beide `defer`, damit bleibt die Markup-Reihenfolge
+  auch die Ausführungsreihenfolge. Dieselbe Datei nutzt die Report-Seite.
+{%- endcomment -%}
+<script src="{{ 'lt-quiz-needs.js' | asset_url }}" defer></script>
 <script src="{{ 'lt-quiz-v2.js' | asset_url }}" defer></script>
 
 {% schema %}
@@ -318,6 +334,37 @@
       "label": "Intro Hero-Bild (URL)",
       "info": "Wird rechts neben dem Intro-Text angezeigt. Komplett sichtbar (nicht beschnitten).",
       "default": "https://cdn.shopify.com/s/files/1/0621/2173/8340/files/lifetime-app-hand-test.png?v=1778667349"
+    },
+    {
+      "type": "header",
+      "content": "E-Mail-Gate (Klaviyo)"
+    },
+    {
+      "type": "text",
+      "id": "klaviyo_company_id",
+      "label": "Klaviyo Public API Key",
+      "info": "Öffentlicher Account-Key, steht in Klaviyo unter Settings → API Keys. Nicht der Private Key.",
+      "default": "Tp4TCT"
+    },
+    {
+      "type": "text",
+      "id": "klaviyo_list_id",
+      "label": "Klaviyo Listen-ID (Quiz-Leads)",
+      "info": "6-stellige ID aus der Listen-URL. SOLANGE LEER: Der Submit läuft weiter über Shopify /contact und kein Klaviyo-Flow startet."
+    },
+    {
+      "type": "text",
+      "id": "klaviyo_source",
+      "label": "Klaviyo Quelle (custom_source)",
+      "info": "Erscheint in Klaviyo als Herkunft des Profils.",
+      "default": "Quiz Age Gate"
+    },
+    {
+      "type": "text",
+      "id": "plan_url",
+      "label": "Report-Seite (Longevity-Plan)",
+      "info": "Ziel des personalisierten Links, der als Property quiz_plan_url an Klaviyo geht.",
+      "default": "/pages/dein-longevity-plan"
     },
     {
       "type": "header",

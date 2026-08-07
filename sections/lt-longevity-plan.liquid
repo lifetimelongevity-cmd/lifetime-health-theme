@@ -1,0 +1,244 @@
+{%- comment -%}
+  LIFETIME — Longevity-Plan (Report-Seite des Quiz-Funnels)
+  ─────────────────────────────────────────────────────────
+  Live unter /pages/dein-longevity-plan. Ziel jeder Mail aus dem Klaviyo-Flow F2.
+
+  Spec: lifetime-klaviyo/quiz-report-konzept.md, Zuschnitt BJ 07.08.2026.
+    · Diese Section trägt nur den PERSÖNLICHEN Teil: Einschätzung und die drei Themen.
+      Der Verkauf steht danach in zwei bestehenden Sections des Templates,
+      `lt-science-bento` (dunkel, mit Mood-Bild) und `lt-pdp-final-cta`.
+    · Sneak-Preview, kein Dokument: je Thema ein Satz, der auf ein Gen endet.
+      Die Variante dazu liefert nur der Test.
+    · Alles Geschätzte ist als geschätzt gekennzeichnet.
+    · Keine Produktempfehlungen nach Befund: ohne Messung gibt es keinen Befund.
+    · Die Hebel („Was du ab heute tun kannst") sind am 07.08. von der Seite genommen:
+      Sie senken die Dringlichkeit und laufen ohnehin in Mail 3.
+
+  Personalisierung steckt im Link, nicht in einer Datenbank:
+    ?t1=<slug>&t2=<slug>&t3=<slug>&ba=<bio-alter>&ca=<pass-alter>&g=<geschlecht>
+  `top1` wird als Alias für `t1` akzeptiert (die Quiz-Result-CTAs hängen das bereits an).
+  Ohne Parameter rendert eine generische Fassung mit Weg zurück ins Quiz.
+
+  Themen-Inhalte kommen aus assets/lt-quiz-needs.js, derselben Quelle wie die
+  Quiz-Result-Page. Nichts wird hier zweitgeschrieben.
+{%- endcomment -%}
+
+{{ 'section-lt-longevity-plan.css' | asset_url | stylesheet_tag }}
+
+<section
+  class="lt-plan"
+  data-lt-plan
+  data-section-id="{{ section.id }}"
+  data-quiz-url="{{ section.settings.quiz_url | default: '/pages/quiz-age' }}"
+  style="--lt-plan-bg: {{ section.settings.color_bg }}; --lt-plan-pt: {{ section.settings.padding_top }}px; --lt-plan-pb: {{ section.settings.padding_bottom }}px;"
+>
+  <div class="lt-plan__container">
+
+    {%- comment -%}
+      Kein eigener Seitenkopf (BJ 07.08.): Der Lead kommt aus einer Mail, die den
+      Kontext schon gesetzt hat. Die Seite startet mit dem Ergebnis. Die Felder
+      bleiben im Schema, falls doch mal ein Kopf gebraucht wird — leer rendern sie nichts.
+    {%- endcomment -%}
+    {%- render 'section-heading-crs',
+        kicker: section.settings.kicker,
+        heading: section.settings.headline,
+        subheading: section.settings.subheadline,
+        align: 'left',
+        heading_tag: 'h2',
+        headline_md: true,
+        extra_class: 'lt-plan__head'
+    -%}
+
+    {%- comment -%}
+      ── Block 1 · Deine Einschätzung ────────────────────────────────
+      Zahlen kommen aus dem Link. Fehlen sie, tritt [data-plan-generic] an die Stelle
+      der Karte — nie eine erfundene Zahl (quiz-report-konzept.md § Harte Regeln 4).
+    {%- endcomment -%}
+    <section class="lt-plan__block lt-plan__block--estimate" data-plan-block="estimate">
+      {%- render 'section-heading-crs',
+          kicker: 'Deine Einschätzung',
+          heading: 'Dein biologisches Alter.',
+          align: 'left',
+          heading_tag: 'h1',
+          headline_md: true,
+          extra_class: 'lt-plan__block-head'
+      -%}
+
+      <div class="lt-plan__bioage" data-plan-bioage hidden>
+        <div class="lt-plan__bioage-numbers">
+          <div class="lt-plan__bioage-side">
+            <span class="lt-plan__bioage-label">Chronologisch</span>
+            <span class="lt-plan__bioage-num" data-plan-pass>—</span>
+          </div>
+          <div class="lt-plan__bioage-side lt-plan__bioage-side--bio">
+            {%- comment -%}
+              Labels folgen dem Satz darunter („chronologisches Alter"), nicht dem
+              „Pass" der Quiz-Result-Page. Dass die Zahl geschätzt ist, sagen die
+              Überschrift und der Satz.
+            {%- endcomment -%}
+            <span class="lt-plan__bioage-label">Biologisch</span>
+            <span class="lt-plan__bioage-num" data-plan-bio>—</span>
+          </div>
+        </div>
+        <div class="lt-plan__scale" aria-hidden="true">
+          <span class="lt-plan__scale-fill" data-plan-scale-fill></span>
+          <span class="lt-plan__scale-dot lt-plan__scale-dot--pass"></span>
+          <span class="lt-plan__scale-dot lt-plan__scale-dot--bio" data-plan-scale-bio></span>
+        </div>
+        <p class="lt-plan__bioage-delta" data-plan-delta></p>
+      </div>
+
+      {%- comment -%}
+        Was Epigenetik ist und was die Zahl bringt (BJ 07.08.). Bewusst nach der Zahl:
+        die Zahl ist der Haken, die Erklärung liefert den Grund, sie messen zu lassen.
+        Messmethoden werden als Analogie erklärt, nicht als Definition (LIFETIME-Stil).
+      {%- endcomment -%}
+      {%- if section.settings.epi_text != blank -%}
+        <div class="lt-plan__explainer">{{ section.settings.epi_text }}</div>
+      {%- endif -%}
+
+      <div class="lt-plan__generic" data-plan-generic hidden>
+        <p class="lt-plan__generic-text">Diese Seite füllt sich mit deinen Quiz-Antworten. Der Link aus deiner E-Mail bringt sie mit.</p>
+        <a class="lt-plan__link" href="{{ section.settings.quiz_url | default: '/pages/quiz-age' }}">Quiz in zwei Minuten machen</a>
+      </div>
+    </section>
+
+    {%- comment -%} ── Block 2 · Deine drei Themen ───────────────────── {%- endcomment -%}
+    <section class="lt-plan__block" data-plan-block="themes">
+      {%- render 'section-heading-crs',
+          kicker: 'Deine drei Themen',
+          heading: 'Darauf kommt es bei dir an.',
+          subheading: 'Und die Gene dahinter.',
+          align: 'left',
+          heading_tag: 'h2',
+          headline_md: true,
+          extra_class: 'lt-plan__block-head'
+      -%}
+      {%- comment -%}
+        Sneak-Preview, kein Kapitel: Marker plus der eine überraschende Satz je Thema.
+        Die ausführliche Themen-Analyse und die Gen-Erklärungen liegen weiter in
+        assets/lt-quiz-needs.js und gehören in die Mails, nicht auf diese Seite.
+      {%- endcomment -%}
+      {%- comment -%}
+        Was Genetik ist und was sie bringt (BJ 07.08.). Steht VOR den Karten, weil sie
+        erklärt, warum darunter Gennamen auftauchen.
+      {%- endcomment -%}
+      {%- if section.settings.gen_text != blank -%}
+        <div class="lt-plan__explainer lt-plan__explainer--lead">{{ section.settings.gen_text }}</div>
+      {%- endif -%}
+
+      <div class="lt-plan__themes" data-plan-themes>
+        {%- comment -%} Crawlbarer Fallback, den lt-longevity-plan.js ersetzt {%- endcomment -%}
+        <p class="lt-plan__fallback">Das Quiz priorisiert drei von zehn Themen und zeigt die genetischen Marker dahinter.</p>
+      </div>
+    </section>
+
+    {%- comment -%}
+      Disclaimer, sinngemäß aus der echten Beratungs-Auswertung übernommen und um den
+      Zusatz ergänzt, dass hier Selbstauskunft die Grundlage ist.
+    {%- endcomment -%}
+    <p class="lt-plan__disclaimer">{{ section.settings.disclaimer }}</p>
+
+  </div>
+</section>
+
+{%- comment -%}
+  Reihenfolge ist Pflicht: lt-quiz-needs.js definiert window.LIFETIME.QUIZ_NEEDS,
+  lt-longevity-plan.js liest es. Beide `defer`, Markup-Reihenfolge = Ausführungsreihenfolge.
+{%- endcomment -%}
+<script src="{{ 'lt-quiz-needs.js' | asset_url }}" defer></script>
+<script src="{{ 'lt-longevity-plan.js' | asset_url }}" defer></script>
+
+{% schema %}
+{
+  "name": "LT Longevity-Plan",
+  "tag": "section",
+  "class": "section lt-plan-section",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Kopf (optional, standardmäßig leer)"
+    },
+    {
+      "type": "text",
+      "id": "kicker",
+      "label": "Kicker",
+      "info": "Leer lassen. Die Seite startet bewusst direkt mit dem Ergebnis."
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline"
+    },
+    {
+      "type": "textarea",
+      "id": "subheadline",
+      "label": "Sub-Headline (gleiche Größe, mit Opacity)"
+    },
+    {
+      "type": "header",
+      "content": "Erklärstücke"
+    },
+    {
+      "type": "richtext",
+      "id": "epi_text",
+      "label": "Epigenetik (steht unter der Alters-Zahl)",
+      "default": "<p><strong>Epigenetik</strong> misst, wie aktiv deine Gene gerade sind. Dein biologisches Alter ist der Kilometerstand dazu: Er zeigt die Richtung und ist dein Startwert für alles, was du ab jetzt änderst.</p>"
+    },
+    {
+      "type": "richtext",
+      "id": "gen_text",
+      "label": "Genetik (steht über den drei Themen)",
+      "default": "<p><strong>Genetik</strong> steht seit deiner Geburt fest. Sie zeigt deine Talente und deine Sollbruchstellen, und erklärt, warum dieselbe Routine bei zwei Menschen unterschiedlich wirkt.</p>"
+    },
+    {
+      "type": "text",
+      "id": "quiz_url",
+      "label": "Quiz-Link (generische Fassung)",
+      "info": "Ziel des Links, wenn die Seite ohne Parameter aufgerufen wird.",
+      "default": "/pages/quiz-age"
+    },
+    {
+      "type": "richtext",
+      "id": "disclaimer",
+      "label": "Disclaimer",
+      "default": "<p>Beschreibt genetische Veranlagungen und ordnet deine Angaben ein. Keine Diagnose, ersetzt keine ärztliche Beratung. Beruht auf Selbstauskunft, nicht auf einer Messung.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Darstellung"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Longevity-Plan"
+    }
+  ]
+}
+{% endschema %}

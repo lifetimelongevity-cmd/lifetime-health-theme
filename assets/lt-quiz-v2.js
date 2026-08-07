@@ -85,134 +85,11 @@
   }
 
   // ── Bedürfnis-Stammdaten für Result-Page ─────────────────────────
-  const NEEDS_DETAIL = {
-    bioage: {
-      topic: 'Biologisches Alter',
-      icon: 'hourglass-medium',
-      title: 'Biologisches Alter senken',
-      short: 'FOXO3 gilt als eines der stärksten Langlebigkeits-Gene, bei Hundertjährigen ist die aktive Variante deutlich häufiger. Ob du sie trägst, und ob Fasten bei dir deshalb mehr bringt als bei anderen, steht in deiner DNA und nicht in deinem Lebensstil.',
-      genes: [
-        { name: 'SIRT1', explainer: 'Reguliert Reparatur-Prozesse deiner DNA und das Energie-Management deiner Zellen.', example: 'Bestimmt, wie stark Fasten und Kalorien-Reduktion bei dir wirken.' },
-        { name: 'FOXO3', explainer: 'Eines der stärksten Langlebigkeits-Gene weltweit.', example: 'Bei Hundertjährigen ist die aktive Variante deutlich häufiger.' },
-        { name: 'TP53', explainer: 'Der „Wächter des Genoms" — verhindert dass beschädigte Zellen unkontrolliert wachsen.', example: 'Zeigt deine zelluläre Schutz-Reserve.' },
-        { name: 'MTOR', explainer: 'Schaltet zwischen Wachstum und Reparatur deiner Zellen.', example: 'Bestimmt, wie dein Körper auf Protein und Aktivität antwortet.' },
-      ],
-      epiLine: 'Dazu dein epigenetisches Alter und MethylPace-Score — der direkteste Indikator für dein biologisches Alter.',
-    },
-    weight: {
-      topic: 'Stoffwechsel',
-      icon: 'scales',
-      title: 'Verstehen, wie der Körper Essen verarbeitet',
-      short: 'FTO steuert dein Sättigungsgefühl, TCF7L2 deine Insulin-Antwort auf Kohlenhydrate. Ob deine Makro-Verteilung zu dir passt oder still gegen dich arbeitet, hängt davon ab, welche Varianten du trägst.',
-      genes: [
-        { name: 'FTO', explainer: 'Beeinflusst Appetit und Fettspeicherung.', example: 'Erklärt, warum manche bei gleicher Kalorienmenge schneller zunehmen.' },
-        { name: 'TCF7L2', explainer: 'Reguliert deine Insulin-Antwort.', example: 'Zeigt, wie dein Körper auf Kohlenhydrate reagiert.' },
-        { name: 'MCM6', explainer: 'Bestimmt deine Laktose-Verträglichkeit.', example: 'Erklärt mögliche Beschwerden nach Milchprodukten.' },
-        { name: 'MC4R', explainer: 'Der zentrale Sättigungs-Schalter im Gehirn.', example: 'Bestimmt, wie schnell du Sättigung wahrnimmst.' },
-      ],
-      epiLine: 'Plus dein epigenetisches Entzündungsprofil — entscheidend für Stoffwechsel-Gesundheit.',
-    },
-    energy: {
-      topic: 'Energie',
-      icon: 'lightning',
-      title: 'Energie zurückgewinnen',
-      short: 'Bei einer schwachen VDR-Variante kommt Vitamin D trotz guter Blutwerte kaum in deinen Zellen an. Ob deine Müdigkeit daher kommt, von deiner Methylierung über MTHFR oder von stiller Entzündung über IL6, trennt erst der Test.',
-      genes: [
-        { name: 'MTHFR', explainer: 'Reguliert deine Methylierung — zentral für Energie- und Nervenstoffwechsel.', example: 'Bestimmt, ob du normale Folsäure verwertest oder methylierte brauchst.' },
-        { name: 'VDR', explainer: 'Vitamin-D-Rezeptor — wie gut Vitamin D in deinen Zellen ankommt.', example: 'Erklärt, warum hohe Blutwerte trotzdem Müdigkeit lassen können.' },
-        { name: 'IL6', explainer: 'Marker für stille Entzündungs-Aktivität.', example: 'Chronisch erhöht: Erschöpfung und schlechte Regeneration.' },
-        { name: 'TLR4', explainer: 'Steuert deine angeborene Immunantwort.', example: 'Beeinflusst, wie schnell dein Körper mit Entzündung reagiert.' },
-      ],
-      epiLine: 'Plus epigenetische Marker, die zeigen, wie aktiv dein Energiestoffwechsel läuft.',
-    },
-    sleep: {
-      topic: 'Schlaf',
-      icon: 'moon',
-      title: 'Endlich durchschlafen',
-      short: 'Mit der langsamen CYP1A2-Variante wirkt der Espresso um 14 Uhr noch um Mitternacht, mit der schnellen ist er um 18 Uhr abgebaut. Welche du trägst, und was PER3 über deinen Chronotyp sagt, liest der Test aus deiner Probe.',
-      genes: [
-        { name: 'PER3', explainer: 'Bestimmt deinen Chronotyp — biologisch früh oder spät aktiv.', example: 'Erklärt, warum manche morgens nicht produktiv sein können.' },
-        { name: 'CYP1A2', explainer: 'Reguliert dein Koffein-Abbau-Tempo.', example: 'Schnelle Variante: Espresso nach dem Essen geht. Langsame: nach 14 Uhr wird Schlaf zum Glücksspiel.' },
-        { name: 'ADORA2A', explainer: 'Bestimmt, wie stark Koffein dein Nervensystem aufdreht.', example: 'Macht den Unterschied zwischen wach und nervös bei der gleichen Dosis.' },
-      ],
-      epiLine: 'Plus epigenetische Schlaf-Marker — zeigen, wie regenerativ dein Schlaf tatsächlich ist.',
-    },
-    stress: {
-      topic: 'Stress',
-      icon: 'wind',
-      title: 'Stress verstehen und Nervensystem unterstützen',
-      short: 'COMT entscheidet, wie schnell du Stress-Hormone wieder abbaust. Die schnelle Variante bleibt unter Druck ruhig, die langsame denkt tiefer und braucht länger zur Erholung. Auf welcher Seite du stehst, zeigt der Test.',
-      genes: [
-        { name: 'COMT', explainer: 'Reguliert den Abbau von Stress-Hormonen wie Adrenalin und Dopamin.', example: 'Schnelle Variante: stressresistent. Langsame: tiefer Denker, längere Erholung.' },
-        { name: 'BDNF', explainer: 'Wachstumsfaktor für deine Nervenzellen.', example: 'Bestimmt deine mentale Resilienz und Lern-Geschwindigkeit.' },
-      ],
-      epiLine: 'Plus epigenetische Stress-Marker — zeigen, wie sehr chronischer Stress dich prägt.',
-    },
-    cognition: {
-      topic: 'Konzentration',
-      icon: 'lightbulb',
-      title: 'Konzentration, Klarheit, Gedächtnis',
-      short: 'Mit einer schwachen FADS1-Variante wandelt dein Körper pflanzliches Omega-3 kaum in die nutzbare Form um, Leinöl bringt dann wenig und Algenöl viel. Ob das auf dich zutrifft, steht in deinem FADS1-Status.',
-      genes: [
-        { name: 'BDNF', explainer: 'Wachstumsfaktor für Nervenzellen — Basis für Lernen und Erinnerung.', example: 'Aktive Variante: schnelles Lernen, gute Konzentration unter Druck.' },
-        { name: 'FADS1', explainer: 'Bestimmt, wie gut du pflanzliche Omega-3 in nutzbare Form umwandelst.', example: 'Schwache Variante: brauchst eher Fisch oder Algenöl statt Leinöl.' },
-        { name: 'APOE', explainer: 'Wichtigster genetischer Marker für kognitive Langzeit-Gesundheit.', example: 'Zeigt dein Risiko-Profil und welche Prävention bei dir am stärksten greift.' },
-      ],
-      epiLine: 'Plus epigenetische Marker für deine aktuelle kognitive Reserve.',
-    },
-    training: {
-      topic: 'Training',
-      icon: 'barbell',
-      title: 'Smarter trainieren',
-      short: 'ACTN3 bestimmt, ob du eher Kraft- oder Ausdauer-Typ bist, ACE wie stark deine VO₂max überhaupt auf Training anspringt. Welches Programm bei dir mehr bringt als das andere, entscheidet sich an diesen Varianten.',
-      genes: [
-        { name: 'ACTN3', explainer: 'Bestimmt deine Muskelfaser-Verteilung.', example: 'RR-Variante: Kraft- und Sprint-Typ. XX: Ausdauer-Typ.' },
-        { name: 'ACE', explainer: 'Beeinflusst, wie stark dein Herz-Kreislauf-System auf Training reagiert.', example: 'I-Variante: gute VO₂max-Trainierbarkeit. D: schnellere Kraft-Adaption.' },
-        { name: 'COL5A1', explainer: 'Reguliert die Stabilität deiner Sehnen und Bänder.', example: 'Bestimmt dein genetisches Verletzungs-Risiko.' },
-        { name: 'PPARA', explainer: 'Steuert den Fett-Stoffwechsel bei Belastung.', example: 'Bestimmt, wie gut du Fett als Energiequelle bei langem Cardio nutzt.' },
-      ],
-      epiLine: 'Plus epigenetische Marker, die deine aktuelle Trainings-Belastung sichtbar machen.',
-    },
-    heart: {
-      topic: 'Herz & Kreislauf',
-      icon: 'heartbeat',
-      title: 'Herz aktiv schützen',
-      short: 'Mit einer salzsensitiven AGT-Variante bewegt jedes Gramm Salz deinen Blutdruck spürbar, mit der anderen kaum. Dazu dein APOE-Cholesterin-Profil und das 9p21-Signal, dein stärkster genetischer Herz-Marker.',
-      genes: [
-        { name: 'APOE', explainer: 'Reguliert deinen Cholesterin-Stoffwechsel.', example: 'E4-Variante: höheres LDL, profitiert besonders von mediterraner Ernährung.' },
-        { name: 'AGT', explainer: 'Beeinflusst, wie dein Blutdruck auf Salz reagiert.', example: 'Sensitive Variante: Salz-Reduktion senkt Blutdruck stärker.' },
-        { name: 'CDKN2B-AS1', explainer: 'Der 9p21-Locus — stärkster bekannter genetischer Herz-Risiko-Marker.', example: 'Zeigt, wie früh und intensiv du präventiv ansetzen solltest.' },
-        { name: 'CETP', explainer: 'Reguliert das HDL-Cholesterin.', example: 'Bestimmt deine genetische "gute Cholesterin"-Reserve.' },
-      ],
-      epiLine: 'Plus epigenetische Marker, die zeigen, wie aktiv dein kardiovaskuläres System ist.',
-    },
-    supplements: {
-      topic: 'Vitamine & Supplements',
-      icon: 'pill',
-      title: 'Passende Vitamine und Supplements',
-      short: 'MTHFR entscheidet, ob normale Folsäure bei dir funktioniert oder ob du die methylierte Form brauchst, FUT2 wie gut B12 durch deine Darmwand kommt. Die Form zählt meist mehr als die Dosis, welche Form, ist individuell.',
-      genes: [
-        { name: 'MTHFR', explainer: 'Reguliert die Folsäure-Verwertung.', example: 'C677T-Variante: brauchst Methylfolat statt synthetische Folsäure.' },
-        { name: 'VDR', explainer: 'Vitamin-D-Rezeptor — wie effizient Vitamin D in deinen Zellen wirkt.', example: 'Bestimmt deinen optimalen Vitamin-D-Zielwert.' },
-        { name: 'FUT2', explainer: 'Beeinflusst deine Vitamin-B12-Aufnahme über die Darmwand.', example: 'Non-secretor: höheres Risiko für B12-Mangel trotz Ernährung.' },
-        { name: 'BCO1', explainer: 'Wandelt pflanzliches Beta-Carotin in nutzbares Vitamin A.', example: 'Schwache Variante: brauchst direkt Vitamin A oder tierische Quellen.' },
-      ],
-      epiLine: 'Plus epigenetische Mikronährstoff-Marker für deinen aktuellen Versorgungs-Status.',
-    },
-    skin: {
-      topic: 'Haut & Haar',
-      icon: 'sparkle',
-      title: 'Haut und Haar von innen',
-      short: 'ERCC2 repariert UV-Schäden in deiner Haut, AR bestimmt, wie empfindlich deine Follikel auf DHT reagieren. Ob bei dir konsequenter UV-Schutz mehr zählt als jede teure Creme, hängt an deiner ERCC2-Variante.',
-      genes: [
-        { name: 'SOD2', explainer: 'Hauptenzym der antioxidativen Abwehr in deinen Zellen.', example: 'Schwache Variante: höherer oxidativer Stress, profitiert von Antioxidantien.' },
-        { name: 'ERCC2', explainer: 'Repariert UV-Schäden in deiner DNA.', example: 'Reduzierte Aktivität: schnellere Hautalterung durch Sonne.' },
-        { name: 'AR', explainer: 'Androgen-Rezeptor — bestimmt deine DHT-Sensitivität.', example: 'Hauptfaktor für androgenetischen Haarausfall.' },
-        { name: 'MC1R', explainer: 'Reguliert Pigment-Bildung und Hautempfindlichkeit.', example: 'Bestimmt dein UV-Schutz-Niveau.' },
-      ],
-      epiLine: 'Plus epigenetische Hautalter-Marker — zeigen den biologischen Zustand deiner Haut.',
-    },
-  };
+  // Seit 2026-08-06 in assets/lt-quiz-needs.js, damit Result-Page, Report-Seite
+  // (/pages/dein-longevity-plan) und die Klaviyo-Mails aus derselben Quelle ziehen
+  // (quiz-report-konzept.md § Harte Regeln 5). Die Section lädt lt-quiz-needs.js
+  // per defer VOR dieser Datei, die Reihenfolge ist damit garantiert.
+  const NEEDS_DETAIL = (window.LIFETIME && window.LIFETIME.QUIZ_NEEDS) || {};
 
   function ageGroup(age) {
     if (age == null) return '';
@@ -232,6 +109,115 @@
     if (ag) tags.push(`age-${ag}`);
     if (answers.gender) tags.push(`gender-${answers.gender}`);
     return tags;
+  }
+
+  // ── Klaviyo-Anschluss (Gate → Liste `Quiz-Leads` → Flow F2) ──────
+  // Die Konfiguration steht in den Section-Settings, nicht hier: Public Key und
+  // Listen-ID sind Betriebsdaten, die BJ in Shopify pflegt. Ohne Listen-ID läuft
+  // der Submit weiter über Shopify /contact (s. submitQuizCustomer).
+  // Trailing Slash bewusst: ohne ihn antwortet Klaviyo mit einem Redirect, und ein
+  // Cross-Origin-Redirect auf ein POST verliert den Body.
+  const KLAVIYO_ENDPOINT = 'https://a.klaviyo.com/client/subscriptions/';
+  // Klaviyo versioniert per Datum. Stand der Doku am 2026-08-06. Ältere Revisionen
+  // laufen weiter, ein Wechsel gehört trotzdem geprüft, nicht geraten.
+  const KLAVIYO_REVISION = '2026-07-15';
+
+  function readKlaviyoConfig(root) {
+    return {
+      companyId: (root.dataset.klaviyoCompanyId || '').trim(),
+      listId: (root.dataset.klaviyoListId || '').trim(),
+      planPath: (root.dataset.planUrl || '/pages/dein-longevity-plan').trim(),
+      source: (root.dataset.klaviyoSource || 'Quiz Age Gate').trim(),
+    };
+  }
+
+  function isKlaviyoConfigured(cfg) {
+    return !!(cfg && cfg.companyId && cfg.listId);
+  }
+
+  // Personalisierter Report-Link. Die Personalisierung steckt im Link, nicht in einer
+  // Datenbank (quiz-report-konzept.md § Wie die individuelle Seite technisch funktioniert).
+  // Wird als Profil-Property `quiz_plan_url` mitgegeben, damit die Klaviyo-Mail den Link
+  // nicht selbst zusammenbauen muss.
+  function buildPlanUrl(planPath, topThree, bioAge, answers) {
+    const url = new URL(planPath || '/pages/dein-longevity-plan', window.location.origin);
+    const top = topThree || [];
+    if (top[0]) url.searchParams.set('t1', top[0]);
+    if (top[1]) url.searchParams.set('t2', top[1]);
+    if (top[2]) url.searchParams.set('t3', top[2]);
+    if (bioAge) {
+      url.searchParams.set('ba', String(bioAge.bioAge));
+      url.searchParams.set('ca', String(bioAge.chronoAge));
+    }
+    if (answers && answers.gender) url.searchParams.set('g', answers.gender);
+    return url.toString();
+  }
+
+  function buildKlaviyoProperties(state, bioAge, planUrl) {
+    const top = state.topThree || [];
+    const label = (id) =>
+      (window.LIFETIME && typeof window.LIFETIME.quizTopicLabel === 'function')
+        ? window.LIFETIME.quizTopicLabel(id)
+        : '';
+    return {
+      // Slugs: stabil für Flow-Splits und Segmente
+      quiz_top1: top[0] || '',
+      quiz_top2: top[1] || '',
+      quiz_top3: top[2] || '',
+      // Klartext: für den Fließtext in den Mails. `{{ quiz_top1 }}` roh im Satz würde
+      // sonst „bioage" ausgeben (flow-spec-quiz-nurture-mapping.md § Vorab).
+      quiz_top1_label: label(top[0]),
+      quiz_top2_label: label(top[1]),
+      quiz_top3_label: label(top[2]),
+      quiz_bioage: bioAge.bioAge,
+      quiz_bioage_delta: bioAge.delta,
+      quiz_age: bioAge.chronoAge,
+      quiz_age_group: ageGroup(state.answers.age),
+      quiz_gender: state.answers.gender || '',
+      quiz_date: new Date().toISOString().slice(0, 10),
+      quiz_plan_url: planUrl,
+    };
+  }
+
+  // Klaviyo Client-Subscribe. Der Endpoint respektiert die Opt-in-Einstellung der Liste:
+  // `Quiz-Leads` steht auf Double-Opt-in (BJ-Entscheid 06.08.), Klaviyo verschickt die
+  // Bestätigungsmail also selbst. Antwort ist 202 ohne Body.
+  async function subscribeToKlaviyo(cfg, email, properties) {
+    const body = {
+      data: {
+        type: 'subscription',
+        attributes: {
+          custom_source: cfg.source,
+          profile: {
+            data: {
+              type: 'profile',
+              attributes: {
+                email: email,
+                properties: properties,
+                // Nur der E-Mail-Kanal. Ohne dieses Objekt setzt Klaviyo Defaults.
+                // Bei einer Liste mit Double-Opt-in bedeutet SUBSCRIBED nicht „sofort
+                // eingetragen", sondern „Bestätigungsmail verschicken" — die Opt-in-
+                // Einstellung der Liste gewinnt. Genau so ist es gewollt.
+                subscriptions: { email: { marketing: { consent: 'SUBSCRIBED' } } },
+              },
+            },
+          },
+        },
+        relationships: {
+          list: { data: { type: 'list', id: cfg.listId } },
+        },
+      },
+    };
+
+    const res = await fetch(
+      KLAVIYO_ENDPOINT + '?company_id=' + encodeURIComponent(cfg.companyId),
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/vnd.api+json', revision: KLAVIYO_REVISION },
+        body: JSON.stringify(body),
+      }
+    );
+    if (!res.ok) throw new Error('Klaviyo HTTP ' + res.status);
   }
 
   function dispatchQuizCompleted(state) {
@@ -365,6 +351,7 @@
       this.backBtn = root.querySelector('[data-quiz-back]');
       this.closeBtn = root.querySelector('[data-quiz-close]');
       this.loadingTimer = null;
+      this.klaviyo = readKlaviyoConfig(root);
 
       this.bindIntro();
       this.bindSliders();
@@ -835,23 +822,38 @@
       }
       if (errorEl) errorEl.hidden = true;
 
+      const bioAge = computeBioAge(this.state.answers);
+      const planUrl = buildPlanUrl(this.klaviyo.planPath, this.state.topThree, bioAge, this.state.answers);
+
       try {
-        // Shopify Standard-Customer-Form endpoint
-        const fd = new FormData();
-        fd.append('form_type', 'customer');
-        fd.append('utf8', '✓');
-        fd.append('contact[email]', email);
-        fd.append('contact[tags]', (this.state.tags || []).join(','));
-        fd.append('contact[accepts_marketing]', 'true');
+        // Genau EIN System nimmt die Adresse entgegen, nie beide. Sonst landet der
+        // Quiz-Lead über den Shopify-Sync zusätzlich in der Liste `Newsletter` und
+        // bekommt Quiz-Nurture und Welcome parallel (flow-map.md § Frequenz-Governance 2).
+        if (isKlaviyoConfigured(this.klaviyo)) {
+          await subscribeToKlaviyo(
+            this.klaviyo,
+            email,
+            buildKlaviyoProperties(this.state, bioAge, planUrl)
+          );
+        } else {
+          // Fallback bis die Klaviyo-Liste angelegt und in den Section-Settings
+          // hinterlegt ist: Shopify Standard-Customer-Form endpoint, wie bisher.
+          const fd = new FormData();
+          fd.append('form_type', 'customer');
+          fd.append('utf8', '✓');
+          fd.append('contact[email]', email);
+          fd.append('contact[tags]', (this.state.tags || []).join(','));
+          fd.append('contact[accepts_marketing]', 'true');
 
-        const res = await fetch('/contact', {
-          method: 'POST',
-          body: fd,
-          credentials: 'same-origin',
-        });
+          const res = await fetch('/contact', {
+            method: 'POST',
+            body: fd,
+            credentials: 'same-origin',
+          });
 
-        // Shopify gibt 200 zurück auch bei "Email schon existiert" — als Erfolg behandeln
-        if (!res.ok && res.status !== 422) throw new Error('HTTP ' + res.status);
+          // Shopify gibt 200 zurück auch bei "Email schon existiert" — als Erfolg behandeln
+          if (!res.ok && res.status !== 422) throw new Error('HTTP ' + res.status);
+        }
 
         this.state.email = email;
         this.state.submitted = true;
@@ -862,13 +864,14 @@
         if (gateEl) gateEl.classList.add('is-unlocked');
         persistUnlock();
 
-        if (window.dataLayer && typeof window.dataLayer.push === 'function') {
-          window.dataLayer.push({
-            event: 'quiz_email_submitted',
-            quiz_gender: this.state.answers.gender,
-            quiz_age_group: ageGroup(this.state.answers.age),
-          });
-        }
+        pushDataLayer({
+          event: 'quiz_email_submitted',
+          quiz_top1: this.state.topThree[0] || '',
+          quiz_bioage: bioAge.bioAge,
+          quiz_gender: this.state.answers.gender,
+          quiz_age_group: ageGroup(this.state.answers.age),
+          quiz_capture_target: isKlaviyoConfigured(this.klaviyo) ? 'klaviyo' : 'shopify',
+        });
       } catch (err) {
         if (submitBtn) {
           submitBtn.disabled = false;

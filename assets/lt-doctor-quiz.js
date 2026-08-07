@@ -38,8 +38,8 @@
 
   // ── Epigenetik-Bereiche (6, gemäß Produktspec) ────────────────────
   const EPIGENETICS = [
-    { id: 'koerperalter',       label: 'Körperalter',       tooltip: 'Höralter · Gedächtnisalter · Sehalter' },
-    { id: 'biologisches-alter', label: 'Biologisches Alter', tooltip: 'MethylPace-Score' },
+    { id: 'koerperalter',       label: 'Körperalter',       tooltip: 'Höralter · Augenalter · Gedächtnisalter' },
+    { id: 'biologisches-alter', label: 'MethylPace',        tooltip: 'Chronologisches Alter · Biologisches Alter · Alterungsgeschwindigkeit' },
     { id: 'epivitality',        label: 'EpiVitality',       tooltip: 'Hypomethylierung entzündungsassoziierter CpG-Stellen' },
     { id: 'immunscore',         label: 'Immunscore',        tooltip: 'Methylierung immunrelevanter Gene · Immunzell-Regulation · Immunologisches Gedächtnis' },
     { id: 'entzuendung',        label: 'Entzündung',        tooltip: 'Pro-Entzündungs-Score · Anti-Entzündungs-Score · Gesamt-Entzündungs-Score' },
@@ -487,7 +487,7 @@
 
     runLoading() {
       const subs = [
-        'Abgleich mit 16 DNA-Kategorien',
+        'Abgleich mit 23 DNA-Kategorien',
         'Identifikation der relevanten Reports',
         'Erstellung Ihrer Vorschau-Seite',
       ];
@@ -679,7 +679,7 @@
         if (epiLabels.length) {
           epiEl.innerHTML = `Plus die für ${escapeHtml(specialty.label)} relevanten epigenetischen Bereiche: ${epiLabels.join(' · ')}.`;
         } else {
-          epiEl.innerHTML = `Plus 6 epigenetische Bereiche (biologisches Alter, EpiVitality, Immunscore, Entzündung, Muskelschwund, Körperalter).`;
+          epiEl.innerHTML = `Plus 6 epigenetische Bereiche (Körperalter, MethylPace, EpiVitality, Immunscore, Entzündung, Muskelschwund).`;
         }
       }
     }

@@ -1,0 +1,323 @@
+/**
+ * LIFETIME — Longevity-Plan (Report-Seite des Quiz-Funnels)
+ * Gehört zu sections/lt-longevity-plan.liquid.
+ *
+ * Visuelle Linie: die echte Beratungs-Auswertung (agedna-recommendations/*_Summary.html) —
+ * ruhige Karten auf warmem Papier, Zahl als Signatur-Moment, Hebel als nummerierte Liste.
+ * Werte kommen ausschliesslich aus den Tokens in assets/theme.css.
+ *
+ * Regeln, die hier bewusst eingehalten sind (.cursor/rules/design-components.mdc):
+ *  - keine farbigen border-left als Deko
+ *  - keine Hardcode-Hex und keine freien px ausserhalb der Skala
+ *  - Fliesstext auf --lt-measure gedeckelt, nicht der Container
+ *  - Titel/Subtitle kommen aus crs-heading-stack und werden hier NICHT umtypografiert,
+ *    nur im Abstand gesetzt
+ */
+
+.lt-plan {
+  background: var(--lt-plan-bg, var(--color-paper));
+  color: var(--color-ink);
+  padding-top: var(--lt-plan-pt, var(--space-8));
+  padding-bottom: var(--lt-plan-pb, var(--space-9));
+}
+
+.lt-plan__container {
+  width: 100%;
+  max-width: 46rem; /* schmaler als --lt-page-max: die Seite ist ein Lesedokument */
+  margin: 0 auto;
+  padding-inline: var(--lt-page-gutter);
+  box-sizing: border-box;
+}
+
+.lt-plan__head {
+  margin-bottom: var(--space-7);
+}
+
+.lt-plan__block {
+  padding-top: var(--space-7);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.lt-plan__block + .lt-plan__block {
+  margin-top: var(--space-7);
+}
+
+.lt-plan__block-head {
+  margin-bottom: var(--space-5);
+}
+
+/* Einzeiler, der den Block schliesst und die Luecke benennt. Klein, aber nicht grau
+   verschluckt — er ist das Verkaufsargument. */
+/* Erklärstück: was Epigenetik bzw. Genetik ist und was sie bringt. Ruhiger als das
+   Ergebnis darüber, aber lesbar — es ist der Grund, warum die Messung etwas taugt. */
+.lt-plan__explainer {
+  margin: var(--space-5) 0 0;
+  max-width: var(--lt-measure);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
+.lt-plan__explainer p { margin: 0; }
+
+.lt-plan__explainer strong {
+  font-weight: var(--weight-semibold);
+  color: var(--color-ink);
+}
+
+/* Variante, die über dem Inhalt steht statt darunter */
+.lt-plan__explainer--lead {
+  margin: 0 0 var(--space-5);
+}
+
+.lt-plan__fallback,
+.lt-plan__generic-text {
+  margin: var(--space-4) 0 0;
+  max-width: var(--lt-measure);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
+.lt-plan__link {
+  display: inline-block;
+  margin-top: var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-medium);
+  color: var(--color-teal-dark);
+  text-underline-offset: 3px;
+}
+
+/* ── Block 1 · Bio-Alter ──────────────────────────────────────────── */
+
+.lt-plan__bioage[hidden],
+.lt-plan__generic[hidden] {
+  display: none;
+}
+
+.lt-plan__bioage {
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6) var(--space-5);
+}
+
+.lt-plan__bioage-numbers {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-8);
+}
+
+.lt-plan__bioage-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.lt-plan__bioage-label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  text-align: center;
+}
+
+.lt-plan__bioage-num {
+  font-family: var(--font-heading);
+  font-size: var(--text-display);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-display);
+  color: var(--color-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.lt-plan__bioage-side--bio .lt-plan__bioage-num {
+  color: var(--color-teal-dark);
+}
+
+.lt-plan__scale {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  height: 16px;
+  margin: var(--space-5) auto 0;
+}
+
+.lt-plan__scale::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: var(--radius-full);
+  background: var(--color-border-default);
+}
+
+.lt-plan__scale-fill {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  transform: translateY(-50%);
+  border-radius: var(--radius-full);
+  background: var(--color-text-muted);
+}
+
+.lt-plan__scale-dot {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-primary);
+  transform: translate(-50%, -50%);
+}
+
+.lt-plan__scale-dot--pass {
+  left: 50%;
+  border: 2px solid var(--color-text-muted);
+}
+
+.lt-plan__scale-dot--bio {
+  left: 50%;
+  border: 2px solid var(--color-text-muted);
+}
+
+.lt-plan__bioage.is-up .lt-plan__scale-fill { background: var(--color-promo); }
+.lt-plan__bioage.is-up .lt-plan__scale-dot--bio { border-color: var(--color-promo); }
+.lt-plan__bioage.is-down .lt-plan__scale-fill { background: var(--color-teal); }
+.lt-plan__bioage.is-down .lt-plan__scale-dot--bio { border-color: var(--color-teal); }
+
+.lt-plan__bioage-delta {
+  margin: var(--space-4) 0 0;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+}
+
+/* ── Block 2 · Themen ─────────────────────────────────────────────── */
+
+.lt-plan__themes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.lt-plan__theme {
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+}
+
+.lt-plan__theme-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+/* Ziffer statt „Thema 1": dieselbe Information, eine Zeile weniger */
+.lt-plan__theme-rank {
+  flex: none;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  color: var(--color-teal-dark);
+}
+
+/* Gen-Marker als Pills, wie auf der Quiz-Result-Page. Sie tragen die Kompetenz,
+   ohne dass jeder Marker einen eigenen Erklaerabsatz bekommt. */
+.lt-plan__markers {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.lt-plan__marker {
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  letter-spacing: 0.04em;
+  color: var(--color-text-secondary);
+}
+
+.lt-plan__theme-title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  color: var(--color-ink);
+}
+
+.lt-plan__theme-lead {
+  margin: 0;
+  max-width: var(--lt-measure);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
+/* ── Fuss ─────────────────────────────────────────────────────────── */
+
+.lt-plan__disclaimer {
+  max-width: var(--lt-measure);
+  font-family: var(--font-body);
+  line-height: var(--leading-body);
+}
+
+.lt-plan__disclaimer {
+  max-width: var(--lt-measure);
+  font-family: var(--font-body);
+  line-height: var(--leading-body);
+  margin: var(--space-7) 0 0;
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-default);
+  font-size: var(--text-micro);
+  color: var(--color-text-muted);
+}
+
+.lt-plan__disclaimer p { margin: 0; }
+
+/* ── Mobile (92 % des Traffics) ───────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .lt-plan__bioage {
+    padding: var(--space-5) var(--space-4);
+  }
+  .lt-plan__bioage-numbers {
+    gap: var(--space-6);
+  }
+  .lt-plan__bioage-num {
+    font-size: var(--text-h1);
+  }
+  .lt-plan__theme {
+    padding: var(--space-4);
+  }
+}
+
+@media (min-width: 768px) {
+  .lt-plan__container {
+    padding-inline: var(--space-5);
+  }
+}
