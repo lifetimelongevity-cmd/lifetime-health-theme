@@ -129,9 +129,12 @@
       var def = data[id];
       if (!def) return;
 
+      // Kein `--featured` (BJ 07.08. abends): Der Modifier vergrößert den Titel von
+      // Thema 1 auf 24 px. Auf der Result-Page ist das richtig, dort ist Thema 1 das
+      // einzige lesbare und trägt den Anriss allein. Hier sind alle drei offen und
+      // gleichrangig — ein größerer erster Titel sieht dann nach Versehen aus.
       var article = document.createElement('article');
-      article.className =
-        'lt-quiz-result-theme' + (idx === 0 ? ' lt-quiz-result-theme--featured' : '');
+      article.className = 'lt-quiz-result-theme';
 
       var header = document.createElement('header');
       header.className = 'lt-quiz-result-theme__header';

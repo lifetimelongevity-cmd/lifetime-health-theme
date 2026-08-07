@@ -36,6 +36,31 @@
   if section.blocks.size > 0
     assign has_block_trust = true
   endif
+
+  comment
+    Optionale Bildspalte (2026-08-07, für /pages/dein-longevity-plan). Leer =
+    exakt das bisherige einspaltige Layout, so wie Startseite, NMN-Seite und
+    Alterstest-Seite es nutzen. Gefüllt = Inhalt links, Bild rechts ab 900 px.
+    URL-Auflösung wie in lt-science-bento, damit `shopify://shop_images/…` und
+    volle CDN-URLs beide funktionieren.
+  endcomment
+  assign ctac_media = section.settings.media_image | strip
+  if ctac_media contains 'shopify://shop_images/'
+    assign ctac_media = ctac_media | remove: 'shopify://shop_images/' | file_url
+  elsif ctac_media != blank
+    unless ctac_media contains '://'
+      assign ctac_media = ctac_media | file_url
+    endunless
+  endif
+
+  comment
+    Bis zu drei kurze Argumente mit Haken. Tragen auf der Longevity-Plan-Seite
+    das, was vorher eine eigene Bento-Section brauchte.
+  endcomment
+  assign has_args = false
+  if section.settings.arg_1 != blank or section.settings.arg_2 != blank or section.settings.arg_3 != blank
+    assign has_args = true
+  endif
 -%}
 
 {% style %}
@@ -54,7 +79,8 @@
 {% endstyle %}
 
 <section id="lt-hp-cta-close-{{ section.id }}" class="ctac">
-  <div class="ctac__container ctac__container--align-{{ hp_align }}">
+  <div class="ctac__container ctac__container--align-{{ hp_align }}{% if ctac_media != blank %} ctac__container--media{% endif %}">
+    <div class="ctac__main">
     <div class="ctac__header crs-heading-stack crs-heading-stack--align-{{ hp_align }}{% if hp_headline_lg %} crs-heading-stack--headline-lg{% endif %} crs-heading-stack--on-dark crs-heading-stack--homepage-truth">
       {%- if section.settings.kicker != blank and section.settings.kicker != '__none__' -%}
         <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
@@ -68,6 +94,18 @@
         {%- endif -%}
       </div>
     </div>
+
+    {%- comment -%}
+      Argumente stehen VOR der Buybox: Sie beantworten „was bekomme ich dafür",
+      und diese Antwort gehört vor den Preis, nicht dahinter.
+    {%- endcomment -%}
+    {%- if has_args -%}
+      <ul class="ctac__args">
+        {%- if section.settings.arg_1 != blank -%}<li>{{ section.settings.arg_1 | escape }}</li>{%- endif -%}
+        {%- if section.settings.arg_2 != blank -%}<li>{{ section.settings.arg_2 | escape }}</li>{%- endif -%}
+        {%- if section.settings.arg_3 != blank -%}<li>{{ section.settings.arg_3 | escape }}</li>{%- endif -%}
+      </ul>
+    {%- endif -%}
 
     {%- if hp_has_price -%}
       <div class="ctac__buybox">
@@ -131,6 +169,18 @@
         </ul>
       {%- endif -%}
     {%- endif -%}
+    </div>
+
+    {%- if ctac_media != blank -%}
+      <figure class="ctac__media">
+        <img
+          src="{{ ctac_media }}"
+          alt="{{ section.settings.media_alt | escape }}"
+          loading="lazy"
+          decoding="async"
+        >
+      </figure>
+    {%- endif -%}
   </div>
 </section>
 
@@ -140,15 +190,25 @@
   color: var(--ctac-text);
 }
 
+/* Container haelt seit 2026-08-07 genau ein Kind (.ctac__main), optional ein
+   zweites (.ctac__media). Die Abstaende zwischen Kopf, Buybox, Badge und
+   Trust-Row liegen jetzt in .ctac__main — ohne Bild ist das Ergebnis pixelgleich
+   zur Vorfassung, weil ein einzelnes Grid-Kind keine Luecke erzeugt. */
 .ctac__container {
   max-width: 52rem;
   margin: 0 auto;
   padding-inline-start: var(--gutter-container);
   padding-inline-end: var(--gutter-container);
+  display: grid;
+  gap: var(--space-7);
+  text-align: center;
+}
+
+.ctac__main {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
-  text-align: center;
+  min-width: 0;
 }
 
 .ctac__container--align-left {
@@ -309,6 +369,59 @@
   inset-inline-end: calc(var(--space-1) * -0.5);
 }
 
+/* ── Argumente mit Haken ──────────────────────────────────────────────────
+   Der Haken ist eine SVG-Maske, kein Zeichen und keine Icon-Schrift: So nimmt er
+   die Akzentfarbe der Section an und bringt keine Abhaengigkeit mit, die die
+   Startseite nicht ohnehin laedt. */
+.ctac__args {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: start;
+}
+
+.ctac__args li {
+  position: relative;
+  padding-inline-start: calc(var(--space-5) + var(--space-1));
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--ctac-text);
+}
+
+.ctac__args li::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0;
+  top: 0.15em;
+  width: 1.05em;
+  height: 1.05em;
+  background-color: var(--ctac-accent);
+  -webkit-mask: var(--ctac-check) center / contain no-repeat;
+          mask: var(--ctac-check) center / contain no-repeat;
+}
+
+.ctac {
+  --ctac-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.6l5.2 5.2L20 7'/%3E%3C/svg%3E");
+}
+
+/* ── Optionale Bildspalte ─────────────────────────────────────────────── */
+.ctac__media {
+  margin: 0;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.ctac__media img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  aspect-ratio: 4 / 3;
+}
+
 @media screen and (min-width: 750px) {
   .ctac__buybox-row {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -327,6 +440,23 @@
   .ctac__price-subline--desktop {
     display: block;
     text-align: start;
+  }
+}
+
+/* Zweispaltig erst ab 900 px: Darunter wuerde die Buybox-Zeile (Preis + Button
+   nebeneinander) in der schmalen Spalte umbrechen und der Preis seine Wucht
+   verlieren. Bis dahin steht das Bild als Abbinder unter dem Trust-Row. */
+@media screen and (min-width: 900px) {
+  .ctac__container--media {
+    max-width: 68rem;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: var(--space-8);
+    align-items: center;
+  }
+
+  .ctac__container--media .ctac__media img {
+    aspect-ratio: 3 / 4;
+    max-height: 34rem;
   }
 }
 {% endstylesheet %}
@@ -476,6 +606,41 @@
       "type": "text",
       "id": "badge_text",
       "label": "Badge unter CTA"
+    },
+    {
+      "type": "header",
+      "content": "Argumente mit Haken (optional)"
+    },
+    {
+      "type": "text",
+      "id": "arg_1",
+      "label": "Argument 1",
+      "info": "Steht über der Preiszeile. Leer lassen blendet die Liste aus."
+    },
+    {
+      "type": "text",
+      "id": "arg_2",
+      "label": "Argument 2"
+    },
+    {
+      "type": "text",
+      "id": "arg_3",
+      "label": "Argument 3"
+    },
+    {
+      "type": "header",
+      "content": "Bildspalte (optional)"
+    },
+    {
+      "type": "text",
+      "id": "media_image",
+      "label": "Bild URL (shopify://shop_images/...)",
+      "info": "Gefüllt: Inhalt links, Bild rechts ab 900 px. Leer: einspaltig wie bisher. Mood-Bild, kein Produktfoto."
+    },
+    {
+      "type": "text",
+      "id": "media_alt",
+      "label": "Alt-Text (Barrierefreiheit)"
     },
     {
       "type": "header",
