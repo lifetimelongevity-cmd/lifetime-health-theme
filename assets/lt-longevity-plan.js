@@ -82,15 +82,21 @@
     if (bioEl) bioEl.textContent = params.bioAge;
 
     card.classList.add(delta > 0 ? 'is-up' : delta < 0 ? 'is-down' : 'is-zero');
+    // Gleiche Einblende-Animation wie auf der Quiz-Result-Page. Die Regel dazu
+    // steht in lt-quiz-result-shared.css und respektiert prefers-reduced-motion.
+    card.classList.add('is-revealed');
 
+    // Wortgleich mit renderResult() in lt-quiz-v2.js. Die Jahres-Zahl steht in
+    // <strong>, weil die geteilte CSS sie je nach Richtung einfärbt. innerHTML ist
+    // hier unbedenklich: `abs` kommt aus parseInt und ist immer eine Ganzzahl.
     if (deltaEl) {
       var abs = Math.abs(delta);
       var unit = abs === 1 ? 'Jahr' : 'Jahre';
       var lead = 'Auf Basis deiner Antworten liegt dein biologisches Alter ';
       if (delta > 0) {
-        deltaEl.textContent = lead + 'rund ' + abs + ' ' + unit + ' über deinem chronologischen Alter.';
+        deltaEl.innerHTML = lead + 'rund <strong>' + abs + '&nbsp;' + unit + '</strong> über deinem chronologischen Alter.';
       } else if (delta < 0) {
-        deltaEl.textContent = lead + 'rund ' + abs + ' ' + unit + ' unter deinem chronologischen Alter.';
+        deltaEl.innerHTML = lead + 'rund <strong>' + abs + '&nbsp;' + unit + '</strong> unter deinem chronologischen Alter.';
       } else {
         deltaEl.textContent = lead + 'etwa gleichauf mit deinem chronologischen Alter.';
       }
@@ -104,10 +110,15 @@
   }
 
   // ── Block 2 · Deine drei Themen ──────────────────────────────────
-  // Sneak-Preview: Rang, Thema, die Marker als Pills und genau EIN Satz (`teaser`).
-  // Jeder Teaser endet auf ein Gen — die Variante dazu liefert nur der Test.
-  // `analysis`, `short`, die Gen-Erklärungen und `epiLine` bleiben in
-  // lt-quiz-needs.js für Mails und Result-Page.
+  // Identisches Markup zu renderResult() in lt-quiz-v2.js: Icon, Titel, Marker,
+  // Text. Nur das Schloss fehlt, weil die Karte hier `is-unlocked` trägt.
+  // Wer eine der beiden Stellen ändert, ändert die andere mit — sonst sehen
+  // Result-Page und Longevity-Plan wieder unterschiedlich aus (BJ 07.08.2026).
+  //
+  // Textfeld ist `short`, nicht `teaser`: Genau dieser Text steht auf der
+  // Result-Page hinter dem Weichzeichner. Wer die E-Mail einträgt, muss mehr
+  // bekommen als vorher zu sehen war, sonst ist das Gate ein leeres Versprechen.
+  // `teaser` bleibt in lt-quiz-needs.js für die Mails.
   function renderThemes(root, params) {
     var host = root.querySelector('[data-plan-themes]');
     if (!host || !params.top.length) return;
@@ -119,38 +130,44 @@
       if (!def) return;
 
       var article = document.createElement('article');
-      article.className = 'lt-plan__theme' + (idx === 0 ? ' lt-plan__theme--first' : '');
+      article.className =
+        'lt-quiz-result-theme' + (idx === 0 ? ' lt-quiz-result-theme--featured' : '');
 
       var header = document.createElement('header');
-      header.className = 'lt-plan__theme-head';
+      header.className = 'lt-quiz-result-theme__header';
 
-      var rank = document.createElement('span');
-      rank.className = 'lt-plan__theme-rank';
-      rank.textContent = String(idx + 1);
-      header.appendChild(rank);
+      if (def.icon) {
+        var icon = document.createElement('span');
+        icon.className = 'lt-quiz-result-theme__icon';
+        icon.setAttribute('aria-hidden', 'true');
+        var i = document.createElement('i');
+        i.className = 'ph-thin ph-' + def.icon;
+        icon.appendChild(i);
+        header.appendChild(icon);
+      }
 
       var title = document.createElement('h3');
-      title.className = 'lt-plan__theme-title';
-      title.textContent = def.topic;
+      title.className = 'lt-quiz-result-theme__title';
+      title.textContent = def.title;
       header.appendChild(title);
       article.appendChild(header);
 
       if (def.genes && def.genes.length) {
-        var markers = document.createElement('ul');
-        markers.className = 'lt-plan__markers';
+        var markers = document.createElement('div');
+        markers.className = 'lt-quiz-result-theme__markers';
         markers.setAttribute('aria-label', 'Relevante Gen-Marker');
         def.genes.forEach(function (gene) {
-          var li = document.createElement('li');
-          li.className = 'lt-plan__marker';
-          li.textContent = gene.name;
-          markers.appendChild(li);
+          var span = document.createElement('span');
+          span.className = 'lt-quiz-result-theme__marker';
+          span.textContent = gene.name;
+          markers.appendChild(span);
         });
         article.appendChild(markers);
       }
 
       var lead = document.createElement('p');
-      lead.className = 'lt-plan__theme-lead';
-      lead.textContent = def.teaser || '';
+      lead.className = 'lt-quiz-result-theme__lead';
+      lead.textContent = def.short || def.teaser || '';
       article.appendChild(lead);
 
       host.appendChild(article);
@@ -161,20 +178,48 @@
   // Der Kauf-CTA steht seit 07.08. in einer eigenen Section (lt-pdp-final-cta) und
   // damit außerhalb dieser Wurzel. Deshalb wird die ganze Seite nach Links auf die
   // AGE&DNA-PDP durchsucht, nicht nur der eigene Abschnitt.
+  // Nur der Seiteninhalt, nicht das Menü: Die mobile Sidebar enthält zwei Links auf
+  // dieselbe PDP und steht im DOM VOR dem Inhalt. Ungescoped war der erste Treffer
+  // deshalb ein ausgeblendeter Navigations-Link — der Sichtbarkeits-Observer hing
+  // an einem Element, das nie im Viewport steht.
   function planCtas() {
+    var scope = document.querySelector('main') || document;
     return Array.prototype.slice.call(
-      document.querySelectorAll('a[href*="/products/lifetime-age-dna"], [data-plan-cta]')
+      scope.querySelectorAll('a[href*="/products/lifetime-age-dna"], [data-plan-cta]')
     );
   }
 
+  // Zwei Formen kommen vor:
+  //   /products/lifetime-age-dna                              → direkt anreichern
+  //   /discount/CODE?redirect=%2Fproducts%2Flifetime-age-dna  → das redirect-Ziel
+  // Die zweite entsteht, sobald im Theme-Editor eine Rabatt-URL hinterlegt wird.
+  // Ohne diesen Zweig fiele dort die top1-Übergabe und damit der Quiz-Banner
+  // auf der PDP still aus.
   function decorateCtas(params) {
     if (!params.top[0]) return;
     planCtas().forEach(function (cta) {
       var href = cta.getAttribute('href');
-      if (!href || href.indexOf('/products/lifetime-age-dna') === -1) return;
-      var url = new URL(href, window.location.origin);
-      url.searchParams.set('top1', params.top[0]);
-      url.searchParams.set('qz', '1');
+      if (!href) return;
+      var url;
+      try {
+        url = new URL(href, window.location.origin);
+      } catch (e) {
+        return;
+      }
+
+      var redirect = url.searchParams.get('redirect');
+      if (redirect && redirect.indexOf('/products/lifetime-age-dna') !== -1) {
+        var inner = new URL(redirect, window.location.origin);
+        inner.searchParams.set('top1', params.top[0]);
+        inner.searchParams.set('qz', '1');
+        url.searchParams.set('redirect', inner.pathname + inner.search);
+      } else if (url.pathname.indexOf('/products/lifetime-age-dna') !== -1) {
+        url.searchParams.set('top1', params.top[0]);
+        url.searchParams.set('qz', '1');
+      } else {
+        return;
+      }
+
       cta.setAttribute('href', url.pathname + url.search);
     });
   }
@@ -195,7 +240,12 @@
       report_personalized: personalized ? 'yes' : 'no',
     });
 
-    var cta = planCtas()[0];
+    // Beobachtet wird der LETZTE Kauf-CTA der Seite (der grosse dunkle Abschluss),
+    // nicht mehr der erste. Seit dem 07.08. steht ein CTA schon in der Alters-Karte
+    // und damit fast immer sofort im Viewport — auf den ersten gemessen wuerde das
+    // Event zu ~100 % feuern und nichts mehr ueber Scrolltiefe aussagen.
+    var ctas = planCtas();
+    var cta = ctas[ctas.length - 1];
     if (cta && typeof IntersectionObserver === 'function') {
       var observer = new IntersectionObserver(function (entries) {
         if (!entries.some(function (e) { return e.isIntersecting; })) return;
@@ -209,8 +259,9 @@
     }
 
     document.addEventListener('click', function (e) {
+      if (!e.target || typeof e.target.closest !== 'function') return;
       var link = e.target.closest('a[href*="/products/lifetime-age-dna"], [data-plan-cta]');
-      if (!link) return;
+      if (!link || !link.closest('main')) return;
       pushDataLayer({
         event: 'quiz_report_cta_click',
         quiz_top1: params.top[0] || '',

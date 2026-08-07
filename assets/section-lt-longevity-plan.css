@@ -2,9 +2,16 @@
  * LIFETIME — Longevity-Plan (Report-Seite des Quiz-Funnels)
  * Gehört zu sections/lt-longevity-plan.liquid.
  *
- * Visuelle Linie: die echte Beratungs-Auswertung (agedna-recommendations/*_Summary.html) —
- * ruhige Karten auf warmem Papier, Zahl als Signatur-Moment, Hebel als nummerierte Liste.
- * Werte kommen ausschliesslich aus den Tokens in assets/theme.css.
+ * ── Was hier NICHT mehr steht (07.08.2026) ──────────────────────────────────
+ * Bio-Alter-Karte, Themen-Karte, Marker und Kauf-Buttons liegen seit heute in
+ * assets/lt-quiz-result-shared.css und sind damit auf dieser Seite und auf
+ * /pages/quiz-age dieselben Regeln. Vorher gab es hier eine zweite Fassung
+ * (.lt-plan__bioage, .lt-plan__theme, .lt-plan__marker) mit anderen Größen,
+ * anderer Marker-Form und ohne Icons — die beiden Seiten liefen auseinander.
+ * **Änderungen am Aussehen der Karten gehören in die geteilte Datei.**
+ *
+ * Diese Datei trägt nur noch: Seitenrahmen, Abstände zwischen den Blöcken,
+ * Erklärstücke, generische Fassung und Disclaimer.
  *
  * Regeln, die hier bewusst eingehalten sind (.cursor/rules/design-components.mdc):
  *  - keine farbigen border-left als Deko
@@ -17,7 +24,7 @@
 .lt-plan {
   background: var(--lt-plan-bg, var(--color-paper));
   color: var(--color-ink);
-  padding-top: var(--lt-plan-pt, var(--space-8));
+  padding-top: var(--lt-plan-pt, var(--space-6));
   padding-bottom: var(--lt-plan-pb, var(--space-9));
 }
 
@@ -38,6 +45,14 @@
   border-top: 1px solid var(--color-border-default);
 }
 
+/* Der erste Block braucht weder Trennlinie noch Vorlauf: darüber steht nichts
+   ausser dem Header. Die Linie las sich wie ein abgeschnittener Abschnitt und
+   kostete zusammen mit dem Innenabstand rund 110 px des ersten Bildschirms. */
+.lt-plan__block:first-of-type {
+  padding-top: 0;
+  border-top: 0;
+}
+
 .lt-plan__block + .lt-plan__block {
   margin-top: var(--space-7);
 }
@@ -46,8 +61,6 @@
   margin-bottom: var(--space-5);
 }
 
-/* Einzeiler, der den Block schliesst und die Luecke benennt. Klein, aber nicht grau
-   verschluckt — er ist das Verkaufsargument. */
 /* Erklärstück: was Epigenetik bzw. Genetik ist und was sie bringt. Ruhiger als das
    Ergebnis darüber, aber lesbar — es ist der Grund, warum die Messung etwas taugt. */
 .lt-plan__explainer {
@@ -71,220 +84,44 @@
   margin: 0 0 var(--space-5);
 }
 
-.lt-plan__fallback,
-.lt-plan__generic-text {
-  margin: var(--space-4) 0 0;
-  max-width: var(--lt-measure);
-  font-family: var(--font-body);
-  font-size: var(--text-body-sm);
-  line-height: var(--leading-relaxed);
-  color: var(--color-text-secondary);
-}
-
-.lt-plan__link {
-  display: inline-block;
-  margin-top: var(--space-3);
-  font-family: var(--font-body);
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-medium);
-  color: var(--color-teal-dark);
-  text-underline-offset: 3px;
-}
-
-/* ── Block 1 · Bio-Alter ──────────────────────────────────────────── */
+/* ── Block 1 · Bio-Alter ──────────────────────────────────────────
+   Optik kommt aus .lt-quiz-result__bioage (geteilte Datei). Hier nur der
+   Sonderfall, den die Quiz-Seite nicht kennt: Die Karte startet versteckt und
+   erscheint erst, wenn der Link Zahlen mitbringt. `display: none` muss die
+   `display: flex` der Basis schlagen. */
 
 .lt-plan__bioage[hidden],
 .lt-plan__generic[hidden] {
   display: none;
 }
 
-.lt-plan__bioage {
-  background: var(--color-surface-primary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6) var(--space-5);
+/* ── Generische Fassung (Aufruf ohne Link-Parameter) ──────────────── */
+
+.lt-plan__generic {
+  margin-top: var(--space-5);
 }
 
-.lt-plan__bioage-numbers {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  gap: var(--space-8);
-}
-
-.lt-plan__bioage-side {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.lt-plan__bioage-label {
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-medium);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  text-align: center;
-}
-
-.lt-plan__bioage-num {
-  font-family: var(--font-heading);
-  font-size: var(--text-display);
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-display);
-  color: var(--color-ink);
-  font-variant-numeric: tabular-nums;
-}
-
-.lt-plan__bioage-side--bio .lt-plan__bioage-num {
-  color: var(--color-teal-dark);
-}
-
-.lt-plan__scale {
-  position: relative;
-  width: 100%;
-  max-width: 320px;
-  height: 16px;
-  margin: var(--space-5) auto 0;
-}
-
-.lt-plan__scale::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 2px;
-  transform: translateY(-50%);
-  border-radius: var(--radius-full);
-  background: var(--color-border-default);
-}
-
-.lt-plan__scale-fill {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 3px;
-  transform: translateY(-50%);
-  border-radius: var(--radius-full);
-  background: var(--color-text-muted);
-}
-
-.lt-plan__scale-dot {
-  position: absolute;
-  top: 50%;
-  width: 12px;
-  height: 12px;
-  border-radius: var(--radius-full);
-  background: var(--color-surface-primary);
-  transform: translate(-50%, -50%);
-}
-
-.lt-plan__scale-dot--pass {
-  left: 50%;
-  border: 2px solid var(--color-text-muted);
-}
-
-.lt-plan__scale-dot--bio {
-  left: 50%;
-  border: 2px solid var(--color-text-muted);
-}
-
-.lt-plan__bioage.is-up .lt-plan__scale-fill { background: var(--color-promo); }
-.lt-plan__bioage.is-up .lt-plan__scale-dot--bio { border-color: var(--color-promo); }
-.lt-plan__bioage.is-down .lt-plan__scale-fill { background: var(--color-teal); }
-.lt-plan__bioage.is-down .lt-plan__scale-dot--bio { border-color: var(--color-teal); }
-
-.lt-plan__bioage-delta {
-  margin: var(--space-4) 0 0;
-  text-align: center;
-  font-family: var(--font-body);
-  font-size: var(--text-body-sm);
-  line-height: var(--leading-body);
-  color: var(--color-text-secondary);
-}
-
-/* ── Block 2 · Themen ─────────────────────────────────────────────── */
-
-.lt-plan__themes {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-5);
-}
-
-.lt-plan__theme {
-  background: var(--color-surface-primary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-}
-
-.lt-plan__theme-head {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
-  margin-bottom: var(--space-3);
-}
-
-/* Ziffer statt „Thema 1": dieselbe Information, eine Zeile weniger */
-.lt-plan__theme-rank {
-  flex: none;
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-semibold);
-  color: var(--color-teal-dark);
-}
-
-/* Gen-Marker als Pills, wie auf der Quiz-Result-Page. Sie tragen die Kompetenz,
-   ohne dass jeder Marker einen eigenen Erklaerabsatz bekommt. */
-.lt-plan__markers {
-  list-style: none;
-  margin: 0 0 var(--space-3);
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-
-.lt-plan__marker {
-  padding: var(--space-1) var(--space-3);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-full);
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-medium);
-  letter-spacing: 0.04em;
-  color: var(--color-text-secondary);
-}
-
-.lt-plan__theme-title {
-  margin: 0;
-  font-family: var(--font-heading);
-  font-size: var(--text-section);
-  font-weight: var(--weight-regular);
-  line-height: var(--leading-tight);
-  color: var(--color-ink);
-}
-
-.lt-plan__theme-lead {
+.lt-plan__generic-text {
   margin: 0;
   max-width: var(--lt-measure);
   font-family: var(--font-body);
-  font-size: var(--text-body);
+  font-size: var(--text-body-sm);
   line-height: var(--leading-relaxed);
   color: var(--color-text-secondary);
 }
 
-/* ── Fuss ─────────────────────────────────────────────────────────── */
-
-.lt-plan__disclaimer {
-  max-width: var(--lt-measure);
-  font-family: var(--font-body);
-  line-height: var(--leading-body);
+.lt-plan__generic-cta {
+  margin-top: var(--space-4);
 }
+
+/* ── Block 2 · Themen ─────────────────────────────────────────────
+   Karte, Icons, Marker und Textgrößen stehen in lt-quiz-result-shared.css. */
+
+.lt-plan__themes-card {
+  margin-top: var(--space-1);
+}
+
+/* ── Fuss ─────────────────────────────────────────────────────────── */
 
 .lt-plan__disclaimer {
   max-width: var(--lt-measure);
@@ -300,21 +137,6 @@
 .lt-plan__disclaimer p { margin: 0; }
 
 /* ── Mobile (92 % des Traffics) ───────────────────────────────────── */
-
-@media (max-width: 640px) {
-  .lt-plan__bioage {
-    padding: var(--space-5) var(--space-4);
-  }
-  .lt-plan__bioage-numbers {
-    gap: var(--space-6);
-  }
-  .lt-plan__bioage-num {
-    font-size: var(--text-h1);
-  }
-  .lt-plan__theme {
-    padding: var(--space-4);
-  }
-}
 
 @media (min-width: 768px) {
   .lt-plan__container {

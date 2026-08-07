@@ -672,13 +672,18 @@
         bioAgeRoot.classList.add('is-' + bioAge.direction);
       }
 
-      // Delta-Caption — ruhig, faktisch (kein medizinischer Claim; Disclaimer steht darunter)
+      // Delta-Caption — ruhig, faktisch (kein medizinischer Claim; Disclaimer steht darunter).
+      // Wortgleich mit assets/lt-longevity-plan.js: dieselbe Karte, derselbe Satz.
+      // Das frühere „Geschätzt, nicht gemessen:" ist raus — Gegensatzpaare dieser Form
+      // sind laut CLAUDE.md § Keine KI-Tells nicht erwünscht. Dass die Zahl geschätzt
+      // ist, sagen das Kartenlabel und der Satzanfang „Auf Basis deiner Antworten".
       const dAbs = Math.abs(bioAge.delta);
       const dUnit = dAbs === 1 ? 'Jahr' : 'Jahre';
+      const dLead = 'Auf Basis deiner Antworten liegt dein biologisches Alter ';
       if (deltaEl) {
-        if (bioAge.direction === 'up') deltaEl.innerHTML = 'Geschätzt, nicht gemessen: rund <strong>' + dAbs + '&nbsp;' + dUnit + '</strong> über deinem Pass-Alter.';
-        else if (bioAge.direction === 'down') deltaEl.innerHTML = 'Geschätzt, nicht gemessen: rund <strong>' + dAbs + '&nbsp;' + dUnit + '</strong> unter deinem Pass-Alter.';
-        else deltaEl.textContent = 'Geschätzt, nicht gemessen: im Einklang mit deinem Pass-Alter.';
+        if (bioAge.direction === 'up') deltaEl.innerHTML = dLead + 'rund <strong>' + dAbs + '&nbsp;' + dUnit + '</strong> über deinem chronologischen Alter.';
+        else if (bioAge.direction === 'down') deltaEl.innerHTML = dLead + 'rund <strong>' + dAbs + '&nbsp;' + dUnit + '</strong> unter deinem chronologischen Alter.';
+        else deltaEl.textContent = dLead + 'etwa gleichauf mit deinem chronologischen Alter.';
       }
 
       // Skala-Zielposition (24-Jahre-Fenster, Pass = Mitte 50 %)
@@ -768,11 +773,25 @@
         pill.classList.toggle('is-relevant', activeCats.has(pill.dataset.scopeCat));
       });
 
-      // 4 — Alle PDP-CTAs (früh + Card + sticky) mit top1 anreichern
+      // 4 — Alle PDP-CTAs (früh + Card + sticky) mit top1 anreichern.
+      //
+      // Fix 2026-08-07: Die drei CTAs zeigen auf
+      // `/discount/QUIZ-ALTER-10?redirect=%2Fproducts%2Flifetime-age-dna%3Fqz%3D1`.
+      // `top1` landete bisher als Parameter an der /discount/-URL — und die verwirft
+      // Shopify beim Weiterleiten. Auf der PDP kam `qz=1` an (das steckt im kodierten
+      // redirect), `top1` nie. Jetzt wird in den redirect-Wert hineingeschrieben.
+      // Dieselbe Logik in assets/lt-longevity-plan.js § decorateCtas.
       result.querySelectorAll('[data-result-pdp-cta]').forEach((pdpCta) => {
         if (!top[0]) return;
         const url = new URL(pdpCta.getAttribute('href'), window.location.origin);
-        url.searchParams.set('top1', top[0]);
+        const redirect = url.searchParams.get('redirect');
+        if (redirect && redirect.indexOf('/products/lifetime-age-dna') !== -1) {
+          const inner = new URL(redirect, window.location.origin);
+          inner.searchParams.set('top1', top[0]);
+          url.searchParams.set('redirect', inner.pathname + inner.search);
+        } else {
+          url.searchParams.set('top1', top[0]);
+        }
         pdpCta.setAttribute('href', url.pathname + url.search);
       });
 

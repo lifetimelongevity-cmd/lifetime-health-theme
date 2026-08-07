@@ -1,0 +1,540 @@
+/**
+ * LIFETIME — Themen-Block (Quiz-Result UND Longevity-Plan)
+ * ────────────────────────────────────────────────────────
+ * EINE Quelle fuer das Aussehen der drei Quiz-Themen. Bis 2026-08-07 lagen diese
+ * Regeln nur in section-lt-pdp-quiz-v2.css, waehrend die Report-Seite ihre eigenen
+ * .lt-plan__theme-Regeln mitbrachte — dieselbe Information, zwei Designs. Genau das
+ * ist auseinandergelaufen (BJ 07.08.).
+ *
+ * Geladen von:
+ *   sections/lt-pdp-quiz-v2.liquid   (Quiz-Result-Page)
+ *   sections/lt-doctor-quiz.liquid   (nutzt dieselben .lt-quiz-result-theme-Klassen)
+ *   sections/lt-longevity-plan.liquid (Report-Seite /pages/dein-longevity-plan)
+ * IMMER VOR der jeweiligen Section-CSS, damit dortige Overrides weiter gewinnen.
+ *
+ * Zustaende:
+ *   .lt-quiz-result__themes-card               → gesperrt: Thema 1 blendet aus, 2+3 unscharf
+ *   .lt-quiz-result__themes-card.is-unlocked   → alles offen (Longevity-Plan nutzt das)
+ *
+ * Regeln aus .cursor/rules/design-components.mdc, unveraendert uebernommen:
+ * Card Info → weisse Flaeche, Border --color-border-default, Icon 48 px mit
+ * --color-surface-benefit und --color-teal-dark.
+ */
+
+.lt-quiz-result__themes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* Nur sichtbar, wenn das JS die personalisierten Themen nicht ersetzt hat */
+.lt-quiz-result__themes-fallback {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.lt-quiz-result-theme {
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.lt-quiz-result-theme__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.lt-quiz-result-theme__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-secondary);
+  font-size: 32px;
+  color: var(--color-text-primary);
+  line-height: 1;
+}
+
+.lt-quiz-result-theme__icon i { display: block; line-height: 1; }
+
+.lt-quiz-result-theme__head-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  flex: 1;
+  min-width: 0;
+}
+
+.lt-quiz-result-theme__pos {
+  font-family: var(--font-body);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+}
+
+.lt-quiz-result-theme__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 22px;
+  line-height: 1.25;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+}
+
+.lt-quiz-result-theme__lead {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+}
+
+/* #3 — Gen-Marker als gestaltete Tokens (Lato uppercase — kein neuer Font) */
+.lt-quiz-result-theme__markers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.lt-quiz-result-theme__marker {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+  background: var(--color-surface-secondary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  padding: 3px var(--space-2);
+}
+
+/* #4 — #1 hervorgehoben (größerer Titel + voller Lead); #2/#3 mit gekürztem Lead */
+.lt-quiz-result-theme--featured { gap: var(--space-4); }
+.lt-quiz-result-theme--featured .lt-quiz-result-theme__title { font-size: 24px; }
+.lt-quiz-result-theme:not(.lt-quiz-result-theme--featured) .lt-quiz-result-theme__lead {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ══ Themen-Karte: alle drei Themen in EINER Karte (2026-07-23) ═════════════════
+   Vorher: drei einzelne Karten plus separate Unlock-Karte. Jetzt eine Karte, in der
+   Thema 1 nach rund einem Satz ausblendet und Thema 2 + 3 nur als Titelzeile mit
+   Schloss stehen.
+
+   Alles hier ist unter .lt-quiz-result__themes-card gescoped, weil
+   sections/lt-doctor-quiz.liquid dieselbe CSS-Datei und die
+   .lt-quiz-result-theme-Klassen nutzt und unveraendert bleiben muss.
+
+   Design-System (.cursor/rules/design-components.mdc):
+   Card Info -> weisse Flaeche, Border --color-border-default, Icon 48 px mit
+   --color-surface-benefit und --color-teal-dark. Benefit Surface fuer den
+   E-Mail-Block. Button-Spec "cta" -> dark bg, weisse Schrift. */
+
+.lt-quiz-result__themes-card {
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.lt-quiz-result__themes-kicker {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+/* Die Themen-Bloecke verlieren in dieser Karte ihre eigene Karten-Optik —
+   sonst steckten Karten in einer Karte. Trennung ueber Linie statt Rahmen. */
+.lt-quiz-result__themes-card .lt-quiz-result-theme {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  gap: var(--space-3);
+}
+
+/* Abstand nur ueber margin/padding, damit die Trennlinie mittig zwischen den
+   Bloecken sitzt statt am oberen Rand des naechsten zu kleben */
+.lt-quiz-result__themes-card .lt-quiz-result__themes { gap: 0; }
+
+.lt-quiz-result__themes-card .lt-quiz-result-theme + .lt-quiz-result-theme {
+  margin-top: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--color-border-default);
+}
+
+.lt-quiz-result__themes-card .lt-quiz-result-theme__header {
+  gap: var(--space-4);
+}
+
+/* Groessen auf die Text-Tokens statt freier px-Werte (nur in dieser Karte,
+   lt-doctor-quiz behaelt seine Werte) */
+.lt-quiz-result__themes-card .lt-quiz-result-theme__title {
+  font-size: var(--text-section);
+}
+
+.lt-quiz-result__themes-card .lt-quiz-result-theme--featured .lt-quiz-result-theme__title {
+  font-size: var(--text-h3);
+}
+
+.lt-quiz-result__themes-card .lt-quiz-result-theme__lead {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+}
+
+/* Card-Info-Spec: 48 px Container, Benefit-Bg, teal-dark Icon */
+.lt-quiz-result__themes-card .lt-quiz-result-theme__icon {
+  width: 48px;
+  height: 48px;
+  background: var(--color-surface-benefit);
+  color: var(--color-teal-dark);
+  font-size: 26px;
+}
+
+.lt-quiz-result__themes-card .lt-quiz-result-theme__title {
+  flex: 1;
+  min-width: 0;
+}
+
+.lt-quiz-result-theme__lock {
+  display: none;
+  flex-shrink: 0;
+  font-size: 18px;
+  line-height: 1;
+  color: var(--color-text-muted);
+}
+
+.lt-quiz-result-theme__lock i { display: block; line-height: 1; }
+
+/* ── Gesperrter Zustand ──────────────────────────────────────────────────── */
+
+/* Thema 1: rund ein Satz, dann sanft ausgeblendet */
+.lt-quiz-result__themes-card:not(.is-unlocked) .lt-quiz-result-theme:first-of-type .lt-quiz-result-theme__lead {
+  max-height: 4.2em;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(#000 40%, transparent 100%);
+          mask-image: linear-gradient(#000 40%, transparent 100%);
+}
+
+/* Thema 2 + 3: Inhalt bleibt sichtbar, aber unscharf (BJ 07.08.). Eine leere Titelzeile
+   sagt nur „hier ist nichts", der Blur zeigt, dass etwas dahinter liegt, und macht damit
+   erst neugierig. `user-select: none` verhindert, dass man den Text markiert und liest. */
+.lt-quiz-result__themes-card:not(.is-unlocked) .lt-quiz-result-theme:nth-of-type(n + 2) .lt-quiz-result-theme__markers,
+.lt-quiz-result__themes-card:not(.is-unlocked) .lt-quiz-result-theme:nth-of-type(n + 2) .lt-quiz-result-theme__lead {
+  filter: blur(5px);
+  opacity: 0.55;
+  user-select: none;
+  pointer-events: none;
+}
+
+.lt-quiz-result__themes-card:not(.is-unlocked) .lt-quiz-result-theme:nth-of-type(n + 2) .lt-quiz-result-theme__lead {
+  max-height: 3.2em;
+  overflow: hidden;
+}
+
+.lt-quiz-result__themes-card:not(.is-unlocked) .lt-quiz-result-theme:nth-of-type(n + 2) .lt-quiz-result-theme__lock {
+  display: block;
+}
+
+/* ── Offener Zustand (Longevity-Plan) ─────────────────────────────────────
+   Die 4-Zeilen-Kuerzung weiter oben ist ein Gate-Mittel: Auf der Result-Page
+   soll Thema 2 und 3 abbrechen. Auf der Report-Seite ist derselbe Text die
+   Belohnung fuer die E-Mail und muss vollstaendig dastehen. */
+.lt-quiz-result__themes-card.is-unlocked .lt-quiz-result-theme__lead {
+  display: block;
+  -webkit-line-clamp: none;
+  max-height: none;
+  overflow: visible;
+  filter: none;
+  opacity: 1;
+  user-select: auto;
+  -webkit-mask-image: none;
+          mask-image: none;
+}
+
+/* ── Mobile ──────────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .lt-quiz-result__themes-card { padding: var(--space-5) var(--space-4); }
+}
+
+
+/* ══════════════════════════════════════════════════════════════════════════
+   Bio-Alter-Karte, Primaer-CTA und Sticky-CTA
+   ──────────────────────────────────────────
+   Ebenfalls am 07.08.2026 aus section-lt-pdp-quiz-v2.css hierher gezogen: Die
+   Report-Seite zeigt dieselbe Karte mit denselben Zahlen und braucht denselben
+   Kauf-Button. Vorher lag beides doppelt vor (.lt-plan__bioage) und driftete in
+   Groesse, Farbe und Innenabstand auseinander.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.lt-quiz-result__bioage {
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  padding: var(--space-7) var(--space-6);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.lt-quiz-result__bioage-label {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
+
+.lt-quiz-result__bioage-numbers {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-7);
+}
+
+.lt-quiz-result__bioage-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 100px;
+}
+
+.lt-quiz-result__bioage-side-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.lt-quiz-result__bioage-num {
+  font-family: var(--font-heading);
+  font-size: clamp(48px, 7vw, 72px);
+  line-height: 1;
+  font-weight: 400;
+  letter-spacing: -0.03em;
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.lt-quiz-result__bioage.is-up .lt-quiz-result__bioage-side--bio .lt-quiz-result__bioage-num {
+  color: var(--color-promo);
+}
+
+.lt-quiz-result__bioage.is-down .lt-quiz-result__bioage-side--bio .lt-quiz-result__bioage-num {
+  color: var(--color-teal);
+}
+
+.lt-quiz-result__bioage.is-revealed {
+  animation: lt-bioage-in 700ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+@keyframes lt-bioage-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.lt-quiz-result__bioage-scale {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  height: 16px;
+  margin: var(--space-3) auto 0;
+}
+
+.lt-quiz-result__bioage-scale::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  transform: translateY(-50%);
+  border-radius: var(--radius-full);
+  background: var(--color-border-default);
+}
+
+.lt-quiz-result__bioage-scale-fill {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 3px;
+  transform: translateY(-50%);
+  border-radius: var(--radius-full);
+  background: var(--color-text-muted);
+  transition: left 900ms cubic-bezier(0.22, 0.61, 0.36, 1), width 900ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.lt-quiz-result__bioage-scale-dot {
+  position: absolute;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-primary);
+  transform: translate(-50%, -50%);
+}
+
+.lt-quiz-result__bioage-scale-dot--pass {
+  left: 50%;
+  border: 2px solid var(--color-text-muted);
+}
+
+.lt-quiz-result__bioage-scale-dot--bio {
+  left: 50%;
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--color-text-muted);
+  z-index: 2;
+  transition: left 900ms cubic-bezier(0.22, 0.61, 0.36, 1), border-color 500ms ease, box-shadow 500ms ease;
+}
+
+.lt-quiz-result__bioage.is-up .lt-quiz-result__bioage-scale-fill { background: var(--color-promo); }
+
+.lt-quiz-result__bioage.is-up .lt-quiz-result__bioage-scale-dot--bio {
+  border-color: var(--color-promo);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-promo) 16%, transparent);
+}
+
+.lt-quiz-result__bioage.is-down .lt-quiz-result__bioage-scale-fill { background: var(--color-teal); }
+
+.lt-quiz-result__bioage.is-down .lt-quiz-result__bioage-scale-dot--bio {
+  border-color: var(--color-teal);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--color-teal) 16%, transparent);
+}
+
+.lt-quiz-result__bioage.is-zero .lt-quiz-result__bioage-scale-fill { display: none; }
+
+.lt-quiz-result__bioage-delta {
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+  color: var(--color-text-secondary);
+}
+
+.lt-quiz-result__bioage.is-up .lt-quiz-result__bioage-delta strong { color: var(--color-promo); }
+
+.lt-quiz-result__bioage.is-down .lt-quiz-result__bioage-delta strong { color: var(--color-teal-dark); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lt-quiz-result__bioage.is-revealed { animation: none; }
+  .lt-quiz-result__bioage-scale-fill,
+  .lt-quiz-result__bioage-scale-dot--bio { transition: none; }
+}
+
+@media (max-width: 640px) {
+  .lt-quiz-result__bioage { padding: var(--space-5) var(--space-4); }
+  .lt-quiz-result__bioage-numbers { gap: var(--space-4); }
+  .lt-quiz-result__bioage-side { min-width: 80px; }
+}
+
+.lt-quiz-result__cta-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px var(--space-6);
+  border-radius: var(--radius-full);
+  background: var(--color-teal);
+  color: var(--color-white);
+  border: 1px solid var(--color-teal);
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-top: var(--space-3);
+  transition: background 180ms ease, transform 180ms ease;
+  text-decoration: none;
+}
+
+.lt-quiz-result__cta-primary:hover {
+  background: var(--color-teal-dark);
+  border-color: var(--color-teal-dark);
+  transform: translateY(-1px);
+}
+
+.lt-quiz-result__cta-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 880px) {
+  .lt-quiz-result__cta-primary { align-self: stretch; }
+}
+
+.lt-quiz-result__bioage-cta {
+  margin-top: var(--space-2);
+  align-self: center;
+  background: var(--color-surface-dark);
+  border-color: var(--color-surface-dark);
+  color: var(--color-white);
+}
+
+.lt-quiz-result__bioage-cta:hover {
+  background: color-mix(in srgb, var(--color-surface-dark) 84%, var(--color-dark));
+  border-color: color-mix(in srgb, var(--color-surface-dark) 84%, var(--color-dark));
+}
+
+.lt-quiz-result__sticky-cta { display: none; }
+
+@media (max-width: 880px) {
+  .lt-quiz-result__sticky-cta {
+    position: sticky;
+    bottom: var(--space-4);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    width: calc(100% - var(--space-5));
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 54px;
+    padding: 14px var(--space-6);
+    border-radius: var(--radius-full);
+    background: var(--color-surface-dark);
+    color: var(--color-white);
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-decoration: none;
+    box-shadow: 0 8px 28px rgba(38, 37, 30, 0.28);
+  }
+  .lt-quiz-result__sticky-cta-price { font-weight: 500; opacity: 0.85; }
+  .lt-quiz-result__sticky-cta-price::before { content: "·"; margin-right: var(--space-2); opacity: 0.6; }
+}
