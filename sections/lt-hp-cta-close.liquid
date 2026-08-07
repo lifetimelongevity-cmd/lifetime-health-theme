@@ -61,6 +61,80 @@
   if section.settings.arg_1 != blank or section.settings.arg_2 != blank or section.settings.arg_3 != blank
     assign has_args = true
   endif
+
+  comment
+    ── Kundenstimmen (2026-08-07) ──────────────────────────────────────────
+    Quelle ist das Loox-Metafeld des Produkts, NICHT gepflegte Textbausteine.
+    Grund: Auf der AGE&DNA-PDP stehen acht handgeschriebene Review-Bloecke mit
+    `verified: true`, Sternen und Monatsdaten, von denen keine einzige im
+    Loox-Bestand auftaucht (111 echte Bewertungen, Schnitt 4,7). Ob die acht je
+    von Kundinnen und Kunden stammen, ist offen — abgeschrieben werden sie hier
+    jedenfalls nicht.
+
+    Kuratiert wird ueber `reviews_pick`: eine Zeile je Bewertung, ein Textanfang,
+    der sie eindeutig trifft. Die Reihenfolge der Zeilen ist die Reihenfolge auf
+    der Seite. Findet sich eine Zeile nicht mehr im Bestand, faellt genau diese
+    Karte weg statt eine falsche zu zeigen.
+
+    Bewusst wie in crs-customer-reviews § Loox-Zweig:
+      keine Sterne je Karte  — das Metafeld traegt keine Einzelbewertung
+      kein Verifiziert-Badge — geht aus den Daten nicht hervor
+    Der echte Schnitt steht einmal ueber den Karten, der steht in den Daten.
+  endcomment
+  assign ctac_rv_product = all_products[section.settings.reviews_handle]
+  assign ctac_rv_raw = ctac_rv_product.metafields.loox.reviews | default: ''
+  assign ctac_rv_rating = ctac_rv_product.metafields.loox.avg_rating.value | default: 0 | plus: 0
+  assign ctac_rv_count = ctac_rv_product.metafields.loox.num_reviews.value | default: 0 | plus: 0
+
+  assign ctac_rv_names = ''
+  assign ctac_rv_texts = ''
+  assign ctac_rv_used = 0
+
+  if ctac_rv_raw != blank and section.settings.reviews_pick != blank
+    assign ctac_rv_chunks = ctac_rv_raw | split: '<div class="review">'
+    assign ctac_rv_picks = section.settings.reviews_pick | newline_to_br | split: '<br />'
+
+    for ctac_pick in ctac_rv_picks
+      assign ctac_p = ctac_pick | strip
+      if ctac_p == blank
+        continue
+      endif
+
+      for ctac_chunk in ctac_rv_chunks offset: 1
+        assign ctac_tp = ctac_chunk | split: '<div class="review_text">'
+        assign ctac_t = ''
+        if ctac_tp.size > 1
+          assign ctac_t = ctac_tp[1] | split: '</div>' | first | strip
+        endif
+        if ctac_t == blank
+          continue
+        endif
+        unless ctac_t contains ctac_p
+          continue
+        endunless
+
+        assign ctac_np = ctac_chunk | split: '<div class="name">'
+        assign ctac_n = ''
+        if ctac_np.size > 1
+          assign ctac_n = ctac_np[1] | split: '</div>' | first | strip
+        endif
+        if ctac_n == blank
+          assign ctac_n = 'Kundin oder Kunde'
+        endif
+
+        comment
+          Trennzeichen, die in keinem Namen und keinem Bewertungstext vorkommen.
+        endcomment
+        assign ctac_rv_names = ctac_rv_names | append: ctac_n | append: '||'
+        assign ctac_rv_texts = ctac_rv_texts | append: ctac_t | append: '||'
+        assign ctac_rv_used = ctac_rv_used | plus: 1
+        break
+      endfor
+    endfor
+  endif
+
+  assign ctac_rv_name_list = ctac_rv_names | split: '||'
+  assign ctac_rv_text_list = ctac_rv_texts | split: '||'
 -%}
 
 {% style %}
@@ -143,6 +217,83 @@
 
     {%- if section.settings.badge_text != blank -%}
       <p class="ctac__badge">{{ section.settings.badge_text | escape }}</p>
+    {%- endif -%}
+
+    {%- comment -%}
+      Kundenstimmen NACH dem Preis (Reihenfolge geprüft 07.08. abends): Davor
+      stand der Button auf dem Handy erst rund 1.100 px tief in der Section, hinter
+      Headline, drei Argumenten und drei Zitaten. Die Argumente machen den Fall,
+      der Preis folgt sofort — die Stimmen und der Badge darunter fangen die auf,
+      die am Button vorbeiscrollen. Beide bilden zusammen den „wer sagt das"-Block.
+    {%- endcomment -%}
+    {%- if ctac_rv_used > 0 -%}
+      <div class="ctac__voices">
+        {%- if ctac_rv_rating > 0 and ctac_rv_count > 0 -%}
+          {%- assign ctac_rv_score = ctac_rv_rating | round: 1 | replace: '.', ',' -%}
+          <p class="ctac__voices-aggregate">
+            <span class="ctac__voices-score">{{ ctac_rv_score }}</span>
+            <span>aus {{ ctac_rv_count }} Bewertungen zum AGE&nbsp;&amp;&nbsp;DNA-Test</span>
+          </p>
+        {%- endif -%}
+
+        <ul class="ctac__voices-list" role="list">
+          {%- for ctac_rv_name in ctac_rv_name_list -%}
+            <li class="ctac__voice">
+              <p class="ctac__voice-text">{{ ctac_rv_text_list[forloop.index0] | escape | newline_to_br }}</p>
+              <p class="ctac__voice-name">{{ ctac_rv_name | escape }}</p>
+            </li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+
+    {%- comment -%}
+      Autoritäts-Badge. Optisch das Gegenstück zum Founder-Block der PDP
+      (`.lt-founder-*` in lt-pdp-hero): 52-px-Avatar, Name, Rolle, Credential-Chips.
+
+      Bewusst eigene Klassen statt der PDP-Klassen: Deren Regeln liegen in
+      assets/lt-pdp.css, und dort steht `.lt-founder-avatar` ZWEIMAL (Zeile 727
+      und 1613, die zweite gewinnt). Ein Herausziehen in eine geteilte Datei
+      würde die Reihenfolge umdrehen und die PDP treffen — für einen Badge zu
+      viel Risiko auf der wichtigsten Seite des Shops. Der Doppeleintrag gehört
+      trotzdem aufgeräumt.
+
+      Chips sind pro Seite zu setzen und müssen belegt sein (Regel aus
+      lt-pdp-hero: kein Fallback für „Spiegel Bestseller" und Verwandtes).
+    {%- endcomment -%}
+    {%- if section.settings.author_name != blank -%}
+      <div class="ctac__author">
+        {%- if section.settings.author_image != blank -%}
+          <span class="ctac__author-avatar">
+            {{
+              section.settings.author_image
+              | image_url: width: 120
+              | image_tag:
+                loading: 'lazy',
+                width: 52,
+                height: 52,
+                alt: section.settings.author_name
+            }}
+          </span>
+        {%- endif -%}
+        <div class="ctac__author-meta">
+          <p class="ctac__author-name">{{ section.settings.author_name | escape }}</p>
+          {%- if section.settings.author_title != blank -%}
+            <p class="ctac__author-title">{{ section.settings.author_title | escape }}</p>
+          {%- endif -%}
+          {%- assign ctac_creds = section.settings.author_creds | split: ',' -%}
+          {%- if ctac_creds.size > 0 -%}
+            <div class="ctac__author-creds">
+              {%- for ctac_cred in ctac_creds -%}
+                {%- assign ctac_cred_t = ctac_cred | strip -%}
+                {%- if ctac_cred_t != blank -%}
+                  <span class="ctac__author-cred">{{ ctac_cred_t | escape }}</span>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+        </div>
+      </div>
     {%- endif -%}
 
     {%- if section.settings.cta_secondary_label != blank and section.settings.cta_secondary_url != blank -%}
@@ -407,6 +558,129 @@
   --ctac-check: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 12.6l5.2 5.2L20 7'/%3E%3C/svg%3E");
 }
 
+/* ── Kundenstimmen ─────────────────────────────────────────────────────
+   Getrennt durch Haarlinien statt durch Karten: Karten in einem dunklen Block
+   werden schwer, und drei davon wuerden den Preis darunter erschlagen. */
+.ctac__voices {
+  display: grid;
+  gap: var(--space-4);
+  text-align: start;
+}
+
+.ctac__voices-aggregate {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-body);
+  color: var(--ctac-text-muted);
+}
+
+.ctac__voices-score {
+  font-family: var(--font-heading);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-bold);
+  color: var(--ctac-text);
+}
+
+.ctac__voices-list {
+  display: grid;
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ctac__voice + .ctac__voice {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--ctac-border);
+}
+
+.ctac__voice-text {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--ctac-text);
+}
+
+.ctac__voice-name {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  color: var(--ctac-text-muted);
+}
+
+/* ── Autoritäts-Badge ──────────────────────────────────────────────────
+   Masse wie der Founder-Block der PDP (52-px-Avatar, 14/11 px Text), Farben aus
+   den Section-Tokens, damit er auf hellem wie dunklem Grund traegt. */
+.ctac__author {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--ctac-border);
+  border-radius: var(--radius-lg);
+  text-align: start;
+}
+
+.ctac__author-avatar {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  border: 2px solid var(--ctac-border);
+  display: inline-flex;
+}
+
+.ctac__author-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ctac__author-meta {
+  min-width: 0;
+}
+
+.ctac__author-name {
+  margin: 0 0 2px;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--ctac-text);
+}
+
+.ctac__author-title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-body);
+  color: var(--ctac-text-muted);
+}
+
+.ctac__author-creds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.ctac__author-cred {
+  padding: 3px 9px;
+  border: 1px solid var(--ctac-border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  color: var(--ctac-text-muted);
+  white-space: nowrap;
+}
+
 /* ── Optionale Bildspalte ─────────────────────────────────────────────── */
 .ctac__media {
   margin: 0;
@@ -626,6 +900,49 @@
       "type": "text",
       "id": "arg_3",
       "label": "Argument 3"
+    },
+    {
+      "type": "header",
+      "content": "Autoritäts-Badge (optional)"
+    },
+    {
+      "type": "image_picker",
+      "id": "author_image",
+      "label": "Porträt"
+    },
+    {
+      "type": "text",
+      "id": "author_name",
+      "label": "Name",
+      "info": "Leer lassen blendet den Badge aus."
+    },
+    {
+      "type": "text",
+      "id": "author_title",
+      "label": "Rolle"
+    },
+    {
+      "type": "text",
+      "id": "author_creds",
+      "label": "Credential-Chips",
+      "info": "Kommagetrennt. Nur belegte Angaben, kein Default (Regel aus lt-pdp-hero)."
+    },
+    {
+      "type": "header",
+      "content": "Kundenstimmen (optional, echte Loox-Bewertungen)"
+    },
+    {
+      "type": "text",
+      "id": "reviews_handle",
+      "label": "Produkt-Handle",
+      "info": "Aus dessen Loox-Bewertungen wird gelesen.",
+      "default": "lifetime-age-dna"
+    },
+    {
+      "type": "textarea",
+      "id": "reviews_pick",
+      "label": "Kuratierte Auswahl",
+      "info": "Eine Zeile je Bewertung: der Textanfang, der sie eindeutig trifft. Reihenfolge der Zeilen = Reihenfolge auf der Seite. Leer lassen blendet den Block aus. Es werden nie Sterne oder ein Verifiziert-Badge je Karte gezeigt, beides steht nicht in den Daten."
     },
     {
       "type": "header",
