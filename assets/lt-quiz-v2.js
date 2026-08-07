@@ -728,15 +728,14 @@
         });
       }
 
-      // 2b — Gate-Zustand. Deterministisch aus dem gespeicherten Zustand — sonst bleibt ein einmal
-      // geöffnetes Gate offen, wenn im selben Tab ein zweiter Durchlauf gerendert wird.
-      const unlocked = isUnlocked();
-      const gateEl = result.querySelector('[data-result-gate]');
+      // 2b — Gate-Zustand. Seit 07.08. klappt das Gate nicht mehr auf: Die drei Themen im
+      // Detail liefert die Report-Seite, hier bleibt der Anriss stehen. Ein Durchlauf im
+      // selben Tab startet deshalb wieder mit dem Formular — ohne die frischen Antworten
+      // gäbe es sonst einen Erfolgs-Block mit totem Link.
       const formEl = result.querySelector('[data-result-form]');
       const successEl = result.querySelector('[data-result-success]');
-      if (gateEl) gateEl.classList.toggle('is-unlocked', unlocked);
-      if (formEl) formEl.hidden = unlocked;
-      if (successEl) successEl.hidden = !unlocked;
+      if (formEl) formEl.hidden = false;
+      if (successEl) successEl.hidden = true;
 
       // 3 — Scope-Pills: Union der Top-3 dnaCategories markieren
       const NEED_CATEGORIES_LOCAL = {
@@ -860,8 +859,11 @@
         form.hidden = true;
         if (successEl) successEl.hidden = false;
 
-        const gateEl = this.root.querySelector('[data-result-gate]');
-        if (gateEl) gateEl.classList.add('is-unlocked');
+        // BJ 07.08.: Die Belohnung ist der Report, nicht ein Aufklappen an Ort und Stelle.
+        // Der Link steht sofort da, ohne Umweg über die Bestätigungsmail — was das Gate
+        // verspricht, wird auf der Stelle eingelöst. Die Themen bleiben hier angerissen.
+        const planLink = this.root.querySelector('[data-result-plan-link]');
+        if (planLink) planLink.setAttribute('href', planUrl);
         persistUnlock();
 
         pushDataLayer({
