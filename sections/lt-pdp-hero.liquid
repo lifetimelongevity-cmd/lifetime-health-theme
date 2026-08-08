@@ -371,12 +371,14 @@
               </div>
             {%- endif -%}
             {%- comment -%}
-              Slot 4 traegt die Novel-Food-Einordnung. Als gleichrangiger
-              Trust-Bullet ging sie zwischen Versand und Zahlart unter.
-              Deshalb abgesetzt als Fussnote, nicht als vierter Vorteil.
+              Slot 4 traegt auf NMN die Novel-Food-Einordnung: als Fussnote
+              abgesetzt, damit sie nicht als vierter Vorteil gelesen wird.
+              Auf PDPs, wo Zeile 4 ein gleichrangiger Vorteil ist (AGE&DNA:
+              DSGVO), laeuft sie per trust_4_as_note=false im Block mit —
+              die Extra-Haarlinie waere dort nur Tufte-Rauschen.
             {%- endcomment -%}
             {%- if lt_trust_4 != blank -%}
-              <div class="lt-pdp-hero__trust-item lt-pdp-hero__trust-item--note">
+              <div class="lt-pdp-hero__trust-item{% if section.settings.trust_4_as_note %} lt-pdp-hero__trust-item--note{% endif %}">
                 {%- if section.settings.trust_4_icon != blank -%}
                   {{
                     section.settings.trust_4_icon
@@ -1159,12 +1161,24 @@
                       data-variant-id="{{ variant.id }}"
                       data-once-price="{{ variant.price }}"
                       data-compare-price="{{ variant.compare_at_price | default: 0 }}"
+                      data-size-short="{{ variant.title | escape }}"
                       {% unless variant.available %}disabled{% endunless %}
                     >
                     <span class="lt-pkg__head">
                       <span class="lt-pkg__radio" aria-hidden="true"></span>
                       <span class="lt-pkg__name">{{ variant.title | escape }}</span>
-                      <span class="lt-pkg__price">{{ variant.price | money_without_trailing_zeros }}</span>
+                      {%- liquid
+                        # Aufpreis-Framing ab Karte 2: die Kauffrage ist "was kostet mich das
+                        # Extra?", nicht der zweite Gesamtpreis neben dem 349-Anker. Der
+                        # Gesamtpreis bleibt fuer Screenreader in der Karte und steht nach
+                        # Auswahl gross im Preisblock (PAngV: dort ist der Gesamtpreis).
+                        assign pkg_delta = variant.price | minus: product.variants.first.price
+                      -%}
+                      {%- if forloop.first == false and pkg_delta > 0 -%}
+                        <span class="lt-pkg__price">+ {{ pkg_delta | money_without_trailing_zeros }}<span class="visually-hidden"> (gesamt {{ variant.price | money_without_trailing_zeros }})</span></span>
+                      {%- else -%}
+                        <span class="lt-pkg__price">{{ variant.price | money_without_trailing_zeros }}</span>
+                      {%- endif -%}
                     </span>
                     {%- if pkg_note != blank -%}
                       <span class="lt-pkg__note">{{ pkg_note | escape }}</span>
@@ -1174,17 +1188,23 @@
               </div>
             {%- endif -%}
             <div class="lt-price-direct">
+              {%- comment -%} Streichpreis + Ersparnis immer im DOM (hidden-gated), damit applyPkg
+                  sie je Paket nachziehen kann. Vorher SSR-konditional: beim Paketwechsel blieben
+                  399-€-Streichpreis und "Du sparst 50 €" der Basis unter dem 429-€-Paket stehen. {%- endcomment -%}
               <div class="lt-price-direct__row">
                 <span class="lt-price-direct__amount" data-lt-direct-amount>{{ lt_pill_1_once | money_without_trailing_zeros }}</span>
-                {%- if lt_compare_price > lt_pill_1_once -%}
-                  <span class="lt-price-direct__compare">{{ lt_compare_price | money_without_trailing_zeros }}</span>
-                {%- endif -%}
+                <span class="lt-price-direct__compare" data-lt-direct-compare {% unless lt_compare_price > lt_pill_1_once %}hidden{% endunless %}>{% if lt_compare_price > lt_pill_1_once %}{{ lt_compare_price | money_without_trailing_zeros }}{% endif %}</span>
               </div>
-              {%- if lt_compare_price > lt_pill_1_once -%}
-                <span class="lt-price-direct__savings">Du sparst {{ lt_compare_price | minus: lt_pill_1_once | money_without_trailing_zeros }}</span>
-              {%- endif -%}
+              <span class="lt-price-direct__savings" data-lt-direct-savings {% unless lt_compare_price > lt_pill_1_once %}hidden{% endunless %}>{% if lt_compare_price > lt_pill_1_once %}Du sparst {{ lt_compare_price | minus: lt_pill_1_once | money_without_trailing_zeros }}{% endif %}</span>
               {%- if section.settings.bb_once_subline != blank -%}
                 <span class="lt-price-direct__note">{{ section.settings.bb_once_subline | escape }}</span>
+              {%- endif -%}
+              {%- comment -%} Zahlungs-Entlastung an den Preisanker statt ans Spaltenende:
+                  bei High-Ticket gehoert der Klarna-Hinweis in den Moment der Preisentscheidung. {%- endcomment -%}
+              {%- assign lt_payment_note = section.settings.payment_note | strip -%}
+              {%- if lt_payment_note != blank -%}
+                <span class="lt-price-direct__payment">{{ lt_payment_note | escape }}</span>
+                {%- assign lt_payment_note_rendered = true -%}
               {%- endif -%}
             </div>
             {%- endif -%}
@@ -1247,6 +1267,13 @@
               endif
               assign lt_atc_label = lt_primary_cta_label
               assign lt_atc_aria = lt_primary_cta_aria
+              # Paket-Pfad: CTA traegt die konsolidierte Auswahl (Label + Preis), wie es
+              # der Abo-Pfad per JS tut. SSR nur fuer den Erst-Render, applyPkg zieht nach.
+              if lt_show_packages and lt_atc_available
+                assign lt_atc_price_txt = lt_pill_1_once | money_without_trailing_zeros
+                assign lt_atc_label = lt_atc_label | append: ', ' | append: lt_atc_price_txt
+                assign lt_atc_aria = lt_atc_label | replace: '→', '' | strip
+              endif
               unless lt_atc_available
                 assign lt_atc_label = 'Ausverkauft'
                 assign lt_atc_aria = 'Ausverkauft'
@@ -1368,7 +1395,7 @@
           </div>
         {%- endif -%}
         {%- assign lt_payment_note = section.settings.payment_note | strip -%}
-        {%- if lt_payment_note != blank -%}
+        {%- if lt_payment_note != blank and lt_payment_note_rendered != true -%}
           <p class="lt-payment-note">{{ lt_payment_note | escape }}</p>
         {%- endif -%}
 
@@ -1611,6 +1638,10 @@
     const priceCompare = section.querySelector('[data-js-product-price-compare]');
     const priceSaving = section.querySelector('[data-js-product-price-saving]');
     const baseComparePrice = {{ lt_compare_price | default: 0 }};
+    // Vor dem Paket-Block deklariert: applyPkg ruft syncStickyAtcPrice schon beim
+    // Init auf — stuende die const nach dem buyBox-Early-Return, waere das eine
+    // TDZ-ReferenceError im Standalone-Pfad.
+    const productPageId = 'product-{{ section.id }}';
 
     // --- Paket-Auswahl (Standalone-Pfad, kein Abo/keine Größen) -----------
     // MUSS vor dem buyBox-Early-Return stehen: der Standalone-Pfad hat keine
@@ -1619,6 +1650,13 @@
     if (pkgGroup) {
       const pkgVariantInput = section.querySelector('[data-lt-variant-input]');
       const pkgAmountEl = section.querySelector('[data-lt-direct-amount]');
+      const pkgCompareEl = section.querySelector('[data-lt-direct-compare]');
+      const pkgSavingsEl = section.querySelector('[data-lt-direct-savings]');
+      const pkgCtaBase = {{ lt_primary_cta_label | json }};
+      const pkgBaseShort = (function () {
+        const first = pkgGroup.querySelector('.lt-pkg__input');
+        return first ? (first.dataset.sizeShort || '') : '';
+      })();
       function formatPkgPrice(cents) {
         const v = cents / 100;
         return (v % 1 === 0 ? String(v) : v.toFixed(2).replace('.', ',')) + ' €';
@@ -1627,7 +1665,39 @@
         if (!inp) return;
         if (pkgVariantInput && inp.dataset.variantId) pkgVariantInput.value = inp.dataset.variantId;
         const once = parseInt(inp.dataset.oncePrice, 10) || 0;
+        const cmp = parseInt(inp.dataset.comparePrice, 10) || 0;
+        const hasCmp = cmp > once;
         if (pkgAmountEl && once > 0) pkgAmountEl.textContent = formatPkgPrice(once);
+        // Streichpreis + Ersparnis gelten je Paket; ohne gueltigen Compare beides aus,
+        // sonst stuende der 399er-Streichpreis der Basis unter dem 429er-Paket.
+        if (pkgCompareEl) {
+          pkgCompareEl.hidden = !hasCmp;
+          pkgCompareEl.textContent = hasCmp ? formatPkgPrice(cmp) : '';
+        }
+        if (pkgSavingsEl) {
+          pkgSavingsEl.hidden = !hasCmp;
+          pkgSavingsEl.textContent = hasCmp ? 'Du sparst ' + formatPkgPrice(cmp - once) : '';
+        }
+        // CTA-Echo wie im Abo-Pfad: Button traegt Label + Preis der Auswahl
+        const pkgAtcText = section.querySelector('[data-js-product-add-to-cart-text]');
+        const pkgAtcBtn = section.querySelector('#lt-hero-atc');
+        const pkgSoldOut = pkgAtcBtn ? pkgAtcBtn.hasAttribute('data-lt-sold-out') : false;
+        if (once > 0 && !pkgSoldOut) {
+          const pkgLabel = pkgCtaBase + ', ' + formatPkgPrice(once);
+          if (pkgAtcText) pkgAtcText.textContent = pkgLabel;
+          if (pkgAtcBtn) pkgAtcBtn.setAttribute('aria-label', pkgLabel.replace(' →', ''));
+        }
+        // Sticky-Bar synchron: Preis + Paket-Chip (nur der Zusatz, "Test" allein
+        // traegt neben dem Produkttitel keine Information)
+        syncStickyAtcPrice(false, 1, once, 0, once, cmp);
+        const short = inp.dataset.sizeShort || '';
+        let chip = '';
+        if (short && short !== pkgBaseShort) {
+          chip = pkgBaseShort && short.indexOf(pkgBaseShort) === 0
+            ? short.slice(pkgBaseShort.length).trim()
+            : short;
+        }
+        updateStickySubline(chip);
         pkgGroup.querySelectorAll('[data-lt-pkg]').forEach(card => {
           const cardInput = card.querySelector('.lt-pkg__input');
           const on = cardInput === inp;
@@ -1653,7 +1723,6 @@
 
     const supplyDays = Math.max(1, parseFloat(buyBox.dataset.supplyDays) || 30);
     const badgeDiscountPct = Math.max(0, parseInt(buyBox.dataset.discountPct, 10) || 0);
-    const productPageId = 'product-{{ section.id }}';
 
     function formatPrice(cents) {
       return (cents / 100).toFixed(2).replace('.', ',') + ' €';
@@ -2139,10 +2208,14 @@
 }
 .lt-price-direct__compare {
   font-size: 14px;
-  opacity: 0.5;
+  opacity: 0.66; /* Sekundaer-AA-Alpha (WCAG-Basisbild 2026-07-29), 0.5 lag unter 4.5:1 */
   text-decoration: line-through;
   color: var(--lt-text, #26251e);
   line-height: 1.2;
+}
+.lt-price-direct__compare[hidden],
+.lt-price-direct__savings[hidden] {
+  display: none;
 }
 .lt-price-direct__amount {
   font-size: 36px;
@@ -2168,6 +2241,12 @@
   margin-top: 8px;
   line-height: 1.4;
 }
+.lt-price-direct__payment {
+  font-size: 13px;
+  opacity: 0.7;
+  color: var(--lt-text, #26251e);
+  line-height: 1.4;
+}
 
 /* Paket-Auswahl (Standalone-Pfad): Karten-Optik wie die Kaufoption-Karten (lt-bb-card),
    aber ohne Modus-Logik. Radio-Punkt + Name + Preis in einer Zeile, Notiz darunter. */
@@ -2184,12 +2263,16 @@
   padding: 12px var(--space-4);
   border: 1px solid var(--lt-border, rgba(38,37,30,0.1));
   border-radius: 6px;
-  background: var(--lt-bg, #f7f7f4);
+  background: transparent;
   cursor: pointer;
-  transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
-.lt-pkg__card:not(.is-selected) { opacity: 0.72; } /* nicht unter AA-Alpha (WCAG-Basisbild 2026-07-29) */
-.no-touchevents .lt-pkg__card:not(.is-selected):hover { opacity: 0.88; }
+/* Nicht gewaehlt heisst "andere Option", nicht "deaktiviert": kein Ganzflaechen-Dimmen.
+   Die kompoundierte Opacity (0.72 Karte x 0.72 Notiz ≈ 0.52) drueckte die Beschreibung
+   des Aufpreis-Pakets unter AA. Zuruecknahme nur ueber den Namen, Auswahl-Signal
+   liegt in Border + weisser Flaeche + Radio. */
+.lt-pkg__card:not(.is-selected) .lt-pkg__name { opacity: 0.85; }
+.no-touchevents .lt-pkg__card:not(.is-selected):hover { border-color: rgba(38, 37, 30, 0.3); }
 .lt-pkg__card.is-selected {
   background: #fff;
   border-color: var(--lt-text, #26251e);
@@ -2218,7 +2301,7 @@
   flex: 0 0 auto;
   width: 16px;
   height: 16px;
-  border: 1.5px solid var(--lt-border, rgba(38,37,30,0.25));
+  border: 1.5px solid rgba(38, 37, 30, 0.45); /* Affordance: als waehlbar erkennbar, nicht Deko-Haarlinie */
   border-radius: 50%;
   background: #fff;
 }
@@ -2241,10 +2324,10 @@
   color: var(--lt-text, #26251e);
 }
 .lt-pkg__note {
-  font-size: 12.5px;
+  font-size: 13px;
   line-height: 1.4;
   color: var(--lt-text, #26251e);
-  opacity: 0.72;
+  opacity: 0.72; /* AA nur, weil die Karte selbst nicht mehr gedimmt wird */
   padding-left: 26px;
 }
 
@@ -3469,6 +3552,13 @@
         { "value": "shield", "label": "Geprüft / Schutz" }
       ],
       "default": "lab"
+    },
+    {
+      "type": "checkbox",
+      "id": "trust_4_as_note",
+      "label": "Trust-Zeile 4 als Fußnote absetzen",
+      "info": "An: mit Haarlinie abgesetzt (Compliance-Hinweis, z. B. Novel Food). Aus: läuft als gleichrangiger Vorteil im Block mit.",
+      "default": true
     },
     {
       "type": "text",
