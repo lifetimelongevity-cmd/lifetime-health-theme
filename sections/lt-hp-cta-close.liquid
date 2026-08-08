@@ -143,6 +143,7 @@
     --ctac-text: {{ section.settings.color_text | default: '#f7f7f4' }};
     --ctac-text-muted: {{ section.settings.color_text | default: '#f7f7f4' | color_modify: 'alpha', 0.68 }};
     --ctac-border: {{ section.settings.color_text | default: '#f7f7f4' | color_modify: 'alpha', 0.12 }};
+    --ctac-surface: {{ section.settings.color_text | default: '#f7f7f4' | color_modify: 'alpha', 0.05 }};
     --ctac-accent: {{ section.settings.color_accent | default: '#65c0b6' }};
     --ctac-accent-text: {{ section.settings.color_accent_text | default: '#ffffff' }};
     background: var(--ctac-bg);
@@ -231,6 +232,7 @@
         {%- if ctac_rv_rating > 0 and ctac_rv_count > 0 -%}
           {%- assign ctac_rv_score = ctac_rv_rating | round: 1 | replace: '.', ',' -%}
           <p class="ctac__voices-aggregate">
+            <span class="ctac__voices-star" aria-hidden="true">&#9733;</span>
             <span class="ctac__voices-score">{{ ctac_rv_score }}</span>
             <span>aus {{ ctac_rv_count }} Bewertungen zum AGE&nbsp;&amp;&nbsp;DNA-Test</span>
           </p>
@@ -559,11 +561,19 @@
 }
 
 /* ── Kundenstimmen ─────────────────────────────────────────────────────
-   Getrennt durch Haarlinien statt durch Karten: Karten in einem dunklen Block
-   werden schwer, und drei davon wuerden den Preis darunter erschlagen. */
+   Seit 2026-08-08 EINE getönte Karte mit Vollrahmen um den ganzen Block
+   (BJ-Befund: Die Stimmen lagen konturlos auf der Fläche, man sah nicht, wo
+   sie anfangen). Eine Karte statt drei: drei einzelne Karten wuerden den
+   Preis darueber erschlagen, die eine begrenzt nur die Zone. Innen bleiben
+   Haarlinien. Tint ueber die Textfarbe (alpha 0.05), damit es auf dunklem
+   wie hellem Grund traegt — Regel: nie farbige Akzent-Border. */
 .ctac__voices {
   display: grid;
   gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--ctac-surface);
+  border: 1px solid var(--ctac-border);
+  border-radius: var(--radius-lg);
   text-align: start;
 }
 
@@ -576,6 +586,11 @@
   font-size: var(--text-micro);
   line-height: var(--leading-body);
   color: var(--ctac-text-muted);
+}
+
+.ctac__voices-star {
+  color: var(--ctac-accent);
+  font-size: var(--text-body-sm);
 }
 
 .ctac__voices-score {

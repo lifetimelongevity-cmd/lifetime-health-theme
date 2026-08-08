@@ -775,12 +775,11 @@
 
       // 4 — Alle PDP-CTAs (früh + Card + sticky) mit top1 anreichern.
       //
-      // Fix 2026-08-07: Die drei CTAs zeigen auf
-      // `/discount/QUIZ-ALTER-10?redirect=%2Fproducts%2Flifetime-age-dna%3Fqz%3D1`.
-      // `top1` landete bisher als Parameter an der /discount/-URL — und die verwirft
-      // Shopify beim Weiterleiten. Auf der PDP kam `qz=1` an (das steckt im kodierten
-      // redirect), `top1` nie. Jetzt wird in den redirect-Wert hineingeschrieben.
-      // Dieselbe Logik in assets/lt-longevity-plan.js § decorateCtas.
+      // Seit 2026-08-08 zeigen die drei CTAs direkt auf /products/lifetime-age-dna?qz=1
+      // (Preis-Konsistenz mit Plan-Seite und Mails; Code nur noch befristet in F2 M5/M6).
+      // Der redirect-Zweig unten bleibt: Er greift, falls ein CTA je wieder über eine
+      // /discount/-URL läuft, und ist dieselbe Logik wie in lt-longevity-plan.js
+      // § decorateCtas.
       result.querySelectorAll('[data-result-pdp-cta]').forEach((pdpCta) => {
         if (!top[0]) return;
         const url = new URL(pdpCta.getAttribute('href'), window.location.origin);
