@@ -1128,9 +1128,54 @@
               </div>
             </div>
             {%- else -%}
+            {%- liquid
+              # Paket-Auswahl (Standalone-Pfad, z. B. Test vs. Test + Ergebnisgespräch):
+              # bewusst getrennt vom Größen-Selector, der Gramm-Titel parst und am
+              # Abo-Pfad hängt. Preise kommen dynamisch aus der Variante, die Karte
+              # trägt nur eine beschreibende Notiz aus den Settings.
+              assign lt_show_packages = false
+              if section.settings.show_package_selector and product.variants.size > 1
+                assign lt_show_packages = true
+              endif
+            -%}
+            {%- if lt_show_packages -%}
+              <div class="lt-pkg" data-lt-pkg-group role="radiogroup" aria-label="Paket wählen">
+                {%- for variant in product.variants -%}
+                  {%- liquid
+                    assign pkg_note = ''
+                    if forloop.index == 1
+                      assign pkg_note = section.settings.pkg_note_1
+                    elsif forloop.index == 2
+                      assign pkg_note = section.settings.pkg_note_2
+                    endif
+                  -%}
+                  <label class="lt-pkg__card{% if variant.id == lt_variant_1.id %} is-selected{% endif %}" data-lt-pkg>
+                    <input
+                      type="radio"
+                      class="lt-pkg__input"
+                      name="lt-pkg-{{ section.id }}"
+                      value="{{ variant.id }}"
+                      {% if variant.id == lt_variant_1.id %}checked{% endif %}
+                      data-variant-id="{{ variant.id }}"
+                      data-once-price="{{ variant.price }}"
+                      data-compare-price="{{ variant.compare_at_price | default: 0 }}"
+                      {% unless variant.available %}disabled{% endunless %}
+                    >
+                    <span class="lt-pkg__head">
+                      <span class="lt-pkg__radio" aria-hidden="true"></span>
+                      <span class="lt-pkg__name">{{ variant.title | escape }}</span>
+                      <span class="lt-pkg__price">{{ variant.price | money_without_trailing_zeros }}</span>
+                    </span>
+                    {%- if pkg_note != blank -%}
+                      <span class="lt-pkg__note">{{ pkg_note | escape }}</span>
+                    {%- endif -%}
+                  </label>
+                {%- endfor -%}
+              </div>
+            {%- endif -%}
             <div class="lt-price-direct">
               <div class="lt-price-direct__row">
-                <span class="lt-price-direct__amount">{{ lt_pill_1_once | money_without_trailing_zeros }}</span>
+                <span class="lt-price-direct__amount" data-lt-direct-amount>{{ lt_pill_1_once | money_without_trailing_zeros }}</span>
                 {%- if lt_compare_price > lt_pill_1_once -%}
                   <span class="lt-price-direct__compare">{{ lt_compare_price | money_without_trailing_zeros }}</span>
                 {%- endif -%}
@@ -1294,6 +1339,18 @@
                 {%- endif -%}
               </div>
             {%- endif -%}
+          </div>
+        {%- endif -%}
+
+        {%- comment -%} Fallback-Pfad für Unentschlossene: leiser Kontakt-Link statt Kaufdruck.
+            Bewusst E-Mail statt Buchungstool (BJ-Entscheid 2026-08-08), Antwort kommt persönlich. {%- endcomment -%}
+        {%- if section.settings.precheck_text != blank -%}
+          <div class="lt-pdp-hero__precheck">
+            <span class="lt-pdp-hero__precheck-text">{{ section.settings.precheck_text | escape }}</span>
+            <a
+              class="lt-pdp-hero__precheck-link"
+              href="mailto:{{ section.settings.precheck_email | default: 'team@lifetime-health.de' }}?subject={{ section.settings.precheck_subject | default: 'Frage vor dem Kauf' | url_escape }}"
+            >{{ section.settings.precheck_link_label | default: 'Schreib uns' | escape }}</a>
           </div>
         {%- endif -%}
 
@@ -1554,6 +1611,43 @@
     const priceCompare = section.querySelector('[data-js-product-price-compare]');
     const priceSaving = section.querySelector('[data-js-product-price-saving]');
     const baseComparePrice = {{ lt_compare_price | default: 0 }};
+
+    // --- Paket-Auswahl (Standalone-Pfad, kein Abo/keine Größen) -----------
+    // MUSS vor dem buyBox-Early-Return stehen: der Standalone-Pfad hat keine
+    // [data-lt-buy-box], das Skript würde sonst nie hierher kommen.
+    const pkgGroup = section.querySelector('[data-lt-pkg-group]');
+    if (pkgGroup) {
+      const pkgVariantInput = section.querySelector('[data-lt-variant-input]');
+      const pkgAmountEl = section.querySelector('[data-lt-direct-amount]');
+      function formatPkgPrice(cents) {
+        const v = cents / 100;
+        return (v % 1 === 0 ? String(v) : v.toFixed(2).replace('.', ',')) + ' €';
+      }
+      function applyPkg(inp) {
+        if (!inp) return;
+        if (pkgVariantInput && inp.dataset.variantId) pkgVariantInput.value = inp.dataset.variantId;
+        const once = parseInt(inp.dataset.oncePrice, 10) || 0;
+        if (pkgAmountEl && once > 0) pkgAmountEl.textContent = formatPkgPrice(once);
+        pkgGroup.querySelectorAll('[data-lt-pkg]').forEach(card => {
+          const cardInput = card.querySelector('.lt-pkg__input');
+          const on = cardInput === inp;
+          card.classList.toggle('is-selected', on);
+          if (cardInput) cardInput.checked = on;
+        });
+      }
+      pkgGroup.querySelectorAll('.lt-pkg__input').forEach(inp => {
+        inp.addEventListener('change', function () {
+          if (this.checked) applyPkg(this);
+        });
+      });
+      const basePkg = pkgGroup.querySelector('.lt-pkg__input:checked:not(:disabled)')
+        || pkgGroup.querySelector('.lt-pkg__input:not(:disabled)');
+      if (basePkg) {
+        basePkg.checked = true;
+        applyPkg(basePkg);
+      }
+    }
+    // ----------------------------------------------------------------------
 
     if (!buyBox) return;
 
@@ -2073,6 +2167,99 @@
   color: var(--lt-text, #26251e);
   margin-top: 8px;
   line-height: 1.4;
+}
+
+/* Paket-Auswahl (Standalone-Pfad): Karten-Optik wie die Kaufoption-Karten (lt-bb-card),
+   aber ohne Modus-Logik. Radio-Punkt + Name + Preis in einer Zeile, Notiz darunter. */
+.lt-pkg {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: var(--space-5);
+}
+.lt-pkg__card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px var(--space-4);
+  border: 1px solid var(--lt-border, rgba(38,37,30,0.1));
+  border-radius: 6px;
+  background: var(--lt-bg, #f7f7f4);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, opacity 0.15s ease;
+}
+.lt-pkg__card:not(.is-selected) { opacity: 0.72; } /* nicht unter AA-Alpha (WCAG-Basisbild 2026-07-29) */
+.no-touchevents .lt-pkg__card:not(.is-selected):hover { opacity: 0.88; }
+.lt-pkg__card.is-selected {
+  background: #fff;
+  border-color: var(--lt-text, #26251e);
+  border-width: 1.5px;
+  opacity: 1;
+}
+.lt-pkg__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.lt-pkg__input:focus-visible ~ .lt-pkg__head {
+  outline: 2px solid var(--lt-text, #26251e);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+.lt-pkg__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.lt-pkg__radio {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--lt-border, rgba(38,37,30,0.25));
+  border-radius: 50%;
+  background: #fff;
+}
+.lt-pkg__card.is-selected .lt-pkg__radio {
+  border-color: var(--lt-text, #26251e);
+  box-shadow: inset 0 0 0 3.5px #fff;
+  background: var(--lt-text, #26251e);
+}
+.lt-pkg__name {
+  flex: 1 1 auto;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--lt-text, #26251e);
+}
+.lt-pkg__price {
+  flex: 0 0 auto;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--lt-text, #26251e);
+}
+.lt-pkg__note {
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--lt-text, #26251e);
+  opacity: 0.72;
+  padding-left: 26px;
+}
+
+/* Kontakt-Fallback unter der Buy-Box: bewusst leise, Text + verlinkter Begriff */
+.lt-pdp-hero__precheck {
+  margin-top: var(--space-4);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--lt-text, #26251e);
+}
+.lt-pdp-hero__precheck-text { opacity: 0.72; }
+.lt-pdp-hero__precheck-link {
+  color: var(--lt-text, #26251e);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* Inline-Dialog-Trigger (Trust-4) — wirkt wie verlinkter Text, nicht wie Button */
@@ -3123,6 +3310,53 @@
       "label": "Größen-Auswahl anzeigen (Varianten)",
       "info": "Zeigt über den Kaufoptionen eine Kachel pro Produktvariante (z. B. 30/60/90 g). Einmal-/Abo-Preis und Warenkorb-Variante wechseln pro Größe. Nur aktivieren, wenn das Produkt mehrere Varianten hat.",
       "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_package_selector",
+      "label": "Paket-Auswahl anzeigen (Varianten)",
+      "info": "Für Einmal-Kauf-Produkte ohne Abo (Standalone-Preis): eine Karte pro Variante, z. B. Test vs. Test + Ergebnisgespräch. Preis kommt dynamisch aus der Variante. Nicht zusammen mit Abo-/Größen-Auswahl verwenden.",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "pkg_note_1",
+      "label": "Paket 1 — Notiz",
+      "info": "Eine Zeile unter dem Namen der ersten Variante. Leer lassen = keine Notiz."
+    },
+    {
+      "type": "text",
+      "id": "pkg_note_2",
+      "label": "Paket 2 — Notiz",
+      "info": "Eine Zeile unter dem Namen der zweiten Variante. Leer lassen = keine Notiz."
+    },
+    {
+      "type": "header",
+      "content": "Kontakt-Fallback (Fragen vor dem Kauf)"
+    },
+    {
+      "type": "text",
+      "id": "precheck_text",
+      "label": "Fallback — Text",
+      "info": "Leer lassen = Zeile wird nicht gerendert. Beispiel: Unsicher, ob der Test zu dir passt?"
+    },
+    {
+      "type": "text",
+      "id": "precheck_link_label",
+      "label": "Fallback — Link-Text",
+      "info": "Standard: Schreib uns"
+    },
+    {
+      "type": "text",
+      "id": "precheck_email",
+      "label": "Fallback — E-Mail-Adresse",
+      "info": "Standard: team@lifetime-health.de"
+    },
+    {
+      "type": "text",
+      "id": "precheck_subject",
+      "label": "Fallback — Mail-Betreff",
+      "info": "Vorbelegter Betreff der Mail. Standard: Frage vor dem Kauf"
     },
     {
       "type": "header",
