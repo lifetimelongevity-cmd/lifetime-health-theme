@@ -539,7 +539,7 @@
   position: relative;
   padding-inline-start: calc(var(--space-5) + var(--space-1));
   font-family: var(--font-body);
-  font-size: var(--text-body-sm);
+  font-size: var(--text-body);
   line-height: var(--leading-relaxed);
   color: var(--ctac-text);
 }
@@ -734,18 +734,33 @@
 
 /* Zweispaltig erst ab 900 px: Darunter wuerde die Buybox-Zeile (Preis + Button
    nebeneinander) in der schmalen Spalte umbrechen und der Preis seine Wucht
-   verlieren. Bis dahin steht das Bild als Abbinder unter dem Trust-Row. */
+   verlieren. Bis dahin steht das Bild als Abbinder unter dem Trust-Row.
+
+   stretch statt center: Die Inhaltsspalte ist deutlich hoeher als ein
+   3:4-Bild mit 34-rem-Deckel. Zentriert blieb dadurch ueber und unter dem
+   Bild eine grosse leere Flaeche neben Headline und Trust-Row. Das Bild
+   fuellt jetzt die volle Spaltenhoehe, Cover-Crop uebernimmt den Ausschnitt. */
 @media screen and (min-width: 900px) {
   .ctac__container--media {
     max-width: 68rem;
     grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
     gap: var(--space-8);
-    align-items: center;
+    align-items: stretch;
+  }
+
+  /* Absolut im Figure-Rahmen: Ein img mit height:100% wuerde ueber seine
+     intrinsische Hoehe die Grid-Zeile mit hochziehen (zirkulaere Track-
+     Berechnung). So bestimmt allein die Inhaltsspalte die Hoehe. */
+  .ctac__container--media .ctac__media {
+    position: relative;
+    min-height: 0;
   }
 
   .ctac__container--media .ctac__media img {
-    aspect-ratio: 3 / 4;
-    max-height: 34rem;
+    position: absolute;
+    inset: 0;
+    height: 100%;
+    aspect-ratio: auto;
   }
 }
 {% endstylesheet %}
