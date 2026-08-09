@@ -163,9 +163,15 @@
     Der dortige Claim-Filter haelt Wirkaussagen aus dem Markup heraus, das war
     der urspruengliche Grund, hier gar keine review-Knoten zu setzen.
   {%- endcomment -%}
+  {%- comment -%}
+    Zugriff OHNE .value: Die Loox-Metafelder sind unstrukturierte App-Metafelder,
+    ".value" liefert dort nil und der Knoten fiel still weg (aggregateRating: null
+    auf der AGE&DNA-PDP trotz sichtbarem 4,7er-Rating). Der Direktzugriff ist
+    dieselbe Leseweise wie in sections/lt-pdp-hero.liquid, die nachweislich rendert.
+  {%- endcomment -%}
   {%- liquid
-    assign lt_rating = product.metafields.loox.avg_rating.value | default: 0 | plus: 0
-    assign lt_count = product.metafields.loox.num_reviews.value | default: 0 | plus: 0
+    assign lt_rating = product.metafields.loox.avg_rating | default: 0 | plus: 0
+    assign lt_count = product.metafields.loox.num_reviews | default: 0 | plus: 0
   -%}
   {%- if lt_rating > 0 and lt_count > 0 -%}
     <script type="application/ld+json">

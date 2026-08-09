@@ -211,19 +211,37 @@
   transform: rotate(180deg);
 }
 
-/* Panel */
+/* Panel: grid-template-rows statt max-height, damit die Transition keine
+   Layout-Arbeit pro Frame ausloest und lange Antworten nicht am
+   2000px-Deckel clippen. Das Kind (.faq-answer) traegt NUR overflow: hidden:
+   das deaktiviert die automatische Mindestgroesse (0fr kollabiert), laesst
+   aber die Content-Contribution intakt. KEIN min-height: 0 setzen, sonst
+   loest 1fr im auto-hohen Container auf 0px auf und das Panel oeffnet nie.
+   Eigenes Padding darf das Kind auch nicht tragen, sonst bleibt im
+   zugeklappten Zustand ein Padding-Rest stehen (border-box-Floor). */
 .faq-panel {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.28s ease;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.28s ease;
 }
 
 .faq-panel.is-open {
-  max-height: min(120vh, 2000px);
+  grid-template-rows: 1fr;
 }
 
 .faq-answer {
-  padding-bottom: 16px;
+  overflow: hidden;
+}
+
+.faq-answer > :last-child {
+  margin-bottom: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .faq-panel,
+  .faq-toggle-icon {
+    transition: none;
+  }
 }
 
 .faq-answer p {

@@ -96,6 +96,10 @@
     /* Cursor design tokens — override lt-* vars at section scope */
     --lt-bg:           {{ section.settings.color_bg }};
     --lt-surface:      {{ section.settings.color_card_bg }};
+    /* Bewusste Weiss-Flaechen (Auswahl-Signal) und Text auf dunklem Grund,
+       zentral statt verstreuter #fff-Literale */
+    --lt-surface-raised: #ffffff;
+    --lt-on-dark:        #ffffff;
     --lt-border:       {{ section.settings.color_text | color_modify: 'alpha', 0.1 }};
     --lt-text:         {{ section.settings.color_text }};
     --lt-muted:        {{ section.settings.color_text | color_modify: 'alpha', 0.72 }};
@@ -138,6 +142,23 @@
       data-js-product-component
     >
       <div class="lt-pdp-hero__gallery-wrap element--is-sticky">
+        {%- comment -%}
+          Preload fuer das LCP-Bild (erstes Galeriebild). imagesrcset/imagesizes spiegeln
+          exakt die no_crop-Leiter aus snippets/lazy-image.liquid inkl. Breiten-Gates,
+          damit Preload und <img> denselben Kandidaten waehlen (kein Doppel-Download).
+          Ohne das haengt fetchpriority=high nur am Shopify-Chat-Drittscript.
+        {%- endcomment -%}
+        {%- assign lt_lcp = product.media.first.preview_image -%}
+        {%- if lt_lcp != blank -%}
+          <link
+            rel="preload"
+            as="image"
+            fetchpriority="high"
+            href="{{ lt_lcp | image_url: width: 480 }}"
+            imagesrcset="{% if lt_lcp.width >= 240 %}{{ lt_lcp | image_url: width: 240 }} 240w{% endif %}{% if lt_lcp.width >= 360 %},{{ lt_lcp | image_url: width: 360 }} 360w{% endif %}{% if lt_lcp.width >= 420 %},{{ lt_lcp | image_url: width: 420 }} 420w{% endif %}{% if lt_lcp.width >= 480 %},{{ lt_lcp | image_url: width: 480 }} 480w{% endif %}{% if lt_lcp.width >= 640 %},{{ lt_lcp | image_url: width: 640 }} 640w{% endif %}{% if lt_lcp.width >= 840 %},{{ lt_lcp | image_url: width: 840 }} 840w{% endif %}{% if lt_lcp.width >= 1080 %},{{ lt_lcp | image_url: width: 1080 }} 1080w{% endif %}{% if lt_lcp.width >= 1280 %},{{ lt_lcp | image_url: width: 1280 }} 1280w{% endif %}{% if lt_lcp.width >= 1540 %},{{ lt_lcp | image_url: width: 1540 }} 1540w{% endif %}{% if lt_lcp.width >= 1860 %},{{ lt_lcp | image_url: width: 1860 }} 1860w{% endif %}{% if lt_lcp.width >= 2100 %},{{ lt_lcp | image_url: width: 2100 }} 2100w{% endif %}{% if lt_lcp.width >= 2460 %},{{ lt_lcp | image_url: width: 2460 }} 2460w{% endif %}{% if lt_lcp.width >= 2820 %},{{ lt_lcp | image_url: width: 2820 }} 2820w{% endif %}{% if lt_lcp.width >= 3360 %},{{ lt_lcp | image_url: width: 3360 }} 3360w{% endif %}{% if lt_lcp.width >= 3820 %},{{ lt_lcp | image_url: width: 3820 }} 3820w{% endif %}"
+            imagesizes="(max-width: 767px) 100vw, (max-width: 1360px) 50vw, 680px"
+          >
+        {%- endif -%}
         <div class="lt-pdp-hero__gallery-frame">
           {%- if section.settings.show_badge -%}
             <span class="lt-pdp-hero__badge lt-badge">{{ section.settings.badge_text | default: 'Bestseller' | escape }}</span>
@@ -203,10 +224,15 @@
             {%- if product.media.size > 1 -%}</css-slider>{%- endif -%}
 
             {%- if product.media.size > 1 -%}
+              {%- comment -%}
+                aria-hidden + tabindex="-1": Die Thumbnails sind reine Maus-Navigation.
+                Tastatur/Screenreader nutzen die benannten Slider-Dots ("Zeige Folie n");
+                fokussierbare Elemente in aria-hidden waeren ein WCAG-4.1.2-Verstoss.
+              {%- endcomment -%}
               <div class="product-gallery__thumbnails" aria-hidden="true">
                 <div class="product-gallery__thumbnails-holder">
                   {%- for media in product.media -%}
-                    <button class="thumbnail element--border-radius" data-index="{{ forloop.index0 }}" tabindex="0">
+                    <button class="thumbnail element--border-radius" data-index="{{ forloop.index0 }}" tabindex="-1">
                       {%- render 'lazy-image-small',
                         image: media.preview_image,
                         aspect_ratio: settings.cart_image_ratio,
@@ -2274,7 +2300,7 @@
 .lt-pkg__card:not(.is-selected) .lt-pkg__name { opacity: 0.85; }
 .no-touchevents .lt-pkg__card:not(.is-selected):hover { border-color: rgba(38, 37, 30, 0.3); }
 .lt-pkg__card.is-selected {
-  background: #fff;
+  background: var(--lt-surface-raised);
   border-color: var(--lt-text, #26251e);
   border-width: 1.5px;
   opacity: 1;
@@ -2303,7 +2329,7 @@
   height: 16px;
   border: 1.5px solid rgba(38, 37, 30, 0.45); /* Affordance: als waehlbar erkennbar, nicht Deko-Haarlinie */
   border-radius: 50%;
-  background: #fff;
+  background: var(--lt-surface-raised);
 }
 .lt-pkg__card.is-selected .lt-pkg__radio {
   border-color: var(--lt-text, #26251e);
@@ -2418,7 +2444,7 @@
 }
 
 .lt-bb-card.is-selected {
-  background: #fff !important;
+  background: var(--lt-surface-raised) !important;
   border-color: var(--lt-text, #26251e) !important;
   border-width: 1.5px !important;
   box-shadow: none !important;
@@ -2494,7 +2520,7 @@
 #lt-sticky-atc .lt-sticky-btn {
   border-radius: 999px !important;
   background: var(--lt-cta-bg, #26251e) !important;
-  color: #fff !important;
+  color: var(--lt-on-dark) !important;
   border-color: var(--lt-cta-bg, #26251e) !important;
 }
 
@@ -2799,10 +2825,10 @@
   padding: 4px 8px;
   border-radius: 4px;
   background: var(--lt-success-text, #3b6d11);
-  color: white;
+  color: var(--lt-on-dark);
 }
 .lt-size__pill.is-selected {
-  background: #fff;
+  background: var(--lt-surface-raised);
   border-color: var(--lt-text, #26251e);
   border-width: 1.5px;
   opacity: 1;
