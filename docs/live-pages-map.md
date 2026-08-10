@@ -306,8 +306,10 @@ sie würden die Template-Settings still überschreiben (Memory `blog-byline`).
 Faktenlage und offene Punkte: `docs/limmroth-faktenblatt.md`,
 Auftrag und Abweichungen: `docs/briefing-expertenseite-aerzte.md` §10.
 
-**Nachtrag 2026-08-10:** Mit `/blogs/longevity-blog/was-ist-spermidin` (Template
-`templates/article.was-ist-spermidin.json`, Start von Cluster 2) sind es **22 Artikel**.
+**Nachtrag 2026-08-10:** Mit `/blogs/longevity-blog/was-ist-spermidin` und
+`/blogs/longevity-blog/was-ist-resveratrol` (Templates `article.was-ist-spermidin.json` und
+`article.was-ist-resveratrol.json`, Cluster 2) sind es **23 Artikel**. Der Resveratrol-Artikel
+führt bewusst `cta_enable: false`, siehe `docs/cluster2-blog/02-was-ist-resveratrol.md`.
 Die Zahlen „21 Artikel" und „42 Byline-Links" in diesem Abschnitt sind der Stand vom 27.07.
 Spec des Artikels: `docs/cluster2-blog/01-was-ist-spermidin.md`.
 

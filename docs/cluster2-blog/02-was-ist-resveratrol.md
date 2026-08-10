@@ -6,8 +6,18 @@ canonical_for: blog-cluster2-resveratrol-artikel
 
 # Cluster 2, Artikel 2 — Resveratrol: was die Forschung zeigt
 
-**Stand: Draft komplett, wartet auf Rechtsfreigabe BJ. Nichts davon ist live.**
-Alle Bildassets liegen bereits am CDN und sind im Body verdrahtet.
+**Stand: LIVE seit 2026-08-10.** Freigabe BJ am 10.08. fuer die Fassung wie gebaut, also
+DR1 in Variante A (Zulassung und Pflichthinweis ja, 150-mg-Hoechstmenge nein) und DR2
+unveraendert drin. Article-ID `1024726827383`, URL `/blogs/longevity-blog/was-ist-resveratrol`.
+**DR3 bleibt offen: Der CTA steht weiter auf `false`**, bis die drei PDP-Befunde entschieden
+sind.
+
+**Panne beim Live-Gang, behoben:** Beim ersten `articleCreate` wurde der Body beim Einsetzen
+abgeschnitten und enthielt einen Textrest. Der Artikel war dadurch wenige Minuten in
+fehlerhafter Fassung erreichbar, wurde sofort auf `isPublished: false` gesetzt, per
+`articleUpdate` mit dem vollstaendigen Body ueberschrieben, gegen die lokale Datei geprueft
+und dann neu veroeffentlicht. **Lehre:** Body niemals aus dem Gedaechtnis in den Tool-Aufruf
+schreiben, sondern aus der Datei, und nach dem Anlegen den Live-Body gegen die Quelle diffen.
 
 Anlass: 446 Impressionen auf Position rund 22, der schnellste Hebel im Cluster-2-Plan.
 
@@ -24,7 +34,7 @@ Anlass: 446 Impressionen auf Position rund 22, der schnellste Hebel im Cluster-2
 | Titel (H1) | Resveratrol: was die Forschung zeigt |
 | Handle / Slug | `was-ist-resveratrol` |
 | URL | `/blogs/longevity-blog/was-ist-resveratrol` |
-| Template | `templates/article.was-ist-resveratrol.json` (gebaut, CTA aus) |
+| Template | `templates/article.was-ist-resveratrol.json` (live gepusht 10.08., CTA aus) |
 | Body | `docs/cluster2-blog/02-was-ist-resveratrol-body.html` |
 | Ziel-Queries | „was ist resveratrol", „resveratrol wirkung", „resveratrol studien", „resveratrol sinnvoll" |
 | Besitz-Thema (exklusiv) | Definition, Vorkommen, Evidenzlage und Bioverfügbarkeit von Resveratrol |
@@ -160,13 +170,15 @@ Basis-URL `https://cdn.shopify.com/s/files/1/0621/2173/8340/`, alle vier mit HTT
 
 ---
 
-## Live-Gang nach Freigabe
+## Live-Gang, am 2026-08-10 abgearbeitet
 
-1. DR1 bis DR3 entschieden, Body angepasst.
-2. Template pushen: `shopify theme push --store lifetime-health-de.myshopify.com --theme 192529400183 --allow-live --only templates/article.was-ist-resveratrol.json`
-3. `articleCreate` in Blog `gid://shopify/Blog/84651049060`, Handle `was-ist-resveratrol`,
+1. ✅ DR1 (Variante A) und DR2 (bleibt) freigegeben, DR3 offen, CTA weiter aus.
+2. ✅ Template gepusht: `shopify theme push --store lifetime-health-de.myshopify.com --theme 192529400183 --allow-live --only templates/article.was-ist-resveratrol.json`
+3. ✅ `articleCreate` in Blog `gid://shopify/Blog/84651049060`, Handle `was-ist-resveratrol`,
    Autor Benedikt Junker, Cover, Tag `Longevity-Grundlagen`, Summary, `custom.takeaways`,
    `custom.reviewed_date`. `custom.author_name` und `custom.reviewer_name` nicht setzen.
-4. Live prüfen wie bei Spermidin (Byline, TOC, Grafiken, Tabellen, FAQ, Schema).
-5. Entwaisung: FAQ-Eintrag auf der Resveratrol-PDP nach dem Muster von Spermidin.
-6. `docs/live-pages-map.md` und diese Datei nachziehen.
+4. ✅ Live geprüft: HTTP 200, alle acht H2, drei Grafiken, Byline, TOC, FAQ, BlogPosting- und
+   FAQPage-Schema, Quellenliste vollständig.
+5. Offen: Entwaisung per FAQ-Eintrag auf der Resveratrol-PDP, gehört in dieselbe Runde wie
+   die PDP-Bereinigung.
+6. ✅ `docs/live-pages-map.md` nachgezogen.
