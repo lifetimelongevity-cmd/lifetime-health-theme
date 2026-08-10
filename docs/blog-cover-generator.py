@@ -206,6 +206,11 @@ img, d = base("Grundlagen", ["Was Spermidin ist,", "was Studien zeigen"])
 steps(d, 520, ["Zellmodell", "Tiermodell", "Beobachtung", "Humanstudien"], 3)
 made.append(("was-ist-spermidin", img))
 
+# 11 - Resveratrol (Cluster 2, Artikel 2)
+img, d = base("Grundlagen", ["Was Resveratrol ist,", "was Studien zeigen"])
+steps(d, 520, ["Zellmodell", "Tiermodell", "Humanstudien", "Nutzen belegt"], 3)
+made.append(("was-ist-resveratrol", img))
+
 for name, im in made:
     p = os.path.join(OUT, f"cover-{name}.png")
     im.save(p, "PNG", optimize=True)
