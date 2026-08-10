@@ -37,6 +37,7 @@
     --scp-chip:  {{ section.settings.color_chip_bg | default: '#f7f7f4' }};
     padding-top:    {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
+    scroll-margin-top: 96px;
   }
 {% endstyle %}
 
@@ -60,14 +61,49 @@
       </div>
 
       <div class="scp__detail">
-        {%- if section.blocks.size > 0 -%}
-          <ul class="scp__examples" role="list">
-            {%- for block in section.blocks -%}
-              {%- if block.settings.label != blank -%}
-                <li class="scp__example" {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</li>
-              {%- endif -%}
-            {%- endfor -%}
-          </ul>
+        {%- liquid
+          assign scp_has_epi = false
+          assign scp_has_dna = false
+          for block in section.blocks
+            if block.settings.label == blank
+              continue
+            endif
+            if block.settings.gruppe == 'epi'
+              assign scp_has_epi = true
+            else
+              assign scp_has_dna = true
+            endif
+          endfor
+        -%}
+
+        {%- if scp_has_dna -%}
+          <div class="scp__group">
+            {%- if section.settings.dna_label != blank -%}
+              <p class="scp__group-label">{{ section.settings.dna_label | escape }}</p>
+            {%- endif -%}
+            <ul class="scp__examples" role="list">
+              {%- for block in section.blocks -%}
+                {%- if block.settings.label != blank and block.settings.gruppe != 'epi' -%}
+                  <li class="scp__example" {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+
+        {%- if scp_has_epi -%}
+          <div class="scp__group">
+            {%- if section.settings.epi_label != blank -%}
+              <p class="scp__group-label">{{ section.settings.epi_label | escape }}</p>
+            {%- endif -%}
+            <ul class="scp__examples" role="list">
+              {%- for block in section.blocks -%}
+                {%- if block.settings.label != blank and block.settings.gruppe == 'epi' -%}
+                  <li class="scp__example scp__example--epi" {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</li>
+                {%- endif -%}
+              {%- endfor -%}
+            </ul>
+          </div>
         {%- endif -%}
 
         {%- if section.settings.note != blank -%}
@@ -157,13 +193,23 @@
   font-family: var(--font-body);
   font-size: var(--text-body);
   line-height: var(--leading-body);
-  opacity: 0.6;
+  opacity: 0.72;
   max-width: 24ch;
 }
 
 /* — Beispiele — */
 .scp__detail {
   min-width: 0;
+  display: grid;
+  gap: var(--space-5);
+}
+
+.scp__group-label {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  opacity: 0.72;
 }
 
 .scp__examples {
@@ -182,6 +228,13 @@
   font-family: var(--font-body);
   font-size: var(--text-body-sm);
   line-height: var(--leading-body);
+}
+
+/* Epigenetik-Chips: Benefit-Tint statt Neutralfläche, damit die zwei
+   Messebenen als zwei Familien lesbar sind und die Epigenetik farblich
+   an der Teal-Kurve des Kapitels hängt. */
+.scp__example--epi {
+  background: var(--color-surface-benefit);
 }
 
 .scp__note {
@@ -271,6 +324,21 @@
       "label": "Bezeichnung unter der Zahl",
       "default": "DNA-Kategorien"
     },
+    { "type": "header", "content": "Gruppen-Beschriftung" },
+    {
+      "type": "text",
+      "id": "dna_label",
+      "label": "Beschriftung DNA-Reihe",
+      "default": "Aus den 23 Kategorien, zum Beispiel:",
+      "info": "Steht über den Chips der Gruppe „DNA\"."
+    },
+    {
+      "type": "text",
+      "id": "epi_label",
+      "label": "Beschriftung Epigenetik-Reihe",
+      "default": "Dazu sechs epigenetische Bereiche:",
+      "info": "Steht über den Chips der Gruppe „Epigenetik\"."
+    },
     { "type": "header", "content": "Text und Button" },
     {
       "type": "textarea",
@@ -306,6 +374,17 @@
           "id": "label",
           "label": "Name des Reports",
           "default": "Körperalter"
+        },
+        {
+          "type": "select",
+          "id": "gruppe",
+          "label": "Gruppe",
+          "options": [
+            { "value": "dna", "label": "DNA" },
+            { "value": "epi", "label": "Epigenetik" }
+          ],
+          "default": "dna",
+          "info": "Steuert, unter welcher Reihen-Beschriftung der Chip erscheint."
         }
       ]
     }

@@ -1,5 +1,5 @@
 {%- comment -%}
-  This snippet structures the micro-data using JSON-LD specification. For product and article pages, the data is 100% outputted by Shopify. The theme only offers schema for the organization and breadcrumb.
+  This snippet structures the micro-data using JSON-LD specification. For product pages, the data is outputted by Shopify (structured_data filter, see below for the NMN category exception). Article pages get a hand-built BlogPosting node instead, because the filter maps the dates wrong (see comment at the article branch). The theme additionally offers schema for the organization and breadcrumb.
 {%- endcomment -%}
 
 {%- liquid
@@ -189,7 +189,49 @@
     </script>
   {%- endif -%}
 {%- elsif request.page_type == 'article' -%}
-  <script type="application/ld+json">{{ article | structured_data }}</script>
+  {%- comment -%}
+    Eigener BlogPosting-Knoten statt `article | structured_data`. Der Shopify-Filter
+    mappt datePublished auf das Anlagedatum und dateModified auf das Publikationsdatum;
+    bei bewusst rueckdatierten Artikeln (Bestands-Handles aus 2023) entsteht daraus
+    "geaendert vor Veroeffentlichung", und inhaltliche Updates bleiben maschinenlesbar
+    unsichtbar (real passiert auf dem NMN-Grundlagenartikel: datePublished 2023-12,
+    dateModified 2023-10, Update vom Juli 2026 fehlte). Hier stattdessen:
+    datePublished = article.published_at, dateModified = custom.reviewed_date, also
+    dasselbe Metafeld, das sections/lt-article.liquid sichtbar als "Stand" rendert.
+    Die @id ist identisch zum alten Filter-Output (relativer Pfad + #article), damit
+    der reviewedBy-Begleitknoten unten weiter auf denselben Knoten mergt.
+  {%- endcomment -%}
+  {%- liquid
+    assign lt_article_modified = article.metafields.custom.reviewed_date.value | default: article.published_at
+    assign lt_article_image = null
+    if article.image
+      assign lt_article_image = article.image | image_url: width: 1200
+    endif
+  -%}
+  <script type="application/ld+json">
+    {
+      "@context": "http://schema.org/",
+      "@type": "BlogPosting",
+      "@id": {{ article.url | append: '#article' | json }},
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": {{ shop.url | append: article.url | json }}
+      },
+      "headline": {{ article.title | json }},
+      "description": {{ article.excerpt_or_content | strip_html | strip_newlines | truncate: 300 | json }},
+      {%- if lt_article_image %}
+      "image": {{ lt_article_image | json }},
+      {%- endif %}
+      "inLanguage": "de",
+      "datePublished": {{ article.published_at | date: '%Y-%m-%d' | json }},
+      "dateModified": {{ lt_article_modified | date: '%Y-%m-%d' | json }},
+      "author": {
+        "@type": "Person",
+        "name": {{ article.author | default: shop.name | json }}
+      },
+      "publisher": { "@id": {{ shop.url | append: '/#organization' | json }} }
+    }
+  </script>
 
   {%- comment -%}
     Begleitknoten fuer die fachliche Pruefung. Gleiches Muster wie aggregateRating oben:

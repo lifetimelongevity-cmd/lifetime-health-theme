@@ -53,10 +53,11 @@
     --lts-text:     {{ section.settings.color_text | default: '#26251e' }};
     --lts-media-bg: {{ section.settings.media_bg | default: '#f2f1ed' }};
     --crs-text:     {{ section.settings.color_text | default: '#26251e' }};
-    --crs-text-sec: {{ section.settings.color_text | default: '#26251e' | color_modify: 'alpha', 0.6 }};
-    --crs-text-ter: {{ section.settings.color_text | default: '#26251e' | color_modify: 'alpha', 0.4 }};
+    --crs-text-sec: {{ section.settings.color_text | default: '#26251e' | color_modify: 'alpha', 0.72 }};
+    --crs-text-ter: {{ section.settings.color_text | default: '#26251e' | color_modify: 'alpha', 0.66 }};
     padding-top:    {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
+    scroll-margin-top: 96px;
   }
 {% endstyle %}
 
@@ -87,7 +88,25 @@
 
     <figure class="lts__media">
       <div class="lts__media-box">
-        {%- if sp_img_src != blank -%}
+        {%- liquid
+          comment
+            SVG-Assets werden inline gerendert statt als <img>, damit die
+            Diagramme animierbar sind (Draw-on-view, siehe javascript-Tag).
+            Die Assets tragen selbst role="img" + aria-label. Externe URLs
+            und Nicht-SVGs laufen weiter über den <img>-Pfad.
+          endcomment
+          assign sp_inline_svg = false
+          if sp_img_asset != blank
+            unless sp_img_asset contains '://'
+              if sp_img_asset contains '.svg'
+                assign sp_inline_svg = true
+              endif
+            endunless
+          endif
+        -%}
+        {%- if sp_inline_svg -%}
+          <div class="lts__media-svg">{{ sp_img_asset | inline_asset_content }}</div>
+        {%- elsif sp_img_src != blank -%}
           <img src="{{ sp_img_src }}" alt="{{ sp_img_alt | escape }}" class="lts__media-img" loading="lazy">
         {%- elsif section.settings.image != blank -%}
           {{ section.settings.image | image_url: width: 1000 | image_tag: loading: 'lazy', class: 'lts__media-img', alt: sp_img_alt }}
@@ -104,6 +123,73 @@
 .lts {
   background: var(--lts-bg, #f7f7f4);
   color: var(--lts-text, #26251e);
+}
+
+/* ── Draw-on-view der Inline-SVG-Diagramme ─────────────────────
+   Ein Material-Gedanke für alle drei Charts: die Evidenz zeichnet
+   sich einmal selbst, wenn sie ins Bild kommt. Default (ohne JS,
+   bei Reduced Motion): alles statisch sichtbar. Erst `sci-ready`
+   (per JS gesetzt) nullt die Elemente, `sci-in` spielt sie ein. */
+.lts__media-svg svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.sci-ready .sci-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+
+.sci-ready.sci-in .sci-draw {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 0.9s cubic-bezier(0.16, 1, 0.3, 1) var(--sci-delay, 0s);
+}
+
+.sci-ready .sci-draw--fill {
+  fill-opacity: 0;
+}
+
+.sci-ready.sci-in .sci-draw--fill {
+  fill-opacity: var(--sci-fill, 0.16);
+  transition:
+    stroke-dashoffset 0.9s cubic-bezier(0.16, 1, 0.3, 1) var(--sci-delay, 0s),
+    fill-opacity 0.5s ease-out calc(var(--sci-delay, 0s) + 0.55s);
+}
+
+.sci-ready .sci-pop {
+  opacity: 0;
+  transform: scale(0.4);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.sci-ready.sci-in .sci-pop {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.3s ease-out var(--sci-delay, 0.75s),
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1) var(--sci-delay, 0.75s);
+}
+
+.sci-ready .sci-fade {
+  opacity: 0;
+}
+
+.sci-ready.sci-in .sci-fade {
+  opacity: 1;
+  transition: opacity 0.5s ease-out var(--sci-delay, 0.5s);
+}
+
+.sci-ready .sci-grow {
+  transform: scaleX(0);
+  transform-box: fill-box;
+  transform-origin: left center;
+}
+
+.sci-ready.sci-in .sci-grow {
+  transform: none;
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1) var(--sci-delay, 0s);
 }
 
 .lts__container {
@@ -219,7 +305,7 @@
   font-size: var(--text-body-sm);
   line-height: var(--leading-body);
   color: var(--lts-text, #26251e);
-  opacity: 0.55;
+  opacity: 0.65;
   max-width: 44ch;
 }
 
@@ -232,6 +318,30 @@
   }
 }
 {% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!('IntersectionObserver' in window)) return;
+    var medias = document.querySelectorAll('.lts__media-svg');
+    if (!medias.length) return;
+    var io = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('sci-in');
+            io.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.35 }
+    );
+    medias.forEach(function (media) {
+      media.classList.add('sci-ready');
+      io.observe(media);
+    });
+  })();
+{% endjavascript %}
 
 {% schema %}
 {

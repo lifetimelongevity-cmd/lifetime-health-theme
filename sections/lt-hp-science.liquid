@@ -33,8 +33,8 @@
     {%- if section.settings.color_text != blank -%}
     color: {{ section.settings.color_text }};
     --crs-text:     {{ section.settings.color_text }};
-    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.6 }};
-    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.4 }};
+    --crs-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.72 }};
+    --crs-text-ter: {{ section.settings.color_text | color_modify: 'alpha', 0.66 }};
     {%- endif -%}
     padding-top:    {{ section.settings.padding_top | default: 80 }}px;
     padding-bottom: {{ section.settings.padding_bottom | default: 80 }}px;
@@ -45,7 +45,9 @@
   <div class="sci__container">
 
     {%- comment -%}=== Section Header ==={%- endcomment -%}
-    <div class="sci__header crs-heading-stack crs-heading-stack--align-center{% if hp_headline_lg %} crs-heading-stack--headline-lg{% elsif hp_headline_md %} crs-heading-stack--headline-md{% endif %} crs-heading-stack--on-dark crs-heading-stack--homepage-truth">
+    {%- comment -%} align-left statt center: die Science-Seite ist durchgängig
+        linksbündig, der zentrierte Block war der einzige Ausreißer. {%- endcomment -%}
+    <div class="sci__header crs-heading-stack crs-heading-stack--align-left{% if hp_headline_lg %} crs-heading-stack--headline-lg{% elsif hp_headline_md %} crs-heading-stack--headline-md{% endif %} crs-heading-stack--on-dark crs-heading-stack--homepage-truth">
       {%- if section.settings.kicker != blank -%}
         <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
       {%- endif -%}
@@ -365,11 +367,10 @@
   margin: 0;
 }
 
-/* Zitat — prominenteste Textstelle der Karte */
+/* Zitat — prominenteste Textstelle der Karte. Kein Left-Border
+   (Hausregel): die getönte Karte trägt die Abgrenzung selbst. */
 .sci__expert-quote {
   margin: 0;
-  padding-inline-start: var(--space-4);
-  border-inline-start: 2px solid rgba(255, 255, 255, 0.25);
 }
 
 .sci__expert-quote-text {
@@ -377,7 +378,7 @@
   font-family: var(--font-heading);
   font-size: var(--text-section);
   font-weight: var(--weight-regular);
-  line-height: var(--leading-tight);
+  line-height: var(--leading-body);
   color: var(--color-text-on-dark);
 }
 
