@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LIFETIME Startseite · Redesign-Preview „Klinisches Dossier“</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Farbwelt = Live-Theme (Flächen #f7f7f4/#f2f1ed im Wechsel, #364f56 dunkel) */
+  --color-teal: #65C0B6;
+  --color-teal-dark: #4A8C85;
+  --color-dark: #364F56;
+  --color-dark-tile: #2D4249;
+  --color-white: #FFFFFF;
+  --color-surface-a: #F7F7F4;
+  --color-surface-b: #F2F1ED;
+  --color-ink: #26251E;
+  --color-gray-600: #525252;
+  --color-gray-400: #A3A3A3;
+  --color-gray-200: #E5E5E5;
+  --color-star: #F4B740;
+  --color-success: #22C55E;
+  --on-dark: #F7F7F4;
+  --on-dark-muted: rgba(247, 247, 244, 0.72);
+  --on-dark-faint: rgba(247, 247, 244, 0.66);
+  --border-hairline: rgba(38, 37, 30, 0.12);
+
+  --font-heading: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-body: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --text-stat: 56px;
+  --text-display: 48px;
+  --text-h1: 36px;
+  --text-h2: 28px;
+  --text-h3: 24px;
+  --text-quote: 28px;
+  --text-body-lg: 18px;
+  --text-body: 16px;
+  --text-body-sm: 14px;
+  --text-micro: 12px;
+
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+  --space-9: 80px; --space-10: 120px;
+
+  --radius-sm: 8px; --radius-md: 12px; --radius-full: 999px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --ease: 0.2s ease;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.4;
+  color: var(--color-ink);
+  background: var(--color-surface-a);
+  -webkit-font-smoothing: antialiased;
+}
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+h1, h2, h3 { font-family: var(--font-heading); font-weight: 400; }
+h1 { font-size: var(--text-display); line-height: 1.1; letter-spacing: -0.02em; }
+h2 { font-size: var(--text-h1); line-height: 1.15; letter-spacing: -0.01em; }
+h3 { font-size: var(--text-h3); line-height: 1.25; }
+
+/* ============ Buttons ============ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  height: 48px; padding: 14px 32px; border-radius: var(--radius-full);
+  font-family: var(--font-body); font-size: var(--text-body-sm); font-weight: 600;
+  text-decoration: none; border: 1px solid transparent; cursor: pointer;
+  transition: transform var(--ease), box-shadow var(--ease), background var(--ease);
+  white-space: nowrap;
+}
+.btn:focus-visible { outline: 2px solid var(--color-teal-dark); outline-offset: 2px; }
+.btn-cta { background: var(--color-dark); color: var(--color-white); }
+.btn-cta:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn-ghost { height: auto; padding: 0; border: none; background: none; color: var(--color-ink); font-weight: 600; border-radius: 0; }
+.btn-ghost:hover { color: var(--color-teal-dark); }
+/* auf dunkler Fläche invertiert */
+.on-dark .btn-cta { background: var(--color-white); color: var(--color-dark); }
+.on-dark .btn-outline { background: transparent; color: var(--on-dark); border-color: rgba(247,247,244,0.4); }
+.on-dark .btn-outline:hover { border-color: var(--on-dark); }
+
+/* ============ Masthead ============ */
+.masthead {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--color-surface-a);
+  border-bottom: 1px solid var(--border-hairline);
+}
+.masthead-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.wordmark { font-family: var(--font-body); font-weight: 700; font-size: var(--text-body-lg); letter-spacing: 0.18em; text-decoration: none; }
+.masthead .btn { height: 40px; padding: 10px 24px; }
+
+/* ============ Kapitel-Rubrik ============ */
+.rubric {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4);
+  border-top: 1px solid var(--border-hairline);
+  padding-top: var(--space-3);
+  margin-bottom: var(--space-7);
+}
+.rubric-label {
+  font-size: var(--text-micro); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--color-gray-600);
+}
+.rubric-label b { color: var(--color-ink); font-weight: 600; }
+.rubric-doc { font-size: var(--text-micro); letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-gray-400); }
+.on-dark .rubric { border-top-color: rgba(247,247,244,0.2); }
+.on-dark .rubric-label { color: var(--on-dark-muted); }
+.on-dark .rubric-label b { color: var(--on-dark); }
+.on-dark .rubric-doc { color: var(--on-dark-faint); }
+
+section { padding: var(--space-9) 0; }
+/* Heading-Pair nach crs-heading-stack: Title + Subtitle EIN Block, gleiche Größe, nur Opacity */
+.section-sub {
+  font-family: var(--font-heading); font-weight: 400;
+  font-size: var(--text-h1); line-height: 1.15; letter-spacing: -0.01em;
+  color: rgba(38, 37, 30, 0.72);
+  margin-top: var(--space-1); max-width: 18em;
+}
+.on-dark .section-sub { color: var(--on-dark-muted); }
+
+/* ============ Deckblatt ============ */
+.cover { padding: var(--space-9) 0 var(--space-9); }
+.cover-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: var(--space-8); align-items: center; }
+.cover h1 { max-width: 12em; }
+.cover-sub {
+  font-family: var(--font-heading); font-weight: 400;
+  font-size: var(--text-display); line-height: 1.1; letter-spacing: -0.02em;
+  color: rgba(38, 37, 30, 0.72);
+  margin-top: var(--space-1); max-width: 13em;
+}
+.cover-actions { display: flex; align-items: center; gap: var(--space-6); margin-top: var(--space-6); flex-wrap: wrap; }
+.cover-trust {
+  display: flex; flex-wrap: wrap; gap: var(--space-3) 0;
+  margin-top: var(--space-8); padding-top: var(--space-4);
+  border-top: 1px solid var(--border-hairline);
+}
+.cover-trust span {
+  font-size: var(--text-body-sm); color: var(--color-gray-600);
+  padding-right: var(--space-4); margin-right: var(--space-4);
+  border-right: 1px solid var(--border-hairline);
+}
+.cover-trust span:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+
+/* Befundblatt */
+.report-stack { position: relative; }
+.report-stack::before {
+  content: ""; position: absolute; inset: 12px -12px -12px 12px;
+  background: var(--color-white); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm); opacity: 0.6;
+}
+.report {
+  position: relative; background: var(--color-white); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md); padding: var(--space-6);
+}
+.report-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding-bottom: var(--space-4); border-bottom: 1px solid var(--color-gray-200);
+}
+.report-head-label { font-size: var(--text-micro); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.report-head-note { font-size: var(--text-micro); color: var(--color-gray-600); }
+.report-age { display: flex; align-items: flex-end; gap: var(--space-4); margin-top: var(--space-5); }
+.report-age-value { font-family: var(--font-heading); font-weight: 700; font-size: 72px; line-height: 1; color: var(--color-teal-dark); }
+.report-age-meta { padding-bottom: var(--space-1); }
+.report-age-label { font-size: var(--text-body-sm); font-weight: 600; }
+.report-age-chron { font-size: var(--text-body-sm); color: var(--color-gray-600); margin-top: var(--space-1); }
+.report-delta {
+  display: inline-block; margin-top: var(--space-2);
+  font-size: var(--text-micro); font-weight: 600; letter-spacing: 0.04em;
+  color: var(--color-teal-dark);
+  opacity: 0; transform: translateY(4px);
+  transition: opacity 0.5s ease 1.1s, transform 0.5s ease 1.1s;
+}
+.report.in-view .report-delta { opacity: 1; transform: none; }
+.report-metrics { margin-top: var(--space-5); padding-top: var(--space-5); border-top: 1px solid var(--color-gray-200); display: grid; gap: var(--space-4); }
+.metric-row { display: grid; grid-template-columns: 1fr auto; gap: var(--space-1) var(--space-3); align-items: baseline; }
+.metric-name { font-size: var(--text-body-sm); font-weight: 600; }
+.metric-value { font-family: var(--font-heading); font-weight: 700; font-size: var(--text-body-lg); font-variant-numeric: tabular-nums; }
+.metric-track { grid-column: 1 / -1; height: 4px; border-radius: var(--radius-full); background: var(--color-surface-b); overflow: hidden; }
+.metric-fill { height: 100%; border-radius: var(--radius-full); background: var(--color-teal); width: var(--w); transform: scaleX(0); transform-origin: left; transition: transform 0.9s cubic-bezier(0.16, 1, 0.3, 1); }
+.metric-fill.gold { background: var(--color-star); }
+.report.in-view .metric-fill { transform: scaleX(1); }
+.report-foot { margin-top: var(--space-5); font-size: var(--text-micro); color: var(--color-gray-600); }
+
+/* ============ Kapitel 01 Befundlage ============ */
+.s-white { background: var(--color-white); }
+.compare { margin-top: var(--space-6); border-top: 1px solid var(--border-hairline); }
+.compare-head, .compare-row {
+  display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6);
+  padding: var(--space-4) 0; border-bottom: 1px solid var(--border-hairline);
+}
+.compare-head { font-size: var(--text-micro); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; }
+.compare-row .col-a { color: var(--color-gray-600); }
+.compare-row .col-b { font-weight: 600; }
+.compare-note { margin-top: var(--space-4); font-size: var(--text-body-sm); color: var(--color-gray-600); }
+
+/* ============ Kapitel 02 Der Test ============ */
+.test-grid { display: grid; grid-template-columns: 0.9fr 1.1fr; gap: var(--space-8); align-items: center; margin-top: var(--space-6); }
+.test-image { border-radius: var(--radius-md); overflow: hidden; }
+.eval-list { border-top: 1px solid var(--border-hairline); }
+.eval-row { display: grid; grid-template-columns: 40px 1fr; gap: var(--space-4); padding: var(--space-5) 0; border-bottom: 1px solid var(--border-hairline); }
+.eval-icon { width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+.eval-icon svg { width: 26px; height: 26px; stroke: var(--color-dark); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.eval-title { font-family: var(--font-body); font-size: var(--text-body); font-weight: 700; }
+.eval-body { font-size: var(--text-body-sm); color: var(--color-gray-600); margin-top: var(--space-1); line-height: 1.6; }
+.buy-card {
+  margin-top: var(--space-7);
+  background: var(--color-white); border-radius: var(--radius-md); box-shadow: var(--shadow-sm);
+  padding: var(--space-5) var(--space-6);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-5); flex-wrap: wrap;
+}
+.buy-name { font-family: var(--font-body); font-weight: 700; font-size: var(--text-body-lg); }
+.buy-price { font-size: var(--text-body-sm); color: var(--color-gray-600); margin-top: var(--space-1); }
+.buy-price strong { font-family: var(--font-heading); font-size: var(--text-h3); font-weight: 700; color: var(--color-ink); margin-right: var(--space-2); }
+.buy-lab { font-size: var(--text-micro); color: var(--color-gray-600); margin-top: var(--space-2); }
+.buy-actions { display: flex; align-items: center; gap: var(--space-5); flex-wrap: wrap; }
+.buy-actions .btn-ghost { font-size: var(--text-body-sm); }
+
+/* ============ Kapitel 03 Methode (dunkel) ============ */
+.s-dark { background: var(--color-dark); color: var(--on-dark); }
+.method-def { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-top: var(--space-6); }
+.def-tile { background: var(--color-dark-tile); border-radius: var(--radius-md); padding: var(--space-5); }
+.def-term { font-size: var(--text-micro); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--on-dark-muted); }
+.def-claim { font-family: var(--font-heading); font-weight: 700; font-size: var(--text-h3); margin-top: var(--space-2); }
+.def-body { font-size: var(--text-body-sm); color: var(--on-dark-muted); margin-top: var(--space-2); line-height: 1.6; }
+.spec-rows { margin-top: var(--space-7); border-top: 1px solid rgba(247,247,244,0.2); max-width: 48rem; }
+.spec-row { display: grid; grid-template-columns: 160px 1fr; gap: var(--space-6); padding: var(--space-4) 0; border-bottom: 1px solid rgba(247,247,244,0.2); }
+.spec-term { font-size: var(--text-micro); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--on-dark-muted); padding-top: 3px; }
+.spec-value { font-size: var(--text-body); line-height: 1.6; }
+.quote-block { display: grid; grid-template-columns: auto 1fr; gap: var(--space-6); align-items: start; margin-top: var(--space-8); padding-top: var(--space-7); border-top: 1px solid rgba(247,247,244,0.2); }
+.quote-portrait { width: 104px; height: 104px; border-radius: var(--radius-md); object-fit: cover; }
+.quote-text { font-size: var(--text-quote); font-style: italic; line-height: 1.4; max-width: 24em; }
+.quote-name { font-weight: 700; margin-top: var(--space-4); font-size: var(--text-body); }
+.quote-title { font-size: var(--text-body-sm); color: var(--on-dark-muted); margin-top: var(--space-1); }
+
+/* ============ Presse-Band ============ */
+.press { background: var(--color-surface-b); padding: var(--space-7) 0; }
+.press-inner { display: flex; align-items: center; gap: var(--space-7); flex-wrap: wrap; justify-content: center; }
+.press-label { font-size: var(--text-micro); font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--color-gray-600); }
+.press-logos { display: flex; align-items: center; gap: var(--space-7); flex-wrap: wrap; justify-content: center; }
+.press-logos img { height: 28px; width: auto; filter: grayscale(1); opacity: 0.55; }
+
+/* ============ Kapitel 04 Verläufe ============ */
+.cases { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); margin-top: var(--space-6); }
+.case-card { background: var(--color-white); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); padding: var(--space-5); display: flex; flex-direction: column; }
+.case-head { display: flex; align-items: center; gap: var(--space-3); }
+.case-avatar { width: 48px; height: 48px; border-radius: var(--radius-full); object-fit: cover; }
+.case-initials {
+  width: 48px; height: 48px; border-radius: var(--radius-full);
+  background: var(--color-surface-b); display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: var(--text-body-sm); color: var(--color-gray-600);
+}
+.case-name { font-weight: 700; font-size: var(--text-body); display: flex; align-items: center; gap: var(--space-2); }
+.case-name svg { width: 16px; height: 16px; }
+.case-measure { display: flex; align-items: baseline; gap: var(--space-3); margin-top: var(--space-5); padding: var(--space-4) 0; border-top: 1px solid var(--border-hairline); border-bottom: 1px solid var(--border-hairline); flex-wrap: wrap; }
+.case-date { margin-left: auto; font-size: var(--text-micro); color: var(--color-gray-600); font-variant-numeric: tabular-nums; }
+.case-measure .num { font-family: var(--font-heading); font-weight: 700; font-size: 32px; font-variant-numeric: tabular-nums; }
+.case-measure .from { color: var(--color-gray-400); }
+.case-measure .arrow { color: var(--color-teal-dark); font-size: var(--text-body-lg); }
+.case-measure .to { color: var(--color-teal-dark); }
+.case-measure .unit { font-size: var(--text-body-sm); color: var(--color-gray-600); }
+.case-quote { font-size: var(--text-body-sm); color: var(--color-gray-600); line-height: 1.6; margin-top: var(--space-4); }
+.agg { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-6); margin-top: var(--space-8); padding-top: var(--space-6); border-top: 1px solid var(--border-hairline); }
+.agg-num { font-family: var(--font-heading); font-weight: 700; font-size: var(--text-h1); }
+.agg-label { font-size: var(--text-body-sm); color: var(--color-gray-600); margin-top: var(--space-2); max-width: 22em; }
+.agg-note { font-size: var(--text-micro); color: var(--color-gray-600); margin-top: var(--space-5); max-width: 48em; }
+
+/* ============ Kapitel 05 System ============ */
+.s-warm-b { background: var(--color-surface-b); }
+.loop-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); margin-top: var(--space-6); position: relative; }
+.loop-steps::before {
+  content: ""; position: absolute; top: 10px; left: 6px; right: calc(33.333% - 10px);
+  border-top: 1px dashed rgba(38,37,30,0.25);
+}
+.loop-step { position: relative; padding-top: var(--space-6); }
+.loop-step::before {
+  content: ""; position: absolute; top: 4px; left: 0;
+  width: 13px; height: 13px; border-radius: var(--radius-full);
+  background: var(--color-surface-b); border: 2px solid var(--color-teal-dark);
+}
+.loop-step.primary::before { background: var(--color-teal-dark); }
+.loop-title { font-family: var(--font-body); font-weight: 700; font-size: var(--text-body-lg); }
+.loop-body { font-size: var(--text-body-sm); color: var(--color-gray-600); line-height: 1.6; margin-top: var(--space-2); max-width: 26em; }
+.loop-cta { margin-top: var(--space-7); }
+
+/* ============ Kapitel 06 Ablauf ============ */
+.journey { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-5); margin-top: var(--space-6); counter-reset: jstep; }
+.j-step { border-top: 2px solid var(--color-dark); padding-top: var(--space-4); counter-increment: jstep; }
+.j-title { font-family: var(--font-body); font-weight: 700; font-size: var(--text-body); }
+.j-title::before { content: counter(jstep, decimal-leading-zero) "  "; font-variant-numeric: tabular-nums; color: var(--color-gray-600); }
+.j-body { font-size: var(--text-body-sm); color: var(--color-gray-600); margin-top: var(--space-2); line-height: 1.6; }
+.j-time { font-size: var(--text-micro); color: var(--color-gray-600); margin-top: var(--space-3); }
+.faq { margin-top: var(--space-8); border-top: 1px solid var(--border-hairline); max-width: 48rem; }
+.faq details { border-bottom: 1px solid var(--border-hairline); }
+.faq summary {
+  display: flex; justify-content: space-between; align-items: center; gap: var(--space-4);
+  padding: var(--space-4) 0; cursor: pointer; list-style: none;
+  font-weight: 600; font-size: var(--text-body);
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: "+"; font-family: var(--font-heading); font-size: var(--text-body-lg);
+  color: var(--color-gray-400); transition: transform var(--ease); flex-shrink: 0;
+}
+.faq details[open] summary::after { transform: rotate(45deg); }
+.faq-answer { padding: 0 0 var(--space-4); font-size: var(--text-body-sm); color: var(--color-gray-600); line-height: 1.6; max-width: 40em; }
+
+/* ============ Schluss ============ */
+.close-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: var(--space-8); align-items: center; }
+.close-sub {
+  font-family: var(--font-heading); font-weight: 400;
+  font-size: var(--text-display); line-height: 1.1; letter-spacing: -0.02em;
+  color: var(--on-dark-muted);
+  margin-top: var(--space-1); max-width: 13em;
+}
+.close-price { margin-top: var(--space-6); }
+.close-price .num { font-family: var(--font-heading); font-weight: 700; font-size: var(--text-stat); line-height: 1; }
+.close-price .terms { font-size: var(--text-body-sm); color: var(--on-dark-muted); margin-top: var(--space-2); }
+.close-actions { display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-6); flex-wrap: wrap; }
+.consult {
+  background: var(--color-dark-tile); border-radius: var(--radius-md); padding: var(--space-5);
+  display: flex; gap: var(--space-4); align-items: center;
+}
+.consult-avatar { width: 64px; height: 64px; border-radius: var(--radius-full); object-fit: cover; flex-shrink: 0; }
+.consult-title { font-weight: 700; font-size: var(--text-body); }
+.consult-body { font-size: var(--text-body-sm); color: var(--on-dark-muted); margin-top: var(--space-1); }
+.consult-avail { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-micro); color: var(--on-dark-muted); margin-top: var(--space-2); }
+.consult-avail::before { content: ""; width: 7px; height: 7px; border-radius: var(--radius-full); background: var(--color-success); }
+.close-trust { display: flex; flex-wrap: wrap; margin-top: var(--space-8); padding-top: var(--space-4); border-top: 1px solid rgba(247,247,244,0.2); }
+.close-trust span {
+  font-size: var(--text-body-sm); color: var(--on-dark-muted);
+  padding-right: var(--space-4); margin-right: var(--space-4);
+  border-right: 1px solid rgba(247,247,244,0.2);
+}
+.close-trust span:last-child { border-right: none; }
+.colophon { padding: var(--space-5) 0; background: var(--color-dark); border-top: 1px solid rgba(247,247,244,0.14); }
+.colophon-inner { display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; font-size: var(--text-micro); color: var(--on-dark-muted); }
+
+/* ============ Responsive ============ */
+@media (max-width: 960px) {
+  .cover-grid, .test-grid, .close-grid { grid-template-columns: 1fr; }
+  .cover-grid { gap: var(--space-7); }
+  .cases { grid-template-columns: 1fr; max-width: 34rem; }
+  .method-def { grid-template-columns: 1fr 1fr; }
+  .journey { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  :root { --text-display: 36px; --text-h1: 28px; --text-quote: 22px; --text-stat: 48px; }
+  section { padding: var(--space-8) 0; }
+  .container { padding: 0 16px; }
+  .cases, .method-def, .method-stats, .agg, .journey, .loop-steps { grid-template-columns: 1fr; }
+  .press-inner { gap: var(--space-5); }
+  .press-logos { gap: var(--space-5) var(--space-6); }
+  .press-logos img { height: 20px; }
+  .loop-steps::before { display: none; }
+  .loop-step { padding-top: 0; padding-left: var(--space-6); }
+  .loop-step::before { top: 4px; }
+  .report-age-value { font-size: 60px; }
+  .quote-block { grid-template-columns: 1fr; }
+  .buy-card { align-items: flex-start; flex-direction: column; }
+  .rubric-doc { display: none; }
+  .cover-trust span { border-right: none; margin-right: 0; padding-right: 0; width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .metric-fill { transition: none; transform: scaleX(1); }
+  .report-delta { transition: none; opacity: 1; transform: none; }
+}
+</style>
+</head>
+<body>
+<!--
+THESIS: Die Startseite ist selbst ein klinisches Befund-Dossier; sie verweigert die
+Lifestyle-Landingpage aus Hero-Bild plus Icon-Karten-Grids.
+OWN-WORLD: LIFETIME-Livepalette (#F7F7F4/#F2F1ED Flächen, #364F56 dunkel, Teal #65C0B6
+nur für Messwerte, Gold sparsam), Lato + Helvetica Neue, Papierblatt mit Hairlines,
+Kapitel-Rubriken, tabellarische Vergleiche, tabular-nums-Zahlen.
+STORY: Besucher versteht: mein Alter ist messbar (Befundblatt), mein Check-up zeigt es
+nicht, dieser Test schon; Labor, Arzt und Verläufe belegen es; er bestellt für 349 €.
+FIRST VIEWPORT: Links Headline + Subline + CTA "Biologisches Alter testen", rechts das
+animierte Befundblatt (56 vs. 60, drei Messbalken), darunter Vertrauenszeile.
+FORM: Klinisches Dossier, Kandidat 6 der geordneten Strukturliste, Seed-Key 4a140473.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish
+review, the verdict, and DESIGN.md
+-->
+
+<header class="masthead">
+  <div class="container masthead-inner">
+    <a class="wordmark" href="#">LIFETIME</a>
+    <a class="btn btn-cta" href="#bestellen">Jetzt testen</a>
+  </div>
+</header>
+
+<!-- Deckblatt -->
+<section class="cover">
+  <div class="container">
+    <div class="cover-grid">
+      <div>
+        <h1>Du tust viel für deinen Körper.</h1>
+        <p class="cover-sub">Jetzt finde heraus, was davon wirkt.</p>
+        <div class="cover-actions">
+          <a class="btn btn-cta" href="#bestellen">Biologisches Alter testen →</a>
+          <a class="btn btn-ghost" href="#system">Das System ansehen ↓</a>
+        </div>
+      </div>
+      <div class="report-stack">
+        <div class="report" id="report">
+          <div class="report-head">
+            <span class="report-head-label">Befund</span>
+            <span class="report-head-note">Beispieldarstellung</span>
+          </div>
+          <div class="report-age">
+            <div class="report-age-value">56</div>
+            <div class="report-age-meta">
+              <div class="report-age-label">Dein biologisches Alter</div>
+              <div class="report-age-chron">Chronologisches Alter: 60</div>
+              <div class="report-delta">4 Jahre jünger als der Pass</div>
+            </div>
+          </div>
+          <div class="report-metrics">
+            <div class="metric-row">
+              <span class="metric-name">Langlebigkeit</span>
+              <span class="metric-value">82</span>
+              <div class="metric-track"><div class="metric-fill" style="--w:82%"></div></div>
+            </div>
+            <div class="metric-row">
+              <span class="metric-name">Entzündungsprofil</span>
+              <span class="metric-value">34</span>
+              <div class="metric-track"><div class="metric-fill gold" style="--w:34%"></div></div>
+            </div>
+            <div class="metric-row">
+              <span class="metric-name">Kognitive Gesundheit</span>
+              <span class="metric-value">71</span>
+              <div class="metric-track"><div class="metric-fill" style="--w:71%"></div></div>
+            </div>
+          </div>
+          <div class="report-foot">Analyse: Eurofins Genomics · ISO 17025</div>
+        </div>
+      </div>
+    </div>
+    <div class="cover-trust">
+      <span>Ergebnisse in 6 Wochen in der App</span>
+      <span>Zu Hause testen. Nicht-invasiv.</span>
+      <span>Eurofins Laboranalyse · ISO-zertifiziert</span>
+      <span>DSGVO-konform · deine Daten gehören dir</span>
+    </div>
+  </div>
+</section>
+
+<!-- Kapitel 01 · Befundlage -->
+<section class="s-white">
+  <div class="container">
+    <div class="rubric">
+      <span class="rubric-label"><b>Kapitel 01</b> · Befundlage</span>
+      <span class="rubric-doc">AGE &amp; DNA · Befund-Dossier</span>
+    </div>
+    <h2>Alles im Normbereich.</h2>
+    <p class="section-sub">Nur nicht, wie schnell du alterst und warum.</p>
+    <div class="compare">
+      <div class="compare-head">
+        <span class="col-a">Was dein Check-up zeigt</span>
+        <span class="col-b">Was er nicht zeigt</span>
+      </div>
+      <div class="compare-row">
+        <span class="col-a">Blutdruck, Cholesterin, Blutzucker</span>
+        <span class="col-b">Ob dein Körper älter ist als dein Pass</span>
+      </div>
+      <div class="compare-row">
+        <span class="col-a">Ob heute etwas aus dem Rahmen fällt</span>
+        <span class="col-b">Wie alt Gehör und Gedächtnis sind</span>
+      </div>
+      <div class="compare-row">
+        <span class="col-a">Wie du dich gerade fühlst</span>
+        <span class="col-b">Ob Kaffee dich wach oder nervös macht</span>
+      </div>
+      <div class="compare-row">
+        <span class="col-a">Was im Schnitt für alle gilt</span>
+        <span class="col-b">Ob du mehr Vitamin D brauchst</span>
+      </div>
+    </div>
+    <p class="compare-note">Ergänzt deinen Check-up. Ersetzt ihn nicht.</p>
+  </div>
+</section>
+
+<!-- Kapitel 02 · Der Test -->
+<section id="bestellen">
+  <div class="container">
+    <div class="rubric">
+      <span class="rubric-label"><b>Kapitel 02</b> · Der Test</span>
+      <span class="rubric-doc">AGE &amp; DNA · Befund-Dossier</span>
+    </div>
+    <h2>Vier Auswertungen aus einer Probe</h2>
+    <div class="test-grid">
+      <div class="test-image">
+        <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/Product-gallery_tst.png?v=1777229670" alt="AGE &amp; DNA-Test Kit mit Röhrchen, Anleitung und Rückumschlag" loading="lazy">
+      </div>
+      <div class="eval-list">
+        <div class="eval-row">
+          <div class="eval-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16a8 8 0 0 1 16 0"/><path d="M12 16l4-5"/><circle cx="12" cy="16" r="1.4"/><path d="M4 20h16"/></svg>
+          </div>
+          <div>
+            <div class="eval-title">Biologisches Alter</div>
+            <p class="eval-body">Du siehst, ob dein Körper schneller oder langsamer altert als dein Pass.</p>
+          </div>
+        </div>
+        <div class="eval-row">
+          <div class="eval-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3c0 6 10 6 10 9s-10 3-10 9"/><path d="M17 3c0 6-10 6-10 9s10 3 10 9"/><path d="M8.2 6h7.6M8.2 18h7.6M10 12h4"/></svg>
+          </div>
+          <div>
+            <div class="eval-title">23 DNA-Kategorien</div>
+            <p class="eval-body">Genetische Analyse aus 23 Kategorien: Nährstoffe, Schlaf, Herzgesundheit, Haut und mehr.</p>
+          </div>
+        </div>
+        <div class="eval-row">
+          <div class="eval-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-4 4v-4H6a2 2 0 0 1-2-2z"/><path d="M8 9h8M8 12h5"/></svg>
+          </div>
+          <div>
+            <div class="eval-title">KI Health Coach</div>
+            <p class="eval-body">Individuelle Empfehlungen für Ernährung, Alltag und Routinen. Direkt aus deinen Ergebnissen abgeleitet.</p>
+          </div>
+        </div>
+        <div class="eval-row">
+          <div class="eval-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/><circle cx="12" cy="11" r="3.2"/><path d="M8.5 17a5 5 0 0 1 7 0"/></svg>
+          </div>
+          <div>
+            <div class="eval-title">Face-Scan Hautanalyse</div>
+            <p class="eval-body">KI-gestützte Hautanalyse per Foto. Feuchtigkeit, Poren, Rötung und Hautalter, jederzeit in der App.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="buy-card">
+      <div>
+        <div class="buy-name">AGE &amp; DNA-Test</div>
+        <div class="buy-price"><strong>349,00 €</strong> einmalig · kein Abo · versandkostenfrei</div>
+        <div class="buy-lab">Eurofins Genomics · ISO 17025</div>
+      </div>
+      <div class="buy-actions">
+        <a class="btn btn-ghost" href="#">Was ist genau enthalten →</a>
+        <a class="btn btn-cta" href="#">AGE &amp; DNA-Test bestellen →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Kapitel 03 · Methode -->
+<section class="s-dark on-dark">
+  <div class="container">
+    <div class="rubric">
+      <span class="rubric-label"><b>Kapitel 03</b> · Methode</span>
+      <span class="rubric-doc">AGE &amp; DNA · Befund-Dossier</span>
+    </div>
+    <h2>Epigenetik zeigt, wie du alterst.</h2>
+    <p class="section-sub">Genetik zeigt, warum.</p>
+    <div class="method-def">
+      <div class="def-tile">
+        <div class="def-term">Epigenetik</div>
+        <div class="def-claim">Wie schnell dein Körper altert</div>
+        <p class="def-body">Dein biologisches Alter, ausgewertet über sechs Bereiche. Ein einzelner Wert schwankt, aussagekräftig ist die Entwicklung über die Zeit.</p>
+      </div>
+      <div class="def-tile">
+        <div class="def-term">Genetik</div>
+        <div class="def-claim">Warum dein Körper so reagiert</div>
+        <p class="def-body">Deine genetischen Ergebnisse aus 23 Kategorien: konkrete Ansatzpunkte für Ernährung, Routinen und Supplemente.</p>
+      </div>
+    </div>
+    <div class="spec-rows">
+      <div class="spec-row">
+        <span class="spec-term">Labor</span>
+        <span class="spec-value">Eurofins Genomics, akkreditiert nach ISO 17025.</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-term">Ergebnis</span>
+        <span class="spec-value">Genetische Ergebnisse aus 23 Kategorien mit konkreten Ansatzpunkten für den Alltag.</span>
+      </div>
+      <div class="spec-row">
+        <span class="spec-term">Dauer</span>
+        <span class="spec-value">6 Wochen von der Probe im Labor bis zu allen Ergebnissen in der App.</span>
+      </div>
+    </div>
+    <div class="quote-block">
+      <img class="quote-portrait" src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/volker-podcast.png" alt="Prof. Dr. med. Volker Limmroth" loading="lazy">
+      <div>
+        <p class="quote-text">„Longevity beginnt mit Daten, nicht mit Annahmen. Der AGE &amp; DNA-Test gibt dir die biologische Basis, auf der echte Prävention aufbaut.“</p>
+        <div class="quote-name">Prof. Dr. med. Volker Limmroth</div>
+        <div class="quote-title">Chefarzt Neurologie · Chief Scientific Officer LIFETIME</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Presse -->
+<div class="press">
+  <div class="container press-inner">
+    <span class="press-label">Bekannt aus</span>
+    <div class="press-logos">
+      <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/1_b5d8bee0-0588-4cab-8e38-b3eee8285532.png" alt="RTL" loading="lazy">
+      <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/Kein_Titel_600_x_400_px_2.png" alt="SAT.1" loading="lazy">
+      <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/swr1-logo.png" alt="SWR1" loading="lazy">
+      <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/ksta-logo-grau-nobg.png" alt="Kölner Stadt-Anzeiger" loading="lazy">
+      <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/3_9df4d585-1a85-4c48-80bb-c8585a85cce7.png" alt="Maxima Magazin" loading="lazy">
+    </div>
+  </div>
+</div>
+
+<!-- Kapitel 04 · Verläufe -->
+<section class="s-white">
+  <div class="container">
+    <div class="rubric">
+      <span class="rubric-label"><b>Kapitel 04</b> · Verläufe</span>
+      <span class="rubric-doc">AGE &amp; DNA · Befund-Dossier</span>
+    </div>
+    <h2>Was sich nach dem Ergebnis geändert hat</h2>
+    <div class="cases">
+      <article class="case-card">
+        <div class="case-head">
+          <img class="case-avatar" src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/testimonial-markus.png" alt="" loading="lazy">
+          <div>
+            <div class="case-name">Markus T., 44
+              <svg viewBox="0 0 24 24" aria-label="Verifiziert"><circle cx="12" cy="12" r="10" fill="#364F56"/><path d="M8 12.5l2.6 2.6L16 9.5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="case-measure">
+          <span class="num from">47</span>
+          <span class="arrow">→</span>
+          <span class="num to">44</span>
+          <span class="unit">Jahre biologisch</span>
+          <span class="case-date">Retest nach 14 Monaten</span>
+        </div>
+        <p class="case-quote">„Mein biologisches Alter lag drei Jahre über meinem chronologischen. Das hat mich überrascht, ich dachte ich mache bereits alles richtig. Nach 14 Monaten bin ich jetzt genau auf meinem Alter. Das ist der Unterschied zwischen raten und wissen.“</p>
+      </article>
+      <article class="case-card">
+        <div class="case-head">
+          <div class="case-initials">AF</div>
+          <div>
+            <div class="case-name">Dr. med. Andreas F., 62
+              <svg viewBox="0 0 24 24" aria-label="Verifiziert"><circle cx="12" cy="12" r="10" fill="#364F56"/><path d="M8 12.5l2.6 2.6L16 9.5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="case-measure">
+          <span class="num from">65</span>
+          <span class="arrow">→</span>
+          <span class="num to">64</span>
+          <span class="unit">Jahre biologisch</span>
+          <span class="case-date">Retest nach 18 Monaten</span>
+        </div>
+        <p class="case-quote">„Als Arzt war ich skeptisch. Aber der Test hat mich überzeugt. Die Methodik hinter dem MethylPace-Score ist solide. Das ist kein Consumer-Gadget.“</p>
+      </article>
+      <article class="case-card">
+        <div class="case-head">
+          <img class="case-avatar" src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/testimonial-sophie.png" alt="" loading="lazy">
+          <div>
+            <div class="case-name">Sophie K., 57
+              <svg viewBox="0 0 24 24" aria-label="Verifiziert"><circle cx="12" cy="12" r="10" fill="#364F56"/><path d="M8 12.5l2.6 2.6L16 9.5" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="case-measure">
+          <span class="num from">60</span>
+          <span class="arrow">→</span>
+          <span class="num to">58</span>
+          <span class="unit">Jahre biologisch</span>
+          <span class="case-date">Retest nach 30 Monaten</span>
+        </div>
+        <p class="case-quote">„Die Speichelprobe war in drei Minuten erledigt. Was mich überrascht hat: wie verständlich die App alles erklärt. Ich habe keine Biologie studiert. Aber ich verstehe jetzt, was meine Werte bedeuten.“</p>
+      </article>
+    </div>
+    <div class="agg">
+      <div>
+        <div class="agg-num">4 von 5</div>
+        <p class="agg-label">ändern nach dem Testergebnis mindestens eine Gesundheitsgewohnheit dauerhaft.</p>
+      </div>
+      <div>
+        <div class="agg-num">9 von 10</div>
+        <p class="agg-label">würden den AGE &amp; DNA-Test weiterempfehlen.</p>
+      </div>
+      <div>
+        <div class="agg-num">2 von 3</div>
+        <p class="agg-label">Kund*innen beauftragen innerhalb von 18 Monaten einen Retest.</p>
+      </div>
+    </div>
+    <p class="agg-note">Basis: Befragung von 124 Kund*innen aus dem Begleitprogramm. Die gezeigten Verläufe stammen aus unserem Begleitprogramm (mindestens 12 Monate Betreuung); einzelne Teilnehmer*innen haben ggf. einen Rabatt erhalten.</p>
+  </div>
+</section>
+
+<!-- Kapitel 05 · Das System -->
+<section class="s-warm-b" id="system">
+  <div class="container">
+    <div class="rubric">
+      <span class="rubric-label"><b>Kapitel 05</b> · Das System</span>
+      <span class="rubric-doc">AGE &amp; DNA · Befund-Dossier</span>
+    </div>
+    <h2>Erst testen, dann ergänzen.</h2>
+    <p class="section-sub">Wir empfehlen dir nichts, bevor wir nicht wissen, was dein Körper braucht.</p>
+    <div class="loop-steps">
+      <div class="loop-step primary">
+        <div class="loop-title">AGE &amp; DNA-Test</div>
+        <p class="loop-body">Wie schnell du alterst, und warum. Aus einer Speichelprobe.</p>
+      </div>
+      <div class="loop-step">
+        <div class="loop-title">Dein persönliches Longevity-Profil</div>
+        <p class="loop-body">Biologisches Alter, genetische Stärken und Schwächen auf einen Blick. Ein KI Health Coach, der deine Daten kennt, erklärt dir, was das für dich bedeutet.</p>
+      </div>
+      <div class="loop-step">
+        <div class="loop-title">Ergänzen, was zu dir passt</div>
+        <p class="loop-body">Nährstoffe und Maßnahmen auf Basis deines Profils statt Pauschalempfehlung.</p>
+      </div>
+    </div>
+    <div class="loop-cta">
+      <a class="btn btn-cta" href="#bestellen">AGE &amp; DNA-Test bestellen →</a>
+    </div>
+  </div>
+</section>
+
+<!-- Kapitel 06 · Ablauf -->
+<section>
+  <div class="container">
+    <div class="rubric">
+      <span class="rubric-label"><b>Kapitel 06</b> · Ablauf</span>
+      <span class="rubric-doc">AGE &amp; DNA · Befund-Dossier</span>
+    </div>
+    <h2>Von der Bestellung bis zum Ergebnis</h2>
+    <p class="section-sub">Kein Arzttermin, kein Laborbesuch.</p>
+    <div class="journey">
+      <div class="j-step">
+        <div class="j-title">Online bestellen</div>
+        <p class="j-body">Röhrchen, Anleitung und frankierter Rückumschlag sind drin.</p>
+        <div class="j-time">Lieferung in 2–3 Werktagen</div>
+      </div>
+      <div class="j-step">
+        <div class="j-title">Registrieren und Probe abgeben</div>
+        <p class="j-body">Kein Blut, keine Nadel.</p>
+        <div class="j-time">Unter 5 Minuten</div>
+      </div>
+      <div class="j-step">
+        <div class="j-title">Probe geht ins Labor</div>
+        <p class="j-body">Eurofins Genomics, akkreditiert nach ISO 17025.</p>
+        <div class="j-time">6 Wochen</div>
+      </div>
+      <div class="j-step">
+        <div class="j-title">Ergebnisse in der App</div>
+        <p class="j-body">Alle Auswertungen an einem Ort.</p>
+        <div class="j-time">Lebenslang verfügbar</div>
+      </div>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>Ist die Probenentnahme schmerzhaft?</summary>
+        <p class="faq-answer">Nein. Nur Speichel, kein Blut, keine Nadel.</p>
+      </details>
+      <details>
+        <summary>Wie genau sind die Ergebnisse?</summary>
+        <p class="faq-answer">Die Analyse läuft bei Eurofins Genomics nach ISO 17025. Dein biologisches Alter ist ein Schätzwert: Ein einzelner Wert schwankt, aussagekräftig ist die Entwicklung über die Zeit.</p>
+      </details>
+      <details>
+        <summary>Wie lange dauert es bis zu den Ergebnissen?</summary>
+        <p class="faq-answer">6 Wochen ab Eingang deiner Probe im Labor. Die App meldet sich, sobald alles da ist.</p>
+      </details>
+      <details>
+        <summary>Was kostet der Test? Gibt es versteckte Kosten?</summary>
+        <p class="faq-answer">349,00 € einmalig. Kein Abo, keine Re-Test-Pflicht. Rückversand und Laboranalyse sind inklusive.</p>
+      </details>
+      <details>
+        <summary>Sind meine genetischen Daten sicher?</summary>
+        <p class="faq-answer">Pseudonymisiert unter einer eigenen ID, DSGVO-konform auf EU-Servern. Zugriff haben nur die Stellen, die für Labor und Bereitstellung nötig sind. Du kannst deine Daten löschen lassen.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- Schluss -->
+<section class="s-dark on-dark">
+  <div class="container">
+    <div class="close-grid">
+      <div>
+        <h2 style="font-size: var(--text-display); line-height: 1.1;">Miss, wo du heute stehst.</h2>
+        <p class="close-sub">Danach weißt du, wo du ansetzt.</p>
+        <div class="close-price">
+          <div class="num">349,00 €</div>
+          <div class="terms">einmalig · kein Abo · versandkostenfrei</div>
+        </div>
+        <div class="close-actions">
+          <a class="btn btn-cta" href="#bestellen">AGE &amp; DNA-Test bestellen →</a>
+        </div>
+      </div>
+      <div class="consult">
+        <img class="consult-avatar" src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/0dacbee3-0d38-4a46-a926-b4ff24102d47-1762517294060.png?v=1762517298" alt="Longevity-Beraterin" loading="lazy">
+        <div>
+          <div class="consult-title">Bevor du bestellst: kostenlos mit einem Experten sprechen.</div>
+          <p class="consult-body">15 Minuten Video-Call, unverbindlich.</p>
+          <div class="consult-avail">Freie Termine verfügbar</div>
+          <div style="margin-top: var(--space-4);">
+            <a class="btn btn-outline" href="#">Kostenfreie Video-Beratung</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="close-trust">
+      <span>Eurofins Genomics · ISO 17025</span>
+      <span>Ergebnisse in 6 Wochen in der App</span>
+      <span>DSGVO-konform · pseudonymisiert</span>
+      <span>Laborversand inklusive</span>
+    </div>
+  </div>
+</section>
+
+<footer class="colophon">
+  <div class="container colophon-inner">
+    <span>LIFETIME Health · Köln</span>
+    <span>Redesign-Preview „Klinisches Dossier“ · nicht live</span>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var report = document.getElementById('report');
+  if (!report) return;
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    report.classList.add('in-view');
+    return;
+  }
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (e.isIntersecting) {
+        report.classList.add('in-view');
+        io.disconnect();
+      }
+    });
+  }, { threshold: 0.4 });
+  io.observe(report);
+})();
+</script>
+</body>
+</html>
