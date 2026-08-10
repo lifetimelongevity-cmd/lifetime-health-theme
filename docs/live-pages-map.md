@@ -306,6 +306,11 @@ sie würden die Template-Settings still überschreiben (Memory `blog-byline`).
 Faktenlage und offene Punkte: `docs/limmroth-faktenblatt.md`,
 Auftrag und Abweichungen: `docs/briefing-expertenseite-aerzte.md` §10.
 
+**Nachtrag 2026-08-10:** Mit `/blogs/longevity-blog/was-ist-spermidin` (Template
+`templates/article.was-ist-spermidin.json`, Start von Cluster 2) sind es **22 Artikel**.
+Die Zahlen „21 Artikel" und „42 Byline-Links" in diesem Abschnitt sind der Stand vom 27.07.
+Spec des Artikels: `docs/cluster2-blog/01-was-ist-spermidin.md`.
+
 **Aus beiden Menüs entfernt, 27.07.2026 (BJ).** Begründung: „Ärztliche Leitung" als
 Menüpunkt ist Geschwafel, die Seite soll eher beiläufig über den Blog erreicht werden.
 Entfernt wurden die Kachel im mobilen Drawer (`sections/header-group.json`) und der Eintrag
