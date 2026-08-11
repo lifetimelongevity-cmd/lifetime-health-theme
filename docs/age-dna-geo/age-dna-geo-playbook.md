@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-07-30
+last_review: 2026-08-11
 canonical_for: age-dna-test-geo-strategie
 supersedes: []
 ---
@@ -187,8 +187,14 @@ Parallel: Off-Site-Outreach an `bioage-test.de` + `zukunftsessen.de` (schnellste
       **Manuskript liegt fertig** in `money-piece-v3-2026-08-11.md`, URL ist noch 404.
 - [x] FAQPage-Schema für beide Live-Artikel ergänzt (11.08.2026). Je sechs vertiefende
       Fragen, bewusst dedup-frei gegen die 12 generischen Hub-Fragen.
-- [ ] Die neun AGE-Artikel von 2023/2024 auf NMN-Niveau ziehen (FAQ, Quellen, Aktualität).
-      Ursachenanalyse dazu: `chatgpt-status-analyse_2026-08-11.md`.
+- [x] Die neun AGE-Artikel von 2023/2024 auf NMN-Niveau ziehen (FAQ, Quellen, Aktualität).
+      **Erledigt 11.08.2026**, zusammen mit vier neuen Entscheidungsartikeln. Alle 13
+      tragen jetzt FAQPage mit je sechs Fragen. Ursachenanalyse:
+      `chatgpt-status-analyse_2026-08-11.md`, Umsetzung und offene Punkte:
+      `A1-umsetzung_2026-08-11.md`.
+- [ ] **Reviewer-Byline nachholen.** Sieben der 13 Artikel nennen Prof. Dr. med. Volker
+      Limmroth als fachlich geprüft, ohne dass eine Durchsicht stattgefunden hat.
+      Entweder einholen oder Byline entfernen. Siehe `A1-umsetzung_2026-08-11.md` §Offene Punkte.
 - [x] Hub-Template `page.biologisches-alter-testen.json` bauen, veröffentlichen und aus
       `/pages/science` verlinken (30.07.2026).
 - [ ] Handlungs-Protokoll (Wedge-Artikel) definieren — was empfiehlt LIFETIME nach dem Ergebnis

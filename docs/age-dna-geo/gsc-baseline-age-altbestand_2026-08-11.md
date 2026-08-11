@@ -10,6 +10,28 @@ Aufgenommen am 11.08.2026, **vor** dem Upgrade. Zweck: Ohne diesen Stand lässt 
 der Überarbeitung nicht mehr belegen, ob sie gewirkt hat. Zeitraum 90 Tage,
 13.05. bis 08.08.2026 (GSC hängt zwei bis drei Tage nach).
 
+> **Vier Handles haben sich am 11.08. geändert. Vor der Nachmessung lesen.**
+> Die Tabelle unten führt die Artikel unter ihrem **alten** Handle. Wer dieselbe
+> Abfrage in 30 Tagen wiederholt und stur nach diesen Pfaden filtert, findet vier
+> Artikel nicht wieder und liest das fälschlich als Absturz. Die Search Console
+> zählt nach der Umstellung auf den neuen Pfad, der alte läuft per 301 weiter.
+>
+> | alter Pfad | neuer Pfad | Grund |
+> |---|---|---|
+> | `biomarker-als-schlussel-zur-langlebigkeit-was-dein-blut-und-speichel-uber-dein-biologisches-alter-verraten` | `biomarker-biologisches-alter` | 104 Zeichen, im A1-Auftrag freigegeben |
+> | `kann-ihr-lebensstil-ihr-biologisches-alter-zuruckdrehen` | `lebensstil-biologisches-alter` | „zurückdrehen“ ist rote Claim-Kategorie, im A1-Auftrag freigegeben |
+> | `epigenetische-uhren-konnen-wir-das-altern-umkehren` | `epigenetische-uhren` | „das Altern umkehren“ in der URL, **nicht vorab freigegeben** |
+> | `dna-tests-ein-tiefer-einblick-in-ihre-genetik` | `dna-test-arten` | Sie-Form in der URL, **nicht vorab freigegeben** |
+>
+> Die beiden unteren Änderungen folgen derselben Begründung, die BJ für die
+> ersten beiden akzeptiert hat (0 Impressionen in 90 Tagen, es ist nichts zu
+> verlieren), sind aber eine eigenmächtige Ausweitung. Wenn sie nicht gewollt
+> sind, lassen sie sich per `articleUpdate` mit `redirectNewHandle: true`
+> zurückdrehen; die 301 zeigt dann in die Gegenrichtung.
+>
+> **Für den Vorher-Nachher-Vergleich zählt ohnehin die Summe über alle neun
+> Artikel**, nicht die Einzelzeile. Die Summe bleibt vergleichbar.
+
 | Artikel | Queries | Impr | Klicks | gew. Position | beste Einzelposition |
 |---|---:|---:|---:|---:|---:|
 | `biologisches-alter-messen` | 0 | 0 | 0 | - | - |
