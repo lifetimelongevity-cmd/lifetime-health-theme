@@ -14,7 +14,9 @@ SPERRE = [
     (r'\bMuhdo\b',                          'Partnername (nie oeffentlich)'),
     (r'MuhdoAge',                           'Uhrname des Partners'),
     (r'\bMAISIE\b',                         'Name des Coach-Systems'),
-    (r'\b187\b',                            'gesperrte Report-Gesamtzahl'),
+    # Nicht die Bandnummer in Zitaten treffen: "Am J Epidemiol 2018;187(6)".
+    # Als Falschtreffer im Fact-Sheet dokumentiert (Korrekturumfang im Theme).
+    (r'(?<!;)\b187\b',                       'gesperrte Report-Gesamtzahl'),
     (r'16\s*(DNA-)?Kategorien',             'gesperrte Kategorienzahl'),
     (r'22\s*(DNA-)?(Kategorien|Bereiche)',  'gesperrte Kategorien-/Bereichszahl'),
     (r'f[uü]nf\s+Epigenetik-Reports',       'gesperrte Reportzahl'),
