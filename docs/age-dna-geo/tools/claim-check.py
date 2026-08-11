@@ -51,9 +51,11 @@ SPERRE = [
 STIL = [
     (r'[—–]',                                          'Em-Dash oder En-Dash', False),
     (r'!',                                             'Ausrufezeichen', False),
-    (r'\bIhre[nmrs]?\b',                               'Sie-Form', True),
-    (r'\bIhnen\b',                                     'Sie-Form', True),
-    (r'\bSie\s+(k[oö]nnen|haben|sind|werden|sollten|m[uü]ssen|erhalten|bekommen|finden)\b', 'Sie-Form', True),
+    # Satzanfang ausklammern: "Sie sind gut untersucht" nach einem Punkt meint im
+    # Zweifel "diese Verfahren", nicht die Anrede. Mitten im Satz bleibt es ein Treffer.
+    (r'(?<![.!?:] )\bIhre[nmrs]?\b',                    'Sie-Form', True),
+    (r'(?<![.!?:] )\bIhnen\b',                          'Sie-Form', True),
+    (r'(?<![.!?:] )\bSie\s+(k[oö]nnen|haben|sind|werden|sollten|m[uü]ssen|erhalten|bekommen|finden)\b', 'Sie-Form', True),
     (r'\brevolution[aä]r\b|\bgame-?chang|\bganzheitlich\b|\bradikal\b', 'pauschaler Verstaerker', False),
 ]
 
