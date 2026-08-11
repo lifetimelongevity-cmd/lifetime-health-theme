@@ -65,15 +65,33 @@ Fertig ist ein Artikel, wenn er hat:
 | 8 | `kann-ihr-lebensstil-ihr-biologisches-alter-zuruckdrehen` | `lebensstil-biologisches-alter` | 2024-04 | Claim-Risiko, siehe unten |
 | 9 | `die-biologie-des-alterns` | `biologie-des-alterns` | 2023-10 | Grundlagen, geringste Dringlichkeit |
 
-### Zwei Artikel brauchen vorab eine Entscheidung von BJ
+### Handles dürfen geändert werden, BJ-Entscheid vom 11.08.2026
 
-- **Nr. 8**, Titel „Kann Ihr Lebensstil Ihr biologisches Alter zurückdrehen?": Der Titel steht in
-  der Sie-Form, während der ganze Shop Du-Form verwendet, und „zurückdrehen" liegt sehr nah an
-  der roten Claim-Kategorie „kehrt Alterung um". Vorschlag: Titel und H1 ändern, Handle über
-  einen 301 umziehen. **Nicht ohne BJ-Freigabe umsetzen**, ein Handle-Wechsel kostet die
-  bestehende Position.
-- **Nr. 7**: Der Handle ist 104 Zeichen lang. Ein Umzug wäre sauberer, kostet aber ebenfalls
-  Position. Erst fragen, dann handeln.
+Die übliche Sorge „Handle-Wechsel kostet Position" wurde gegen die Search Console geprüft und
+trägt hier nicht. Über 90 Tage: `lebensstil-biologisches-alter` hat **1 Impression** aus einer
+einzigen Query, `biomarker-langlebigkeit` hat **5 Impressionen** und in den letzten 14 Tagen
+keine. Beide Artikel haben null Klicks. Es ist nichts zu verlieren.
+
+Damit sind freigegeben:
+
+- **Nr. 8** „Kann Ihr Lebensstil Ihr biologisches Alter zurückdrehen?": Titel und H1 auf Du-Form
+  umstellen und „zurückdrehen" ersetzen, das liegt zu nah an der roten Claim-Kategorie
+  „kehrt Alterung um". Handle mitziehen, 301 setzen.
+- **Nr. 7**: Handle von 104 Zeichen auf eine lesbare Länge kürzen, 301 setzen.
+
+Bei jedem Handle-Wechsel den 301 live prüfen, bevor der nächste Artikel drankommt.
+
+### Tempo: alle neun, nicht gestaffelt
+
+BJ-Entscheid vom 11.08.2026. Der Ausgangsstand rechtfertigt das: Alle neun Artikel zusammen
+bringen über 90 Tage **293 Impressionen und null Klicks**, vier davon ranken auf gar nichts.
+Es gibt keinen Bestand, den eine Staffelung schützen würde.
+
+Der Ausgangsstand ist bereits gesichert in
+`docs/age-dna-geo/gsc-baseline-age-altbestand_2026-08-11.md`, mit Impressionen, Klicks,
+gewichteter Position und den Zielqueries je Artikel. Dieselbe Abfrage 30 Tage nach dem Upgrade
+wiederholen. Erfolgskriterium ist die gewichtete Position und die Zahl der Queries je Artikel,
+nicht der Klick. Klicks folgen erst unterhalb von Position 10.
 
 ## Arbeitsablauf je Artikel
 
@@ -189,8 +207,11 @@ Die Texte von 2023/2024 sind teils in der Sie-Form geschrieben, die wird auf Du 
 - Keine Wettbewerbernamen in diese neun Artikel. Der Anbietervergleich hat seine eigene Seite,
   eine zweite Stelle wäre doppelte Pflege und doppeltes Rechtsrisiko.
 - Keine Genauigkeits- oder Wirkversprechen, auch nicht in abgeschwächter Form.
-- Nicht alle neun in einem Rutsch pushen. Nach den ersten zwei Artikeln 7 Tage warten und in der
-  Search Console prüfen, ob sich die Position bewegt, bevor die restlichen sieben folgen.
+- **Den Kopfbegriff „biologisches alter test" nicht anvisieren.** Diese Query bringt 192
+  Impressionen und landet heute auf der PDP (Position 12,9) und dem Quiz (13,9), also auf den
+  Seiten, die konvertieren. Die Blogartikel bedienen die informationalen Langformen
+  („wie funktioniert", „was bedeutet", „woran erkenne ich"), nicht den kommerziellen Kopf.
+  Sonst nehmen wir uns selbst die Position weg.
 
 ## Nebenbefund zum Mitnehmen
 

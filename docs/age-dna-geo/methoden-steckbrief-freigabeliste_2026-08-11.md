@@ -185,6 +185,23 @@ belegbar, und sie ist genau die Art von ausgewogener Formulierung, die von Sprac
 bevorzugt zitiert wird. Der Wettbewerbsvorteil liegt hier nicht in einer besseren Zahl, sondern
 darin, die Grenze offen zu benennen, während andere sie verschweigen.
 
+## Entscheidungen BJ vom 11.08.2026
+
+| Frage | Entscheidung |
+|---|---|
+| Partner öffentlich nennen? | **Nein.** Der Name bleibt draußen, die Zusammenarbeit wird wie beim Labor als Partnerschaft beschrieben. Der Fingerabdruck-Einwand oben ist zur Kenntnis genommen und akzeptiert |
+| Methodenzahlen verwenden? | **Ja**, in attribuierter und datierter Form: „die zugrunde liegende Uhr wurde 2024 an 2.682 Personen geprüft". Keine Gegenwartsbehauptung über das heute ausgelieferte Kit |
+| Genauigkeitszahl | **Als Grenzangabe**, nicht als Qualitätsargument. 5,97 Jahre Gesamtkohorte gegen 3,49 Jahre gesunde Teilkohorte, mit der Erklärung, dass die Streuung aus dem Gesundheitszustand kommt und nicht aus dem Verfahren |
+| MethylPace | Name des Uhr-Anbieters, nicht LIFETIME-Marke. Wird sachlich weiterverwendet, nicht als eigene Marke inszeniert |
+| Platzierung | **Nicht prominent auf der PDP.** Das ist Detailwissen und gehört in die Tiefe, also auf `/pages/science`. Auf der PDP höchstens ein kurzer Verweis |
+
+### Was daraus folgt
+
+Der Methodenabschnitt wird auf `/pages/science` gebaut, nicht auf der PDP. Er beschreibt die
+epigenetische Ebene mit Zahlen und Datum, die genetische Ebene bis auf Weiteres **ohne Zahlen**,
+weil dafür keine Methodenbeschreibung existiert. Beide Ebenen werden sichtbar getrennt, damit
+die epigenetischen Kennwerte nicht fälschlich auf die Genotypisierung bezogen werden.
+
 ## Nächster Schritt
 
 Sobald Anfrage A beantwortet ist, lässt sich ein Methodenabschnitt auf `/pages/science` und ein
