@@ -47,7 +47,7 @@
 .lt-about-experts__grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-5);            /* 24px */
+  gap: var(--space-7);            /* 48px — ohne Rahmen trennt der Raum */
   list-style: none;
   margin: 0;
   padding: 0;
@@ -59,17 +59,48 @@
   }
 }
 
-/* ── Card ────────────────────────────────────────────────────── */
 /*
-  DECISION: card-info-Regel auf weißem Section-Grund — Border
-  (--color-border-default) + shadow-sm, --radius-md, Padding --space-5.
+  DECISION: Mit Leitkarte dreispaltig. Die Leitkarte spannt über alle
+  drei Spalten, die drei verbleibenden Karten füllen exakt eine Reihe —
+  im 2er-Grid entstünde eine Waisenkarte. Sprung direkt auf eine Spalte
+  bei 900px, weil zwei Spalten bei drei Karten dieselbe Waise erzeugen.
+*/
+.lt-about-experts__grid--with-lead {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+/*
+  Drei Karten ohne Leitkarte: ebenfalls dreispaltig. Das 2×2 oben ist
+  auf vier gleichwertige Karten kalibriert und würde hier eine Waise in
+  der zweiten Reihe stehen lassen. Der Fall entsteht, seit die Leitkarte
+  Limmroth in einer eigenen Section direkt hinter dem Hero sitzt.
+*/
+.lt-about-experts__grid--cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media screen and (max-width: 900px) {
+  .lt-about-experts__grid--with-lead,
+  .lt-about-experts__grid--cols-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Spalte ──────────────────────────────────────────────────── */
+/*
+  DECISION 2026-08-11 (Review): keine Karten mehr, Haarlinien.
+
+  Die Seite erklärt in ihrem eigenen Richtungsvertrag, dass getrennt wird
+  über 1px-Linien und nicht über Kästen, und das Register drei Sections
+  weiter oben nennt die Kachellösung ausdrücklich den Reflex, den es
+  vermeidet. Zwei von sechs Bändern haben trotzdem gerahmte Karten mit
+  Schatten geliefert. Das Argument für die Karte war, dass sie die
+  unterschiedlichen Porträtquellen normalisiert; das leistet aber der
+  einheitliche 96px-Avatar, nicht der Rahmen.
 */
 .lt-about-experts__card {
-  background-color: var(--color-surface-primary);
-  border: 1px solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  padding: var(--space-5);        /* 24px */
-  box-shadow: var(--shadow-sm);
+  border-top: 1px solid var(--color-border-strong);
+  padding-top: var(--space-5);    /* 24px unter der Linie */
   display: flex;
   flex-direction: column;
 }
@@ -99,6 +130,16 @@
   align-items: center;
   justify-content: center;
   color: var(--color-text-muted);
+  /*
+    DECISION 2026-08-11 (Review, 2. Durchgang): Innenlinie statt Karte.
+    Ohne den Kartenrahmen saßen die vier Porträts direkt auf Papier, und
+    weil ihre Bildhintergründe von Weiß bis Dunkelgrau reichen, las sich
+    die Reihe als drei verschiedene Bildqualitäten. Eine Haarlinie um
+    jede Box gibt allen vier dieselbe sichtbare Kante, unabhängig davon,
+    was im Bild dahinter passiert. Die eigentliche Lösung sind einheitlich
+    eng beschnittene Quadrat-Porträts.
+  */
+  box-shadow: inset 0 0 0 1px var(--color-border-strong);
 }
 
 .lt-about-experts__photo {
@@ -115,18 +156,24 @@
 }
 
 /*
-  DECISION: Rolle als Micro-Eyebrow ÜBER dem Namen — Funktion →
-  Person → Vita, wie in der PDP-Expert-Card.
+  DECISION: Rolle über dem Namen, Funktion → Person → Vita.
+
+  DECISION 2026-08-11 (Review, 2. Durchgang): Rolle steht UNTER dem
+  Namen. Oben stand sie nur, weil sie einmal ein Eyebrow war; Register
+  und Team-Band nennen beide zuerst die Person.
+
+  DECISION 2026-08-11 (Review): keine Versalien-Sperrung mehr. Dieselbe
+  Information stand auf einer Seite in zwei Behandlungen, im Register als
+  14px-Satzschrift und hier als 12px-Eyebrow. Das Register wird zuerst
+  gelesen und ist die ruhigere Form, also gewinnt es.
 */
 .lt-about-experts__role {
   font-family: var(--font-body);
-  font-size: var(--text-micro);   /* 12px */
-  font-weight: var(--weight-medium);
+  font-size: var(--text-body-sm); /* 14px, wie im Register */
+  font-weight: var(--weight-regular);
   line-height: var(--leading-tight);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  margin: 0 0 var(--space-1);     /* 4px */
+  color: var(--color-text-secondary);
+  margin: var(--space-1) 0 0;     /* 4px unter dem Namen */
 }
 
 /*
@@ -139,7 +186,7 @@
   font-size: var(--text-section); /* 20px */
   font-weight: var(--weight-bold);
   line-height: var(--leading-tight);
-  color: var(--color-text-primary);
+  color: var(--color-ink);
   margin: 0;
 }
 
@@ -172,8 +219,252 @@
   font-weight: var(--weight-regular);
   font-style: italic;
   line-height: var(--leading-body);
-  color: var(--color-text-primary);
+  color: var(--color-ink);
   margin: 0;
   padding-top: var(--space-4);    /* 16px über dem Zitat */
   margin-top: auto;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Leitkarte (Ergänzung 2026-08-11, Über-uns-Umbau)
+   ────────────────────────────────────────────────────────────────
+   DECISION: Eine Karte läuft über beide Spalten und trägt zusätzlich
+   Belegzeilen und ein Video. Grund: Der Differenzierer der Marke ist
+   eine bestimmte Person (PRODUCT.md § Positioning). Vier optisch
+   gleichwertige Karten behaupten eine Gleichrangigkeit, die es
+   inhaltlich nicht gibt.
+   ════════════════════════════════════════════════════════════════ */
+.lt-about-experts__card--lead {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: var(--space-6);            /* 32px */
+  align-items: start;
+  padding-bottom: var(--space-7); /* 48px vor der nächsten Reihe */
+}
+
+@media screen and (max-width: 900px) {
+  .lt-about-experts__card--lead {
+    grid-template-columns: 1fr;
+  }
+}
+
+.lt-about-experts__main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Standardkarten: __main trägt die Kartenhöhe, damit margin-top:auto
+   am Zitat weiterhin an der Kartenbasis greift. */
+.lt-about-experts__card:not(.lt-about-experts__card--lead) .lt-about-experts__main {
+  flex: 1;
+}
+
+/*
+  DECISION 2026-08-11 (nach zweitem Render): Die Belegzeilen laufen über
+  beide Spalten der Leitkarte, nicht innerhalb der Textspalte. Innen
+  gestapelt wuchs die linke Spalte 250px über das Video hinaus, und
+  rechts unter dem Video stand eine leere Fläche. Über die volle Breite
+  liest sich die Liste zudem als das, was sie ist: ein Datenblatt unter
+  dem Porträt.
+*/
+.lt-about-experts__card--lead > .lt-about-experts__main {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.lt-about-experts__card--lead > .lt-about-experts__video {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.lt-about-experts__card--lead > .lt-about-experts__credentials {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+/* Einspaltig: Auto-Platzierung, Reihenfolge Text → Belege → Video. */
+@media screen and (max-width: 900px) {
+  .lt-about-experts__card--lead > .lt-about-experts__main,
+  .lt-about-experts__card--lead > .lt-about-experts__video,
+  .lt-about-experts__card--lead > .lt-about-experts__credentials {
+    grid-column: auto;
+    grid-row: auto;
+  }
+}
+
+/* ── Belegzeilen ─────────────────────────────────────────────── */
+/*
+  DECISION: Definitionsliste auf Haarlinien, kein Badge-Band. Belege
+  sind Term-plus-Wert-Paare; als Pillen gesetzt verlieren sie genau
+  die Information, die sie belegen sollen.
+*/
+.lt-about-experts__credentials {
+  margin: var(--space-5) 0 0;     /* 24px über der Liste */
+  padding: 0;
+  border-top: 1px solid var(--color-border-default);
+}
+
+.lt-about-experts__credential {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: var(--space-4);            /* 16px */
+  padding: var(--space-3) 0;      /* 12px */
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+@media screen and (max-width: 560px) {
+  .lt-about-experts__credential {
+    grid-template-columns: 1fr;
+    gap: var(--space-1);          /* 4px */
+  }
+}
+
+.lt-about-experts__credential-term {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);   /* 12px */
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin: 0;
+  padding-top: 2px;               /* optische Grundlinie zum 16px-Wert */
+}
+
+.lt-about-experts__credential-value {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm); /* 14px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+/*
+  DECISION: die Behauptung wird selbst zum Link auf ihren Beleg, statt
+  ein zusätzliches „Quelle"-Wort daneben zu setzen. Auszeichnung nur
+  über die Unterstreichung, gleiche Farbe wie die Zeile — kein Teal,
+  das bedeutet auf dieser Seite nichts (Teal heißt Messwert, und hier
+  wird nichts gemessen). Im Hover geht die Zeile auf Ink hoch.
+*/
+.lt-about-experts__credential-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+  transition: color var(--ease-default);
+}
+
+.lt-about-experts__credential-link:hover {
+  color: var(--color-text-primary);
+}
+
+.lt-about-experts__credential-link:focus-visible {
+  outline: 2px solid var(--color-text-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── Video-Fassade ───────────────────────────────────────────── */
+/*
+  DECISION: Klick-zum-Laden statt eingebettetem Player. Vor dem Klick
+  steht ein Bild auf der Seite, kein YouTube-Request und kein
+  Player-Bundle. Erst der Klick tauscht die Fläche gegen den
+  nocookie-Player.
+*/
+.lt-about-experts__video {
+  min-width: 0;
+}
+
+.lt-about-experts__video-facade {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background-color: var(--color-surface-secondary);
+  cursor: pointer;
+}
+
+.lt-about-experts__video-facade:focus-visible {
+  outline: 2px solid var(--color-teal-dark);
+  outline-offset: 2px;
+}
+
+.lt-about-experts__video-poster {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/*
+  Play-Marke: gefüllte Scheibe in der Markenfläche, kein Unicode-Glyph
+  und kein YouTube-Rot. 56px Ziel, deutlich über der Mindestgröße.
+*/
+.lt-about-experts__video-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-dark);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-left: 3px;              /* optische Mitte des Dreiecks */
+  transition: transform var(--ease-default), background-color var(--ease-default);
+}
+
+.lt-about-experts__video-facade:hover .lt-about-experts__video-play {
+  transform: translate(-50%, -50%) scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lt-about-experts__video-play {
+    transition: none;
+  }
+  .lt-about-experts__video-facade:hover .lt-about-experts__video-play {
+    transform: translate(-50%, -50%);
+  }
+}
+
+.lt-about-experts__video-frame {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  border-radius: var(--radius-md);
+  display: block;
+}
+
+.lt-about-experts__video-caption {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm); /* 14px */
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+  margin: var(--space-3) 0 0;     /* 12px */
+}
+
+/*
+  Folgenhinweis unter der Bildunterschrift. Eigene Zeile, eine Stufe
+  leiser: er gehört zur Handlung, nicht zum Inhalt des Videos.
+*/
+.lt-about-experts__video-note {
+  display: block;
+  font-size: var(--text-micro);   /* 12px */
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);     /* 4px */
+}
+
+.lt-about-experts .crs-heading-stack__title,
+.lt-about-experts .crs-heading-stack__subtitle {
+  text-wrap: balance;
 }

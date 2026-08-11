@@ -1,0 +1,109 @@
+{% comment %}
+  LIFETIME — LT Arbeitsregeln
+  ───────────────────────────
+  Ersetzt das Icon-Karten-Grid „Unsere Werte" (lt-benefits) auf der
+  Über-uns-Seite. Statt drei austauschbarer Wertebegriffe stehen hier
+  Regeln, nach denen tatsächlich entschieden wird, jeweils mit ihrer
+  Begründung.
+
+  Inhaltliche Bindung: `lifetime-schreibstil/kern/business-context.md`
+  (Produktphilosophie, Haltung zu Celebrity Marketing, Hochleistung ist
+  nicht automatisch Gesundheit) und PRODUCT.md („Erst testen, dann
+  ergänzen").
+
+  §12 Build Spec:
+  - Surface:          --color-surface-secondary (warm)
+  - Section label:    keiner
+  - Dominant element: Section-Headline (headline_lg)
+  - Content pattern:  NEU „Regelzeilen" — Definitionsliste auf Haarlinien
+  - CTA:              keiner
+  - Removed:          Icon-Pockets, Karten, Card-Shadows
+  - Quality move:     dl statt Kachelgrid — die Regel steht links als
+                      Behauptung, ihre Begründung rechts im Lesemaß
+{% endcomment %}
+
+{{ 'section-lt-about-principles.css' | asset_url | stylesheet_tag }}
+
+<section class="lt-about-principles">
+  <div class="lt-about-principles__container">
+
+    {% render 'section-heading-crs',
+      heading: section.settings.title,
+      subheading: section.settings.subheading,
+      align: 'left',
+      headline_lg: true,
+      heading_tag: 'h2',
+      extra_class: 'lt-about-principles__header'
+    %}
+
+    {%- if section.blocks.size > 0 -%}
+      <dl class="lt-about-principles__list">
+        {%- for block in section.blocks -%}
+          <div class="lt-about-principles__row" {{ block.shopify_attributes }}>
+            <dt class="lt-about-principles__term">{{ block.settings.term | escape }}</dt>
+            {%- if block.settings.description != blank -%}
+              <dd class="lt-about-principles__desc">{{ block.settings.description | escape }}</dd>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </dl>
+    {%- endif -%}
+
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LT Arbeitsregeln",
+  "tag": "section",
+  "class": "lt-about-principles-section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "Heading",
+      "info": "Wenn hier eine Zahl steht, muss sie zur Anzahl der Regel-Blöcke passen. Beim Löschen einer Regel mitzählen.",
+      "default": "Regeln, nach denen wir entscheiden"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "info": "Bildet mit dem Heading einen Block. Gleiche Größe, nur Farbe abgesetzt. Kurz halten: über etwa 55 Zeichen bricht die Subline dreizeilig unter einen einzeiligen Titel und das Paar kippt.",
+      "default": "Sie gelten auch für das, was wir über uns behaupten."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "rule",
+      "name": "Regel",
+      "settings": [
+        {
+          "type": "text",
+          "id": "term",
+          "label": "Regel",
+          "info": "Kurze Behauptung, ein Satz.",
+          "default": "Erst messen, dann empfehlen."
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Begründung",
+          "default": "Warum diese Regel gilt und was sie im Alltag bedeutet."
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Arbeitsregeln",
+      "blocks": [
+        { "type": "rule" },
+        { "type": "rule" },
+        { "type": "rule" },
+        { "type": "rule" }
+      ]
+    }
+  ]
+}
+{% endschema %}

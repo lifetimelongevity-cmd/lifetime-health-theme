@@ -1,0 +1,247 @@
+{% comment %}
+  LIFETIME — LT Founder-Mail-Anmeldung
+  ────────────────────────────────────
+  Der Ausgang der Über-uns-Seite. Die Seite hatte vorher auf ihrer
+  ganzen Länge keinen einzigen CTA.
+
+  Anschluss: Ist die Klaviyo-Listen-ID gesetzt, geht die Adresse per
+  Client-Subscribe an Klaviyo und startet dort F3 Welcome
+  (lifetime-klaviyo/flow-map.md § F3). Ist sie leer, postet das native
+  Shopify-Customer-Formular weiter auf /contact — dasselbe Muster wie
+  im Quiz-Gate (lt-pdp-quiz-v2.liquid). Ohne JavaScript funktioniert
+  immer der Shopify-Weg.
+
+  Einwilligung: Die Zeile am Formular muss ausdrücklich Folge-Mails zu
+  Themen UND Produkten nennen. Bei Single-Opt-in trägt sie zusammen mit
+  Klaviyos Zeitstempel und `custom_source` die Beweislast
+  (flow-map.md § Opt-in-Politik).
+
+  §12 Build Spec:
+  - Surface:          --color-surface-dark (Abschluss, zweiter Bruch)
+  - Section label:    keiner
+  - Dominant element: Heading-Paar links, Eingabefeld rechts
+  - Content pattern:  Split 1/1 — Aussage und Formular auf gleicher Höhe
+  - CTA:              ein Feld, ein Button, kein zweiter Ausgang
+  - Quality move:     das Formular steht NEBEN dem Grund, sich
+                      einzutragen, nicht darunter als Fußzeile
+{% endcomment %}
+
+{{ 'section-lt-about-signup.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'lt-about-signup.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign form_id = 'about-signup-' | append: section.id
+-%}
+
+<section class="lt-about-signup">
+  <div class="lt-about-signup__container">
+    <div class="lt-about-signup__grid">
+
+      <div class="lt-about-signup__intro">
+        {% render 'section-heading-crs',
+          heading: section.settings.title,
+          subheading: section.settings.subheading,
+          align: 'left',
+          on_dark: true,
+          headline_md: true,
+          heading_tag: 'h2',
+          extra_class: 'lt-about-signup__header'
+        %}
+
+        {%- comment -%}
+          Absender benennen. Die Ich-Stimme dieser Section stammt aus dem
+          Gründer-Band weiter oben, dazwischen laufen zwei Bänder in
+          Wir-Form. Ohne diese Zeile ist am Punkt der Einwilligung nicht
+          gesagt, wer schreibt.
+        {%- endcomment -%}
+        {%- if section.settings.sender != blank -%}
+          <p class="lt-about-signup__sender">{{ section.settings.sender | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      <div
+        data-lt-about-signup
+        data-klaviyo-company-id="{{ section.settings.klaviyo_company_id | escape }}"
+        data-klaviyo-list-id="{{ section.settings.klaviyo_list_id | escape }}"
+        data-klaviyo-source="{{ section.settings.klaviyo_source | escape }}"
+        data-error-invalid="{{ section.settings.error_invalid | escape }}"
+        data-error-failed="{{ section.settings.error_failed | escape }}"
+      >
+
+        {%- form 'customer', id: form_id, class: 'lt-about-signup__form' -%}
+          {%- if form.posted_successfully? -%}
+            <p class="lt-about-signup__success">{{ section.settings.success_text | escape }}</p>
+          {%- else -%}
+            <input type="hidden" name="contact[tags]" value="newsletter,ueber-lifetime">
+
+            <div class="lt-about-signup__field">
+              {%- comment -%}
+                Sichtbare, bleibende Beschriftung. Vorher trug nur der
+                Placeholder den Feldnamen, und der verschwindet beim ersten
+                Zeichen. Der Placeholder ist jetzt ein Beispiel, kein Label.
+              {%- endcomment -%}
+              <label class="lt-about-signup__label" for="Email-{{ form_id }}">
+                {{ section.settings.field_label | escape }}
+              </label>
+
+              <div class="lt-about-signup__fieldset">
+              <input
+                type="email"
+                class="lt-about-signup__input"
+                id="Email-{{ form_id }}"
+                name="contact[email]"
+                value="{% if customer %}{{ customer.email }}{% endif %}"
+                placeholder="{{ section.settings.field_placeholder | escape }}"
+                autocomplete="email"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+                required
+                data-signup-input
+              >
+              <button
+                type="submit"
+                class="lt-about-signup__button"
+                data-signup-button
+                data-busy-label="{{ section.settings.button_busy | escape }}"
+              >
+                {{ section.settings.button_label | escape }}
+              </button>
+              </div>
+            </div>
+
+            <p class="lt-about-signup__error" role="alert" data-signup-error hidden></p>
+
+            {%- if section.settings.consent_text != blank -%}
+              <p class="lt-about-signup__consent">
+                {{ section.settings.consent_text }}
+              </p>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endform -%}
+
+        {%- comment -%}
+          role="status" statt stumm: den JS-Erfolg muss ein Screenreader
+          genauso mitbekommen wie den Fehler nebenan (role="alert").
+        {%- endcomment -%}
+        <p class="lt-about-signup__success" role="status" data-signup-success hidden>
+          {{ section.settings.success_text | escape }}
+        </p>
+
+      </div>
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LT Founder-Mails",
+  "tag": "section",
+  "class": "lt-about-signup-section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "Heading",
+      "default": "Ich schreibe auf, was uns beschäftigt"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "info": "Bildet mit dem Heading einen Block. Gleiche Größe, nur Farbe abgesetzt.",
+      "default": "Studien aus dem Montagstermin und Ideen, die wir verworfen haben."
+    },
+    {
+      "type": "text",
+      "id": "sender",
+      "label": "Absenderzeile",
+      "info": "Wer schreibt. Muss stehen, weil zwischen dem Gründer-Band und dieser Section zwei Bänder in Wir-Form liegen.",
+      "default": "Geschrieben von Benedikt Junker, Co-Founder und COO"
+    },
+    {
+      "type": "text",
+      "id": "field_label",
+      "label": "Feldbeschriftung",
+      "info": "Steht sichtbar über dem Feld und bleibt beim Tippen stehen.",
+      "default": "E-Mail-Adresse"
+    },
+    {
+      "type": "text",
+      "id": "field_placeholder",
+      "label": "Beispiel im Feld",
+      "info": "Beispiel, nicht Beschriftung. Nie denselben Text wie die Feldbeschriftung eintragen.",
+      "default": "name@beispiel.de"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button",
+      "default": "Eintragen"
+    },
+    {
+      "type": "text",
+      "id": "button_busy",
+      "label": "Button während des Sendens",
+      "info": "Gleiches Verb wie der Button, damit der Zustand als derselbe Vorgang lesbar bleibt.",
+      "default": "Wird eingetragen"
+    },
+    {
+      "type": "textarea",
+      "id": "success_text",
+      "label": "Bestätigungstext",
+      "default": "Danke, du stehst auf der Liste. Die erste Mail kommt, sobald es etwas zu berichten gibt."
+    },
+    {
+      "type": "text",
+      "id": "error_invalid",
+      "label": "Fehler: Adresse unvollständig",
+      "info": "Wird per role=\"alert\" vorgelesen, also ohne den Kontext des Formulars. Muss allein verständlich sein.",
+      "default": "Diese E-Mail-Adresse sieht nicht vollständig aus. Bitte prüfe sie noch einmal."
+    },
+    {
+      "type": "text",
+      "id": "error_failed",
+      "label": "Fehler: Senden fehlgeschlagen",
+      "info": "Wird per role=\"alert\" vorgelesen. Den Vorgang benennen, nicht „das“.",
+      "default": "Die Anmeldung ist gerade nicht durchgegangen. Bitte versuche es in einem Moment noch einmal."
+    },
+    {
+      "type": "richtext",
+      "id": "consent_text",
+      "label": "Einwilligungszeile",
+      "info": "Muss Folge-Mails zu Themen UND Produkten ausdrücklich nennen und auf die Datenschutzerklärung verlinken (flow-map.md § Opt-in-Politik).",
+      "default": "<p>Mit dem Eintragen bekommst du Mails zu Longevity-Themen und zu LIFETIME-Produkten. Abmelden geht in jeder Mail mit einem Klick. Wie wir mit deinen Daten umgehen, steht in der <a href=\"/policies/privacy-policy\">Datenschutzerklärung</a>.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Anschluss (Klaviyo)"
+    },
+    {
+      "type": "text",
+      "id": "klaviyo_company_id",
+      "label": "Klaviyo Public API Key",
+      "info": "Öffentlicher Account-Key aus Klaviyo unter Settings → API Keys. Nicht der Private Key."
+    },
+    {
+      "type": "text",
+      "id": "klaviyo_list_id",
+      "label": "Klaviyo Listen-ID (Newsletter)",
+      "info": "6-stellige ID aus der Listen-URL. SOLANGE LEER: Der Submit läuft über Shopify /contact und kein Klaviyo-Flow startet."
+    },
+    {
+      "type": "text",
+      "id": "klaviyo_source",
+      "label": "Klaviyo Quelle (custom_source)",
+      "info": "Erscheint in Klaviyo als Herkunft des Profils.",
+      "default": "Über LIFETIME"
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Founder-Mails"
+    }
+  ]
+}
+{% endschema %}

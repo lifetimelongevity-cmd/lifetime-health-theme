@@ -88,29 +88,29 @@
 
     <figure class="lts__media">
       <div class="lts__media-box">
-        {%- liquid
-          comment
-            SVG-Assets werden inline gerendert statt als <img>, damit die
-            Diagramme animierbar sind (Draw-on-view, siehe javascript-Tag).
-            Die Assets tragen selbst role="img" + aria-label. Externe URLs
-            und Nicht-SVGs laufen weiter über den <img>-Pfad.
-          endcomment
-          assign sp_inline_svg = false
-          if sp_img_asset != blank
-            unless sp_img_asset contains '://'
-              if sp_img_asset contains '.svg'
-                assign sp_inline_svg = true
-              endif
-            endunless
-          endif
-        -%}
-        {%- if sp_inline_svg -%}
-          <div class="lts__media-svg">{{ sp_img_asset | inline_asset_content }}</div>
-        {%- elsif sp_img_src != blank -%}
+        {%- comment -%}
+          Die drei Science-Diagramme werden inline gerendert statt als <img>,
+          damit sie animierbar sind (Draw-on-view, siehe javascript-Tag).
+          Inline-Quelle sind Snippets (`snippets/science-svg-*.liquid`), weil
+          `inline_asset_content` auf diesem Store leer rendert. Die Snippets
+          sind Kopien der gleichnamigen Assets; Änderungen an den Diagrammen
+          müssen in beiden landen. Die SVGs tragen selbst role="img" +
+          aria-label. Unbekannte Assets laufen weiter über den <img>-Pfad.
+        {%- endcomment -%}
+        {%- case sp_img_asset -%}
+          {%- when 'science-healthspan-luecke.svg' -%}
+            <div class="lts__media-svg">{% render 'science-svg-healthspan-luecke' %}</div>
+          {%- when 'science-epigenetik-alter.svg' -%}
+            <div class="lts__media-svg">{% render 'science-svg-epigenetik-alter' %}</div>
+          {%- when 'science-genetik-anlagen.svg' -%}
+            <div class="lts__media-svg">{% render 'science-svg-genetik-anlagen' %}</div>
+          {%- else -%}
+        {%- if sp_img_src != blank -%}
           <img src="{{ sp_img_src }}" alt="{{ sp_img_alt | escape }}" class="lts__media-img" loading="lazy">
         {%- elsif section.settings.image != blank -%}
           {{ section.settings.image | image_url: width: 1000 | image_tag: loading: 'lazy', class: 'lts__media-img', alt: sp_img_alt }}
         {%- endif -%}
+        {%- endcase -%}
       </div>
       {%- if section.settings.caption != blank -%}
         <figcaption class="lts__caption">{{ section.settings.caption | escape }}</figcaption>

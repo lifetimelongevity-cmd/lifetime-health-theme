@@ -1,0 +1,210 @@
+/*
+  LIFETIME — section-lt-about-founder.css
+  Pattern „Gründer-Statement": dunkle Fläche, Byline-Zeile unter der
+  Überschrift, danach der Fließtext in einer schmalen Lesespalte.
+  Der Text läuft in Ich-Form (lifetime-schreibstil/PROJEKT.md,
+  Sprecher-Modus „Founder- und Über-uns-Inhalte").
+  Section-Header-Typografie kommt aus crs-heading-stack (global).
+  Token references: design-governance §3, §4, §6.
+*/
+
+/* ── Section shell ──────────────────────────────────────────── */
+/*
+  DECISION: --color-surface-dark als bewusster Rhythmusbruch nach zwei
+  hellen Flächen. Die dunkle Fläche markiert zugleich den Wechsel der
+  Stimme: alles davor ist Registratur, hier spricht eine Person.
+*/
+.lt-about-founder {
+  background-color: var(--color-surface-dark);
+  color: var(--color-text-on-dark);
+  padding-top: var(--space-9);    /* 80px desktop */
+  padding-bottom: var(--space-9);
+}
+
+/*
+  DECISION 2026-08-11 (nach erstem Render): keine zweite Spalte mehr.
+  Die erste Fassung stellte die Attribution als 4fr-Spalte neben den
+  Text. Das Porträt ist 96px breit, die Spalte war 350px, und darunter
+  standen auf 1230px Sectionhöhe rund 700px leere dunkle Fläche. Ein
+  Brief braucht keine zweite Spalte, er braucht eine Lesespalte und
+  eine Byline.
+
+  KORREKTUR 2026-08-11 (Review): der Container bleibt bei 1200px wie
+  alle anderen Sections. Ein zentrierter 820er-Container hatte die linke
+  Kante für genau eine Section um 190px verschoben, auf einer Seite,
+  deren ganze Ordnung eine einzige linke Kante ist. Schmal wird jetzt
+  der Inhalt, nicht der Container.
+*/
+.lt-about-founder__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+@media screen and (max-width: 768px) {
+  .lt-about-founder {
+    padding-top: var(--space-8);  /* 64px mobile */
+    padding-bottom: var(--space-8);
+  }
+  .lt-about-founder__container {
+    padding: 0 var(--space-4);
+  }
+}
+
+/* ── Kopfzeile ───────────────────────────────────────────────── */
+/*
+  DECISION 2026-08-11 (BJ: „warum alles linksseitig?"): Überschrift und
+  Byline teilen sich eine Zeile über die volle Breite. Vorher standen
+  beide untereinander in einer 36rem-Spalte, und rechts blieben rund
+  600px dunkle Fläche ohne Inhalt.
+
+  Der frühere Einwand gegen eine zweite Spalte (siehe DECISION oben:
+  Porträtspalte mit 700px Leere darunter) greift hier nicht: Die
+  Byline steht NEBEN der Überschrift, nicht neben dem Fließtext. Beide
+  Spalten enden auf derselben Grundlinie und die Haarlinie darunter
+  schließt die Zeile ab.
+*/
+.lt-about-founder__top {
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+  gap: var(--space-8);            /* 64px */
+  align-items: end;
+  padding-bottom: var(--space-5); /* 24px */
+  margin-bottom: var(--space-7);  /* 48px → Text */
+  border-bottom: 1px solid rgba(247, 247, 244, 0.2);
+}
+
+@media screen and (max-width: 900px) {
+  .lt-about-founder__top {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);          /* 32px gestapelt */
+    align-items: start;
+  }
+}
+
+.lt-about-founder__header {
+  max-width: 34rem;               /* Überschriften-Lesemaß */
+  margin-bottom: 0;
+}
+
+/*
+  Ohne Balance bricht das 36px-Paar in Waisenzeilen um („empfehlen“
+  allein auf Zeile drei).
+*/
+.lt-about-founder .crs-heading-stack__title,
+.lt-about-founder .crs-heading-stack__subtitle {
+  text-wrap: balance;
+}
+
+/* ── Byline ──────────────────────────────────────────────────── */
+/*
+  DECISION: Die Attribution steht als Zeile ZWISCHEN Überschrift und
+  Text, wie eine Magazin-Byline, und schließt mit einer Haarlinie ab.
+  Wer spricht, steht damit vor dem ersten Satz, nicht als Signatur
+  darunter, und kostet keine zweite Spalte.
+*/
+/*
+  Die Haarlinie sitzt jetzt unter der ganzen Kopfzeile (__top), nicht
+  mehr unter der Byline allein. Sonst liefe sie auf halber Breite ins
+  Leere und widerspräche der Formregel „getrennt wird über eine Linie,
+  die die Spalte auch abschließt".
+*/
+.lt-about-founder__byline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);            /* 16px */
+}
+
+.lt-about-founder__portrait {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-md);
+  background-color: rgba(247, 247, 244, 0.1);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.lt-about-founder__portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;    /* intentional: Gesichts-Bias */
+  display: block;
+}
+
+.lt-about-founder__name {
+  font-family: var(--font-heading);
+  font-size: var(--text-body-lg); /* 18px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  color: var(--color-text-on-dark);
+  margin: 0 0 var(--space-1);     /* 4px */
+}
+
+.lt-about-founder__role {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm); /* 14px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  color: rgba(247, 247, 244, 0.72);
+  margin: 0;
+}
+
+/* ── Fließtext ───────────────────────────────────────────────── */
+/*
+  DECISION 2026-08-11 (BJ: „viel zu viel Prosa-Text"): Der Text läuft
+  zweispaltig. Fünf gekürzte Absätze stehen damit auf halber Höhe, und
+  die dunkle Fläche wird auf ganzer Breite getragen statt links
+  vollgeschrieben und rechts leer gelassen.
+
+  Das Lesemaß regelt jetzt die Spaltenbreite, nicht mehr ein max-width
+  am Absatz: 1152px Inhalt minus 64px Spalte ergibt rund 544px, bei
+  18px Lato etwa 67 Zeichen und damit im Korridor.
+
+  break-inside: avoid hält Absätze zusammen. Ohne das reißt ein Absatz
+  mitten im Satz von Spalte eins nach Spalte zwei.
+*/
+.lt-about-founder__body {
+  columns: 2;
+  column-gap: var(--space-8);     /* 64px */
+}
+
+@media screen and (max-width: 900px) {
+  .lt-about-founder__body {
+    columns: 1;
+  }
+}
+
+/*
+  Erster Absatz in voller Deckkraft, die folgenden leicht abgesetzt:
+  der Einstieg trägt die Szene, danach übernimmt der Gedanke.
+*/
+.lt-about-founder__body p {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg); /* 18px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: rgba(247, 247, 244, 0.82);
+  margin: 0 0 var(--space-5);     /* 24px zwischen Absätzen */
+  break-inside: avoid;
+}
+
+.lt-about-founder__body p:first-child {
+  color: var(--color-text-on-dark);
+}
+
+.lt-about-founder__body p:last-child {
+  margin-bottom: 0;
+}
+
+@media screen and (max-width: 900px) {
+  .lt-about-founder__body p {
+    max-width: 36rem;             /* einspaltig braucht der Absatz wieder einen Deckel */
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .lt-about-founder__body p {
+    font-size: var(--text-body);  /* 16px */
+  }
+}

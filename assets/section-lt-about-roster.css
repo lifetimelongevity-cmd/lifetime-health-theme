@@ -1,0 +1,305 @@
+/*
+  LIFETIME — section-lt-about-roster.css
+  Pattern „Namensregister": Heading-Paar links, haarlinien-getrennte
+  Personenzeilen rechts. Ersetzt den früheren Stock-Foto-Hero der
+  Über-uns-Seite (photographischer Lifestyle-Hero ist Anti-Referenz,
+  docs/design-governance.md §5).
+  Trennung läuft über 1px-Haarlinien, nicht über Karten oder Boxen.
+  Section-Header-Typografie kommt aus crs-heading-stack (global).
+  Token references: design-governance §3, §4, §6.
+*/
+
+/* ── Section shell ──────────────────────────────────────────── */
+.lt-about-roster {
+  background-color: var(--color-paper);
+  padding-top: var(--space-9);    /* 80px desktop */
+  padding-bottom: var(--space-9);
+}
+
+.lt-about-roster__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+@media screen and (max-width: 768px) {
+  .lt-about-roster {
+    padding-top: var(--space-8);  /* 64px mobile */
+    padding-bottom: var(--space-8);
+  }
+  .lt-about-roster__container {
+    padding: 0 var(--space-4);
+  }
+}
+
+/* ── Split grid ──────────────────────────────────────────────── */
+/*
+  DECISION: 5/7-Asymmetrie wie lt-about-mission — die Aussage steht
+  links kompakt, das Register bekommt rechts die Breite. Das Register
+  ist damit im ersten Viewport, nicht 3000px weiter unten.
+  align-items: start hält die Headline oben, auch wenn das Register
+  länger wird.
+*/
+.lt-about-roster__grid {
+  display: grid;
+  grid-template-columns: 5fr 7fr;
+  gap: var(--space-8);            /* 64px */
+  align-items: start;
+}
+
+@media screen and (max-width: 900px) {
+  .lt-about-roster__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);          /* 32px gestapelt */
+  }
+}
+
+/* ── Intro-Spalte ────────────────────────────────────────────── */
+/*
+  Kein eigenes max-width: die 5fr-Spalte ist auf 1200px Container bereits
+  ~450px breit, das ist das Lesemaß der 36px-Headline. Ein zusätzlicher
+  Deckel würde das Heading-Paar auf zwei Wörter pro Zeile pressen.
+*/
+.lt-about-roster__intro {
+  min-width: 0;
+}
+
+.lt-about-roster__note {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);  /* 14px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: var(--space-5) 0 0;      /* 24px unter dem Heading-Paar */
+  max-width: 28rem;
+}
+
+/* ── Register ────────────────────────────────────────────────── */
+/*
+  DECISION: Haarlinien-Zeilen statt Karten. Sieben Karten wären die
+  Kachel-Reflexlösung; als Register liest sich dieselbe Information
+  wie das Impressum eines Dossiers und bleibt im ersten Viewport
+  vollständig sichtbar.
+
+  DECISION 2026-08-11 (nach erstem Render): standardmäßig OHNE Porträts.
+  Die vorhandenen Personenfotos sind unterschiedlich weit gefasste
+  Halbtotalen. Auf 40px heruntergerechnet wird daraus bei mehreren
+  Personen eine Fläche mit einem kleinen Kopf darin, und die Reihe
+  liest sich unruhig statt ruhig. Die Gesichter stehen 700px weiter
+  unten in 96px und in der Gründer-Galerie, dort tragen sie. Wer
+  Porträts im Register will, braucht eng beschnittene Quadrate;
+  dann greift der --with-photos-Modifier.
+*/
+.lt-about-roster__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-border-strong);
+}
+
+.lt-about-roster__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+  align-items: baseline;
+  column-gap: var(--space-5);      /* 24px */
+  padding: var(--space-4) 0;       /* 16px */
+  border-bottom: 1px solid var(--color-border-strong);
+}
+
+.lt-about-roster__list--with-photos .lt-about-roster__row {
+  grid-template-columns: 40px minmax(0, 1fr) minmax(0, auto);
+  align-items: center;
+  column-gap: var(--space-4);      /* 16px */
+}
+
+@media screen and (max-width: 560px) {
+  .lt-about-roster__row {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--space-1);       /* 4px */
+    align-items: start;
+  }
+  .lt-about-roster__list--with-photos .lt-about-roster__row {
+    grid-template-columns: 40px minmax(0, 1fr);
+    align-items: start;
+  }
+}
+
+/* ── Porträt (optional) ──────────────────────────────────────── */
+.lt-about-roster__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface-secondary);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-muted);
+}
+
+@media screen and (max-width: 560px) {
+  .lt-about-roster__avatar {
+    grid-row: span 2;
+  }
+}
+
+.lt-about-roster__photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 25%;     /* intentional: Gesichts-Bias */
+  display: block;
+}
+
+/* ── Name + Rolle ────────────────────────────────────────────── */
+.lt-about-roster__name {
+  font-family: var(--font-heading);
+  font-size: var(--text-body-lg);  /* 18px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.lt-about-roster__role {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);  /* 14px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  color: var(--color-text-secondary);
+  margin: 0;
+}
+
+@media screen and (min-width: 561px) {
+  .lt-about-roster__role {
+    text-align: right;
+  }
+}
+
+/* ── Zeilenumbruch ───────────────────────────────────────────── */
+/*
+  Ohne Balance bricht das 36px-Paar in Waisenzeilen um („stehen,“
+  allein auf Zeile zwei). balance verteilt die Zeilen gleichmäßig,
+  Browser ohne Unterstützung fallen auf normales Umbrechen zurück.
+*/
+.lt-about-roster .crs-heading-stack__title,
+.lt-about-roster .crs-heading-stack__subtitle {
+  text-wrap: balance;
+}
+
+/* ── Wissenschafts-Grafik „Eine Probe, zwei Auskünfte" ──────── */
+/*
+  DECISION 2026-08-11 (BJ): Das Namensregister ist aus dem ersten
+  Viewport raus, an seiner Stelle steht eine Grafik. Gezeichnet wird
+  nicht die Doppelhelix (Kategorie-Klischee, behauptet nichts über
+  diese Marke), sondern die tatsächliche Position: aus EINER Probe
+  kommen zwei verschieden geartete Auskünfte. Oben elf Positionen,
+  die feststehen, unten dieselben elf als Messwerte, die sich bewegen.
+
+  Die Grafik ist selbst nach der Formregel dieser Seite gebaut:
+  Haarlinien, keine Kästen, kein Schatten, keine Fläche. Beschriftung
+  läuft als HTML darum herum, damit sie beim Skalieren ihre Größe hält.
+*/
+.lt-about-roster__diagram {
+  margin: 0;
+  min-width: 0;
+}
+
+.lt-about-roster__plot {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: var(--space-4) 0;       /* 16px zu den Beschriftungen */
+  overflow: visible;
+}
+
+/* Achse und Verbinder: 1px-Haarlinien, wie überall auf dieser Seite */
+.lt-about-roster__axis {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+}
+
+.lt-about-roster__axis--faint {
+  stroke-dasharray: 2 5;
+}
+
+/*
+  Die Verbinder binden gleiche Position oben an gleiche Position
+  unten. Sie müssen als Struktur lesen, nicht als Gitter, deshalb
+  deutlich schwächer als die Achsen.
+*/
+.lt-about-roster__tie path {
+  stroke: var(--color-border-strong);
+  stroke-width: 1;
+  opacity: 0.55;
+}
+
+/* Feststehend: offene Kreise in Ink. Nichts ist gefüllt, weil nichts
+   gemessen wurde — die Anlage steht einfach da. */
+.lt-about-roster__locus circle {
+  fill: var(--color-paper);
+  stroke: var(--color-text-primary);
+  stroke-width: 1.5;
+}
+
+/*
+  Beweglich: Teal. Auf dieser Seite war Teal bisher aus, weil sie
+  keinen Messwert zeigte. Sie zeigt jetzt einen, und Teal bedeutet im
+  System exakt das (DESIGN.md § Measured-Teal Rule). Die Farbe
+  markiert die bewegliche Spur und sonst nichts auf der ganzen Seite.
+*/
+.lt-about-roster__curve {
+  stroke: var(--color-teal-dark);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+.lt-about-roster__value circle {
+  fill: var(--color-teal-dark);
+  stroke: none;
+}
+
+/* ── Beschriftung der Spuren ─────────────────────────────────── */
+.lt-about-roster__track-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);            /* 8px */
+  flex-wrap: wrap;
+  margin: 0;
+}
+
+.lt-about-roster__track-head--b {
+  margin-top: var(--space-2);     /* 8px unter die Kurve */
+}
+
+.lt-about-roster__track-label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);   /* 12px */
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-primary);
+}
+
+.lt-about-roster__track-note {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm); /* 14px */
+  font-weight: var(--weight-regular);
+  color: var(--color-text-secondary);
+}
+
+/*
+  Die Unterschrift trägt den Zusammenhang. Ohne sie stehen zwei Spuren
+  ohne Grund untereinander. Haarlinie darüber, wie jede Trennung hier.
+*/
+.lt-about-roster__diagram-caption {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm); /* 14px */
+  line-height: var(--leading-body);
+  color: var(--color-text-secondary);
+  margin: var(--space-5) 0 0;     /* 24px */
+  padding-top: var(--space-4);    /* 16px */
+  border-top: 1px solid var(--color-border-strong);
+}

@@ -1,0 +1,142 @@
+{% comment %}
+  LIFETIME — LT Gründer-Statement
+  ───────────────────────────────
+  Trägt den Ich-Text der Über-uns-Seite. Sprecher-Modus laut
+  `lifetime-schreibstil/PROJEKT.md`: „Founder- und Über-uns-Inhalte →
+  deutliche Ich-Founder-Stimme". Der Text ersetzt die frühere
+  `lt-about-mission`-Section mit ihrem Wir-Vision-Block.
+
+  Inhaltliche Bindung: `lifetime-schreibstil/kern/business-context.md`
+  (Montagstreffen, Versorgungslücke, Reihenfolge Messen vor Empfehlen)
+  und `kern/stil-dna.md` (konkrete Szene vor abstrakter These, keine
+  Em-Dashes, keine Dreiklang-Slogans).
+
+  §12 Build Spec:
+  - Surface:          --color-surface-dark (Rhythmusbruch + Stimmwechsel)
+  - Section label:    keiner
+  - Dominant element: Heading-Paar, danach der Fließtext (18px)
+  - Content pattern:  Kopfzeile über volle Breite (Überschrift links,
+                      Byline rechts), darunter der Text zweispaltig
+  - CTA:              keiner
+  - Removed:          Wir-Vision-Absätze der alten Mission-Section
+  - Quality move:     zwei Spalten statt einer linken Wand. Derselbe
+                      Text steht damit halb so hoch, und die dunkle
+                      Fläche trägt ihn auf ganzer Breite
+
+  Ergänzung 2026-08-11 (BJ: „viel zu viel Prosa-Text, warum alles
+  linksseitig?"): Der Essay ist von acht auf fünf Absätze gekürzt.
+  Raus sind die Überleitung „Genau da fängt der Grund an", der
+  Buch-Absatz (die Angabe steht als Belegzeile bei Limmroth) und die
+  ausführliche Erklärung von „erst messen, dann empfehlen" — die stand
+  als Regel 1 im nächsten Band gleich noch einmal. Das Layout läuft
+  jetzt zweispaltig, damit der Text die Fläche füllt statt sie links
+  liegen zu lassen.
+{% endcomment %}
+
+{{ 'section-lt-about-founder.css' | asset_url | stylesheet_tag }}
+
+<section class="lt-about-founder">
+  <div class="lt-about-founder__container">
+
+    {%- comment -%}
+      Kopfzeile über die volle Breite: Überschrift links, Byline rechts.
+      Vorher standen beide untereinander in einer 36rem-Spalte und die
+      rechte Hälfte der dunklen Fläche blieb leer.
+    {%- endcomment -%}
+    <div class="lt-about-founder__top">
+      {% render 'section-heading-crs',
+        heading: section.settings.title,
+        subheading: section.settings.subheading,
+        align: 'left',
+        on_dark: true,
+        headline_lg: true,
+        heading_tag: 'h2',
+        extra_class: 'lt-about-founder__header'
+      %}
+
+      {%- if section.settings.name != blank -%}
+        <div class="lt-about-founder__byline">
+          {%- if section.settings.photo != blank -%}
+            <div class="lt-about-founder__portrait">
+              {{
+                section.settings.photo
+                | image_url: width: 168
+                | image_tag:
+                  loading: 'lazy',
+                  class: 'lt-about-founder__portrait-img',
+                  width: 56,
+                  height: 56,
+                  alt: section.settings.name
+              }}
+            </div>
+          {%- endif -%}
+
+          <div>
+            <p class="lt-about-founder__name">{{ section.settings.name | escape }}</p>
+            {%- if section.settings.role != blank -%}
+              <p class="lt-about-founder__role">{{ section.settings.role | escape }}</p>
+            {%- endif -%}
+          </div>
+        </div>
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.body != blank -%}
+      <div class="lt-about-founder__body">
+        {{ section.settings.body }}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LT Gründer-Statement",
+  "tag": "section",
+  "class": "lt-about-founder-section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "Heading",
+      "default": "Warum es LIFETIME gibt"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "info": "Bildet mit dem Heading einen Block. Gleiche Größe, nur Farbe abgesetzt. Eigener vollständiger Satz, kein grammatisches Anhängsel des Headings.",
+      "default": "Und warum wir messen, bevor wir empfehlen."
+    },
+    {
+      "type": "image_picker",
+      "id": "photo",
+      "label": "Porträt der sprechenden Person"
+    },
+    {
+      "type": "text",
+      "id": "name",
+      "label": "Name",
+      "default": "Benedikt Junker"
+    },
+    {
+      "type": "text",
+      "id": "role",
+      "label": "Rolle",
+      "default": "Co-Founder und COO von LIFETIME"
+    },
+    {
+      "type": "richtext",
+      "id": "body",
+      "label": "Text (Ich-Form)",
+      "info": "Sprecher-Modus laut lifetime-schreibstil: deutliche Ich-Founder-Stimme.",
+      "default": "<p>Montags sitzen wir zusammen und gehen durch, was in der Woche davor aufgefallen ist.</p>"
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT Gründer-Statement"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,312 @@
+{% comment %}
+  LIFETIME — LT About Register (Über-uns-Auftakt)
+  ──────────────────────────────────────────────
+  Ersetzt `lt-science-hero` als Auftakt der Über-uns-Seite. Trägt das
+  H1 der Seite plus das Namensregister aller Personen.
+
+  Warum kein Hero-Bild: Der frühere Auftakt war ein Stock-Bergfoto.
+  Photographische Lifestyle-Heroes sind in dieser Bildwelt
+  Anti-Referenz (docs/design-governance.md §5), und ein Bergpanorama
+  belegt nichts über LIFETIME. Die Personen sind der Beleg.
+
+  §12 Build Spec:
+  - Surface:          --color-surface-primary (#f7f7f4 via Theme)
+  - Section label:    keiner — die Headline trägt den Kontext selbst
+  - Dominant element: H1-Heading-Paar (headline_lg)
+  - Content pattern:  rechte Spalte umschaltbar (`visual`):
+                      „Namensregister" = haarlinien-getrennte
+                      Personenzeilen, „Wissenschafts-Grafik" = die
+                      Zwei-Spuren-Grafik „Eine Probe, zwei Auskünfte"
+  - CTA:              keiner (der Ausgang sitzt am Seitenende)
+  - Removed:          Hero-Stockfoto, dekorativer Kicker
+  - Quality move:     die Grafik ist nach derselben Formregel gebaut
+                      wie die Seite: Haarlinien, keine Kästen, keine
+                      Fläche, Beschriftung als HTML statt SVG-Text
+
+  Änderung 2026-08-11 (BJ): Auf /pages/ueber-lifetime steht die Grafik,
+  nicht mehr das Register. Die Personen-Blöcke bleiben im Schema, weil
+  die Section als Preset weiter das Register bauen können soll.
+{% endcomment %}
+
+{{ 'section-lt-about-roster.css' | asset_url | stylesheet_tag }}
+
+{%- comment -%}
+  Richtungsvertrag dieser Seite. Bleibt bewusst im gerenderten Markup,
+  damit er auf der Live-Seite auffindbar ist (Seed-Key greppbar).
+{%- endcomment -%}
+<!--
+  IMPECCABLE DIRECTION CONTRACT · /pages/ueber-lifetime · seed cd519b65
+  THESIS: Die Seite sagt zuerst, warum es LIFETIME gibt, und zeichnet daneben,
+    worauf die Arbeit beruht. Personen kommen als Beleg danach: erst das
+    Management-Team, dann die Ärzte mit ihren Vitae.
+  OWN-WORLD: LIFETIME-Livepalette unverändert (Paper #f7f7f4 / #f2f1ed, Slate
+    #364f56, Ink #26251e, Teal nur für Messwerte). Trennung über 1px-Haarlinien
+    statt Kästen. Helvetica Neue für Überschriften, Lato für Fließtext,
+    Heading-Pair-Regel (Titel und Subline gleich groß, nur Opacity trennt).
+  STORY: Der Besucher liest die Mission als H1 und sieht daneben, dass aus einer
+    Probe zwei verschiedene Auskünfte kommen. Danach in Ich-Stimme, warum es
+    LIFETIME gibt, danach die vier Arbeitsregeln, danach das Management-Team,
+    danach die Ärzte, und am Ende trägt er sich für die Founder-Mails ein.
+  FIRST VIEWPORT: Links das H1-Heading-Paar in 36px mit der Arbeitsthese,
+    rechts die Zwei-Spuren-Grafik. Kein Foto, keine Kachel, keine Namensliste.
+    Die primäre Aktion sitzt am Seitenende.
+  FORM: Mission-first mit gezeichnetem Beleg. Reihenfolge und Hero-Grafik am
+    11.08.2026 auf BJ-Zuruf gesetzt, Seed-Key cd519b65.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the
+    finish review, the verdict, and DESIGN.md
+-->
+
+<section class="lt-about-roster">
+  <div class="lt-about-roster__container">
+    <div class="lt-about-roster__grid">
+
+      <div class="lt-about-roster__intro">
+        {% render 'section-heading-crs',
+          heading: section.settings.title,
+          subheading: section.settings.subheading,
+          align: 'left',
+          headline_lg: true,
+          heading_tag: 'h1'
+        %}
+
+        {%- if section.settings.note != blank -%}
+          <p class="lt-about-roster__note">{{ section.settings.note | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      {%- liquid
+        comment
+          Porträts sind optional. Nur wenn mindestens ein Block ein Bild
+          trägt, bekommt das Register die Bildspalte. Sonst läuft es als
+          reine Namensliste, siehe DECISION in section-lt-about-roster.css.
+        endcomment
+        assign has_photos = false
+        for block in section.blocks
+          if block.settings.photo != blank
+            assign has_photos = true
+          endif
+        endfor
+      -%}
+
+      {%- if section.settings.visual == 'diagram' -%}
+        {%- comment -%}
+          „Eine Probe, zwei Auskünfte."
+
+          Warum diese Grafik und keine Doppelhelix: Die Helix ist das
+          Kategorie-Klischee schlechthin und behauptet nichts, was diese
+          Marke von anderen unterscheidet. Gezeichnet wird stattdessen
+          die tatsächliche wissenschaftliche Position (PRODUCT.md
+          § Positioning): aus EINER Speichelprobe kommen zwei verschieden
+          geartete Auskünfte. Oben elf Positionen, die feststehen. Unten
+          dieselben elf Positionen als Messwerte, die sich bewegen. Die
+          senkrechten Haarlinien binden gleiche Position an gleiche
+          Position, damit der Vergleich und nicht die Dekoration liest.
+
+          Teal: Auf dieser Seite war Teal bisher aus, weil sie keinen
+          Messwert zeigte. Sie zeigt jetzt einen. Teal bedeutet im System
+          exakt „das ist ein Messwert" (DESIGN.md § Measured-Teal Rule),
+          also markiert es hier die bewegliche Spur und nichts sonst.
+
+          Die Beschriftung steht als HTML um die Grafik herum, nicht als
+          <text> darin: SVG-Text skaliert mit und wäre auf dem Handy
+          rund 7px groß.
+        {%- endcomment -%}
+        <figure class="lt-about-roster__diagram">
+
+          <p class="lt-about-roster__track-head">
+            <span class="lt-about-roster__track-label">{{ section.settings.diagram_label_a | escape }}</span>
+            <span class="lt-about-roster__track-note">{{ section.settings.diagram_note_a | escape }}</span>
+          </p>
+
+          <svg class="lt-about-roster__plot" viewBox="0 0 640 250" fill="none" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet">
+            {%- comment -%} Verbinder: gleiche Position oben wie unten {%- endcomment -%}
+            <g class="lt-about-roster__tie">
+              <path d="M30 42V156M88 42V192M146 42V174M204 42V212M262 42V198M320 42V148M378 42V168M436 42V204M494 42V220M552 42V176M610 42V206"/>
+            </g>
+
+            {%- comment -%} Spur A: feststehend, Kreise offen auf gerader Linie {%- endcomment -%}
+            <path class="lt-about-roster__axis" d="M30 34H610"/>
+            <g class="lt-about-roster__locus">
+              <circle cx="30" cy="34" r="4.5"/><circle cx="88" cy="34" r="4.5"/><circle cx="146" cy="34" r="4.5"/>
+              <circle cx="204" cy="34" r="4.5"/><circle cx="262" cy="34" r="4.5"/><circle cx="320" cy="34" r="4.5"/>
+              <circle cx="378" cy="34" r="4.5"/><circle cx="436" cy="34" r="4.5"/><circle cx="494" cy="34" r="4.5"/>
+              <circle cx="552" cy="34" r="4.5"/><circle cx="610" cy="34" r="4.5"/>
+            </g>
+
+            {%- comment -%} Spur B: beweglich, Messkurve über derselben Achse {%- endcomment -%}
+            <path class="lt-about-roster__axis lt-about-roster__axis--faint" d="M30 190H610"/>
+            <polyline class="lt-about-roster__curve" points="30,164 88,200 146,182 204,220 262,206 320,156 378,176 436,212 494,228 552,184 610,214"/>
+            <g class="lt-about-roster__value">
+              <circle cx="30" cy="164" r="4.5"/><circle cx="88" cy="200" r="4.5"/><circle cx="146" cy="182" r="4.5"/>
+              <circle cx="204" cy="220" r="4.5"/><circle cx="262" cy="206" r="4.5"/><circle cx="320" cy="156" r="4.5"/>
+              <circle cx="378" cy="176" r="4.5"/><circle cx="436" cy="212" r="4.5"/><circle cx="494" cy="228" r="4.5"/>
+              <circle cx="552" cy="184" r="4.5"/><circle cx="610" cy="214" r="4.5"/>
+            </g>
+          </svg>
+
+          <p class="lt-about-roster__track-head lt-about-roster__track-head--b">
+            <span class="lt-about-roster__track-label">{{ section.settings.diagram_label_b | escape }}</span>
+            <span class="lt-about-roster__track-note">{{ section.settings.diagram_note_b | escape }}</span>
+          </p>
+
+          {%- if section.settings.diagram_caption != blank -%}
+            <figcaption class="lt-about-roster__diagram-caption">{{ section.settings.diagram_caption | escape }}</figcaption>
+          {%- endif -%}
+
+        </figure>
+
+      {%- elsif section.blocks.size > 0 -%}
+        <ul class="lt-about-roster__list{% if has_photos %} lt-about-roster__list--with-photos{% endif %}" role="list">
+          {%- for block in section.blocks -%}
+            <li class="lt-about-roster__row" {{ block.shopify_attributes }}>
+
+              {%- if has_photos -%}
+                <span class="lt-about-roster__avatar">
+                  {%- if block.settings.photo != blank -%}
+                    {{
+                      block.settings.photo
+                      | image_url: width: 120
+                      | image_tag:
+                        loading: 'eager',
+                        class: 'lt-about-roster__photo',
+                        width: 40,
+                        height: 40,
+                        alt: block.settings.name
+                    }}
+                  {%- else -%}
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                      <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                  {%- endif -%}
+                </span>
+              {%- endif -%}
+
+              <p class="lt-about-roster__name">{{ block.settings.name | escape }}</p>
+
+              {%- if block.settings.role != blank -%}
+                <p class="lt-about-roster__role">{{ block.settings.role | escape }}</p>
+              {%- endif -%}
+
+            </li>
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "LT About Register",
+  "tag": "section",
+  "class": "lt-about-roster-section",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "title",
+      "label": "Heading",
+      "info": "Trägt die Mission, nicht die Regieanweisung. Kein Satzfragment: Heading und Subheading müssen je für sich lesbar sein.",
+      "default": "Gesundheit bekommt meist erst Aufmerksamkeit, wenn sie fehlt."
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "info": "Bildet mit dem Heading einen Block. Gleiche Größe, nur Farbe abgesetzt. Eigener vollständiger Satz.",
+      "default": "Wir wollen früher ansetzen."
+    },
+    {
+      "type": "textarea",
+      "id": "note",
+      "label": "Notiz unter dem Heading",
+      "info": "Optional. Brücke von der Mission zu dem, was rechts daneben steht.",
+      "default": "Deshalb gibt es LIFETIME. Sieben Personen: vier beantworten die fachlichen Fragen, drei führen das Unternehmen."
+    },
+    {
+      "type": "select",
+      "id": "visual",
+      "label": "Rechte Spalte",
+      "info": "„Namensregister“ listet die Personen-Blöcke. „Wissenschafts-Grafik“ blendet sie aus und zeichnet stattdessen die Zwei-Spuren-Grafik.",
+      "options": [
+        { "value": "register", "label": "Namensregister" },
+        { "value": "diagram", "label": "Wissenschafts-Grafik" }
+      ],
+      "default": "register"
+    },
+    {
+      "type": "header",
+      "content": "Wissenschafts-Grafik"
+    },
+    {
+      "type": "text",
+      "id": "diagram_label_a",
+      "label": "Obere Spur",
+      "default": "Genetik"
+    },
+    {
+      "type": "text",
+      "id": "diagram_note_a",
+      "label": "Obere Spur, Zusatz",
+      "default": "was feststeht"
+    },
+    {
+      "type": "text",
+      "id": "diagram_label_b",
+      "label": "Untere Spur",
+      "default": "Epigenetik"
+    },
+    {
+      "type": "text",
+      "id": "diagram_note_b",
+      "label": "Untere Spur, Zusatz",
+      "default": "was sich bewegt"
+    },
+    {
+      "type": "text",
+      "id": "diagram_caption",
+      "label": "Bildunterschrift",
+      "info": "Muss den Zusammenhang benennen, sonst stehen zwei Spuren ohne Grund untereinander.",
+      "default": "Beide Auskünfte kommen aus derselben Speichelprobe."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "person",
+      "name": "Person",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "photo",
+          "label": "Porträt (optional)",
+          "info": "Nur eng beschnittene Quadrat-Porträts verwenden. Halbtotalen werden auf 40px zu einer Fläche mit kleinem Kopf. Trägt kein Block ein Bild, läuft das Register als reine Namensliste."
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Vor- und Nachname"
+        },
+        {
+          "type": "text",
+          "id": "role",
+          "label": "Rolle",
+          "info": "Fachliche Rollen als deutsche Funktionsbezeichnung („Schlafmedizin“), nicht als englischer Titel („Head of Sleep“). Gesellschaftsrechtliche Bezeichnungen der Gründung bleiben, wie sie im Register stehen.",
+          "default": "Funktion bei LIFETIME"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "LT About Register",
+      "blocks": [
+        { "type": "person" },
+        { "type": "person" },
+        { "type": "person" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,276 @@
+/*
+  LIFETIME — section-lt-about-signup.css
+  Pattern „Founder-Mail-Anmeldung": dunkler Abschluss der Über-uns-Seite
+  mit einem einzigen Eingabefeld. Der Ausgang der Seite, die vorher
+  keinen hatte.
+  Section-Header-Typografie kommt aus crs-heading-stack (global).
+  Token references: design-governance §3, §4, §6, §8 (Buttons, Inputs).
+*/
+
+/* ── Section shell ──────────────────────────────────────────── */
+/*
+  DECISION 2026-08-11 (nach erstem Render): 120px statt 80px. Als
+  einziger Ausgang der Seite schloss die Section auf 321px Höhe zu
+  beiläufig ab, sie las sich wie eine Fußzeile statt wie ein Angebot.
+*/
+.lt-about-signup {
+  background-color: var(--color-surface-dark);
+  color: var(--color-text-on-dark);
+  padding-top: var(--space-10);   /* 120px desktop */
+  padding-bottom: var(--space-10);
+}
+
+.lt-about-signup__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+@media screen and (max-width: 768px) {
+  .lt-about-signup {
+    padding-top: var(--space-8);  /* 64px mobile */
+    padding-bottom: var(--space-8);
+  }
+  .lt-about-signup__container {
+    padding: 0 var(--space-4);
+  }
+}
+
+/* ── Split grid ──────────────────────────────────────────────── */
+/*
+  DECISION: 6/6-Split. Aussage links, Formular rechts auf gleicher
+  Höhe — der Ausgang ist nicht kleiner gesetzt als der Grund, ihn zu
+  nehmen. Kollabiert unter 900px.
+*/
+.lt-about-signup__grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-8);            /* 64px */
+  align-items: start;
+}
+
+@media screen and (max-width: 900px) {
+  .lt-about-signup__grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);          /* 32px */
+  }
+}
+
+.lt-about-signup__header {
+  max-width: 26rem;
+}
+
+@media screen and (max-width: 900px) {
+  .lt-about-signup__header {
+    max-width: 100%;
+  }
+}
+
+/*
+  Absenderzeile. Die Ich-Stimme kommt aus dem Gründer-Band, dazwischen
+  liegen zwei Bänder in Wir-Form; wer hier „ich schreibe" liest, hat den
+  Namen längst verloren. Steht am Grund, nicht am Formular, weil sie
+  begründet und nicht bedient.
+*/
+.lt-about-signup__sender {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm); /* 14px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  color: rgba(247, 247, 244, 0.72); /* > 4.5:1 gegen #364F56 */
+  margin: var(--space-5) 0 0;     /* 24px unter das Heading-Paar */
+  max-width: 26rem;
+}
+
+/* ── Formular ────────────────────────────────────────────────── */
+.lt-about-signup__form {
+  margin: 0;
+}
+
+.lt-about-signup__fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: var(--space-3);            /* 12px */
+  align-items: stretch;
+}
+
+@media screen and (max-width: 480px) {
+  .lt-about-signup__fieldset {
+    flex-direction: column;
+  }
+}
+
+.lt-about-signup__field {
+  display: block;
+}
+
+/*
+  DECISION: sichtbare, bleibende Beschriftung statt sr-only. Vorher war
+  das Label ausgeblendet und der Placeholder trug den Feldnamen — der
+  verschwindet aber beim ersten getippten Zeichen, und genau dann muss
+  das Feld noch sagen, was es will. Der Placeholder ist jetzt ein
+  Beispiel. 0.86-Weiß statt der 0.72 des Consent-Satzes, damit die
+  Beschriftung nicht wie Fließtext liest.
+*/
+.lt-about-signup__label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm); /* 14px */
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+  color: rgba(247, 247, 244, 0.86);
+  margin: 0 0 var(--space-3);     /* 12px auf das Feld */
+}
+
+/*
+  DECISION: Eingabefeld auf dunkler Fläche als getönte Fläche mit
+  Vollrahmen, nicht als weißes Feld — ein weißes Input würde auf dem
+  Slate als Fremdkörper sitzen. Rahmen 1px, im Fokus volle Deckkraft.
+*/
+.lt-about-signup__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 48px;
+  padding: 0 var(--space-4);      /* 16px */
+  border-radius: var(--radius-full);
+  /* 0.45 statt 0.32: nachgerechnet 3,02:1 gegen #364F56 und damit über
+     der 3:1-Schwelle für Bedienelement-Ränder (WCAG 1.4.11). 0.32 lag
+     bei 2,26:1, der Rahmen wäre für manche Augen nicht sichtbar. */
+  border: 1px solid rgba(247, 247, 244, 0.45);
+  background-color: rgba(247, 247, 244, 0.06);
+  color: var(--color-text-on-dark);
+  font-family: var(--font-body);
+  font-size: var(--text-body);    /* 16px — verhindert iOS-Zoom beim Fokus */
+  line-height: 1;
+  transition: border-color var(--ease-default), background-color var(--ease-default);
+  appearance: none;
+}
+
+.lt-about-signup__input::placeholder {
+  color: rgba(247, 247, 244, 0.65); /* nachgerechnet 4,51:1 gegen #364F56 */
+}
+
+.lt-about-signup__input:hover {
+  border-color: rgba(247, 247, 244, 0.62);
+}
+
+.lt-about-signup__input:focus {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+  border-color: rgba(247, 247, 244, 0.8);
+  background-color: rgba(247, 247, 244, 0.1);
+}
+
+.lt-about-signup__input[aria-invalid='true'] {
+  border-color: var(--color-promo);
+}
+
+/* ── Button ──────────────────────────────────────────────────── */
+/*
+  DECISION: heller Button auf dunkler Fläche (btn-cta-on-dark).
+  Hover hebt um 1px, kein Farbwechsel — Bewegung statt Buntheit.
+*/
+.lt-about-signup__button {
+  flex: 0 0 auto;
+  height: 48px;
+  padding: 0 var(--space-6);      /* 32px */
+  border: 0;
+  border-radius: var(--radius-full);
+  background-color: var(--color-white);
+  color: var(--color-dark);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm); /* 14px */
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  cursor: pointer;
+  transition: transform var(--ease-default), box-shadow var(--ease-default), opacity var(--ease-default);
+}
+
+.lt-about-signup__button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.lt-about-signup__button:focus-visible {
+  outline: 2px solid var(--color-teal);
+  outline-offset: 2px;
+}
+
+.lt-about-signup__button[disabled] {
+  opacity: 0.55;
+  cursor: progress;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lt-about-signup__button {
+    transition: none;
+  }
+  .lt-about-signup__button:hover {
+    transform: none;
+  }
+}
+
+/* ── Hinweise ────────────────────────────────────────────────── */
+.lt-about-signup__consent {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm); /* 14px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: rgba(247, 247, 244, 0.72); /* > 4.5:1 gegen #364F56 */
+  margin: var(--space-4) 0 0;     /* 16px */
+  max-width: 26rem;
+}
+
+/* Der Link muss als Link erkennbar sein: gleiche Farbe wie der Satz,
+   Unterstreichung trägt die Auszeichnung. */
+.lt-about-signup__consent a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.lt-about-signup__consent a:hover {
+  color: var(--color-text-on-dark);
+}
+
+/*
+  Fehlermeldung: benennt Problem und Weg zurück. Sitzt über dem
+  Consent-Text, damit sie nicht mit ihm verwechselt wird.
+*/
+.lt-about-signup__error {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm); /* 14px */
+  line-height: var(--leading-relaxed);
+  color: var(--color-promo-on-dark); /* nachgerechnet 4,91:1 auf #364F56 */
+  margin: var(--space-3) 0 0;     /* 12px */
+}
+
+.lt-about-signup__error[hidden] {
+  display: none;
+}
+
+/* ── Erfolgszustand ──────────────────────────────────────────── */
+.lt-about-signup__success {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg); /* 18px */
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-on-dark);
+  margin: 0;
+  max-width: 28rem;
+}
+
+.lt-about-signup__success[hidden] {
+  display: none;
+}
+
+/*
+  Ohne Balance bricht das 28px-Paar in Waisenzeilen um.
+*/
+.lt-about-signup .crs-heading-stack__title,
+.lt-about-signup .crs-heading-stack__subtitle {
+  text-wrap: balance;
+}

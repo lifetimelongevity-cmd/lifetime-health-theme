@@ -8,8 +8,15 @@
 */
 
 /* ── Section shell ──────────────────────────────────────────── */
+/*
+  DECISION 2026-08-11: --color-paper (#f7f7f4) statt --color-surface-secondary.
+  Auf der Über-uns-Seite steht direkt darüber die Regel-Section auf
+  #F6F4F1; zwei identische Flächen hintereinander lassen die Grenze
+  verschwinden. Der Flächenrhythmus der Seite ist
+  paper → weiß → slate → warm → paper → slate.
+*/
 .lt-about-team {
-  background-color: var(--color-surface-secondary); /* #F6F4F1 */
+  background-color: var(--color-paper); /* #f7f7f4 */
   padding-top: var(--space-9);    /* 80px desktop */
   padding-bottom: var(--space-9);
 }
@@ -57,18 +64,15 @@
   }
 }
 
-/* ── Card ────────────────────────────────────────────────────── */
+/* ── Spalte ──────────────────────────────────────────────────── */
 /*
-  DECISION: weiße Karte auf warmem Grund, --radius-md, shadow-sm —
-  identische Card-Behandlung wie lt-benefits auf derselben Seite
-  (§7: konsistente Card-Optik pro Seite). Foto full-bleed:
-  overflow hidden lässt Bild und Karte als ein Objekt lesen.
+  DECISION 2026-08-11 (Review): keine Karte, das Porträt trägt die
+  Begrenzung selbst. Auf der Über-uns-Seite gilt „Haarlinien statt
+  Kästen"; eine weiße Karte auf warmem Grund war der letzte Rest der
+  alten Kachellogik. Das Bild bekommt den Radius, die Bildunterschrift
+  steht frei darunter.
 */
 .lt-about-team__card {
-  background-color: var(--color-surface-primary); /* white */
-  border-radius: var(--radius-md);                /* 12px */
-  box-shadow: var(--shadow-sm);
-  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -84,12 +88,14 @@
   object-fit: cover;
   aspect-ratio: 4 / 3;
   display: block;
+  border-radius: var(--radius-md);
 }
 
 .lt-about-team__img-placeholder {
   width: 100%;
   aspect-ratio: 4 / 3;
   background: var(--color-surface-secondary);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -98,12 +104,14 @@
 
 /* ── Meta (Name + Rolle) ─────────────────────────────────────── */
 /*
-  DECISION: zentriert unter dem Porträt — ruhige Galerie-Caption
-  (entspricht der Live-Ausrichtung der Team-Karten).
+  DECISION 2026-08-11 (Review, 2. Durchgang): linksbündig. Zentriert war
+  eine Kartenbildunterschrift; ohne Karte war es der einzige zentrierte
+  Text der Seite und stand quer zur einen linken Kante, die alle anderen
+  Bänder halten.
 */
 .lt-about-team__meta {
-  padding: var(--space-5);        /* 24px — card-info Innenmaß */
-  text-align: center;
+  padding: var(--space-4) 0 0;    /* 16px unter dem Porträt */
+  text-align: left;
 }
 
 .lt-about-team__name {
@@ -111,17 +119,20 @@
   font-size: var(--text-section); /* 20px — dominantes Element der Karte */
   font-weight: var(--weight-bold);
   line-height: var(--leading-tight);
-  color: var(--color-text-primary);
-  margin: 0 0 var(--space-2);     /* 8px */
+  color: var(--color-ink);
+  margin: 0;
 }
 
 .lt-about-team__role {
   font-family: var(--font-body);
-  font-size: var(--text-micro);   /* 12px */
-  font-weight: var(--weight-medium);
+  font-size: var(--text-body-sm); /* 14px, wie im Register */
+  font-weight: var(--weight-regular);
   line-height: var(--leading-tight);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--color-text-muted);
-  margin: 0;
+  color: var(--color-text-secondary);
+  margin: var(--space-1) 0 0;     /* 4px unter dem Namen */
+}
+
+.lt-about-team .crs-heading-stack__title,
+.lt-about-team .crs-heading-stack__subtitle {
+  text-wrap: balance;
 }

@@ -1,0 +1,112 @@
+/*
+  LIFETIME — section-lt-about-principles.css
+  Pattern „Regelzeilen": Definitionsliste auf Haarlinien. Ersetzt das
+  Icon-Karten-Grid der früheren Werte-Section.
+
+  Warum keine Karten: „gleich große Karten aus Icon plus Überschrift
+  plus Text als Seitenstruktur" ist der Kachel-Reflex, den das
+  Design-System als Anti-Muster führt. Eine Regel ist eine Behauptung
+  plus ihre Begründung, also eine Definitionsliste, kein Kachelgrid.
+
+  Section-Header-Typografie kommt aus crs-heading-stack (global).
+  Token references: design-governance §3, §4, §6.
+*/
+
+/* ── Section shell ──────────────────────────────────────────── */
+.lt-about-principles {
+  background-color: var(--color-surface-secondary); /* #F6F4F1 */
+  padding-top: var(--space-9);    /* 80px desktop */
+  padding-bottom: var(--space-9);
+}
+
+.lt-about-principles__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-5);
+}
+
+@media screen and (max-width: 768px) {
+  .lt-about-principles {
+    padding-top: var(--space-8);  /* 64px mobile */
+    padding-bottom: var(--space-8);
+  }
+  .lt-about-principles__container {
+    padding: 0 var(--space-4);
+  }
+}
+
+/* ── Section header ─────────────────────────────────────────── */
+.lt-about-principles__header {
+  max-width: 40rem;               /* 34rem erzwang beim Paar drei Zeilen mit Waise */
+  margin-bottom: var(--space-7);  /* 48px → Liste */
+}
+
+@media screen and (max-width: 768px) {
+  .lt-about-principles__header {
+    margin-bottom: var(--space-6); /* 32px */
+  }
+}
+
+/* ── Regelzeilen ─────────────────────────────────────────────── */
+/*
+  DECISION: Links die Regel als Behauptung (heading font, 20px),
+  rechts die Begründung im Lesemaß. Trennung über Haarlinien; keine
+  Boxen, keine farbigen Kanten, keine Icons. Die Regel steht damit
+  typografisch über ihrer Begründung, ohne dass eine zweite
+  Überschriftenebene entsteht.
+
+  DECISION 2026-08-11 (nach erstem Render): feste Termspalte statt
+  5fr/7fr. Bei 5fr klaffte zwischen dem Ende der kürzesten Regel und
+  dem Beginn ihrer Begründung rund 230px Leerraum, und die beiden
+  Hälften der Zeile lasen sich nicht mehr als ein Paar.
+*/
+.lt-about-principles__list {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--color-border-strong);
+}
+
+.lt-about-principles__row {
+  display: grid;
+  grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+  gap: var(--space-7);            /* 48px */
+  align-items: baseline;
+  padding: var(--space-6) 0;      /* 32px */
+  border-bottom: 1px solid var(--color-border-strong);
+}
+
+@media screen and (max-width: 768px) {
+  .lt-about-principles__row {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);          /* 12px */
+    padding: var(--space-5) 0;    /* 24px */
+  }
+}
+
+.lt-about-principles__term {
+  font-family: var(--font-heading);
+  font-size: var(--text-section); /* 20px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  color: var(--color-ink);
+  margin: 0;
+}
+
+.lt-about-principles__desc {
+  font-family: var(--font-body);
+  font-size: var(--text-body);    /* 16px */
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: 0;
+  max-width: var(--lt-measure); /* 32rem, theme.css: ch deckelt deutsche Lato-Copy zu breit */
+}
+
+/*
+  Ohne Balance bricht das 36px-Paar in Waisenzeilen um („behaupten.“
+  allein auf Zeile drei).
+*/
+.lt-about-principles .crs-heading-stack__title,
+.lt-about-principles .crs-heading-stack__subtitle {
+  text-wrap: balance;
+}
