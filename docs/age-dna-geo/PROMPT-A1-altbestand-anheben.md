@@ -53,17 +53,25 @@ Fertig ist ein Artikel, wenn er hat:
 
 ### Die neun Artikel, in dieser Reihenfolge
 
-| # | Handle | templateSuffix | zuletzt | warum diese Position |
-|---:|---|---|---|---|
-| 1 | `biologisches-alter-messen-optimieren` | `biologisches-alter-messen` | 2024-03 | Prioritätsset #12. Zielquery „biologisches alter test" hat 192 Impressionen auf Position 12,5, also knapp neben Seite 1 |
-| 2 | `was-dein-biologisches-alter-uber-dich-verrat` | `biologisches-alter-verraet` | 2024-09 | 171 Impressionen auf Position 37,4. Volumen ist da, Position ist schlecht, größter Hebel pro Aufwand |
-| 3 | `epigenetik-erklaerung-einfluesse` | `epigenetik-erklaerung` | 2024-03 | Prioritätsset #13. Zielquery „epigenetik test", 69 Impressionen auf 14,5 |
-| 4 | `dna-tests-ein-tiefer-einblick-in-ihre-genetik` | `dna-tests-einblick` | 2023-11 | Prioritätsset #14, DNA-Test-Grundlagen |
-| 5 | `epigenetische-uhren-konnen-wir-das-altern-umkehren` | `epigenetische-uhren` | 2024-10 | Uhren-Thema, grenzt direkt an den Genauigkeitsartikel |
-| 6 | `wie-deine-gene-dein-wahres-alter-bestimmen` | `gene-biologisches-alter` | 2024-10 | Genetik-Ebene |
-| 7 | `biomarker-als-schlussel-zur-langlebigkeit-was-dein-blut-und-speichel-uber-dein-biologisches-alter-verraten` | `biomarker-langlebigkeit` | 2024-10 | Biomarker-Frage, Handle ist zu lang, siehe unten |
-| 8 | `kann-ihr-lebensstil-ihr-biologisches-alter-zuruckdrehen` | `lebensstil-biologisches-alter` | 2024-04 | Claim-Risiko, siehe unten |
-| 9 | `die-biologie-des-alterns` | `biologie-des-alterns` | 2023-10 | Grundlagen, geringste Dringlichkeit |
+Reihenfolge nach tatsächlich vorhandener Suchfläche, gemessen über 90 Tage. Alle neun werden
+bearbeitet, die Reihenfolge bestimmt nur, wo die Sorgfalt zuerst hingeht.
+
+| # | Handle | templateSuffix | Impr / 90 T | gew. Pos | warum diese Position |
+|---:|---|---|---:|---:|---|
+| 1 | `was-dein-biologisches-alter-uber-dich-verrat` | `biologisches-alter-verraet` | **137** | 59,6 | Größte vorhandene Fläche, 25 Queries. Rankt auf „biologisches alter" (56 Impr) und steht bei „kalendarisches alter" schon auf 8,5 |
+| 2 | `wie-deine-gene-dein-wahres-alter-bestimmen` | `gene-biologisches-alter` | **115** | 74,2 | Zweitgrößte Fläche, 13 Queries, aber sehr tiefe Position. Viel Luft nach oben |
+| 3 | `epigenetik-erklaerung-einfluesse` | `epigenetik-erklaerung` | 35 | 30,8 | Prioritätsset #13, 19 Queries rund um „epigenetik", beste Position der drei mit Fläche |
+| 4 | `biomarker-als-schlussel-zur-langlebigkeit-was-dein-blut-und-speichel-uber-dein-biologisches-alter-verraten` | `biomarker-langlebigkeit` | 5 | 43,6 | Handle-Kürzung mitnehmen |
+| 5 | `kann-ihr-lebensstil-ihr-biologisches-alter-zuruckdrehen` | `lebensstil-biologisches-alter` | 1 | 9,0 | Claim- und Sie-Form-Problem, Titel und Handle ändern |
+| 6 | `biologisches-alter-messen-optimieren` | `biologisches-alter-messen` | **0** | - | Prioritätsset #12, rankt aktuell auf nichts. Thema ist stark, die Umsetzung offensichtlich nicht |
+| 7 | `dna-tests-ein-tiefer-einblick-in-ihre-genetik` | `dna-tests-einblick` | **0** | - | Prioritätsset #14, DNA-Test-Grundlagen |
+| 8 | `epigenetische-uhren-konnen-wir-das-altern-umkehren` | `epigenetische-uhren` | **0** | - | Grenzt an den Genauigkeitsartikel, Abgrenzung sauber halten |
+| 9 | `die-biologie-des-alterns` | `biologie-des-alterns` | **0** | - | Grundlagen, geringste Dringlichkeit |
+
+Die vier Nullen sind keine Nebensache: Vier von neun Artikeln erzeugen seit 90 Tagen **keine
+einzige Impression**. Bei denen ist die Frage nicht „wie hebe ich die Position", sondern ob
+Thema und Titel überhaupt eine echte Nutzerfrage treffen. Titel und H1 dort neu denken, nicht
+nur den Body auffrischen.
 
 ### Handles dürfen geändert werden, BJ-Entscheid vom 11.08.2026
 
