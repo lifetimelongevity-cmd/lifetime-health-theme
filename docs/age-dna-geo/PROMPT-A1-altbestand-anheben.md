@@ -191,6 +191,40 @@ Methodenüberblick auf `/pages/biologisches-alter-testen`.
 
 ---
 
+## Durchgehendes Element: Ansprechpartner und Beratung
+
+BJ-Vorgabe vom 11.08.2026. Das ist unser deutlichster Unterschied zum Wettbewerb und gehörte
+bisher in keinen Text. Es läuft ab jetzt durch alle neuen Artikel, wo es die Frage tatsächlich
+beantwortet, nicht als Werbeblock am Ende.
+
+**Verifizierter Ist-Stand am 11.08.2026:**
+
+| | Angebot |
+|---|---|
+| LIFETIME | Ergebnisgespräch optional zubuchbar, 80 Euro Aufpreis (429 Euro gesamt), **45 Minuten Video**, Termin nach Eingang der Ergebnisse, Terminvorschläge per E-Mail. Dazu E-Mail- und Chat-Support zu Probenahme, Lieferung und App. Beides live geprüft |
+| epiAge | auf den geprüften Seiten keine Ergebnisbesprechung beschrieben; genannt wird ein Netzwerk aus Ärzten, Therapeuten und Kliniken |
+| neotes | **nicht** im Basic-Paket (299 Euro), im Premium-Paket (935 Euro) als „Longevity-Beratung durch erfahrene Mediziner inklusive detaillierter Ergebnisbesprechung"; für Basic separat zubuchbar |
+| TruDiagnostic | auf der geprüften Produktseite nicht beschrieben (Seitentext am 11.08. geprüft, null Treffer für consult/coaching) |
+
+**Fairness-Regel:** Immer als „auf den geprüften Seiten beschrieben" beziehungsweise „nicht
+beschrieben" formulieren, **nie** als „Anbieter X bietet keine Beratung". Dass eine Leistung auf
+einer Website fehlt, ist kein Beweis, dass es sie nicht gibt. Diesen Vorbehalt sichtbar
+mitschreiben, er macht den Vergleich glaubwürdiger.
+
+**Wo es hingehört:**
+
+- **Neu-1 (Wedge):** Ein Teil der Antwort auf „was jetzt?" ist, dass man darüber sprechen kann.
+  Der Artikel soll aber zuerst zeigen, was man selbst mit dem Ergebnis anfangen kann. Das
+  Gespräch ist die Option für alle, die es nicht allein durcharbeiten wollen, nicht die
+  Voraussetzung dafür, dass der Test etwas bringt.
+- **Neu-4 (Lohnt sich das):** gehört zur ehrlichen Antwort. Wer sich mit Zahlen schwertut, für
+  den ändert das Gespräch die Rechnung.
+- **Altartikel:** nur dort, wo die Frage tatsächlich gestellt wird. Nicht überall anhängen.
+
+Der Anbietervergleich hat die Achse seit 11.08. als eigene Tabellenzeile plus Abschnitt
+„Ob dir jemand das Ergebnis erklärt" und eine FAQ-Frage. Datenbasis:
+`docs/age-dna-geo/competitor-data-2026-08-11.yml`, Feld `consultation` je Anbieter.
+
 ## Zielzustand je Artikel
 
 Muster: `templates/article.alterstest-vergleich.json` und `templates/article.nmn-vs-nr.json`.
