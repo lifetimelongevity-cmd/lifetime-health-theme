@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-07-08
+last_review: 2026-07-30
 canonical_for: age-dna-test-geo-strategie
 supersedes: []
 ---
@@ -145,10 +145,11 @@ Der eine Artikel mit dem höchsten Zitations-Hebel. Ehrlich = zitierfähig. Stru
 - Globale Entität (`Organization` mit sameAs/logo/@id) liegt in `snippets/microdata-schema.liquid`
   (erweitert 2026-07-08) — nicht doppeln.
 
-**Zu bauen:** Hub-Template `templates/page.biologisches-alter-testen.json` (Muster:
-`page.science.json` / NMN-Hub), Stack: `lt-science-hero` → `rich-text` (Definition) →
-`lt-comparison-table` (Anbieter) → `lt-science-bento` (Methodik/Studien) → Autor-Section
-(`_examples/sections/expert-profile.liquid`) → `crs-faq-accordion` → `lt-hp-cta-close`.
+**Seit 30.07.2026 live:** Hub-Template `templates/page.biologisches-alter-testen.json`,
+Stack: `lt-science-proof-hero` → `lt-age-test-guide` (direkte Antwort, vier Methoden,
+sechs Auswahlkriterien, Disclosure, fünf Primärquellen) → `crs-faq-accordion`
+(zwölf sichtbare Antworten plus `FAQPage`) → `lt-hp-cta-close`. Der neutrale Hub wurde
+bewusst vom noch ungeprüften Anbieter-Vergleich getrennt.
 
 ---
 
@@ -172,8 +173,8 @@ Der eine Artikel mit dem höchsten Zitations-Hebel. Ehrlich = zitierfähig. Stru
 ## 9. Reihenfolge & Kadenz
 
 Realistisch 1–2 Artikel/Woche. Zitier-Hebel zuerst:
-1. **Money-Piece Vergleichstabelle** (besetzt „welcher Test").
-2. **Hub-Seite** `/pages/biologisches-alter-testen`.
+1. ✅ **Hub-Seite** `/pages/biologisches-alter-testen` (live 30.07.2026).
+2. **Money-Piece Vergleichstabelle** nach Daten- und Legal-Gate.
 3. **Wedge** „Was kann ich mit dem Ergebnis tun?".
 4. Definition → Methodik → Bio-vs-chrono → Seriosität → Ablauf.
 Parallel: Off-Site-Outreach an `bioage-test.de` + `zukunftsessen.de` (schnellster Realwin).
@@ -183,11 +184,18 @@ Parallel: Off-Site-Outreach an `bioage-test.de` + `zukunftsessen.de` (schnellste
 ## 10. Offene Punkte / TODO
 
 - [ ] Money-Piece-Vergleichstabelle: finale Anbieter-Daten (Preise/CpG-Zahl) verifizieren + Rechts-Check.
-- [ ] Hub-Template `page.biologisches-alter-testen.json` bauen.
+      **Manuskript liegt fertig** in `money-piece-v3-2026-08-11.md`, URL ist noch 404.
+- [x] FAQPage-Schema für beide Live-Artikel ergänzt (11.08.2026). Je sechs vertiefende
+      Fragen, bewusst dedup-frei gegen die 12 generischen Hub-Fragen.
+- [ ] Die neun AGE-Artikel von 2023/2024 auf NMN-Niveau ziehen (FAQ, Quellen, Aktualität).
+      Ursachenanalyse dazu: `chatgpt-status-analyse_2026-08-11.md`.
+- [x] Hub-Template `page.biologisches-alter-testen.json` bauen, veröffentlichen und aus
+      `/pages/science` verlinken (30.07.2026).
 - [ ] Handlungs-Protokoll (Wedge-Artikel) definieren — was empfiehlt LIFETIME nach dem Ergebnis
       (compliance-safe, inkl. NMN nur als Themen-Link, nicht als Heilversprechen).
 - [ ] Claim-Ampel (§4) einmal juristisch freigeben (IVD-/HWG-Abgrenzung).
-- [ ] Prompt-Panel um Age-Test-Prompts erweitern (siehe geo-strategy.md §3-P3).
+- [x] Prompt-Panel um Age-Test-Prompts erweitern; Baseline mit 15 generischen AGE&DNA-Prompts
+      liegt in `docs/geo-prompt-baseline-2026-07-29.md`.
 
 ---
 
