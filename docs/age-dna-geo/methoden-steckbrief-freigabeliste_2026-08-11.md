@@ -52,6 +52,67 @@ Rückfrage im Methodenabschnitt verdichtet werden:
 **Das reicht für einen brauchbaren Methodenabschnitt bereits aus**, mit einer Ausnahme: Es fehlt
 weiterhin jede Zahl, an der sich ein Modell festhalten kann.
 
+## Primärquelle, direkt gelesen am 11.08.2026
+
+BJ hat am 11.08.2026 entschieden: **Wir sind die Quelle.** Wir verlinken den Preprint nicht,
+kommunizieren die Zusammenarbeit mit einem Partner aber wie beim Labor. Damit sind die
+Methodenfakten grundsätzlich verwendbar. Die folgende Aufstellung stammt aus dem Volltext, nicht
+aus einer Zusammenfassung.
+
+**Dokument:** Collins C, Brown J, Berkley N. *MuhdoAge: A Novel Saliva Based Epigenetic Clock
+that Has a Strong Association with Ageing in a Healthy, Disease-Free Cohort.* Preprints.org,
+16.04.2024, doi 10.20944/preprints202404.0985.v1. **Nicht peer-reviewed.** Autoren sind bei
+Muhdo Health Ltd. beschäftigt; „Conflicts of Interest: none declared".
+
+### Verfahren
+
+| Angabe | Wert |
+|---|---|
+| Probe | 2 ml passiver Speichel, GeneFiX Saliva DNA/RNA Collection |
+| Array | Illumina Infinium MethylationEPIC, rund 850.000 CpG-Stellen analysiert |
+| Labor | Eurofins Global Laboratory, ISO 17025:2005 und ISO 17025:2017 |
+| Auswahlweg | 850.000 → 662 signifikant (p ≤ 0,05) → 4 wegen Ausfallrate entfernt → 658 (R² 0,238) → verschärft auf p ≤ 0,01 → **237 CpG-Stellen** für die Uhr |
+| Gewichtung | Vier Robustheitsstufen: 10 zeitrobuste, 5 zeitgetriebene, 150 pathologiebeeinflusste, 72 lebensstilbeeinflusste. Formel M1 + 0,07·M2 + 0,02·M3 + 0,005·M4 |
+
+### Kohorten und Kennwerte
+
+| Kohorte | n | R² | MAE |
+|---|---:|---:|---:|
+| Gesamt getestet | 23.589 | | |
+| Trainingskohorte (≥2 EPIC-Tests in <6 Monaten) | 2.109 | 0,652 nach Ausreißerbereinigung (2.091) | |
+| Neue Prüfkohorte | 2.682 | **0,726** | **5,97 Jahre** |
+| Gesunde Teilkohorte | 1.844 | **0,878** | **3,49 Jahre** |
+
+Mittlere Abweichung Vorhersage zu Kalenderalter: gesunde Teilkohorte +2,29 Jahre, Gesamtkohorte
++4,19 Jahre. Die Autoren lesen das als Hinweis auf beschleunigte Alterung in pathologischen
+Gruppen.
+
+Vom Preprint selbst genannte Vergleichswerte anderer Uhren: Horvath R² 0,96 über alle Gewebe,
+CheekAge 0,93, Hannum 0,81, GrimAge 0,75.
+
+### Vom Preprint selbst benannte Grenzen
+
+Geografisch und ethnisch begrenzte Kohorte, Daten aus einem Direktvertriebsmodell,
+Fragebogenangaben durch die Teilnehmenden selbst, Selektionseffekt durch die Kaufbereitschaft
+für einen kostenpflichtigen Test. Longitudinale Validierung steht aus.
+
+### Was der Preprint ausdrücklich nicht abdeckt
+
+**Die genetische Ebene.** Das Dokument beschreibt ausschließlich die epigenetische Uhr. Zur
+Genotypisierung, aus der die 23 DNA-Kategorien entstehen, steht dort nur, dass das Unternehmen
+Illumina-Arrays verwendet, „some of which are combined IP". Keine Array-Bezeichnung, keine
+Variantenzahl, keine Referenzpanels. **Für die genetische Ebene existiert weiterhin keine
+Methodenbeschreibung.** Epigenetik und Genetik dürfen in der Kommunikation deshalb nicht in
+einem Atemzug mit Zahlen belegt werden.
+
+### Offener Punkt zur Identifizierbarkeit
+
+Die Uhr heißt MuhdoAge, das Unternehmen Muhdo Health Ltd. Wer 237 CpG-Stellen, den
+MethylationEPIC-Array, GeneFiX und Eurofins Global Laboratory zusammen veröffentlicht,
+beschreibt einen eindeutigen Fingerabdruck. Der Preprint ist damit in wenigen Sekunden
+auffindbar. „Partner nicht nennen" und „Methode vollständig beschreiben" schließen einander
+praktisch aus. Entscheidung dazu steht aus, siehe unten.
+
 ## Was gesperrt ist, obwohl die Zahl intern vorliegt
 
 Die Zahlen stehen im Anbieter-Preprint
