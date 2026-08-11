@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-08-03
+last_review: 2026-08-06
 canonical_for: age-dna-spoke-briefings-v1
 depends_on:
   - docs/geo-claim-ledger.md
@@ -78,10 +78,13 @@ Verbindliche Sprachregeln aus `docs/geo-claim-ledger.md`:
 
 Freigegebene Produktfakten, die verwendet werden dürfen:
 
-- **187 DNA-Reports in 16 Kategorien plus sechs epigenetische Bereiche.** Die 187 nie als
-  Gesamtzahl inklusive Epigenetik rechnen. (`AGEDNA-SCOPE-001/005`)
-- Die sechs Bereiche: Körperalter, biologisches Alter, EpiVitality, Immunscore, Entzündung,
-  Muskelschwund. (`AGEDNA-SCOPE-003`)
+- **23 DNA-Kategorien plus sechs epigenetische Bereiche.** Kategorien und Bereiche nie
+  addieren. **Keine Report-Gesamtzahl nennen**, sie schwankt pro Kunde. Zulässig ist „über 150".
+  (`AGEDNA-SCOPE-001/005/006`, korrigiert 06.08.2026)
+- Die sechs Bereiche: Körperalter, **MethylPace**, EpiVitality, Immunscore, Entzündung,
+  Muskelschwund. Das biologische Alter ist ein Wert *innerhalb* von MethylPace, kein eigener
+  Bereich. (`AGEDNA-SCOPE-003`, korrigiert 06.08.2026)
+- **Gesperrt:** „187", „16 Kategorien", „22 Kategorien", „biologisches Alter" als Bereichsname.
 - Ergebnisse **6 Wochen nach Probeneingang im Labor**, Startpunkt der Frist immer mitnennen.
   (`AGEDNA-TIME-001`)
 - Datenbasis der epigenetischen Analyse über 20.000 Teilnehmer, Validierungskohorte der

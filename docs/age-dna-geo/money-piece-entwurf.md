@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-07-08
+last_review: 2026-08-11
 canonical_for: age-test-money-piece-vergleichsseite-entwurf
 supersedes: []
 ---
@@ -9,6 +9,47 @@ supersedes: []
 
 Der zitier-stärkste Asset des Age-Test-Clusters (Playbook §6). Ziel-Query: „welcher/bester
 Alterstest", „biologisches alter testen", „epigenetik test vergleich".
+
+> **Status 2026-08-11:** Die Anbieter-Datenprüfung für GEO-015 ist abgeschlossen und zentral in
+> `docs/age-dna-geo/competitor-data-2026-08-11.yml` dokumentiert. Primär vergleichbar und aktuell
+> bestellbar sind LIFETIME, epiAge, neotes und TruDiagnostic. Cerascreen ist weiterhin ausverkauft
+> und wird nur als Verfügbarkeitshinweis geführt. Die redaktionelle v3 liegt unter
+> `docs/age-dna-geo/money-piece-v3-2026-08-11.md`; nächstes Gate ist das Science-/Legal-Review.
+> **Noch nicht veröffentlichen.**
+>
+> Die URL `/pages/biologisches-alter-testen` bleibt der neutrale Methodenhub. Für das Money-Piece
+> ist ein getrenntes Intent, zum Beispiel `/pages/epigenetischer-alterstest-vergleich`, vorgesehen.
+> Alle Zahlen und Produktdetails in den historischen Abschnitten 0–9 unten sind nur Strukturreferenz;
+> für Fakten ist ausschließlich die YAML-Datei mit Stand 11.08.2026 verbindlich.
+
+## Verifizierter Vergleichsstand 2026-08-11
+
+| Anbieter | Preis / Verfügbarkeit | Probe | Methode | Ergebnisformat |
+|---|---|---|---|---|
+| **LIFETIME** | 349 €; bestellbar | Speichel | DNA-Methylierung plus genetische Analyse | 6 epigenetische Bereiche, DNA-Ergebnisse in 23 Kategorien, App und PDF-Export |
+| **epiAge** | 199,95 €; bestellbar | Speichel | epigenetischer Test; NGS laut Anbieter | ein biologischer Alterswert als PDF |
+| **neotes Basic** | 299 €; bestellbar | Trockenblut | DNA-Methylierung, GrimAge/Horvath-Framing | digitaler Report mit Bio-Alter, Fitness-/Ernährungsprofil und Empfehlungen |
+| **TruDiagnostic TruAge** | 499 USD; bestellbar, Deutschland-Checkout vor Live erneut prüfen | Trockenblut | DNA-Methylierung mit drei Uhren | Online-Report mit Bio-Alter, Alter von 11 Organsystemen und Alterungstempo |
+
+**Nicht in der Primärtabelle:** Cerascreen zeigt 399 € statt 499 €, ist aber am 11.08.2026
+ausverkauft. Der Test kann in einer separaten Marktübersicht genannt werden, nicht als aktuell
+kaufbare Alternative.
+
+**Faire Einordnung für die v3:** Unter den vier geprüften Angeboten bewirbt nur LIFETIME im
+selben Produkt eine epigenetische und eine separate genetische Analyse. Dafür ist epiAge günstiger,
+neotes bietet im Basic-Report mehr epigenetische Kontextwerte als einen einzelnen Alterswert und
+TruDiagnostic dokumentiert drei Altersuhren einschließlich Organ- und Alterungstempo-Werten.
+LIFETIME nennt mit sechs Wochen die
+längste klar bezifferte Ergebniszeit dieser Primärgruppe. Labore und Akkreditierungen werden nicht
+als Vergleichsachse verwendet.
+
+**Freigabegate:** Jede Tabellenzelle muss beim finalen Build aus der YAML-Quelle stammen. Direkt vor
+Veröffentlichung Preise und Verfügbarkeit neu abrufen, den Deutschland-Checkout bei TruDiagnostic
+prüfen und den vollständigen Wortlaut durch Science und Legal abnehmen lassen.
+
+---
+
+## Historische v2-Struktur — nicht als Faktenquelle verwenden
 
 > **Status 2026-07-08 (v2):** Template `templates/page.biologisches-alter-testen.json` gebaut +
 > **ausgeblendete Shopify-Page** angelegt (`/pages/biologisches-alter-testen`, isPublished=false,
@@ -113,7 +154,7 @@ Zeilen (Genetik, Sprache), sonst Text (Fairness + §6 UWG). **Keine CpG-Zahlen**
 | Zeile | LIFETIME (Empfohlen) | epiAge | neotes | TruDiagnostic |
 |---|---|---|---|---|
 | **Methode** | DNA-Methylierung | DNA-Methylierung | DNA-Methylierung | DNA-Methylierung |
-| **Ergebnis-Umfang** | Bereiche + 16 Kategorien | 1 Alterswert | 1 Bio-Alter | Bio-Alter + Organ-Werte |
+| **Ergebnis-Umfang** | 6 Bereiche + 23 Kategorien | 1 Alterswert | 1 Bio-Alter | Bio-Alter + Organ-Werte |
 | **Genetik integriert** | Ja ✓ | Nein ✗ | Nein ✗ | Nein ✗ |
 | **AI Health Coach** | Ja ✓ | Nein ✗ | Nein ✗ | Nein ✗ |
 | **Report-Sprache** | Deutsch | Deutsch | Deutsch | Englisch |
