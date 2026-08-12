@@ -1,0 +1,333 @@
+{% comment %}
+  Renders genau EIN Post-ATC-Angebot im Warenkorb, in dieser Reihenfolge:
+
+  1. Groessen-Upgrade. Gibt es zu einer Position eine teurere Variante desselben
+     Produkts, wird der Wechsel angeboten (NMN 30 g auf 60 g, AGE&DNA-Test auf
+     Test + Ergebnisgespraech). Das ist der staerkste Hebel, weil 90 % der
+     Bestellungen ohnehin dasselbe Produkt enthalten und der Wechsel keine
+     zweite Kaufentscheidung verlangt.
+  2. Cross-Sell aus settings.cart_upsell_products. Unterhalb der Versandschwelle
+     gewinnt das guenstigste Produkt, das die Luecke wirklich schliesst. Der
+     naheliegende Vorschlag ist hier eine Falle: bei 30 g NMN fehlen 15,10 € und
+     TMG kostet 14,90 €, ein Kunde landet damit 20 Cent unter der Schwelle und
+     zahlt trotzdem Versand.
+
+  Bewusst nur ein Angebot. Die Mehrfach-Auswahl steht darunter in
+  sections/cart-recommendations.liquid.
+
+  Ausgeschlossen bleiben Abo-Positionen (ein Variantentausch wuerde den
+  Appstle-Vertrag brechen) und Positionen, deren Zielvariante schon im Korb
+  liegt (/cart/update setzt Mengen, es addiert sie nicht). 2026-08-12
+
+  Accepts:
+  - type: {String} 'sidebar' oder 'page'
+
+  Usage:
+  {% render 'cart-upsell', type: 'sidebar' %}
+{% endcomment %}
+
+{%- liquid
+  assign lt_up_on = false
+  if settings.cart_upsell_enable and cart.item_count > 0
+    assign lt_up_on = true
+  endif
+-%}
+
+{%- if lt_up_on -%}
+  {%- liquid
+
+    if settings.show_currency_codes
+      assign iso_code = localization.country.currency.iso_code | prepend: ' '
+    endif
+
+    # Handles im Korb als ,a,b,-Kette, damit die Enthalten-Pruefung ohne
+    # verschachtelte Schleifen auskommt.
+    assign lt_cart_handles = ','
+    assign lt_cart_variants = ','
+    for item in cart.items
+      assign lt_cart_handles = lt_cart_handles | append: item.product.handle | append: ','
+      assign lt_cart_variants = lt_cart_variants | append: item.variant.id | append: ','
+    endfor
+
+    # ---- 1. Groessen-Upgrade ----
+    assign lt_up_variant = false
+    assign lt_up_from = false
+    assign lt_up_item = false
+    assign lt_up_gain = 0
+
+    for item in cart.items
+      if item.selling_plan_allocation
+        continue
+      endif
+      if item.product.has_only_default_variant
+        continue
+      endif
+      if item.item_components and item.item_components.size > 0
+        continue
+      endif
+      if item.product.id == settings.gift_wrap_product.id
+        continue
+      endif
+
+      assign lt_cand = false
+      for v in item.product.variants
+        unless v.available
+          continue
+        endunless
+        if v.price <= item.variant.price
+          continue
+        endif
+        assign lt_v_key = v.id | prepend: ',' | append: ','
+        if lt_cart_variants contains lt_v_key
+          continue
+        endif
+        unless lt_cand
+          assign lt_cand = v
+        else
+          if v.price < lt_cand.price
+            assign lt_cand = v
+          endif
+        endunless
+      endfor
+
+      if lt_cand
+        # Gesamtaufpreis, nicht Stueckpreis: bei Menge 2 kostet der Wechsel das
+        # Doppelte, und genau diese Zahl steht spaeter auf dem Button.
+        assign lt_gain = lt_cand.price | minus: item.variant.price | times: item.quantity
+        if lt_gain > lt_up_gain
+          assign lt_up_gain = lt_gain
+          assign lt_up_variant = lt_cand
+          assign lt_up_from = item.variant
+          assign lt_up_item = item
+        endif
+      endif
+    endfor
+
+    # ---- 2. Cross-Sell, nur wenn kein Upgrade moeglich ----
+    assign lt_cs = false
+    assign lt_cs_closes_gap = false
+    assign lt_gap = 0
+
+    unless lt_up_variant
+
+      if settings.cart_free_shipping
+        assign lt_has_sub = false
+        for item in cart.items
+          if item.selling_plan_allocation
+            assign lt_has_sub = true
+            break
+          endif
+        endfor
+        unless lt_has_sub
+          assign lt_threshold = settings.cart_free_shipping_amount | times: 100
+          if cart.total_price < lt_threshold
+            assign lt_gap = lt_threshold | minus: cart.total_price
+          endif
+        endunless
+      endif
+
+      assign lt_cs_handles = settings.cart_upsell_products | default: '' | remove: ' ' | split: ','
+
+      # Durchlauf A: guenstigstes Produkt, das die Versandluecke wirklich schliesst
+      if lt_gap > 0
+        for h in lt_cs_handles
+          assign p = all_products[h]
+          if p == empty
+            continue
+          endif
+          unless p.available
+            continue
+          endunless
+          assign lt_h_key = h | prepend: ',' | append: ','
+          if lt_cart_handles contains lt_h_key
+            continue
+          endif
+          if p.price < lt_gap
+            continue
+          endif
+          unless lt_cs
+            assign lt_cs = p
+          else
+            if p.price < lt_cs.price
+              assign lt_cs = p
+            endif
+          endunless
+        endfor
+        if lt_cs
+          assign lt_cs_closes_gap = true
+        endif
+      endif
+
+      # Durchlauf B: sonst das Produkt mit der hoechsten Prioritaet, ohne Versand-Argument
+      unless lt_cs
+        for h in lt_cs_handles
+          assign p = all_products[h]
+          if p == empty
+            continue
+          endif
+          unless p.available
+            continue
+          endunless
+          assign lt_h_key = h | prepend: ',' | append: ','
+          if lt_cart_handles contains lt_h_key
+            continue
+          endif
+          assign lt_cs = p
+          break
+        endfor
+      endunless
+
+    endunless
+  -%}
+
+  {%- if lt_up_variant -%}
+    {%- liquid
+      # Grundpreis kommt aus Shopifys unit_price, nicht aus dem Variantennamen.
+      # Die Warenkorbzeile direkt darueber zeigt denselben Wert ("113,00 € / 100 g"),
+      # eine selbst gerechnete Bezugsgroesse ("1,13 € je g") stuende daneben und
+      # zwaenge zum Umrechnen. Nur vergleichen, wenn beide Varianten dieselbe
+      # Bezugsgroesse tragen.
+      assign lt_unit_line = ''
+      assign lt_m_new = lt_up_variant.unit_price_measurement
+      assign lt_m_old = lt_up_from.unit_price_measurement
+
+      if lt_m_new and lt_m_old
+        if lt_m_new.reference_unit == lt_m_old.reference_unit and lt_m_new.reference_value == lt_m_old.reference_value
+          if lt_up_variant.unit_price < lt_up_from.unit_price
+            # Geschuetztes Leerzeichen: sonst bricht die Zeile im schmalen Drawer
+            # zwischen Zahl und Einheit und laesst ein einzelnes "g" stehen.
+            capture lt_unit_label
+              if lt_m_new.reference_value != 1
+                echo lt_m_new.reference_value
+                echo '&nbsp;'
+              endif
+              echo lt_m_new.reference_unit
+            endcapture
+            assign lt_ppu_new_label = lt_up_variant.unit_price | money | append: iso_code
+            assign lt_ppu_old_label = lt_up_from.unit_price | money | append: iso_code
+            assign lt_unit_line = 'cart.lt_upsell_per_unit' | t: new_price: lt_ppu_new_label, old_price: lt_ppu_old_label, unit: lt_unit_label
+          endif
+        endif
+      endif
+
+      unless lt_unit_line != ''
+        # Die t-Variante oben traegt bewusst rohes HTML (&nbsp;), der Fallback
+        # kommt aus dem Produkttitel und wird deshalb hier escaped.
+        assign lt_unit_line = lt_up_item.product.title | escape
+      endunless
+
+      assign lt_up_image = lt_up_variant.image
+      unless lt_up_image
+        assign lt_up_image = lt_up_item.image
+      endunless
+    -%}
+
+    <cart-upsell
+      class="cart-upsell hide-if-empty-cart cart-upsell--{{ type | default: 'sidebar' }}"
+      data-mode="swap"
+      data-variant-id="{{ lt_up_variant.id }}"
+      data-from-variant-id="{{ lt_up_from.id }}"
+      data-quantity="{{ lt_up_item.quantity }}"
+    >
+      <div class="cart-upsell__inner element--has-border--body element--border-radius">
+
+        {%- comment -%}
+          Bild dekorativ, nicht verlinkt: ein Link hier wuerde entweder aus dem
+          Drawer fuehren oder als aria-hidden im Tab-Fokus fehlen. Die Aktion ist
+          der Button, und der traegt den vollen Namen.
+        {%- endcomment -%}
+        <span class="cart-upsell__thumb" aria-hidden="true">
+          {%- render 'lazy-image-small',
+            image: lt_up_image,
+            aspect_ratio: settings.cart_image_ratio,
+            fit: settings.cart_image_fit,
+            sizes: '56px'
+          -%}
+        </span>
+
+        <div class="cart-upsell__text">
+          <span class="cart-upsell__title text-weight--medium text-line-height--small">
+            {{- 'cart.lt_upsell_switch_to' | t: variant: lt_up_variant.title -}}
+          </span>
+          <span class="cart-upsell__meta text-size--small text-color--opacity">
+            {{- lt_unit_line -}}
+          </span>
+        </div>
+
+        {%- capture lt_up_aria -%}
+          {{- 'cart.lt_upsell_switch_to' | t: variant: lt_up_variant.title }}, +{{ lt_up_gain | money | append: iso_code -}}
+        {%- endcapture -%}
+        <button
+          type="button"
+          class="cart-upsell__action button button--small button--outline"
+          aria-label="{{ lt_up_aria | strip | escape }}"
+          data-js-cart-upsell-action
+        >
+          <span class="button__text">{{ 'cart.lt_upsell_switch_cta' | t }} &middot; +{{ lt_up_gain | money | append: iso_code }}</span>
+        </button>
+
+      </div>
+      <span class="cart-upsell__error" data-js-cart-upsell-error role="status" aria-live="polite"></span>
+    </cart-upsell>
+
+  {%- elsif lt_cs -%}
+    {%- assign lt_cs_variant = lt_cs.selected_or_first_available_variant -%}
+
+    <cart-upsell
+      class="cart-upsell hide-if-empty-cart cart-upsell--{{ type | default: 'sidebar' }}"
+      data-mode="add"
+      data-variant-id="{{ lt_cs_variant.id }}"
+      data-quantity="1"
+    >
+      <div class="cart-upsell__inner element--has-border--body element--border-radius">
+
+        <span class="cart-upsell__thumb" aria-hidden="true">
+          {%- render 'lazy-image-small',
+            image: lt_cs.featured_media,
+            aspect_ratio: settings.cart_image_ratio,
+            fit: settings.cart_image_fit,
+            sizes: '56px'
+          -%}
+        </span>
+
+        <div class="cart-upsell__text">
+          {%- comment -%}
+            Beim Cross-Sell traegt der Titel den Link: anders als beim Upgrade ist
+            das Produkt neu und der Kunde will es womoeglich nachlesen.
+          {%- endcomment -%}
+          <a href="{{ lt_cs.url }}" class="cart-upsell__title text-weight--medium text-line-height--small">
+            <span class="text-animation--underline-thin">{{- lt_cs.title | escape -}}</span>
+          </a>
+          {%- liquid
+            assign lt_cs_meta = ''
+            if lt_cs_closes_gap
+              assign lt_cs_meta = 'cart.lt_upsell_free_shipping' | t
+            elsif lt_cs.has_only_default_variant == false
+              assign lt_cs_meta = lt_cs_variant.title
+            endif
+          -%}
+          {%- if lt_cs_meta != '' -%}
+            <span class="cart-upsell__meta text-size--small text-color--opacity">
+              {{- lt_cs_meta | escape -}}
+            </span>
+          {%- endif -%}
+        </div>
+
+        {%- capture lt_cs_aria -%}
+          {{- 'cart.lt_upsell_add_cta' | t }}: {{ lt_cs.title }}, +{{ lt_cs.price | money | append: iso_code -}}
+        {%- endcapture -%}
+        <button
+          type="button"
+          class="cart-upsell__action button button--small button--outline"
+          aria-label="{{ lt_cs_aria | strip | escape }}"
+          data-js-cart-upsell-action
+        >
+          <span class="button__text">{{ 'cart.lt_upsell_add_cta' | t }} &middot; +{{ lt_cs.price | money | append: iso_code }}</span>
+        </button>
+
+      </div>
+      <span class="cart-upsell__error" data-js-cart-upsell-error role="status" aria-live="polite"></span>
+    </cart-upsell>
+
+  {%- endif -%}
+{%- endif -%}

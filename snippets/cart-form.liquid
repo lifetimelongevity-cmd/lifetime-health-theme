@@ -217,6 +217,18 @@
 
 	</form>
 
+	{%- comment -%}
+		Innerhalb von #AjaxCartForm, damit der Vorschlag bei jedem Cart-Update
+		neu berechnet wird (component-cart.js ersetzt hier das komplette innerHTML).
+		Das Script liegt bewusst ausserhalb der Bedingung: per innerHTML nachgeladene
+		<script>-Tags fuehrt der Browser nicht aus, bei anfangs leerem Warenkorb waere
+		das Custom Element sonst nie registriert und der Button tot.
+	{%- endcomment -%}
+	{%- render 'cart-upsell', type: 'sidebar' -%}
+	{%- if settings.cart_upsell_enable -%}
+		<script src="{{ 'component-cart-upsell.js' | asset_url }}" defer></script>
+	{%- endif -%}
+
 	<span class="cart__count hidden" aria-hidden="true" data-cart-count>{{ cart.item_count }}</span>
 	<span class="cart__total hidden" aria-hidden="true" data-cart-total>{{ cart.total_price | money | append: iso_code }}</span>
 

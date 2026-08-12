@@ -463,3 +463,62 @@ html[dir=ltr] .cart-notice__slider-bar {
   background: var(--color-secondary-background-main) !important;
   cursor: default;
 }
+/* Post-ATC-Angebot im Warenkorb (snippets/cart-upsell.liquid).
+   Ein Angebot, nicht mehrere. Bewusst ohne Flaechenfarbe und ohne Akzentrahmen:
+   der Block sitzt direkt unter den Warenkorbpositionen und soll sich als Teil
+   des Warenkorbs lesen, nicht als Werbeflaeche. 2026-08-12 */
+.cart-upsell {
+  display: block;
+  margin-top: 1.25rem;
+}
+.sidebar .cart-upsell {
+  padding-inline-start: var(--sidebar-gutter);
+  padding-inline-end: var(--sidebar-gutter);
+}
+/* Zweizeilig, ueberall: einzeilig bleibt fuer die Textspalte in jedem schmalen
+   Kontext zu wenig (Drawer wie Cart-Page auf dem Handy), der Grundpreis-Vergleich
+   bricht dann mitten im Satz um und der Button schrumpft auf ein 63px-Touchziel. */
+.cart-upsell__inner {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  grid-template-areas:
+    "thumb text"
+    "action action";
+  align-items: center;
+  column-gap: 0.75rem;
+  row-gap: 0.75rem;
+  padding: 0.75rem;
+}
+.cart-upsell__thumb {
+  grid-area: thumb;
+  display: block;
+  width: 3.5rem;
+}
+.cart-upsell__text {
+  grid-area: text;
+  display: grid;
+  gap: 0.125rem;
+  min-width: 0;
+}
+.cart-upsell__title,
+.cart-upsell__meta {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.cart-upsell__action {
+  grid-area: action;
+  width: 100%;
+}
+.cart-upsell.processing {
+  opacity: 0.36;
+  pointer-events: none;
+}
+.cart-upsell__error:empty {
+  display: none;
+}
+.cart-upsell__error {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: calc(13px / 16 * var(--base-body-primary-size) + 0px);
+  color: var(--color-error, var(--color-text-main));
+}
