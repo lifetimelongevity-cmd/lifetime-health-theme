@@ -114,6 +114,11 @@
 		data-ratio="{{ ratio }}"
 	  {{ sizes }}
 	  {% unless preload %} loading="lazy" {% endunless %}
+	  {%- comment -%}
+	    preload ist im Theme "erstes Bild oben", das ist der LCP-Kandidat.
+	    Ohne fetchpriority reiht Chrome ihn hinter Skripte und Fonts ein.
+	  {%- endcomment -%}
+	  {% if preload %} fetchpriority="high" decoding="async" {% endif %}
 		{% if image_alignment %} style="object-position: {{ image.presentation.focal_point }}" {% endif %}
 		{% if id %} id="responsive-background-{{ id }}" {% endif %}
 		onload="this.parentNode.classList.add('lazyloaded');
