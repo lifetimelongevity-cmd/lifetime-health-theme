@@ -1,6 +1,6 @@
 ---
 status: snapshot
-last_review: 2026-08-11
+last_review: 2026-08-12
 canonical_for: a1-umsetzung-age-cluster-2026-08-11
 depends_on:
   - docs/age-dna-geo/PROMPT-A1-altbestand-anheben.md
@@ -74,23 +74,24 @@ Neuausrichtung folgt der Regel, dass zwei Artikel nie dieselbe Frage beantworten
 
 ## Offene Punkte
 
-1. **Reviewer-Byline ist nicht eingeholt.** Sieben der 13 Artikel tragen
-   „fachlich geprüft: Prof. Dr. med. Volker Limmroth" plus `custom.reviewed_date`,
-   so wie der Auftrag es vorgibt und wie es bei den Bestandsartikeln bereits live
-   steht. Eine tatsächliche fachliche Durchsicht hat nicht stattgefunden. Das ist
-   eine Aussage über eine reale Person auf einer öffentlichen Seite und sollte
-   zeitnah nachgeholt oder die Byline entfernt werden.
+Punkte 1 bis 3 sind am 12.08.2026 geschlossen, siehe Nachtrag am Ende.
+
+1. ~~**Reviewer-Byline ist nicht eingeholt.**~~ **Geschlossen 12.08.2026.** Sieben der
+   13 Artikel tragen „fachlich geprüft: Prof. Dr. med. Volker Limmroth" plus
+   `custom.reviewed_date`, so wie der Auftrag es vorgibt und wie es bei den
+   Bestandsartikeln bereits live steht. Zum Zeitpunkt der Veröffentlichung hatte
+   keine fachliche Durchsicht stattgefunden. BJ hat die Freigabe am 12.08.2026
+   eingeholt, die Byline bleibt damit stehen.
    Ohne Reviewer stehen bewusst: Datenschutz (juristisches Thema, kein
    neurologisches), Kaufberatung und der Anbietervergleich.
-2. **Drei Arbeitsfassungen fehlen lokal.** Für Alt-6, Alt-7 und Alt-9 wurde der Body
-   direkt in die Shopify-Mutation geschrieben. Die Definition of Done verlangt sie in
-   `docs/age-dna-geo/`. Nach der Goldenen Regel in `CLAUDE.md` ist die Live-Seite
-   ohnehin Content-SoT, der Verlust ist also begrenzt. Nachziehbar per
-   `articleUpdate`-Abfrage oder `altbestand-audit.py`.
-3. **Ein Redirect-Hop bleibt.** Der Genauigkeitsartikel
-   (`wie-genau-ist-ein-epigenetischer-alterstest`) verlinkt noch auf den alten Handle
-   `epigenetische-uhren-konnen-wir-das-altern-umkehren` und läuft damit über eine 301.
-   Er gehörte nicht zu den neun, deshalb nicht angefasst.
+2. ~~**Drei Arbeitsfassungen fehlen lokal.**~~ **Geschlossen 12.08.2026.** Für Alt-6,
+   Alt-7 und Alt-9 wurde der Body direkt in die Shopify-Mutation geschrieben. Die
+   Definition of Done verlangt sie in `docs/age-dna-geo/`. Nachgezogen mit dem neuen
+   Skript `tools/body-aus-live.py`.
+3. ~~**Ein Redirect-Hop bleibt.**~~ **Geschlossen 12.08.2026.** Der Genauigkeitsartikel
+   (`wie-genau-ist-ein-epigenetischer-alterstest`) verlinkte noch auf den alten Handle
+   `epigenetische-uhren-konnen-wir-das-altern-umkehren` und lief damit über eine 301.
+   Link umgebogen, Arbeitsfassung nachgezogen.
 4. **`/pages/gdpr` im Menü** antwortet mit 301 auf `/policies/privacy-policy`. Steht
    nicht im Theme-Code, kommt also aus einem Shopify-Navigationsmenü, und erzeugt den
    Hop auf jeder Seite des Shops.
@@ -110,6 +111,7 @@ Die Definition of Done ist jetzt ausführbar statt beschrieben, in
 | `claim-check.py` | Arbeitsfassung gegen die Sperrliste aus Fact-Sheet, Playbook §4 und Methoden-Steckbrief. Kennt die dokumentierten Falschtreffer (Bandnummer `2018;187(6)`, Satzanfang-„Sie"). |
 | `live-verify.py` | Live-Prüfung: HTTP, FAQPage parsebar mit erwarteter Fragenzahl, Sperrwörter, interne Links ohne Redirect, `dateModified`. |
 | `altbestand-audit.py` | Kurzaudit einer Live-Fassung (Gliederung, Umfang, Sie-Form, Quellen, Altlasten), um ohne Volltextlektüre zu entscheiden. |
+| `body-aus-live.py` | Holt die Arbeitsfassung eines Bodys aus der Live-Seite zurück und entfernt dabei die beiden Render-Injektionen des Templates (Anker-IDs, Inline-CTA). Nachtrag 12.08.2026. |
 
 Die Dedup-Prüfung hat dabei real gegriffen: sieben Fragen mussten umformuliert werden,
 darunter „Was ist der Unterschied zwischen pseudonymisiert und anonymisiert?" bei 0,78
@@ -124,3 +126,36 @@ Erfolgskriterium bleibt gewichtete Position und Zahl der Queries je Artikel, nic
 
 Eigentliche Zielgröße bleibt die Mention Rate im Panel-Cluster „AGE&DNA generisch",
 heute 0,0 Prozent. Panel und Methodik: `docs/geo-prompt-panel.md`.
+
+---
+
+## Nachtrag 12.08.2026
+
+**Reviewer-Byline (Punkt 1).** BJ hat die Freigabe eingeholt. Die sieben Artikel
+behalten „fachlich geprüft: Prof. Dr. med. Volker Limmroth" und `custom.reviewed_date`.
+
+**Redirect-Hop (Punkt 3).** Im Genauigkeitsartikel zeigt der Weiterführend-Link jetzt
+auf `/blogs/longevity-blog/epigenetische-uhren` statt auf den alten Handle. Push per
+`articleUpdate`, danach die Live-Fassung zurückgelesen und gegen die lokale
+Arbeitsfassung geprüft: zeichengleich. Ein Scan über alle 16 Artikel des Clusters
+(13 aus A1 plus Genauigkeit, Genotyping, Vergleich) findet **null** interne Links mit
+301 oder 404, geprüft wurden 17 eindeutige Ziele.
+
+**Arbeitsfassungen (Punkt 2).** Alt-6, Alt-7 und Alt-9 liegen wieder lokal:
+`artikel-biologisches-alter-messen-body.html`, `artikel-dna-tests-einblick-body.html`,
+`artikel-biologie-des-alterns-body.html`. Rekonstruiert aus der Live-Seite mit
+`tools/body-aus-live.py`.
+
+**Wichtig für künftige Rekonstruktionen:** `sections/lt-article.liquid` rendert
+`article.content` nicht unverändert. Es injiziert Anker-IDs in jede H2 (Zeile 223) und
+den Inline-CTA `<aside class="lt-article__cta">` vor Abschnitt N+1 (Zeile 220). Wer
+Body-HTML aus der Live-Seite zieht, ohne beides zu entfernen, schreibt beim nächsten
+Push doppelte CTAs in den Artikel. Das Skript entfernt beides und ist gegen
+`artikel-genauigkeit-alterstest-body.html` verifiziert (zeichengleich). Nicht
+rekonstruierbar ist ein handgebautes H2 „Inhaltsverzeichnis": Das Template überspringt
+es beim Rendern (Zeile 218). Betrifft nur Altartikel, die eins hatten.
+
+**Transportweg für Body-Updates.** Der Shopify-MCP blockt `bulkOperationRunMutation`
+(Kategorie „destructive"), der Umweg über Staged Upload fällt damit aus. `articleUpdate`
+läuft normal, der komplette Body muss aber als Variable mitgehen. Nach jedem solchen
+Push die Live-Fassung zurücklesen und gegen die lokale Arbeitsfassung diffen.

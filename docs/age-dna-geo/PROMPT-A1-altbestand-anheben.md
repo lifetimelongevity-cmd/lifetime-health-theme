@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-08-11
+last_review: 2026-08-12
 canonical_for: age-cluster-content-briefing
 supersedes: []
 depends_on:
@@ -14,6 +14,12 @@ depends_on:
 ---
 
 # Arbeitsauftrag: AGE&DNA-Cluster ausbauen und sanieren
+
+> **Ausgeführt am 11.08.2026, alle 13 Artikel sind live.** Protokoll und Nachträge:
+> `A1-umsetzung_2026-08-11.md`. Der Auftrag ist damit abgearbeitet, das Dokument bleibt
+> `living`, weil die Regeln darin weiter gelten: die Muhdo-Regel, die Sperrliste, der
+> Umgang mit den übrigen Anbietern, die Beratungs-Achse und der Sprachstil sind für
+> jeden weiteren Artikel im AGE-Cluster verbindlich.
 
 Fertiger Auftrag für eine neue Session. Ab „## Auftrag" einfügen. Reihenfolge einhalten:
 **erst die vier neuen Artikel, dann der Altbestand.**
