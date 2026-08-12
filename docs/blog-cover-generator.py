@@ -92,11 +92,10 @@ def bar(d, y, pct, label):
     d.text((M, y + 54), label, font=F_BOLD(32), fill=INK)
 
 
-def chips(d, y, entries):
+def chips(d, y, entries, w=146):
     """entries: (code, land, erlaubt)"""
     x = M
     for code, land, ok in entries:
-        w = 146
         d.rounded_rectangle([x, y, x + w, y + 74], radius=10,
                             fill=ACCENT if ok else PAPER,
                             outline=ACCENT if ok else LINE, width=2)
@@ -210,6 +209,42 @@ made.append(("was-ist-spermidin", img))
 img, d = base("Grundlagen", ["Was Resveratrol ist,", "was Studien zeigen"])
 steps(d, 520, ["Zellmodell", "Tiermodell", "Humanstudien", "Nutzen belegt"], 3)
 made.append(("was-ist-resveratrol", img))
+
+# 12 - Lohnt sich ein Alterstest (AGE-Cluster)
+img, d = base("Kaufberatung", ["Lohnt sich ein", "Alterstest f\u00fcr dich?"])
+columns(d, 470,
+        ("Eher nein", ["nur einmal messen", "Diagnose gesucht"], False),
+        ("Eher ja", ["Verlauf \u00fcber Jahre", "Ausgangspunkt jetzt"], True))
+made.append(("lohnt-sich-ein-alterstest", img))
+
+# 13 - Wearables gegen epigenetische Uhr
+img, d = base("Wearables", ["WHOOP Age, Oura", "und Garmin"])
+columns(d, 470,
+        ("Wearable", ["Puls, Schlaf, Bewegung", "t\u00e4glich messbar"], False),
+        ("Epigenetik", ["Markierungen an der DNA", "molekulare Ebene"], True))
+made.append(("whoop-oura-garmin", img))
+
+# 14 - DNA-Probe und Datenschutz
+img, d = base("Datenschutz", ["Was mit deiner", "DNA-Probe passiert"])
+steps(d, 520, ["Labor", "Auswertung", "Anwendung", "Dein Zugang"], 4)
+made.append(("dna-probe-datenschutz", img))
+
+# 15 - Ergebnis verstehen
+img, d = base("Ergebnis", ["Dein Alterstest-", "Ergebnis lesen"])
+steps(d, 520, ["Ausgangspunkt", "Fragen bilden", "Zweite Messung"], 1)
+made.append(("alterstest-ergebnis-verstehen", img))
+
+# 16 - Anbietervergleich
+img, d = base("Vergleich", ["Vier epigenetische", "Alterstests"])
+chips(d, 480, [("349 \u20ac", "LIFETIME", True), ("199,95 \u20ac", "epiAge", False),
+               ("299 \u20ac", "neotes", False), ("499 $", "TruDiagnostic", False)],
+      w=208)
+made.append(("epigenetischer-alterstest-vergleich", img))
+
+# 17 - Genauigkeit
+img, d = base("Genauigkeit", ["Wie genau ist ein", "Alterstest?"])
+bar(d, 520, 0.17, "rund 1,5 von bis zu 9 Jahren Streuung")
+made.append(("wie-genau-ist-ein-alterstest", img))
 
 for name, im in made:
     p = os.path.join(OUT, f"cover-{name}.png")
