@@ -144,6 +144,9 @@ if ( typeof CSSSlider !== 'function' ) {
           this.prevEl = container.querySelector('.css-slider-prev');
           this.prevEl.setAttribute('tabindex', 0);
           this.prevEl.setAttribute('role', 'button');
+          // Die Locale-Strings gab es schon, sie wurden nur nie gesetzt:
+          // prev/next waren fokussierbare Buttons ohne Namen (WCAG 4.1.2).
+          this.prevEl.setAttribute('aria-label', window.KROWN.settings.locales.slider_prev_button_label);
           this.prevEl.addEventListener('click', e=>{
             e.preventDefault();
             this.changeSlide('prev');
@@ -163,6 +166,7 @@ if ( typeof CSSSlider !== 'function' ) {
           this.nextEl = container.querySelector('.css-slider-next');
           this.nextEl.setAttribute('tabindex', 0);
           this.nextEl.setAttribute('role', 'button');
+          this.nextEl.setAttribute('aria-label', window.KROWN.settings.locales.slider_next_button_label);
           this.nextEl.addEventListener('click', e=>{
             e.preventDefault();
             this.changeSlide('next');

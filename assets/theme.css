@@ -2504,8 +2504,23 @@ html[dir=ltr] .button--loader .button__preloader-element {
 .button--no-border {
   border: 0;
 }
-.button:focus-visible {
-  box-shadow: 0 0 0 3px var(--color-secondary-background-main);
+/* Fokusring: zweifarbig, weil keine Einzelfarbe auf hell UND auf dem dunklen
+   Slate 3:1 erreicht (WCAG 1.4.11). #4A8C85 liegt auf #f7f7f4 bei 3,6:1 und
+   auf #364f56 nur bei 2,2:1; #f7f7f4 wiederum traegt auf dem Slate. Der innere
+   Papierring und der aeussere Teal-Ring greifen abwechselnd, je nach Grund.
+   Vorher: box-shadow 3px in --color-secondary-background-main, auf der PDP
+   rgba(0,0,0,0.08). Sichtbar war faktisch nur der Browser-Default-Ring.
+   Der transparente outline haelt den Ring im Windows-Kontrastmodus am Leben. */
+.button:focus-visible,
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+[role="button"]:focus-visible,
+[tabindex="0"]:focus-visible {
+  box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-teal-dark);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-radius: inherit;
 }
 
 .button--small {

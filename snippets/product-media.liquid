@@ -29,7 +29,20 @@
   data-product-single-media-wrapper
   data-media-id="{{ media.id }}"
   data-video
+  {%- comment -%}
+    tabindex="0" macht jede Folie fokussierbar, damit die Galerie per Tastatur
+    scrollbar bleibt. Ohne Namen waren das sechs stumme Tab-Stopps: der
+    Screenreader meldete "Gruppe" ohne Inhalt. role=group + Label ist das
+    uebliche Karussell-Muster und laesst das Scrollverhalten unberuehrt.
+  {%- endcomment -%}
   tabindex="0"
+  role="group"
+  aria-roledescription="Folie"
+  {%- comment -%}
+    Alle Aufrufer uebergeben forloop.index0, deshalb plus: 1 fuer die
+    menschliche Zaehlung. Der Alt-Text gewinnt, wenn er gepflegt ist.
+  {%- endcomment -%}
+  aria-label="{% if media.alt != blank %}{{ media.alt | strip_html | escape }}{% else %}Produktbild {{ index | plus: 1 }}{% endif %}"
   data-index="{{ index }}"
   {%- if media_type == 'external_video' -%} 
     data-video-id="{{ media.external_id }}" 

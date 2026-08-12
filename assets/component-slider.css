@@ -407,3 +407,20 @@ html[dir=ltr] .css-slider--scrollbars-visible:after {
 .no-fullwidth-padding .container--fullwidth.container--has-background .css-slider-navigation-container {
   padding-bottom: 1.25rem;
 }
+/* Trefferflaeche der Slider-Punkte auf 24px Hoehe (WCAG 2.5.8 AA).
+   Der sichtbare Balken bleibt 6px: die Flaeche kommt aus einem absolut
+   positionierten Pseudo-Element, das im Hit-Test zum Punkt selbst gehoert
+   und die Zeilenhoehe der Navigation nicht veraendert. Die Punkte tragen
+   keine Kindelemente, overflow: hidden ist dort ohne visuelle Wirkung. */
+.css-slider:not(.css-slider--overlay-navigation) .css-slider-dot-navigation .css-slider-dot {
+  position: relative;
+  overflow: visible;
+}
+.css-slider:not(.css-slider--overlay-navigation) .css-slider-dot-navigation .css-slider-dot::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  height: 24px;
+  transform: translateY(-50%);
+}
