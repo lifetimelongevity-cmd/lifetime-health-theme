@@ -40,11 +40,9 @@
     --crs-card-bg:   {{ section.settings.color_card_bg }};
     --crs-text:      {{ section.settings.color_text }};
     --crs-text-sec:  {{ section.settings.color_text | color_modify: 'alpha', 0.72 }};
-    --crs-border:    {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
     --ps-card-dark:  {{ section.settings.color_card_dark }};
     --ps-on-dark:    {{ section.settings.color_text_on_dark }};
     --ps-on-dark-sec:{{ section.settings.color_text_on_dark | color_modify: 'alpha', 0.72 }};
-    --ps-on-dark-line:{{ section.settings.color_text_on_dark | color_modify: 'alpha', 0.2 }};
     --ps-measure:    {{ section.settings.color_measure }};
     padding-top:    min({{ section.settings.padding_top }}px, 15vw);
     padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
@@ -124,12 +122,16 @@
 
             {%- if b_value != blank -%}
               <p class="ps-card__figure">
+                {%- comment -%}
+                  &#32; überlebt die Liquid-Trimmung. Ohne sie steht im Textbaum
+                  "unter5Minuten", auch wenn das Flex-Gap optisch trennt.
+                {%- endcomment -%}
                 {%- if b_prefix != blank -%}
-                  <span class="ps-card__affix">{{ b_prefix | escape }}</span>
+                  <span class="ps-card__affix">{{ b_prefix | escape }}</span>&#32;
                 {%- endif -%}
                 <span class="ps-card__value{% if b_value_word %} ps-card__value--word{% endif %}">{{ b_value | escape }}</span>
                 {%- if b_unit != blank -%}
-                  <span class="ps-card__affix">{{ b_unit | escape }}</span>
+                  &#32;<span class="ps-card__affix">{{ b_unit | escape }}</span>
                 {%- endif -%}
               </p>
             {%- endif -%}
@@ -255,7 +257,9 @@
   font-family: var(--font-heading);
   font-size: var(--text-h3, 24px);
   font-weight: var(--weight-bold, 700);
-  line-height: 1;
+  /* Gleiche Durchschusslogik wie die Überschrift, sonst sitzt die Zeitbilanz
+     im Kopfband sichtbar tiefer als die Headline daneben. */
+  line-height: var(--leading-tight, 1.25);
   color: var(--ps-measure, #4a8c85);
   font-variant-numeric: tabular-nums;
 }
@@ -337,9 +341,10 @@
   color: var(--ps-on-dark, #f7f7f4);
 }
 
-/* Wortwert statt Ziffer: eine Stufe kleiner, sonst kippt die Reihe. */
+/* Wortwert statt Ziffer: eine Stufe kleiner, sonst kippt die Reihe.
+   Nicht kleiner als h3, sonst verliert der Wert gegen den Kartentitel. */
 .ps-card__value--word {
-  font-size: var(--text-section, 20px);
+  font-size: var(--text-h3, 24px);
   letter-spacing: 0;
 }
 
@@ -386,11 +391,10 @@
   color: var(--ps-on-dark-sec, rgba(247, 247, 244, 0.72));
 }
 
-/* Herkunftszeile, sitzt am Kartenfuß statt in einem Kasten. */
+/* Herkunftszeile, sitzt am Kartenfuß. Getrennt durch Weißraum, nicht durch
+   eine Linie: die Karte ist hier das trennende Element. */
 .ps-card__source {
   margin: var(--space-5, 24px) 0 0;
-  padding-top: var(--space-3, 12px);
-  border-top: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
   font-family: var(--font-body);
   font-size: var(--text-micro, 12px);
   font-weight: var(--weight-semibold, 600);
@@ -404,19 +408,21 @@
   white-space: nowrap;
 }
 
+/* auto schiebt die Zeile auf den Kartenfuß, padding sichert den Mindestabstand:
+   auf der höchsten Karte gibt es keinen freien Raum, dort wird auto zu null. */
 .ps-card__body + .ps-card__source {
   margin-top: auto;
+  padding-top: var(--space-4, 16px);
 }
 
 .ps-card--dark .ps-card__source {
-  border-top-color: var(--ps-on-dark-line, rgba(247, 247, 244, 0.2));
   color: var(--ps-on-dark-sec, rgba(247, 247, 244, 0.72));
 }
 
 /* ---------- Schlussnotiz + CTA ---------- */
 
 .ps-note {
-  max-width: 48rem;
+  max-width: var(--lt-measure, 32rem);
   margin: var(--space-6, 32px) 0 0;
   font-family: var(--font-body);
   font-size: var(--text-body-sm, 14px);
@@ -514,10 +520,6 @@
 
   .ps-card__step {
     margin-bottom: var(--space-4, 16px);
-  }
-
-  .ps-card__body + .ps-card__source {
-    margin-top: var(--space-5, 24px);
   }
 }
 {% endstylesheet %}
@@ -631,13 +633,13 @@
       "type": "textarea",
       "id": "heading",
       "label": "Überschrift",
-      "default": "Dein Test in 3 Schritten"
+      "default": "In 4 Schritten zum Ergebnis."
     },
     {
       "type": "textarea",
       "id": "subheading",
       "label": "Unterüberschrift (optional)",
-      "default": "Eine Speichelprobe. Sechs bis acht Wochen Wartezeit.",
+      "default": "Ohne Arztbesuch.",
       "info": "__none__ = ausblenden"
     },
     {
@@ -661,7 +663,7 @@
       "type": "text",
       "id": "ledger_value_1",
       "label": "Wert 1",
-      "default": "unter 10 Minuten"
+      "info": "Produktspezifisch, bewusst ohne Vorgabe. Leer blendet die Zeile aus."
     },
     {
       "type": "text",
@@ -673,7 +675,7 @@
       "type": "text",
       "id": "ledger_value_2",
       "label": "Wert 2",
-      "default": "6 Wochen"
+      "info": "Produktspezifisch, bewusst ohne Vorgabe. Leer blendet die Zeile aus."
     },
     {
       "type": "header",
@@ -683,7 +685,7 @@
       "type": "textarea",
       "id": "footer_callout",
       "label": "Schlussnotiz",
-      "default": "Warum dauern 6 Wochen? Weil Epigenetik-Analysen nicht automatisiert sind. Jede Probe wird bei Eurofins Genomics einzeln verarbeitet, nach ISO 17025."
+      "info": "Produktspezifisch, bewusst ohne Vorgabe. Ein geerbter Labor- oder Dauer-Satz wäre auf einer anderen PDP eine falsche Aussage."
     },
     {
       "type": "text",
