@@ -31,8 +31,17 @@
       <link rel="shortcut icon" href="{{ settings.favicon | image_url: width: 48, height: 48 }}" type="image/png" />
     {%- endif -%}
 
+    {%- comment -%}
+      Titel-Budget, identisch zu layout/theme.liquid: kurze Marke, und nur wenn
+      der Titel darunter unter 60 Zeichen bleibt. Laengere Titel bekommen keine,
+      weil Google von hinten kuerzt und die Marke dann ohnehin wegfaellt.
+    {%- endcomment -%}
     {%- capture seo_title -%}
-      {{ page_title }}{% unless page_title contains 'LIFETIME' %} &ndash; {{ shop.name | escape }}{% endunless %}
+      {{- page_title -}}
+      {%- unless page_title contains 'LIFETIME' -%}
+        {%- assign seo_title_length = page_title | size | plus: 11 -%}
+        {%- if seo_title_length <= 60 %} | LIFETIME{% endif -%}
+      {%- endunless -%}
     {%- endcapture -%}
 
     <title>{{ seo_title }}</title>
