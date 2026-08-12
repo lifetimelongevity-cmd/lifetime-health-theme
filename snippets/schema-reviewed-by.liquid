@@ -1,0 +1,62 @@
+{%- comment -%}
+  Macht die fachliche Pruefung einer Seite maschinenlesbar.
+
+  Warum als eigener WebPage-Knoten und nicht am Produkt: `reviewedBy` ist eine
+  Eigenschaft von CreativeWork/WebPage, nicht von Product. An den Product-Knoten
+  gehaengt waere sie ungueltiges Markup, und der Product-Knoten kommt ausserdem
+  aus dem Shopify-Filter, der keine Parameter nimmt. Der WebPage-Knoten haengt
+  an der kanonischen Seiten-URL und verweist per `mainEntity` auf das Produkt.
+
+  Ausgangslage: Prof. Dr. med. Volker Limmroth stand auf NMN-PDP, AGE&DNA-PDP
+  und /pages/science sichtbar im Fliesstext, maschinenlesbar aber nur auf
+  /pages/aerzte. Der Autoritaetsbeleg fehlte genau dort, wo gekauft wird.
+
+  Bewusst Opt-in ohne Default: Der Knoten behauptet einen Pruefvorgang. Den darf
+  nur tragen, wo die Seite ihn auch sichtbar aussagt (NMN-PDP: "Fachlich geprueft
+  von Prof. Dr. med. Volker Limmroth"). Ein stiller Default wuerde die Aussage
+  auf jede PDP ausrollen, auch auf die, die sie nicht macht. Auf der AGE&DNA-PDP
+  steht Limmroth am 2026-08-12 nur als Zitatgeber, nicht als Pruefer, deshalb
+  bleibt das Metafeld dort leer.
+
+  Der Personen-Anker muss mit `schema_anchor` in sections/lt-expert-profile.liquid
+  uebereinstimmen, sonst mergen die Knoten nicht und kein Validator meldet es.
+  Ohne aufloesbare Expertenseite bleibt @id weg, damit das Schema nicht auf einen
+  404 zeigt; der Knoten traegt dann nur den Namen.
+
+  Akzeptierte Parameter:
+  • reviewer            (String, Pflicht) Name, sonst wird nichts gerendert
+  • credential          (String) jobTitle der Person
+  • reviewed_date       (Date)   wird zu lastReviewed
+  • main_entity         (String) relative URL des Hauptobjekts, z. B. product.url
+  • main_entity_anchor  (String) Anker dazu, z. B. '#product'
+  • expert_node         (String) absolute @id des Personenknotens
+{%- endcomment -%}
+
+{%- if reviewer != blank -%}
+  {%- assign srb_page_id = canonical_url | split: '?' | first -%}
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "@id": {{ srb_page_id | json }},
+      "url": {{ srb_page_id | json }},
+      {%- if main_entity != blank -%}
+        "mainEntity": { "@id": {{ main_entity | append: main_entity_anchor | json }} },
+      {%- endif -%}
+      {%- if reviewed_date != blank -%}
+        "lastReviewed": {{ reviewed_date | date: '%Y-%m-%d' | json }},
+      {%- endif -%}
+      "reviewedBy": {
+        "@type": "Person",
+        {%- if expert_node != blank -%}
+          "@id": {{ expert_node | json }},
+          "url": {{ expert_node | json }},
+        {%- endif -%}
+        "name": {{ reviewer | json }}
+        {%- if credential != blank -%}
+          , "jobTitle": {{ credential | json }}
+        {%- endif -%}
+      }
+    }
+  </script>
+{%- endif -%}

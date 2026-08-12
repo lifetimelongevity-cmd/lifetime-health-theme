@@ -13,11 +13,35 @@
       <link rel="shortcut icon" href="{{ settings.favicon | image_url: width: 48, height: 48 }}" type="image/png" />
     {%- endif -%}
   
+    {%- comment -%}
+      Titel-Budget. Der volle Shop-Name als Suffix (" &ndash; LIFETIME Longevity &
+      Health", 30 Zeichen) hat die Titel im Schnitt auf 69 Zeichen getrieben, weit
+      ueber der Stelle, an der Google kuerzt. Gekuerzt wird von hinten, also fiel
+      genau die Marke weg: sie kostete Platz, ohne je in der SERP zu stehen.
+
+      Regel jetzt: kurze Marke "| LIFETIME" (11 Zeichen inkl. Trenner), und nur
+      wenn der Titel damit unter 60 Zeichen bleibt. Ist der Basistitel schon
+      laenger, bekommt er keine Marke, weil sie ohnehin abgeschnitten wuerde.
+
+      Der bestehende contains-Guard bleibt: Seiten mit manuell gesetztem
+      SEO-Titel, der "LIFETIME" schon fuehrt, werden nicht angefasst.
+    {%- endcomment -%}
+    {%- capture seo_title_base -%}
+      {{- page_title -}}
+      {%- if current_tags %}{% assign meta_tags = current_tags | join: ', ' %} &ndash; {{ 'general.meta.tags' | t: tags: meta_tags }}{% endif -%}
+      {%- if current_page != 1 %} &ndash; {{ 'general.meta.page' | t: page: current_page }}{% endif -%}
+    {%- endcapture -%}
+    {%- assign seo_title_base = seo_title_base | strip -%}
+
     {%- capture seo_title -%}
       {%- if template contains 'search' -%}
         {{ search.terms | replace: '*', '' | split: ' AND ' | last }} - {{ shop.name | escape }}
       {%- else -%}
-        {{ page_title }}{% if current_tags %}{% assign meta_tags = current_tags | join: ', ' %} &ndash; {{ 'general.meta.tags' | t: tags: meta_tags }}{% endif %}{% if current_page != 1 %} &ndash; {{ 'general.meta.page' | t: page: current_page }}{% endif %}{% unless page_title contains 'LIFETIME' %} &ndash; {{ shop.name | escape }}{% endunless %}
+        {{- seo_title_base -}}
+        {%- unless seo_title_base contains 'LIFETIME' -%}
+          {%- assign seo_title_length = seo_title_base | size | plus: 11 -%}
+          {%- if seo_title_length <= 60 %} | LIFETIME{% endif -%}
+        {%- endunless -%}
       {%- endif -%}
     {%- endcapture -%}
   

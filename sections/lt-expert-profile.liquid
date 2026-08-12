@@ -49,6 +49,13 @@
 {%- liquid
   assign lep_section_title = section.settings.section_title | default: '' | strip
   assign lep_person_blocks = section.blocks | where: 'type', 'person'
+
+  comment
+    Merker fuer den ProfilePage-Knoten weiter unten. Nicht forloop.first, weil
+    Bloecke ohne Namen uebersprungen werden: steht so ein Block vorn, waere
+    forloop.first bei der ersten *gerenderten* Person schon false.
+  endcomment
+  assign lep_profile_done = false
 -%}
 
 <section class="lt-exp">
@@ -381,6 +388,36 @@
             {%- endif -%}
           }
         </script>
+
+        {%- comment -%}
+          ProfilePage sagt Suchsystemen, dass diese Seite *ueber* die Person ist
+          und nicht bloss eine Seite, auf der ein Name vorkommt. Ohne sie war der
+          Person-Knoten ein Detail einer gewoehnlichen WebPage; mit ihr ist die
+          Person das Hauptobjekt, und die Seite wird zum Identitaetsanker, auf
+          den `reviewedBy` und `employee` von ueberall her zeigen.
+
+          Eigener Knoten statt Umbau des Person-Knotens: Der Person-Knoten wird
+          per @id aus Artikeln, PDPs und der Organization referenziert, seine
+          Struktur bleibt deshalb unangetastet.
+
+          Nur fuer den ersten Personenblock. ProfilePage kennt genau ein
+          mainEntity; bei mehreren Profilen auf einer Seite waere jede weitere
+          Zuweisung eine Behauptung darueber, welche Person die Seite traegt.
+        {%- endcomment -%}
+        {%- unless lep_profile_done -%}
+          <script type="application/ld+json">
+            {
+              "@context": "https://schema.org",
+              "@type": "ProfilePage",
+              "@id": {{ canonical_url | split: '?' | first | json }},
+              "url": {{ canonical_url | split: '?' | first | json }},
+              "mainEntity": { "@id": {{ lep_person_id | json }} },
+              "about": { "@id": {{ lep_person_id | json }} },
+              "isPartOf": { "@id": {{ shop.url | append: '/#website' | json }} }
+            }
+          </script>
+          {%- assign lep_profile_done = true -%}
+        {%- endunless -%}
       {%- endif -%}
     {%- endfor -%}
 

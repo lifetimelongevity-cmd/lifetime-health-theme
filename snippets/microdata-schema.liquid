@@ -9,6 +9,25 @@
   elsif settings.favicon != blank
     assign org_logo = settings.favicon | image_url: width: 512
   endif
+
+  # shop.name kommt aus Liquid bereits HTML-escaped an ("&amp;"). Der json-Filter
+  # escaped nicht, er umschliesst nur, also stand der Entity-Name bisher als
+  # "LIFETIME Longevity &amp; Health" im Markup, waehrend der Shopify-eigene
+  # structured_data-Filter auf den Produktseiten "LIFETIME Longevity & Health"
+  # ausgibt. Zwei Schreibweisen derselben Marke auf derselben Seite. Hier wird
+  # zurueckgedreht, damit Organization, WebSite und Brand denselben Namen tragen.
+  assign org_name = shop.name | replace: '&amp;', '&'
+
+  # Personenknoten der aerztlichen Leitung. Der Anker muss mit `schema_anchor`
+  # im Person-Block von sections/lt-expert-profile.liquid uebereinstimmen, sonst
+  # mergen die Knoten nicht (und kein Validator meldet das). Dokumentiert in
+  # docs/limmroth-faktenblatt.md.
+  assign lt_expert_anchor = 'limmroth'
+  assign lt_expert_page = pages['aerzte']
+  assign lt_expert_node = null
+  if lt_expert_page != blank
+    assign lt_expert_node = shop.url | append: lt_expert_page.url | append: '#' | append: lt_expert_anchor
+  endif
 -%}
 <script type="application/ld+json">
   [
@@ -16,7 +35,7 @@
       "@context": "https://schema.org",
       "@type": "WebSite",
       "@id": {{ shop.url | append: '/#website' | json }},
-      "name": {{ shop.name | json }},
+      "name": {{ org_name | json }},
       "url": {{ shop.url | json }},
       "publisher": { "@id": {{ shop.url | append: '/#organization' | json }} },
       "potentialAction": {
@@ -32,12 +51,29 @@
       "@context": "https://schema.org",
       "@type": "Organization",
       "@id": {{ shop.url | append: '/#organization' | json }},
-      "name": {{ shop.name | json }},
+      "name": {{ org_name | json }},
+      "legalName": "LIFETIME Diga Health GmbH",
       "url": {{ shop.url | json }},
       "description": {{ 'LIFETIME Health ist eine deutsche Longevity- und Gesundheitsmarke für epigenetische Alterstests und Nahrungsergänzung.' | json }},
-      {%- if org_logo %}
-      "logo": {{ org_logo | json }},
-      "image": {{ org_logo | json }},
+      {%- comment -%}
+        Adresse und Registername aus dem Impressum. Sie machen die Organization
+        zu einer aufloesbaren Firma statt zu einem blossen Markennamen.
+      {%- endcomment %}
+      "address": {
+        "@type": "PostalAddress",
+        "streetAddress": "Oststraße 11-13",
+        "postalCode": "50996",
+        "addressLocality": "Köln",
+        "addressCountry": "DE"
+      },
+      {%- comment -%}
+        Die Bruecke zwischen Marke und Person. Ohne sie steht der Personenknoten
+        auf /pages/aerzte isoliert da: von der Organization aus fuehrt kein Weg
+        zu ihm, und genau diesen Weg laufen Suchsysteme ab, wenn sie fragen,
+        wer hinter einer Gesundheitsmarke fachlich steht.
+      {%- endcomment %}
+      {%- if lt_expert_node %}
+      "employee": { "@id": {{ lt_expert_node | json }} },
       {%- endif %}
       "sameAs": [
         "https://www.instagram.com/lifetime.longevity/",
@@ -188,6 +224,20 @@
       }
     </script>
   {%- endif -%}
+
+  {%- render 'schema-reviewed-by',
+    reviewer: product.metafields.custom.reviewer_name.value,
+    credential: product.metafields.custom.reviewer_credential.value,
+    reviewed_date: product.metafields.custom.reviewed_date.value,
+    main_entity: product.url,
+    main_entity_anchor: '#product',
+    expert_node: lt_expert_node -%}
+{%- elsif request.page_type == 'page' -%}
+  {%- render 'schema-reviewed-by',
+    reviewer: page.metafields.custom.reviewer_name.value,
+    credential: page.metafields.custom.reviewer_credential.value,
+    reviewed_date: page.metafields.custom.reviewed_date.value,
+    expert_node: lt_expert_node -%}
 {%- elsif request.page_type == 'article' -%}
   {%- comment -%}
     Eigener BlogPosting-Knoten statt `article | structured_data`. Der Shopify-Filter
@@ -201,12 +251,23 @@
     Die @id ist identisch zum alten Filter-Output (relativer Pfad + #article), damit
     der reviewedBy-Begleitknoten unten weiter auf denselben Knoten mergt.
   {%- endcomment -%}
+  {%- comment -%}
+    Der Autorenknoten hatte bisher nur einen Namen. Ohne @id ist jeder Artikel
+    eine neue, namensgleiche Person: 20 Artikel ergaben 20 Waisenknoten, die
+    kein Suchsystem zu einem Autor zusammenfuehren kann. Die @id haengt am
+    Shop-Host statt an einer Profilseite, weil es fuer den Autor bislang keine
+    gibt; sie ist trotzdem stabil und identisch ueber alle Artikel, damit die
+    Knoten mergen. Sobald eine Autorenseite existiert, zeigt die @id dorthin.
+  {%- endcomment -%}
   {%- liquid
     assign lt_article_modified = article.metafields.custom.reviewed_date.value | default: article.published_at
     assign lt_article_image = null
     if article.image
       assign lt_article_image = article.image | image_url: width: 1200
     endif
+    assign lt_author_name = article.author | default: org_name
+    assign lt_author_handle = lt_author_name | handleize
+    assign lt_author_node = shop.url | append: '/#person-' | append: lt_author_handle
   -%}
   <script type="application/ld+json">
     {
@@ -227,7 +288,9 @@
       "dateModified": {{ lt_article_modified | date: '%Y-%m-%d' | json }},
       "author": {
         "@type": "Person",
-        "name": {{ article.author | default: shop.name | json }}
+        "@id": {{ lt_author_node | json }},
+        "name": {{ lt_author_name | json }},
+        "worksFor": { "@id": {{ shop.url | append: '/#organization' | json }} }
       },
       "publisher": { "@id": {{ shop.url | append: '/#organization' | json }} }
     }
