@@ -160,11 +160,14 @@
           >
         {%- endif -%}
         <div class="lt-pdp-hero__gallery-frame">
-          {%- if section.settings.show_badge -%}
-            <span class="lt-pdp-hero__badge lt-badge">{{ section.settings.badge_text | default: 'Bestseller' | escape }}</span>
-          {%- endif -%}
-
           <div class="product-gallery product-gallery--slider lap--grid--slider-container" data-js-product-gallery>
+            {%- comment -%} Badge + Hauptbild teilen sich einen relativ positionierten Rahmen,
+              damit das Badge am Bild verankert ist und nicht am ganzen Frame inkl.
+              Thumbnail-Leiste (dort landete bottom:12px sonst unter den Thumbnails). {%- endcomment -%}
+            <div class="lt-pdp-hero__gallery-media">
+              {%- if section.settings.show_badge -%}
+                <span class="lt-pdp-hero__badge lt-badge">{{ section.settings.badge_text | default: 'Bestseller' | escape }}</span>
+              {%- endif -%}
             {%- if product.media.size > 1 -%}
               <css-slider
                 data-options='
@@ -222,6 +225,7 @@
             </div>
 
             {%- if product.media.size > 1 -%}</css-slider>{%- endif -%}
+            </div>{%- comment -%} /.lt-pdp-hero__gallery-media {%- endcomment -%}
 
             {%- if product.media.size > 1 -%}
               {%- comment -%}
