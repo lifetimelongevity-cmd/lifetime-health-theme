@@ -24,15 +24,6 @@
   if ps_kicker != blank or ps_head != blank or ps_sub != blank
     assign ps_has_header = true
   endif
-
-  assign ps_led_1 = section.settings.ledger_value_1 | strip
-  assign ps_led_2 = section.settings.ledger_value_2 | strip
-  assign ps_has_ledger = false
-  if section.settings.ledger_enable
-    if ps_led_1 != blank or ps_led_2 != blank
-      assign ps_has_ledger = true
-    endif
-  endif
 -%}
 {% style %}
   #section-{{ section.id }} {
@@ -40,10 +31,9 @@
     --crs-card-bg:   {{ section.settings.color_card_bg }};
     --crs-text:      {{ section.settings.color_text }};
     --crs-text-sec:  {{ section.settings.color_text | color_modify: 'alpha', 0.72 }};
-    --ps-card-dark:  {{ section.settings.color_card_dark }};
-    --ps-on-dark:    {{ section.settings.color_text_on_dark }};
-    --ps-on-dark-sec:{{ section.settings.color_text_on_dark | color_modify: 'alpha', 0.72 }};
-    --ps-measure:    {{ section.settings.color_measure }};
+    --ps-text-ter:   {{ section.settings.color_text | color_modify: 'alpha', 0.55 }};
+    --ps-num:        {{ section.settings.color_text | color_modify: 'alpha', 0.40 }};
+    --ps-line:       {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
     padding-top:    min({{ section.settings.padding_top }}px, 15vw);
     padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
     background:     var(--crs-bg);
@@ -56,42 +46,23 @@
 <div class="ps-section" id="section-{{ section.id }}">
   <div class="ps-container">
 
-    {%- if ps_has_header or ps_has_ledger -%}
-      <div class="ps-head ps-head--align-{{ crs_h_align }}{% if ps_has_header and ps_has_ledger %} ps-head--split{% endif %}">
-        {%- if ps_has_header -%}
-          <div class="ps-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_h_headline_md %} crs-heading-stack--headline-md{% endif %}">
-            {%- if ps_kicker != blank -%}
-              <p class="crs-heading-stack__kicker">{{ ps_kicker | escape }}</p>
-            {%- endif -%}
-            {%- if ps_head != blank or ps_sub != blank -%}
-              <div class="crs-heading-stack__pair">
-                {%- if ps_head != blank -%}
-                  <h2 class="crs-heading-stack__title">{{ ps_head | escape | newline_to_br }}</h2>
-                {%- endif -%}
-                {%- if ps_sub != blank -%}
-                  <p class="crs-heading-stack__subtitle">{{ ps_sub | escape | newline_to_br }}</p>
-                {%- endif -%}
-              </div>
-            {%- endif -%}
-          </div>
-        {%- endif -%}
-
-        {%- if ps_has_ledger -%}
-          <dl class="ps-ledger">
-            {%- if ps_led_1 != blank -%}
-              <div class="ps-ledger__item">
-                <dt class="ps-ledger__label">{{ section.settings.ledger_label_1 | escape }}</dt>
-                <dd class="ps-ledger__value">{{ ps_led_1 | escape }}</dd>
-              </div>
-            {%- endif -%}
-            {%- if ps_led_2 != blank -%}
-              <div class="ps-ledger__item">
-                <dt class="ps-ledger__label">{{ section.settings.ledger_label_2 | escape }}</dt>
-                <dd class="ps-ledger__value">{{ ps_led_2 | escape }}</dd>
-              </div>
-            {%- endif -%}
-          </dl>
-        {%- endif -%}
+    {%- if ps_has_header -%}
+      <div class="ps-head ps-head--align-{{ crs_h_align }}">
+        <div class="ps-header crs-heading-stack crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_h_headline_md %} crs-heading-stack--headline-md{% endif %}">
+          {%- if ps_kicker != blank -%}
+            <p class="crs-heading-stack__kicker">{{ ps_kicker | escape }}</p>
+          {%- endif -%}
+          {%- if ps_head != blank or ps_sub != blank -%}
+            <div class="crs-heading-stack__pair">
+              {%- if ps_head != blank -%}
+                <h2 class="crs-heading-stack__title">{{ ps_head | escape | newline_to_br }}</h2>
+              {%- endif -%}
+              {%- if ps_sub != blank -%}
+                <p class="crs-heading-stack__subtitle">{{ ps_sub | escape | newline_to_br }}</p>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        </div>
       </div>
     {%- endif -%}
 
@@ -99,41 +70,38 @@
       <ol class="ps-cards ps-cards--{{ section.blocks.size }}">
         {%- for block in section.blocks -%}
           {%- liquid
-            assign b_value  = block.settings.step_timeframe | strip
-            assign b_prefix = block.settings.step_value_prefix | strip
-            assign b_unit   = block.settings.step_unit | strip
-            assign b_dark   = false
-            if block.settings.card_style == 'dark'
-              assign b_dark = true
-            endif
             comment
-              Wortwerte (z. B. "Lebenslang") tragen viel mehr Fläche als eine
-              Ziffer und würden die Reihe kippen. Sie kommen eine Stufe kleiner.
+              Fokus: die Sache führt (Titel), die Zeit ist eine ruhige Zeile am Fuß.
+              Zeit bevorzugt aus step_time; Fallback für Altbestand (Quiz-Templates)
+              aus prefix + timeframe + unit, optional die Herkunft (callout_text).
             endcomment
-            assign b_value_word = false
-            if b_value.size > 4
-              assign b_value_word = true
+            assign b_time = block.settings.step_time | strip
+            if b_time == blank
+              assign _pre = block.settings.step_value_prefix | strip
+              assign _tf  = block.settings.step_timeframe | strip
+              assign _un  = block.settings.step_unit | strip
+              assign _src = block.settings.callout_text | strip
+              capture b_time
+                if _pre != blank
+                  echo _pre
+                  echo ' '
+                endif
+                echo _tf
+                if _un != blank
+                  echo ' '
+                  echo _un
+                endif
+                if _src != blank
+                  echo ' · '
+                  echo _src
+                endif
+              endcapture
+              assign b_time = b_time | strip
             endif
           -%}
-          <li class="ps-card{% if b_dark %} ps-card--dark{% endif %}" {{ block.shopify_attributes }}>
+          <li class="ps-card" {{ block.shopify_attributes }}>
             {%- if block.settings.step_number != blank -%}
-              <p class="ps-card__step">Schritt {{ block.settings.step_number | escape }}</p>
-            {%- endif -%}
-
-            {%- if b_value != blank -%}
-              <p class="ps-card__figure">
-                {%- comment -%}
-                  &#32; überlebt die Liquid-Trimmung. Ohne sie steht im Textbaum
-                  "unter5Minuten", auch wenn das Flex-Gap optisch trennt.
-                {%- endcomment -%}
-                {%- if b_prefix != blank -%}
-                  <span class="ps-card__affix">{{ b_prefix | escape }}</span>&#32;
-                {%- endif -%}
-                <span class="ps-card__value{% if b_value_word %} ps-card__value--word{% endif %}">{{ b_value | escape }}</span>
-                {%- if b_unit != blank -%}
-                  &#32;<span class="ps-card__affix">{{ b_unit | escape }}</span>
-                {%- endif -%}
-              </p>
+              <p class="ps-card__num">{{ block.settings.step_number | escape }}</p>
             {%- endif -%}
 
             {%- if block.settings.step_title != blank -%}
@@ -144,18 +112,8 @@
               <p class="ps-card__body">{{ block.settings.step_body | escape }}</p>
             {%- endif -%}
 
-            {%- if block.settings.show_callout and block.settings.callout_text != blank -%}
-              {%- comment -%}
-                Jedes Glied bleibt zusammen, der Trenner hängt am Glied davor.
-                So bricht die Zeile nur zwischen den Angaben, nie mitten im Namen.
-              {%- endcomment -%}
-              {%- assign src_parts = block.settings.callout_text | split: ' · ' -%}
-              <p class="ps-card__source">
-                {%- for part in src_parts -%}
-                  <span class="ps-card__source-part">{{ part | escape }}{% unless forloop.last %} ·{% endunless %}</span>
-                  {%- unless forloop.last -%}&#32;{%- endunless -%}
-                {%- endfor -%}
-              </p>
+            {%- if b_time != blank -%}
+              <p class="ps-card__time">{{ b_time | escape }}</p>
             {%- endif -%}
           </li>
         {%- endfor -%}
@@ -184,10 +142,10 @@
 {% stylesheet %}
 /* ===================================================
    Process Steps — lt-pdp-process-steps.liquid
-   Vier Karten als Zeitbilanz. Die Zeitmarke ist die
-   Hauptfigur, die Ordnungszahl das Label. Eine Karte
-   (das Labor) ist dunkel: der lange Teil ist nicht
-   der Aufwand des Kunden.
+   Vier gleichwertige Karten. Die Sache (Titel) führt,
+   die Zeit ist eine ruhige Zeile am Fuß. Einfarbig,
+   keine Hervorhebung einzelner Karten, minimale
+   Größen- und Gewichtsabstufung.
    =================================================== */
 
 .ps-section {
@@ -195,22 +153,17 @@
 }
 
 .ps-container {
-  max-width: 1200px;
+  /* 1280 / 20px Gutter: identisch zu den CRS-Sections, damit die Section
+     nicht schmaler startet als ihre Nachbarn. */
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 var(--space-5, 20px);
+  padding: 0 20px;
 }
 
-/* ---------- Kopfband: Headline links, Zeitbilanz rechts ---------- */
+/* ---------- Kopfband ---------- */
 
 .ps-head {
   margin-bottom: var(--space-7, 48px);
-}
-
-.ps-head--split {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-5, 24px);
-  align-items: end;
 }
 
 .ps-head--align-center {
@@ -219,49 +172,6 @@
 
 .ps-head--align-right {
   text-align: right;
-}
-
-.ps-ledger {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-5, 24px) var(--space-7, 48px);
-  margin: 0;
-  padding: 0;
-}
-
-.ps-head--align-center .ps-ledger {
-  justify-content: center;
-}
-
-.ps-head--align-right .ps-ledger {
-  justify-content: flex-end;
-}
-
-.ps-ledger__item {
-  min-width: 0;
-}
-
-.ps-ledger__label {
-  margin: 0 0 var(--space-2, 8px);
-  font-family: var(--font-body);
-  font-size: var(--text-micro, 12px);
-  font-weight: var(--weight-semibold, 600);
-  line-height: 1.2;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--crs-text-sec, rgba(38, 37, 30, 0.72));
-}
-
-.ps-ledger__value {
-  margin: 0;
-  font-family: var(--font-heading);
-  font-size: var(--text-h3, 24px);
-  font-weight: var(--weight-bold, 700);
-  /* Gleiche Durchschusslogik wie die Überschrift, sonst sitzt die Zeitbilanz
-     im Kopfband sichtbar tiefer als die Headline daneben. */
-  line-height: var(--leading-tight, 1.25);
-  color: var(--ps-measure, #4a8c85);
-  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- Kartenreihe ---------- */
@@ -294,88 +204,33 @@
   padding: var(--space-6, 32px);
   background: var(--crs-card-bg, #ffffff);
   border-radius: var(--radius-md, 12px);
-  box-shadow: var(--shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.05));
+  /* Kante wie alle anderen PDP-Karten (Feature-Grid, Reviews): 1px Haarlinie,
+     kein Schatten. */
+  border: 1px solid var(--ps-line, rgba(38, 37, 30, 0.08));
 }
 
-/* Die Laborkarte: dunkle Fläche, keine Elevation. */
-.ps-card--dark {
-  background: var(--ps-card-dark, #364f56);
-  box-shadow: none;
-}
-
-.ps-card__step {
-  margin: 0 0 var(--space-5, 24px);
+/* Ordnungszahl: leise, blass. Trägt die Reihenfolge, dominiert nicht. */
+.ps-card__num {
+  margin: 0 0 var(--space-3, 12px);
   font-family: var(--font-body);
-  font-size: var(--text-micro, 12px);
-  font-weight: var(--weight-semibold, 600);
-  line-height: 1.2;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--crs-text-sec, rgba(38, 37, 30, 0.72));
-}
-
-.ps-card--dark .ps-card__step {
-  color: var(--ps-on-dark-sec, rgba(247, 247, 244, 0.72));
-}
-
-/* Zeitwert: die Hauptfigur der Karte. */
-.ps-card__figure {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2, 8px);
-  margin: 0 0 var(--space-4, 16px);
-}
-
-.ps-card__value {
-  font-family: var(--font-heading);
-  font-size: var(--text-h2, 28px);
-  font-weight: var(--weight-bold, 700);
+  font-size: var(--text-body-sm, 14px);
+  font-weight: var(--weight-regular, 400);
   line-height: 1;
-  letter-spacing: -0.01em;
-  color: var(--crs-text, #26251e);
+  color: var(--ps-num, rgba(38, 37, 30, 0.4));
   font-variant-numeric: tabular-nums;
 }
 
-.ps-card--dark .ps-card__value {
-  color: var(--ps-on-dark, #f7f7f4);
-}
-
-/* Wortwert statt Ziffer: eine Stufe kleiner, sonst kippt die Reihe.
-   Nicht kleiner als h3, sonst verliert der Wert gegen den Kartentitel. */
-.ps-card__value--word {
-  font-size: var(--text-h3, 24px);
-  letter-spacing: 0;
-}
-
-.ps-card__affix {
-  font-family: var(--font-body);
-  font-size: var(--text-micro, 12px);
-  font-weight: var(--weight-semibold, 600);
-  line-height: 1.2;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--crs-text-sec, rgba(38, 37, 30, 0.72));
-}
-
-.ps-card--dark .ps-card__affix {
-  color: var(--ps-on-dark-sec, rgba(247, 247, 244, 0.72));
-}
-
+/* Die Sache: das einzige hervorgehobene Element der Karte. */
 /* (0,2,0) — schlägt die h3-Elementregeln aus theme.css ohne !important */
 .ps-section .ps-card__title {
   margin: 0 0 var(--space-2, 8px);
   font-family: var(--font-body);
-  font-size: var(--text-body, 16px);
+  font-size: var(--text-body-lg, 18px);
   font-weight: var(--weight-semibold, 600);
-  line-height: 1.4;
+  line-height: 1.3;
   letter-spacing: 0;
   color: var(--crs-text, #26251e);
   text-wrap: balance;
-}
-
-.ps-section .ps-card--dark .ps-card__title {
-  color: var(--ps-on-dark, #f7f7f4);
 }
 
 .ps-card__body {
@@ -387,42 +242,27 @@
   color: var(--crs-text-sec, rgba(38, 37, 30, 0.72));
 }
 
-.ps-card--dark .ps-card__body {
-  color: var(--ps-on-dark-sec, rgba(247, 247, 244, 0.72));
-}
-
-/* Herkunftszeile, sitzt am Kartenfuß. Getrennt durch Weißraum, nicht durch
-   eine Linie: die Karte ist hier das trennende Element. */
-.ps-card__source {
+/* Zeit: ruhige Zeile, sitzt am Kartenfuß. Getrennt durch Weißraum, nicht
+   durch eine Linie. auto schiebt sie auf den Fuß, padding sichert den
+   Mindestabstand; auf der höchsten Karte wird auto zu null. */
+.ps-card__time {
   margin: var(--space-5, 24px) 0 0;
   font-family: var(--font-body);
-  font-size: var(--text-micro, 12px);
-  font-weight: var(--weight-semibold, 600);
-  line-height: 1.4;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--crs-text-sec, rgba(38, 37, 30, 0.72));
+  font-size: var(--text-body-sm, 14px);
+  font-weight: var(--weight-regular, 400);
+  line-height: 1.45;
+  color: var(--ps-text-ter, rgba(38, 37, 30, 0.55));
 }
 
-.ps-card__source-part {
-  white-space: nowrap;
-}
-
-/* auto schiebt die Zeile auf den Kartenfuß, padding sichert den Mindestabstand:
-   auf der höchsten Karte gibt es keinen freien Raum, dort wird auto zu null. */
-.ps-card__body + .ps-card__source {
+.ps-card__body + .ps-card__time {
   margin-top: auto;
-  padding-top: var(--space-4, 16px);
-}
-
-.ps-card--dark .ps-card__source {
-  color: var(--ps-on-dark-sec, rgba(247, 247, 244, 0.72));
+  padding-top: var(--space-5, 24px);
 }
 
 /* ---------- Schlussnotiz + CTA ---------- */
 
 .ps-note {
-  max-width: var(--lt-measure, 32rem);
+  max-width: var(--lt-measure, 34rem);
   margin: var(--space-6, 32px) 0 0;
   font-family: var(--font-body);
   font-size: var(--text-body-sm, 14px);
@@ -445,7 +285,7 @@
   line-height: 1.2;
   color: var(--crs-text, #26251e);
   text-decoration: none;
-  transition: color var(--ease-default, 0.2s ease);
+  transition: opacity var(--ease-default, 0.2s ease);
 }
 
 .ps-cta svg {
@@ -455,7 +295,7 @@
 
 .ps-cta:hover,
 .ps-cta:focus-visible {
-  color: var(--ps-measure, #4a8c85);
+  opacity: 0.7;
 }
 
 .ps-cta:hover svg,
@@ -464,7 +304,7 @@
 }
 
 .ps-cta:focus-visible {
-  outline: 2px solid var(--ps-measure, #4a8c85);
+  outline: 2px solid var(--crs-text, #26251e);
   outline-offset: 3px;
   border-radius: var(--radius-sm, 8px);
 }
@@ -483,13 +323,6 @@
 
 /* ---------- Responsive ---------- */
 
-@media screen and (min-width: 1025px) {
-  .ps-head--split {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--space-7, 48px);
-  }
-}
-
 @media screen and (max-width: 1024px) {
   .ps-cards,
   .ps-cards--3,
@@ -503,11 +336,6 @@
     margin-bottom: var(--space-6, 32px);
   }
 
-  /* Aufwand und Laborzeit bleiben nebeneinander, der Vergleich ist die Aussage. */
-  .ps-ledger {
-    gap: var(--space-4, 16px) var(--space-5, 24px);
-  }
-
   .ps-cards,
   .ps-cards--3,
   .ps-cards--2 {
@@ -518,8 +346,10 @@
     padding: var(--space-5, 24px);
   }
 
-  .ps-card__step {
-    margin-bottom: var(--space-4, 16px);
+  /* Auf schmalen Karten braucht die Zeitzeile den Fuß-Schub nicht. */
+  .ps-card__body + .ps-card__time {
+    margin-top: var(--space-4, 16px);
+    padding-top: 0;
   }
 }
 {% endstylesheet %}
@@ -548,28 +378,10 @@
     },
     {
       "type": "color",
-      "id": "color_card_dark",
-      "label": "Hintergrund hervorgehobene Karte",
-      "default": "#364f56"
-    },
-    {
-      "type": "color",
       "id": "color_text",
       "label": "Textfarbe",
-      "default": "#26251e"
-    },
-    {
-      "type": "color",
-      "id": "color_text_on_dark",
-      "label": "Textfarbe auf dunkler Karte",
-      "default": "#f7f7f4"
-    },
-    {
-      "type": "color",
-      "id": "color_measure",
-      "label": "Farbe Messwert",
-      "default": "#4a8c85",
-      "info": "Nur für die Zeitbilanz. Sparsam halten."
+      "default": "#26251e",
+      "info": "Nummer, Zeit und Kartenkante werden daraus abgeleitet."
     },
     {
       "type": "header",
@@ -644,41 +456,6 @@
     },
     {
       "type": "header",
-      "content": "Zeitbilanz"
-    },
-    {
-      "type": "checkbox",
-      "id": "ledger_enable",
-      "label": "Zeitbilanz anzeigen",
-      "default": true,
-      "info": "Steht neben der Überschrift und fasst Eigenaufwand und Wartezeit zusammen."
-    },
-    {
-      "type": "text",
-      "id": "ledger_label_1",
-      "label": "Label 1",
-      "default": "Dein Aufwand"
-    },
-    {
-      "type": "text",
-      "id": "ledger_value_1",
-      "label": "Wert 1",
-      "info": "Produktspezifisch, bewusst ohne Vorgabe. Leer blendet die Zeile aus."
-    },
-    {
-      "type": "text",
-      "id": "ledger_label_2",
-      "label": "Label 2",
-      "default": "Laborzeit"
-    },
-    {
-      "type": "text",
-      "id": "ledger_value_2",
-      "label": "Wert 2",
-      "info": "Produktspezifisch, bewusst ohne Vorgabe. Leer blendet die Zeile aus."
-    },
-    {
-      "type": "header",
       "content": "Abschluss"
     },
     {
@@ -710,27 +487,43 @@
           "default": "01"
         },
         {
-          "type": "select",
-          "id": "card_style",
-          "label": "Kartenstil",
-          "options": [
-            { "value": "standard", "label": "Standard (hell)" },
-            { "value": "dark", "label": "Hervorgehoben (dunkel)" }
-          ],
-          "default": "standard",
-          "info": "Höchstens eine Karte hervorheben, sonst verliert sie ihre Wirkung."
+          "type": "text",
+          "id": "step_title",
+          "label": "Titel (die Sache)",
+          "default": "Testkit bestellen",
+          "info": "Das führende Element der Karte. Kurz und konkret."
+        },
+        {
+          "type": "textarea",
+          "id": "step_body",
+          "label": "Beschreibung",
+          "info": "Ein Satz. Was in diesem Schritt passiert."
+        },
+        {
+          "type": "text",
+          "id": "step_time",
+          "label": "Zeit-Zeile",
+          "info": "Ruhige Zeile am Fuß, z. B. „2–3 Werktage bis zur Lieferung“. Leer = wird aus den Fallback-Feldern unten zusammengesetzt."
+        },
+        {
+          "type": "header",
+          "content": "Zeit (Fallback)"
+        },
+        {
+          "type": "paragraph",
+          "content": "Nur genutzt, wenn „Zeit-Zeile“ leer ist. Reihenfolge: Präfix + Wert + Einheit, danach optional die Herkunft."
         },
         {
           "type": "text",
           "id": "step_value_prefix",
-          "label": "Zeitwert-Präfix",
-          "info": "z. B. unter, ca., ab. Leer lassen ist der Normalfall."
+          "label": "Präfix",
+          "info": "z. B. unter, ca., ab."
         },
         {
           "type": "text",
           "id": "step_timeframe",
-          "label": "Zeitwert",
-          "info": "Die große Zahl der Karte, z. B. 2–3 oder 6. Leer lassen blendet die Zeile aus."
+          "label": "Wert",
+          "info": "z. B. 2–3, 6, Lebenslang."
         },
         {
           "type": "text",
@@ -740,28 +533,9 @@
         },
         {
           "type": "text",
-          "id": "step_title",
-          "label": "Titel",
-          "default": "Testkit bestellen"
-        },
-        {
-          "type": "textarea",
-          "id": "step_body",
-          "label": "Beschreibung",
-          "info": "Kurz halten. Titel und Zeitwert tragen den Schritt."
-        },
-        {
-          "type": "checkbox",
-          "id": "show_callout",
-          "label": "Herkunftszeile anzeigen",
-          "default": false
-        },
-        {
-          "type": "textarea",
           "id": "callout_text",
-          "label": "Herkunftszeile",
-          "default": "Eurofins Genomics · ISO 17025",
-          "info": "Sitzt am Kartenfuß. Kurz halten, das ist ein Beleg, kein Satz."
+          "label": "Herkunft (optional)",
+          "info": "z. B. Eurofins Genomics · ISO 17025. Wird an die Zeit-Zeile angehängt."
         }
       ]
     }
@@ -775,46 +549,36 @@
           "type": "step",
           "settings": {
             "step_number": "01",
-            "step_timeframe": "2–3",
-            "step_unit": "Werktage",
             "step_title": "Testkit bestellen & erhalten",
             "step_body": "Röhrchen, Anleitung und frankierter Rückumschlag sind drin.",
-            "show_callout": false
+            "step_time": "2–3 Werktage bis zur Lieferung"
           }
         },
         {
           "type": "step",
           "settings": {
             "step_number": "02",
-            "step_value_prefix": "unter",
-            "step_timeframe": "5",
-            "step_unit": "Minuten",
             "step_title": "Registrieren und Probe abgeben",
-            "step_body": "Kein Blut, keine Nadel.",
-            "show_callout": false
+            "step_body": "Speichelprobe zuhause. Kein Blut, keine Nadel.",
+            "step_time": "Unter 5 Minuten"
           }
         },
         {
           "type": "step",
           "settings": {
             "step_number": "03",
-            "card_style": "dark",
-            "step_timeframe": "6",
-            "step_unit": "Wochen",
             "step_title": "Probe geht ins Labor",
-            "step_body": "Eurofins Genomics, eines der führenden Genomik-Labore Europas.",
-            "show_callout": true,
-            "callout_text": "Eurofins Genomics · ISO 17025"
+            "step_body": "Eines der führenden Genomik-Labore Europas wertet sie aus.",
+            "step_time": "6 Wochen · Eurofins Genomics, ISO 17025"
           }
         },
         {
           "type": "step",
           "settings": {
             "step_number": "04",
-            "step_timeframe": "Lebenslang",
             "step_title": "Ergebnisse in der App",
             "step_body": "Dein biologisches Alter, deine Reports und der AI Health Coach, der sie erklärt.",
-            "show_callout": false
+            "step_time": "Lebenslang verfügbar"
           }
         }
       ]
