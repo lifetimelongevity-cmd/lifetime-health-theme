@@ -5,6 +5,14 @@
   @param {number} row    - Row index 1–6
   @param {string} row_label - Row heading text
   @param {boolean} is_active - true if this is the active/recommended column
+  @param {boolean} is_first_row - true on the first data row; carries the badge in card mode
+  @param {string} badge_text - "Empfohlen"-Badge, nur fuer die aktive Spalte der ersten Zeile
+
+  Der Spaltenname steht in jeder Zelle (`.lct-cell-colname`), nicht nur in der
+  Kopfzeile. In der Tabellenansicht ist er ausgeblendet, dort traegt die Kopfzeile
+  ihn. Unter 700px wird die Kopfzeile ausgeblendet und jede Zelle beschriftet sich
+  selbst — das ist die Voraussetzung dafuer, dass die Zeilen zu Karten werden
+  koennen, ohne dass Werte ihre Zuordnung verlieren.
 {%- enddoc -%}
 {%- liquid
   case row
@@ -66,6 +74,14 @@
   {%- elsif icon_type == 'custom' and custom_img != blank -%}
     <span class="lct-cell-icon" aria-hidden="true">
       {{- custom_img | image_url: width: 80 | image_tag: loading: 'lazy', class: 'lct-icon-img', alt: '' -}}
+    </span>
+  {%- endif -%}
+  {%- if block.settings.column_heading != blank -%}
+    <span class="lct-cell-colname">
+      {{- block.settings.column_heading | escape -}}
+      {%- if is_active and is_first_row and badge_text != blank -%}
+        <span class="lct-badge lct-badge--inline">{{ badge_text | escape }}</span>
+      {%- endif -%}
     </span>
   {%- endif -%}
   {%- if cell_value != blank -%}

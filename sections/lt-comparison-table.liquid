@@ -90,10 +90,30 @@
     {%- if rh6 != blank -%}{%- assign row_data = row_data | append: '6|' | append: rh6 | append: ';' -%}{%- endif -%}
     {%- assign row_list = row_data | split: ';' -%}
 
-    <div class="lct-outer-wrap">
-      <div class="lct-scroll-wrap">
+    {%- comment -%}
+      Ab drei Spalten passt die Tabelle unter 700px nicht mehr nebeneinander und
+      wird dort zu Karten (eine je Merkmal). Zweispalter bleiben Tabelle: die
+      passen bei 375px vollstaendig (min-width 284px) und haetten von Karten nur
+      zusaetzliche Hoehe.
+    {%- endcomment -%}
+    {%- assign use_cards = false -%}
+    {%- if col_count >= 3 -%}{%- assign use_cards = true -%}{%- endif -%}
+
+    <div class="lct-outer-wrap{% if use_cards %} lct-outer-wrap--cards{% endif %}">
+      {%- comment -%}
+        tabindex/role/aria-label nur dort, wo der Container ueberhaupt scrollen
+        kann. Beim Zweispalter waere es ein Tab-Stopp ohne Ziel.
+      {%- endcomment -%}
+      <div
+        class="lct-scroll-wrap{% if use_cards %} lct-scroll-wrap--cards{% endif %}"
+        {% if use_cards %}
+          tabindex="0"
+          role="region"
+          aria-label="{{ section.settings.headline | default: 'Produktvergleich' | escape }}"
+        {% endif %}
+      >
         <div
-          class="lct-grid"
+          class="lct-grid{% if use_cards %} lct-grid--cards{% endif %}"
           role="table"
           aria-label="{{ section.settings.headline | default: 'Produktvergleich' | escape }}"
           data-cols="{{ col_count }}"
@@ -151,6 +171,8 @@
             {%- assign row_idx    = entry_parts[0] | plus: 0 -%}
             {%- assign row_label  = entry_parts[1] -%}
             {%- assign visible_idx = forloop.index -%}
+            {%- comment -%} Vor der inneren Schleife sichern, die ueberschreibt forloop. {%- endcomment -%}
+            {%- assign is_first_data_row = forloop.first -%}
 
             {%- comment -%} Inject group 2 label before the correct row {%- endcomment -%}
             {%- if group_2_label != blank and group_split_after > 0 and visible_idx == group_split_target -%}
@@ -179,7 +201,9 @@
                     block: block,
                     row: row_idx,
                     row_label: row_label,
-                    is_active: is_active
+                    is_active: is_active,
+                    is_first_row: is_first_data_row,
+                    badge_text: badge_text
                 -%}
               {%- endfor -%}
             </div>
@@ -419,6 +443,11 @@
 .lct-cell--data.is-active .lct-cell-icon { color: var(--crs-accent, #65c0b6); }
 .lct-icon-img { width: 20px; height: 20px; object-fit: contain; }
 
+/* ── Spaltenname in der Zelle ──
+   Steht immer im Markup, sichtbar nur in der Kartenansicht (<700px). In der
+   Tabelle traegt die Kopfzeile den Namen, hier waere er eine Dopplung. */
+.lct-cell-colname { display: none; }
+
 /* ── Cell text ── */
 .lct-cell-text {
   font-size: 12px;
@@ -500,9 +529,16 @@
     grid-template-columns: minmax(160px, 1.4fr) repeat(3, 1fr);
     min-width: 560px;
   }
+  /* minmax(0, 1fr) statt 1fr: ein blankes 1fr hat min-content als Boden, das
+     laengste unbrechbare Wort spannt die Spalte also auf und die Tabelle laeuft
+     ueber. Bei vier Spalten reichte "Alterungsgeschwindigkeit" (148px), um bei
+     812px 25px Ueberlauf zu erzeugen. Mit 0 als Boden darf die Spalte schrumpfen,
+     den Umbruch uebernehmen Soft Hyphen und `overflow-wrap: break-word`.
+     min-width 640 statt 680, damit der Vierspalter ab 700px passt — darunter
+     rendern ohnehin Karten. */
   .lct-grid[data-cols="4"] {
-    grid-template-columns: minmax(160px, 1.4fr) repeat(4, 1fr);
-    min-width: 680px;
+    grid-template-columns: minmax(160px, 1.4fr) repeat(4, minmax(0, 1fr));
+    min-width: 640px;
   }
 
   .lct-cell { padding: 14px 18px; min-height: 62px; }
@@ -545,6 +581,157 @@
 
   .lct-label-text { font-size: 15px; }
   .lct-cell-text  { font-size: 14px; }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   KARTEN  < 700px — nur ab drei Spalten (.lct-grid--cards)
+
+   Ein Dreispalter braucht 540px Rasterbreite, bei 375px stehen 341px
+   zur Verfuegung. Sichtbar war die erste Datenspalte plus 46px der
+   zweiten, mitten im Wort abgeschnitten. Ein Fade mit Wisch-Hinweis
+   waere die kleinere Aenderung gewesen, traegt hier aber nicht: die
+   Label-Spalte ist NICHT sticky (gemessen, `position: relative`), beim
+   Scrollen auf 199px steht sie bei -182px, also ausserhalb des Bildes.
+   Der Hinweis wuerde also in eine Ansicht einladen, in der Werte wie
+   "Ja, eine Zahl" ohne ihre Zeilenbeschriftung dastehen.
+
+   Deshalb hier der Zeilenvergleich: eine Karte je Merkmal, in der die
+   drei Werte untereinander stehen und sich selbst beschriften. Der
+   Vergleich passiert damit innerhalb einer Karte statt ueber zwei
+   Wischgesten hinweg, und es bleibt bei der vertikalen Geste, die der
+   Besucher ohnehin macht.
+
+   Zweispalter (NMN, Spermidin) bleiben bewusst Tabelle — sie passen bei
+   375px vollstaendig und wuerden durch Karten nur laenger.
+
+   Steht am Ende der Datei und ist durchgehend auf .lct-grid--cards
+   gescopet, damit im Ueberlappungsband 640–699px keine Regel der
+   Tablet-Stufe gewinnt.
+   ══════════════════════════════════════════════════════════════ */
+@media (max-width: 699px) {
+  /* Rahmen und Radius wandern vom Gesamtblock auf die einzelne Karte */
+  .lct-outer-wrap--cards {
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    max-width: none;
+  }
+  .lct-scroll-wrap--cards { overflow-x: visible; }
+
+  /* min-width der Raster-Regel muss weg, sonst zwingt sie den Flex-
+     Container weiterhin auf 540px und die Seite scrollt horizontal.
+     Drei Selektoren mit Absicht: `.lct-grid[data-cols="3"]` zaehlt als
+     zwei Klassen, eine einzelne .lct-grid--cards verliert dagegen. */
+  .lct-grid.lct-grid--cards[data-cols] {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    min-width: 0;
+    background: transparent;
+  }
+
+  /* Kopfzeile entfaellt, jede Zelle nennt ihre Spalte selbst */
+  .lct-grid--cards .lct-row--head { display: none; }
+
+  /* Gruppen-Label wird zur freistehenden Zwischenueberschrift */
+  .lct-grid--cards .lct-row--group { display: block; }
+  .lct-grid--cards .lct-cell--group-filler { display: none; }
+  .lct-grid--cards .lct-cell--group-label,
+  .lct-grid--cards .lct-row--head + .lct-row--group .lct-cell--group-label {
+    background: transparent;
+    border-top: none;
+    padding: var(--space-2) 0 0;
+  }
+  .lct-grid--cards .lct-row--group:first-child .lct-cell--group-label {
+    padding-top: 0;
+  }
+
+  /* ── Eine Karte je Merkmal ── */
+  .lct-grid--cards .lct-row--data {
+    display: block;
+    background: var(--crs-bg);
+    border: 1px solid var(--crs-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+
+  /* Kartenkopf = das Merkmal, auf derselben getoenten Flaeche, die in
+     der Tabellenansicht die Label-Spalte traegt. Die Abgrenzung laeuft
+     ueber Flaeche und Gewicht, nicht ueber eine farbige Kante. */
+  .lct-grid--cards .lct-cell--label {
+    display: block;
+    background: var(--crs-card-bg);
+    border-top: none;
+    padding: var(--space-2) var(--space-4);
+    min-height: 0;
+  }
+  .lct-grid--cards .lct-label-text {
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-bold);
+    line-height: var(--leading-tight);
+    color: var(--crs-text);
+  }
+
+  /* ── Ein Eintrag je Spalte: Icon links, darueber der Spaltenname,
+        darunter der Wert ── */
+  .lct-grid--cards .lct-cell--data {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      "icon name"
+      "icon value";
+    align-items: center;
+    gap: var(--space-1) var(--space-3);
+    text-align: left;
+    /* space-2 statt space-3: die Karten kosten Seitenlaenge, und bei zwei
+       Textzeilen je Eintrag traegt die Zeilenhoehe die Trennung bereits. */
+    padding: var(--space-2) var(--space-4);
+    min-height: 0;
+    border-top: 1px solid var(--crs-border);
+    border-left: none;
+  }
+
+  .lct-grid--cards .lct-cell-icon { grid-area: icon; }
+  /* 20px wie ab 640px, nicht die 18px der Mobil-Tabelle: das Icon steht hier
+     neben zwei Textzeilen statt darueber. Fuer Icon-Groessen gibt es kein
+     Token, der Rest der Datei setzt sie ebenso direkt. */
+  .lct-grid--cards .lct-cell-icon svg { width: 20px; height: 20px; }
+
+  .lct-grid--cards .lct-cell-colname {
+    grid-area: name;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    font-size: var(--text-micro);
+    font-weight: var(--weight-medium);
+    line-height: var(--leading-tight);
+    color: var(--crs-text-sec);
+  }
+
+  /* Volle Kartenbreite statt 123px Spalte: der Wert darf jetzt auf die
+     14px des Fliesstextes hoch, statt auf 12.5px gedrueckt zu werden. */
+  .lct-grid--cards .lct-cell-text {
+    grid-area: value;
+    font-size: var(--text-body-sm);
+    line-height: var(--leading-tight);
+  }
+
+  /* Aktive Spalte: weisse Flaeche wie in der Tabelle. Die seitlichen
+     Inset-Kanten entfallen, diese Aufgabe hat hier der Kartenrahmen. */
+  .lct-grid--cards .lct-cell--data.is-active,
+  .lct-grid--cards .lct-row--data:last-of-type .lct-cell--data.is-active {
+    background: var(--crs-surface-raised);
+    box-shadow: none;
+  }
+
+  /* Badge einmal, im ersten Merkmal, in der Zeile des Spaltennamens.
+     Absolut positioniert wuerde es mit langen Spaltennamen kollidieren. */
+  .lct-grid--cards .lct-badge--inline {
+    position: static;
+    transform: none;
+    flex-shrink: 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

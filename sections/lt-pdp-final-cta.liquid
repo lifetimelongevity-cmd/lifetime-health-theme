@@ -20,12 +20,34 @@
   if section.settings.heading_size == 'product_title'
     assign crs_h_headline_lg = true
   endif
+  assign crs_h_headline_md = false
+  if section.settings.heading_size == 'feature'
+    assign crs_h_headline_md = true
+  endif
 -%}
+
+{%- comment -%}
+  Flush-Regeln nur, wenn die Section die Seite abschliesst. Als Band mitten in
+  der Seite darf sie den Footer-Abstand nicht anfassen.
+{%- endcomment -%}
+{%- if section.settings.flush_bottom -%}
+  {% style %}
+    #shopify-section-{{ section.id }} {
+      margin-bottom: 0;
+    }
+
+    /* !important wie zuvor, damit die Theme-Default-Marge sicher faellt. Neu ist
+       nur, dass die Regel an flush_bottom haengt statt global zu gelten. */
+    .main-footer {
+      margin-top: 0 !important;
+    }
+  {% endstyle %}
+{%- endif -%}
 <section class="lt-pdp-final-cta" id="lt-pdp-final-cta-{{ section.id }}">
   <div class="container container--large">
 
     {%- if crs_fc_kicker != blank or crs_fc_head != blank or crs_fc_sub != blank -%}
-      <div class="lt-pdp-final-cta__intro crs-heading-stack crs-heading-stack--on-dark crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% endif %}">
+      <div class="lt-pdp-final-cta__intro crs-heading-stack crs-heading-stack--on-dark crs-heading-stack--align-{{ crs_h_align }}{% if crs_h_headline_lg %} crs-heading-stack--headline-lg{% elsif crs_h_headline_md %} crs-heading-stack--headline-md{% endif %}">
         {%- if crs_fc_kicker != blank -%}
           <p class="crs-heading-stack__kicker">{{ crs_fc_kicker | escape }}</p>
         {%- endif -%}
@@ -62,12 +84,22 @@
       </ul>
     {%- endif -%}
 
-    {%- assign cta_url = section.settings.button_url | default: product.url -%}
     {%- if section.settings.button_label != blank -%}
       <div class="lt-pdp-final-cta__cta">
-        <a href="{{ cta_url }}" class="lt-pdp-final-cta__btn">
-          {{ section.settings.button_label | escape }}
-        </a>
+        {%- if section.settings.button_url != blank -%}
+          <a href="{{ section.settings.button_url }}" class="lt-pdp-final-cta__btn">
+            {{ section.settings.button_label | escape }}
+          </a>
+        {%- else -%}
+          {%- comment -%}
+            Ohne Link scrollt der Button zur Buy-Box, statt die Seite neu zu laden.
+            Gleiches Ziel und gleicher Offset wie der Abschluss-CTA in
+            crs-risk-free-close, damit beide Wege identisch landen.
+          {%- endcomment -%}
+          <button type="button" class="lt-pdp-final-cta__btn" data-lt-fc-scroll>
+            {{ section.settings.button_label | escape }}
+          </button>
+        {%- endif -%}
       </div>
     {%- endif -%}
 
@@ -101,6 +133,25 @@
   </div>
 </section>
 
+<script>
+  (function () {
+    var root = document.getElementById('lt-pdp-final-cta-{{ section.id }}');
+    if (!root) return;
+
+    var cta = root.querySelector('[data-lt-fc-scroll]');
+    if (!cta) return;
+
+    cta.addEventListener('click', function () {
+      var target = document.querySelector('[data-lt-buy-box]') || document.getElementById('lt-hero-atc');
+      if (!target) return;
+
+      var offset = 96;
+      var y = target.getBoundingClientRect().top + window.pageYOffset - offset;
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+  })();
+</script>
+
 {% stylesheet %}
   .lt-pdp-final-cta {
     padding-block: var(--space-10);
@@ -111,6 +162,10 @@
   @media screen and (max-width: 749px) {
     .lt-pdp-final-cta {
       padding-block: var(--space-8);
+      /* Die Sticky-ATC-Leiste liegt fix ueber dem Content (~60px hoch). Ohne den
+         Zuschlag steht die Vertrauenszeile bei ungluecklichem Scrollstand genau
+         dahinter. */
+      padding-bottom: calc(var(--space-8) + var(--space-5));
     }
   }
 
@@ -206,6 +261,8 @@
     padding: 0 var(--space-7);
     background: var(--color-white);
     color: var(--color-dark);
+    border: 0;
+    cursor: pointer;
     border-radius: var(--radius-full);
     font-family: var(--font-body);
     font-size: var(--text-body-sm);
@@ -244,15 +301,11 @@
     flex-shrink: 0;
   }
 
-  /* Remove theme default section wrapper margin + match dark bg so no seam shows */
+  /* Match dark bg on the wrapper so no seam shows above or below the band.
+     Wrapper-Margin und Footer-Abstand haengen am flush_bottom-Style-Block oben:
+     die gelten nur, wenn die Section die Seite abschliesst. */
   .section-lt-pdp-final-cta {
-    margin-bottom: 0;
     background: var(--color-surface-dark);
-  }
-
-  /* Footer has theme-default margin-top — remove it after dark CTA to flush footer */
-  .main-footer {
-    margin-top: 0 !important;
   }
 {% endstylesheet %}
 
@@ -282,10 +335,18 @@
       "label": "Überschrift Größe",
       "options": [
         { "value": "section", "label": "Standard (Abschnitt)" },
+        { "value": "feature", "label": "Mittel (Section-Headline)" },
         { "value": "product_title", "label": "Wie Produkttitel" }
       ],
       "default": "section",
       "info": "Zeilenumbruch: Enter in Überschrift/Unterzeile."
+    },
+    {
+      "type": "checkbox",
+      "id": "flush_bottom",
+      "label": "Schließt die Seite ab",
+      "default": true,
+      "info": "An: Footer sitzt bündig am dunklen Band. Aus für CTA-Bänder mitten in der Seite."
     },
     {
       "type": "text",

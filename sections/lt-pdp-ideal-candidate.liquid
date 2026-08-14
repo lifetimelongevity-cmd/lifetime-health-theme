@@ -139,10 +139,14 @@
   background: var(--crs-bg, #f2f1ed);
 }
 
+/* Container auf dem Seitenraster der Nachbar-Sections. Vorher standen hier 1280px
+   und 20px als Literale, die linke Inhaltskante sass dadurch 4px rechts von
+   FAQ, Vergleichstabelle und Reviews (gemessen live: 20 statt 24 auf Desktop,
+   20 statt 16 mobil). */
 .ic-container {
-  max-width: 1280px;
+  max-width: var(--lt-page-max, 1280px);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--lt-page-gutter, 16px);
 }
 
 .ic-header {
@@ -174,12 +178,20 @@
   padding: 20px 22px 22px;
 }
 
+/* Spaltenueberschrift traegt hier die Unterscheidung passt/passt-nicht, sie muss
+   also als Ueberschrift lesbar sein. Vorher lief sie in Groesse UND Gewicht der
+   Listenzeilen und war nur ueber die Deckkraft abgesetzt, damit stand die Zeile
+   flach zwischen den Aussagen. Das Gleichstand-Prinzip aus dem Heading-Stack
+   (Title und Subtitle unterscheiden sich nur in der Farbe) gilt fuer ein Paar
+   Titel/Beschreibung wie in .fg-card, nicht fuer ein Label ueber einer Liste.
+   Absetzung deshalb ueber das Gewicht, wie die Tabellen- und Review-Labels der
+   Nachbar-Sections: --weight-medium ist als echter Lato-Schnitt geladen. */
 .ic-col-heading {
-  font-size: 16px;
-  font-weight: 400;
-  line-height: 1.4;
+  font-size: var(--text-body, 16px);
+  font-weight: var(--weight-medium, 500);
+  line-height: var(--leading-body, 1.4);
   color: var(--crs-text, #26251e);
-  margin: 0 0 16px;
+  margin: 0 0 var(--space-4, 16px);
 }
 
 .ic-list {
@@ -188,15 +200,18 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3, 12px);
 }
 
+/* 1.5 ist die Fliesstext-Durchschusshoehe dieser Seite (.fg-card-desc,
+   .mg-desc). Es gibt dafuer kein Token, --leading-body waere 1.4 und wuerde die
+   Zeilen enger stellen als in allen Nachbar-Sections. */
 .ic-item {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  font-size: 16px;
-  font-weight: 400;
+  font-size: var(--text-body, 16px);
+  font-weight: var(--weight-regular, 400);
   line-height: 1.5;
   color: var(--crs-text-sec, rgba(38, 37, 30, 0.72));
 }
