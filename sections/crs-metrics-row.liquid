@@ -82,12 +82,19 @@
     {%- if section.blocks.size > 0 -%}
       <div class="mg-grid" data-count="{{ section.blocks.size }}">
         {%- for block in section.blocks -%}
-          <div class="mg-card{% if block.settings.source != blank %} mg-card--with-source{% endif %}" {{ block.shopify_attributes }}>
+          <div class="mg-card{% if block.settings.source != blank %} mg-card--with-source{% endif %}{% if block.settings.detail != blank %} mg-card--with-detail{% endif %}" {{ block.shopify_attributes }}>
             <div class="mg-number">{{ block.settings.number | escape }}</div>
-            {%- if block.settings.description != blank or block.settings.source != blank -%}
+            {%- if block.settings.description != blank or block.settings.detail != blank or block.settings.source != blank -%}
               <div class="mg-text">
                 {%- if block.settings.description != blank -%}
                   <div class="mg-desc">{{ block.settings.description | escape }}</div>
+                {%- endif -%}
+                {%- comment -%} Zweite Textzeile unter der Beschreibung. Getrennt von
+                    `source`, weil die Quellenzeile eine Belegangabe ist und kleiner
+                    laeuft; `detail` traegt normalen Fliesstext, etwa die Erlaeuterung
+                    zu einem Prozess-Schritt. {%- endcomment -%}
+                {%- if block.settings.detail != blank -%}
+                  <div class="mg-detail">{{ block.settings.detail | escape }}</div>
                 {%- endif -%}
                 {%- if block.settings.source != blank -%}
                   <div class="mg-source">{{ block.settings.source | escape }}</div>
@@ -229,6 +236,15 @@
   .mg-grid[data-count="2"] {
     grid-template-columns: repeat(2, minmax(0, 26rem));
   }
+
+  /* Vier Karten laufen als Viererreihe, sonst stuende die vierte allein in
+     Zeile zwei. Bewusst in derselben min-width-Klammer wie die Ein- und
+     Zwei-Karten-Raster: als (0,2,0) wuerde die Regel ausserhalb auch das
+     Tablet-Raster (0,1,0) weiter unten schlagen und dort vier Spalten
+     erzwingen, obwohl es Spezifitaet und nicht Reihenfolge waere. */
+  .mg-grid[data-count="4"] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 
 /* Card */
@@ -267,6 +283,16 @@
   color: var(--crs-text, #26251e);
 }
 
+/* Zweite Textzeile (Prozess-Schritt, Erlaeuterung) — abgesetzt, aber lesbar,
+   nicht auf Fussnoten-Groesse wie .mg-source. */
+.mg-detail {
+  font-size: var(--text-body-sm, 14px);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.72));
+  margin-top: var(--space-1);
+}
+
 /* Source / method line */
 .mg-source {
   font-size: 13px;
@@ -280,6 +306,15 @@
 .mg-card--with-source {
   aspect-ratio: auto;
   min-height: 220px;
+}
+
+/* Karten mit zweiter Textzeile bestimmen ihre Hoehe ueber den Inhalt. Das
+   16:9-Grundmass macht sie in einer Viererreihe so flach, dass Zahl und zwei
+   Textzeilen aneinanderkleben; im Stretch-Raster stehen sie ohnehin alle auf
+   der Hoehe der laengsten Karte. */
+.mg-card--with-detail {
+  aspect-ratio: auto;
+  min-height: 0;
 }
 
 /* Note below the grid */
@@ -480,15 +515,21 @@
           "default": "bestätigte NMN-Reinheit"
         },
         {
+          "type": "textarea",
+          "id": "detail",
+          "label": "Zweite Zeile (optional)",
+          "info": "Fließtext unter der Beschreibung, z. B. die Erläuterung zu einem Prozess-Schritt. Für Quellenangaben das Feld darunter nehmen."
+        },
+        {
           "type": "text",
           "id": "source",
           "label": "Quelle / Methode (optional)",
-          "info": "Kleine Zeile unter der Beschreibung, z. B. Labor und Messmethode."
+          "info": "Kleine Zeile ganz unten, z. B. Labor und Messmethode."
         }
       ]
     }
   ],
-  "max_blocks": 3,
+  "max_blocks": 4,
   "presets": [
     {
       "name": "Metrics Row",
