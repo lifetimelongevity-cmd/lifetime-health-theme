@@ -1197,18 +1197,11 @@
                     <span class="lt-pkg__head">
                       <span class="lt-pkg__radio" aria-hidden="true"></span>
                       <span class="lt-pkg__name">{{ variant.title | escape }}</span>
-                      {%- liquid
-                        # Aufpreis-Framing ab Karte 2: die Kauffrage ist "was kostet mich das
-                        # Extra?", nicht der zweite Gesamtpreis neben dem 349-Anker. Der
-                        # Gesamtpreis bleibt fuer Screenreader in der Karte und steht nach
-                        # Auswahl gross im Preisblock (PAngV: dort ist der Gesamtpreis).
-                        assign pkg_delta = variant.price | minus: product.variants.first.price
-                      -%}
-                      {%- if forloop.first == false and pkg_delta > 0 -%}
-                        <span class="lt-pkg__price">+ {{ pkg_delta | money_without_trailing_zeros }}<span class="visually-hidden"> (gesamt {{ variant.price | money_without_trailing_zeros }})</span></span>
-                      {%- else -%}
-                        <span class="lt-pkg__price">{{ variant.price | money_without_trailing_zeros }}</span>
-                      {%- endif -%}
+                      {%- comment -%} Jede Karte traegt ihren Gesamtpreis (BJ-Entscheid 2026-08-14).
+                          Das fruehere Aufpreis-Framing ("+ 80 €") liess die zweite Karte billiger
+                          wirken als sie ist und zwang zum Kopfrechnen; zwei Vollpreise nebeneinander
+                          sind die klarere Entscheidung und decken sich mit dem Preisblock (PAngV). {%- endcomment -%}
+                      <span class="lt-pkg__price">{{ variant.price | money_without_trailing_zeros }}</span>
                     </span>
                     {%- if pkg_note != blank -%}
                       <span class="lt-pkg__note">{{ pkg_note | escape }}</span>
@@ -1399,23 +1392,12 @@
           </div>
         {%- endif -%}
 
-        {%- comment -%} Fallback-Pfad für Unentschlossene: leiser Kontakt-Link statt Kaufdruck.
-            Bewusst E-Mail statt Buchungstool (BJ-Entscheid 2026-08-08), Antwort kommt persönlich. {%- endcomment -%}
-        {%- if section.settings.precheck_text != blank -%}
-          <div class="lt-pdp-hero__precheck">
-            <span class="lt-pdp-hero__precheck-text">{{ section.settings.precheck_text | escape }}</span>
-            <a
-              class="lt-pdp-hero__precheck-link"
-              href="mailto:{{ section.settings.precheck_email | default: 'info@lifetime-health.com' }}?subject={{ section.settings.precheck_subject | default: 'Frage vor dem Kauf' | url_escape }}"
-            >{{ section.settings.precheck_link_label | default: 'Schreib uns' | escape }}</a>
-          </div>
-        {%- endif -%}
-
-        {%- unless lt_show_sub -%}
-          {{ lt_trust_block }}
-          {{ lt_doctor_block }}
-        {%- endunless -%}
-
+        {%- comment -%} Reihenfolge unter dem CTA (BJ-Entscheid 2026-08-14):
+            Garantie → Zahlarten → Trust-Zeilen → Arzt-Badge → Kontakt-Fallback.
+            Garantie und Zahlarten gehoeren als Absicherungs-Paar zusammen und stehen
+            deshalb direkt untereinander, statt durch Trust- und Arzt-Block getrennt zu
+            werden. Der Kontakt-Fallback schliesst die Spalte ab, weil er der leiseste
+            Ausgang ist und nicht zwischen den Belegen stehen soll. {%- endcomment -%}
         {%- if shop.enabled_payment_types.size > 1 -%}
           {%- assign lt_payment_limit = shop.enabled_payment_types.size | minus: 1 -%}
           <div class="lt-payment-icons" aria-label="Zahlungsmethoden">
@@ -1427,6 +1409,23 @@
         {%- assign lt_payment_note = section.settings.payment_note | strip -%}
         {%- if lt_payment_note != blank and lt_payment_note_rendered != true -%}
           <p class="lt-payment-note">{{ lt_payment_note | escape }}</p>
+        {%- endif -%}
+
+        {%- unless lt_show_sub -%}
+          {{ lt_trust_block }}
+          {{ lt_doctor_block }}
+        {%- endunless -%}
+
+        {%- comment -%} Fallback-Pfad für Unentschlossene: leiser Kontakt-Link statt Kaufdruck.
+            Bewusst E-Mail statt Buchungstool (BJ-Entscheid 2026-08-08), Antwort kommt persönlich. {%- endcomment -%}
+        {%- if section.settings.precheck_text != blank -%}
+          <div class="lt-pdp-hero__precheck">
+            <span class="lt-pdp-hero__precheck-text">{{ section.settings.precheck_text | escape }}</span>
+            <a
+              class="lt-pdp-hero__precheck-link"
+              href="mailto:{{ section.settings.precheck_email | default: 'info@lifetime-health.com' }}?subject={{ section.settings.precheck_subject | default: 'Frage vor dem Kauf' | url_escape }}"
+            >{{ section.settings.precheck_link_label | default: 'Schreib uns' | escape }}</a>
+          </div>
         {%- endif -%}
 
         <script>
@@ -2752,15 +2751,17 @@
    gap: 4px statt 6px, damit die neun Zahlarten auf einer 390px-Breite in EINE
    Zeile passen (9 × 35px + 8 × 4px = 347px bei 358px Spaltenbreite). Mit 6px
    bricht das letzte Icon um und steht als einzelne Waise in Zeile zwei.
-   Linksbündig, damit die Zone unter dem CTA dieselbe Kante hat wie die
-   Trust-Zeilen darunter statt drei verschiedene Ausrichtungen zu mischen. */
+   Zentriert und dicht unter der Garantie-Zeile (2026-08-14): beide gehoeren zum
+   selben Absicherungs-Paar, und die Garantie steht im post-cta-Block ebenfalls
+   zentriert. Linksbuendig wuerde die Reihe jetzt gegen die Kante darueber laufen. */
 .lt-payment-icons {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-1);
   align-items: center;
-  justify-content: flex-start;
-  margin-top: var(--space-3);
+  justify-content: center;
+  margin-top: var(--space-2);
+  margin-bottom: var(--space-2);
 }
 
 /* Entsättigt. Die Shopify-Logos bringen sonst sechs Fremdfarben (AMEX-Blau,
@@ -2769,7 +2770,10 @@
    erfüllen sie ihre Aufgabe (Zahlarten belegen) ohne die lauteste Fläche der
    PDP zu sein. */
 .lt-payment-icon {
-  height: 22px;
+  /* 20px statt 22px: bei 22px messen die neun Icons mitsamt Abstaenden 345px und
+     laufen auf einem 375px-Screen (343px Spalte) um, sodass UnionPay als Waise in
+     Zeile zwei steht. Bei 20px sind es 317px, das haelt auch auf 360px-Geraeten. */
+  height: 20px;
   width: auto;
   border-radius: 3px;
   filter: grayscale(1);

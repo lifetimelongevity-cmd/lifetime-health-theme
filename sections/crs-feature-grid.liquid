@@ -24,6 +24,13 @@
     assign crs_h_headline_md = true
   endif
   assign fg_single_frame_media = section.settings.single_frame_media
+  # Bildrahmen (Flaeche + Kontur + Schatten) ist Default an. Bei Motiven, die ihre
+  # eigene Rahmung mitbringen (App-Screenshot im Geraete-Mockup), doppelt er nur und
+  # wird per show_media_frame=false abgeschaltet.
+  assign fg_media_frame = true
+  if section.settings.show_media_frame == false
+    assign fg_media_frame = false
+  endif
 -%}
 {% style %}
   #section-{{ section.id }} {
@@ -43,7 +50,7 @@
     <div class="fg-layout{% if section.settings.image != blank or section.settings.image_url != blank %} fg-layout--has-media fg-layout--media-{{ section.settings.media_position }}{% endif %}{% if fg_single_frame_media %} fg-layout--single-frame{% endif %}">
       {%- if section.settings.image != blank or section.settings.image_url != blank -%}
         <div class="fg-media">
-          <div class="fg-media__frame">
+          <div class="fg-media__frame{% unless fg_media_frame %} fg-media__frame--bare{% endunless %}">
             {%- if section.settings.image != blank -%}
               {{
                 section.settings.image
@@ -220,6 +227,17 @@
 }
 
 .fg-layout--single-frame .fg-media__image {
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Rahmenlos: das Motiv steht frei auf der Sektionsfläche. Für Screenshots im
+   Geräte-Mockup, die ihre Kontur schon mitbringen — der Container-Rahmen wäre
+   dort der zweite und macht aus einem Bild eine Karte in einer Karte. */
+.fg-media__frame--bare {
+  padding: 0;
+  background: none;
+  border: 0;
   border-radius: 0;
   box-shadow: none;
 }
@@ -518,6 +536,13 @@
       "id": "single_frame_media",
       "label": "Nur ein Bildrahmen",
       "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_media_frame",
+      "label": "Bildrahmen anzeigen",
+      "default": true,
+      "info": "Aus, wenn das Motiv seine eigene Rahmung mitbringt (z. B. App-Screenshot im Geräte-Mockup)."
     }
   ],
   "blocks": [

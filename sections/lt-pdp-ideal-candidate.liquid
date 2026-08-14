@@ -20,13 +20,22 @@
   if section.settings.heading_size == 'feature'
     assign crs_h_headline_md = true
   endif
+  assign ic_cand_heading = section.settings.candidate_heading | strip
   assign ic_excl_heading = section.settings.exclusion_heading | strip
   assign ic_has_exclusions = false
+  assign ic_has_candidates = false
   for block in section.blocks
     if block.type == 'exclusion'
       assign ic_has_exclusions = true
     endif
+    if block.type == 'candidate'
+      assign ic_has_candidates = true
+    endif
   endfor
+  assign ic_show_exclusions = false
+  if section.settings.show_exclusion_block and ic_has_exclusions
+    assign ic_show_exclusions = true
+  endif
 -%}
 {% style %}
   #section-{{ section.id }} {
@@ -63,57 +72,58 @@
       </div>
     {%- endif -%}
 
-    {%- comment -%} Candidate cards {%- endcomment -%}
-    {%- assign ic_has_candidates = false -%}
-    {%- for block in section.blocks -%}
-      {%- if block.type == 'candidate' -%}
-        {%- assign ic_has_candidates = true -%}
-      {%- endif -%}
-    {%- endfor -%}
-
-    {%- if ic_has_candidates -%}
-      <div class="ic-grid">
-        {%- for block in section.blocks -%}
-          {%- if block.type == 'candidate' -%}
-            <div class="ic-card" {{ block.shopify_attributes }}>
-              <span class="ic-card-icon" aria-hidden="true">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"/>
-                  <path d="M5.5 8.2l1.6 1.6 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </span>
-              {%- if block.settings.candidate_description != blank -%}
-                <p class="ic-card-desc">{{ block.settings.candidate_description | escape }}</p>
-              {%- endif -%}
-            </div>
+    {%- comment -%} Zwei Spalten statt Kartenraster plus Ausschluss-Kasten (2026-08-14).
+        Passt und passt-nicht sind dieselbe Frage aus zwei Richtungen und gehoeren
+        nebeneinander, damit der Leser sich in einem Blick einsortiert. Ohne Kaesten:
+        die Unterscheidung traegt das Icon und die Spaltenueberschrift, nicht eine
+        zweite graue Flaeche auf grauem Grund. {%- endcomment -%}
+    <div class="ic-columns">
+      {%- if ic_has_candidates -%}
+        <div class="ic-col">
+          {%- if ic_cand_heading != blank -%}
+            <p class="ic-col-heading">{{ ic_cand_heading | escape }}</p>
           {%- endif -%}
-        {%- endfor -%}
-      </div>
-    {%- endif -%}
+          <ul class="ic-list" role="list">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'candidate' and block.settings.candidate_description != blank -%}
+                <li class="ic-item" {{ block.shopify_attributes }}>
+                  <span class="ic-item-icon" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"/>
+                      <path d="M5.5 8.2l1.6 1.6 3-3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </span>
+                  <span>{{ block.settings.candidate_description | escape }}</span>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
 
-    {%- comment -%} Exclusion block {%- endcomment -%}
-    {%- if section.settings.show_exclusion_block and ic_has_exclusions -%}
-      <div class="ic-exclusion">
-        {%- if ic_excl_heading != blank -%}
-          <p class="ic-exclusion-heading">{{ ic_excl_heading | escape }}</p>
-        {%- endif -%}
-        <ul class="ic-exclusion-list" role="list">
-          {%- for block in section.blocks -%}
-            {%- if block.type == 'exclusion' and block.settings.exclusion_text != blank -%}
-              <li class="ic-exclusion-item" {{ block.shopify_attributes }}>
-                <span class="ic-exclusion-icon" aria-hidden="true">
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                    <circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="1" opacity="0.3"/>
-                    <path d="M5 7h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
-                  </svg>
-                </span>
-                <span>{{ block.settings.exclusion_text | escape }}</span>
-              </li>
-            {%- endif -%}
-          {%- endfor -%}
-        </ul>
-      </div>
-    {%- endif -%}
+      {%- if ic_show_exclusions -%}
+        <div class="ic-col ic-col--exclusion">
+          {%- if ic_excl_heading != blank -%}
+            <p class="ic-col-heading">{{ ic_excl_heading | escape }}</p>
+          {%- endif -%}
+          <ul class="ic-list" role="list">
+            {%- for block in section.blocks -%}
+              {%- if block.type == 'exclusion' and block.settings.exclusion_text != blank -%}
+                <li class="ic-item" {{ block.shopify_attributes }}>
+                  <span class="ic-item-icon" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.3"/>
+                      <path d="M5.6 8h4.8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+                    </svg>
+                  </span>
+                  <span>{{ block.settings.exclusion_text | escape }}</span>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+    </div>
 
   </div>
 </div>
@@ -137,93 +147,65 @@
   margin-bottom: var(--space-7, 48px);
 }
 
-/* Candidate grid */
-.ic-grid {
+/* Zwei Spalten: passt / passt nicht */
+.ic-columns {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  grid-template-columns: 1fr;
+  gap: var(--space-6, 40px);
 }
 
-.ic-card {
-  box-sizing: border-box;
-  background: var(--crs-card-bg, #f7f7f4);
-  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-  border-radius: 4px;
-  padding: 14px 15px 15px;
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
+@media (min-width: 768px) {
+  .ic-columns {
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8, 64px);
+  }
 }
 
-.ic-card-icon {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  margin-top: 2px;
+.ic-col {
+  min-width: 0;
+}
+
+.ic-col-heading {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.4;
   color: var(--crs-text, #26251e);
+  margin: 0 0 16px;
 }
 
-.ic-card-desc {
-  font-size: 14px;
-  font-weight: 400;
-  line-height: 1.6;
-  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
-  margin: 0;
+.ic-col--exclusion .ic-col-heading {
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.72));
 }
 
-/* Exclusion block */
-.ic-exclusion {
-  box-sizing: border-box;
-  margin-top: var(--space-6, 40px);
-  background: rgba(38, 37, 30, 0.03);
-  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.08));
-  border-radius: 4px;
-  padding: 20px 24px;
-}
-
-.ic-exclusion-heading {
-  font-size: 13px;
-  font-weight: 400;
-  letter-spacing: 0.01em;
-  color: var(--crs-text-sec, rgba(38, 37, 30, 0.6));
-  margin: 0 0 12px;
-}
-
-.ic-exclusion-list {
+.ic-list {
   list-style: none;
   margin: 0;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-.ic-exclusion-item {
+.ic-item {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 400;
-  line-height: 1.6;
-  color: var(--crs-text-ter, rgba(38, 37, 30, 0.4));
+  line-height: 1.5;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.72));
 }
 
-.ic-exclusion-icon {
+.ic-col--exclusion .ic-item {
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.66));
+}
+
+.ic-item-icon {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  margin-top: 2px;
-  color: var(--crs-text-ter, rgba(38, 37, 30, 0.4));
-}
-
-@media (max-width: 767px) {
-  .ic-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .ic-exclusion {
-    padding: 16px 18px;
-  }
+  margin-top: 3px;
+  color: currentColor;
 }
 {% endstylesheet %}
 
@@ -328,19 +310,25 @@
     },
     {
       "type": "header",
-      "content": "Nicht-für-dich-Block"
+      "content": "Spalten"
+    },
+    {
+      "type": "text",
+      "id": "candidate_heading",
+      "label": "Überschrift linke Spalte",
+      "default": "Der richtige Test für dich"
     },
     {
       "type": "checkbox",
       "id": "show_exclusion_block",
-      "label": "Ausschluss-Block anzeigen",
+      "label": "Rechte Spalte anzeigen",
       "default": true
     },
     {
       "type": "text",
       "id": "exclusion_heading",
-      "label": "Ausschluss-Überschrift",
-      "default": "Dieser Test ist nicht das Richtige für dich, wenn…"
+      "label": "Überschrift rechte Spalte",
+      "default": "Nicht das Richtige für dich"
     }
   ],
   "blocks": [
@@ -351,8 +339,9 @@
         {
           "type": "textarea",
           "id": "candidate_description",
-          "label": "Beschreibung (Mindset / Situation)",
-          "default": "Du willst eine biologische Baseline vor Start eines Longevity-Protokolls."
+          "label": "Aussage (5-8 Wörter)",
+          "default": "Du willst Daten statt Gefühl.",
+          "info": "Ein Satz, direkt mit der Aussage beginnen. Kein Nebensatz-Aufbau."
         }
       ]
     },
@@ -363,8 +352,9 @@
         {
           "type": "textarea",
           "id": "exclusion_text",
-          "label": "Ausschluss-Text",
-          "default": "…du eine medizinische Diagnose suchst."
+          "label": "Aussage (5-8 Wörter)",
+          "default": "Du suchst eine ärztliche Diagnose.",
+          "info": "Ein Satz, direkt mit der Aussage beginnen. Kein „…\" am Anfang."
         }
       ]
     }
@@ -377,43 +367,49 @@
         {
           "type": "candidate",
           "settings": {
-            "candidate_description": "Du willst eine biologische Baseline – bevor du mit einem Longevity-Protokoll anfängst. Nicht nach Gefühl optimieren, sondern nach Daten."
+            "candidate_description": "Du willst Daten statt Gefühl, bevor du startest."
           }
         },
         {
           "type": "candidate",
           "settings": {
-            "candidate_description": "Du nimmst bereits Supplemente und willst wissen, welche genetisch für dich Sinn ergeben – und welche nicht."
+            "candidate_description": "Du willst wissen, welche Supplements genetisch passen."
           }
         },
         {
           "type": "candidate",
           "settings": {
-            "candidate_description": "Du hast das Gefühl, dass dein Körper anders altert als dein Pass vermuten lässt. Du willst es wissen, nicht vermuten."
+            "candidate_description": "Du vermutest, dein Körper altert anders als gedacht."
           }
         },
         {
           "type": "candidate",
           "settings": {
-            "candidate_description": "Du machst regelmäßig Blutbilder – und willst eine zweite Analyseebene: wie Lebensstil und Umwelt heute auf zellulärer Ebene wirken."
-          }
-        },
-        {
-          "type": "candidate",
-          "settings": {
-            "candidate_description": "Du willst einen Gesundheitscheck, der in 6 Monaten wiederholbar ist. Kein Schnappschuss – ein Werkzeug, das Veränderung messbar macht."
+            "candidate_description": "Du willst Veränderung messen, nicht einmal hineinschauen."
           }
         },
         {
           "type": "exclusion",
           "settings": {
-            "exclusion_text": "…du eine medizinische Diagnose für eine spezifische Erkrankung suchst. Der Test ist ein Präventions- und Optimierungswerkzeug, kein Krankheitsdiagnostikum."
+            "exclusion_text": "Du suchst eine ärztliche Diagnose."
           }
         },
         {
           "type": "exclusion",
           "settings": {
-            "exclusion_text": "…du kurzfristige Ergebnisse erwartest. Die Laboranalyse dauert 6 Wochen. Nachhaltige Erkenntnisse brauchen Geduld."
+            "exclusion_text": "Du brauchst dein Ergebnis in wenigen Tagen."
+          }
+        },
+        {
+          "type": "exclusion",
+          "settings": {
+            "exclusion_text": "Du willst eine einzelne Zahl ohne Einordnung."
+          }
+        },
+        {
+          "type": "exclusion",
+          "settings": {
+            "exclusion_text": "Du willst danach nichts verändern."
           }
         }
       ]
