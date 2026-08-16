@@ -791,7 +791,11 @@
             {%- comment -%}
               Quiz-Vorteil: startet mit [hidden] und wird nur eingeblendet, wenn der Besucher
               ueber die Quiz-Ergebnisseite kam (?qz=1, danach in localStorage gemerkt).
-              Der Rabatt selbst haengt am Code in ?discount=, den Shopify in den Warenkorb legt.
+              Achtung: ?discount= legt in diesem Shop KEINEN Code in den Warenkorb, das kann
+              nur /discount/<code>?redirect=... Seit 2026-08-08 tragen die Quiz-CTAs bewusst
+              keinen Code mehr (Preis-Konsistenz, siehe snippets/lt-quiz-result.liquid); die
+              befristeten Einzelcodes kommen per Mail. Banner nur einschalten, wenn der
+              Vorteil auf der PDP wirklich einloesbar ist, sonst verspricht er ins Leere.
               Laeuft die Frist ab, verschwindet das Banner und die Merkung wird geloescht.
             {%- endcomment -%}
             {%- if section.settings.quiz_promo_enable and section.settings.quiz_promo_title != blank -%}
@@ -881,9 +885,16 @@
                   var deadline = new Date(el.getAttribute('data-lt-promo-deadline')).getTime();
                   if (isNaN(deadline)) return;
                   function pad(n) { return n < 10 ? '0' + n : '' + n; }
+                  var iv = null;
                   function tick() {
                     var diff = deadline - Date.now();
-                    if (diff <= 0) { el.hidden = true; return; }
+                    if (diff <= 0) {
+                      // Titel behauptet die Frist, nach Ablauf muss der ganze Banner weg.
+                      banner.hidden = true;
+                      el.hidden = true;
+                      if (iv) clearInterval(iv);
+                      return;
+                    }
                     var d = Math.floor(diff / 86400000);
                     var h = Math.floor((diff % 86400000) / 3600000);
                     var m = Math.floor((diff % 3600000) / 60000);
@@ -893,7 +904,7 @@
                     el.hidden = false;
                   }
                   tick();
-                  setInterval(tick, 1000);
+                  iv = setInterval(tick, 1000);
                 })();
               </script>
             {%- endif -%}
@@ -3051,7 +3062,7 @@
       "type": "text",
       "id": "quiz_promo_note",
       "label": "Quiz-Zusatz",
-      "default": "Code QUIZ-ALTER-10 aktiviert"
+      "default": "Mit deinem Code aus deiner Ergebnis-Mail"
     },
     {
       "type": "text",
@@ -3063,7 +3074,7 @@
       "type": "text",
       "id": "quiz_promo_deadline",
       "label": "Quiz-Countdown-Enddatum",
-      "info": "ISO-Format. Muss zu dem Zeitpunkt passen, an dem du QUIZ-ALTER-10 in Shopify deaktivierst.",
+      "info": "ISO-Format. Muss zum endsAt des aktiven Quiz-Rabatts in Shopify passen.",
       "default": "2026-08-05T23:59:59"
     },
     {

@@ -103,6 +103,23 @@
       </div>
     {%- endif -%}
 
+    {%- comment -%}
+      Aktionszeile: behauptet eine Frist, deshalb fristgesteuert. Rendert [hidden]
+      und wird per JS nur eingeblendet, solange promo_deadline in der Zukunft liegt;
+      nach Ablauf verschwindet sie ohne Template-Push. Ohne Deadline bleibt sie
+      bewusst unsichtbar, eine unbefristete "Aktion" soll es hier nicht geben.
+    {%- endcomment -%}
+    {%- if section.settings.promo_line != blank and section.settings.promo_deadline != blank -%}
+      <p
+        class="lt-pdp-final-cta__promo"
+        data-lt-fc-promo
+        data-lt-fc-promo-deadline="{{ section.settings.promo_deadline | escape }}"
+        hidden
+      >
+        {{ section.settings.promo_line | escape }}
+      </p>
+    {%- endif -%}
+
     <div class="lt-pdp-final-cta__trust" aria-label="Kaufversprechen">
       {%- if section.settings.trust_1 != blank -%}
         <span class="lt-pdp-final-cta__trust-item">
@@ -137,6 +154,20 @@
   (function () {
     var root = document.getElementById('lt-pdp-final-cta-{{ section.id }}');
     if (!root) return;
+
+    // Aktionszeile nur zeigen, solange die Frist laeuft. Kein Countdown noetig,
+    // ein Minutentakt reicht, um sie beim Ablauf still auszublenden.
+    var promo = root.querySelector('[data-lt-fc-promo]');
+    if (promo) {
+      var promoDeadline = new Date(promo.getAttribute('data-lt-fc-promo-deadline')).getTime();
+      if (!isNaN(promoDeadline)) {
+        var promoTick = function () {
+          promo.hidden = promoDeadline - Date.now() <= 0;
+        };
+        promoTick();
+        setInterval(promoTick, 60000);
+      }
+    }
 
     var cta = root.querySelector('[data-lt-fc-scroll]');
     if (!cta) return;
@@ -277,6 +308,18 @@
     opacity: 0.88;
   }
 
+  .lt-pdp-final-cta__promo {
+    margin: 0 0 var(--space-5);
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-bold);
+    color: var(--color-promo-on-dark);
+  }
+
+  .lt-pdp-final-cta__promo[hidden] {
+    display: none;
+  }
+
   .lt-pdp-final-cta__trust {
     display: flex;
     justify-content: center;
@@ -395,6 +438,22 @@
       "id": "trust_3",
       "label": "Trust-Punkt 3",
       "default": "Abo jederzeit kündigen"
+    },
+    {
+      "type": "header",
+      "content": "Aktionszeile (fristgesteuert)"
+    },
+    {
+      "type": "text",
+      "id": "promo_line",
+      "label": "Aktionszeile",
+      "info": "Erscheint zwischen Button und Trust-Punkten, nur solange das Enddatum in der Zukunft liegt."
+    },
+    {
+      "type": "text",
+      "id": "promo_deadline",
+      "label": "Aktions-Enddatum",
+      "info": "ISO-Format, z. B. 2026-08-30T23:59:59+02:00. Ohne Datum bleibt die Zeile unsichtbar."
     }
   ],
   "blocks": [
