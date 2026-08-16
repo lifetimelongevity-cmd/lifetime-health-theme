@@ -76,7 +76,7 @@ und der ersten Nutzenaussage liegen. Entscheid bei BJ, Details in `03` §5.
 - Belege hinter „Bekannt aus" oder Entscheid, die Section zu ziehen
 - Ads-Landing: Quiz oder PDP
 - Section-Reihenfolge: bleibt eingefroren oder wird umgestellt (`03` §5)
-- ~~Einzelpreis eines 45-Minuten-Ergebnisgesprächs~~ **beantwortet 16.08.: 149 €** (`07` §2). Neu offen stattdessen: SKU-Anlage, Segment-Rabatt 249 €, Premium 499 € ab 31.08. (`07` §5)
+- ~~Einzelpreis eines 45-Minuten-Ergebnisgesprächs~~ **beantwortet 16.08.: 149 €** (`07` §2). Neu offen stattdessen: SKU-Anlage, Premium 499 € ab 31.08. (`07` §5). ~~Segment-Rabatt 249 €~~ verworfen (BJ 16.08.): Folgetest 299 € für alle
 - Freigabe des Nutzenblock-Vorschlags plus drei Detailfragen darin (`05` §10)
 
 ## Sofort und unabhängig von jeder Freigabe

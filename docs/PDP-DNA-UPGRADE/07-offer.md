@@ -145,7 +145,7 @@ Button, vor der Garantie.
 | 4 | Ergebnisgespräch, 45 Minuten (folgt der Paketwahl) | Premium-Variante live | Paket 1: „im Paket" gedimmt · Paket 2: „einzeln 149 €" |
 | Summe | „Du zahlst heute" + Paketpreis, im Paket zusätzlich „Einzeln zusammen 498 € · du sparst 49 €" | Variantenpreise + `stack_talk_value_cents` | dynamisch |
 | Konditionen | Einmalzahlung · kein Abo · keine Folgekosten | Risk-Reversal-Bestand | – |
-| Verlauf | „Später weitermessen: Folgetest (nur Epigenetik) 299 €, als Testkunde 249 €. Deine DNA-Ergebnisse bleiben, gemessen wird, was sich verändert hat." | Folgetest live; 249 € siehe §6 | abgesetzte Schlusszeile |
+| Verlauf | „Später weitermessen: Folgetest (nur Epigenetik) 299 €. Deine DNA-Ergebnisse bleiben, gemessen wird, was sich verändert hat." | Folgetest live. **BJ-Entscheid 16.08.: kein Testkunden-Rabatt, 299 € für alle** (die 249-€-Empfehlung aus §3 ist verworfen) | abgesetzte Schlusszeile |
 
 Bewusst ohne Zeitintervall in der Verlaufszeile: das Fact Sheet (§Retest) hält „sechs Monate"
 bis zur Product/Science-Bestätigung offen, die Kandidat-3-Formulierung „nach sechs Monaten"
@@ -185,7 +185,7 @@ auch in der Buy-Box (Maßnahme 4, bisher nur Nutzenblock-Karte 2).
 | # | Punkt | Für |
 |---|---|---|
 | 1 | SKU „Ergebnisgespräch" 149 € anlegen | BJ (Shopify Admin, Fulfillment wie Premium-SKU) |
-| 2 | Segment-Rabatt Folgetest 249 € für Testkäufer | BJ-Freigabe, Bau per Shopify-Discount + Segment |
+| 2 | ~~Segment-Rabatt Folgetest 249 € für Testkäufer~~ **verworfen (BJ 16.08.): 299 € für alle, Verlaufszeile entsprechend angepasst** | erledigt |
 | 3 | Premium 449 → 499 € am 31.08. | BJ-Freigabe, zusammen mit 399-Pflichtumstellung |
 | 4 | Folgetest-Hinweis in die Ergebnis-Mail (Klaviyo-Strecke) | nach Kanalaufbau, eigene Fläche |
 | 5 | `competitor-data-2026-08-11.yml`: Beratungszeile 80/429 € auf 100/449 € nachziehen | Assistent, beim nächsten YML-Review |
@@ -200,13 +200,13 @@ Rabatt auf der Seite (genau die Klasse Fehler, die dieses Paket sonst abbaut):
 
 1. **„einzeln 149 €" / „Einzeln zusammen 498 €"** braucht die live kaufbare Gesprächs-SKU
    zu 149 €.
-2. **„als Testkunde 249 €"** braucht den serverseitig durchgesetzten Segment-Rabatt auf den
-   Folgetest.
+2. ~~**„als Testkunde 249 €"** braucht den serverseitig durchgesetzten Segment-Rabatt auf den
+   Folgetest.~~ **Entfallen (BJ 16.08.): kein Testkunden-Rabatt, die Verlaufszeile nennt nur
+   noch 299 €.** Das Gate besteht damit nur noch aus Punkt 1.
 
-Reihenfolge: SKU anlegen → Rabatt anlegen → Theme pushen. Fällt eine Entscheidung anders
-aus, degradiert der Bau sauber: `stack_talk_value_cents: 0` entfernt Anker und Ersparnis
-überall (Karte 2 sieht aus wie heute), die Verlaufszeile ohne 249er lautet „Später
-weitermessen: Folgetest (nur Epigenetik) 299 €."
+Reihenfolge: SKU anlegen → Theme pushen. Fällt die Entscheidung anders aus, degradiert
+der Bau sauber: `stack_talk_value_cents: 0` entfernt Anker und Ersparnis überall
+(Karte 2 sieht aus wie heute).
 
 Achtung Theme-Manager: läuft die App, pusht sie automatisch. Bis zur SKU-Anlage die App
 nicht mitlaufen lassen oder die beiden Settings vorher neutralisieren.
