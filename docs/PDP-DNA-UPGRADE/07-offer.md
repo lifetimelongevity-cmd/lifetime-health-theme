@@ -91,7 +91,8 @@ Architektur statt Preisaggression.
 
 - **Regulärpreis Test: 449 €** (Streichpreis auf Variante 1, Aktionspreis 349 € bis 30.08.)
 - **Regulärpreis Test + Ergebnisgespräch: 549 €** (Streichpreis auf Variante 2, aktuell 449 €)
-- **Value-Stack-Einzelwerte: DNA 300 € und Epigenetik 300 €** (je Zeile „einzeln 300 €")
+- ~~**Value-Stack-Einzelwerte: DNA 300 € und Epigenetik 300 €**~~ **überholt am 16.08. abends
+  (clarify-Lauf), siehe §3b**
 - **Folgetest: 299 € für alle**, kein Testkunden-Rabatt (siehe §5)
 
 Die Preisleiter liest sich so (BJ-Klarstellung 16.08.): 300 € ist der Wert **je Ebene
@@ -109,9 +110,30 @@ Streichpreis die Ersparnis-Aussage und die Komponenten-Rechnung verschwindet aut
 **Konsistenz-Pflicht (echte-Frist-Bauweise):** Der 449/549-Strich ist nur haltbar, wenn ab
 31.08. real 449 bzw. 549 verlangt wird (Aktionsende 30.08. bleibt). Die frühere
 399-Pflicht aus [[project_agedna_aktionsfrist_2026-08]] ist damit durch 449 ersetzt.
-Offen an BJ: Zeile 1 im Stack sagt „einzeln 300 €", die Verlaufszeile „Folgetest 299 €",
-beides meint die Epigenetik-Ebene; entweder Folgetest auf 300 € heben oder mit der
-1-€-Differenz leben.
+
+## 3b. BJ-Entscheid 16.08. abends: nur nachprüfbare Werte im Stack
+
+Der 300/300-Stand hatte drei Zahlen auf einer Fläche, die sich gegenseitig widerlegten: der
+Leser addiert 600, der Streichpreis darüber sagt 449, und die Verlaufszeile drei Zeilen tiefer
+nennt für dieselbe epigenetische Ebene 299 €. Dazu behauptete „einzeln" eine Einzel-Kaufbarkeit,
+die es für keine der beiden Analysen gibt. Ersetzt durch:
+
+| Zeile | Wert-Label | Warum belegbar |
+|---|---|---|
+| Epigenetische Analyse | **einzeln 299 €** | Live-Preis des Folgetests, im selben Shop kaufbar |
+| Genetische Analyse | **nur im Test** | keine erfundene Zahl, weil es keinen Einzelpreis gibt |
+| LIFETIME App | inklusive | unverändert |
+| Ergebnisgespräch | **nur im Paket** / **im Paket enthalten** | 149-€-SKU existiert nicht (§6) |
+
+**Der Anker ist damit eine Leiter statt einer Summe:** eine Ebene allein 299 €, beide Ebenen
+349 € in der Aktion, regulär 449 €. Die zweite Ebene kostet sichtbar 50 € mehr statt das
+Doppelte, und jede Zahl darin ist im Shop nachprüfbar. Das ist genau der Struktur-Anker aus
+§3 Punkt 2, nur schon jetzt statt ab September. Bewusst in Kauf genommen: der behauptete
+Gesamtwert sinkt von 600 auf 299 plus Unbeziffertes.
+
+**Regel für künftige Stack-Zeilen:** ein Wert-Label trägt nur dann eine Zahl, wenn diese Zahl
+als Preis irgendwo real verlangt wird. Sonst trägt es eine Zustandsangabe („nur im Test",
+„inklusive", „im Paket enthalten"). Keine addierten Gesamtwerte.
 
 **Zwei Kaufstufen bleiben.** Eine dritte Prepaid-Verlaufsstufe wurde geprüft und verworfen:
 ein rabattiertes Bundle verkauft den zweiten DB für ~8 € Aufpreis (sequenziell 184 € DB gegen
@@ -172,7 +194,7 @@ Button, vor der Garantie.
 | 1 | Epigenetische Analyse: sechs Bereiche, zwölf Werte (Körperalter mit Hör-, Augen-, Gedächtnisalter, MethylPace, EpiVitality, Immunscore, Entzündung, Muskelschwund) | Portal-Audit 06.08. | **einzeln 299 €** (= Live-Preis des Folgetests) |
 | 2 | Genetische Analyse: 23 Kategorien, über 150 Einzelergebnisse, 18 Wirkstoff-Reports darunter NMN und Ausdauer, 32 Lifestyle-Reports | Fact Sheet §Produktumfang; NMN-Brücke = Maßnahme 4 aus `02` | nur im Test |
 | 3 | LIFETIME App, lebenslanger Zugriff, AI Health Coach, PDF-Export, Face Scan | freigegeben 30.07. | inklusive |
-| 4 | Ergebnisgespräch, 45 Minuten (folgt der Paketwahl) | Premium-Variante live | Paket 1: „im Paket" gedimmt · Paket 2: „einzeln 149 €" |
+| 4 | Ergebnisgespräch, 45 Minuten (folgt der Paketwahl) | Premium-Variante live | Paket 1: „nur im Paket" gedimmt · Paket 2: „im Paket enthalten" (§3b/§6) |
 | Summe | „Du zahlst heute" + Paketpreis, im Paket zusätzlich „Einzeln zusammen 498 € · du sparst 49 €" | Variantenpreise + `stack_talk_value_cents` | dynamisch |
 | Konditionen | Einmalzahlung · kein Abo · keine Folgekosten | Risk-Reversal-Bestand | – |
 | Verlauf | „Später weitermessen: Folgetest (nur Epigenetik) 299 €. Deine DNA-Ergebnisse bleiben, gemessen wird, was sich verändert hat." | Folgetest live. **BJ-Entscheid 16.08.: kein Testkunden-Rabatt, 299 € für alle** (die 249-€-Empfehlung aus §3 ist verworfen) | abgesetzte Schlusszeile |
@@ -242,7 +264,17 @@ Karten-Anzeigenamen und Streichungen gepusht (Commit `a622db7`). Live rechnet se
 Karte 1 „4̶4̶9̶ 349", Karte 2 „5̶4̶9̶ 449", Aktionszeile „Du sparst 100 €" je Paket,
 Komponenten-Anker über das compare_at-Gate verschwunden.
 
-**Einziger offener Gate-Punkt: die Gesprächs-SKU 149 €.** „einzeln 149 €" steht live in der
-Gesprächszeile des Kassenzettels (sichtbar bei Paket-2-Wahl), ohne dass das Gespräch einzeln
-kaufbar ist. Entweder SKU anlegen (Fulfillment wie Premium) oder `stack_talk_value_cents: 0`
-setzen, bis sie existiert.
+~~**Einziger offener Gate-Punkt: die Gesprächs-SKU 149 €.**~~ **Geschlossen am 16.08. abends
+(clarify-Lauf):** Die Zahl ist raus. `stack_talk_value_cents: 0`, die Gesprächszeile sagt jetzt
+„nur im Paket" (Paket 1) bzw. „im Paket enthalten" (Paket 2). Dafür kam das Schema-Setting
+`stack_talk_on_label` dazu, weil das Paket-2-Label vorher hartcodiert „einzeln <Wert>" war und
+mit Wert 0 die Preiszelle leer geblieben wäre. Wird die SKU später angelegt, kann der Einzelwert
+über `stack_talk_value_cents` zurück; die Anker-Rechnung auf Karte 2 hängt weiterhin daran.
+
+**Gleicher Lauf, weitere Copy-Fixes auf der Fläche:** Aktionskarte rendert jetzt
+`promo_banner_note` („Danach gilt wieder der reguläre Preis.", bewusst ohne Betrag, weil Paket 1
+und 2 verschiedene Regulärpreise haben) — die Frist hatte vorher keine Folge. Chargenzeile sagt
+„aktuelle Laborcharge" statt „Charge". Aus Stack-Zeile 2 sind die exakten Reportzahlen 18/32
+raus (schwanken je Kunde, Fact Sheet erlaubt nur „über 150"). Die Gesprächs-Unterzeile war
+wortgleich die Notiz der Paketkarte darüber. Die Verlaufszeile ist als Option formuliert, sonst
+las sie sich als Widerspruch zu „keine Folgekosten" zwei Zeilen darüber.
