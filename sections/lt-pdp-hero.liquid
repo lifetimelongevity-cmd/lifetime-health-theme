@@ -815,6 +815,52 @@
 
         {%- if lt_show_sub or section.settings.show_price_standalone -%}
           <div class="lt-purchase-block">
+            {%- liquid
+              # Paket-Pfad (Standalone, z. B. Test vs. Test + Gespraech) frueher berechnen:
+              # der Aktions-Banner wechselt dort die Form. Als Box VOR den Karten wiederholte
+              # er den Preis, den die Karten und der CTA ohnehin tragen (gemessen 16.08.:
+              # 349 € viermal, 399 € dreimal zwischen Bullets und CTA). Im Paket-Pfad
+              # rendert stattdessen die schlanke Aktionszeile HINTER den Karten.
+              assign lt_show_packages = false
+              unless lt_show_sub
+                if section.settings.show_package_selector and product.variants.size > 1
+                  assign lt_show_packages = true
+                endif
+              endunless
+            -%}
+            {%- capture lt_promo_countdown_script -%}
+              <script>
+                (function () {
+                  var banner = document.currentScript.previousElementSibling;
+                  var el = banner && banner.querySelector('[data-lt-promo-deadline]');
+                  if (!el) return;
+                  var out = el.querySelector('[data-lt-promo-countdown]');
+                  var deadline = new Date(el.getAttribute('data-lt-promo-deadline')).getTime();
+                  if (isNaN(deadline)) return;
+                  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+                  var iv = null;
+                  function tick() {
+                    var diff = deadline - Date.now();
+                    if (diff <= 0) {
+                      // Der Text behauptet die Frist, nach Ablauf muss das ganze Element weg.
+                      banner.hidden = true;
+                      el.hidden = true;
+                      if (iv) clearInterval(iv);
+                      return;
+                    }
+                    var d = Math.floor(diff / 86400000);
+                    var h = Math.floor((diff % 86400000) / 3600000);
+                    var m = Math.floor((diff % 3600000) / 60000);
+                    var s = Math.floor((diff % 60000) / 1000);
+                    var txt = (d > 0 ? d + ' T ' : '') + pad(h) + ':' + pad(m) + ':' + pad(s);
+                    if (out) { out.textContent = txt; } else { el.textContent = txt; }
+                    el.hidden = false;
+                  }
+                  tick();
+                  iv = setInterval(tick, 1000);
+                })();
+              </script>
+            {%- endcapture -%}
             {%- comment -%}
               Quiz-Vorteil: startet mit [hidden] und wird nur eingeblendet, wenn der Besucher
               ueber die Quiz-Ergebnisseite kam (?qz=1, danach in localStorage gemerkt).
@@ -888,7 +934,7 @@
                 })();
               </script>
             {%- endif -%}
-            {%- if section.settings.show_promo_banner and section.settings.promo_banner_title != blank -%}
+            {%- if section.settings.show_promo_banner and section.settings.promo_banner_title != blank and lt_show_packages == false -%}
               <div class="lt-promo-banner" role="note">
                 <span class="lt-promo-banner__tag">{{ section.settings.promo_banner_tag | default: 'Aktion' | escape }}</span>
                 <span class="lt-promo-banner__text">
@@ -903,37 +949,7 @@
                   {%- endif -%}
                 </span>
               </div>
-              <script>
-                (function () {
-                  var banner = document.currentScript.previousElementSibling;
-                  var el = banner && banner.querySelector('[data-lt-promo-deadline]');
-                  if (!el) return;
-                  var out = el.querySelector('[data-lt-promo-countdown]');
-                  var deadline = new Date(el.getAttribute('data-lt-promo-deadline')).getTime();
-                  if (isNaN(deadline)) return;
-                  function pad(n) { return n < 10 ? '0' + n : '' + n; }
-                  var iv = null;
-                  function tick() {
-                    var diff = deadline - Date.now();
-                    if (diff <= 0) {
-                      // Titel behauptet die Frist, nach Ablauf muss der ganze Banner weg.
-                      banner.hidden = true;
-                      el.hidden = true;
-                      if (iv) clearInterval(iv);
-                      return;
-                    }
-                    var d = Math.floor(diff / 86400000);
-                    var h = Math.floor((diff % 86400000) / 3600000);
-                    var m = Math.floor((diff % 3600000) / 60000);
-                    var s = Math.floor((diff % 60000) / 1000);
-                    var txt = (d > 0 ? d + ' T ' : '') + pad(h) + ':' + pad(m) + ':' + pad(s);
-                    if (out) { out.textContent = txt; } else { el.textContent = txt; }
-                    el.hidden = false;
-                  }
-                  tick();
-                  iv = setInterval(tick, 1000);
-                })();
-              </script>
+              {{ lt_promo_countdown_script }}
             {%- endif -%}
             {%- liquid
               assign lt_show_sizes = false
@@ -1198,16 +1214,14 @@
               </div>
             </div>
             {%- else -%}
-            {%- liquid
-              # Paket-Auswahl (Standalone-Pfad, z. B. Test vs. Test + Ergebnisgespräch):
-              # bewusst getrennt vom Größen-Selector, der Gramm-Titel parst und am
-              # Abo-Pfad hängt. Preise kommen dynamisch aus der Variante, die Karte
-              # trägt nur eine beschreibende Notiz aus den Settings.
-              assign lt_show_packages = false
-              if section.settings.show_package_selector and product.variants.size > 1
-                assign lt_show_packages = true
-              endif
-            -%}
+            {%- comment -%}
+              Paket-Auswahl (Standalone-Pfad, z. B. Test vs. Test + Ergebnisgespräch):
+              bewusst getrennt vom Größen-Selector, der Gramm-Titel parst und am
+              Abo-Pfad hängt. Preise kommen dynamisch aus der Variante, die Karte
+              trägt nur eine beschreibende Notiz aus den Settings.
+              lt_show_packages ist oben am Purchase-Block berechnet (der Aktions-Banner
+              braucht den Wert vor diesem Zweig).
+            {%- endcomment -%}
             {%- if lt_show_packages -%}
               <div class="lt-pkg" data-lt-pkg-group role="radiogroup" aria-label="Paket wählen">
                 {%- for variant in product.variants -%}
@@ -1239,8 +1253,16 @@
                       {%- comment -%} Jede Karte traegt ihren Gesamtpreis (BJ-Entscheid 2026-08-14).
                           Das fruehere Aufpreis-Framing ("+ 80 €") liess die zweite Karte billiger
                           wirken als sie ist und zwang zum Kopfrechnen; zwei Vollpreise nebeneinander
-                          sind die klarere Entscheidung und decken sich mit dem Preisblock (PAngV). {%- endcomment -%}
-                      <span class="lt-pkg__price">{{ variant.price | money_without_trailing_zeros }}</span>
+                          sind die klarere Entscheidung und decken sich mit dem Preisblock (PAngV).
+                          Der Streichpreis steht seit 16.08. direkt in der Karte: die fruehere
+                          Preiszeile darunter (lt-price-direct) wiederholte 349/399/Ersparnis
+                          wortgleich und ist im Paket-Pfad entfallen. {%- endcomment -%}
+                      <span class="lt-pkg__price">
+                        {%- if variant.compare_at_price > variant.price -%}
+                          <del class="lt-pkg__compare">{{ variant.compare_at_price | money_without_trailing_zeros }}</del>
+                        {%- endif %}
+                        {{- variant.price | money_without_trailing_zeros -}}
+                      </span>
                     </span>
                     {%- comment -%} C9-Anker: die Paketkarte rechnet ihre eigene Ersparnis gegen die
                         Einzelsumme (Basis-Variante + real verkaufter Einzelwert des Gespraechs).
@@ -1255,11 +1277,38 @@
                   </label>
                 {%- endfor -%}
               </div>
-            {%- endif -%}
+              {%- comment -%} Aktionszeile statt Banner-Box plus Preiszeilen-Dublette (CRO 16.08.):
+                  die Karten tragen die Preise (Karte 1 inklusive Streichpreis), hier stehen nur
+                  noch Ersparnis und Frist. Die Ersparnis folgt der Paketwahl (applyPkg schaltet
+                  ueber data-lt-direct-savings): Paket 2 hat keinen compare_at, die Zeile nennt
+                  dann nur die Frist. Nach Fristablauf nimmt das Script die ganze Zeile raus. {%- endcomment -%}
+              {%- if section.settings.show_promo_banner and section.settings.promo_banner_title != blank -%}
+                <div class="lt-promo-line" role="note">
+                  <span class="lt-promo-line__tag">{{ section.settings.promo_banner_tag | default: 'Aktion' | escape }}</span>
+                  <span class="lt-promo-line__text">
+                    <span class="lt-promo-line__savings" data-lt-direct-savings {% unless lt_compare_price > lt_pill_1_once %}hidden{% endunless %}>{% if lt_compare_price > lt_pill_1_once %}Du sparst {{ lt_compare_price | minus: lt_pill_1_once | money_without_trailing_zeros }}{% endif %}</span>
+                    <span class="lt-promo-line__title">{{ section.settings.promo_banner_title | escape }}</span>
+                    {%- if section.settings.promo_banner_deadline != blank -%}
+                      <span class="lt-promo-line__timer" data-lt-promo-deadline="{{ section.settings.promo_banner_deadline | escape }}" hidden>
+                        {{ section.settings.promo_banner_timer_label | default: 'Endet in' | escape }} <strong data-lt-promo-countdown>–</strong>
+                      </span>
+                    {%- endif -%}
+                  </span>
+                </div>
+                {{ lt_promo_countdown_script }}
+              {%- endif -%}
+              {%- comment -%} Zahlungs-Entlastung bleibt am Entscheidungsmoment (vorher in der
+                  Preiszeile): letzte Zeile vor dem CTA. {%- endcomment -%}
+              {%- assign lt_payment_note = section.settings.payment_note | strip -%}
+              {%- if lt_payment_note != blank -%}
+                <p class="lt-payment-note lt-payment-note--pre-cta">{{ lt_payment_note | escape }}</p>
+                {%- assign lt_payment_note_rendered = true -%}
+              {%- endif -%}
+            {%- else -%}
             <div class="lt-price-direct">
-              {%- comment -%} Streichpreis + Ersparnis immer im DOM (hidden-gated), damit applyPkg
-                  sie je Paket nachziehen kann. Vorher SSR-konditional: beim Paketwechsel blieben
-                  399-€-Streichpreis und "Du sparst 50 €" der Basis unter dem 429-€-Paket stehen. {%- endcomment -%}
+              {%- comment -%} Einzige Preisanzeige im Standalone-Pfad OHNE Paketwahl (z. B.
+                  Folgetest). Im Paket-Pfad entfallen: dort wiederholte die Zeile wortgleich
+                  Preis, Streichpreis und Ersparnis der Karte darueber (CRO 16.08.). {%- endcomment -%}
               <div class="lt-price-direct__row">
                 <span class="lt-price-direct__amount" data-lt-direct-amount>{{ lt_pill_1_once | money_without_trailing_zeros }}</span>
                 <span class="lt-price-direct__compare" data-lt-direct-compare {% unless lt_compare_price > lt_pill_1_once %}hidden{% endunless %}>{% if lt_compare_price > lt_pill_1_once %}{{ lt_compare_price | money_without_trailing_zeros }}{% endif %}</span>
@@ -1276,6 +1325,7 @@
                 {%- assign lt_payment_note_rendered = true -%}
               {%- endif -%}
             </div>
+            {%- endif -%}
             {%- endif -%}
           </div>
         {%- endif -%}
@@ -1770,8 +1820,9 @@
     const pkgGroup = section.querySelector('[data-lt-pkg-group]');
     if (pkgGroup) {
       const pkgVariantInput = section.querySelector('[data-lt-variant-input]');
-      const pkgAmountEl = section.querySelector('[data-lt-direct-amount]');
-      const pkgCompareEl = section.querySelector('[data-lt-direct-compare]');
+      // Ersparnis lebt seit 16.08. in der Aktionszeile unter den Karten; die
+      // fruehere Preiszeile (data-lt-direct-amount/-compare) rendert im
+      // Paket-Pfad nicht mehr, ihre Preise stehen SSR in den Karten selbst.
       const pkgSavingsEl = section.querySelector('[data-lt-direct-savings]');
       const pkgCtaBase = {{ lt_primary_cta_label | json }};
       const pkgBaseShort = (function () {
@@ -1788,13 +1839,8 @@
         const once = parseInt(inp.dataset.oncePrice, 10) || 0;
         const cmp = parseInt(inp.dataset.comparePrice, 10) || 0;
         const hasCmp = cmp > once;
-        if (pkgAmountEl && once > 0) pkgAmountEl.textContent = formatPkgPrice(once);
-        // Streichpreis + Ersparnis gelten je Paket; ohne gueltigen Compare beides aus,
-        // sonst stuende der 399er-Streichpreis der Basis unter dem 429er-Paket.
-        if (pkgCompareEl) {
-          pkgCompareEl.hidden = !hasCmp;
-          pkgCompareEl.textContent = hasCmp ? formatPkgPrice(cmp) : '';
-        }
+        // Ersparnis gilt je Paket; ohne gueltigen Compare aus, sonst stuende
+        // "Du sparst 50 €" der Basis neben dem gewaehlten 449er-Paket.
         if (pkgSavingsEl) {
           pkgSavingsEl.hidden = !hasCmp;
           pkgSavingsEl.textContent = hasCmp ? 'Du sparst ' + formatPkgPrice(cmp - once) : '';
@@ -2459,6 +2505,58 @@
   font-size: 15px;
   font-weight: 600;
   color: var(--lt-text, #26251e);
+}
+/* Streichpreis direkt in der Karte (ersetzt die fruehere Preiszeile unter den Karten) */
+.lt-pkg__compare {
+  font-size: 13px;
+  font-weight: 400;
+  opacity: 0.66; /* Sekundaer-AA-Alpha, siehe .lt-price-direct__compare */
+  text-decoration: line-through;
+  margin-right: 6px;
+}
+
+/* Aktionszeile unter den Karten: Tag + Ersparnis + Frist + Countdown in einer
+   ruhigen Zeile. Ersetzt die Banner-Box, die Preis und Frist VOR den Karten
+   wiederholte. [hidden] kommt vom Countdown-Script nach Fristablauf. */
+.lt-promo-line {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: var(--space-4);
+  line-height: 1.4;
+}
+.lt-promo-line[hidden] { display: none; }
+.lt-promo-line__tag {
+  flex-shrink: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: var(--lt-radius-pill, 999px);
+  background: var(--color-promo);
+  color: var(--lt-surface, #fff);
+}
+.lt-promo-line__text {
+  font-size: 13px;
+  color: var(--lt-text, #26251e);
+}
+.lt-promo-line__savings {
+  font-weight: 700;
+}
+.lt-promo-line__savings[hidden] { display: none; }
+.lt-promo-line__timer {
+  font-weight: 700;
+  color: color-mix(in srgb, var(--color-promo) 78%, #000);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.lt-promo-line__timer[hidden] { display: none; }
+
+/* Klarna-Zeile vor dem CTA (Paket-Pfad): Stimme kommt aus .lt-payment-note,
+   hier nur der Abstand zur Aktionszeile darueber */
+.lt-payment-note--pre-cta {
+  margin: var(--space-3) 0 0;
 }
 .lt-pkg__note {
   font-size: 13px;
