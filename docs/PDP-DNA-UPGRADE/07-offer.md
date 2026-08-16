@@ -234,20 +234,15 @@ Rabatt auf der Seite (genau die Klasse Fehler, die dieses Paket sonst abbaut):
    Folgetest.~~ **Entfallen (BJ 16.08.): kein Testkunden-Rabatt, die Verlaufszeile nennt nur
    noch 299 €.** Das Gate besteht damit nur noch aus Punkt 1.
 
-**Reihenfolge (aktualisiert 16.08. um das 449/549-Regime aus §3a):**
+**Stand 16.08. abends: die Sequenz ist gelaufen — außerplanmäßig.** Der Theme Manager lief
+und hatte den Buy-Box-Stand bereits live gepusht, bevor SKU und compare_at existierten
+(genau das Szenario aus der Warnung unten). Daraufhin wurde konsistent nachgezogen statt
+zurückgerollt: compare_at 449/549 per API gesetzt, die drei CTA-Bänder auf „statt 449",
+Karten-Anzeigenamen und Streichungen gepusht (Commit `a622db7`). Live rechnet seitdem:
+Karte 1 „4̶4̶9̶ 349", Karte 2 „5̶4̶9̶ 449", Aktionszeile „Du sparst 100 €" je Paket,
+Komponenten-Anker über das compare_at-Gate verschwunden.
 
-1. Gesprächs-SKU 149 € anlegen (Shopify Admin)
-2. compare_at setzen: Variante 1 → 449 €, Variante 2 → 549 € (Shopify Admin oder MCP)
-3. Theme pushen (Section + Template zusammen)
-
-Schritt 2 darf **nicht vor** Schritt 3 alleine live gehen: das Live-Template trägt noch den
-alten Banner-Text „349 € statt 399 €", der dann neben einem 449er-Strich stünde. Erst der
-Push ersetzt den Banner durch die preisfreie Aktionszeile, die den Strich je Paket liest.
-Nach Schritt 2+3 rechnet alles automatisch: Karte 1 „4̶4̶9̶ 349", Karte 2 „5̶4̶9̶ 449",
-Aktionszeile „Du sparst 100 €" je Paket, Komponenten-Anker verschwindet (gegated).
-
-Fällt die SKU-Entscheidung anders aus, degradiert der Bau sauber: `stack_talk_value_cents: 0`
-entfernt Anker und Ersparnis überall (Karte 2 sieht aus wie heute).
-
-Achtung Theme-Manager: läuft die App, pusht sie automatisch. Bis SKU + compare_at stehen,
-die App nicht mitlaufen lassen oder die Settings vorher neutralisieren.
+**Einziger offener Gate-Punkt: die Gesprächs-SKU 149 €.** „einzeln 149 €" steht live in der
+Gesprächszeile des Kassenzettels (sichtbar bei Paket-2-Wahl), ohne dass das Gespräch einzeln
+kaufbar ist. Entweder SKU anlegen (Fulfillment wie Premium) oder `stack_talk_value_cents: 0`
+setzen, bis sie existiert.
