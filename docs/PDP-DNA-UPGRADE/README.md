@@ -97,7 +97,7 @@ Fünf Punkte stehen live und hängen an keiner Copy-Entscheidung. Vollständig m
 
 **Gebaut und live seit 2026-08-16.**
 
-Sieben Commits, Push durch BJ am 16.08.:
+Sechs Bau-Commits, Push durch BJ am 16.08.:
 
 | Commit | Inhalt |
 |---|---|
@@ -107,6 +107,7 @@ Sieben Commits, Push durch BJ am 16.08.:
 | `5d1110c` | `lt-pdp-report-preview` zeigt Deutungsebene statt Kanal (`06` §5) |
 | `28d499c` | `crs-expert-quotes` wird Nutzenblock (`05`) |
 | `4cdee57` | vier scharfe Hero-Settings entschärft (`06` §2.6) |
+| `b00a66e` | Nachtrag: „zu Hause"-Dopplung in `crs-metrics-row` Schritt 1 geheilt |
 
 Davor bereits live: M1 bis M3 aus `03` §4 (Vergleichstabelle mobil, drei CTA-Bänder, Loox auf 6),
 gebaut am 14.08.
