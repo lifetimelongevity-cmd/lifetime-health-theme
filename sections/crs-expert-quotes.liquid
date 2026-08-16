@@ -73,33 +73,42 @@
         {%- for block in section.blocks -%}
           <div class="eq-card" {{ block.shopify_attributes }}>
 
-            <blockquote class="eq-blockquote">
-              <p class="eq-quote-text">{{ block.settings.quote | escape }}</p>
-            </blockquote>
-
-            <div class="eq-author">
-              {%- if block.settings.photo != blank -%}
-                <div class="eq-photo">
-                  {{
-                    block.settings.photo
-                    | image_url: width: 160
-                    | image_tag:
-                      loading: 'lazy',
-                      class: 'eq-photo-img',
-                      alt: block.settings.name | escape
-                  }}
-                </div>
-              {%- else -%}
-                <div class="eq-initials" aria-hidden="true">
-                  {{ block.settings.name | slice: 0, 2 | upcase }}
-                </div>
+            {%- comment -%}
+              Kein blockquote mehr: die Karten tragen seit dem Nutzenblock-Umbau
+              eigenen Text, keine Zitate. Auch fuer Screenreader relevant.
+            {%- endcomment -%}
+            <div class="eq-card-text">
+              {%- if block.settings.label != blank -%}
+                <h3 class="eq-card-label">{{ block.settings.label | escape }}</h3>
               {%- endif -%}
-              <div class="eq-author-info">
-                <span class="eq-name">{{ block.settings.name | escape }}</span>
-                <span class="eq-title">{{ block.settings.title | escape }}</span>
-                <span class="eq-source">{{ block.settings.source | escape }}</span>
-              </div>
+              <p class="eq-card-body">{{ block.settings.quote | escape }}</p>
             </div>
+
+            {%- if section.settings.show_author and block.settings.name != blank -%}
+              <div class="eq-author">
+                {%- if block.settings.photo != blank -%}
+                  <div class="eq-photo">
+                    {{
+                      block.settings.photo
+                      | image_url: width: 160
+                      | image_tag:
+                        loading: 'lazy',
+                        class: 'eq-photo-img',
+                        alt: block.settings.name | escape
+                    }}
+                  </div>
+                {%- else -%}
+                  <div class="eq-initials" aria-hidden="true">
+                    {{ block.settings.name | slice: 0, 2 | upcase }}
+                  </div>
+                {%- endif -%}
+                <div class="eq-author-info">
+                  <span class="eq-name">{{ block.settings.name | escape }}</span>
+                  <span class="eq-title">{{ block.settings.title | escape }}</span>
+                  <span class="eq-source">{{ block.settings.source | escape }}</span>
+                </div>
+              </div>
+            {%- endif -%}
 
           </div>
         {%- endfor -%}
@@ -175,15 +184,31 @@
   gap: var(--space-5);
 }
 
-.eq-blockquote {
+.eq-card-text {
   flex: 1;
-  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
-.eq-quote-text {
+/* Kartentitel und Kartentext laufen in derselben Groesse und im selben
+   Gewicht, unterschieden nur ueber die Farbe. Dasselbe Prinzip wie im
+   Heading-Stack und in .fg-card-title (crs-feature-grid, direkt darueber
+   auf der AGE&DNA-PDP). !important, sonst greifen die globalen h3-Regeln. */
+.eq-card-label {
+  font-family: var(--font-body) !important;
+  font-size: 0.9375rem !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+  letter-spacing: 0 !important;
+  color: var(--crs-text, #26251e) !important;
+  margin: 0 !important;
+}
+
+.eq-card-body {
   font-size: 0.9375rem;
   line-height: 1.7;
-  color: var(--crs-text, #26251e);
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.72));
   margin: 0;
 }
 
@@ -375,6 +400,13 @@
       "label": "Einleitungstext (optional)",
       "default": "__none__",
       "info": "__none__ = ausblenden. Für längere Einordnungen statt Unterüberschrift."
+    },
+    {
+      "type": "checkbox",
+      "id": "show_author",
+      "label": "Autorenzeile anzeigen",
+      "default": true,
+      "info": "Aus = Foto, Name, Titel und Quelle entfallen in allen Karten (Nutzenblock-Modus)."
     }
   ],
   "blocks": [
@@ -383,9 +415,15 @@
       "name": "Experten-Zitat",
       "settings": [
         {
+          "type": "text",
+          "id": "label",
+          "label": "Kartenüberschrift (optional)",
+          "info": "Zeile über dem Text, läuft in Textgröße und voller Textfarbe. Leer = keine."
+        },
+        {
           "type": "textarea",
           "id": "quote",
-          "label": "Zitat (Original-Sprache)",
+          "label": "Text",
           "default": "Zitat hier einfügen."
         },
         {
