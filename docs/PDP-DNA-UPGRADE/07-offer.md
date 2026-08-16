@@ -94,6 +94,12 @@ Architektur statt Preisaggression.
 - **Value-Stack-Einzelwerte: DNA 300 € und Epigenetik 300 €** (je Zeile „einzeln 300 €")
 - **Folgetest: 299 € für alle**, kein Testkunden-Rabatt (siehe §5)
 
+Die Preisleiter liest sich so (BJ-Klarstellung 16.08.): 300 € ist der Wert **je Ebene
+einzeln**; **DNA + Epigenetik zusammen kosten ohne Aktion 449 €** — der Kombipreis ist der
+Streichpreis, nicht die Summe der Einzelwerte. Deshalb behauptet der Stack bewusst keine
+600er-Gesamtsumme: die Zeilen tragen nur ihre Einzelwerte, die Ersparnis-Aussage kommt
+allein aus compare_at (449/549) gegen den Aktionspreis.
+
 Konsequenzen im Bau (alles dynamisch, committet 16.08.): Karten lesen compare_at je Variante,
 die Aktionszeile rechnet die Ersparnis je Paket (dann „Du sparst 100 €" auf beiden). Der
 „Einzeln zusammen 498 €"-Anker auf Karte 2 und die Anker-Note im Stack sind auf
