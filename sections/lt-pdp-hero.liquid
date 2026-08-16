@@ -592,10 +592,15 @@
                     <span class="lt-value-stack__pay-price" data-lt-stack-pay>{{ lt_variant_1.price | money_without_trailing_zeros }}</span>
                   </div>
                 {%- endif -%}
+                {%- comment -%} Gleiches compare_at-Gate wie der Karten-Anker: traegt das
+                    Paket einen eigenen Streichpreis, uebernimmt der die Ersparnis-Aussage
+                    und die Komponenten-Rechnung entfaellt auch im DOM. {%- endcomment -%}
                 {%- if lt_stack_save > 0 -%}
-                  <p class="lt-value-stack__anchor-note" data-lt-stack-anchor hidden>
-                    Einzeln zusammen {{ lt_stack_sum | money_without_trailing_zeros }} · du sparst {{ lt_stack_save | money_without_trailing_zeros }}
-                  </p>
+                  {%- unless lt_stack_bundle_variant.compare_at_price > lt_stack_bundle_variant.price -%}
+                    <p class="lt-value-stack__anchor-note" data-lt-stack-anchor hidden>
+                      Einzeln zusammen {{ lt_stack_sum | money_without_trailing_zeros }} · du sparst {{ lt_stack_save | money_without_trailing_zeros }}
+                    </p>
+                  {%- endunless -%}
                 {%- endif -%}
               {%- endunless -%}
               {%- if section.settings.stack_terms_note != blank -%}
@@ -1227,10 +1232,17 @@
                 {%- for variant in product.variants -%}
                   {%- liquid
                     assign pkg_note = ''
+                    assign pkg_label = variant.title
                     if forloop.index == 1
                       assign pkg_note = section.settings.pkg_note_1
+                      if section.settings.pkg_label_1 != blank
+                        assign pkg_label = section.settings.pkg_label_1
+                      endif
                     elsif forloop.index == 2
                       assign pkg_note = section.settings.pkg_note_2
+                      if section.settings.pkg_label_2 != blank
+                        assign pkg_label = section.settings.pkg_label_2
+                      endif
                     endif
                   -%}
                   <label class="lt-pkg__card{% if variant.id == lt_variant_1.id %} is-selected{% endif %}" data-lt-pkg>
@@ -1249,7 +1261,7 @@
                     >
                     <span class="lt-pkg__head">
                       <span class="lt-pkg__radio" aria-hidden="true"></span>
-                      <span class="lt-pkg__name">{{ variant.title | escape }}</span>
+                      <span class="lt-pkg__name">{{ pkg_label | escape }}</span>
                       {%- comment -%} Jede Karte traegt ihren Gesamtpreis (BJ-Entscheid 2026-08-14).
                           Das fruehere Aufpreis-Framing ("+ 80 €") liess die zweite Karte billiger
                           wirken als sie ist und zwang zum Kopfrechnen; zwei Vollpreise nebeneinander
@@ -3684,9 +3696,21 @@
     },
     {
       "type": "text",
+      "id": "pkg_label_1",
+      "label": "Paket 1 — Anzeigename",
+      "info": "Überschreibt den Shopify-Variantentitel auf der Karte (z. B. 'AGE & DNA-Test'). Leer = Variantentitel."
+    },
+    {
+      "type": "text",
       "id": "pkg_note_1",
       "label": "Paket 1 — Notiz",
       "info": "Eine Zeile unter dem Namen der ersten Variante. Leer lassen = keine Notiz."
+    },
+    {
+      "type": "text",
+      "id": "pkg_label_2",
+      "label": "Paket 2 — Anzeigename",
+      "info": "Überschreibt den Shopify-Variantentitel auf der Karte. Leer = Variantentitel."
     },
     {
       "type": "text",
