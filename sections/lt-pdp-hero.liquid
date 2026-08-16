@@ -1316,8 +1316,12 @@
             {%- comment -%}
               Chargen-Bestand: liest den echten Shopify-Bestand live (Summe aller
               getrackten Varianten, beide Pakete sind dasselbe physische Kit).
-              Keine Handpflege, die Zahl faellt mit jeder Bestellung. Bei Bestand
-              <= 0 verschwindet die Zeile still (Policy CONTINUE verkauft weiter,
+              Bewusst OHNE absolute Zahl (BJ 16.08.): bei 1-2 Verkaeufen pro Woche
+              wirkt eine stehende "11" erfunden. Stattdessen zeigt der Balken den
+              vergebenen Anteil und der Text nur die Stufe; Stufen sind grob genug,
+              um nie stale zu wirken, und bleiben aus dem Inventar belegbar.
+              Zeile erscheint erst, wenn ueber die Haelfte vergeben ist, und
+              verschwindet still bei Bestand <= 0 (Policy CONTINUE verkauft weiter,
               dann ohne Knappheits-Claim). Neue Charge = Bestand im Admin setzen.
             {%- endcomment -%}
             {%- liquid
@@ -1333,16 +1337,24 @@
               endif
             -%}
             {%- if section.settings.batch_note_enable and lt_batch_size > 0 and lt_batch_remaining > 0 -%}
-              {%- assign lt_batch_pct = lt_batch_remaining | times: 100 | divided_by: lt_batch_size -%}
-              <div class="lt-batch-note" role="note">
-                <span class="lt-batch-note__text">
-                  Noch <strong>{{ lt_batch_remaining }} von {{ lt_batch_size }}</strong>
-                  {{- ' ' -}}{{ section.settings.batch_unit | default: 'Kits' | escape }} aus der aktuellen Charge
-                </span>
-                <span class="lt-batch-note__bar" aria-hidden="true">
-                  <span class="lt-batch-note__fill" style="width: {{ lt_batch_pct }}%"></span>
-                </span>
-              </div>
+              {%- liquid
+                assign lt_batch_left_pct = lt_batch_remaining | times: 100 | divided_by: lt_batch_size
+                assign lt_batch_taken_pct = 100 | minus: lt_batch_left_pct
+                assign lt_batch_text = ''
+                if lt_batch_left_pct <= 15
+                  assign lt_batch_text = 'Die aktuelle Charge ist fast vergeben'
+                elsif lt_batch_left_pct <= 50
+                  assign lt_batch_text = 'Mehr als die Hälfte der Charge ist vergeben'
+                endif
+              -%}
+              {%- if lt_batch_text != blank -%}
+                <div class="lt-batch-note" role="note">
+                  <span class="lt-batch-note__text">{{ lt_batch_text }}</span>
+                  <span class="lt-batch-note__bar" aria-hidden="true">
+                    <span class="lt-batch-note__fill" style="width: {{ lt_batch_taken_pct }}%"></span>
+                  </span>
+                </div>
+              {%- endif -%}
             {%- endif -%}
             <div class="product__cart-functions">
               <div class="flex-buttons">
@@ -3116,7 +3128,7 @@
       "type": "checkbox",
       "id": "batch_note_enable",
       "label": "Chargen-Zeile anzeigen",
-      "info": "Liest den echten Shopify-Bestand (Summe aller Varianten). Verschwindet selbst, wenn der Bestand 0 erreicht.",
+      "info": "Liest den echten Shopify-Bestand (Summe aller Varianten). Zeigt bewusst keine absolute Zahl, nur Stufe + Balken; erscheint erst ab halber Charge und verschwindet bei Bestand 0.",
       "default": false
     },
     {
@@ -3125,12 +3137,6 @@
       "label": "Chargengröße",
       "info": "Kits pro Bestellung beim Labor. Neue Charge: Bestand im Admin auf die reale Zahl setzen.",
       "default": 30
-    },
-    {
-      "type": "text",
-      "id": "batch_unit",
-      "label": "Einheit",
-      "default": "Kits"
     },
     {
       "type": "header",
