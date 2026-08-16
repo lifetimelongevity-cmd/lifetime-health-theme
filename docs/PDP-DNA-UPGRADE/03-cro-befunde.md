@@ -1,6 +1,6 @@
 ---
 status: snapshot
-last_review: 2026-08-14
+last_review: 2026-08-16
 canonical_for: pdp-age-dna-cro-messung
 depends_on:
   - docs/PDP-DNA-UPGRADE/01-rmbc-kontext.md
@@ -273,7 +273,24 @@ Reihenfolge, und die Maßnahmen 1 bis 9 funktionieren auch ohne Umbau.
 
 ## 7. Status
 
-Nichts davon ist gebaut. Reines Analyse-Dokument, kein Änderungsstand am Theme.
+**Teilweise gebaut, Stand 2026-08-16.**
+
+| Maßnahme (§4) | Status |
+|---|---|
+| 1 Vergleichstabelle mobil lesbar (C1) | gebaut 14.08. |
+| 2 Zwei CTA-Bänder (C2) | gebaut 14.08., drei Bänder statt zwei: `cta_band_report`, `cta_band_reviews`, `cta_band_loox` |
+| 3 Loox deckeln (C3) | gebaut 14.08., `limit` von 20 auf 6 |
+| 9 Sterne und Daten aus den Review-Blöcken (C11) | gebaut 16.08. (`e6eac0d`) |
+| 4, 5, 7, 8 | offen |
+| 10 Anker auf der 449-€-Option (C9) | offen, BJ (Einzelpreis) |
+| 11 Ads-Ziel (C10) | offen, BJ |
+
+C4 (Mid-Page-Exit) und C8 (Dublette Feature-Grid / Report-Preview) sind durch den Copy-Umbau vom
+16.08. teilweise berührt, siehe [`06`](06-kausalkette.md) §5. Nicht als erledigt führen, bis
+nachgemessen ist.
+
+**Die Messwerte in §1 sind ein Snapshot vom 14.08. und beschreiben die Seite vor allen Umbauten.**
+Sie werden nicht überschrieben. Die Neumessung nach §6 steht aus.
 
 **Überholt durch §8.** Maßnahmen 1 bis 3 sind seit dem Push 14.08. 17:02 live, Maßnahme 9 liegt
 lokal und ist nicht gepusht. Die Zahlen in §1 bleiben als Vorher-Stand stehen.

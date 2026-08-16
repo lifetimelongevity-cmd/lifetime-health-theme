@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-08-15
+last_review: 2026-08-16
 canonical_for: pdp-age-dna-kausalkette
 depends_on:
   - docs/PDP-DNA-UPGRADE/01-rmbc-kontext.md
@@ -17,7 +17,9 @@ und `lt-pdp-report-preview`, plus der Einordnung aller Flächen in eine durchgeh
 Der Nutzenblock aus [`05-nutzenblock.md`](05-nutzenblock.md) ist Teil derselben Kette und wird hier
 nicht wiederholt.
 
-**Nichts davon ist gebaut.** Live-Stand geprüft am 15.08.2026 im Browser bei 375 x 812.
+**Gebaut am 2026-08-16**, sechs Commits (`e6eac0d` bis `4cdee57`), Live-Push durch BJ am selben
+Tag. Der Live-Stand in diesem Dokument beschreibt die Seite **vor** dem Umbau, gemessen am
+15.08.2026 bei 375 x 812. Die Höhen in §6 sind Erwartungswerte und **noch nicht nachgemessen**.
 
 ---
 
@@ -81,7 +83,7 @@ statt die Form des Ergebnisses. Position 7 erzählt gar nichts über das Produkt
 
 ## 2. Live-Funde, die unabhängig von jeder Copy-Freigabe gelten
 
-Absteigend nach Dringlichkeit.
+Absteigend nach Dringlichkeit. **BJ-Entscheide vom 2026-08-16 sind je Fund eingetragen.**
 
 ### 2.1 „Hallo, ich bin MAISIE." steht lesbar auf der PDP
 
@@ -92,6 +94,12 @@ in Richtung Anbieter zeigt, deutlich schwächer.
 
 Das ist die bekannte Klasse Problem: die Aussage liegt im Bild, wo Template-Audits nicht hinsehen.
 
+> **Entscheid BJ, 2026-08-16: bleibt so.** Das Bild wird nicht getauscht und nicht retuschiert.
+> Die Sperre in `01` §2 ist entsprechend eingeschränkt: sie gilt weiter für Copy, nicht für den
+> Bildbestand der PDP. Der Grund für die ursprüngliche Sperre ist nirgends dokumentiert. Falls sie
+> aus einer Anbieter-Vereinbarung stammt, ist dieser Entscheid vor dem Vertrag zu prüfen und nicht
+> hier. Fund geschlossen.
+
 ### 2.2 Der Hero widerspricht der eigenen FAQ
 
 | Ort | Text |
@@ -101,10 +109,23 @@ Das ist die bekannte Klasse Problem: die Aussage liegt im Bild, wo Template-Audi
 
 Beide live, dieselbe Seite. Die FAQ hat recht.
 
+> **Entscheid BJ, 2026-08-16: „Nicht geschätzt." wird gestrichen.** Der Bullet endet nach „Aus
+> DNA-Methylierung gemessen." Die FAQ bleibt unverändert. Zu bauen in
+> `templates/product.age-dna-test.json`, `sections.main.settings`.
+>
+> **Gebaut 2026-08-16** mit Schritt 1 des Hero-Rewrites (`5b01ea9`).
+
 ### 2.3 Zwei Präzisionsaussagen in `crs-expert-quotes`
 
 „eine der präzisesten Methoden" und „einer der genauesten Indikatoren". Details in
 [`05`](05-nutzenblock.md) §2. Fallen mit dem Umbau weg, müssen aber auch ohne ihn raus.
+
+> **Entscheid BJ, 2026-08-16: raus.** Unabhängig davon, ob der Nutzenblock aus `05` gebaut wird.
+>
+> **Gebaut 2026-08-16**: beide Sätze sind mit dem Nutzenblock entfallen (`28d499c`). Die
+> Streichung deckt sich mit dem älteren BJ-Entscheid vom 15.08. in [`05`](05-nutzenblock.md) §1
+> („Als Überzeugung intern in Ordnung, auf der Seite nicht"), sie steht also nicht allein auf der
+> Lesart des „ok".
 
 ### 2.4 Der Arzt-Badge steht unter einer Kaufoption, die es im Juli noch nicht gab
 
@@ -113,10 +134,44 @@ von · Prof. Dr. med. Volker Limmroth". Das Gespräch ist laut `01` §2 ausdrüc
 ärztlich**. Zusätzlich lässt sich „Fachlich geprüft von" als „dein Report wird von ihm geprüft"
 lesen, was ebenfalls nicht stimmt.
 
+> **Gelöst durch Schritt 2, kein eigener Fund mehr.** Rückfrage BJ 2026-08-16: „steht da nicht
+> jetzt wissenschaftliche Leitung?" — live nein, im Vorschlag ja.
+>
+> Live trägt `sections.main.settings.founder_endorsed` am 16.08. weiterhin „Fachlich geprüft von".
+> [§3](#3-lt-pdp-hero) setzt es im Hero-Rewrite auf **„WISSENSCHAFTLICHE LEITUNG"** und schreibt
+> zusätzlich `pkg_note_2` ohne Rollenangabe um, „weil in keinem Dokument steht, wer das Gespräch
+> führt, und ‚Arzt' falsch wäre". Beide Hälften des Funds, der Badge und die Nähe zur Kaufoption,
+> sind damit in Schritt 2 abgedeckt.
+>
+> Kein separater Bau nötig. **Mit Schritt 1 gebaut** (`5b01ea9`): `founder_endorsed` steht seit
+> dem 16.08. auf „Wissenschaftliche Leitung", `pkg_note_2` ist ohne Rollenangabe neu gesetzt.
+
 ### 2.5 Eine Superlative ohne Beleg
 
 `crs-metrics-row`, Schritt 3: „Führendes Genomik-Labor in Europa". Der belegte Satz steht in der
 Freigabeliste und ist stärker: Eurofins Genomics, ISO 17025.
+
+> **Entscheid BJ, 2026-08-16: bleibt.** „Führend" ist die stärkere Formulierung und trifft nach
+> BJs Einschätzung zu. Der Claim wird nicht abgeschwächt. Fund als Copy-Frage geschlossen.
+>
+> **Offener Input, kein Blocker:** eine zeigbare Quelle für die Spitzenstellung (Marktanteil,
+> Durchsatz, Ranking oder eine Eurofins-eigene Angabe). Nach der Copy-Linie in der
+> Workspace-`CLAUDE.md` wird bei substanziierungsbedürftigen Claims die Quelle beschafft, nicht der
+> Claim gekürzt. Bis sie vorliegt, steht der Satz unverändert.
+>
+> Der Zusatz „Eurofins Genomics, ISO 17025" ist davon unberührt und kann **zusätzlich** stehen.
+> Er ersetzt „führend" nicht, er belegt die Ebene darunter.
+>
+> **Konflikt mit §4, aufgefallen am 16.08.:** Der Rewrite in [§4](#4-crs-metrics-row) streicht die
+> Zeile ersatzlos. Schritt 3 wird dort zu „Zwei Auswertungen, ein Ergebnis", weil die Fläche das
+> Zwei-Läufe-Argument übernimmt; Eurofins und ISO 17025 wandern nach Schritt 2. Der 2.5-Entscheid
+> ist gegen die Frage „abschwächen oder nicht" gefallen, nicht gegen diesen Rewrite.
+>
+> **Auflösung, die beides hält:** „führend" zieht in das Detail von Schritt 2, wo Eurofins ohnehin
+> genannt wird — „Eurofins Genomics, führendes Genomik-Labor in Europa. Analyse nach ISO 17025."
+> Damit bleibt der starke Claim, und Schritt 3 kann seine neue Aufgabe übernehmen.
+>
+> **So gebaut 2026-08-16** (`ac6bdb1`).
 
 ### 2.6 Vier scharfe Settings im Hero
 
@@ -129,6 +184,21 @@ Freigabeliste und ist stärker: Eurofins Genomics, ISO 17025.
 
 Das ist dieselbe Lage wie in `project_pdp_refit_phase0`: geerbte Defaults, die niemand gesetzt hat
 und die niemand prüft.
+
+> **Entscheid BJ, 2026-08-16: aufräumen.** Die vier Settings werden entschärft, sodass ein
+> versehentliches Einschalten keine falsche Copy publiziert.
+>
+> **Gebaut 2026-08-16** (`4cdee57`): `promo_banner_title/_deadline/_tag/_note` und
+> `coa_purity_label` geleert, `benefit_1_text` repariert zu „Erfahre, wie du alterst, nicht nur wie
+> alt du bist.", `stack_old_total` wie entschieden unverändert bei 449,00 €.
+>
+> **Nachtrag aus der Prüfung vom 16.08.:** Ein fünftes Setting-Paar ist live und unauffällig
+> geblieben. `quiz_promo_enable` steht auf `true` und rendert für Quiz-Besucher „10 % auf deinen
+> Test". `quiz_promo_deadline` ist **leer**, und `lt-pdp-hero.liquid:805` rendert den Timer nur bei
+> gesetzter Deadline. Es läuft heute also **kein** Countdown, das Banner zeigt nur Titel und Notiz.
+> Kein Fund, aber die Stelle, an der die Urgency-Regel der Workspace-`CLAUDE.md` greift: Wer
+> `quiz_promo_deadline` später setzt, braucht eine echte, serverseitig durchgesetzte Frist, nach
+> deren Ablauf der Rabatt wirklich nicht mehr gilt. Ein Datum ins Feld zu schreiben genügt nicht.
 
 ---
 
@@ -197,7 +267,7 @@ werden die sechs Wochen vom Einwand zum Beweis.
 | Überschrift | So einfach geht's. | **Eine Probe, zwei Analysen.** |
 | Subline | Ohne Arztbesuch & ohne Blut. (28 Z.) | **Ohne Arztbesuch, ohne Blut.** (27 Z.) |
 | `intro` (ungenutzt) | — | **Deine Probe durchläuft im Labor zwei getrennte Auswertungen. Deshalb zwei Ebenen statt einer, und deshalb sechs Wochen.** |
-| Schritt 1 | Bestelle dein Testkit / Erhalte dein Kit nach wenigen Tagen | **Kit bestellen und Probe zu Hause nehmen / Fünf Minuten, zu Hause.** |
+| Schritt 1 | Bestelle dein Testkit / Erhalte dein Kit nach wenigen Tagen | **Kit bestellen und Probe zu Hause nehmen / Dauert fünf Minuten.** |
 | Schritt 2 | Scanne das Kit & sammle die Probe / Einfache Speichelprobe in Minuten | **Kostenlos ins Labor schicken / Eurofins Genomics, Analyse nach ISO 17025.** |
 | Schritt 3 | Versende es kostenlos / Führendes Genomik-Labor in Europa | **Zwei Auswertungen, ein Ergebnis / Genetik und Epigenetik laufen getrennt. Sechs Wochen ab Eingang der Probe, dann liegt beides in der App.** |
 | Schritt 4 | Erhalte deine Ergebnisse / ca. 6 Wochen bis zur fertigen Auswertung | entfällt |
@@ -205,6 +275,11 @@ werden die sechs Wochen vom Einwand zum Beweis.
 „Bestelle dein Testkit" als eigener nummerierter Schritt ist Füllung, das vollständige
 Probenverfahren steht ohnehin in FAQ 1. Drei Schritte halten die Section auf ihrer heutigen Höhe,
 vier kosten 136 px mehr.
+
+**Beim Bau am 16.08. geheilt:** Eine frühere Fassung der Tabelle trug „zu Hause" doppelt in
+Schritt 1 (Beschreibung und Detail). Das Detail ist als reine Dauer-Aussage gebaut („Dauert fünf
+Minuten."), BJ-Freigabe 16.08. „Ohne Termin" wäre die Alternative gewesen, hätte aber die Subline
+wiederholt, also dieselbe Wiederholungsklasse, die dieser Abschnitt aus Schritt 1 entfernt.
 
 **Die Subline bleibt.** Sie war mit 28 Zeichen bereits im Budget und ist der Reibungslöser der
 Section. Eine frühere Fassung wollte sie streichen, das war falsch (§0). Weil sie bleibt, entfällt
@@ -281,23 +356,32 @@ Sublines werden gekürzt statt gestrichen. Der Hero bleibt damit praktisch gleic
 gesparte Subline-Zeile wird von der zweizeiligen Bullet 1 und der längeren Premium-Note
 aufgebraucht.
 
-Alle Werte sind gerechnet auf den am 15.08. gemessenen Live-Größen, gemessen wird nach dem Bau bei
-375 x 812.
+Alle Werte sind gerechnet auf den am 15.08. gemessenen Live-Größen.
+
+**Stand 2026-08-16: gebaut, aber noch nicht nachgemessen.** Die Spalte „neu" ist weiterhin eine
+Rechnung, kein Messergebnis. Die Messung nach der Methodik in [`03`](03-cro-befunde.md) §6 steht
+aus und muss auch M1 bis M3 vom 14.08. mit erfassen, die in dieser Tabelle noch nicht enthalten
+sind.
 
 ---
 
 ## 7. Bauvorgaben und Reihenfolge
 
-Empfohlene Reihenfolge, weil sie mit dem größten Risiko anfängt und mit dem größten Aufwand endet:
+Ursprünglich empfohlene Reihenfolge, weil sie mit dem größten Risiko anfängt und mit dem größten
+Aufwand endet. **Am 2026-08-16 abgearbeitet**, Reihenfolge wie geplant.
 
-| Schritt | Umfang | Aufwand |
-|---|---|---|
-| 1 | MAISIE-Bild tauschen (§2.1) | Bildarbeit plus Upload |
-| 2 | Hero: sieben Textfelder, davon eines der FAQ-Widerspruch (§3) | reine Template-Edits |
-| 3 | `crs-metrics-row` (§4) | reine Template-Edits, ein Block gelöscht |
-| 4 | `lt-pdp-report-preview` (§5) | reine Template-Edits, ein Block gelöscht, `retest_show: false` |
-| 5 | Nutzenblock (`05`) | zwei Schema-Felder plus Markup, einzige Liquid-Änderung im ganzen Paket |
-| 6 | Vier scharfe Hero-Settings aufräumen (§2.6) | Template-Hygiene, jederzeit |
+| Schritt | Umfang | Aufwand | Status |
+|---|---|---|---|
+| 0 | C11: Sterne und Daten aus den Review-Blöcken (`03` §C11) | Template plus eine Liquid-Korrektur | gebaut `e6eac0d` |
+| 1 | ~~MAISIE-Bild tauschen (§2.1)~~ | — | **entfällt**, BJ-Entscheid 16.08. |
+| 2 | Hero: sieben Textfelder, davon eines der FAQ-Widerspruch (§3) | reine Template-Edits | gebaut `5b01ea9` |
+| 3 | `crs-metrics-row` (§4) | reine Template-Edits, ein Block gelöscht | gebaut `ac6bdb1` |
+| 4 | `lt-pdp-report-preview` (§5) | reine Template-Edits, ein Block gelöscht, `retest_show: false` | gebaut `5d1110c` |
+| 5 | Nutzenblock (`05`) | zwei Schema-Felder plus Markup, einzige Liquid-Änderung im ganzen Paket | gebaut `28d499c` |
+| 6 | Vier scharfe Hero-Settings aufräumen (§2.6) | Template-Hygiene, jederzeit | gebaut `4cdee57` |
+
+C11 stand nicht in der ursprünglichen Liste, lag aber ungebaut im Working Tree und wurde als
+Schritt 0 vorgezogen, damit die Copy-Commits sauber bleiben.
 
 **Zum Bildtausch.** Nicht per `fileUpdate` überschreiben: die alte `?v=`-URL liefert weiter die
 alten Bytes. Neue Datei hochladen, `app_visual` im Template neu setzen, alte Datei danach löschen.

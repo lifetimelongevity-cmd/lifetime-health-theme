@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-08-14
+last_review: 2026-08-16
 canonical_for: pdp-age-dna-massnahmen
 depends_on:
   - docs/PDP-DNA-UPGRADE/01-rmbc-kontext.md
@@ -27,6 +27,19 @@ Assistent heißt, ich kann das mit vorhandenem Material bauen.
 | 5 | App-Kundensicht verifizieren | entsperrt 3 Sections | klein, braucht Zugang | BJ (Zugang) |
 | 6 | „Bekannt aus" belegen oder ziehen | Proof +2 | klein | BJ |
 | 7 | Ads-Landing entscheiden | Ads-CR | klein | BJ |
+
+> **Statusnachtrag 2026-08-16.** Der Copy-Umbau ist gebaut und live, Details in
+> [`06`](06-kausalkette.md) §7 und im [README](README.md).
+>
+> | # | Status |
+> |---|---|
+> | 1 Mechanismus schärfen | **gebaut.** Kandidat 2, 3 und 6 aus `04` liegen in `crs-expert-quotes`, `crs-metrics-row` und `lt-pdp-report-preview` |
+> | 2 Ergebnis-Konkretheit | **weitgehend gebaut** über die drei Karten des Nutzenblocks (`05` §5). Die Loox-Volltext-Auswertung per `/customer-research` ist damit **nicht** erledigt |
+> | 4 NMN-Brücke | **angelegt**, nicht ausgebaut. Karte 2 des Nutzenblocks nennt NMN erstmals auf der PDP, ein eigener Cross-Sell-Weg fehlt weiter |
+> | 3, 5, 6, 7 | unverändert offen, alle vier hängen an einer Zahl oder Festlegung von BJ |
+>
+> Ob die Punkte in Klammern („Mechanism +6 bis +8") eingetreten sind, sagt erst
+> `/rmbc-copy-audit` gegen die Baseline 65 / 100. Bis dahin sind es Erwartungen.
 
 ---
 

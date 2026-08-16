@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-08-15
+last_review: 2026-08-16
 canonical_for: pdp-age-dna-upgrade
 review_cadence_days: 30
 ---
@@ -18,8 +18,8 @@ Arbeitspaket zur AGE&DNA-PDP, angelegt am 14.08.2026 aus einem RMBC-Kontext-Durc
 | [`02-massnahmen.md`](02-massnahmen.md) | Priorisierte Maßnahmen mit Aufwand und Entscheidungsbedarf |
 | [`03-cro-befunde.md`](03-cro-befunde.md) | Gemessene CRO-Ebene: GA4- und Shopify-Zahlen, Layout bei 375 px, elf Befunde, Methodik zum Nachmessen (`snapshot` vom 14.08.) |
 | [`04-mechanismus.md`](04-mechanismus.md) | Sieben Mechanismus-Kandidaten mit Score, Proof, Einwänden und Sperren-Check. Empfehlung: Kandidat 2, 3 und 6 als ein zusammenhängender Mechanismus |
-| [`05-nutzenblock.md`](05-nutzenblock.md) | Erste Copy-Umsetzung: `crs-expert-quotes` wird vom Zitatband zum Nutzenblock. Vorschlag mit Vorher/Nachher, Sperren-Check, Höhenrechnung, Bauvorgaben. Ungebaut |
-| [`06-kausalkette.md`](06-kausalkette.md) | **Gesamtempfehlung.** Die ganze PDP als eine Argumentationskette, plus Rewrites für Hero, `crs-metrics-row` und `lt-pdp-report-preview`. Enthält Bau-Reihenfolge, Höhenbudget und die Live-Funde. Ungebaut |
+| [`05-nutzenblock.md`](05-nutzenblock.md) | Erste Copy-Umsetzung: `crs-expert-quotes` wird vom Zitatband zum Nutzenblock. Vorher/Nachher, Sperren-Check, Höhenrechnung, Bauvorgaben. **Gebaut 16.08.** |
+| [`06-kausalkette.md`](06-kausalkette.md) | **Gesamtempfehlung.** Die ganze PDP als eine Argumentationskette, plus Rewrites für Hero, `crs-metrics-row` und `lt-pdp-report-preview`. Enthält Bau-Reihenfolge, Höhenbudget und die Live-Funde. **Gebaut 16.08.** |
 
 01/02 fragen, ob die Seite das Richtige sagt. 03 fragt, ob sie auf dem Gerät ankommt, auf dem sie
 gelesen wird. 04 liefert den Mechanismus, 05 und 06 sind die Flächen, die daraus gebaut werden.
@@ -95,4 +95,22 @@ Fünf Punkte stehen live und hängen an keiner Copy-Entscheidung. Vollständig m
 
 ## Status
 
-Nichts davon ist gebaut. Das Paket ist Analyse und Plan, kein Änderungsstand am Theme.
+**Gebaut und live seit 2026-08-16.**
+
+Sieben Commits, Push durch BJ am 16.08.:
+
+| Commit | Inhalt |
+|---|---|
+| `e6eac0d` | C11: Sterne und Daten aus den Review-Blöcken, `default: 5` entfernt |
+| `5b01ea9` | Hero-Rewrite (`06` §3), inklusive FAQ-Widerspruch und `founder_endorsed` |
+| `ac6bdb1` | `crs-metrics-row` erzählt Kausalität statt Logistik (`06` §4) |
+| `5d1110c` | `lt-pdp-report-preview` zeigt Deutungsebene statt Kanal (`06` §5) |
+| `28d499c` | `crs-expert-quotes` wird Nutzenblock (`05`) |
+| `4cdee57` | vier scharfe Hero-Settings entschärft (`06` §2.6) |
+
+Davor bereits live: M1 bis M3 aus `03` §4 (Vergleichstabelle mobil, drei CTA-Bänder, Loox auf 6),
+gebaut am 14.08.
+
+**Was noch aussteht:** die Neumessung bei 375 x 812 nach `03` §6. Bis dahin sind alle Zahlen in
+`03` §1 und `06` §6 Vorher-Werte beziehungsweise Erwartungen, keine Ergebnisse. Danach
+`/rmbc-copy-audit` gegen die Baseline 65 / 100.

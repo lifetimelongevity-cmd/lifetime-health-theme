@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-08-14
+last_review: 2026-08-16
 canonical_for: rmbc-kontext-age-dna
 depends_on:
   - docs/age-dna-product-fact-sheet.md
@@ -33,6 +33,13 @@ und Gegenprüfung der Varianten in der Shopify Admin API.
 | Section-Reihenfolge | hero, logo_garden, metrics_row, feature_grid, report_preview, expert_quotes, comparison_table, customer_reviews, ideal_candidate, faq, risk_free_close, loox | `templates/product.age-dna-test.json` |
 | Quiz-Rabattbanner | im HTML vorhanden, per `hidden` gegated, greift nur für Quiz-Besucher | Live-HTML |
 | Urgency-Element | keins auf der Seite | Live-HTML |
+
+> **Nachtrag 2026-08-16.** Die Tabelle oben ist der Stand vom 14.08. und wird nicht überschrieben.
+> Seither live: drei CTA-Bänder (`cta_band_report` nach `report_preview`, `cta_band_reviews` nach
+> `customer_reviews`, `cta_band_loox` nach dem Loox-Block), das `order`-Array hat damit 16 statt 12
+> Einträge. Der Copy-Umbau vom 16.08. hat die Reihenfolge **nicht** verändert, nur die Inhalte von
+> `hero`, `metrics_row`, `report_preview` und `expert_quotes`. Details in
+> [`06`](06-kausalkette.md) §7.
 
 Der Streichpreis von 399 € ist ein echter `compareAtPrice` in Shopify, kein Theme-Setting.
 Die Premium-Variante trägt bewusst keinen, deshalb zeigt Karte 2 weder Streichpreis noch Sparbadge.
@@ -140,7 +147,10 @@ Argument, aber kein Mechanismus im RMBC-Sinn: er erklärt nicht, weshalb das Erg
 - 23 DNA-Kategorien, sechs epigenetische Bereiche mit zwölf Einzelwerten
 
 **Harte Sperren, gelten für jeden Output:**
-- Name des Uhr-Anbieters und des Coach-Systems (MAISIE): nie, nirgends
+- Name des Uhr-Anbieters und des Coach-Systems (MAISIE): nie in Copy. **Eingeschränkt per
+  BJ-Entscheid 2026-08-16:** gilt nicht für den vorhandenen Bildbestand. „Hallo, ich bin MAISIE."
+  im App-Bild `Group_40820.png` der PDP bleibt stehen, siehe [`06`](06-kausalkette.md) §2.1. Das
+  Bild ist damit kein Auditfund mehr, geschriebene Nennung bleibt gesperrt.
 - keine öffentliche CpG-Zahl
 - keine feste Gesamtzahl an DNA-Reports. Zulässig sind „23 Kategorien" und „über 150 Einzelergebnisse"
 - keine Präzisions- oder Genauigkeitsaussage. Die mittlere Abweichung liegt bei 5,97 Jahren

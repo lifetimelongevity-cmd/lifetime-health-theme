@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-08-15
+last_review: 2026-08-16
 canonical_for: pdp-age-dna-nutzenblock
 depends_on:
   - docs/PDP-DNA-UPGRADE/01-rmbc-kontext.md
@@ -14,7 +14,8 @@ review_cadence_days: 30
 
 Ergebnis von `/copy-rewrite` gegen `sections/crs-expert-quotes.liquid` auf der AGE&DNA-PDP,
 15.08.2026. Enthält den Copy-Vorschlag, den Sperren-Check, die Höhenrechnung und die Bauvorgaben.
-**Nichts davon ist gebaut**, der Bau wartet auf BJ-Freigabe.
+**Gebaut am 2026-08-16** (`28d499c`), Live-Push durch BJ am selben Tag. Der Live-Stand unten
+beschreibt die Section **vor** dem Umbau. Die Höhen sind Erwartungswerte, noch nicht nachgemessen.
 
 Live-Stand geprüft am 15.08.2026 im Browser bei 375 x 812, nicht aus dem Code gelesen.
 
@@ -63,6 +64,9 @@ Rechnerisch: 112,5 + 290 + 48 + 898 = 1.348,5.
 
 Beide fallen mit dem Umbau weg. Sie sind unabhängig davon ein Compliance-Punkt: wenn der Umbau
 nicht kommt, müssen die zwei Formulierungen trotzdem raus.
+
+> **Entscheid BJ, 2026-08-16: raus, unabhängig vom Umbau.** Eingetragen und begründet in
+> [`06`](06-kausalkette.md) §2.3. Mit diesem Umbau erledigt (`28d499c`).
 
 **Dritter Punkt, kleiner.** Der Horvath-Karte ist *Genome Biology, 2013* als Quelle zugeordnet.
 Der zweite Satz („Es erfasst, was der Kalender nicht erfassen kann") liest sich wie ein
