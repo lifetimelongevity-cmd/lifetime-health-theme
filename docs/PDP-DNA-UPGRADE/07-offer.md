@@ -81,7 +81,31 @@ Architektur statt Preisaggression.
 
 ---
 
-## 3. Preisarchitektur (Empfehlung, BJ-Freigabe nötig)
+## 3. Preisarchitektur
+
+> **Überholt durch BJ-Entscheid 16.08. (abends), siehe §3a.** Die ursprüngliche Empfehlung
+> unten bleibt als Herleitung stehen; wo sie §3a widerspricht (499-Premium, 249-Rabatt,
+> „kein compareAt als Anker"), gilt §3a.
+
+## 3a. BJ-Entscheid 16.08.: Streichpreis-Regime 449 / 549
+
+- **Regulärpreis Test: 449 €** (Streichpreis auf Variante 1, Aktionspreis 349 € bis 30.08.)
+- **Regulärpreis Test + Ergebnisgespräch: 549 €** (Streichpreis auf Variante 2, aktuell 449 €)
+- **Value-Stack-Einzelwerte: DNA 300 € und Epigenetik 300 €** (je Zeile „einzeln 300 €")
+- **Folgetest: 299 € für alle**, kein Testkunden-Rabatt (siehe §5)
+
+Konsequenzen im Bau (alles dynamisch, committet 16.08.): Karten lesen compare_at je Variante,
+die Aktionszeile rechnet die Ersparnis je Paket (dann „Du sparst 100 €" auf beiden). Der
+„Einzeln zusammen 498 €"-Anker auf Karte 2 und die Anker-Note im Stack sind auf
+`compare_at`-Abwesenheit gegated: sobald die 549 in Shopify gesetzt ist, übernimmt der
+Streichpreis die Ersparnis-Aussage und die Komponenten-Rechnung verschwindet automatisch.
+
+**Konsistenz-Pflicht (echte-Frist-Bauweise):** Der 449/549-Strich ist nur haltbar, wenn ab
+31.08. real 449 bzw. 549 verlangt wird (Aktionsende 30.08. bleibt). Die frühere
+399-Pflicht aus [[project_agedna_aktionsfrist_2026-08]] ist damit durch 449 ersetzt.
+Offen an BJ: Zeile 1 im Stack sagt „einzeln 300 €", die Verlaufszeile „Folgetest 299 €",
+beides meint die Epigenetik-Ebene; entweder Folgetest auf 300 € heben oder mit der
+1-€-Differenz leben.
 
 **Zwei Kaufstufen bleiben.** Eine dritte Prepaid-Verlaufsstufe wurde geprüft und verworfen:
 ein rabattiertes Bundle verkauft den zweiten DB für ~8 € Aufpreis (sequenziell 184 € DB gegen
@@ -186,7 +210,7 @@ auch in der Buy-Box (Maßnahme 4, bisher nur Nutzenblock-Karte 2).
 |---|---|---|
 | 1 | SKU „Ergebnisgespräch" 149 € anlegen | BJ (Shopify Admin, Fulfillment wie Premium-SKU) |
 | 2 | ~~Segment-Rabatt Folgetest 249 € für Testkäufer~~ **verworfen (BJ 16.08.): 299 € für alle, Verlaufszeile entsprechend angepasst** | erledigt |
-| 3 | Premium 449 → 499 € am 31.08. | BJ-Freigabe, zusammen mit 399-Pflichtumstellung |
+| 3 | ~~Premium 449 → 499 € am 31.08.~~ **überholt (BJ 16.08., §3a): Regulärpreise 449 (Test) / 549 (Paket) als compare_at, ab 31.08. real** | BJ (Shopify Admin, Teil der Push-Sequenz §6) |
 | 4 | Folgetest-Hinweis in die Ergebnis-Mail (Klaviyo-Strecke) | nach Kanalaufbau, eigene Fläche |
 | 5 | `competitor-data-2026-08-11.yml`: Beratungszeile 80/429 € auf 100/449 € nachziehen | Assistent, beim nächsten YML-Review |
 
@@ -204,9 +228,20 @@ Rabatt auf der Seite (genau die Klasse Fehler, die dieses Paket sonst abbaut):
    Folgetest.~~ **Entfallen (BJ 16.08.): kein Testkunden-Rabatt, die Verlaufszeile nennt nur
    noch 299 €.** Das Gate besteht damit nur noch aus Punkt 1.
 
-Reihenfolge: SKU anlegen → Theme pushen. Fällt die Entscheidung anders aus, degradiert
-der Bau sauber: `stack_talk_value_cents: 0` entfernt Anker und Ersparnis überall
-(Karte 2 sieht aus wie heute).
+**Reihenfolge (aktualisiert 16.08. um das 449/549-Regime aus §3a):**
 
-Achtung Theme-Manager: läuft die App, pusht sie automatisch. Bis zur SKU-Anlage die App
-nicht mitlaufen lassen oder die beiden Settings vorher neutralisieren.
+1. Gesprächs-SKU 149 € anlegen (Shopify Admin)
+2. compare_at setzen: Variante 1 → 449 €, Variante 2 → 549 € (Shopify Admin oder MCP)
+3. Theme pushen (Section + Template zusammen)
+
+Schritt 2 darf **nicht vor** Schritt 3 alleine live gehen: das Live-Template trägt noch den
+alten Banner-Text „349 € statt 399 €", der dann neben einem 449er-Strich stünde. Erst der
+Push ersetzt den Banner durch die preisfreie Aktionszeile, die den Strich je Paket liest.
+Nach Schritt 2+3 rechnet alles automatisch: Karte 1 „4̶4̶9̶ 349", Karte 2 „5̶4̶9̶ 449",
+Aktionszeile „Du sparst 100 €" je Paket, Komponenten-Anker verschwindet (gegated).
+
+Fällt die SKU-Entscheidung anders aus, degradiert der Bau sauber: `stack_talk_value_cents: 0`
+entfernt Anker und Ersparnis überall (Karte 2 sieht aus wie heute).
+
+Achtung Theme-Manager: läuft die App, pusht sie automatisch. Bis SKU + compare_at stehen,
+die App nicht mitlaufen lassen oder die Settings vorher neutralisieren.

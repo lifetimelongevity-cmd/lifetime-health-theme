@@ -1266,10 +1266,15 @@
                     </span>
                     {%- comment -%} C9-Anker: die Paketkarte rechnet ihre eigene Ersparnis gegen die
                         Einzelsumme (Basis-Variante + real verkaufter Einzelwert des Gespraechs).
-                        Rendert nur, wenn stack_talk_value_cents gesetzt ist und die Summe wirklich
-                        ueber dem Paketpreis liegt; ohne Einzel-SKU bleibt die Karte wie bisher. {%- endcomment -%}
+                        Rendert nur, wenn stack_talk_value_cents gesetzt ist, die Summe wirklich
+                        ueber dem Paketpreis liegt UND die Variante keinen eigenen Streichpreis
+                        traegt: sobald compare_at gesetzt ist (Zielbild BJ 16.08.: 549 auf dem
+                        Paket), uebernimmt der Streichpreis den Anker-Job, und zwei konkurrierende
+                        Ersparnis-Rechnungen an einer Karte waeren widerspruechlich. {%- endcomment -%}
                     {%- if forloop.index == 2 and lt_stack_save > 0 -%}
-                      <span class="lt-pkg__anchor">Einzeln zusammen {{ lt_stack_sum | money_without_trailing_zeros }} · du sparst {{ lt_stack_save | money_without_trailing_zeros }}</span>
+                      {%- unless variant.compare_at_price > variant.price -%}
+                        <span class="lt-pkg__anchor">Einzeln zusammen {{ lt_stack_sum | money_without_trailing_zeros }} · du sparst {{ lt_stack_save | money_without_trailing_zeros }}</span>
+                      {%- endunless -%}
                     {%- endif -%}
                     {%- if pkg_note != blank -%}
                       <span class="lt-pkg__note">{{ pkg_note | escape }}</span>
@@ -1867,8 +1872,11 @@
           if (talkOff) talkOff.hidden = isBundle;
           const stackPay = stackEl.querySelector('[data-lt-stack-pay]');
           if (stackPay && once > 0) stackPay.textContent = formatPkgPrice(once);
+          // Anker-Note nur, solange das Paket keinen eigenen Streichpreis traegt
+          // (gleiche Logik wie der SSR-Anker auf der Karte): mit compare_at am
+          // Paket uebernimmt der Streichpreis die Ersparnis-Aussage.
           const stackAnchor = stackEl.querySelector('[data-lt-stack-anchor]');
-          if (stackAnchor) stackAnchor.hidden = !isBundle;
+          if (stackAnchor) stackAnchor.hidden = !isBundle || hasCmp;
         }
         // Sticky-Bar synchron: Preis + Paket-Chip (nur der Zusatz, "Test" allein
         // traegt neben dem Produkttitel keine Information)
