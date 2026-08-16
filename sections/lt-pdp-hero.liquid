@@ -1313,6 +1313,37 @@
                 assign lt_atc_aria = 'Ausverkauft'
               endunless
             -%}
+            {%- comment -%}
+              Chargen-Bestand: liest den echten Shopify-Bestand live (Summe aller
+              getrackten Varianten, beide Pakete sind dasselbe physische Kit).
+              Keine Handpflege, die Zahl faellt mit jeder Bestellung. Bei Bestand
+              <= 0 verschwindet die Zeile still (Policy CONTINUE verkauft weiter,
+              dann ohne Knappheits-Claim). Neue Charge = Bestand im Admin setzen.
+            {%- endcomment -%}
+            {%- liquid
+              assign lt_batch_size = section.settings.batch_size | default: 0
+              assign lt_batch_remaining = 0
+              for v in product.variants
+                if v.inventory_management == 'shopify'
+                  assign lt_batch_remaining = lt_batch_remaining | plus: v.inventory_quantity
+                endif
+              endfor
+              if lt_batch_remaining > lt_batch_size
+                assign lt_batch_remaining = lt_batch_size
+              endif
+            -%}
+            {%- if section.settings.batch_note_enable and lt_batch_size > 0 and lt_batch_remaining > 0 -%}
+              {%- assign lt_batch_pct = lt_batch_remaining | times: 100 | divided_by: lt_batch_size -%}
+              <div class="lt-batch-note" role="note">
+                <span class="lt-batch-note__text">
+                  Noch <strong>{{ lt_batch_remaining }} von {{ lt_batch_size }}</strong>
+                  {{- ' ' -}}{{ section.settings.batch_unit | default: 'Kits' | escape }} aus der aktuellen Charge
+                </span>
+                <span class="lt-batch-note__bar" aria-hidden="true">
+                  <span class="lt-batch-note__fill" style="width: {{ lt_batch_pct }}%"></span>
+                </span>
+              </div>
+            {%- endif -%}
             <div class="product__cart-functions">
               <div class="flex-buttons">
                 <button
@@ -3076,6 +3107,30 @@
       "label": "Quiz-Countdown-Enddatum",
       "info": "ISO-Format. Muss zum endsAt des aktiven Quiz-Rabatts in Shopify passen.",
       "default": "2026-08-05T23:59:59"
+    },
+    {
+      "type": "header",
+      "content": "Chargen-Bestand"
+    },
+    {
+      "type": "checkbox",
+      "id": "batch_note_enable",
+      "label": "Chargen-Zeile anzeigen",
+      "info": "Liest den echten Shopify-Bestand (Summe aller Varianten). Verschwindet selbst, wenn der Bestand 0 erreicht.",
+      "default": false
+    },
+    {
+      "type": "number",
+      "id": "batch_size",
+      "label": "Chargengröße",
+      "info": "Kits pro Bestellung beim Labor. Neue Charge: Bestand im Admin auf die reale Zahl setzen.",
+      "default": 30
+    },
+    {
+      "type": "text",
+      "id": "batch_unit",
+      "label": "Einheit",
+      "default": "Kits"
     },
     {
       "type": "header",
