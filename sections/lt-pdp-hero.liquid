@@ -501,82 +501,109 @@
           {%- endif -%}
         {%- endcapture -%}
 
+        {%- liquid
+          # Angebots-Stack (Kassenzettel unter dem CTA). Zwei Rechenwerte fuer den
+          # Paket-Anker: Einzelsumme = Basis-Variante + Einzelwert der Zusatzleistung
+          # (stack_talk_value_cents, nur setzen wenn eine real verkaufte Einzel-SKU
+          # existiert). Ersparnis nur, wenn das Paket wirklich unter der Summe liegt;
+          # ohne Einzelwert gibt es keine Anker-Zeile und keine Ersparnis-Behauptung.
+          assign lt_talk_cents = section.settings.stack_talk_value_cents | default: 0
+          assign lt_stack_bundle_variant = blank
+          if lt_talk_cents > 0 and product.variants.size > 1
+            assign lt_stack_bundle_variant = product.variants[1]
+          endif
+          assign lt_stack_sum = lt_variant_1.price | plus: lt_talk_cents
+          assign lt_stack_save = 0
+          if lt_stack_bundle_variant != blank and lt_stack_sum > lt_stack_bundle_variant.price
+            assign lt_stack_save = lt_stack_sum | minus: lt_stack_bundle_variant.price
+          endif
+        -%}
         {%- capture lt_value_stack_block -%}
           {%- if section.settings.show_value_stack -%}
-            <div class="lt-value-stack">
+            <div class="lt-value-stack" data-lt-value-stack>
               <h3 class="lt-value-stack__header">{{ section.settings.stack_header | escape }}</h3>
-              {%- if section.settings.show_stack_product_line -%}
+              {%- if section.settings.stack_row1_title != blank -%}
                 <div class="lt-value-stack__item">
                   <div class="lt-value-stack__item-info">
-                    <span class="lt-value-stack__item-title">{{ product.title | escape }}</span>
-                    {%- if section.settings.stack_product_sub != blank -%}
-                      <span class="lt-value-stack__item-sub">{{ section.settings.stack_product_sub | escape }}</span>
+                    <span class="lt-value-stack__item-title">{{ section.settings.stack_row1_title | escape }}</span>
+                    {%- if section.settings.stack_row1_sub != blank -%}
+                      <span class="lt-value-stack__item-sub">{{ section.settings.stack_row1_sub | escape }}</span>
+                    {%- endif -%}
+                  </div>
+                  {%- if section.settings.stack_row1_value != blank -%}
+                    <div class="lt-value-stack__item-price">
+                      <span class="lt-value-stack__item-label">{{ section.settings.stack_row1_value | escape }}</span>
+                    </div>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+              {%- if section.settings.stack_row2_title != blank -%}
+                <div class="lt-value-stack__item">
+                  <div class="lt-value-stack__item-info">
+                    <span class="lt-value-stack__item-title">{{ section.settings.stack_row2_title | escape }}</span>
+                    {%- if section.settings.stack_row2_sub != blank -%}
+                      <span class="lt-value-stack__item-sub">{{ section.settings.stack_row2_sub | escape }}</span>
+                    {%- endif -%}
+                  </div>
+                  {%- if section.settings.stack_row2_value != blank -%}
+                    <div class="lt-value-stack__item-price">
+                      <span class="lt-value-stack__item-label">{{ section.settings.stack_row2_value | escape }}</span>
+                    </div>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+              {%- if section.settings.stack_row3_title != blank -%}
+                <div class="lt-value-stack__item">
+                  <div class="lt-value-stack__item-info">
+                    <span class="lt-value-stack__item-title">{{ section.settings.stack_row3_title | escape }}</span>
+                    {%- if section.settings.stack_row3_sub != blank -%}
+                      <span class="lt-value-stack__item-sub">{{ section.settings.stack_row3_sub | escape }}</span>
+                    {%- endif -%}
+                  </div>
+                  {%- if section.settings.stack_row3_value != blank -%}
+                    <div class="lt-value-stack__item-price">
+                      <span class="lt-value-stack__item-label">{{ section.settings.stack_row3_value | escape }}</span>
+                    </div>
+                  {%- endif -%}
+                </div>
+              {%- endif -%}
+              {%- if section.settings.stack_talk_title != blank -%}
+                {%- comment -%} Die Gespraechs-Zeile folgt der Paketwahl: bei Paket 1 gedimmt
+                    mit Hinweis-Label, bei Paket 2 aktiv mit Einzelwert. applyPkg schaltet. {%- endcomment -%}
+                <div class="lt-value-stack__item lt-value-stack__item--talk" data-lt-stack-talk data-state="off">
+                  <div class="lt-value-stack__item-info">
+                    <span class="lt-value-stack__item-title">{{ section.settings.stack_talk_title | escape }}</span>
+                    {%- if section.settings.stack_talk_sub != blank -%}
+                      <span class="lt-value-stack__item-sub">{{ section.settings.stack_talk_sub | escape }}</span>
                     {%- endif -%}
                   </div>
                   <div class="lt-value-stack__item-price">
-                    <span class="lt-value-stack__item-label" data-lt-stack-product-price>{{ lt_base_price | money }}</span>
+                    <span class="lt-value-stack__item-label" data-lt-stack-talk-off>{{ section.settings.stack_talk_off_label | default: 'im Paket' | escape }}</span>
+                    {%- if lt_talk_cents > 0 -%}
+                      <span class="lt-value-stack__item-label" data-lt-stack-talk-on hidden>einzeln {{ lt_talk_cents | money_without_trailing_zeros }}</span>
+                    {%- endif -%}
                   </div>
                 </div>
               {%- endif -%}
-              {%- if section.settings.stack_guide_title != blank -%}
-                {%- assign guide_cents = section.settings.stack_guide_value_cents | default: 0 -%}
-                <div class="lt-value-stack__item">
-                  <div class="lt-value-stack__item-info">
-                    <span class="lt-value-stack__item-title">{{ section.settings.stack_guide_title | escape }}</span>
-                    {%- if section.settings.stack_guide_sub != blank -%}
-                      <span class="lt-value-stack__item-sub">{{ section.settings.stack_guide_sub | escape }}</span>
-                    {%- endif -%}
-                  </div>
-                  <div class="lt-value-stack__item-price">
-                    {%- if guide_cents > 0 -%}
-                      <del class="lt-value-stack__item-was">{{ guide_cents | money }}</del>
-                    {%- endif -%}
-                    <span class="lt-value-stack__item-label lt-value-stack__item-label--free">{{ section.settings.stack_guide_price | default: 'Gratis' | escape }}</span>
-                  </div>
-                </div>
-              {%- endif -%}
-              {%- if section.settings.stack_bonus_title != blank -%}
-                {%- assign bonus_cents = section.settings.stack_bonus_value_cents | default: 0 -%}
-                <div class="lt-value-stack__item">
-                  <div class="lt-value-stack__item-info">
-                    <span class="lt-value-stack__item-title">{{ section.settings.stack_bonus_title | escape }}</span>
-                    {%- if section.settings.stack_bonus_sub != blank -%}
-                      <span class="lt-value-stack__item-sub">{{ section.settings.stack_bonus_sub | escape }}</span>
-                    {%- endif -%}
-                  </div>
-                  <div class="lt-value-stack__item-price">
-                    {%- if bonus_cents > 0 -%}
-                      <del class="lt-value-stack__item-was">{{ bonus_cents | money }}</del>
-                    {%- endif -%}
-                    <span class="lt-value-stack__item-label lt-value-stack__item-label--free">{{ section.settings.stack_bonus_price | default: 'Gratis' | escape }}</span>
-                  </div>
-                </div>
-              {%- endif -%}
-              {%- if section.settings.stack_extra_title != blank -%}
-                <div class="lt-value-stack__item">
-                  <div class="lt-value-stack__item-info">
-                    <span class="lt-value-stack__item-title">{{ section.settings.stack_extra_title | escape }}</span>
-                    {%- if section.settings.stack_extra_sub != blank -%}
-                      <span class="lt-value-stack__item-sub">{{ section.settings.stack_extra_sub | escape }}</span>
-                    {%- endif -%}
-                  </div>
-                  <div class="lt-value-stack__item-price">
-                    <span class="lt-value-stack__item-label lt-value-stack__item-label--free">{{ section.settings.stack_extra_price | default: 'Enthalten' | escape }}</span>
-                  </div>
-                </div>
-              {%- endif -%}
-              <div class="lt-value-stack__total">
-                <span class="lt-value-stack__total-label">{{ section.settings.stack_total_label | default: 'Gesamtwert' | escape }}</span>
-                <span class="lt-value-stack__total-value" data-lt-stack-total>{{ section.settings.stack_old_total | escape }}</span>
-              </div>
               {%- unless lt_show_sub -%}
                 {%- if section.settings.stack_pay_today_label != blank -%}
                   <div class="lt-value-stack__pay-today">
                     <span class="lt-value-stack__pay-label">{{ section.settings.stack_pay_today_label | escape }}</span>
-                    <span class="lt-value-stack__pay-price">{{ lt_pill_1_once | money }}</span>
+                    <span class="lt-value-stack__pay-price" data-lt-stack-pay>{{ lt_variant_1.price | money_without_trailing_zeros }}</span>
                   </div>
                 {%- endif -%}
+                {%- if lt_stack_save > 0 -%}
+                  <p class="lt-value-stack__anchor-note" data-lt-stack-anchor hidden>
+                    Einzeln zusammen {{ lt_stack_sum | money_without_trailing_zeros }} · du sparst {{ lt_stack_save | money_without_trailing_zeros }}
+                  </p>
+                {%- endif -%}
               {%- endunless -%}
+              {%- if section.settings.stack_terms_note != blank -%}
+                <p class="lt-value-stack__terms">{{ section.settings.stack_terms_note | escape }}</p>
+              {%- endif -%}
+              {%- if section.settings.stack_retest_text != blank -%}
+                <p class="lt-value-stack__retest">{{ section.settings.stack_retest_text | escape }}</p>
+              {%- endif -%}
             </div>
           {%- endif -%}
         {%- endcapture -%}
@@ -1203,6 +1230,7 @@
                       data-once-price="{{ variant.price }}"
                       data-compare-price="{{ variant.compare_at_price | default: 0 }}"
                       data-size-short="{{ variant.title | escape }}"
+                      data-stack-bundle="{% if forloop.first %}0{% else %}1{% endif %}"
                       {% unless variant.available %}disabled{% endunless %}
                     >
                     <span class="lt-pkg__head">
@@ -1214,6 +1242,13 @@
                           sind die klarere Entscheidung und decken sich mit dem Preisblock (PAngV). {%- endcomment -%}
                       <span class="lt-pkg__price">{{ variant.price | money_without_trailing_zeros }}</span>
                     </span>
+                    {%- comment -%} C9-Anker: die Paketkarte rechnet ihre eigene Ersparnis gegen die
+                        Einzelsumme (Basis-Variante + real verkaufter Einzelwert des Gespraechs).
+                        Rendert nur, wenn stack_talk_value_cents gesetzt ist und die Summe wirklich
+                        ueber dem Paketpreis liegt; ohne Einzel-SKU bleibt die Karte wie bisher. {%- endcomment -%}
+                    {%- if forloop.index == 2 and lt_stack_save > 0 -%}
+                      <span class="lt-pkg__anchor">Einzeln zusammen {{ lt_stack_sum | money_without_trailing_zeros }} · du sparst {{ lt_stack_save | money_without_trailing_zeros }}</span>
+                    {%- endif -%}
                     {%- if pkg_note != blank -%}
                       <span class="lt-pkg__note">{{ pkg_note | escape }}</span>
                     {%- endif -%}
@@ -1266,10 +1301,9 @@
           </dialog>
         {%- endif -%}
 
-        {%- unless lt_show_sub -%}
-          {{ lt_value_stack_block }}
-        {%- endunless -%}
-
+        {%- comment -%} Stack-Render bewusst NACH dem Formular (unter dem CTA): der Kassenzettel
+            begruendet den Preis, darf aber den Weg zum Kauf-Button nicht verlaengern. Der Hero
+            ist mobil bereits die laengste Section der Seite (03-cro-befunde §8.6, M5). {%- endcomment -%}
         {%- assign product_form_id = 'product-form-' | append: section.id -%}
         <product-form
           id="add-to-cart-{{ section.id }}"
@@ -1383,6 +1417,10 @@
             </div>
           {%- endform -%}
         </product-form>
+
+        {%- unless lt_show_sub -%}
+          {{ lt_value_stack_block }}
+        {%- endunless -%}
 
         {%- assign lt_show_cancel_after_cta = false -%}
         {%- if lt_show_sub and section.settings.cancel_popup_body != blank -%}
@@ -1769,6 +1807,22 @@
           const pkgLabel = pkgCtaBase + ', ' + formatPkgPrice(once);
           if (pkgAtcText) pkgAtcText.textContent = pkgLabel;
           if (pkgAtcBtn) pkgAtcBtn.setAttribute('aria-label', pkgLabel.replace(' →', ''));
+        }
+        // Angebots-Stack folgt der Paketwahl: Gespraechs-Zeile an/aus, "Du zahlst
+        // heute" auf den Paketpreis, Anker-Note (Einzelsumme + Ersparnis) nur im Paket.
+        const stackEl = section.querySelector('[data-lt-value-stack]');
+        if (stackEl) {
+          const isBundle = inp.dataset.stackBundle === '1';
+          const talkRow = stackEl.querySelector('[data-lt-stack-talk]');
+          if (talkRow) talkRow.dataset.state = isBundle ? 'on' : 'off';
+          const talkOn = stackEl.querySelector('[data-lt-stack-talk-on]');
+          const talkOff = stackEl.querySelector('[data-lt-stack-talk-off]');
+          if (talkOn) talkOn.hidden = !isBundle;
+          if (talkOff) talkOff.hidden = isBundle;
+          const stackPay = stackEl.querySelector('[data-lt-stack-pay]');
+          if (stackPay && once > 0) stackPay.textContent = formatPkgPrice(once);
+          const stackAnchor = stackEl.querySelector('[data-lt-stack-anchor]');
+          if (stackAnchor) stackAnchor.hidden = !isBundle;
         }
         // Sticky-Bar synchron: Preis + Paket-Chip (nur der Zusatz, "Test" allein
         // traegt neben dem Produkttitel keine Information)
@@ -2414,6 +2468,17 @@
   padding-left: 26px;
 }
 
+/* C9-Anker auf der Paketkarte: Einzelsumme + Ersparnis, nur mit realem Einzelwert */
+.lt-pkg__anchor {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--lt-text, #26251e);
+  opacity: 0.72;
+  padding-left: 26px;
+  margin-top: 2px;
+}
+
 /* Kontakt-Fallback unter der Buy-Box: bewusst leise, Text + verlinkter Begriff */
 .lt-pdp-hero__precheck {
   margin-top: var(--space-4);
@@ -2634,13 +2699,14 @@
   border-radius: 4px !important;
 }
 
-/* Value stack */
+/* Value stack (Kassenzettel unter dem CTA) */
 .lt-value-stack {
   border: 1px solid var(--lt-border, rgba(38,37,30,0.1));
   border-radius: 4px;
   padding: 16px;
   display: flex;
   flex-direction: column;
+  margin-top: 14px;
 }
 
 .lt-value-stack__header {
@@ -2687,43 +2753,16 @@
   flex-shrink: 0;
 }
 
-.lt-value-stack__item-was {
-  font-size: 11px;
-  color: var(--lt-muted, rgba(38,37,30,0.4));
-  text-decoration: line-through;
-}
-
 .lt-value-stack__item-label {
   font-size: 13px;
   font-weight: 500;
   color: var(--lt-text, #26251e);
+  white-space: nowrap;
 }
 
-.lt-value-stack__item-label--free {
-  color: var(--lt-text, #26251e);
-}
-
-.lt-value-stack__total {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 8px;
-  padding-top: 12px;
-  border-top: 1px solid color-mix(in srgb, var(--lt-text, #26251e) 12%, transparent);
-  opacity: 0.5;
-}
-
-.lt-value-stack__total-label {
-  font-size: var(--font-size-sm, 12px);
-  font-weight: 400;
-  color: var(--lt-text, #26251e);
-}
-
-.lt-value-stack__total-value {
-  font-size: var(--font-size-sm, 12px);
-  font-weight: 500;
-  color: var(--lt-text, #26251e);
-  text-decoration: line-through;
+/* Gespraechs-Zeile folgt der Paketwahl: gedimmt, solange Paket 1 gewaehlt ist */
+.lt-value-stack__item--talk[data-state="off"] {
+  opacity: 0.55;
 }
 
 .lt-value-stack__pay-today {
@@ -2732,6 +2771,33 @@
   align-items: center;
   padding-top: 12px;
   margin-top: 4px;
+}
+
+/* Anker-Note (nur im Paket sichtbar): Einzelsumme + echte Ersparnis */
+.lt-value-stack__anchor-note {
+  margin: 2px 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: right;
+  color: var(--lt-text, #26251e);
+  opacity: 0.72;
+}
+
+.lt-value-stack__terms {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--lt-muted, rgba(38,37,30,0.55));
+}
+
+/* Verlaufszeile: gehoert nicht zur heutigen Summe, deshalb abgesetzt */
+.lt-value-stack__retest {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--lt-border, rgba(38,37,30,0.08));
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--lt-text, #26251e);
+  opacity: 0.72;
 }
 
 .lt-value-stack__pay-label {
@@ -3773,122 +3839,104 @@
     {
       "type": "checkbox",
       "id": "show_value_stack",
-      "label": "Value Stack anzeigen",
-      "default": true
+      "label": "Angebots-Stack anzeigen",
+      "info": "Kassenzettel unter dem CTA. Zeilen ohne Titel werden nicht gerendert.",
+      "default": false
     },
     {
       "type": "text",
       "id": "stack_header",
-      "label": "Offer Titel",
-      "default": "Was du heute bekommst"
-    },
-    {
-      "type": "checkbox",
-      "id": "show_stack_product_line",
-      "label": "Erste Zeile (Produktname + Preis) anzeigen",
-      "info": "Deaktivieren wenn der Produktname bereits als Headline sichtbar ist (z. B. Diagnostik-Produkte).",
-      "default": true
+      "label": "Titel",
+      "default": "Das steckt im Preis"
     },
     {
       "type": "text",
-      "id": "stack_product_sub",
-      "label": "Produkt Unterzeile",
-      "default": "30 g Pulver · ca. 60 Portionen · Uthever® NMN"
-    },
-    {
-      "type": "image_picker",
-      "id": "stack_guide_image",
-      "label": "Longevity-Guide Bild"
+      "id": "stack_row1_title",
+      "label": "Zeile 1 Titel"
     },
     {
       "type": "text",
-      "id": "stack_guide_title",
-      "label": "Longevity-Guide Titel",
-      "default": "Longevity-Protokoll PDF"
+      "id": "stack_row1_sub",
+      "label": "Zeile 1 Unterzeile"
     },
     {
       "type": "text",
-      "id": "stack_guide_sub",
-      "label": "Longevity-Guide Unterzeile",
-      "default": "Wann & womit · Dr. Limmroth"
+      "id": "stack_row1_value",
+      "label": "Zeile 1 Wert-Label",
+      "info": "Nur echte, belegbare Preise oder neutrale Labels (z. B. inklusive)."
     },
     {
       "type": "text",
-      "id": "stack_guide_price",
-      "label": "Longevity-Guide Preislabel",
-      "default": "Gratis"
+      "id": "stack_row2_title",
+      "label": "Zeile 2 Titel"
+    },
+    {
+      "type": "text",
+      "id": "stack_row2_sub",
+      "label": "Zeile 2 Unterzeile"
+    },
+    {
+      "type": "text",
+      "id": "stack_row2_value",
+      "label": "Zeile 2 Wert-Label"
+    },
+    {
+      "type": "text",
+      "id": "stack_row3_title",
+      "label": "Zeile 3 Titel"
+    },
+    {
+      "type": "text",
+      "id": "stack_row3_sub",
+      "label": "Zeile 3 Unterzeile"
+    },
+    {
+      "type": "text",
+      "id": "stack_row3_value",
+      "label": "Zeile 3 Wert-Label"
+    },
+    {
+      "type": "text",
+      "id": "stack_talk_title",
+      "label": "Zusatzleistung Titel",
+      "info": "Zeile folgt der Paketwahl (Variante 2). Leer = keine Zeile."
+    },
+    {
+      "type": "text",
+      "id": "stack_talk_sub",
+      "label": "Zusatzleistung Unterzeile"
     },
     {
       "type": "number",
-      "id": "stack_guide_value_cents",
-      "label": "Longevity-Guide Wert",
-      "info": "Preis in Cent. Beispiel: 29,90 € → 2990",
-      "default": 2990
-    },
-    {
-      "type": "image_picker",
-      "id": "stack_bonus_image",
-      "label": "AGE & DNA-Test Benefit Bild"
-    },
-    {
-      "type": "text",
-      "id": "stack_bonus_title",
-      "label": "AGE & DNA-Test Benefit Titel",
-      "default": "10 % Rabatt auf den AGE & DNA-Test"
-    },
-    {
-      "type": "text",
-      "id": "stack_bonus_sub",
-      "label": "AGE & DNA-Test Benefit Unterzeile",
-      "default": "Exklusiv für Neukund:innen"
-    },
-    {
-      "type": "text",
-      "id": "stack_bonus_price",
-      "label": "AGE & DNA-Test Benefit Preislabel",
-      "default": "10 % Rabatt"
-    },
-    {
-      "type": "number",
-      "id": "stack_bonus_value_cents",
-      "label": "AGE & DNA-Test Benefit Wert",
-      "info": "Preis in Cent. Beispiel: 29,90 € → 2990. 0 = kein Wert anzeigen",
+      "id": "stack_talk_value_cents",
+      "label": "Zusatzleistung Einzelwert",
+      "info": "In Cent, z. B. 14900 = 149 €. Nur setzen, wenn die Leistung wirklich einzeln zu diesem Preis verkauft wird (SKU muss live sein). Speist Anker + Ersparnis auf Paketkarte und Stack. 0 = keine Anker-Rechnung.",
       "default": 0
     },
     {
       "type": "text",
-      "id": "stack_extra_title",
-      "label": "Extra-Zeile Titel",
-      "info": "Optionale vierte Stack-Zeile (z. B. App · AI Health Coach). Leer lassen = nicht anzeigen."
+      "id": "stack_talk_off_label",
+      "label": "Zusatzleistung Label (Paket 1)",
+      "info": "Wert-Label der gedimmten Zeile, solange das Basis-Paket gewählt ist.",
+      "default": "im Paket"
     },
     {
       "type": "text",
-      "id": "stack_extra_sub",
-      "label": "Extra-Zeile Unterzeile"
+      "id": "stack_terms_note",
+      "label": "Konditionszeile",
+      "info": "Unter der Summe, z. B. Einmalzahlung · kein Abo. Leer = aus."
     },
     {
-      "type": "text",
-      "id": "stack_extra_price",
-      "label": "Extra-Zeile Preislabel",
-      "default": "Enthalten"
-    },
-    {
-      "type": "text",
-      "id": "stack_total_label",
-      "label": "Gesamtwert Label",
-      "default": "Gesamtwert"
-    },
-    {
-      "type": "text",
-      "id": "stack_old_total",
-      "label": "Fallback Gesamtwert (falls JS aus)",
-      "default": "69,80 €"
+      "type": "textarea",
+      "id": "stack_retest_text",
+      "label": "Verlaufszeile",
+      "info": "Abgesetzte Schlusszeile für den Folgetest-Pfad. Nur belegbare Preise nennen. Leer = aus."
     },
     {
       "type": "text",
       "id": "stack_pay_today_label",
       "label": "Du zahlst heute — Label",
-      "info": "Wird nur bei show_price_standalone: false angezeigt (no-sub Modus). Leer lassen = Zeile wird nicht gerendert. Standard: Du zahlst heute",
+      "info": "Summenzeile im Standalone-Modus. Leer lassen = Zeile wird nicht gerendert.",
       "default": "Du zahlst heute"
     },
     {

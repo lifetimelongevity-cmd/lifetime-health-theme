@@ -1,0 +1,212 @@
+---
+status: living
+last_review: 2026-08-16
+canonical_for: pdp-age-dna-offer-architektur
+depends_on:
+  - docs/PDP-DNA-UPGRADE/01-rmbc-kontext.md
+  - docs/PDP-DNA-UPGRADE/03-cro-befunde.md
+  - docs/PDP-DNA-UPGRADE/04-mechanismus.md
+  - docs/age-dna-product-fact-sheet.md
+review_cadence_days: 30
+---
+
+# AGE&DNA: Offer-Architektur
+
+Ergebnis des Dreierlaufs `/competitor-offer-analysis` → `/pricing-strategy` → `/offer-stack`
+vom 16.08.2026, inklusive BJ-Inputs vom selben Tag (Gesprächswert, Kapazität, Einkaufspreise).
+Beantwortet C9 aus [`03`](03-cro-befunde.md) und gibt der Kandidat-3-These aus [`04`](04-mechanismus.md)
+(die zweite Messung ist das Produkt) erstmals eine Preisform.
+
+**Gebaut am 16.08.: der neue Angebots-Stack im Hero (§4), committet, nicht gepusht.**
+Vor dem Push gilt das Gate in §6. Die Preisentscheidungen in §3 sind Empfehlungen und
+gehen erst nach ausdrücklicher BJ-Zustimmung live.
+
+---
+
+## 1. Wettbewerbsbefund (live geprüft 16.08.2026)
+
+Kernfrage war das Verlaufs-/Retest-Angebot. Ergebnis: zwei von vier Anbietern bepreisen
+den Verlauf, keiner verbindet ihn mit einer These.
+
+| Anbieter | Ersttest | Verlaufsangebot | effektiver Retest-Preis |
+|---|---|---|---|
+| epiAge | 199,95 € | 2er-Bundle 379,95 € („Vorher-Nachher"), 5er 849,95 € | ~190 € / ~170 € |
+| TruDiagnostic | $499 | Subscribe & Save $249/Test, Kadenz 3 bis 6 Monate | 50 % des Erstpreises |
+| neotes | 299 € Basic / 935 € Premium | keins. Empfiehlt Retest „alle 6 bis 12 Monate" ohne Preis | – |
+| Cerascreen | 399 € (von 499 €) | weiterhin **ausverkauft**, nicht bestellbar | – |
+| LIFETIME (vorher) | 349 € | Folgetest 299 € als separates, unverlinktes Produkt | 86 % des Erstpreises |
+
+**Der härteste Befund:** LIFETIME ist seit dem 16.08. der einzige Anbieter, dessen PDP die
+Zweitmessung zur Produktthese macht, und hatte gleichzeitig die schlechteste, unsichtbarste
+Retest-Ökonomie im Feld. These und Preisarchitektur widersprachen sich öffentlich.
+
+Weitere Live-Funde: neotes wirbt mit „935.000 Methylierungsmustern" (die perfekte Wand für
+Kandidat 2, Auswahlprinzip). neotes' Beratung ist nur im 935-€-Paket erreichbar, Cerascreens
+inkludierte 15-Minuten-Beratung ist mit dem Produkt aus dem Markt. 45 Minuten auf Deutsch für
++100 € ist damit die zugänglichste Beratung im deutschen Feld. Der Zwei-Ebenen-Differenziator
+hält dem Stresstest stand, bleibt aber kopierbar; die Verteidigung ist die installierte
+Verlaufsbeziehung mit Preislogik, nicht der Umfang.
+
+Datenbasis-Ergänzung: `docs/age-dna-geo/competitor-data-2026-08-11.yml` nennt für die
+LIFETIME-Beratung noch „80 EUR (429 EUR total)", der Live-Stand ist 100 € / 449 €. Beim
+nächsten Review des YML nachziehen.
+
+---
+
+## 2. BJ-Inputs und Deckungsbeitrag (16.08.2026)
+
+| Input | Wert |
+|---|---|
+| Einzelwert 45-Minuten-Ergebnisgespräch | **149 €** |
+| Kapazität Gespräche pro Woche | 6 bis 10 (kein Engpass, heutiges Volumen 1 bis 2 Verkäufe/Woche) |
+| Einkauf Vollkit (Kit + beide Analysen + Versand) | **200 €** |
+| Einkauf Folgetest (nur Epigenetik) | **~160 €** |
+
+Deckungsbeitrag netto (19 % USt):
+
+| Variante | brutto | netto | Einkauf | DB | Marge |
+|---|---|---|---|---|---|
+| Test heute | 349 € | 293,28 € | 200 € | 93,28 € | 27 % |
+| Test ab 31.08. | 399 € | 335,29 € | 200 € | 135,29 € | 34 % |
+| Test + Gespräch | 449 € | 377,31 € | 200 € | 177,31 € | 40 % |
+| Folgetest | 299 € | 251,26 € | 160 € | 91,26 € | 31 % |
+| Folgetest zum Testkunden-Preis | 249 € | 209,24 € | 160 € | 49,24 € | 20 % |
+
+**Zwei Konsequenzen.** Erstens: Die Premium-Variante verkauft nicht Zeit gegen 100 €, sie ist
+der beste DB-Hebel der Seite. Ein Attach bringt +84 € netto (fast ein ganzer zusätzlicher
+Testverkauf), vergütet BJs Stunde mit ~70 bis 84 € netto und die Kapazität liegt beim Drei-
+bis Fünffachen des Volumens. Sie verdient offensive Bewerbung. Zweitens: Ein epiAge-Konter
+über den Retest-Einzelpreis ist nicht baubar (199 € ließen 7 € DB), der Verlauf läuft über
+Architektur statt Preisaggression.
+
+---
+
+## 3. Preisarchitektur (Empfehlung, BJ-Freigabe nötig)
+
+**Zwei Kaufstufen bleiben.** Eine dritte Prepaid-Verlaufsstufe wurde geprüft und verworfen:
+ein rabattiertes Bundle verkauft den zweiten DB für ~8 € Aufpreis (sequenziell 184 € DB gegen
+101 € im 549-€-Bundle), erhöht die Buy-Box-Last auf der schwächsten Fläche (mobil 2,8 % ATC)
+und schafft 6 Monate Fulfillment- und Widerrufs-Exposure.
+
+| Maßnahme | Wert | Wann |
+|---|---|---|
+| Neue SKU „Ergebnisgespräch (45 Minuten)", einzeln kaufbar | 149 € | vor dem Theme-Push (§6) |
+| Premium-Variante | 449 → **499 €** | 31.08., zusammen mit der 399-Umstellung |
+| Folgetest | bleibt 299 € | – |
+| Testkunden-Rabatt Folgetest, Segment „hat AGE&DNA gekauft" | **249 €** | vor dem Theme-Push (§6) |
+
+**Warum die 149-€-SKU der Schlüssel ist:** Sie macht den Paket-Anker wahr und dauerhaft.
+Heute: 349 + 149 = 498, Paket 449, echte 49 € Ersparnis. Ab 31.08.: 399 + 149 = 548, Paket
+499, wieder 49 €. Die Summe zweier real verkaufter Einzelleistungen gehört als Text in Karte
+und Stack, nicht als `compareAtPrice` (ein Streichpreis behauptet einen früher verlangten
+Preis, die Komponenten-Summe ist die unangreifbare Form). Zielgruppe der Einzel-SKU existiert
+real: Testkäufer, die nach dem Ergebnis Einordnung wollen. Fulfillment wie die Premium-SKU
+manuell.
+
+**Was den toten Dauerstreichpreis 399 ersetzt** (er stirbt am 31.08. planmäßig):
+
+1. Komponenten-Anker Premium: „Einzeln zusammen 548 €, im Paket 499 €."
+2. Interner Struktur-Anker Basistest: Der Folgetest ist der öffentliche Preis der
+   epigenetischen Ebene allein (299 €). Ab September wörtlich: die Epigenetik allein 299 €,
+   beide Ebenen 399 €. Zwei eigene Live-Preise, kein Ablaufdatum, und die Zwei-Ebenen-
+   Differenzierung wird zur Preislogik.
+3. Marktrahmen sparsam: neotes-Beratungsstufe 935 €, epiAge 199,95 € für eine Ebene.
+
+**Urgency bis 30.08.:** Die Preiserhöhung selbst aussprechen. Die Banner-Note sagt jetzt
+„Ab dem 1. September gilt dauerhaft der reguläre Preis von 399 €." (gebaut, §4). Wahr per
+BJ-Entscheid, und die angekündigte Erhöhung ist die stärkste ehrliche Urgency-Form.
+
+**Der Verlauf wird angebunden, nicht vorverkauft:** feste Position im Angebots-Stack
+(299 €, als Testkunde 249 €), Rabatt serverseitig über ein Shopify-Kundensegment
+(`products_purchased`), kommuniziert auf der PDP und im Ergebnis-Moment. Damit hat als
+erster deutscher Anbieter die Retest-These auch einen Retest-Preis. Das strukturelle
+Argument gehört dazu: die DNA-Ebene ist beim Ersttest abgeräumt, der Folgetest misst nur,
+was sich ändert. Das kann kein Ein-Ebenen-Anbieter erzählen.
+
+---
+
+## 4. Der neue Angebots-Stack (gebaut 16.08.)
+
+Der alte Stack (starres Vier-Zeilen-Gerüst, `stack_old_total` als Handpflege-Anker, zuletzt
+exakt auf dem Premium-Preis, siehe `01` §6.5) ist ersetzt. Neu:
+
+**Form: Kassenzettel unter dem CTA.** Bewusst nicht vor dem Kauf-Button: der Hero ist mobil
+die längste Section der Seite (`03` §8.6, M5), der Stack begründet den Preis, darf aber den
+Weg zum CTA nicht verlängern. Wer zögert, findet die Rechnung eine Wischbewegung unter dem
+Button, vor der Garantie.
+
+**Inhalt, jede Zeile Fact-Sheet-belegt:**
+
+| Zeile | Copy | Beleg | Wert-Label |
+|---|---|---|---|
+| 1 | Epigenetische Analyse: sechs Bereiche, zwölf Werte (Körperalter mit Hör-, Augen-, Gedächtnisalter, MethylPace, EpiVitality, Immunscore, Entzündung, Muskelschwund) | Portal-Audit 06.08. | **einzeln 299 €** (= Live-Preis des Folgetests) |
+| 2 | Genetische Analyse: 23 Kategorien, über 150 Einzelergebnisse, 18 Wirkstoff-Reports darunter NMN und Ausdauer, 32 Lifestyle-Reports | Fact Sheet §Produktumfang; NMN-Brücke = Maßnahme 4 aus `02` | nur im Test |
+| 3 | LIFETIME App, lebenslanger Zugriff, AI Health Coach, PDF-Export, Face Scan | freigegeben 30.07. | inklusive |
+| 4 | Ergebnisgespräch, 45 Minuten (folgt der Paketwahl) | Premium-Variante live | Paket 1: „im Paket" gedimmt · Paket 2: „einzeln 149 €" |
+| Summe | „Du zahlst heute" + Paketpreis, im Paket zusätzlich „Einzeln zusammen 498 € · du sparst 49 €" | Variantenpreise + `stack_talk_value_cents` | dynamisch |
+| Konditionen | Einmalzahlung · kein Abo · keine Folgekosten | Risk-Reversal-Bestand | – |
+| Verlauf | „Später weitermessen: Folgetest (nur Epigenetik) 299 €, als Testkunde 249 €. Deine DNA-Ergebnisse bleiben, gemessen wird, was sich verändert hat." | Folgetest live; 249 € siehe §6 | abgesetzte Schlusszeile |
+
+Bewusst ohne Zeitintervall in der Verlaufszeile: das Fact Sheet (§Retest) hält „sechs Monate"
+bis zur Product/Science-Bestätigung offen, die Kandidat-3-Formulierung „nach sechs Monaten"
+wird deshalb nicht übernommen. Fact Sheet schlägt Paket-Doc.
+
+**Mechanik (alles in `sections/lt-pdp-hero.liquid`):**
+
+- Kein `stack_old_total` mehr, kein addierter Fantasie-Gesamtwert. Einzelsumme und Ersparnis
+  werden aus Variante 1 + `stack_talk_value_cents` gerechnet und erscheinen nur, wenn die
+  Summe wirklich über dem Paketpreis liegt.
+- `applyPkg` schaltet beim Paketwechsel: Gesprächszeile an/aus, „Du zahlst heute", Anker-Note.
+  SSR-Zustand entspricht Paket 1, ohne JS bleibt die Seite wahr.
+- **C9-Fix:** Paketkarte 2 trägt die Zeile „Einzeln zusammen 498 € · du sparst 49 €" (SSR,
+  gleiche Rechnung). Rendert nur mit gesetztem Einzelwert.
+- Schema generisch (row1 bis row3 + Zusatzleistung + Verlaufszeile), auf allen anderen 13
+  PDP-Templates bleibt der Stack aus. Default `show_value_stack: false`.
+- Die 31.08.-Preisumstellung braucht am Stack **keinen Edit**: alle Beträge außer dem
+  149-Einzelwert kommen aus Variantenpreisen. Steigt Premium auf 499, rechnet der Anker
+  automatisch 548/49.
+
+**Verifiziert am 16.08.** per `shopify theme dev` + curl (SSR: alle Zeilen, Position nach
+`</product-form>`, Anker in Karte 2, Talk-Zeile off) und im Browser-Pane mobil 375 px
+(Paketwechsel hin und zurück schaltet Talk-Zeile, Anker, Summe 349↔449, CTA und
+Varianten-Input; kein horizontaler Überlauf; `settings_data.json` nach Dev-Server-Lauf
+unverändert). theme-check: keine neuen Befunde.
+
+---
+
+## 5. Was dieses Paket an offenen Punkten schließt und öffnet
+
+**Geschlossen:** C9 (Anker auf der 449er, `03` §3), die `stack_old_total`-Falle (`01` §6.5),
+die Frage „Einzelpreis Ergebnisgespräch" (README §Offen bei BJ: 149 €), NMN-Brücke jetzt
+auch in der Buy-Box (Maßnahme 4, bisher nur Nutzenblock-Karte 2).
+
+**Neu geöffnet:**
+
+| # | Punkt | Für |
+|---|---|---|
+| 1 | SKU „Ergebnisgespräch" 149 € anlegen | BJ (Shopify Admin, Fulfillment wie Premium-SKU) |
+| 2 | Segment-Rabatt Folgetest 249 € für Testkäufer | BJ-Freigabe, Bau per Shopify-Discount + Segment |
+| 3 | Premium 449 → 499 € am 31.08. | BJ-Freigabe, zusammen mit 399-Pflichtumstellung |
+| 4 | Folgetest-Hinweis in die Ergebnis-Mail (Klaviyo-Strecke) | nach Kanalaufbau, eigene Fläche |
+| 5 | `competitor-data-2026-08-11.yml`: Beratungszeile 80/429 € auf 100/449 € nachziehen | Assistent, beim nächsten YML-Review |
+
+---
+
+## 6. Push-Gate und Reihenfolge
+
+Der Commit enthält zwei Aussagen, die erst nach zwei Admin-Handgriffen wahr sind. **Nicht
+pushen, bevor beides existiert**, sonst stehen ein Anker ohne Angebot und ein Rabatt ohne
+Rabatt auf der Seite (genau die Klasse Fehler, die dieses Paket sonst abbaut):
+
+1. **„einzeln 149 €" / „Einzeln zusammen 498 €"** braucht die live kaufbare Gesprächs-SKU
+   zu 149 €.
+2. **„als Testkunde 249 €"** braucht den serverseitig durchgesetzten Segment-Rabatt auf den
+   Folgetest.
+
+Reihenfolge: SKU anlegen → Rabatt anlegen → Theme pushen. Fällt eine Entscheidung anders
+aus, degradiert der Bau sauber: `stack_talk_value_cents: 0` entfernt Anker und Ersparnis
+überall (Karte 2 sieht aus wie heute), die Verlaufszeile ohne 249er lautet „Später
+weitermessen: Folgetest (nur Epigenetik) 299 €."
+
+Achtung Theme-Manager: läuft die App, pusht sie automatisch. Bis zur SKU-Anlage die App
+nicht mitlaufen lassen oder die beiden Settings vorher neutralisieren.

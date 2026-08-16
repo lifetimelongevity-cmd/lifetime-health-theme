@@ -20,6 +20,7 @@ Arbeitspaket zur AGE&DNA-PDP, angelegt am 14.08.2026 aus einem RMBC-Kontext-Durc
 | [`04-mechanismus.md`](04-mechanismus.md) | Sieben Mechanismus-Kandidaten mit Score, Proof, Einwänden und Sperren-Check. Empfehlung: Kandidat 2, 3 und 6 als ein zusammenhängender Mechanismus |
 | [`05-nutzenblock.md`](05-nutzenblock.md) | Erste Copy-Umsetzung: `crs-expert-quotes` wird vom Zitatband zum Nutzenblock. Vorher/Nachher, Sperren-Check, Höhenrechnung, Bauvorgaben. **Gebaut 16.08.** |
 | [`06-kausalkette.md`](06-kausalkette.md) | **Gesamtempfehlung.** Die ganze PDP als eine Argumentationskette, plus Rewrites für Hero, `crs-metrics-row` und `lt-pdp-report-preview`. Enthält Bau-Reihenfolge, Höhenbudget und die Live-Funde. **Gebaut 16.08.** |
+| [`07-offer.md`](07-offer.md) | **Offer-Architektur.** Wettbewerbs-Offer-Analyse (Retest-Lücke), DB-Rechnung je Variante, Preisarchitektur (149-€-Gesprächs-SKU als Anker, Premium 499 ab 31.08., Folgetest-Testkundenpreis 249 €) und der neue Angebots-Stack im Hero. Beantwortet C9. **Stack gebaut 16.08., nicht gepusht, Push-Gate in §6. Preise brauchen BJ-Freigabe.** |
 
 01/02 fragen, ob die Seite das Richtige sagt. 03 fragt, ob sie auf dem Gerät ankommt, auf dem sie
 gelesen wird. 04 liefert den Mechanismus, 05 und 06 sind die Flächen, die daraus gebaut werden.
@@ -75,7 +76,7 @@ und der ersten Nutzenaussage liegen. Entscheid bei BJ, Details in `03` §5.
 - Belege hinter „Bekannt aus" oder Entscheid, die Section zu ziehen
 - Ads-Landing: Quiz oder PDP
 - Section-Reihenfolge: bleibt eingefroren oder wird umgestellt (`03` §5)
-- Einzelpreis eines 45-Minuten-Ergebnisgesprächs, sonst kein Anker auf der 449-€-Option (`03` C9)
+- ~~Einzelpreis eines 45-Minuten-Ergebnisgesprächs~~ **beantwortet 16.08.: 149 €** (`07` §2). Neu offen stattdessen: SKU-Anlage, Segment-Rabatt 249 €, Premium 499 € ab 31.08. (`07` §5)
 - Freigabe des Nutzenblock-Vorschlags plus drei Detailfragen darin (`05` §10)
 
 ## Sofort und unabhängig von jeder Freigabe

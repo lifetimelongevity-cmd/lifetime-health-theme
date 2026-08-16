@@ -282,7 +282,7 @@ Reihenfolge, und die Maßnahmen 1 bis 9 funktionieren auch ohne Umbau.
 | 3 Loox deckeln (C3) | gebaut 14.08., `limit` von 20 auf 6 |
 | 9 Sterne und Daten aus den Review-Blöcken (C11) | gebaut 16.08. (`e6eac0d`) |
 | 4, 5, 7, 8 | offen |
-| 10 Anker auf der 449-€-Option (C9) | offen, BJ (Einzelpreis) |
+| 10 Anker auf der 449-€-Option (C9) | **gebaut 16.08.** über [`07-offer.md`](07-offer.md): BJ-Einzelwert 149 €, Anker auf Paketkarte 2 und im neuen Angebots-Stack. Push-Gate beachten (`07` §6) |
 | 11 Ads-Ziel (C10) | offen, BJ |
 
 C4 (Mid-Page-Exit) und C8 (Dublette Feature-Grid / Report-Preview) sind durch den Copy-Umbau vom
