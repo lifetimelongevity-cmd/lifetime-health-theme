@@ -36,7 +36,8 @@ Assistent heißt, ich kann das mit vorhandenem Material bauen.
 > | 1 Mechanismus schärfen | **gebaut.** Kandidat 2, 3 und 6 aus `04` liegen in `crs-expert-quotes`, `crs-metrics-row` und `lt-pdp-report-preview` |
 > | 2 Ergebnis-Konkretheit | **weitgehend gebaut** über die drei Karten des Nutzenblocks (`05` §5). Die Loox-Volltext-Auswertung per `/customer-research` ist damit **nicht** erledigt |
 > | 4 NMN-Brücke | **angelegt**, nicht ausgebaut. Karte 2 des Nutzenblocks nennt NMN erstmals auf der PDP, ein eigener Cross-Sell-Weg fehlt weiter |
-> | 3, 5, 6, 7 | unverändert offen, alle vier hängen an einer Zahl oder Festlegung von BJ |
+> | 3 Urgency | **gebaut 16.08.** (Commit `2afc335`), aber als **Kampagnenfrist-Variante**, nicht als Batch-Zahl: „349 € statt 399 € bis So, 30.08." auf Hero-Banner (Countdown), Sticky-Streichpreis und allen drei CTA-Bändern (fristgesteuert, verstecken sich nach Ablauf selbst). **Pflicht 31.08.: Basispreis real auf 399 €, compareAt weg**, sonst war die Frist unwahr. Gleichzeitig Quiz-Banner deaktiviert (bewarb den seit 10.08. EXPIRED Code QUIZ-ALTER-10). Die Batch-Zahl-Variante bleibt als Ausbaustufe offen (BJ-Zahl) |
+> | 5, 6, 7 | unverändert offen, alle drei hängen an einer Zahl oder Festlegung von BJ |
 >
 > Ob die Punkte in Klammern („Mechanism +6 bis +8") eingetreten sind, sagt erst
 > `/rmbc-copy-audit` gegen die Baseline 65 / 100. Bis dahin sind es Erwartungen.
