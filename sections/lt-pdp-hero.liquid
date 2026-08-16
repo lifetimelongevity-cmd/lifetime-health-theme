@@ -578,10 +578,13 @@
                     {%- endif -%}
                   </div>
                   <div class="lt-value-stack__item-price">
-                    <span class="lt-value-stack__item-label" data-lt-stack-talk-off>{{ section.settings.stack_talk_off_label | default: 'im Paket' | escape }}</span>
-                    {%- if lt_talk_cents > 0 -%}
-                      <span class="lt-value-stack__item-label" data-lt-stack-talk-on hidden>einzeln {{ lt_talk_cents | money_without_trailing_zeros }}</span>
-                    {%- endif -%}
+                    <span class="lt-value-stack__item-label" data-lt-stack-talk-off>{{ section.settings.stack_talk_off_label | default: 'nur im Paket' | escape }}</span>
+                    {%- comment -%} Das Label bei gewaehltem Paket kommt aus dem Schema und
+                        rendert immer. Frueher stand hier hartcodiert "einzeln <Einzelwert>",
+                        gekoppelt an stack_talk_value_cents: mit Wert 0 blieb die Preiszelle
+                        bei Paket 2 leer, und mit Wert behauptete sie eine Einzel-Kaufbarkeit,
+                        die es ohne eigene SKU nicht gibt (07-offer §6). {%- endcomment -%}
+                    <span class="lt-value-stack__item-label" data-lt-stack-talk-on hidden>{{ section.settings.stack_talk_on_label | default: 'im Paket enthalten' | escape }}</span>
                   </div>
                 </div>
               {%- endif -%}
@@ -1311,6 +1314,13 @@
                       <span class="lt-promo-card__savings" data-lt-direct-savings {% unless lt_compare_price > lt_pill_1_once %}hidden{% endunless %}>{% if lt_compare_price > lt_pill_1_once %}Du sparst {{ lt_compare_price | minus: lt_pill_1_once | money_without_trailing_zeros }}{% endif %}</span>
                       <span class="lt-promo-card__title">{{ section.settings.promo_banner_title | escape }}</span>
                     </span>
+                    {%- comment -%} Die Frist sagt ohne Folge nichts. Die Notiz beantwortet
+                        "und dann?" und ist bewusst ohne Betrag formuliert, weil der regulaere
+                        Preis je Paket unterschiedlich ist (449 / 549) und die Karte der
+                        Paketwahl folgt. {%- endcomment -%}
+                    {%- if section.settings.promo_banner_note != blank -%}
+                      <span class="lt-promo-card__note">{{ section.settings.promo_banner_note | escape }}</span>
+                    {%- endif -%}
                     {%- if section.settings.promo_banner_deadline != blank -%}
                       <span class="lt-promo-card__timer" data-lt-promo-deadline="{{ section.settings.promo_banner_deadline | escape }}" hidden>
                         {{ section.settings.promo_banner_timer_label | default: 'Endet in' | escape }} <strong data-lt-promo-countdown>–</strong>
@@ -1447,10 +1457,13 @@
                 assign lt_batch_left_pct = lt_batch_remaining | times: 100 | divided_by: lt_batch_size
                 assign lt_batch_taken_pct = 100 | minus: lt_batch_left_pct
                 assign lt_batch_text = ''
+                # "Charge" allein ist Laborsprache und erklaert nicht, warum die Menge
+                # begrenzt ist. "Laborcharge" nennt den Grund im Wort, "aktuelle" sagt
+                # ehrlich, dass eine naechste folgt.
                 if lt_batch_left_pct <= 15
-                  assign lt_batch_text = 'Die aktuelle Charge ist fast vergeben'
+                  assign lt_batch_text = 'Die aktuelle Laborcharge ist fast vergeben'
                 elsif lt_batch_left_pct <= 50
-                  assign lt_batch_text = 'Mehr als die Hälfte der Charge ist bereits vergeben'
+                  assign lt_batch_text = 'Mehr als die Hälfte der aktuellen Laborcharge ist vergeben'
                 endif
               -%}
               {%- if lt_batch_text != blank -%}
@@ -2621,6 +2634,11 @@
   font-weight: 700;
 }
 .lt-promo-card__savings[hidden] { display: none; }
+/* Die Folge der Frist steht leiser als Ersparnis und Countdown: sie ordnet ein,
+   sie drueckt nicht. 0.72 haelt den AA-Kontrast auf der hellen Promo-Flaeche. */
+.lt-promo-card__note {
+  opacity: 0.72;
+}
 .lt-promo-card__timer {
   font-weight: 700;
   color: color-mix(in srgb, var(--color-promo) 78%, #000);
@@ -4115,7 +4133,14 @@
       "id": "stack_talk_off_label",
       "label": "Zusatzleistung Label (Paket 1)",
       "info": "Wert-Label der gedimmten Zeile, solange das Basis-Paket gewählt ist.",
-      "default": "im Paket"
+      "default": "nur im Paket"
+    },
+    {
+      "type": "text",
+      "id": "stack_talk_on_label",
+      "label": "Zusatzleistung Label (Paket 2)",
+      "info": "Wert-Label, sobald das Paket mit der Zusatzleistung gewählt ist. Keinen Einzelpreis nennen, solange die Leistung nicht einzeln kaufbar ist.",
+      "default": "im Paket enthalten"
     },
     {
       "type": "text",
