@@ -295,23 +295,30 @@
       <ul class="cr-track" role="list" data-cr-track>
         {%- for block in section.blocks -%}
           {%- if block.type == 'review' -%}
-            {%- assign cr_rating = block.settings.rating | default: 5 -%}
+            {%- comment -%}
+              Kein Sterne-Default. `rating: 0` heisst „keine Angabe" und rendert
+              keine Sterne. Frueher stand hier `| default: 5`: ein im Template
+              geleerter Wert brachte damit trotzdem fuenf gefuellte Sterne, also
+              eine Bewertungsangabe, die in keiner Quelle steht.
+            {%- endcomment -%}
+            {%- assign cr_rating = block.settings.rating | plus: 0 -%}
             <li class="cr-card" {{ block.shopify_attributes }}>
 
-              {%- comment -%} Stars {%- endcomment -%}
-              <div class="cr-stars" aria-label="{{ cr_rating }} von 5 Sternen">
-                {%- for i in (1..5) -%}
-                  {%- if i <= cr_rating -%}
-                    <svg class="cr-star cr-star--filled" width="14" height="14" viewBox="0 0 14 13" fill="none" aria-hidden="true">
-                      <path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/>
-                    </svg>
-                  {%- else -%}
-                    <svg class="cr-star cr-star--empty" width="14" height="14" viewBox="0 0 14 13" fill="none" aria-hidden="true">
-                      <path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" stroke="currentColor" stroke-width="0.9" fill="none"/>
-                    </svg>
-                  {%- endif -%}
-                {%- endfor -%}
-              </div>
+              {%- if cr_rating > 0 -%}
+                <div class="cr-stars" aria-label="{{ cr_rating }} von 5 Sternen">
+                  {%- for i in (1..5) -%}
+                    {%- if i <= cr_rating -%}
+                      <svg class="cr-star cr-star--filled" width="14" height="14" viewBox="0 0 14 13" fill="none" aria-hidden="true">
+                        <path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/>
+                      </svg>
+                    {%- else -%}
+                      <svg class="cr-star cr-star--empty" width="14" height="14" viewBox="0 0 14 13" fill="none" aria-hidden="true">
+                        <path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" stroke="currentColor" stroke-width="0.9" fill="none"/>
+                      </svg>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </div>
+              {%- endif -%}
 
               {%- comment -%} Review text {%- endcomment -%}
               {%- if block.settings.text != blank -%}
@@ -336,20 +343,27 @@
                   {%- endif -%}
                   <span class="cr-name">{{ block.settings.name | escape }}</span>
                 </div>
-                <div class="cr-author-bottom">
-                  {%- if block.settings.verified -%}
-                    <span class="cr-verified" aria-label="Verifizierter Kauf">
-                      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
-                        <circle cx="5.5" cy="5.5" r="5.5" fill="var(--color-teal)"/>
-                        <path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-                      </svg>
-                      Verifiziert
-                    </span>
-                  {%- endif -%}
-                  {%- if block.settings.date != blank -%}
-                    <time class="cr-date">{{ block.settings.date | escape }}</time>
-                  {%- endif -%}
-                </div>
+                {%- comment -%}
+                  Wrapper nur, wenn er etwas traegt. Ohne die Bedingung bleibt
+                  bei leerem Datum und ohne Kennzeichen ein leerer Flex-Row samt
+                  4px-Gap unter dem Namen stehen.
+                {%- endcomment -%}
+                {%- if block.settings.verified or block.settings.date != blank -%}
+                  <div class="cr-author-bottom">
+                    {%- if block.settings.verified -%}
+                      <span class="cr-verified" aria-label="Verifizierter Kauf">
+                        <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true">
+                          <circle cx="5.5" cy="5.5" r="5.5" fill="var(--color-teal)"/>
+                          <path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        Verifiziert
+                      </span>
+                    {%- endif -%}
+                    {%- if block.settings.date != blank -%}
+                      <time class="cr-date">{{ block.settings.date | escape }}</time>
+                    {%- endif -%}
+                  </div>
+                {%- endif -%}
               </div>
 
             </li>
@@ -399,11 +413,18 @@
   ausgezeichneter kostet mehr.
 
   Fuer die Block-Quelle greift der Filter nicht: die Bloecke sind von Hand
-  kuratiert und tragen zusaetzlich eine echte Einzelbewertung, also auch
-  `reviewRating`. Nur die sind damit ueberhaupt Rich-Snippet-faehig. Die
-  Loox-Quelle liefert `author` und `reviewBody` ohne Rating, weil das Metafeld
-  keine Einzelbewertung traegt. Ein erfundener Fuenf-Sterne-Default waere die
-  Alternative gewesen und kommt nicht in Frage.
+  kuratiert. Die Loox-Quelle liefert `author` und `reviewBody` ohne Rating, weil
+  das Metafeld keine Einzelbewertung traegt. Ein erfundener Fuenf-Sterne-Default
+  waere die Alternative gewesen und kommt nicht in Frage.
+
+  RATING NUR, WENN ES EINES GIBT (2026-08-14)
+  Frueher trug jeder Block-Knoten ein `reviewRating`, notfalls aus dem
+  Fuenf-Sterne-Default. Damit ging ein gesetzter, nicht gemessener Sternewert als
+  `ratingValue` in die strukturierten Daten. `rating: 0` heisst jetzt „keine
+  Angabe": der Knoten laesst `reviewRating` dann weg und sieht aus wie der
+  Loox-Zweig. Das kostet die Rich-Snippet-Faehigkeit dieser Reviews, der
+  `aggregateRating` am Product-Knoten (aus `loox.avg_rating`) bleibt davon
+  unberuehrt und traegt das Sterne-Snippet in der Suche weiter.
 {%- endcomment -%}
 
 {%- liquid
@@ -436,8 +457,14 @@
     {%- elsif cr_has_reviews -%}
       {%- for block in section.blocks -%}
         {%- if block.type == 'review' and block.settings.text != blank -%}
-          {%- assign cr_ld_rating = block.settings.rating | default: 5 -%}
-          {"@type":"Review","author":{"@type":"Person","name":{{ block.settings.name | default: 'Kundin oder Kunde' | json }}},"reviewBody":{{ block.settings.text | strip | json }},"reviewRating":{"@type":"Rating","ratingValue":{{ cr_ld_rating }},"bestRating":5,"worstRating":1}}@@LDITEM@@
+          {%- liquid
+            assign cr_ld_rating = block.settings.rating | plus: 0
+            assign cr_ld_rating_node = ''
+            if cr_ld_rating > 0
+              assign cr_ld_rating_node = ',"reviewRating":{"@type":"Rating","ratingValue":' | append: cr_ld_rating | append: ',"bestRating":5,"worstRating":1}'
+            endif
+          -%}
+          {"@type":"Review","author":{"@type":"Person","name":{{ block.settings.name | default: 'Kundin oder Kunde' | json }}},"reviewBody":{{ block.settings.text | strip | json }}{{ cr_ld_rating_node }}}@@LDITEM@@
         {%- endif -%}
       {%- endfor -%}
     {%- endif -%}
@@ -1015,11 +1042,13 @@
         {
           "type": "range",
           "id": "rating",
-          "label": "Sterne (1–5)",
-          "min": 1,
+          "label": "Sterne",
+          "min": 0,
           "max": 5,
           "step": 1,
-          "default": 5
+          "default": 0,
+          "unit": "★",
+          "info": "0 = keine Angabe: die Karte zeigt dann keine Sterne und der Bewertungsknoten im JSON-LD bekommt kein ratingValue. Nur setzen, wenn der Wert aus der Bewertung selbst stammt."
         },
         {
           "type": "textarea",
@@ -1049,8 +1078,7 @@
           "type": "text",
           "id": "date",
           "label": "Datum",
-          "default": "März 2025",
-          "info": "Z. B. «März 2025» oder «02/2025»."
+          "info": "Leer lassen, wenn kein Datum aus der Bewertung selbst vorliegt. Sonst z. B. «März 2025» oder «02/2025»."
         }
       ]
     }
@@ -1078,41 +1106,33 @@
         {
           "type": "review",
           "settings": {
-            "rating": 5,
             "text": "Ich habe das Buch von David Sinclair gelesen und wollte es unbedingt ausprobieren. Ich fühle mich insgesamt energiegeladener und weniger erschöpft im Alltag.",
             "name": "Sven M.",
-            "verified": true,
-            "date": "April 2025"
+            "verified": true
           }
         },
         {
           "type": "review",
           "settings": {
-            "rating": 5,
             "text": "Es ist nicht nur ein Longevity-Trend, es ist wissenschaftlich bewiesen. Ich merke den Unterschied seit Woche 3 – mehr Fokus, mehr Ausdauer.",
             "name": "@misscasiraghi",
-            "verified": true,
-            "date": "März 2025"
+            "verified": true
           }
         },
         {
           "type": "review",
           "settings": {
-            "rating": 4,
             "text": "Kein Wow-Effekt — aber nach 3 Monaten hat sich mein Wohlbefinden klar verbessert. Ein ruhiges Gefühl, das Richtige zu tun.",
             "name": "Mattes J.",
-            "verified": true,
-            "date": "Februar 2025"
+            "verified": true
           }
         },
         {
           "type": "review",
           "settings": {
-            "rating": 5,
             "text": "LIFETIME ist ein von Ärzten geführtes Unternehmen aus Berlin. Das Vertrauen war von Anfang an da — und die Wirkung kam nach.",
             "name": "Thomas K.",
-            "verified": true,
-            "date": "Januar 2025"
+            "verified": true
           }
         }
       ]
