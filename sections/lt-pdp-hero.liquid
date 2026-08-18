@@ -1010,6 +1010,25 @@
             {%- if lt_show_sizes -%}
               {%- comment -%} Größe VOR Modus (Zone B vor Zone C, nmn-angebotsarchitektur §6): der Selector
                   steht über beiden Kaufoption-Karten und schreibt die gewählte Größe auf BEIDE. {%- endcomment -%}
+              {%- comment -%} Mengenvorteil auf den Pills (nmn-angebotsarchitektur §5, §10 Phase 3):
+                  Prozent statt Euro, weil das Abo-Badge daneben Euro trägt und zwei Euro-Zahlen
+                  in einem Kasten Verschiedenes meinen würden. Basis ist die erste Variante. {%- endcomment -%}
+              {%- liquid
+                assign lt_base_variant = product.variants.first
+                assign lt_base_grams = lt_base_variant.title | replace: ' ', '' | replace: 'g', '' | replace: 'G', '' | times: 1
+                assign lt_base_alloc = nil
+                for alloc in lt_base_variant.selling_plan_allocations
+                  if alloc.selling_plan.price_adjustments.first.value_type == 'price'
+                    assign lt_base_alloc = alloc
+                    break
+                  endif
+                endfor
+                if lt_base_alloc
+                  assign lt_base_sub = lt_base_alloc.price
+                else
+                  assign lt_base_sub = lt_base_variant.price | times: lt_sub_mult | divided_by: 100
+                endif
+              -%}
               <div class="lt-size" data-lt-size-group role="radiogroup" aria-label="Größe wählen">
                 {%- for variant in product.variants -%}
                   {%- liquid
@@ -1030,6 +1049,27 @@
                       assign v_sub = variant.price | times: lt_sub_mult | divided_by: 100
                     endif
                   -%}
+                  {%- liquid
+                    # Mengenvorteil je Modus gegen den €/g der Basisgröße. Float erzwingen, sonst
+                    # schneidet die Integer-Division und der Wert kippt um einen Prozentpunkt.
+                    assign v_save_once = 0
+                    assign v_save_sub = 0
+                    if v_grams > 0 and lt_base_grams > 0 and variant.id != lt_base_variant.id
+                      assign v_ppg = variant.price | times: 1.0 | divided_by: v_grams
+                      assign base_ppg = lt_base_variant.price | times: 1.0 | divided_by: lt_base_grams
+                      assign v_rel = v_ppg | divided_by: base_ppg | times: 100 | round
+                      assign v_save_once = 100 | minus: v_rel
+                      assign v_ppg_s = v_sub | times: 1.0 | divided_by: v_grams
+                      assign base_ppg_s = lt_base_sub | times: 1.0 | divided_by: lt_base_grams
+                      assign v_rel_s = v_ppg_s | divided_by: base_ppg_s | times: 100 | round
+                      assign v_save_sub = 100 | minus: v_rel_s
+                    endif
+                    if lt_show_sub
+                      assign v_save_now = v_save_sub
+                    else
+                      assign v_save_now = v_save_once
+                    endif
+                  -%}
                   <label class="lt-size__pill{% if variant.id == lt_active_variant.id %} is-selected{% endif %}" data-lt-size>
                     <input
                       type="radio"
@@ -1044,12 +1084,15 @@
                       data-compare-price="{{ v_compare }}"
                       data-grams="{{ v_grams }}"
                       data-size-short="{{ variant.title | escape }}"
+                      data-save-once="{{ v_save_once }}"
+                      data-save-sub="{{ v_save_sub }}"
                       {% unless variant.available %}disabled{% endunless %}
                     >
-                    {%- comment -%} Nur die Menge, keine Preise: Grundpreis/Ersparnis hängen am Modus (Abo vs. einmalig)
-                        und stehen deshalb ausschließlich in den Karten, die beim Größenwechsel live mitgehen.
-                        Zwei Grundpreis-Basen gleichzeitig (Pill einmalig, Karte Abo) wirkten widersprüchlich. {%- endcomment -%}
+                    {%- comment -%} Menge plus Mengenvorteil des AKTIVEN Modus. Der alte Einwand (zwei
+                        Grundpreis-Basen gleichzeitig) trägt nicht mehr, weil nur eine Basis gezeigt wird
+                        und sie beim Moduswechsel mitgeht. Grundpreis €/100 g bleibt in den Karten. {%- endcomment -%}
                     <span class="lt-size__name">{{ variant.title | escape }}</span>
+                    <span class="lt-size__save" data-lt-size-save{% unless v_save_now > 0 %} hidden{% endunless %}>{% if v_save_now > 0 %}−{{ v_save_now }} %{% endif %}</span>
                   </label>
                 {%- endfor -%}
               </div>
@@ -1096,7 +1139,7 @@
                       <span class="lt-bb-card__meta">
                         <span class="lt-bb-card__title-row">
                           <span class="lt-bb-card__title">{{ bb_sub1_title | escape }}</span>
-                          <span class="lt-bb-card__badge lt-bb-card__badge--strong" data-lt-bb-badge>SPARE {{ section.settings.sub_discount_percent | default: 10 }}%</span>
+                          <span class="lt-bb-card__badge lt-bb-card__badge--strong" data-lt-bb-badge>{%- assign lt_badge_delta = lt_active_variant.price | minus: lt_abo_sub -%}{%- if lt_badge_delta > 0 -%}SPARE {{ lt_badge_delta | money_without_trailing_zeros }}{%- endif -%}</span>
                         </span>
                         {%- if lt_show_sizes and lt_abo_alloc -%}
                           {%- comment -%} Subline = echter Liefertakt der gewählten Größe (Plan-Name, z. B. „Alle 2 Monate");
@@ -1206,7 +1249,7 @@
                           {%- comment -%} Versandstatus je gewählter Größe statt statischem „ab 49 €": über der DE-Schwelle
                               positiv „Versandkostenfrei", darunter der Fakt. Schwelle/Kosten: §7 nmn-angebotsarchitektur;
                               bei Versandänderung hier UND im JS (applySize) mitziehen. {%- endcomment -%}
-                          <span class="lt-bb-card__sub" data-lt-once-subline>{% if lt_active_variant.price >= 4900 %}Versandkostenfrei{% else %}zzgl. 4,90 € Versand{% endif %}</span>
+                          <span class="lt-bb-card__sub" data-lt-once-subline>{% if lt_active_variant.price >= 4900 %}Versandkostenfrei{% else %}zzgl. Versand ab 4,90 €{% endif %}</span>
                         {%- else -%}
                           <span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>
                         {%- endif -%}
@@ -2071,6 +2114,27 @@
       }
     }
 
+    // Mengenvorteil auf den Pills folgt dem aktiven Modus (B1). Die Werte stehen als
+    // data-save-once / data-save-sub am Radio, gerechnet im SSR gegen die Basisgröße.
+    function updateSizeSavings() {
+      const activeInput = section.querySelector('.lt-bb-card__input:checked');
+      const activeKind = activeInput ? activeInput.closest('[data-lt-bb-card]')?.dataset.bbKind : null;
+      const useSub = activeKind !== 'once';
+      section.querySelectorAll('[data-lt-size]').forEach(pill => {
+        const inp = pill.querySelector('.lt-size__input');
+        const el = pill.querySelector('[data-lt-size-save]');
+        if (!inp || !el) return;
+        const pct = parseInt(useSub ? inp.dataset.saveSub : inp.dataset.saveOnce, 10) || 0;
+        if (pct > 0) {
+          el.textContent = '−' + pct + ' %';
+          el.hidden = false;
+        } else {
+          el.textContent = '';
+          el.hidden = true;
+        }
+      });
+    }
+
     function updateCardFacades() {
       const cards = section.querySelectorAll('[data-lt-bb-card]');
       const subCards = [];
@@ -2109,8 +2173,11 @@
             // Bei aktivem Sale trägt das Abo-Badge den Sale-Ton (coral), sonst den Abo-Ton (grün).
             badgeEl.classList.toggle('lt-bb-card__badge--sale', subSaleActive);
             badgeEl.classList.toggle('lt-bb-card__badge--strong', !subSaleActive);
-            if (pct > 0) {
-              badgeEl.textContent = 'SPARE ' + pct + '%';
+            const subDeltaC = onceC > subC ? onceC - subC : 0;
+            if (subDeltaC > 0) {
+              // Euro statt Prozent (B2): die Prozentleiter lief 12/10/11 und argumentierte gegen
+              // das Hochkaufen. Euro ist monoton und braucht keine Preisänderung.
+              badgeEl.textContent = 'SPARE ' + formatPrice(subDeltaC);
               badgeEl.hidden = false;
             } else {
               badgeEl.textContent = '';
@@ -2175,6 +2242,8 @@
           el.classList.toggle('lt-bb-card__badge--muted', !strong);
         });
       }
+
+      updateSizeSavings();
     }
 
     function syncFromCard(card) {
@@ -2304,7 +2373,7 @@
       const onceSublineEl = section.querySelector('[data-lt-once-subline]');
       if (onceSublineEl) {
         const oncePriceCents = parseInt(sizeInput.dataset.oncePrice, 10) || 0;
-        onceSublineEl.textContent = oncePriceCents >= 4900 ? 'Versandkostenfrei' : 'zzgl. 4,90 € Versand';
+        onceSublineEl.textContent = oncePriceCents >= 4900 ? 'Versandkostenfrei' : 'zzgl. Versand ab 4,90 €';
       }
       section.querySelectorAll('[data-lt-size]').forEach(pill => {
         const inp = pill.querySelector('.lt-size__input');
@@ -3184,6 +3253,22 @@
   font-weight: 500;
   line-height: 1.1;
   color: var(--lt-text, #26251e);
+}
+/* Mengenvorteil unter der Menge. Zweite Zeile statt zweiter Spalte: die Pill ist auf 375 px rund
+   105 px breit, seitlich ist kein Platz. */
+.lt-size__save {
+  display: block;
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.1;
+  color: rgba(38, 37, 30, 0.72);
+}
+.lt-size__save[hidden] {
+  display: none;
+}
+.lt-size__input:disabled ~ .lt-size__save {
+  opacity: 0.4;
 }
 .lt-size__input:disabled ~ .lt-size__name {
   opacity: 0.4;

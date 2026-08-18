@@ -220,23 +220,24 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <div id="screen-reader-info" aria-live="polite" class="visually-hidden"></div>
 
     {%- comment -%}
-      Schlanke Topbar statt header-group: Logo (unverlinkt — jeder Link ist auf
-      einer Paid-LP ein Leak) plus die Loox-Rating-Zeile aus dem Announcement-Bar
-      (Substitutionslogik identisch zu sections/announcement-bar.liquid, inkl.
-      Fallbacks, falls Loox keine Shop-Aggregate liefert).
+      Schlanke Topbar statt header-group: Logo (unverlinkt, jeder Link ist auf
+      einer Paid-LP ein Leak) plus optional die Loox-Rating-Zeile.
+
+      Die Rating-Zeile rendert NUR, wenn Loox echte Shop-Aggregate liefert.
+      Vorher standen hier die Fallbacks '4,8' und '431'. Es gibt aber gar keine
+      Shop-Metafield-Definition im Namespace loox, also hat immer der Fallback
+      gegriffen und die Zeile war eine gesetzte Bewertungsangabe ohne Quelle
+      (Anhang zu § 3 Abs. 3 Nr. 23b UWG, per se unzulaessig). Ohne Quelle wird
+      deshalb nichts ausgegeben. Nicht durch Hardcodes ersetzen.
     {%- endcomment -%}
     {%- liquid
       assign lp_loox_rating_raw = shop.metafields.loox.avg_rating | plus: 0
-      if lp_loox_rating_raw > 0
-        assign lp_loox_rating = lp_loox_rating_raw | round: 1 | replace: '.', ','
-      else
-        assign lp_loox_rating = '4,8'
-      endif
       assign lp_loox_count_raw = shop.metafields.loox.num_reviews | plus: 0
-      if lp_loox_count_raw > 0
+      assign lp_show_rating = false
+      if lp_loox_rating_raw > 0 and lp_loox_count_raw > 0
+        assign lp_show_rating = true
+        assign lp_loox_rating = lp_loox_rating_raw | round: 1 | replace: '.', ','
         assign lp_loox_count = lp_loox_count_raw
-      else
-        assign lp_loox_count = '431'
       endif
       assign lp_logo_src = 'logo-lifetime-black.svg' | file_url
     -%}
@@ -249,7 +250,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
           height="27"
           loading="eager"
         >
-        <p class="lt-lp-topbar__rating">&#9733; {{ lp_loox_rating }}/5 &middot; {{ lp_loox_count }} Bewertungen</p>
+        {%- if lp_show_rating -%}
+          <p class="lt-lp-topbar__rating">&#9733; {{ lp_loox_rating }}/5 &middot; {{ lp_loox_count }} Bewertungen</p>
+        {%- endif -%}
       </div>
     </header>
 
