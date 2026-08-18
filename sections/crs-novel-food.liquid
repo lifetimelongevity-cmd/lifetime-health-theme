@@ -182,7 +182,17 @@
       {%- if has_status -%}
         <details class="cnf-reg">
           <summary class="cnf-reg__summary">
-            <span class="cnf-reg__summary-label">{{ section.settings.status_title | default: 'Regulatorischer Stand' | escape }}</span>
+            {%- comment -%} Datum dynamisch: die Zeile behauptet Aktualitaet, deshalb traegt sie das
+                heutige Datum und wird taeglich per Routine gegen EFSA und EU-Register geprueft.
+                Shopifys date-Filter lokalisiert %B nicht, der Monatsname kommt deshalb aus der Liste. {%- endcomment -%}
+            {%- liquid
+              assign cnf_months = 'Januar,Februar,März,April,Mai,Juni,Juli,August,September,Oktober,November,Dezember' | split: ','
+              assign cnf_m = 'now' | date: '%m' | plus: 0 | minus: 1
+              assign cnf_d = 'now' | date: '%-d'
+              assign cnf_y = 'now' | date: '%Y'
+              assign cnf_today = cnf_d | append: '. ' | append: cnf_months[cnf_m] | append: ' ' | append: cnf_y
+            -%}
+            <span class="cnf-reg__summary-label">{{ section.settings.status_title | default: 'Regulatorischer Stand' | escape }}{%- if section.settings.status_date_auto -%}: {{ cnf_today }}{%- endif -%}</span>
             {% render 'crs-chevron', class: 'cnf-reg__chevron' %}
           </summary>
           <div class="cnf-reg__body">
@@ -874,7 +884,14 @@
       "type": "text",
       "id": "status_title",
       "label": "Accordion-Titel",
-      "default": "Regulatorischer Stand: Juli 2026"
+      "default": "Regulatorischer Stand"
+    },
+    {
+      "type": "checkbox",
+      "id": "status_date_auto",
+      "label": "Datum automatisch auf heute setzen",
+      "info": "Haengt das heutige Datum an den Titel. Nur aktivieren, solange die taegliche Regulatorik-Pruefung laeuft, sonst behauptet die Zeile eine Aktualitaet, die niemand herstellt.",
+      "default": true
     },
     {
       "type": "text",
