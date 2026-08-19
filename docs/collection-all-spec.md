@@ -488,11 +488,17 @@ zwei.
 | Feld | Neu |
 |---|---|
 | Kicker | *(leer)* |
-| H1 | Die Produkte, die wir selbst nehmen. |
+| H1 | Die Produkte, hinter denen wir stehen. |
 | Subline | Erst testen, dann ergänzen. |
 
-Der H1 bleibt, wie er ist. Er ist Gründerstimme, er sitzt, und an BJs eigenen
-Zeilen wird nur angefasst, was faktisch falsch ist. Die Subline ersetzt
+**Korrektur 2026-08-19 (BJ).** Der ursprüngliche H1 „Die Produkte, die wir selbst
+nehmen." stand zwei Zentimeter über einer Karte mit dem Kicker „Nur zu
+Forschungszwecken". Das ist nicht nur schief, es ist die eine Stelle, an der die Seite
+dokumentiert, dass LIFETIME ein als Forschungsware deklariertes Produkt konsumiert.
+Der Satzbau bleibt, nur der Anspruch wechselt von Einnahme auf Haftung. Aus demselben
+Grund ist die NMN-Nutzenzeile geändert: „30 g reichen etwa zwei Monate" ist eine
+Verbrauchsdauer und damit implizit eine Verzehrangabe, ersetzt durch „Drei Größen".
+Ansonsten gilt weiter: an BJs eigenen Zeilen wird nur angefasst, was faktisch falsch ist. Die Subline ersetzt
 „Wissenschaftlich begründet, geprüft und selbst im Alltag getestet." Diese Zeile
 wiederholt „selbst" aus dem H1, listet drei Eigenschaften hintereinander und
 läuft bei 36px über zwei Zeilen. Die neue Zeile ist das Produktprinzip selbst,
@@ -532,16 +538,16 @@ Premium-Variante steht stattdessen sauber in der Preisnotiz.
 |---|---|
 | Kicker | Nur zu Forschungszwecken |
 | Titel | NMN Pulver |
-| Nutzenzeile | Reines NMN-Pulver, Reinheit je Charge im Labor geprüft. 30 g reichen etwa zwei Monate. |
+| Nutzenzeile | Reines NMN-Pulver, Reinheit je Charge im Labor geprüft. Drei Größen. |
 | Preis | ab 33,90 € |
 | Abo-Zeile | im Abo ab 28,90 € (automatisch) |
 | CTA | Größe wählen |
 
 Der Kicker bleibt wortgleich, BJ-Entscheid. Er wandert nur von der Section-
 Unterzeile auf die Karte, weil NMN keine eigene Gruppe mehr ist. Die „Chemikalie"-
-Auszeichnung entfällt ersatzlos. „30 g reichen etwa zwei Monate" ist die geprüfte
-Reichweite bei rund 500 mg pro Tag. CTA „Größe wählen" statt „Zum Produkt", weil
-drei Größen existieren und das der nächste Schritt ist.
+Auszeichnung entfällt ersatzlos. Eine Verbrauchsdauer steht bewusst nicht auf der
+Karte, siehe §4.1. CTA „Größe wählen" statt „Zum Produkt", weil drei Größen
+existieren und das der nächste Schritt ist.
 
 **Zeile AGE-Folgetest** (`row`)
 
@@ -780,6 +786,27 @@ Variante `sheet-wide` wurde im DOM gegengeprüft. Für `sections/lt-collection-r
 liegen Schema-Validität, Tag-Balance, JS-Syntax und die Prüfung auf verwaiste Variablen und
 Selektoren vor, aber kein Render-Test. **Nach dem Push zuerst `/collections/nmn` und
 `/collections/bestseller` ansehen.**
+
+**8.12 Die Nährstoffe sind ein Kachelraster, keine Zeilenliste.** §2 hatte Zeilen
+vorgesehen, weil eine einspaltige Liste bei Gruppengrößen von 5/3/2 keine Löcher
+bekommt. Im direkten Vergleich am Bildschirm (BJ-Entscheid) hat das Raster gewonnen:
+in der Zeile ist das stärkste Element pro Produkt der Text, das Präparat selbst sitzt
+als 88px-Miniatur links, und beim Umsehen erkennt man ein Präparat am Packshot. Bei
+1440 stehen jetzt rund sieben Produkte in einer Ansicht statt fünf, und zwar als
+Produkte. Der Preis dafür ist ehrlich: die Seite wächst von 3589 auf 4974px, und zwei
+Gruppen lassen eine kurze Schlussreihe (desktop Zellfunktion 3+2 und Haut/Gelenke/Schlaf
+2, mobil zusätzlich zwei Waisen). Diese Lücken sind eine Folge der Gruppengrößen, nicht
+des Rasters; jede mehrspaltige Anordnung hat sie bei 5/3/2. Wer sie weghaben will,
+ändert die Gruppen, nicht das Layout.
+
+Die Kachel trägt keinen weißen Kasten. Papier bleibt den zwei Protagonisten
+vorbehalten (Paper-Regel), die getönte Bildfläche trägt die Kachel, getrennt wird über
+den Rasterabstand.
+
+**8.13 Zwei Spalten halten mobil bis zum schmalsten Telefon.** Die Section hatte einen
+599px-Breakpoint auf einspaltig geerbt. Gemessen bei 390: die Seite wächst von 6498 auf
+8120px und man sieht ein Produkt pro Blick. Der Breakpoint ist entfernt, bei 390 sind
+die Kacheln 172px breit.
 
 ### Nicht umgesetzt
 

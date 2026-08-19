@@ -160,7 +160,18 @@ Kollektionen). `sections/lifetime-collection-grid.liquid` und
 | Geerbter Außenabstand | `container--vertical-space` gab 100px, gemessen 213px zwischen Zeile und Überschrift | 81px, die DESIGN.md-Kapitelrhythmik |
 | Hero-Platzhalter | grauer Kasten, wenn kein Bild gesetzt ist | Spalte entfällt, Platzhalter nur im Theme-Editor |
 
-**Struktur:** 7 Sections auf 4, Seite desktop von 5935px auf 3589px. Zwei Protagonisten
+**Copy-Korrektur (BJ):** Der H1 „Die Produkte, die wir selbst nehmen." stand über der
+NMN-Karte mit „Nur zu Forschungszwecken" und dokumentierte damit den Konsum einer
+Forschungsware. Jetzt „Die Produkte, hinter denen wir stehen." Aus demselben Grund
+ersetzt die NMN-Nutzenzeile die Verbrauchsdauer („30 g reichen etwa zwei Monate")
+durch „Drei Größen".
+
+**Layout-Entscheid (BJ):** Die Nährstoffe sind ein Kachelraster statt einer Zeilenliste,
+drei Spalten desktop, zwei bis zum schmalsten Telefon. In der Zeile war das stärkste
+Element pro Produkt der Text; beim Umsehen erkennt man ein Präparat aber am Packshot.
+Kostet Seitenlänge (desktop 4974 statt 3589px) und zwei kurze Schlussreihen.
+
+**Struktur:** 7 Sections auf 4, Seite desktop von 5935px auf 4974px. Zwei Protagonisten
 als Papierblätter (AGE&DNA mit echter Frist bis 30.08., NMN mit Abo-Preis), zehn Nährstoffe
 als Register in drei Gruppen, Slate-Leiste mit neun Kollektionslinks am Fuß.
 `templates/collection.json` hat `basisversorgung` im Register-Index bekommen (jetzt 12 Blöcke,
