@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-08-06
+last_review: 2026-08-19
 canonical_for: live-page-slug-to-template-mapping
 ---
 
@@ -342,6 +342,34 @@ wortgleich geblieben**, sie ist laut Faktenblatt §3 die Offenlegung, die die Se
 Der Kernsatz „Was die Studienlage nicht trägt, geht nicht online." steht groß, aber ohne
 Anführungszeichen und ohne Zuschreibung: es ist LIFETIME-Text über ihn, kein Zitat, und
 seine Wortlaut-Freigabe ist weiter offen. Die Beitragsliste bleibt bewusst leise.
+
+## Kollektionsseiten (Stand 2026-08-19)
+
+Zwei Flächen, zwei Templates, **eine** Produktkarte.
+
+| Slug | Template | Haupt-Section | Bemerkung |
+|---|---|---|---|
+| `/collections/all` | `templates/collection.katalog.json` | `lt-science-hero`, 2 × `lifetime-collection-grid`, `lt-katalog-index` | Kuratierter Katalog, 13 Produkte als Blöcke gepflegt (liest `collection.products` nicht) |
+| `/collections/<handle>` (12 weitere) | `templates/collection.json` | `lt-collection-register` | Rendert das echte Kollektionsobjekt |
+
+`all` trägt im Admin `templateSuffix: "katalog"`. Slug und Suffix sind zwei verschiedene
+Dinge, wie bei der NMN-PDP auch.
+
+**Die gemeinsame Karte ist `snippets/lt-product-card.liquid`** mit
+`assets/lt-product-card.css`. Beide Sections rendern sie in einer von vier Varianten:
+`sheet` (Protagonistenblatt), `sheet-wide` (dasselbe Papier liegend, für den
+hervorgehobenen Registereintrag), `row` (Registerzeile), `tile` (Raster, auf diesen
+Flächen nicht mehr benutzt). Wer die Karte ändert, ändert beide Flächen. Preis,
+Streichpreis, Abo-Preis, Bewertung und Kaufweg liegen im Snippet, nicht in den Sections.
+
+**`lifetime-collection-grid` wird von genau einem Template benutzt** (`collection.katalog.json`),
+geprüft über `templates/` und `sections/`. Änderungen daran treffen keine andere Seite.
+
+Am 2026-08-19 aus dem Katalog entfernt: `lifetime-collection-nav` (fünf Sprungmarken
+innerhalb derselben Seite, mobil 30px hohe Bedienelemente) und der Badge-Slot der Karte
+(weißer Text auf weißem Grund, Kontrast 1:1, auf allen 13 Karten unsichtbar).
+Ersetzt durch `lt-katalog-index` am Seitenfuß, das in die echten Kollektionen führt.
+
 
 ## Bekannt-dead Slugs (nicht aktiv)
 

@@ -1,0 +1,1015 @@
+{{ 'lt-product-card.css' | asset_url | stylesheet_tag }}
+
+{% comment %}
+
+  LIFETIME — Collection Register ("Der aufgeschlagene Registerband")
+
+  Default collection surface. Renders the ACTUAL collection object: title,
+  description, product count and the collection's own products.
+
+  Replaces the previous behaviour, where templates/collection.json was a
+  hardcoded catalogue and all 22 collections rendered byte-identical bodies.
+  The curated catalogue now lives on templates/collection.katalog.json.
+
+  Visual world: DESIGN.md "Klinisches Dossier" — paper, hairlines, ink,
+  tabular numbers. Teal is reserved for measured values (ratings), never for
+  CTAs or headings. Shadows only under white paper sheets, and paper is
+  reserved for exactly ONE entry per chapter (The Paper Rule: paper means
+  rarity, so a wall of sheets would flatten the signal).
+{% endcomment %}
+
+{%- liquid
+  assign reg_title = collection.title | default: shop.name
+  assign reg_desc = collection.description | strip_html | strip
+  assign reg_count = collection.products_count
+  assign sticky_offset = section.settings.sticky_offset | default: 96
+-%}
+
+<!--
+  IMPECCABLE DIRECTION CONTRACT — seed d5297b21 (surface, persuade)
+  THESIS: A collection is a chapter of the LIFETIME product register, not a tile wall.
+    Refuses the category default: a filter bar over an endless card grid.
+  OWN-WORLD: Clinical-Slate verso against a Paper A recto, 1px hairlines carrying the
+    entries, exactly one white paper sheet per chapter, ink type in Helvetica Neue, Lato
+    running copy, teal only on measured ratings. Recognizable with all content removed by
+    the dark spine and the ruled recto beside it.
+  STORY: The visitor sees which chapter they are in, what else the register holds,
+    and every entry in this chapter as a comparable record, then opens one.
+  FIRST VIEWPORT: Asymmetric spread. The verso (left, sticky) is the bound spine of the
+    register: a Clinical Slate panel carrying the rubric, the chapter title at 36px, the
+    description, the entry count as the page's protagonist number at stat scale, and the
+    ruled register index. Recto (right) is a hairline-ruled register on Paper A: the
+    chapter's lead entry as the one white paper sheet carrying the filled CTA, every
+    following entry a flat ruled line with thumbnail, name, measured rating, tabular price
+    and an outline buy control. Rows add to cart directly; the PDPs are not finished for
+    every product.
+  FORM: Open register spread, candidate 4 of 7 on the ordered list, seed key d5297b21.
+
+  AMPLIFICATION 2026-08-19 (bolder, Mechanik unveraendert). Die Flaeche hatte sich aus den
+  drei staerksten Zuegen des Systems ausgeklinkt und las sich deshalb flach:
+    1. Flaechenrhythmus. DESIGN.md wechselt Paper A / Weiss / Paper B / Clinical Slate.
+       Die Seite war ein einziges Paper-A-Feld, Slate kam nur auf 36px-Pillen vor. Der
+       Verso ist jetzt die Slate-Flaeche, der Recto bleibt Paper A. Erst dadurch liest
+       sich das eine weisse Blatt im Register als seltenes Papier.
+    2. Zahlen als Protagonisten. Das groesste Element der Seite war eine 36px-Ueberschrift,
+       die groesste Zahl die Eintragszahl mit 24px in einer Spec-Zeile. Die Eintragszahl
+       steht jetzt auf der Stat-Stufe und ist das groesste Element. Preise von 18 auf 24px,
+       auf dem Lead 32px: im Tail gab es vorher gar keine Hierarchie.
+    3. Der eine autorisierte Bewegungsmoment. Die Index-Linien zeichneten sich mit 12 %
+       Ink auf #f7f7f4 ein, also praktisch unsichtbar. Auf dem Ruecken sind es helle
+       Linien auf Slate, und die Bewegung ist erstmals wahrnehmbar.
+  Dabei drei belegte Defekte behoben, alle im Dev-Server gemessen, nicht geschaetzt:
+    - align-items: start liess dem sticky Verso 0px Weg. Der Ruecken scrollte nach 600px
+      weg und liess 912px tote Flaeche stehen. Jetzt 775px Weg.
+    - Nicht verfuegbare Zeilen wurden per opacity 0.68 komplett gedimmt, wodurch
+      ausgerechnet der Hinweis "Nicht verfuegbar" auf 3,9:1 fiel. Jetzt wird nur das
+      Bild gedimmt, der Text traegt 7,28:1.
+    - Die Scrollleiste des Ruecken war die helle Standardleiste auf dunkler Flaeche.
+  Geprueft bei 1440 und 390: keine Querscrollleiste, Zeilenraster 121px gleichmaessig,
+  Kontraste 5,13 bis 14,33:1, Chips 44px, Rating 3,64:1 bei 20px/700 (Large-Text-Grenze).
+  Unveraendert: Direktkauf aus der Zeile, PDP-Ausnahmen, Paginierung, Leerzustand,
+  die Index-Absicherung fuer nicht gelistete Kapitel.
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+
+<div class="section-{{ section.id }}-reg lt-reg-scope">
+  <div class="lt-reg">
+    <div class="lt-reg__inner">
+
+      {%- comment -%} -- Verso: the register column -- {%- endcomment -%}
+      <div class="lt-reg__verso">
+        <div class="lt-reg__versoInner">
+
+          {%- comment -%}
+            Only the running document title. The chapter's own identity is the
+            h1 directly below, so a left-hand label would both duplicate it and
+            leave a lone uppercase kicker above the heading once the running
+            title is hidden on mobile.
+          {%- endcomment -%}
+          <div class="lt-reg__rubric">
+            <span class="lt-reg__rubricDoc">{{ section.settings.document_title | escape }}</span>
+          </div>
+
+          <h1 class="lt-reg__title">{{ reg_title | escape }}</h1>
+
+          {%- if reg_desc != blank -%}
+            <p class="lt-reg__desc">{{ reg_desc }}</p>
+          {%- endif -%}
+
+          <dl class="lt-reg__spec">
+            <dt class="lt-reg__specTerm">Einträge</dt>
+            <dd class="lt-reg__specValue">{{ reg_count }}</dd>
+          </dl>
+
+          {%- liquid
+            comment
+              Half the live collections are not in the merchant-picked index
+              (internal/ops ones deliberately, others by omission). Without this
+              the visitor stands in a chapter the register denies exists and
+              aria-current never fires anywhere on the page.
+            endcomment
+            assign index_has_current = false
+            for block in section.blocks
+              if block.settings.collection != blank and block.settings.collection.handle == collection.handle
+                assign index_has_current = true
+                break
+              endif
+            endfor
+          -%}
+
+          {%- if section.blocks.size > 0 -%}
+            <nav class="lt-reg__index" aria-label="{{ section.settings.index_aria | escape }}">
+              <p class="lt-reg__indexHead">{{ section.settings.index_heading | escape }}</p>
+              <ul class="lt-reg__indexList" role="list">
+                {%- unless index_has_current -%}
+                  <li class="lt-reg__indexItem">
+                    <span class="lt-reg__indexLink is-current" aria-current="page">
+                      <span class="lt-reg__indexName">{{ collection.title | escape }}</span>
+                      <span class="lt-reg__indexCount">{{ collection.products_count }}</span>
+                    </span>
+                  </li>
+                {%- endunless -%}
+                {%- for block in section.blocks -%}
+                  {%- liquid
+                    assign idx_col = block.settings.collection
+                    if idx_col == blank
+                      continue
+                    endif
+                    assign idx_label = block.settings.label | default: idx_col.title
+                    assign is_current = false
+                    if idx_col.handle == collection.handle
+                      assign is_current = true
+                    endif
+                  -%}
+                  <li class="lt-reg__indexItem" {{ block.shopify_attributes }}>
+                    <a
+                      class="lt-reg__indexLink{% if is_current %} is-current{% endif %}"
+                      href="{{ idx_col.url }}"
+                      {% if is_current %}aria-current="page"{% endif %}
+                    >
+                      <span class="lt-reg__indexName">{{ idx_label | escape }}</span>
+                      <span class="lt-reg__indexCount">{{ idx_col.products_count }}</span>
+                    </a>
+                  </li>
+                {%- endfor -%}
+              </ul>
+            </nav>
+          {%- endif -%}
+
+        </div>
+      </div>
+
+      {%- comment -%} -- Recto: the entries -- {%- endcomment -%}
+      <div class="lt-reg__recto">
+
+        {%- paginate collection.products by section.settings.per_page -%}
+
+          {%- if collection.products.size > 0 -%}
+
+            <ul class="lt-reg__entries" role="list">
+              {%- for product in collection.products -%}
+                {%- liquid
+                  # Bewertung, Preis, Streichpreis und Abo-Zeile liegen in
+                  # snippets/lt-product-card.liquid, damit sie nicht zweimal
+                  # gepflegt werden muessen.
+
+                  # Paper signals rarity in this world (DESIGN.md, The Paper Rule), so
+                  # exactly one entry per chapter is a sheet and the rest are ruled
+                  # register lines. Only on page 1, or every page would have a "lead".
+                  assign is_lead = false
+                  if section.settings.promote_lead and forloop.first and paginate.current_page == 1
+                    assign is_lead = true
+                  endif
+
+                  # Die PDPs sind nicht fuer alle Produkte fertig, deshalb kauft die
+                  # Zeile direkt (BJ-Entscheid). Ausnahmen sind die beiden mehr-
+                  # variantigen Produkte, bei denen die erste Variante keine
+                  # eindeutige Wahl waere. Spiegelt lifetime-collection-grid.liquid.
+                  assign pdp_raw = section.settings.pdp_exception_handles | default: 'lifetime-age-dna,lifetime-nmn,nmn-pulver,age-dna-test'
+                  assign pdp_list = pdp_raw | replace: ' ', '' | split: ','
+                  assign is_pdp_exception = false
+                  if pdp_list contains product.handle
+                    assign is_pdp_exception = true
+                  endif
+
+                  assign use_atc = false
+                  assign atc_variant_id = blank
+                  if section.settings.link_behavior == 'cart' and is_pdp_exception == false and product.available
+                    assign first_variant = product.variants.first.id
+                    if first_variant
+                      assign atc_variant_id = first_variant
+                      assign use_atc = true
+                    endif
+                  endif
+
+                  assign action_label = section.settings.cta_label
+                  if use_atc
+                    assign action_label = section.settings.atc_label
+                  endif
+                -%}
+                <li class="lt-reg__entry{% if is_lead %} lt-reg__entry--lead{% endif %}">
+                  {%- comment -%}
+                    Dieselbe Karte wie im Katalog. Der hervorgehobene Eintrag
+                    ist dasselbe Papier, nur liegend, damit er die Zeilenflucht
+                    des Registers nicht bricht.
+                  {%- endcomment -%}
+                  {%- if is_lead -%}
+                    {%- assign entry_variant = 'sheet-wide' -%}
+                  {%- else -%}
+                    {%- assign entry_variant = 'row' -%}
+                  {%- endif -%}
+                  {%- render 'lt-product-card',
+                    product: product,
+                    variant: entry_variant,
+                    href: product.url,
+                    atc_variant_id: atc_variant_id,
+                    cta_label: action_label,
+                    soldout_label: section.settings.soldout_label
+                  -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+
+            {%- if paginate.pages > 1 -%}
+              <nav class="lt-reg__pages" aria-label="{{ section.settings.pagination_aria | escape }}">
+                {%- if paginate.previous -%}
+                  <a class="lt-reg__page lt-reg__page--step" href="{{ paginate.previous.url }}" rel="prev">
+                    {{- section.settings.prev_label | escape -}}
+                  </a>
+                {%- endif -%}
+                {%- for part in paginate.parts -%}
+                  {%- if part.is_link -%}
+                    <a class="lt-reg__page" href="{{ part.url }}">{{ part.title }}</a>
+                  {%- elsif part.title == paginate.current_page -%}
+                    <span class="lt-reg__page is-current" aria-current="page">{{ part.title }}</span>
+                  {%- else -%}
+                    <span class="lt-reg__page is-gap" aria-hidden="true">{{ part.title }}</span>
+                  {%- endif -%}
+                {%- endfor -%}
+                {%- if paginate.next -%}
+                  <a class="lt-reg__page lt-reg__page--step" href="{{ paginate.next.url }}" rel="next">
+                    {{- section.settings.next_label | escape -}}
+                  </a>
+                {%- endif -%}
+              </nav>
+            {%- endif -%}
+
+          {%- else -%}
+
+            <div class="lt-reg__empty">
+              <p class="lt-reg__emptyHead">{{ section.settings.empty_heading | escape }}</p>
+              <p class="lt-reg__emptyBody">{{ section.settings.empty_body | escape }}</p>
+              {%- if section.settings.empty_url != blank -%}
+                <a class="lt-reg__emptyLink" href="{{ section.settings.empty_url }}">
+                  {{- section.settings.empty_link_label | escape -}}
+                </a>
+              {%- endif -%}
+            </div>
+
+          {%- endif -%}
+
+        {%- endpaginate -%}
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+  .section-{{ section.id }}-reg {
+    --reg-sticky: {{ sticky_offset }}px;
+    --reg-hairline: rgba(38, 37, 30, 0.12);
+    --reg-ink: var(--color-ink, #26251e);
+    /* Warm muted ink, not neutral gray-400: gray-400 measures 2.35:1 on the
+       paper ground and 2.52:1 on a sheet, well under the 4.5:1 floor for the
+       12-14px label voice. ink-muted holds 5.01:1 / 5.37:1 and stays in the
+       ink family the rest of the type is tinted from. */
+    --reg-faint: var(--color-ink-muted, #6b6b63);
+    --reg-slate: var(--color-dark, #364f56);
+    --reg-teal: var(--color-teal-dark, #4a8c85);
+    /* On-dark-Rampe fuer den Rueckenteil. Werte aus DESIGN.md, dort als die
+       WCAG-geprueften on-dark-Textstufen gefuehrt: voll 7,43:1 auf dem Slate,
+       muted 4,82:1. Deep Teal traegt auf Slate nur 2,10:1 und ist deshalb
+       innerhalb des Ruecken weder Hover- noch Fokusfarbe.
+       Wie --reg-well sind das Literale: DESIGN.md fuehrt sie als on-dark und
+       dark-tile, das Live-Theme legt dafuer aber keine CSS-Variable an
+       (geprueft gegen assets/theme.css). Also hier deklariert statt als
+       var() auf einen Token zu zeigen, den es nicht gibt. */
+    --reg-on-dark: #f7f7f4;
+    --reg-on-dark-muted: rgba(247, 247, 244, 0.72);
+    --reg-hairline-dark: rgba(247, 247, 244, 0.2);
+    --reg-slate-tile: #2d4249;
+    /* Paper B. DESIGN.md carries it as surface-b, but the live theme exposes no
+       CSS variable for it, so it is declared here rather than left as a literal
+       buried in a rule. */
+    --reg-well: #f2f1ed;
+
+    background: {{ section.settings.bg_color }};
+  }
+
+  .section-{{ section.id }}-reg .lt-reg {
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+  }
+
+  /* The desktop opening breath costs ~17% of a phone viewport before the first
+     rule; halve it so the chapter title is in the first screen, not below it. */
+  @media (max-width: 767px) {
+    .section-{{ section.id }}-reg .lt-reg {
+      padding-top: {{ section.settings.padding_top | divided_by: 2 }}px;
+      padding-bottom: {{ section.settings.padding_bottom | divided_by: 2 }}px;
+    }
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--space-4, 16px);
+    display: grid;
+    /* minmax(0, …) rather than plain fr: a grid track's implicit min-width is
+       auto, so the nowrap chip rail below 1000px stretches its own track and
+       pushes the whole document into horizontal scroll. */
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-7, 48px);
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__verso,
+  .section-{{ section.id }}-reg .lt-reg__recto {
+    min-width: 0;
+  }
+
+  @media (min-width: 1000px) {
+    .section-{{ section.id }}-reg .lt-reg__inner {
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+      gap: var(--space-8, 64px);
+      padding: 0 var(--space-5, 24px);
+      /* KEIN align-items: start. Ein nicht gedehnter Grid-Eintrag ist genau so
+         hoch wie sein Inhalt, und sticky kann sich nur innerhalb des eigenen
+         Eintrags bewegen: der Weg war damit 0px, der Ruecken scrollte nach
+         600px weg und liess 912px tote Flaeche neben dem Register stehen.
+         Gemessen im Dev-Server, nicht geschaetzt. */
+    }
+
+    .section-{{ section.id }}-reg .lt-reg__versoInner {
+      position: sticky;
+      top: var(--reg-sticky);
+      /* The verso runs ~840px with a full index. On a 800px-tall laptop the
+         last chapters would sit below the fold of a sticky block and be
+         permanently unreachable, so the column scrolls itself. */
+      max-height: calc(100vh - var(--reg-sticky) - var(--space-5, 24px));
+      overflow-y: auto;
+      scrollbar-width: thin;
+      /* Der Ruecken ist dunkel, die Standard-Scrollleiste ist hell und sass
+         als heller Balken auf der Slate-Flaeche. */
+      scrollbar-color: rgba(247, 247, 244, 0.28) transparent;
+      overscroll-behavior: contain;
+    }
+
+    .section-{{ section.id }}-reg .lt-reg__versoInner::-webkit-scrollbar { width: 6px; }
+    .section-{{ section.id }}-reg .lt-reg__versoInner::-webkit-scrollbar-track { background: transparent; }
+    .section-{{ section.id }}-reg .lt-reg__versoInner::-webkit-scrollbar-thumb {
+      background: rgba(247, 247, 244, 0.28);
+      border-radius: var(--radius-full, 999px);
+    }
+  }
+
+  /* -- Der Ruecken
+     Die gebundene Kante des Registerbands. Clinical Slate ist laut DESIGN.md
+     die Autoritaetsfarbe des Dokuments und traegt dort die dunklen Kapitel.
+     Auf dieser Flaeche kam sie bisher nur auf 36px-Pillen vor, die Seite war
+     ein einziges flaches Paper-A-Feld. Der Ruecken gibt ihr den Flaechen-
+     wechsel zurueck und laesst das eine weisse Blatt im Register erst als
+     seltenes Papier lesen. Er traegt keine Kaufsteuerung, nur Identitaet
+     und Wegweisung. */
+  .section-{{ section.id }}-reg .lt-reg__versoInner {
+    background: var(--reg-slate);
+    border-radius: var(--radius-md, 12px);
+    padding: var(--space-6, 32px);
+    color: var(--reg-on-dark);
+  }
+
+  @media (min-width: 1000px) {
+    .section-{{ section.id }}-reg .lt-reg__versoInner {
+      padding: var(--space-6, 32px) var(--space-6, 32px) var(--space-5, 24px);
+    }
+  }
+
+  /* -- Rubric  */
+  .section-{{ section.id }}-reg .lt-reg__rubric {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+    min-height: 1em;
+    gap: var(--space-4, 16px);
+    border-top: 1px solid var(--reg-hairline-dark);
+    padding-top: var(--space-3, 12px);
+    margin-bottom: var(--space-7, 48px);
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__rubricDoc {
+    font-family: var(--font-body, 'Lato', sans-serif);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 0;
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__rubricDoc { color: var(--reg-on-dark-muted); }
+
+  @media (max-width: 767px) {
+    .section-{{ section.id }}-reg .lt-reg__rubricDoc { display: none; }
+
+    /* With the running title hidden the rubric is a bare rule; at desktop
+       spacing it would spend ~63px of a phone viewport on nothing, undoing
+       the halved section padding that puts the chapter title above the fold. */
+    .section-{{ section.id }}-reg .lt-reg__rubric {
+      margin-bottom: var(--space-5, 24px);
+    }
+  }
+
+  /* -- Verso type  */
+  .section-{{ section.id }}-reg .lt-reg__title {
+    font-family: var(--font-heading, 'Helvetica Neue', Helvetica, Arial, sans-serif);
+    font-size: var(--text-h1, 36px);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--reg-on-dark);
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  @media (max-width: 767px) {
+    .section-{{ section.id }}-reg .lt-reg__title { font-size: var(--text-h2, 28px); }
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__desc {
+    font-family: var(--font-body, 'Lato', sans-serif);
+    font-size: var(--text-body, 16px);
+    font-weight: 400;
+    line-height: 1.6;
+    /* Deliberately NOT the reserved subline alpha rgba(38,37,30,0.72): sitting
+       directly under the h1 in that exact colour reads as the second line of a
+       heading pair, which PRODUCT.md forbids at a different size and family. */
+    color: var(--reg-on-dark-muted);
+    max-width: 34rem;
+    margin: var(--space-4, 16px) 0 0;
+  }
+
+  /* -- Die Kennzahl des Kapitels
+     DESIGN.md stellt die Zahlen in den Vordergrund: das groesste Element
+     einer Seite ist eine Zahl, keine Ueberschrift. Auf dieser Flaeche war
+     die groesste Zahl bisher die Eintragszahl mit 24px, eingeklemmt in eine
+     Spec-Zeile unter der Beschreibung. Sie steht jetzt auf der Stat-Stufe
+     (56px, mobil 48px) und ist damit das groesste Element der Seite.
+     Bewusst NICHT auf der Report-Value-Stufe und bewusst nicht in Teal: die
+     Eintragszahl ist eine Zaehlung, kein Messwert, und Teal bedeutet in
+     diesem System Messung. Dieselbe Regel, nach der die Preise Ink bleiben. */
+  .section-{{ section.id }}-reg .lt-reg__spec {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4, 16px);
+    border-top: 1px solid var(--reg-hairline-dark);
+    padding: var(--space-5, 24px) 0 0;
+    margin: var(--space-6, 32px) 0 0;
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__specTerm {
+    font-family: var(--font-body, 'Lato', sans-serif);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--reg-on-dark-muted);
+    margin: 0;
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__specValue {
+    font-family: var(--font-heading, 'Helvetica Neue', Helvetica, Arial, sans-serif);
+    font-size: var(--text-stat, 56px);
+    font-weight: 700;
+    line-height: 0.9;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--reg-on-dark);
+    margin: 0;
+  }
+
+  @media (max-width: 767px) {
+    .section-{{ section.id }}-reg .lt-reg__specValue { font-size: 48px; }
+  }
+
+  /* -- Register index  */
+  .section-{{ section.id }}-reg .lt-reg__index {
+    margin-top: var(--space-6, 32px);
+    border-top: 1px solid var(--reg-hairline-dark);
+    padding-top: var(--space-5, 24px);
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__indexHead {
+    font-family: var(--font-body, 'Lato', sans-serif);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--reg-on-dark-muted);
+    margin: 0 0 var(--space-2, 8px);
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__indexList {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__indexLink {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4, 16px);
+    padding: var(--space-3, 12px) 0;
+    text-decoration: none;
+    color: var(--reg-on-dark-muted);
+    font-family: var(--font-body, 'Lato', sans-serif);
+    font-size: var(--text-body-sm, 14px);
+    transition: color 0.2s ease;
+
+    /* Authored moment: the register rules itself in, left to right.
+       Auf dem hellen Grund waren das 12-Prozent-Ink-Linien auf #f7f7f4, also
+       praktisch unsichtbar. Auf dem Ruecken sind es helle Linien auf Slate,
+       und die Bewegung ist erstmals wahrnehmbar. */
+    background-image: linear-gradient(var(--reg-hairline-dark), var(--reg-hairline-dark));
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% 1px;
+  }
+
+  /* Deep Teal traegt auf Slate nur 2,10:1. Der Hover geht deshalb auf die
+     volle On-Dark-Stufe hoch, nicht auf die Interaktionsfarbe des hellen
+     Grunds. Gleiche Logik wie beim Outline-Button auf dunklen Flaechen. */
+  .section-{{ section.id }}-reg .lt-reg__indexLink:hover { color: var(--reg-on-dark); }
+
+  .section-{{ section.id }}-reg .lt-reg__indexLink:focus-visible {
+    outline: 2px solid var(--reg-on-dark);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm, 8px);
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__indexLink.is-current {
+    color: var(--reg-on-dark);
+    font-weight: 700;
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__indexName { min-width: 0; }
+
+  .section-{{ section.id }}-reg .lt-reg__indexCount {
+    font-family: var(--font-heading, 'Helvetica Neue', Helvetica, Arial, sans-serif);
+    font-variant-numeric: tabular-nums;
+    font-size: var(--text-body-sm, 14px);
+    color: var(--reg-on-dark-muted);
+    flex: none;
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__indexLink.is-current .lt-reg__indexCount { color: var(--reg-on-dark); }
+
+  /* Mobile: the index becomes a scrollable chip rail, matching lt-cnav. */
+  @media (max-width: 999px) {
+    .section-{{ section.id }}-reg .lt-reg__indexList {
+      display: flex;
+      gap: var(--space-2, 8px);
+      overflow-x: auto;
+      scrollbar-width: none;
+      scroll-snap-type: x proximity;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: var(--space-1, 4px);
+    }
+
+    .section-{{ section.id }}-reg .lt-reg__indexList::-webkit-scrollbar { display: none; }
+
+    .section-{{ section.id }}-reg .lt-reg__indexItem {
+      flex: none;
+      scroll-snap-align: start;
+    }
+
+    /* Auf dem Ruecken sind die Chips Slate-Tile statt Paper: derselbe
+       Aufbau wie die erhabenen Kacheln auf dunklen Flaechen in DESIGN.md.
+       44px Mindesthoehe bleibt die Tap-Target-Untergrenze. */
+    .section-{{ section.id }}-reg .lt-reg__indexLink {
+      background-image: none;
+      border-radius: var(--radius-full, 999px);
+      background-color: var(--reg-slate-tile);
+      box-shadow: inset 0 0 0 1px var(--reg-hairline-dark);
+      padding: 0 var(--space-4, 16px);
+      min-height: 44px;
+      align-items: center;
+      white-space: nowrap;
+    }
+
+    /* Der aktuelle Chip ist der On-Dark-CTA aus DESIGN.md: weiss auf Slate. */
+    .section-{{ section.id }}-reg .lt-reg__indexLink.is-current {
+      background-color: var(--reg-on-dark);
+      box-shadow: none;
+      color: var(--reg-slate);
+    }
+
+    .section-{{ section.id }}-reg .lt-reg__indexLink.is-current .lt-reg__indexCount { color: var(--reg-slate); opacity: 0.72; }
+  }
+
+  /* -- Entry sheets
+     Die Eintraege selbst liegen in assets/lt-product-card.css, damit
+     Katalog und Register nicht zwei Kopien derselben Karte pflegen.
+     Hier bleibt nur, was die Liste als Liste betrifft. */
+  .section-{{ section.id }}-reg .lt-reg__entries {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__entry--lead {
+    margin-bottom: var(--space-6, 32px);
+  }
+
+  /* Nach dem Blatt beginnt die Zeilenliste neu, also traegt ihre erste
+     Zeile keine eigene Hairline. */
+  .section-{{ section.id }}-reg .lt-reg__entry--lead + .lt-reg__entry .ltc--row {
+    border-top: 0;
+  }
+
+  /* Der Rueckenteil setzt Paper A als Grund, das Well ist Paper B. */
+  .section-{{ section.id }}-reg .ltc {
+    --ltc-well: var(--reg-well);
+  }
+
+  .section-{{ section.id }}-reg .ltc.is-loading {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+
+  /* -- Pagination  */
+  .section-{{ section.id }}-reg .lt-reg__pages {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2, 8px);
+    border-top: 1px solid var(--reg-hairline);
+    margin-top: var(--space-7, 48px);
+    padding-top: var(--space-4, 16px);
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__page {
+    font-family: var(--font-body, 'Lato', sans-serif);
+    font-size: var(--text-body-sm, 14px);
+    font-variant-numeric: tabular-nums;
+    color: var(--color-gray-600, #525252);
+    text-decoration: none;
+    padding: var(--space-2, 8px) var(--space-3, 12px);
+    border-radius: var(--radius-full, 999px);
+    transition: color 0.2s ease, background-color 0.2s ease;
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__page:hover { color: var(--reg-teal); }
+
+  .section-{{ section.id }}-reg .lt-reg__page.is-current {
+    background: var(--reg-slate);
+    color: var(--color-white, #fff);
+    font-weight: 600;
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__page.is-gap { color: var(--reg-faint); }
+
+  .section-{{ section.id }}-reg .lt-reg__page:focus-visible {
+    outline: 2px solid var(--reg-teal);
+    outline-offset: 2px;
+  }
+
+  /* -- Empty state  */
+  .section-{{ section.id }}-reg .lt-reg__empty {
+    border-top: 1px solid var(--reg-hairline);
+    border-bottom: 1px solid var(--reg-hairline);
+    padding: var(--space-8, 64px) 0;
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__emptyHead {
+    font-family: var(--font-heading, 'Helvetica Neue', Helvetica, Arial, sans-serif);
+    font-size: var(--text-h3, 24px);
+    font-weight: 400;
+    line-height: 1.25;
+    color: var(--reg-ink);
+    margin: 0;
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__emptyBody {
+    font-family: var(--font-body, 'Lato', sans-serif);
+    font-size: var(--text-body, 16px);
+    line-height: 1.6;
+    color: var(--color-gray-600, #525252);
+    max-width: 34rem;
+    margin: var(--space-3, 12px) 0 0;
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__emptyLink {
+    display: inline-flex;
+    align-items: center;
+    height: 48px;
+    padding: 0 var(--space-6, 32px);
+    border-radius: var(--radius-full, 999px);
+    background: var(--reg-slate);
+    color: var(--color-white, #fff);
+    font-family: var(--font-body, 'Lato', sans-serif);
+    font-size: var(--text-body-sm, 14px);
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: var(--space-5, 24px);
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__emptyLink:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+
+  .section-{{ section.id }}-reg .lt-reg__emptyLink:focus-visible {
+    outline: 2px solid var(--reg-teal);
+    outline-offset: 2px;
+  }
+
+  /* -- The one authored moment
+     On first paint the register rules itself in: each index row's
+     hairline grows from the left, staggered down the column. Content
+     is fully visible before, during and after; only the rule moves. */
+  @media (min-width: 1000px) {
+    .section-{{ section.id }}-reg .lt-reg__indexLink {
+      background-size: 0% 1px;
+      animation: lt-reg-rule 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    {%- for i in (1..12) -%}
+      .section-{{ section.id }}-reg .lt-reg__indexItem:nth-child({{ i }}) .lt-reg__indexLink {
+        animation-delay: {{ i | times: 55 }}ms;
+      }
+    {%- endfor -%}
+  }
+
+  @keyframes lt-reg-rule {
+    from { background-size: 0% 1px; }
+    to   { background-size: 100% 1px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .section-{{ section.id }}-reg .lt-reg__indexLink {
+      background-size: 100% 1px;
+      animation: none;
+    }
+
+    .section-{{ section.id }}-reg .lt-reg__emptyLink,
+    .section-{{ section.id }}-reg .lt-reg__page,
+    .section-{{ section.id }}-reg .lt-reg__indexLink {
+      transition: none;
+    }
+
+    .section-{{ section.id }}-reg .lt-reg__emptyLink:hover { transform: none; }
+  }
+</style>
+
+<script>
+  (function () {
+    var scope = document.querySelector('.section-{{ section.id }}-reg');
+    if (!scope) return;
+
+    function handleClick(e) {
+      var card = e.currentTarget;
+      var id = card.getAttribute('data-lt-card-atc');
+      if (!id) return;
+      e.preventDefault();
+      if (card.classList.contains('is-loading')) return;
+      card.classList.add('is-loading');
+
+      var payload = JSON.stringify({ items: [{ id: parseInt(id, 10), quantity: 1 }] });
+      var headers = { 'Content-Type': 'application/json' };
+      function done() { card.classList.remove('is-loading'); }
+
+      // Gleicher Theme-Helper wie lifetime-collection-grid: oeffnet den Drawer
+      // und aktualisiert den Warenkorb, der Besucher bleibt auf der Seite.
+      if (typeof window.handleAddToCart === 'function') {
+        try {
+          window.handleAddToCart(payload, 1, headers, done);
+        } catch (err) {
+          done();
+        }
+      } else {
+        fetch('/cart/add.js', { method: 'POST', headers: headers, body: payload })
+          .then(function () {
+            document.dispatchEvent(new CustomEvent('cart:refresh'));
+          })
+          .finally(done);
+      }
+    }
+
+    scope.querySelectorAll('[data-lt-card-atc]').forEach(function (card) {
+      card.addEventListener('click', handleClick);
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection Register",
+  "tag": "section",
+  "class": "lt-collection-register",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Register"
+    },
+    {
+      "type": "text",
+      "id": "document_title",
+      "label": "Laufender Dokumenttitel rechts",
+      "default": "LIFETIME · Produktregister"
+    },
+    {
+      "type": "text",
+      "id": "index_heading",
+      "label": "Überschrift Registerspalte",
+      "default": "Weitere Kapitel"
+    },
+    {
+      "type": "text",
+      "id": "index_aria",
+      "label": "ARIA-Label Registerspalte",
+      "default": "Produktregister"
+    },
+    {
+      "type": "header",
+      "content": "Einträge"
+    },
+    {
+      "type": "range",
+      "id": "per_page",
+      "label": "Einträge pro Seite",
+      "min": 6,
+      "max": 48,
+      "step": 6,
+      "default": 24
+    },
+    {
+      "type": "select",
+      "id": "link_behavior",
+      "label": "Klick auf einen Eintrag",
+      "info": "Direktkauf ist der Standard, solange die Produktseiten nicht fuer alle Produkte fertig sind.",
+      "options": [
+        { "value": "cart", "label": "Legt in den Warenkorb" },
+        { "value": "product", "label": "Fuehrt zur Produktseite" }
+      ],
+      "default": "cart"
+    },
+    {
+      "type": "text",
+      "id": "pdp_exception_handles",
+      "label": "Immer zur Produktseite (Handles, kommagetrennt)",
+      "info": "Fuer mehrvariantige Produkte, bei denen die erste Variante keine eindeutige Wahl ist.",
+      "default": "lifetime-age-dna,lifetime-nmn,nmn-pulver,age-dna-test"
+    },
+    {
+      "type": "text",
+      "id": "atc_label",
+      "label": "Button-Text Direktkauf",
+      "default": "In den Warenkorb"
+    },
+    {
+      "type": "checkbox",
+      "id": "promote_lead",
+      "label": "Ersten Eintrag als Papierkarte hervorheben",
+      "info": "Papier ist in diesem System selten. Genau ein Eintrag pro Kapitel wird zur weissen Karte mit Button, alle weiteren sind Registerzeilen.",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button-Text (nur Papierkarte)",
+      "default": "Zum Produkt"
+    },
+    {
+      "type": "text",
+      "id": "soldout_label",
+      "label": "Hinweis nicht verfügbar",
+      "default": "Nicht verfügbar"
+    },
+    {
+      "type": "text",
+      "id": "pagination_aria",
+      "label": "ARIA-Label Seitennavigation",
+      "default": "Seitennavigation"
+    },
+    {
+      "type": "text",
+      "id": "prev_label",
+      "label": "Zurück",
+      "default": "Zurück"
+    },
+    {
+      "type": "text",
+      "id": "next_label",
+      "label": "Weiter",
+      "default": "Weiter"
+    },
+    {
+      "type": "header",
+      "content": "Leerer Zustand"
+    },
+    {
+      "type": "text",
+      "id": "empty_heading",
+      "label": "Überschrift",
+      "default": "Dieses Kapitel ist noch leer."
+    },
+    {
+      "type": "textarea",
+      "id": "empty_body",
+      "label": "Text",
+      "default": "Hier sind aktuell keine Produkte hinterlegt. Im vollständigen Register findest du alles, was wir führen."
+    },
+    {
+      "type": "url",
+      "id": "empty_url",
+      "label": "Link-Ziel",
+      "default": "/collections/all"
+    },
+    {
+      "type": "text",
+      "id": "empty_link_label",
+      "label": "Link-Text",
+      "default": "Zum vollständigen Register"
+    },
+    {
+      "type": "header",
+      "content": "Darstellung"
+    },
+    {
+      "type": "color",
+      "id": "bg_color",
+      "label": "Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "range",
+      "id": "sticky_offset",
+      "label": "Sticky-Abstand oben",
+      "min": 0,
+      "max": 200,
+      "step": 8,
+      "unit": "px",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 96
+    }
+  ],
+  "blocks": [
+    {
+      "type": "register_link",
+      "name": "Register-Eintrag",
+      "settings": [
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Kollektion"
+        },
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Abweichender Titel"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "enabled_on": {
+    "templates": ["collection"]
+  },
+  "presets": [
+    {
+      "name": "Collection Register"
+    }
+  ]
+}
+{% endschema %}

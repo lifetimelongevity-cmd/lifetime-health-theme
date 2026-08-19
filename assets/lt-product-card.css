@@ -1,0 +1,514 @@
+/*
+   lt-product-card — die gemeinsame Produktkarte
+   Getragen von sections/lifetime-collection-grid.liquid (Katalog)
+   und sections/lt-collection-register.liquid (Register-Recto).
+
+   Ein Feldsatz, vier Layouts: sheet · sheet-wide · row · tile.
+   Alle Werte über Theme-Tokens. Zwei Ausnahmen unten begründet.
+   Spec: docs/collection-all-spec.md §3
+*/
+
+.ltc {
+  /* Paper B als Bildwell. DESIGN.md führt die Fläche als surface-b,
+     das Live-Theme legt dafür aber keine CSS-Variable an (geprüft gegen
+     assets/theme.css). Deshalb hier deklariert statt auf einen Token zu
+     zeigen, den es nicht gibt. Gleiche Begründung wie --reg-well. */
+  --ltc-well: #f2f1ed;
+
+  /* Preisstufe des Blatts. Liegt bewusst zwischen --text-h2 (28) und
+     --text-stat (56); für diesen Schritt hat das Theme keinen Token. */
+  --ltc-price-lg: 32px;
+
+  --ltc-hairline: rgba(38, 37, 30, 0.12);
+
+  position: relative;
+  display: grid;
+  text-decoration: none;
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+.ltc:focus-visible {
+  outline: 2px solid var(--color-teal-dark);
+  outline-offset: 2px;
+}
+
+/* -- Bildwell
+   Die Produktrender sind weiße Verpackung auf transparentem Grund.
+   Ohne getönte Fläche verschwindet die halbe Seite. */
+.ltc__well {
+  display: block;
+  background: var(--ltc-well);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.ltc__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transition: transform var(--ease-smooth);
+}
+
+.ltc__well--empty {
+  display: block;
+}
+
+.ltc:hover .ltc__img {
+  transform: scale(1.04);
+}
+
+/* -- Textblock  */
+.ltc__body {
+  display: block;
+  min-width: 0;
+}
+
+.ltc__kicker {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  /* ink-muted statt gray-400: 5,01:1 auf Paper A, und die Tönung
+     bleibt in der Ink-Familie statt neutral grau zu werden. */
+  color: var(--color-ink-muted);
+  margin-bottom: var(--space-2);
+}
+
+.ltc__name {
+  font-family: var(--font-heading);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-bold);
+  line-height: 1.25;
+  color: var(--color-ink);
+  /* Ein Register hält seinen Rhythmus. Ohne die Klemmung sprengen
+     dreizeilige Namen das Zeilenraster. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ltc__sub {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: 1.5;
+  color: var(--color-gray-600);
+  max-width: 44em;
+  margin-top: var(--space-2);
+}
+
+.ltc__meta {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+}
+
+/* -- Bewertung als Messwert
+   20px/700 statt 16px/700: Deep Teal misst auf Weiß 3,9:1 und trägt
+   damit erst ab 18,66px fett. Hält den festgelegten Teal, statt einen
+   dunkleren Ton zu erfinden, den das System nicht hat. */
+.ltc__rating {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25em;
+}
+
+.ltc__ratingValue {
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-teal-dark);
+}
+
+.ltc__ratingScale,
+.ltc__ratingCount {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-ink-muted);
+}
+
+.ltc__flag {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-gray-600);
+}
+
+/* -- Preisspalte
+   Preise sind Ink, nie Teal. Teal sagt in dieser Welt "gemessen",
+   und ein Preis ist keine Messung. */
+.ltc__tail {
+  display: block;
+}
+
+.ltc__price {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+.ltc__priceFrom {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  color: var(--color-ink-muted);
+}
+
+/* DESIGN.md lässt Gray 400 für durchgestrichene Vergleichspreise zu. Hier
+   trotzdem ink-muted: Gray 400 misst auf Papier 2,35:1, und ein Ankerpreis,
+   den man nicht lesen kann, macht seine eigene Arbeit nicht. ink-muted hält
+   5,01:1 und bleibt in der Ink-Familie, dieselbe Begründung, mit der
+   DESIGN.md Gray 400 aus der 12–14px-Stimme schon herausgenommen hat. */
+.ltc__compare {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-muted);
+  margin-top: 2px;
+}
+
+.ltc__subPrice,
+.ltc__note {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: 1.4;
+  color: var(--color-ink-muted);
+  margin-top: var(--space-1);
+}
+
+/* -- CTA  */
+.ltc__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  text-align: center;
+  background: var(--color-dark);
+  color: var(--color-white);
+  border: 1px solid var(--color-dark);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.ltc__cta--outline {
+  background: transparent;
+  color: var(--color-dark);
+  /* Volle Slate-Kante statt --color-border-strong: das misst auf Weiß nur
+     rund 1,2:1 und ist damit keine erkennbare Bedienelement-Kante. */
+  border: 1px solid var(--color-dark);
+}
+
+.ltc:hover .ltc__cta {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.ltc:hover .ltc__cta--outline {
+  background: var(--color-dark);
+  color: var(--color-white);
+  box-shadow: none;
+  transform: none;
+}
+
+/* -- Nicht verfügbar
+   Nur das Bild dimmen. Wird die ganze Zeile gedimmt, fällt
+   ausgerechnet der Hinweis "Nicht verfügbar" unter den Kontrastwert. */
+.ltc.is-unavailable .ltc__well {
+  opacity: 0.5;
+}
+
+.ltc.is-unavailable .ltc__name,
+.ltc.is-unavailable .ltc__price {
+  color: var(--color-gray-600);
+}
+
+/*
+   Variante: sheet — das Blatt
+   Das einzige Element dieser Flächen, das Papier ist.
+*/
+.ltc--sheet {
+  grid-template-rows: auto 1fr auto;
+  gap: var(--space-5);
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  /* paper-rest. Schatten trägt in dieser Welt nur Papier. */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease;
+}
+
+.ltc--sheet:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.ltc--sheet .ltc__well {
+  width: 100%;
+  height: 220px;
+  padding: var(--space-3);
+}
+
+.ltc--sheet .ltc__name {
+  font-size: var(--text-h3);
+}
+
+.ltc--sheet .ltc__price {
+  font-size: var(--ltc-price-lg);
+}
+
+.ltc--sheet .ltc__tail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.ltc--sheet .ltc__cta {
+  margin-top: var(--space-4);
+  width: 100%;
+}
+
+/*
+   Variante: sheet-wide — das Blatt in der Zeilenflucht
+   Dasselbe Papier wie sheet, aber liegend: der hervorgehobene Eintrag
+   eines Registers steht in einer Zeilenliste und darf ihren Fluss
+   nicht brechen.
+*/
+.ltc--sheet-wide {
+  grid-template-columns: 144px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-6);
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.ltc--sheet-wide:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.ltc--sheet-wide .ltc__well {
+  width: 144px;
+  height: 144px;
+  padding: var(--space-3);
+}
+
+.ltc--sheet-wide .ltc__name {
+  font-size: var(--text-h3);
+}
+
+.ltc--sheet-wide .ltc__tail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+  text-align: right;
+}
+
+.ltc--sheet-wide .ltc__cta {
+  margin-top: var(--space-2);
+}
+
+/*
+   Variante: row — die Registerzeile
+   Kein Kasten, keine Fläche, kein Schatten. Getrennt durch Hairlines.
+*/
+.ltc--row {
+  grid-template-columns: 88px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-5);
+  padding: var(--space-5) 0;
+  border-top: 1px solid var(--ltc-hairline);
+}
+
+.ltc--row:hover {
+  background-color: rgba(38, 37, 30, 0.03);
+}
+
+.ltc--row .ltc__well {
+  width: 88px;
+  height: 88px;
+  padding: var(--space-1);
+}
+
+.ltc--row .ltc__tail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+  text-align: right;
+}
+
+.ltc--row .ltc__cta {
+  margin-top: var(--space-2);
+}
+
+/*
+   Variante: tile — Kachel
+   Bleibt für Sections, die weiter im Raster arbeiten.
+*/
+.ltc--tile {
+  grid-template-rows: auto 1fr auto;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+}
+
+.ltc--tile .ltc__well {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-width: 220px;
+  padding: var(--space-3);
+}
+
+.ltc--tile .ltc__price {
+  font-size: var(--text-h3);
+}
+
+.ltc--tile .ltc__tail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+}
+
+.ltc--tile .ltc__cta {
+  margin-top: var(--space-3);
+}
+
+/*
+   Mobil
+   Keine horizontalen Scrollflächen. Das Blatt stapelt, die Zeile
+   bleibt Zeile und lässt Preis und CTA unter den Text umbrechen.
+*/
+@media (max-width: 749px) {
+  .ltc--sheet {
+    padding: var(--space-5);
+    gap: var(--space-4);
+  }
+
+  .ltc--sheet .ltc__well {
+    height: 180px;
+  }
+
+  /* 88px bleibt auch auf dem Telefon: bei 72px lesen sich zwölf sehr
+     ähnliche Präparatdosen als Textur statt als Produkte. Gemessen am
+     Register, dort ist der Wert bereits geprüft. */
+  .ltc--row {
+    grid-template-columns: 88px minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-4);
+    padding: var(--space-4) 0;
+  }
+
+  .ltc--row .ltc__well {
+    width: 88px;
+    height: 88px;
+  }
+
+  /* Die Zeilenbreite reicht auf dem Telefon nicht für Name plus benannten
+     Kaufbutton, also bricht der Schwanz um. Er bleibt aber in der Textspalte:
+     unter dem Bild gesetzt liest er sich als eigener Block statt als Teil
+     derselben Zeile. Und er braucht keine eigene Hairline, die Zeile hat
+     schon eine. */
+  .ltc--row .ltc__tail,
+  .ltc--sheet-wide .ltc__tail {
+    grid-column: 2;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left;
+    gap: var(--space-2) var(--space-3);
+    width: 100%;
+    margin-top: var(--space-3);
+  }
+
+  /* Preis und Abo-Zeile bleiben nebeneinander, die Aktion wandert nach
+     rechts. Reicht die Breite nicht, bricht die Aktion um, nicht der Preis
+     weg von seiner eigenen Erlaeuterung. */
+  .ltc--row .ltc__price,
+  .ltc--sheet-wide .ltc__price {
+    flex: 0 0 auto;
+    order: 1;
+  }
+
+  .ltc--row .ltc__subPrice,
+  .ltc--row .ltc__compare,
+  .ltc--row .ltc__note,
+  .ltc--sheet-wide .ltc__subPrice,
+  .ltc--sheet-wide .ltc__compare,
+  .ltc--sheet-wide .ltc__note {
+    flex: 0 0 auto;
+    order: 2;
+    margin-top: 0;
+  }
+
+  .ltc--row .ltc__cta,
+  .ltc--sheet-wide .ltc__cta {
+    order: 3;
+    margin-top: 0;
+    margin-left: auto;
+  }
+
+  .ltc--sheet-wide {
+    grid-template-columns: 112px minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-4);
+    padding: var(--space-4);
+  }
+
+  .ltc--sheet-wide .ltc__well {
+    width: 112px;
+    height: 112px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ltc__img,
+  .ltc__cta,
+  .ltc--sheet,
+  .ltc--sheet-wide,
+  .ltc--row {
+    transition: none;
+  }
+
+  .ltc:hover .ltc__img,
+  .ltc:hover .ltc__cta,
+  .ltc--sheet-wide:hover {
+    transform: none;
+  }
+}

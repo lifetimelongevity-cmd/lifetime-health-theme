@@ -1,0 +1,245 @@
+{% doc %}
+  Die gemeinsame Produktkarte für Katalog und Register. Ein Feldsatz, drei Layouts.
+
+  Rendert das komplette <a>-Element. Die Kaufpolitik (PDP oder Warenkorb) entscheidet
+  die aufrufende Section und reicht das Ergebnis über `href` und `atc_variant_id` durch.
+
+  Reihenfolge der Felder: Bild im Well, Kicker, Titel, Nutzenzeile, Bewertung,
+  Preis, Streichpreis, Abo-Zeile, Preisnotiz, CTA.
+
+  @param {object} product - Produkt. Über all_products[handle] rehydriert übergeben, sonst fehlen die App-Metafelder (Loox).
+  @param {string} href - Ziel des Karten-Links.
+  @param {string} cta_label - Beschriftung der CTA-Pille.
+  @param {string} [variant] - sheet | row | tile. Default row.
+  @param {string} [atc_variant_id] - Variant-ID. Gesetzt heißt: die Karte legt in den Warenkorb.
+  @param {string} [title_override] - Kuratierter Kurztitel.
+  @param {string} [subline_override] - Kuratierte Nutzenzeile.
+  @param {string} [kicker] - Kurzlabel über dem Titel. Nur wo es etwas sagt.
+  @param {object} [image_override] - Kuratierter Packshot.
+  @param {boolean} [price_from] - Default true. false unterdrückt das "ab" trotz price_varies.
+  @param {string} [price_note] - Eine kurze Zeile unter dem Preis.
+  @param {boolean} [show_rating] - Default true.
+  @param {boolean} [show_subscription] - Default true.
+  @param {string} [soldout_label] - Default "Nicht verfügbar".
+
+  @example
+  {% render 'lt-product-card',
+     product: product,
+     variant: 'sheet',
+     href: product.url,
+     cta_label: 'Zum Produkt',
+     kicker: 'Aktionspreis bis 30. August' %}
+{% enddoc %}
+
+{%- liquid
+  assign ltc_variant = variant | default: 'row'
+
+  assign ltc_show_rating = true
+  if show_rating == false
+    assign ltc_show_rating = false
+  endif
+
+  assign ltc_show_sub = true
+  if show_subscription == false
+    assign ltc_show_sub = false
+  endif
+
+  assign ltc_price_from = true
+  if price_from == false
+    assign ltc_price_from = false
+  endif
+
+  assign ltc_soldout = soldout_label | default: 'Nicht verfügbar'
+
+  comment
+    Titel: kuratierter Kurztitel gewinnt über product.title. Andersherum war
+    jeder gepflegte Titel wirkungslos, und die Karte zeigte einen anderen Text
+    als ihr eigener Bild-Alt-Text.
+  endcomment
+  assign ltc_name = title_override
+  if ltc_name == blank
+    assign ltc_name = product.title
+  endif
+
+  comment
+    Nutzenzeile: kuratiert, sonst das Metafeld, sonst die Produktbeschreibung.
+    custom.tagline ist heute auf allen Produkten leer, die Stufe steht für die
+    spätere Pflege bereit und kostet nichts.
+  endcomment
+  assign ltc_sub = subline_override
+  if ltc_sub == blank
+    assign ltc_sub = product.metafields.custom.tagline.value
+  endif
+  if ltc_sub == blank and product.description != blank
+    assign ltc_sub = product.description | strip_html | truncatewords: 14
+  endif
+
+  assign ltc_image = image_override
+  if ltc_image == blank
+    assign ltc_image = product.featured_image
+  endif
+
+  comment
+    Bewertung: Loox zuerst, dann Shopify Reviews. `reviews.rating.value` ist ein
+    Rating-Objekt, keine Zahl; `| times: 1` darauf liefert nichts. Deshalb
+    `.value.rating`. Kanonisches Muster: snippets/product-rating.liquid:34.
+  endcomment
+  assign ltc_rating = 0
+  assign ltc_rating_count = blank
+  if ltc_show_rating
+    assign ltc_loox_avg = product.metafields.loox.avg_rating | default: 0 | plus: 0
+    assign ltc_loox_count = product.metafields.loox.num_reviews | default: 0 | plus: 0
+    if ltc_loox_avg > 0
+      assign ltc_rating = ltc_loox_avg
+      assign ltc_rating_count = ltc_loox_count
+    elsif product.metafields.reviews.rating.value != blank
+      assign ltc_rating = product.metafields.reviews.rating.value.rating | times: 1
+      assign ltc_rating_count = product.metafields.reviews.rating_count
+    endif
+  endif
+
+  assign ltc_on_sale = false
+  if product.compare_at_price > product.price
+    assign ltc_on_sale = true
+  endif
+
+  comment
+    Der Abo-Preis steht nicht an der Plangruppe, sondern an der Zuordnung der
+    Variante. Ohne Zuordnung entfällt die Zeile ersatzlos, sie wird nie geschätzt.
+  endcomment
+  assign ltc_sub_price = 0
+  if ltc_show_sub and product.selling_plan_groups.size > 0
+    for ltc_v in product.variants
+      for ltc_alloc in ltc_v.selling_plan_allocations
+        if ltc_alloc.price > 0
+          if ltc_sub_price == 0 or ltc_alloc.price < ltc_sub_price
+            assign ltc_sub_price = ltc_alloc.price
+          endif
+        endif
+      endfor
+    endfor
+  endif
+
+  assign ltc_img_alt = ltc_name
+  if ltc_image.alt != blank
+    assign ltc_img_alt = ltc_image.alt
+  endif
+
+  case ltc_variant
+    when 'sheet'
+      assign ltc_well_px = 220
+      assign ltc_src_px = 440
+    when 'sheet-wide'
+      assign ltc_well_px = 144
+      assign ltc_src_px = 288
+    when 'tile'
+      assign ltc_well_px = 220
+      assign ltc_src_px = 440
+    else
+      assign ltc_well_px = 88
+      assign ltc_src_px = 176
+  endcase
+-%}
+
+<a
+  class="ltc ltc--{{ ltc_variant }}{% unless product.available %} is-unavailable{% endunless %}"
+  href="{{ href }}"
+  {%- if atc_variant_id != blank %}
+    data-lt-card-atc="{{ atc_variant_id }}"
+    aria-label="{{ ltc_name | escape }}, {{ cta_label | escape }}"
+  {%- endif -%}
+>
+
+  <span class="ltc__well">
+    {%- if ltc_image != blank -%}
+      {%- comment -%}
+        Das img wird von Hand geschrieben statt ueber image_tag. image_tag legt
+        auch ohne widths eine srcset an; ohne sizes nimmt der Browser dann 100vw
+        als Slot an und zieht die groesste Kandidatin. Gemessen waren so 1440px
+        breite Bilder in 80px-Feldern. Ein fester Quelle in doppelter Feldbreite
+        ist auf Retina scharf und laesst nichts zu raten uebrig.
+      {%- endcomment -%}
+      <img
+        src="{{ ltc_image | image_url: width: ltc_src_px }}"
+        width="{{ ltc_well_px }}"
+        height="{{ ltc_well_px }}"
+        alt="{{ ltc_img_alt | escape }}"
+        loading="lazy"
+        decoding="async"
+        class="ltc__img"
+      >
+    {%- else -%}
+      <span class="ltc__well--empty" aria-hidden="true"></span>
+    {%- endif -%}
+  </span>
+
+  <span class="ltc__body">
+    {%- if kicker != blank -%}
+      <span class="ltc__kicker">{{ kicker | escape }}</span>
+    {%- endif -%}
+
+    <span class="ltc__name">{{ ltc_name | escape }}</span>
+
+    {%- if ltc_sub != blank -%}
+      <span class="ltc__sub">{{ ltc_sub }}</span>
+    {%- endif -%}
+
+    {%- if ltc_rating > 0 or product.available == false -%}
+      <span class="ltc__meta">
+        {%- if ltc_rating > 0 -%}
+          <span class="ltc__rating">
+            <span class="visually-hidden">
+              {{- ltc_rating }} von 5 Sternen
+              {%- if ltc_rating_count != blank %}, {{ ltc_rating_count }} Bewertungen{% endif -%}
+            </span>
+            <span class="ltc__ratingValue" aria-hidden="true">
+              {{- ltc_rating | round: 1 | replace: '.', ',' -}}
+            </span>
+            <span class="ltc__ratingScale" aria-hidden="true">/ 5</span>
+            {%- if ltc_rating_count != blank -%}
+              <span class="ltc__ratingCount" aria-hidden="true">({{ ltc_rating_count }})</span>
+            {%- endif -%}
+          </span>
+        {%- endif -%}
+
+        {%- unless product.available -%}
+          <span class="ltc__flag">{{ ltc_soldout | escape }}</span>
+        {%- endunless -%}
+      </span>
+    {%- endif -%}
+  </span>
+
+  <span class="ltc__tail">
+    <span class="ltc__price">
+      {%- if ltc_on_sale -%}
+        <span class="visually-hidden">Aktionspreis</span>
+      {%- endif -%}
+      {%- if product.price_varies and ltc_price_from -%}
+        <span class="ltc__priceFrom">ab&#32;</span>
+      {%- endif -%}
+      {{ product.price | money_without_trailing_zeros }}
+    </span>
+
+    {%- if ltc_on_sale -%}
+      <s class="ltc__compare">
+        <span class="visually-hidden">Regulärer Preis</span>
+        {{- product.compare_at_price | money_without_trailing_zeros -}}
+      </s>
+    {%- endif -%}
+
+    {%- if ltc_sub_price > 0 -%}
+      <span class="ltc__subPrice">im Abo ab {{ ltc_sub_price | money_without_trailing_zeros }}</span>
+    {%- endif -%}
+
+    {%- if price_note != blank -%}
+      <span class="ltc__note">{{ price_note | escape }}</span>
+    {%- endif -%}
+
+    {%- if product.available and cta_label != blank -%}
+      <span class="ltc__cta{% unless ltc_variant == 'sheet' %} ltc__cta--outline{% endunless %}">
+        {{- cta_label | escape -}}
+      </span>
+    {%- endif -%}
+  </span>
+
+</a>

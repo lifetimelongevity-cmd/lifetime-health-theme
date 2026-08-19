@@ -39,9 +39,16 @@
       </div>
     </div>
 
-    {%- comment -%} Image — right column {%- endcomment -%}
-    <div class="lsh__visual">
-      {%- if section.settings.image != blank -%}
+    {%- comment -%}
+      Image — right column.
+
+      Ohne Bild entfaellt die Spalte ganz, statt einen grauen Platzhalterkasten
+      zu rendern. Der Platzhalter ist eine Editor-Hilfe und gehoert nur in den
+      Theme-Editor; auf der Live-Seite war er ein leerer Kasten, der eine
+      Bildspalte behauptet, die es nicht gibt.
+    {%- endcomment -%}
+    {%- if section.settings.image != blank -%}
+      <div class="lsh__visual">
         {{
           section.settings.image
           | image_url: width: 1200
@@ -50,21 +57,23 @@
             class: 'lsh__img',
             alt: lsh_alt
         }}
-      {%- else -%}
+      </div>
+    {%- elsif request.design_mode -%}
+      <div class="lsh__visual">
         <div class="lsh__placeholder">{{ 'image' | placeholder_svg_tag: 'lsh__placeholder-svg' }}</div>
-      {%- endif -%}
-    </div>
+      </div>
+    {%- endif -%}
 
   </div>
 </section>
 
 {% stylesheet %}
-/* ================================================================
+/*
    lt-science-hero — Science Page Hero
    §3 tokens, §4 layout (split 60/40), §6 typography
    Dominant element: H1 headline
    No CTA — sets editorial tone only
-   ================================================================ */
+*/
 
 .lsh {
   background: var(--lsh-bg, #f7f7f4);
@@ -84,6 +93,13 @@
 /* — Text column — */
 .lsh__content {
   min-width: 0;
+}
+
+/* Ohne Bildspalte spannt der Text über beide Spuren, das Lesemaß wird
+   dann am Inhalt gedeckelt und nicht am Container. */
+.lsh__content:only-child {
+  grid-column: 1 / -1;
+  max-width: 46rem;
 }
 
 .lsh__content .crs-heading-stack__subtitle {

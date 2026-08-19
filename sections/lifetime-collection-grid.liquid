@@ -1,12 +1,32 @@
+{%- comment -%}
+  Collection Grid — kuratierte Produktbänder.
+
+  Rendert die gemeinsame Karte aus snippets/lt-product-card.liquid in einer von
+  drei Varianten. Die Section entscheidet nur die Kaufpolitik (PDP oder Warenkorb)
+  und das Bandlayout, die Karte entscheidet die Darstellung.
+
+  Blocktypen:
+  - product_card: ein Produkt
+  - group_label: eine Gruppenmarke im laufenden Band, ohne eigene Section
+
+  Spec: docs/collection-all-spec.md §2, §3
+{%- endcomment -%}
+
+{{ 'lt-product-card.css' | asset_url | stylesheet_tag }}
+
 {%- liquid
-  case section.settings.columns_desktop
-    when '2'
-      assign grid_class = 'grid-2 grid-palm-1'
-    when '3'
-      assign grid_class = 'grid-3 grid-portable-2 grid-palm-2'
-    else
-      assign grid_class = 'grid-4 grid-laptop-3 grid-palm-2'
-  endcase
+  assign cg_variant = section.settings.card_variant | default: 'tile'
+
+  comment
+    Kaufpolitik: link_behavior == 'cart' legt die erste Variante direkt in den
+    Warenkorb, der Drawer öffnet, der Besucher bleibt auf der Seite. Die
+    Handle-Liste in pdp_exception_handles führt trotzdem zur Produktseite, weil
+    dort die Größen- oder Variantenwahl der eigentliche nächste Schritt ist.
+    Der href bleibt in beiden Fällen die PDP, damit der Klick ohne JavaScript
+    nicht ins Leere geht.
+  endcomment
+  assign cg_pdp_raw = section.settings.pdp_exception_handles | default: 'lifetime-age-dna,lifetime-nmn,nmn-pulver,age-dna-test'
+  assign cg_pdp_list = cg_pdp_raw | replace: ' ', '' | split: ','
 -%}
 
 <div
@@ -15,297 +35,125 @@
 >
 
   {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
-    <div class="cg-header crs-heading-stack crs-heading-stack--align-left">
-      {%- if section.settings.subheading != blank -%}
-        <p class="crs-heading-stack__kicker">{{ section.settings.subheading | escape }}</p>
-      {%- endif -%}
-      {%- if section.settings.heading != blank -%}
-        <div class="crs-heading-stack__pair">
+    <div class="cg-header crs-heading-stack crs-heading-stack--align-left crs-heading-stack--headline-md">
+      <div class="crs-heading-stack__pair">
+        {%- if section.settings.heading != blank -%}
           <h2 class="cg-heading crs-heading-stack__title">{{ section.settings.heading | escape }}</h2>
-        </div>
-      {%- endif -%}
+        {%- endif -%}
+        {%- comment -%}
+          Die Unterzeile gehört in den Pair-Block, nicht über die Überschrift.
+          Titel und Unterzeile sind ein Block, unterschieden nur durch Farbe.
+          Vorher rendert sie als Kicker und erzeugte damit eine zweite
+          Hierarchieebene, die das System nicht kennt.
+        {%- endcomment -%}
+        {%- if section.settings.subheading != blank -%}
+          <p class="crs-heading-stack__subtitle">{{ section.settings.subheading | escape }}</p>
+        {%- endif -%}
+      </div>
     </div>
   {%- endif -%}
 
-  <div class="grid grid--layout {{ grid_class }}">
+  <div class="cg-list cg-list--{{ cg_variant }}">
 
     {%- for block in section.blocks -%}
-      {%- assign product_picker = block.settings.product -%}
-      {%- assign product = blank -%}
-      {%- assign product_handle = blank -%}
-      {%- if product_picker != blank -%}
-        {%- assign product = product_picker -%}
-        {%- assign product_handle = product_picker.handle | default: product_picker -%}
-        {%- if product_handle != blank -%}
-          {%- comment -%}
-            Rehydrate picker products through all_products so app-backed metafields
-            like Loox are available consistently, matching the PDP sections.
-          {%- endcomment -%}
-          {%- assign hydrated_product = all_products[product_handle] -%}
-          {%- if hydrated_product != blank -%}
-            {%- assign product = hydrated_product -%}
-          {%- endif -%}
-        {%- endif -%}
-      {%- endif -%}
-      {%- assign card_bg    = block.settings.card_bg_color -%}
-      {%- assign text_color = block.settings.text_color -%}
-      {%- assign use_bg_img = block.settings.image_as_background -%}
-      {%- assign price_pill = blank -%}
-      {%- if product != blank -%}
-        {%- if product.price_varies -%}
-          {%- capture price_pill -%}Ab {{ product.price | money_without_trailing_zeros }}{%- endcapture -%}
-        {%- else -%}
-          {%- capture price_pill -%}{{ product.price | money_without_trailing_zeros }}{%- endcapture -%}
-        {%- endif -%}
-      {%- endif -%}
 
-      {%- comment -%}
-        Link-Logik:
-        - section.settings.link_behavior == 'cart' → Karten-Klick legt die Variante via /cart/add.js
-          in den Warenkorb. Drawer öffnet, User bleibt auf der Seite (kein Redirect).
-        - block.settings.force_product_link == true → Karte führt trotzdem zur PDP (Override).
-        - section.settings.pdp_exception_handles → komma-getrennte Handle-Liste, die immer zur
-          PDP führt (Backstop für AGE/DNA-Test und NMN Pulver, auch wenn force_product_link
-          versehentlich nicht gesetzt wäre).
-        - Fallback-href bei ATC-Modus = product.url, damit der Klick bei deaktiviertem
-          JavaScript nicht ins Leere geht (graceful degradation).
-      {%- endcomment -%}
-      {%- assign card_href = '#' -%}
-      {%- assign use_atc_drawer = false -%}
-      {%- assign atc_variant_id = blank -%}
-
-      {%- assign pdp_exception_raw = section.settings.pdp_exception_handles | default: 'lifetime-age-dna,lifetime-nmn,nmn-pulver,age-dna-test' -%}
-      {%- assign pdp_exceptions = pdp_exception_raw | replace: ' ', '' | split: ',' -%}
-      {%- assign is_pdp_exception = false -%}
-      {%- if product_handle != blank and pdp_exceptions contains product_handle -%}
-        {%- assign is_pdp_exception = true -%}
-      {%- endif -%}
-
-      {%- if section.settings.link_behavior == 'cart'
-             and block.settings.force_product_link != true
-             and is_pdp_exception != true
-             and product != blank -%}
-        {%- assign cart_variant_id = product.variants.first.id -%}
-        {%- if cart_variant_id -%}
-          {%- assign atc_variant_id = cart_variant_id -%}
-          {%- assign use_atc_drawer = true -%}
-          {%- comment -%} Fallback-Ziel ohne JS = PDP {%- endcomment -%}
-          {%- assign card_href = product.url -%}
-        {%- endif -%}
-      {%- endif -%}
-      {%- unless use_atc_drawer -%}
-        {%- if product != blank -%}
-          {%- assign card_href = product.url -%}
-        {%- elsif block.settings.custom_url != blank -%}
-          {%- assign card_href = block.settings.custom_url -%}
-        {%- endif -%}
-      {%- endunless -%}
-
-      {%- comment -%} Resolve the image object once for reuse {%- endcomment -%}
-      {%- assign card_image = block.settings.custom_image -%}
-      {%- if card_image == blank and product != blank -%}
-        {%- assign card_image = product.featured_image -%}
-      {%- endif -%}
-      {%- assign card_image_alt = block.settings.custom_title | escape -%}
-      {%- if card_image_alt == blank and product != blank -%}
-        {%- assign card_image_alt = product.featured_image.alt | escape -%}
-      {%- endif -%}
-
-      {%- comment -%}
-        Button-Label-Resolution + HTML-Capture:
-        - Leeres button_label → Auto-Mode mit Token-konformem CTA (dark bg, white text)
-          - "In den Warenkorb" für ATC-Karten
-          - "Zum Produkt" für PDP-Karten (Ausnahmen wie AGE/DNA, NMN Pulver)
-        - Beide Auto-Varianten nutzen .cg-card__btn--cta (#364F56 + weiß)
-        - Manuelles button_label im Editor → Legacy-Inline-Style mit Editor-Farben
-      {%- endcomment -%}
-      {%- assign resolved_button_label = block.settings.button_label -%}
-      {%- assign button_auto_mode = false -%}
-      {%- if resolved_button_label == blank and product != blank -%}
-        {%- assign button_auto_mode = true -%}
-        {%- if use_atc_drawer -%}
-          {%- assign resolved_button_label = 'In den Warenkorb' -%}
-        {%- else -%}
-          {%- assign resolved_button_label = 'Zum Produkt' -%}
-        {%- endif -%}
-      {%- endif -%}
-
-      {%- capture button_html -%}
-        {%- if resolved_button_label != blank -%}
-          {%- if button_auto_mode -%}
-            <span class="cg-card__btn cg-card__btn--auto cg-card__btn--cta">
-              {{ resolved_button_label | escape }}
-            </span>
-          {%- else -%}
-            <span
-              class="cg-card__btn"
-              style="background-color: {{ block.settings.button_bg_color }}; color: {{ block.settings.button_text_color }};"
-            >
-              {{ resolved_button_label | escape }}
-            </span>
-          {%- endif -%}
-        {%- endif -%}
-      {%- endcapture -%}
-
-      <a
-        href="{{ card_href }}"
-        class="cg-card{% if use_bg_img %} cg-card--bg{% endif %}{% if use_atc_drawer %} cg-card--atc{% endif %}"
-        style="background-color: {{ card_bg }}; border-radius: {{ section.settings.card_border_radius }}px;"
-        {%- if use_atc_drawer -%}
-          data-lt-card-atc="{{ atc_variant_id }}"
-          aria-label="{{ product.title | escape }} in den Warenkorb legen"
-        {%- endif -%}
-        {{ block.shopify_attributes }}
-      >
-
-        {%- if use_bg_img and card_image != blank -%}
-          <img
-            src="{{ card_image | image_url: width: 1100 }}"
-            srcset="
-              {{ card_image | image_url: width: 550 }} 550w,
-              {{ card_image | image_url: width: 750 }} 750w,
-              {{ card_image | image_url: width: 1100 }} 1100w
-            "
-            sizes="(min-width: 990px) calc(100vw / {{ section.settings.columns_desktop }}), 50vw"
-            alt="{{ card_image_alt }}"
-            loading="lazy"
-            width="{{ card_image.width }}"
-            height="{{ card_image.height }}"
-            class="cg-card__bg-image"
-          >
-          <span class="cg-card__overlay" aria-hidden="true"></span>
+      {%- if block.type == 'group_label' -%}
+        {%- if block.settings.label != blank -%}
+          <p class="cg-group" {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</p>
         {%- endif -%}
 
-        {%- if block.settings.badge != blank -%}
-          <div class="cg-card__badges">
-            <span class="cg-badge" style="color: {{ card_bg }};">
-              {{ block.settings.badge | escape }}
-            </span>
+      {%- else -%}
+        {%- liquid
+          assign cg_product = blank
+          assign cg_handle = blank
+
+          if block.settings.product != blank
+            assign cg_handle = block.settings.product.handle | default: block.settings.product
+            comment
+              Über all_products rehydrieren, sonst fehlen die App-Metafelder
+              (Loox) so wie in den PDP-Sections auch.
+            endcomment
+            assign cg_hydrated = all_products[cg_handle]
+            if cg_hydrated != blank
+              assign cg_product = cg_hydrated
+            else
+              assign cg_product = block.settings.product
+            endif
+          endif
+        -%}
+
+        {%- if cg_product != blank -%}
+          {%- liquid
+            assign cg_block_variant = block.settings.card_variant
+            if cg_block_variant == blank or cg_block_variant == 'inherit'
+              assign cg_block_variant = cg_variant
+            endif
+
+            assign cg_is_pdp_exception = false
+            if cg_handle != blank and cg_pdp_list contains cg_handle
+              assign cg_is_pdp_exception = true
+            endif
+
+            assign cg_atc_id = blank
+            if section.settings.link_behavior == 'cart' and block.settings.force_product_link != true and cg_is_pdp_exception == false and cg_product.available
+              assign cg_first_variant = cg_product.variants.first.id
+              if cg_first_variant
+                assign cg_atc_id = cg_first_variant
+              endif
+            endif
+
+            assign cg_cta = block.settings.button_label
+            if cg_cta == blank
+              if cg_atc_id != blank
+                assign cg_cta = section.settings.atc_label | default: 'In den Warenkorb'
+              else
+                assign cg_cta = section.settings.cta_label | default: 'Zum Produkt'
+              endif
+            endif
+          -%}
+
+          <div class="cg-item cg-item--{{ cg_block_variant }}" {{ block.shopify_attributes }}>
+            {%- render 'lt-product-card',
+              product: cg_product,
+              variant: cg_block_variant,
+              href: cg_product.url,
+              atc_variant_id: cg_atc_id,
+              cta_label: cg_cta,
+              title_override: block.settings.custom_title,
+              subline_override: block.settings.subline,
+              kicker: block.settings.kicker,
+              image_override: block.settings.custom_image,
+              price_from: block.settings.price_from,
+              price_note: block.settings.price_note,
+              show_rating: block.settings.show_rating,
+              soldout_label: section.settings.soldout_label
+            -%}
           </div>
         {%- endif -%}
-
-        <div class="cg-card__body">
-          <h3 class="cg-card__title" style="color: {{ text_color }};">
-            {%- if product != blank -%}
-              {{ product.title | escape }}
-            {%- elsif block.settings.custom_title != blank -%}
-              {{ block.settings.custom_title | escape }}
-            {%- endif -%}
-            {%- comment -%}
-              Decorative arrow on feature cards (image-as-background).
-              aria-hidden so screen readers don't announce "right arrow".
-            {%- endcomment -%}
-            {%- if use_bg_img -%}
-              <span class="cg-card__arrow" aria-hidden="true">&nbsp;→</span>
-            {%- endif -%}
-          </h3>
-
-          {%- if price_pill != blank and use_bg_img == false -%}
-            <p class="cg-card__price" style="color: {{ text_color }};">{{ price_pill | strip }}</p>
-          {%- endif -%}
-
-          {%- assign subline = block.settings.subline -%}
-          {%- if subline == blank and product != blank -%}
-            {%- assign subline = product.description | strip_html | truncate: 60 -%}
-          {%- endif -%}
-          {%- if subline != blank -%}
-            <p class="cg-card__subline" style="color: {{ text_color }};">{{ subline }}</p>
-          {%- endif -%}
-
-          {%- comment -%}
-            Rating priority: 1) Loox metafields, 2) Shopify Reviews metafields,
-            3) manual block setting. Rating = 0 means "don't show".
-          {%- endcomment -%}
-          {%- assign rating_value = 0 -%}
-          {%- assign rating_count = block.settings.rating_count -%}
-          {%- if block.settings.rating_value and block.settings.rating_value > 0 -%}
-            {%- assign rating_value = block.settings.rating_value -%}
-          {%- endif -%}
-          {%- assign loox_avg = 0 -%}
-          {%- assign loox_count = 0 -%}
-          {%- assign rating_product = product -%}
-          {%- if product_handle == 'lifetime-age-folgetest' -%}
-            {%- assign rating_product = all_products['lifetime-age-dna'] | default: product -%}
-          {%- endif -%}
-          {%- if product != blank -%}
-            {%- assign loox_avg = rating_product.metafields.loox.avg_rating | default: 0 | plus: 0 -%}
-            {%- assign loox_count = rating_product.metafields.loox.num_reviews | default: 0 | plus: 0 -%}
-            {%- if loox_avg > 0 -%}
-              {%- assign rating_value = loox_avg -%}
-              {%- assign rating_count = loox_count -%}
-            {%- elsif rating_product.metafields.reviews.rating.value != blank -%}
-              {%- assign rating_value = rating_product.metafields.reviews.rating.value | times: 1 -%}
-              {%- assign rating_count = rating_product.metafields.reviews.rating_count -%}
-            {%- endif -%}
-          {%- endif -%}
-          {%- if rating_value > 0 -%}
-            {%- assign rating_fill = rating_value | times: 20 -%}
-            <div
-              class="cg-card__rating"
-              style="color: {{ text_color }};"
-              aria-label="{{ rating_value }} von 5 Sternen{% if rating_count != blank %}, {{ rating_count }} Bewertungen{% endif %}"
-            >
-              <span class="cg-card__stars" style="--rating-fill: {{ rating_fill }}%;" aria-hidden="true"></span>
-              {%- if rating_count != blank -%}
-                <span class="cg-card__rating-count" aria-hidden="true">({{ rating_count }})</span>
-              {%- endif -%}
-            </div>
-          {%- endif -%}
-
-          {%- comment -%}
-            Button-HTML wird in cg-card__footer am Karten-Boden gerendert
-            (siehe weiter unten). Innerhalb des Body bleibt der Button nur
-            für bg-image-Karten (Hero-Variante mit überlagertem Text).
-          {%- endcomment -%}
-          {%- if use_bg_img and resolved_button_label != blank -%}
-            {{ button_html }}
-          {%- endif -%}
-        </div>
-
-        {%- unless use_bg_img -%}
-          <div class="cg-card__image-wrap">
-            {%- if card_image != blank -%}
-              <img
-                src="{{ card_image | image_url: width: 1100 }}"
-                srcset="
-                  {{ card_image | image_url: width: 550 }} 550w,
-                  {{ card_image | image_url: width: 750 }} 750w,
-                  {{ card_image | image_url: width: 1100 }} 1100w
-                "
-                sizes="(min-width: 990px) calc(100vw / {{ section.settings.columns_desktop }}), 50vw"
-                alt="{{ card_image_alt }}"
-                loading="lazy"
-                width="{{ card_image.width }}"
-                height="{{ card_image.height }}"
-                class="cg-card__image"
-              >
-            {%- else -%}
-              {{ 'product-1' | placeholder_svg_tag: 'cg-card__image cg-card__image--placeholder' }}
-            {%- endif -%}
-          </div>
-
-          {%- if resolved_button_label != blank -%}
-            <div class="cg-card__footer">
-              {{ button_html }}
-            </div>
-          {%- endif -%}
-        {%- endunless -%}
-
-      </a>
+      {%- endif -%}
 
     {%- endfor -%}
+
   </div>
 
 </div>
 
 <style>
+  /* Die Theme-Klasse container--vertical-space bringt 50px Aussenabstand mit.
+     Zwei aufeinanderfolgende Baender ergaben damit 100px, die kein Setting
+     erklaert; gemessen standen 213px zwischen der letzten Zeile und der
+     naechsten Ueberschrift. Der Abstand gehoert in die Paddings der Section,
+     nicht in eine geerbte Klasse. */
+  .section-{{ section.id }}-cg.container--vertical-space {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
   .section-{{ section.id }}-cg {
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
   }
 
-  /* Scale section padding down on mobile (~0.8x, token-aligned:
-     e.g. 80px desktop → 64px mobile, 64px → 48px). */
   @media (max-width: 749px) {
     .section-{{ section.id }}-cg {
       padding-top: calc({{ section.settings.padding_top }}px * 0.8);
@@ -313,426 +161,130 @@
     }
   }
 
-  /* ---- Header ---- */
+  /*  Header  */
   .section-{{ section.id }}-cg .cg-header {
     border-top: 1px solid var(--color-border-default);
     padding-top: var(--space-6);
-    margin-bottom: var(--space-5);
+    margin-bottom: var(--space-6);
   }
 
   @media (max-width: 749px) {
     .section-{{ section.id }}-cg .cg-header {
       padding-top: var(--space-5);
-      margin-bottom: var(--space-4);
+      margin-bottom: var(--space-5);
     }
   }
 
   .section-{{ section.id }}-cg .cg-heading {
     margin: 0;
-    font-size: var(--text-h2);
-    font-weight: var(--weight-regular);
-    line-height: var(--leading-heading);
   }
 
-  /* Equalize row heights for all cards */
-  .section-{{ section.id }}-cg .grid {
+  /*  Band: Blätter
+     Zwei Blätter nebeneinander. Eine Zeile im selben Band spannt über
+     beide Spalten, damit der Anschlusskauf unter den Protagonisten
+     stehen kann, ohne eine eigene Section zu brauchen. */
+  .section-{{ section.id }}-cg .cg-list--sheet {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6);
     align-items: stretch;
   }
 
-  /* ---- Card (default) ---- */
-  .section-{{ section.id }}-cg .cg-card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    overflow: hidden;
-    padding: var(--space-7) var(--space-2) 0;
-    text-align: center;
-    text-decoration: none;
-    color: inherit;
+  .section-{{ section.id }}-cg .cg-list--sheet > .cg-item--row {
+    grid-column: 1 / -1;
   }
 
-  @media (max-width: 749px) {
-    .section-{{ section.id }}-cg .cg-card {
-      padding: var(--space-6) var(--space-3) 0;
+  .section-{{ section.id }}-cg .cg-list--sheet > .cg-item {
+    display: flex;
+  }
+
+  .section-{{ section.id }}-cg .cg-list--sheet > .cg-item > .ltc {
+    flex: 1 1 auto;
+  }
+
+  @media (max-width: 767px) {
+    .section-{{ section.id }}-cg .cg-list--sheet {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-5);
     }
   }
 
-  /* ---- Card – background-image mode ---- */
-  .section-{{ section.id }}-cg .cg-card--bg {
-    padding: 0;
-    justify-content: flex-end;
-    /* min-height acts as a floor when this card is alone in a row;
-       align-items: stretch on the grid takes over when siblings are taller */
-    min-height: {{ section.settings.card_image_height }}px;
-  }
-
-  .section-{{ section.id }}-cg .cg-card__bg-image {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
+  /*  Band: Register
+     Zeilen tragen ihre Hairline selbst, das Band braucht keine. */
+  .section-{{ section.id }}-cg .cg-list--row {
     display: block;
-    transition: transform var(--ease-smooth);
   }
 
-  .section-{{ section.id }}-cg .cg-card--bg:hover .cg-card__bg-image {
-    transform: scale(1.05);
+  /*  Band: Kacheln
+     Eigenes Raster statt der Theme-Klasse .grid--layout. Deren
+     Mobilregeln machen aus jedem Band eine horizontale Scrollfläche,
+     und verstecktes Inventar ist auf einer Katalogseite der teuerste
+     Fehler. Hier bricht das Raster stattdessen um. */
+  .section-{{ section.id }}-cg .cg-list--tile {
+    display: grid;
+    grid-template-columns: repeat({{ section.settings.columns_desktop }}, minmax(0, 1fr));
+    gap: var(--space-6);
+    align-items: stretch;
   }
 
-  /* gradient overlay so text stays readable */
-  .section-{{ section.id }}-cg .cg-card__overlay {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to top, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.1) 55%, transparent 100%);
-    pointer-events: none;
-  }
-
-  /* card body in bg mode sits on top of the overlay */
-  .section-{{ section.id }}-cg .cg-card--bg .cg-card__body {
-    position: relative;
-    z-index: 1;
-    padding: var(--space-5) var(--space-5) var(--space-6);
-    margin-bottom: 0;
-  }
-
-  /* ---- Badge ---- */
-  .section-{{ section.id }}-cg .cg-card__badges {
-    position: absolute;
-    top: var(--space-2);
-    right: var(--space-2);
-    z-index: 2;
+  .section-{{ section.id }}-cg .cg-list--tile > .cg-item {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-    gap: var(--space-1);
-    max-width: calc(100% - var(--space-4));
   }
 
-  .section-{{ section.id }}-cg .cg-badge {
-    background: var(--color-surface-primary);
-    padding: 0.25rem var(--space-2);
+  .section-{{ section.id }}-cg .cg-list--tile > .cg-item > .ltc {
+    flex: 1 1 auto;
+  }
+
+  @media (max-width: 989px) {
+    .section-{{ section.id }}-cg .cg-list--tile {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 599px) {
+    .section-{{ section.id }}-cg .cg-list--tile {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  /*  Gruppenmarke
+     Die 12px-Versalienstimme des Systems. Sie trägt die Hairline, die
+     sonst die erste Zeile der Gruppe trüge; deshalb nimmt die Zeile
+     direkt darunter ihre eigene zurück. */
+  .section-{{ section.id }}-cg .cg-group {
+    grid-column: 1 / -1;
+    margin: var(--space-7) 0 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border-default);
     font-family: var(--font-body);
-    font-weight: var(--weight-medium);
     font-size: var(--text-micro);
+    font-weight: var(--weight-semibold);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     line-height: 1.4;
-    white-space: nowrap;
-    border-radius: var(--radius-full);
+    color: var(--color-ink-muted);
   }
 
-  @media (min-width: 750px) {
-    .section-{{ section.id }}-cg .cg-card__badges {
-      top: var(--space-3);
-      right: var(--space-3);
-    }
-
-    .section-{{ section.id }}-cg .cg-badge {
-      padding: var(--space-1) var(--space-2);
-    }
+  .section-{{ section.id }}-cg .cg-list > .cg-group:first-child {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: 0;
   }
 
-  /* ---- Card body ---- */
-  .section-{{ section.id }}-cg .cg-card__body {
-    margin-bottom: var(--space-3);
-  }
-
-  @media (min-width: 750px) {
-    .section-{{ section.id }}-cg .cg-card__body {
-      margin-bottom: var(--space-6);
-    }
-
-    .section-{{ section.id }}-cg .cg-card--bg .cg-card__body {
-      margin-bottom: 0;
-    }
-  }
-
-  .section-{{ section.id }}-cg .cg-card__title {
-    margin: 0 0 var(--space-1);
-    font-family: var(--font-heading);
-    font-weight: var(--weight-bold);
-    font-size: var(--text-body-lg);
-    line-height: var(--leading-heading, 1.15);
-    letter-spacing: 0;
-  }
-
-  .section-{{ section.id }}-cg .cg-card__price {
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-body);
-    font-weight: var(--weight-medium);
-    font-size: var(--text-body-sm);
-    line-height: 1.2;
-    opacity: 0.65;
-  }
-
-  .section-{{ section.id }}-cg .cg-card__arrow {
-    display: inline-block;
-    transition: transform var(--ease-default, 0.2s ease);
-  }
-
-  .section-{{ section.id }}-cg .cg-card:hover .cg-card__arrow {
-    transform: translateX(4px);
-  }
-
-  @media (min-width: 750px) {
-    .section-{{ section.id }}-cg .cg-card__title {
-      font-size: var(--text-h3);
-    }
-  }
-
-  .section-{{ section.id }}-cg .cg-card__subline {
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-body);
-    font-weight: var(--weight-regular);
-    font-size: var(--text-body-sm);
-    line-height: var(--leading-body, 1.5);
+  .section-{{ section.id }}-cg .cg-group + .cg-item--row > .ltc--row {
+    border-top: 0;
   }
 
   @media (max-width: 749px) {
-    .section-{{ section.id }}-cg .cg-card__subline {
-      margin-bottom: var(--space-1);
+    .section-{{ section.id }}-cg .cg-group {
+      margin-top: var(--space-6);
     }
   }
 
-  /* ---- Rating / social proof ---- */
-  .section-{{ section.id }}-cg .cg-card__rating {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    margin: 0 0 var(--space-2);
-    font-family: var(--font-body);
-    font-weight: var(--weight-regular);
-    font-size: var(--text-body-sm);
-    line-height: 1;
-    justify-content: center;
-  }
-
-  .section-{{ section.id }}-cg .cg-card__stars {
-    --rating-fill: 0%;
-    position: relative;
-    display: inline-block;
-    width: 5.4em;
-    height: 1em;
-    line-height: 1;
-    letter-spacing: 0.08em;
-    font-family: Helvetica, Arial, sans-serif;
-  }
-
-  .section-{{ section.id }}-cg .cg-card__stars::before,
-  .section-{{ section.id }}-cg .cg-card__stars::after {
-    content: "★★★★★";
-    position: absolute;
-    top: 0;
-    left: 0;
-    line-height: 1;
-  }
-
-  .section-{{ section.id }}-cg .cg-card__stars::before {
-    color: var(--color-gray-200, #E5E5E5);
-  }
-
-  .section-{{ section.id }}-cg .cg-card__stars::after {
-    color: var(--color-star, #F4B740);
-    width: var(--rating-fill);
-    overflow: hidden;
-    white-space: nowrap;
-  }
-
-  .section-{{ section.id }}-cg .cg-card__rating-count {
-    opacity: 0.7;
-    font-size: 0.92em;
-  }
-
-  /* ============================================================
-     Card-Footer — verankert den CTA am Karten-Boden
-     ------------------------------------------------------------
-     Layout: .cg-card hat justify-content: space-between, mit
-     drei Kindern (body / image-wrap / footer) → body oben,
-     image mittig, footer unten.
-     ============================================================ */
-  .section-{{ section.id }}-cg .cg-card__footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: var(--space-5) var(--space-3) var(--space-6);
-    margin-top: auto; /* Defensive: zieht Footer auch dann ans Ende, wenn space-between durch Inhalt verschoben wäre */
-  }
-
-  @media (max-width: 749px) {
-    .section-{{ section.id }}-cg .cg-card__footer {
-      padding: var(--space-4) var(--space-3) var(--space-5);
-    }
-  }
-
-  /* ============================================================
-     CTA Button — folgt design-governance.md §5 (Button-Specs)
-     ------------------------------------------------------------
-     Default: legacy mode mit Editor-Color-Settings (Inline-Styles)
-     Auto-Mode: Token-konform (radius-full, 48px, semibold)
-       .cg-card__btn--cta     → primärer CTA (#364F56 + weiß).
-                                Wird sowohl für ATC als auch
-                                für PDP-Karten verwendet, damit
-                                visuell ein konsistenter Primary
-                                vorliegt.
-       .cg-card__btn--outline → reserviert für künftige Use-Cases,
-                                aktuell ungenutzt im Auto-Mode.
-     ============================================================ */
-  .section-{{ section.id }}-cg .cg-card__btn {
-    /* display:flex statt inline-flex → eigene Zeile, nicht inline neben Rating */
-    display: flex;
-    width: fit-content;
-    align-items: center;
-    justify-content: center;
-    padding: 0 var(--space-6);
-    min-height: 48px;
-    font-family: var(--font-body);
-    font-weight: var(--weight-semibold);
-    font-size: var(--text-body-sm);
-    line-height: 1.2;
-    letter-spacing: 0.02em;
-    border-radius: var(--radius-full);
-    border: 1px solid transparent;
-    text-align: center;
-    transition: opacity var(--ease-default), background-color var(--ease-default);
-  }
-
-  /* Wenn der Button im body sitzt (bg-image-Karten), --space-6 Atemraum
-     zum darüberliegenden Element (Rating/Subline) per §6b Visual Weight. */
-  .section-{{ section.id }}-cg .cg-card__body .cg-card__btn {
-    margin: var(--space-6) auto 0;
-  }
-
-  /* Im Footer: Spacing kommt aus Footer-Padding, kein zusätzlicher Margin */
-  .section-{{ section.id }}-cg .cg-card__footer .cg-card__btn {
-    margin: 0 auto;
-  }
-
-  /* Primary-CTA-Variante (ATC + PDP-Ausnahmen) */
-  .section-{{ section.id }}-cg .cg-card__btn--cta {
-    background-color: var(--color-dark, #364F56);
-    color: var(--color-text-on-dark, #FFFFFF);
-    border-color: var(--color-dark, #364F56);
-  }
-
-  /* Outline-Variante (reserviert; aktuell nicht im Auto-Mode genutzt) */
-  .section-{{ section.id }}-cg .cg-card__btn--outline {
-    background-color: transparent;
-    color: var(--color-text-primary, #26251e);
-    border-color: var(--color-text-primary, #26251e);
-  }
-
-  .section-{{ section.id }}-cg .cg-card:hover .cg-card__btn--cta {
-    opacity: 0.92;
-  }
-  .section-{{ section.id }}-cg .cg-card:hover .cg-card__btn--outline {
-    background-color: rgba(0, 0, 0, 0.04);
-  }
-
-  /* Mobile: kompaktere Padding, Höhe bleibt 48px Touch-Target */
-  @media (max-width: 749px) {
-    .section-{{ section.id }}-cg .cg-card__btn {
-      padding: 0 var(--space-5);
-    }
-    .section-{{ section.id }}-cg .cg-card__body .cg-card__btn {
-      margin-top: var(--space-5);
-    }
-  }
-
-  /* ATC-Karten signalisieren Cursor + leichten Press-Effekt */
-  .section-{{ section.id }}-cg .cg-card--atc {
-    cursor: pointer;
-  }
-  .section-{{ section.id }}-cg .cg-card--atc.is-loading {
+  /* Ladezustand der Warenkorb-Karten */
+  .section-{{ section.id }}-cg .ltc.is-loading {
     opacity: 0.6;
     pointer-events: none;
-  }
-
-  /* ---- Image (default mode) ---- */
-  .section-{{ section.id }}-cg .cg-card__image-wrap {
-    height: {{ section.settings.card_image_height }}px;
-    max-height: {{ section.settings.card_image_height }}px;
-    display: flex;
-    justify-content: center;
-    align-items: flex-end;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-
-  @media (max-width: 749px) {
-    .section-{{ section.id }}-cg .cg-card__image-wrap {
-      height: clamp(130px, 42vw, {{ section.settings.card_image_height }}px);
-      max-height: clamp(130px, 42vw, {{ section.settings.card_image_height }}px);
-    }
-  }
-
-  .section-{{ section.id }}-cg .cg-card__image {
-    display: block;
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-    object-position: center bottom;
-    transition: transform 0.2s ease;
-  }
-
-  .section-{{ section.id }}-cg .cg-card:hover .cg-card__image {
-    transform: scale(1.08);
-  }
-
-  .section-{{ section.id }}-cg .cg-card__image--placeholder {
-    opacity: 0.25;
-    width: auto;
-    max-width: 60%;
-  }
-
-  /* ============================================================
-     Mobile horizontal scroll carousel
-     ------------------------------------------------------------
-     Bei ≤749px wird das 2-Spalten-Grid in eine horizontale
-     Scroll-Reihe umgewandelt. Ziele:
-     - Weniger vertikaler Scroll (~60%)
-     - Cards à ~72% Viewport → Text hat Atem, Bild wirkt
-     - Peek-In der nächsten Card als Affordanz-Signal
-     - Scroll-Snap für premiumiges Wischgefühl
-     ============================================================ */
-  @media (max-width: 749px) {
-    .section-{{ section.id }}-cg .grid.grid--layout {
-      display: flex !important;
-      grid-template-columns: none !important;
-      flex-wrap: nowrap;
-      overflow-x: auto;
-      overflow-y: visible;
-      -webkit-overflow-scrolling: touch;
-      scroll-snap-type: x mandatory;
-      gap: var(--space-3, 12px);
-      /* kleiner Bottom-Pad, damit hover-scale der Cards nicht geclippt wird */
-      padding-bottom: var(--space-2);
-      /* Scrollbar visuell verstecken (Funktion bleibt) */
-      scrollbar-width: none;
-      -ms-overflow-style: none;
-    }
-
-    .section-{{ section.id }}-cg .grid.grid--layout::-webkit-scrollbar {
-      display: none;
-    }
-
-    .section-{{ section.id }}-cg .grid.grid--layout > .cg-card {
-      flex: 0 0 72%;
-      max-width: 280px;
-      min-width: 220px;
-      scroll-snap-align: start;
-    }
-
-    /* Background-Image-Cards ("Hero"-Cards der Kategorie) im Carousel:
-       fixe Mindesthöhe, damit sie nicht zusammenklappen — ohne die
-       aspect-ratio-Logik aus dem Desktop zu stören. */
-    .section-{{ section.id }}-cg .grid.grid--layout > .cg-card--bg {
-      min-height: 280px;
-    }
   }
 </style>
 
@@ -783,7 +335,7 @@
 {
   "name": "Collection Grid",
   "class": "container--remove-margin-before",
-  "max_blocks": 12,
+  "max_blocks": 20,
   "settings": [
     {
       "type": "header",
@@ -796,29 +348,10 @@
       "default": "Our Collection"
     },
     {
-      "type": "range",
-      "id": "heading_size",
-      "label": "Heading size",
-      "min": 20,
-      "max": 72,
-      "step": 2,
-      "unit": "px",
-      "default": 36
-    },
-    {
       "type": "text",
       "id": "subheading",
-      "label": "Subheading"
-    },
-    {
-      "type": "header",
-      "content": "Colors"
-    },
-    {
-      "type": "color",
-      "id": "section_bg_color",
-      "label": "Section background",
-      "default": "#ffffff"
+      "label": "Unterzeile",
+      "info": "Steht als zweite Zeile im Überschriften-Block, gleiche Größe, nur heller."
     },
     {
       "type": "header",
@@ -826,263 +359,183 @@
     },
     {
       "type": "select",
-      "id": "columns_desktop",
-      "label": "Columns on desktop",
+      "id": "card_variant",
+      "label": "Kartenvariante",
       "options": [
-        { "value": "2", "label": "2 columns" },
-        { "value": "3", "label": "3 columns" },
-        { "value": "4", "label": "4 columns" }
+        { "value": "sheet", "label": "Blatt (Protagonisten)" },
+        { "value": "row", "label": "Registerzeile" },
+        { "value": "tile", "label": "Kachel" }
       ],
-      "default": "4"
+      "default": "tile"
     },
     {
-      "type": "range",
-      "id": "card_image_height",
-      "label": "Card image area height",
-      "min": 120,
-      "max": 400,
-      "step": 20,
-      "unit": "px",
-      "default": 220
+      "type": "select",
+      "id": "columns_desktop",
+      "label": "Spalten (nur Kachel)",
+      "options": [
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" },
+        { "value": "4", "label": "4" }
+      ],
+      "default": "3"
     },
     {
-      "type": "range",
-      "id": "card_border_radius",
-      "label": "Card border radius",
-      "min": 0,
-      "max": 40,
-      "step": 2,
-      "unit": "px",
-      "default": 0
-    },
-    {
-      "type": "header",
-      "content": "Spacing"
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Hintergrund",
+      "default": "#f7f7f4"
     },
     {
       "type": "range",
       "id": "padding_top",
-      "label": "Padding top",
+      "label": "Abstand oben",
       "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "default": 36
+      "max": 160,
+      "step": 8,
+      "default": 80
     },
     {
       "type": "range",
       "id": "padding_bottom",
-      "label": "Padding bottom",
+      "label": "Abstand unten",
       "min": 0,
-      "max": 100,
-      "step": 4,
-      "unit": "px",
-      "default": 36
+      "max": 160,
+      "step": 8,
+      "default": 80
     },
     {
       "type": "header",
-      "content": "Klick-Verhalten"
+      "content": "Kaufweg"
     },
     {
       "type": "select",
       "id": "link_behavior",
-      "label": "Beim Klick auf eine Produktkarte",
-      "info": "„In den Warenkorb (Drawer)“ legt die erste Variante per /cart/add.js in den Warenkorb und öffnet den Cart-Drawer — kein Seitenwechsel. Karten mit aktiviertem Override im Block oder Produkten in der Ausnahmen-Liste führen trotzdem zur Produktseite.",
+      "label": "Klick auf die Karte",
       "options": [
-        { "value": "product", "label": "Zur Produktseite (Default)" },
-        { "value": "cart", "label": "In den Warenkorb (Drawer öffnet, bleibt auf Seite)" }
+        { "value": "product", "label": "Zur Produktseite" },
+        { "value": "cart", "label": "In den Warenkorb" }
       ],
       "default": "product"
     },
     {
-      "type": "textarea",
+      "type": "text",
       "id": "pdp_exception_handles",
-      "label": "Ausnahmen: Produkt-Handles, die immer zur PDP führen",
-      "info": "Komma-getrennte Liste von Produkt-Handles. Diese Karten gehen IMMER zur Produktseite — auch im Warenkorb-Modus. Default deckt AGE & DNA-Test plus NMN Pulver ab.",
-      "default": "lifetime-age-dna,lifetime-nmn,nmn-pulver,age-dna-test"
+      "label": "Handles, die immer zur Produktseite führen",
+      "default": "lifetime-age-dna,lifetime-nmn,nmn-pulver,age-dna-test",
+      "info": "Komma-getrennt. Für Produkte, bei denen die Variantenwahl der nächste Schritt ist."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "CTA (Produktseite)",
+      "default": "Zum Produkt"
+    },
+    {
+      "type": "text",
+      "id": "atc_label",
+      "label": "CTA (Warenkorb)",
+      "default": "In den Warenkorb"
+    },
+    {
+      "type": "text",
+      "id": "soldout_label",
+      "label": "Hinweis bei nicht verfügbar",
+      "default": "Nicht verfügbar"
     }
   ],
   "blocks": [
     {
       "type": "product_card",
-      "name": "Product card",
+      "name": "Produkt",
       "settings": [
-        {
-          "type": "header",
-          "content": "Product"
-        },
         {
           "type": "product",
           "id": "product",
-          "label": "Product"
+          "label": "Produkt"
         },
         {
-          "type": "text",
-          "id": "subline",
-          "label": "Subline / tagline",
-          "info": "Short descriptor below the title. Falls back to product description if blank."
-        },
-        {
-          "type": "checkbox",
-          "id": "force_product_link",
-          "label": "Immer zur Produktseite führen (Override)",
-          "info": "Greift nur im Warenkorb-Modus: Diese einzelne Karte führt trotzdem zur PDP, z. B. weil die Produktseite bereits fertig ist.",
-          "default": false
-        },
-        {
-          "type": "header",
-          "content": "Manual override (when no product is set)"
+          "type": "select",
+          "id": "card_variant",
+          "label": "Kartenvariante",
+          "options": [
+            { "value": "inherit", "label": "Wie die Section" },
+            { "value": "sheet", "label": "Blatt" },
+            { "value": "row", "label": "Registerzeile" },
+            { "value": "tile", "label": "Kachel" }
+          ],
+          "default": "inherit"
         },
         {
           "type": "text",
           "id": "custom_title",
-          "label": "Custom title"
+          "label": "Kurztitel",
+          "info": "Gewinnt über den Produkttitel."
         },
         {
-          "type": "url",
-          "id": "custom_url",
-          "label": "Custom link URL"
+          "type": "text",
+          "id": "subline",
+          "label": "Nutzenzeile"
+        },
+        {
+          "type": "text",
+          "id": "kicker",
+          "label": "Kicker",
+          "info": "Nur setzen, wenn er etwas sagt, das sonst nirgends steht."
         },
         {
           "type": "image_picker",
           "id": "custom_image",
-          "label": "Custom image"
-        },
-        {
-          "type": "header",
-          "content": "Card style"
+          "label": "Bild"
         },
         {
           "type": "checkbox",
-          "id": "image_as_background",
-          "label": "Use image as full card background",
-          "info": "Image fills the card as a cover. Text sits at the bottom with a gradient overlay.",
+          "id": "price_from",
+          "label": "Preis mit \"ab\"",
+          "default": true,
+          "info": "Aus, wenn ein \"ab\" neben einem Streichpreis widersprüchlich läse."
+        },
+        {
+          "type": "text",
+          "id": "price_note",
+          "label": "Preisnotiz",
+          "info": "Eine kurze Zeile unter dem Preis, etwa für eine zweite Variante."
+        },
+        {
+          "type": "checkbox",
+          "id": "show_rating",
+          "label": "Bewertung zeigen",
+          "default": true
+        },
+        {
+          "type": "checkbox",
+          "id": "force_product_link",
+          "label": "Immer zur Produktseite",
           "default": false
-        },
-        {
-          "type": "header",
-          "content": "Card colors"
-        },
-        {
-          "type": "color",
-          "id": "card_bg_color",
-          "label": "Card background",
-          "default": "#222222"
-        },
-        {
-          "type": "color",
-          "id": "text_color",
-          "label": "Text color",
-          "default": "#ffffff"
-        },
-        {
-          "type": "color",
-          "id": "compare_price_color",
-          "label": "Compare-at price color",
-          "default": "#dfdfdf"
-        },
-        {
-          "type": "header",
-          "content": "Badge"
-        },
-        {
-          "type": "text",
-          "id": "badge",
-          "label": "Badge text",
-          "info": "e.g. NEW, SALE, LIMITED TIME ONLY"
-        },
-        {
-          "type": "header",
-          "content": "Rating"
-        },
-        {
-          "type": "range",
-          "id": "rating_value",
-          "label": "Star rating",
-          "min": 0,
-          "max": 5,
-          "step": 0.1,
-          "default": 0,
-          "info": "Leave at 0 to hide. Overridden by product metafield reviews.rating when the product is linked."
-        },
-        {
-          "type": "text",
-          "id": "rating_count",
-          "label": "Review count",
-          "info": "Shown in parentheses next to the stars, e.g. 128."
-        },
-        {
-          "type": "header",
-          "content": "CTA Button (optional)"
         },
         {
           "type": "text",
           "id": "button_label",
-          "label": "Button label",
-          "info": "Leave blank to hide the button."
-        },
+          "label": "CTA-Text",
+          "info": "Leer lassen für den Standardtext der Section."
+        }
+      ]
+    },
+    {
+      "type": "group_label",
+      "name": "Gruppenmarke",
+      "settings": [
         {
-          "type": "color",
-          "id": "button_bg_color",
-          "label": "Button background",
-          "default": "#ffffff"
-        },
-        {
-          "type": "color",
-          "id": "button_text_color",
-          "label": "Button text color",
-          "default": "#000000"
+          "type": "text",
+          "id": "label",
+          "label": "Marke",
+          "default": "Gruppe"
         }
       ]
     }
   ],
   "presets": [
     {
-      "name": "Collection Grid",
-      "blocks": [
-        {
-          "type": "product_card",
-          "settings": {
-            "custom_title": "Coffee",
-            "subline": "Full-bodied coffee",
-            "card_bg_color": "#926253",
-            "text_color": "#ffffff",
-            "compare_price_color": "#dfdfdf",
-            "badge": "NEW"
-          }
-        },
-        {
-          "type": "product_card",
-          "settings": {
-            "custom_title": "Original",
-            "subline": "Rich chocolate chai",
-            "card_bg_color": "#222222",
-            "text_color": "#ffffff",
-            "compare_price_color": "#dfdfdf",
-            "badge": "Most Popular"
-          }
-        },
-        {
-          "type": "product_card",
-          "settings": {
-            "custom_title": "Matcha",
-            "subline": "Premium Japanese matcha",
-            "card_bg_color": "#707956",
-            "text_color": "#ffffff",
-            "compare_price_color": "#8c9394"
-          }
-        },
-        {
-          "type": "product_card",
-          "settings": {
-            "custom_title": "Rest",
-            "subline": "Nutty rooibos",
-            "card_bg_color": "#5c587e",
-            "text_color": "#ffffff",
-            "compare_price_color": "#dfdfdf"
-          }
-        }
-      ]
+      "name": "Collection Grid"
     }
   ]
 }
