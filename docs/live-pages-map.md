@@ -350,13 +350,17 @@ Zwei Flächen, zwei Templates, **eine** Produktkarte.
 | Slug | Template | Haupt-Section | Bemerkung |
 |---|---|---|---|
 | `/collections/all` | `templates/collection.katalog.json` | `lt-science-hero`, 2 × `lifetime-collection-grid`, `lt-katalog-index` | Kuratierter Katalog, 13 Produkte als Blöcke gepflegt (liest `collection.products` nicht) |
-| `/collections/<handle>` (12 weitere) | `templates/collection.json` | `lt-collection-register` | Rendert das echte Kollektionsobjekt |
+| `/collections/<handle>` (12 weitere) | `templates/collection.json` | `lifetime-collection-grid` mit `source: collection` | Rendert `collection.products`, Titel als H1, Beschreibung als Absatz |
 
 `all` trägt im Admin `templateSuffix: "katalog"`. Slug und Suffix sind zwei verschiedene
 Dinge, wie bei der NMN-PDP auch.
 
+**Eine Section, eine Karte für beide Flächen.** `lt-collection-register.liquid` ist am
+2026-08-19 gelöscht (GA4: 72 Einstiege in 90 Tagen über acht Kollektionsseiten, null Key
+Events). `lifetime-collection-grid` bedient beide Flächen über das Setting `source`.
+
 **Die gemeinsame Karte ist `snippets/lt-product-card.liquid`** mit
-`assets/lt-product-card.css`. Beide Sections rendern sie in einer von vier Varianten:
+`assets/lt-product-card.css`. Die Section rendert sie in einer von vier Varianten:
 `sheet` (Protagonistenblatt), `sheet-wide` (dasselbe Papier liegend, für den
 hervorgehobenen Registereintrag), `row` (Registerzeile), `tile` (Raster, auf diesen
 Flächen nicht mehr benutzt). Wer die Karte ändert, ändert beide Flächen. Preis,

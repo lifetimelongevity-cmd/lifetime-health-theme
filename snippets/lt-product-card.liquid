@@ -18,6 +18,7 @@
   @param {object} [image_override] - Kuratierter Packshot.
   @param {boolean} [price_from] - Default true. false unterdrückt das "ab" trotz price_varies.
   @param {string} [price_note] - Eine kurze Zeile unter dem Preis.
+  @param {boolean} [show_subline] - Default true. false unterdrueckt die Nutzenzeile ganz.
   @param {boolean} [show_rating] - Default true.
   @param {boolean} [show_subscription] - Default true.
   @param {string} [soldout_label] - Default "Nicht verfügbar".
@@ -49,6 +50,11 @@
     assign ltc_price_from = false
   endif
 
+  assign ltc_show_sub_line = true
+  if show_subline == false
+    assign ltc_show_sub_line = false
+  endif
+
   assign ltc_soldout = soldout_label | default: 'Nicht verfügbar'
 
   comment
@@ -66,12 +72,15 @@
     custom.tagline ist heute auf allen Produkten leer, die Stufe steht für die
     spätere Pflege bereit und kostet nichts.
   endcomment
-  assign ltc_sub = subline_override
-  if ltc_sub == blank
-    assign ltc_sub = product.metafields.custom.tagline.value
-  endif
-  if ltc_sub == blank and product.description != blank
-    assign ltc_sub = product.description | strip_html | truncatewords: 14
+  assign ltc_sub = blank
+  if ltc_show_sub_line
+    assign ltc_sub = subline_override
+    if ltc_sub == blank
+      assign ltc_sub = product.metafields.custom.tagline.value
+    endif
+    if ltc_sub == blank and product.description != blank
+      assign ltc_sub = product.description | strip_html | truncatewords: 14
+    endif
   endif
 
   assign ltc_image = image_override

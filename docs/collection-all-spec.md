@@ -767,6 +767,12 @@ den Paddings der Section, gemessen 81px zwischen den Kapiteln.
 größte Kandidatin. Gemessen: 1440px breite Bilder in 80px-Feldern. Jetzt eine feste
 Quelle in doppelter Feldbreite (440 / 288 / 176).
 
+**8.9a Nachtrag 2026-08-19 (BJ): das Kollektionsbild ist wieder drin.** §2 hatte den
+Masthead ohne Bild vorgesehen. Auf Ansage steht die Tennis-Aufnahme wieder da, im
+selben Format wie vorher: 3fr/2fr-Teilung, 3:2, 12px Radius, 435×290 auf 1440. Das
+knappere Padding (48/32 statt 80/56) bleibt, der Masthead ist damit 370px statt der
+ursprünglichen 426px, mobil 516 statt 678.
+
 **8.9 `lt-science-hero` rendert ohne Bild keine Bildspalte mehr.** Vorher kam ein grauer
 Platzhalterkasten. Der Platzhalter ist eine Editor-Hilfe und erscheint jetzt nur noch bei
 `request.design_mode`. Betrifft auch `/pages/science-hub` und `/pages/nmn-deutschland`, dort
@@ -820,3 +826,87 @@ die Kacheln 172px breit.
 - `assets/lt-product-card.css` wird auf dem Katalog zweimal per `stylesheet_tag`
   eingebunden, weil beide Bänder dieselbe Section sind. Zwei identische `<link>`, ein
   Abruf, keine doppelte Anwendung. Belassen.
+
+---
+
+## 9. Register verworfen 2026-08-19 (BJ-Entscheid)
+
+Das `lt-collection-register` ist gelöscht. Die zwölf Kollektionsseiten laufen jetzt
+über dieselbe Section und dieselbe Karte wie der Katalog.
+
+### Warum
+
+GA4, Einstiegsseiten unter `/collections/`, 90 Tage:
+
+| Seite | Sessions | Key Events |
+|---|---|---|
+| `/collections/all` | 97 | 1 |
+| naehrstoffe | 21 | 0 |
+| immun | 11 | 0 |
+| bundles | 10 | 0 |
+| basisversorgung, bestseller, juenger-aussehen | je 9 | 0 |
+| kraft-beweglichkeit | 2 | 0 |
+| dna-epigenetik-test | 1 | 0 |
+| nmn, energie, fokus, stack-eligible | 0 | 0 |
+
+Acht der zwölf Seiten zusammen: 72 Einstiege in 90 Tagen, also 0,8 pro Tag, bei null
+Key Events. Vier bekommen gar keinen. Auf der Live-Startseite ist `/collections/all`
+zudem der einzige verlinkte Kollektionspfad (viermal); keine der zwölf anderen ist von
+dort erreichbar. Die einzigen zusätzlichen Inbound-Links wären die neun aus der
+Katalog-Leiste gewesen, die in derselben Session entstanden sind. Für diesen Verkehr
+war ein bespoke 37-KB-Register mit klebrigem Slate-Rücken, Kapitelindex, Paginierung,
+Leerzustand und eigenem Bewegungsmoment nicht zu rechtfertigen.
+
+### Was stattdessen steht
+
+`lifetime-collection-grid` hat ein Setting `source`:
+
+- `blocks` (Default): kuratierte Blöcke, wie auf `/collections/all`.
+- `collection`: läuft über `collection.products`. Der Kollektionstitel ist die H1 in der
+  36px-Stufe, die Kollektionsbeschreibung ein Absatz darunter in Lesegröße (nicht als
+  Heading-Pair-Unterzeile, eine Beschreibung ist kein Subtitle). Darunter dasselbe
+  Kachelraster mit derselben Karte, drei Spalten desktop, zwei mobil.
+
+Dazu Paginierung (`per_page`, Default 24; bei aktuell maximal 12 Produkten je Kollektion
+greift sie nie, sie steht für später) und ein Leerzustand mit Link auf `/collections/all`.
+
+`templates/collection.json` ist auf diese Section umgestellt und trägt keine
+`register_link`-Blöcke mehr.
+
+### Eine Entscheidung, die nicht offensichtlich ist
+
+**`show_subline: false` auf den Kollektionsseiten.** Ohne kuratierte Zeile fällt die Karte
+auf `product.description` zurück. Gemessen ergab das auf `/collections/naehrstoffe`
+Zeilen wie „NAD⁺ Booster (Nicotinamid-Adenin-Dinukleotid) ist ein körpereigenes Molekül,
+das in fast allen Zellen vorkommt. NAD⁺…". Auf dem Katalog steht in jeder Zeile ein
+abgestimmter, claim-geprüfter Satz; hier stünde die rohe Beschreibung samt der Claims,
+die dort stehen. Solange `custom.tagline` auf allen 18 Produkten leer ist, bleibt die
+Zeile aus. Ein Checkbox-Setting, kein Code-Eingriff.
+
+### Gemessen (QA-Kopie, 1440 und 390)
+
+`/collections/naehrstoffe`: genau eine H1 mit 36px, keine Hairline darüber, Beschreibung
+16px, 12 Kacheln, 3 Spalten desktop und 2 mobil, keine Nutzenzeilen, Abo-Preise vorhanden,
+CTA 48px, keine Querscrollleiste, Seite 3091 bzw. 3790px. Ein nicht verfügbares Produkt
+zeigt die Fahne, gedimmt wird nur das Bild.
+
+`/collections/nmn`: H1 „NMN", keine Beschreibung, eine Kachel, CTA „Zum Produkt" statt
+Warenkorb (die PDP-Ausnahme greift), keine Querscrollleiste. Ein Produkt in einem
+Dreierraster lässt zwei Drittel leer; das ist der Bestand dieser Kollektion, kein
+Layoutfehler, und die Seite hatte in 90 Tagen null Einstiege.
+
+### Offen
+
+- **`custom.tagline` auf den 18 aktiven Produkten pflegen.** Danach `show_subline` auf
+  `true`, und die Kollektionsseiten tragen dieselbe Zeilenqualität wie der Katalog.
+- **Kuratierte Packshots fehlen auf den Kollektionsseiten.** Der Katalog nutzt
+  freigestellte Renders über `custom_image`, die Kollektionsseiten das
+  `featured_image` des Produkts, also Fotos mit eigenem Hintergrund im getönten Well.
+  Sichtbar, aber kein Defekt.
+- **Zwei 404 mit Verkehr:** `/collections/empfehlungen` und `/collections/energie-nad`.
+  `empfehlungen` sammelt über seine Produktpfade 30 Sessions,
+  `/collections/empfehlungen/products/hyaluron` allein 15. Die Produktpfade leiten
+  weiter, die Kollektionsseite selbst nicht. Zwei Redirects auf `/collections/all`.
+- **`/collections/naehrstoffe` zeigt NAD⁺ und Astaxanthin**, die im Katalog bewusst
+  fehlen. Das ist Kollektionszugehörigkeit, also Taxonomie, und bleibt außerhalb dieses
+  Scopes. NAD⁺ steht im Compliance-Audit noch offen.

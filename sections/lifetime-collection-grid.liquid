@@ -5,17 +5,22 @@
   drei Varianten. Die Section entscheidet nur die Kaufpolitik (PDP oder Warenkorb)
   und das Bandlayout, die Karte entscheidet die Darstellung.
 
-  Blocktypen:
+  Zwei Quellen:
+  - blocks:     kuratierte Bloecke, wie auf /collections/all
+  - collection: die Produkte der Kollektion selbst, fuer jede /collections/<handle>
+
+  Blocktypen (nur bei source: blocks):
   - product_card: ein Produkt
   - group_label: eine Gruppenmarke im laufenden Band, ohne eigene Section
 
-  Spec: docs/collection-all-spec.md §2, §3
+  Spec: docs/collection-all-spec.md §2, §3, §9
 {%- endcomment -%}
 
 {{ 'lt-product-card.css' | asset_url | stylesheet_tag }}
 
 {%- liquid
   assign cg_variant = section.settings.card_variant | default: 'tile'
+  assign cg_source = section.settings.source | default: 'blocks'
 
   comment
     Kaufpolitik: link_behavior == 'cart' legt die erste Variante direkt in den
@@ -30,11 +35,28 @@
 -%}
 
 <div
-  class="container--large container--vertical-space section-{{ section.id }}-cg"
+  class="container--large container--vertical-space section-{{ section.id }}-cg cg--{{ cg_source }}"
   style="background-color: {{ section.settings.section_bg_color }};"
 >
 
-  {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
+  {%- if cg_source == 'collection' -%}
+    {%- comment -%}
+      Die Kollektion traegt ihren eigenen Titel, der Merchant tippt ihn nicht
+      nach. Hier ist er die H1 der Seite, deshalb die grosse Stufe. Die
+      Beschreibung ist ein Absatz, keine Unterzeile: sie gehoert nicht in den
+      Heading-Pair-Block, sondern darunter in die Lesegroesse.
+    {%- endcomment -%}
+    <div class="cg-header crs-heading-stack crs-heading-stack--align-left crs-heading-stack--headline-lg">
+      <div class="crs-heading-stack__pair">
+        <h1 class="cg-heading crs-heading-stack__title">{{ collection.title | escape }}</h1>
+      </div>
+    </div>
+    {%- assign cg_desc = collection.description | strip_html | strip -%}
+    {%- if cg_desc != blank -%}
+      <p class="cg-desc">{{ cg_desc }}</p>
+    {%- endif -%}
+
+  {%- elsif section.settings.heading != blank or section.settings.subheading != blank -%}
     <div class="cg-header crs-heading-stack crs-heading-stack--align-left crs-heading-stack--headline-md">
       <div class="crs-heading-stack__pair">
         {%- if section.settings.heading != blank -%}
@@ -52,6 +74,90 @@
       </div>
     </div>
   {%- endif -%}
+
+  {%- if cg_source == 'collection' -%}
+
+    {%- paginate collection.products by section.settings.per_page -%}
+      {%- if collection.products.size > 0 -%}
+        <div class="cg-list cg-list--{{ cg_variant }}">
+          {%- for product in collection.products -%}
+            {%- liquid
+              comment
+                Dieselbe Kaufpolitik wie im kuratierten Band. Sie steht hier ein
+                zweites Mal, weil Liquid keine Funktionen kennt; die Darstellung
+                selbst liegt trotzdem nur einmal im Snippet.
+              endcomment
+              assign cg_is_pdp_exception = false
+              if cg_pdp_list contains product.handle
+                assign cg_is_pdp_exception = true
+              endif
+
+              assign cg_atc_id = blank
+              if section.settings.link_behavior == 'cart' and cg_is_pdp_exception == false and product.available
+                assign cg_first_variant = product.variants.first.id
+                if cg_first_variant
+                  assign cg_atc_id = cg_first_variant
+                endif
+              endif
+
+              assign cg_cta = section.settings.cta_label | default: 'Zum Produkt'
+              if cg_atc_id != blank
+                assign cg_cta = section.settings.atc_label | default: 'In den Warenkorb'
+              endif
+            -%}
+            <div class="cg-item cg-item--{{ cg_variant }}">
+              {%- comment -%}
+                show_subline: false. Ohne kuratierte Zeile faellt die Karte auf
+                product.description zurueck, und die ist ungeprueft. Auf dem
+                Katalog steht in jeder Zeile ein abgestimmter Satz; hier stuende
+                die rohe Beschreibung, samt der Claims, die dort stehen. Sobald
+                custom.tagline gepflegt ist, kann das Setting zurueck auf true.
+              {%- endcomment -%}
+              {%- render 'lt-product-card',
+                product: product,
+                variant: cg_variant,
+                href: product.url,
+                atc_variant_id: cg_atc_id,
+                cta_label: cg_cta,
+                show_subline: section.settings.show_subline,
+                soldout_label: section.settings.soldout_label
+              -%}
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- if paginate.pages > 1 -%}
+          <nav class="cg-pages" aria-label="{{ section.settings.pagination_aria | escape }}">
+            {%- if paginate.previous -%}
+              <a class="cg-page" href="{{ paginate.previous.url }}" rel="prev">{{ section.settings.prev_label | escape }}</a>
+            {%- endif -%}
+            {%- for part in paginate.parts -%}
+              {%- if part.is_link -%}
+                <a class="cg-page" href="{{ part.url }}">{{ part.title }}</a>
+              {%- elsif part.title == paginate.current_page -%}
+                <span class="cg-page is-current" aria-current="page">{{ part.title }}</span>
+              {%- else -%}
+                <span class="cg-page is-gap" aria-hidden="true">{{ part.title }}</span>
+              {%- endif -%}
+            {%- endfor -%}
+            {%- if paginate.next -%}
+              <a class="cg-page" href="{{ paginate.next.url }}" rel="next">{{ section.settings.next_label | escape }}</a>
+            {%- endif -%}
+          </nav>
+        {%- endif -%}
+
+      {%- else -%}
+        {%- comment -%}
+          Eine leere Kollektion rendert sonst eine Ueberschrift ueber nichts.
+        {%- endcomment -%}
+        <p class="cg-empty">
+          {{ section.settings.empty_text | escape }}
+          <a class="cg-emptyLink" href="{{ section.settings.empty_url }}">{{ section.settings.empty_link_label | escape }}</a>
+        </p>
+      {%- endif -%}
+    {%- endpaginate -%}
+
+  {%- else -%}
 
   <div class="cg-list cg-list--{{ cg_variant }}">
 
@@ -135,6 +241,8 @@
     {%- endfor -%}
 
   </div>
+
+  {%- endif -%}
 
 </div>
 
@@ -282,6 +390,75 @@
     }
   }
 
+  /*  Kollektionsseite
+     Als erstes Element der Seite braucht der Kopf keine Hairline nach oben,
+     es steht nichts darueber, wovon er sich trennen muesste. Die Regel haengt
+     am Modus, nicht an :first-child: im kuratierten Band ist der Kopf ebenfalls
+     das erste Kind, dort traegt die Hairline aber die Kapitelmarke. */
+  .section-{{ section.id }}-cg.cg--collection .cg-header {
+    border-top: 0;
+    padding-top: 0;
+    margin-bottom: var(--space-4);
+  }
+
+  .section-{{ section.id }}-cg .cg-desc {
+    margin: 0 0 var(--space-6);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.6;
+    color: var(--color-gray-600);
+    /* Lesemass am Inhalt gedeckelt, nicht am Container. */
+    max-width: 32rem;
+  }
+
+  .section-{{ section.id }}-cg .cg-empty {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.6;
+    color: var(--color-gray-600);
+    max-width: 32rem;
+  }
+
+  .section-{{ section.id }}-cg .cg-emptyLink {
+    color: var(--color-dark);
+    text-underline-offset: 3px;
+  }
+
+  .section-{{ section.id }}-cg .cg-pages {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin-top: var(--space-7);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--color-border-default);
+  }
+
+  .section-{{ section.id }}-cg .cg-page {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-full);
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-variant-numeric: tabular-nums;
+    text-decoration: none;
+    color: var(--color-ink);
+  }
+
+  .section-{{ section.id }}-cg .cg-page.is-current {
+    background: var(--color-dark);
+    color: var(--color-white);
+  }
+
+  .section-{{ section.id }}-cg .cg-page.is-gap {
+    color: var(--color-ink-muted);
+  }
+
   /* Ladezustand der Warenkorb-Karten */
   .section-{{ section.id }}-cg .ltc.is-loading {
     opacity: 0.6;
@@ -353,6 +530,17 @@
       "id": "subheading",
       "label": "Unterzeile",
       "info": "Steht als zweite Zeile im Überschriften-Block, gleiche Größe, nur heller."
+    },
+    {
+      "type": "select",
+      "id": "source",
+      "label": "Quelle",
+      "options": [
+        { "value": "blocks", "label": "Kuratierte Bloecke" },
+        { "value": "collection", "label": "Produkte der Kollektion" }
+      ],
+      "default": "blocks",
+      "info": "Bei \"Produkte der Kollektion\" tragen Titel und Beschreibung der Kollektion den Kopf, die Bloecke werden ignoriert."
     },
     {
       "type": "header",
@@ -442,6 +630,61 @@
       "id": "soldout_label",
       "label": "Hinweis bei nicht verfügbar",
       "default": "Nicht verfügbar"
+    },
+    {
+      "type": "header",
+      "content": "Nur bei Quelle: Produkte der Kollektion"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_subline",
+      "label": "Nutzenzeile zeigen",
+      "default": false,
+      "info": "Aus, solange die Produkte kein gepflegtes custom.tagline haben. Sonst rendert die rohe Produktbeschreibung."
+    },
+    {
+      "type": "range",
+      "id": "per_page",
+      "label": "Produkte pro Seite",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "default": 24
+    },
+    {
+      "type": "text",
+      "id": "pagination_aria",
+      "label": "Aria-Label der Seitennavigation",
+      "default": "Seitennavigation"
+    },
+    {
+      "type": "text",
+      "id": "prev_label",
+      "label": "Zurück",
+      "default": "Zurück"
+    },
+    {
+      "type": "text",
+      "id": "next_label",
+      "label": "Weiter",
+      "default": "Weiter"
+    },
+    {
+      "type": "text",
+      "id": "empty_text",
+      "label": "Text bei leerer Kollektion",
+      "default": "Hier sind aktuell keine Produkte hinterlegt."
+    },
+    {
+      "type": "url",
+      "id": "empty_url",
+      "label": "Ziel des Links im Leerzustand"
+    },
+    {
+      "type": "text",
+      "id": "empty_link_label",
+      "label": "Beschriftung des Links im Leerzustand",
+      "default": "Alle Produkte ansehen"
     }
   ],
   "blocks": [

@@ -183,7 +183,21 @@ Theme-Kopie, weil der Shopify-CLI von diesem Rechner nicht erreichbar war
 Querscrollleiste auf beiden Breiten, CTA-Pillen 48px, Index-Links 52px, Bewertung 20px/700
 in Deep Teal (Large-Text-Grenze), Bildquellen deterministisch.
 
-**Spec:** `docs/collection-all-spec.md`.
+**Register verworfen (BJ, gemessen).** `lt-collection-register.liquid` ist gelöscht.
+GA4 90 Tage: die acht noch erreichbaren Kollektionsseiten kommen zusammen auf 72
+Einstiege bei null Key Events, vier bekommen gar keinen, und auf der Startseite ist
+`/collections/all` der einzige verlinkte Kollektionspfad. `lifetime-collection-grid` hat
+stattdessen ein Setting `source: blocks | collection`; bei `collection` rendert sie
+`collection.products` mit Kollektionstitel als H1, Beschreibung als Absatz, demselben
+Kachelraster und derselben Karte. Plus Paginierung und Leerzustand. Eine Karte, ein
+Raster, eine Section für den ganzen Shop.
+
+**`show_subline: false` auf Kollektionsseiten.** Ohne kuratierte Zeile fällt die Karte auf
+`product.description` zurück; gemessen ergab das Zeilen wie „NAD⁺ Booster
+(Nicotinamid-Adenin-Dinukleotid) ist ein körpereigenes Molekül…". Bleibt aus, bis
+`custom.tagline` gepflegt ist.
+
+**Spec:** `docs/collection-all-spec.md`, Abweichungen in §8, Register-Entscheid in §9.
 
 
 ### 2026-08-17 — GEO-014 ChatGPT-Tranche vollständig
