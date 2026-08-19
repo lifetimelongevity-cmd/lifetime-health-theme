@@ -45,8 +45,20 @@
   
     <title>{{ seo_title }}</title>
   
-    {%- if page_description -%}
-      <meta name="description" content="{{ page_description | escape }}">
+    {%- comment -%}
+      page_description ist bei Collections ohne SEO-Text ein leerer String.
+      Ein leerer String ist in Liquid truthy, deshalb rendert `if page_description`
+      ein wirkungsloses <meta name="description" content="">. Auf `blank` prüfen
+      und bei Collections auf die Collection-Beschreibung zurückfallen.
+    {%- endcomment -%}
+    {%- liquid
+      assign meta_description = page_description
+      if meta_description == blank and collection != blank
+        assign meta_description = collection.description | strip_html | strip | truncatewords: 30
+      endif
+    -%}
+    {%- if meta_description != blank -%}
+      <meta name="description" content="{{ meta_description | escape }}">
     {%- endif -%}
 
     {%- if request.page_type == 'page' -%}
