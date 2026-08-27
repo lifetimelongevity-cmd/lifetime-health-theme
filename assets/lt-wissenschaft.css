@@ -356,13 +356,66 @@ lt-wiss-wipe { display: block; }
 
 /* =============================================================================
    Kapitel 2 · Das Wichtigste in Kürze
+   -----------------------------------------------------------------------------
+   Bild links, Zusammenfassung rechts. Die schmalere Textspalte ist hier die
+   eigentliche Massnahme: dieselbe Copy liest in rund 46 Zeichen Breite ruhiger
+   als ueber die volle Seite, und die Section baut nur noch halb so hoch.
+   Ohne Bild faellt die Section auf eine Spalte zurueck und deckelt den Text
+   selbst, damit er nicht ueber die ganze Breite laeuft.
    ========================================================================== */
-.ltw-tldr {
-  background: var(--ltw-card, var(--color-light-warm));
-  border: 1px solid var(--ltw-hairline, rgba(38, 37, 30, 0.12));
-  border-radius: var(--radius-md);
-  padding: var(--space-6);
+.ltw-kurz__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  align-items: center;
+}
+
+/* Der Block laeuft bewusst schmaler als der Container, so wie die
+   Zusammenfassung es vorher als 52rem-Karte auch tat. Bei voller Breite bliebe
+   rechts neben dem Lesemass eine tote Zone stehen; so ist die Kante gewollt.
+   60rem minus Spalte ergibt rund 32rem Textbreite, also genau das Lesemass des
+   Themes (--lt-measure).
+
+   Wichtig: die Deckelung sitzt auf dem Raster, NICHT auf `.ltw__container`.
+   Der Container traegt `margin: 0 auto`; ein max-width darauf zentriert den
+   Block und laesst die linke Inhaltskante gegenueber allen anderen Kapiteln
+   verspringen. Gutter und Container ergeben genau eine Kante, die bleibt. */
+@media screen and (min-width: 961px) {
+  .ltw-kurz__grid {
+    grid-template-columns: 0.85fr 1.15fr;
+    gap: var(--space-8);
+    max-width: 60rem;
+  }
+}
+
+.ltw-kurz__grid--single .ltw-kurz__copy {
   max-width: 52rem;
+}
+
+.ltw-kurz__figure {
+  margin: 0;
+}
+
+/* 4:5 ist das Hausformat fuer Hochkant-Spalten (design-governance.md §2c).
+   Das Motiv kommt als 3:4; die 4:5-Deckelung nimmt oben und unten je rund
+   45 px weg, kostet also praktisch nichts, haelt das Kapitel aber niedriger
+   als die Vorgaengerfassung mit der Karte. */
+.ltw-kurz__figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+/* Mobil steht das Bild ueber dem Text und darf dort nicht die halbe Seite
+   fuellen; hochkant 3:4 ueber die volle Breite waere auf 375 px eine halbe
+   Bildschirmhoehe. */
+@media screen and (max-width: 960px) {
+  .ltw-kurz__figure {
+    max-width: 22rem;
+  }
 }
 
 .ltw-tldr__list {
@@ -379,7 +432,7 @@ lt-wiss-wipe { display: block; }
   font-family: var(--font-body);
   font-size: var(--text-body);
   line-height: var(--leading-relaxed);
-  max-width: var(--ltw-measure);
+  max-width: 34rem;
 }
 
 /* Marker neutral in Slate: Teal ist Mess- und Interaktionsfarbe, keine Deko. */
