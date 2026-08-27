@@ -1,0 +1,189 @@
+{% comment %}
+  LIFETIME — Wissenschaft · Kapitel 4 (Was wir messen, Rubrik 02)
+  ───────────────────────────────────────────────────────────────
+  Zwei Circos-Plots aus der eigenen Auswertung nebeneinander (Genetik links,
+  Epigenetik rechts), darunter die beiden Erklärspalten und die
+  Transparenz-Zeile zum Labor. Visueller Vertrag: docs/science-preview.html §4.
+
+  Die Titel stehen bereits in den Grafiken, deshalb tragen die Panels darunter
+  nur Untertitel und Label und keine dritte Überschrift.
+
+  §12 Build Spec:
+  - Surface:         Weiss
+  - Dominant:        die beiden Circos-Plots
+  - Heading size:    --text-h1 (headline_lg). Auf dieser Seite frei, weil
+                     das Seiten-H1 auf --text-display sitzt (DESIGN.md: Display 48
+                     fuer das Deckblatt, Headline 36 je Kapitel).
+  - Content pattern: zwei Bildpanels + zwei Textspalten + Haarlinien-Abbinder
+  - CTA:             keine
+  - Entfernt:        Bildunterschriften unter den Plots, die den Bildtitel
+                     wiederholen wuerden
+  - Quality move:    die Transparenz-Zeile steht ueber einer Haarlinie statt in
+                     einer Box, damit sie als Fussnote des Kapitels liest
+{% endcomment %}
+
+{%- liquid
+  assign wm_anchor = section.settings.anchor_id
+  if wm_anchor == blank
+    assign wm_anchor = 'section-' | append: section.id
+  endif
+
+  assign wm_text = section.settings.color_text | default: '#26251e'
+  assign wm_pad_t = section.settings.padding_top | default: 80
+  assign wm_pad_b = section.settings.padding_bottom | default: 80
+  assign wm_pad_t_m = wm_pad_t | times: 0.8 | round
+  assign wm_pad_b_m = wm_pad_b | times: 0.8 | round
+-%}
+
+{{ 'lt-wissenschaft.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+  #{{ wm_anchor }} {
+    --ltw-bg:       {{ section.settings.color_bg | default: '#ffffff' }};
+    --ltw-text:     {{ wm_text }};
+    --ltw-text-sec: {{ wm_text | color_modify: 'alpha', 0.72 }};
+    --ltw-text-ter: {{ wm_text | color_modify: 'alpha', 0.66 }};
+    --ltw-hairline: {{ wm_text | color_modify: 'alpha', 0.12 }};
+    --crs-text:     {{ wm_text }};
+    --crs-text-sec: {{ wm_text | color_modify: 'alpha', 0.72 }};
+    --crs-text-ter: {{ wm_text | color_modify: 'alpha', 0.66 }};
+    padding-top:    {{ wm_pad_t }}px;
+    padding-bottom: {{ wm_pad_b }}px;
+    scroll-margin-top: 96px;
+  }
+
+  @media screen and (max-width: 767px) {
+    #{{ wm_anchor }} {
+      padding-top:    {{ wm_pad_t_m }}px;
+      padding-bottom: {{ wm_pad_b_m }}px;
+    }
+  }
+{% endstyle %}
+
+<section id="{{ wm_anchor }}" class="ltw ltw-messung">
+  <div class="ltw__container">
+    {% render 'lt-wiss-rubric',
+      number: section.settings.rubric_number,
+      label: section.settings.rubric_label %}
+
+    {% render 'section-heading-crs',
+      heading: section.settings.heading,
+      subheading: section.settings.subheading,
+      align: 'left',
+      heading_tag: 'h2',
+      headline_lg: true,
+      extra_class: 'ltw-heading'
+    %}
+
+    <figure class="ltw-measure__figure">
+      <div class="ltw-measure__panels">
+        {%- for i in (1..2) -%}
+          {%- liquid
+            if i == 1
+              assign panel_img = section.settings.image_left
+              assign panel_alt = section.settings.image_left_alt
+              assign panel_sub = section.settings.sub_left
+              assign panel_note = section.settings.note_left
+            else
+              assign panel_img = section.settings.image_right
+              assign panel_alt = section.settings.image_right_alt
+              assign panel_sub = section.settings.sub_right
+              assign panel_note = section.settings.note_right
+            endif
+          -%}
+          {%- if panel_img != blank -%}
+            <div class="ltw-measure__panel">
+              {{ panel_img
+                 | image_url: width: 900
+                 | image_tag:
+                   loading: 'lazy',
+                   widths: '400, 600, 900',
+                   sizes: '(min-width: 768px) 30rem, 90vw',
+                   class: 'ltw-measure__img',
+                   alt: panel_alt }}
+              {%- if panel_sub != blank -%}
+                <div class="ltw-measure__sub">{{ panel_sub | escape }}</div>
+              {%- endif -%}
+              {%- if panel_note != blank -%}
+                <div class="ltw-measure__note">{{ panel_note | escape }}</div>
+              {%- endif -%}
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </figure>
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="ltw-measure__cols">
+        {%- for block in section.blocks -%}
+          <div class="ltw-measure__col" {{ block.shopify_attributes }}>
+            {%- if block.settings.title != blank -%}
+              <h3>{{ block.settings.title | escape }}</h3>
+            {%- endif -%}
+            {%- if block.settings.body != blank -%}
+              <p>{{ block.settings.body | escape }}</p>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.transparency != blank -%}
+      <div class="ltw-measure__transparency">
+        <p>{{ section.settings.transparency | escape }}</p>
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Wissenschaft Messung",
+  "tag": "section",
+  "class": "lt-wiss-messung",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anker-ID", "info": "Ohne Wert bleibt die automatische ID." },
+
+    { "type": "header", "content": "Kapitel-Rubrik" },
+    { "type": "text", "id": "rubric_number", "label": "Kapitelziffer", "default": "02" },
+    { "type": "text", "id": "rubric_label", "label": "Kapitelname", "default": "Die Messung" },
+
+    { "type": "header", "content": "Text" },
+    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Deine DNA zeigt den Bauplan." },
+    { "type": "textarea", "id": "subheading", "label": "Subline", "default": "Deine Epigenetik zeigt, was sich verändern kann." },
+
+    { "type": "header", "content": "Panel links" },
+    { "type": "image_picker", "id": "image_left", "label": "Grafik" },
+    { "type": "text", "id": "image_left_alt", "label": "Alt-Text", "default": "Circos-Darstellung Genetik: alle Chromosomen im Ring" },
+    { "type": "text", "id": "sub_left", "label": "Untertitel", "default": "Der Bauplan. Ein Leben lang stabil." },
+    { "type": "text", "id": "note_left", "label": "Label", "default": "Rund 700.000 Genorte" },
+
+    { "type": "header", "content": "Panel rechts" },
+    { "type": "image_picker", "id": "image_right", "label": "Grafik" },
+    { "type": "text", "id": "image_right_alt", "label": "Alt-Text", "default": "Circos-Darstellung Epigenetik: dieselben Chromosomen" },
+    { "type": "text", "id": "sub_right", "label": "Untertitel", "default": "Die Markierungen. Verändern sich mit der Zeit." },
+    { "type": "text", "id": "note_right", "label": "Label", "default": "Der dynamische Teil deiner Biologie" },
+
+    { "type": "header", "content": "Abbinder" },
+    { "type": "textarea", "id": "transparency", "label": "Transparenz-Zeile", "info": "Steht über einer Haarlinie am Kapitelende.", "default": "Die Labortechnologie dahinter ist etabliert und tausendfach bewährt." },
+
+    { "type": "header", "content": "Farben und Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#ffffff" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 }
+  ],
+  "blocks": [
+    {
+      "type": "column",
+      "name": "Erklärspalte",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Titel", "default": "Die DNA: dein Ausgangspunkt" },
+        { "type": "textarea", "id": "body", "label": "Text", "default": "Kurzer erklärender Absatz." }
+      ]
+    }
+  ],
+  "max_blocks": 2,
+  "presets": [{ "name": "Wissenschaft Messung" }]
+}
+{% endschema %}

@@ -1,0 +1,149 @@
+{% comment %}
+  LIFETIME — Wissenschaft · Kapitel 9 (Wohin wir unterwegs sind, Rubrik 07)
+  ─────────────────────────────────────────────────────────────────────────
+  Ruhiger Ausklang auf der dunklen Teal-Fläche. Visueller Vertrag:
+  docs/science-preview.html §9.
+
+  Die dunkle Fläche ist der einzige Bruch im hellen Rhythmus der Seite und
+  deshalb bewusst am Ende gesetzt (DESIGN.md: max 1 bis 2 dunkle Sections).
+
+  On-Dark-Text läuft über die WCAG-geprüfte Rampe #f7f7f4 / 0.72 / 0.66. Der
+  Heading-Stack bekommt sie über --crs-*, nicht über den --on-dark-Modifier:
+  der zieht die Theme-Tokens (reines Weiss, 0.65) und wäre hier die falsche
+  Rampe.
+
+  §12 Build Spec:
+  - Surface:         Clinical Slate, dunkel
+  - Dominant:        der Schlussanspruch (--text-h2 in Headline-Schrift)
+  - Heading size:    --text-h1 (headline_lg). Auf dieser Seite frei, weil
+                     das Seiten-H1 auf --text-display sitzt (DESIGN.md: Display 48
+                     fuer das Deckblatt, Headline 36 je Kapitel).
+  - Content pattern: Lede + zwei Haarlinien-Spalten + Anspruch + Stand
+  - CTA:             keine. Die Seite endet ohne Angebot, das ist die Aussage.
+  - Entfernt:        ein Element gegenueber der hellen Entsprechung
+                     (design-components.mdc: auf Dunkel eins weniger)
+  - Quality move:    der Stand-Vermerk unten in der Faint-Stufe, wie ein
+                     Kolophon: die Seite sagt selbst, dass sie weiterwaechst
+{% endcomment %}
+
+{%- liquid
+  assign wa_anchor = section.settings.anchor_id
+  if wa_anchor == blank
+    assign wa_anchor = 'section-' | append: section.id
+  endif
+
+  assign wa_text = section.settings.color_text | default: '#f7f7f4'
+  assign wa_pad_t = section.settings.padding_top | default: 80
+  assign wa_pad_b = section.settings.padding_bottom | default: 80
+  assign wa_pad_t_m = wa_pad_t | times: 0.8 | round
+  assign wa_pad_b_m = wa_pad_b | times: 0.8 | round
+-%}
+
+{{ 'lt-wissenschaft.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+  #{{ wa_anchor }} {
+    --ltw-bg:       {{ section.settings.color_bg | default: '#364f56' }};
+    --ltw-text:     {{ wa_text }};
+    --ltw-text-sec: {{ wa_text | color_modify: 'alpha', 0.72 }};
+    --ltw-text-ter: {{ wa_text | color_modify: 'alpha', 0.66 }};
+    --ltw-hairline: {{ wa_text | color_modify: 'alpha', 0.2 }};
+    --crs-text:     {{ wa_text }};
+    --crs-text-sec: {{ wa_text | color_modify: 'alpha', 0.72 }};
+    --crs-text-ter: {{ wa_text | color_modify: 'alpha', 0.66 }};
+    padding-top:    {{ wa_pad_t }}px;
+    padding-bottom: {{ wa_pad_b }}px;
+    scroll-margin-top: 96px;
+  }
+
+  @media screen and (max-width: 767px) {
+    #{{ wa_anchor }} {
+      padding-top:    {{ wa_pad_t_m }}px;
+      padding-bottom: {{ wa_pad_b_m }}px;
+    }
+  }
+{% endstyle %}
+
+<section id="{{ wa_anchor }}" class="ltw ltw-outlook">
+  <div class="ltw__container">
+    {% render 'lt-wiss-rubric',
+      number: section.settings.rubric_number,
+      label: section.settings.rubric_label %}
+
+    {% render 'section-heading-crs',
+      heading: section.settings.heading,
+      subheading: section.settings.subheading,
+      align: 'left',
+      heading_tag: 'h2',
+      headline_lg: true,
+      extra_class: 'ltw-heading'
+    %}
+
+    {%- if section.settings.body != blank -%}
+      <div class="ltw-body ltw-body--lede ltw-body--sec rte">{{ section.settings.body }}</div>
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="ltw-outlook__next">
+        {%- for block in section.blocks -%}
+          <div class="ltw-outlook__item" {{ block.shopify_attributes }}>
+            {%- if block.settings.title != blank -%}
+              <h3>{{ block.settings.title | escape }}</h3>
+            {%- endif -%}
+            {%- if block.settings.body != blank -%}
+              <p>{{ block.settings.body | escape }}</p>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.claim != blank -%}
+      <p class="ltw-outlook__claim">{{ section.settings.claim | escape }}</p>
+    {%- endif -%}
+
+    {%- if section.settings.stand != blank -%}
+      <p class="ltw-outlook__stand">{{ section.settings.stand | escape }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Wissenschaft Ausblick",
+  "tag": "section",
+  "class": "lt-wiss-ausblick",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anker-ID", "info": "Ohne Wert bleibt die automatische ID." },
+
+    { "type": "header", "content": "Kapitel-Rubrik" },
+    { "type": "text", "id": "rubric_number", "label": "Kapitelziffer", "default": "07" },
+    { "type": "text", "id": "rubric_label", "label": "Kapitelname", "default": "Ausblick" },
+
+    { "type": "header", "content": "Text" },
+    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Wohin wir unterwegs sind." },
+    { "type": "textarea", "id": "subheading", "label": "Subline" },
+    { "type": "richtext", "id": "body", "label": "Fließtext", "default": "<p>Kurzer erklärender Absatz.</p>" },
+    { "type": "textarea", "id": "claim", "label": "Schlussanspruch", "default": "Wir messen uns an denselben vier Kriterien, die wir dir gegeben haben." },
+    { "type": "text", "id": "stand", "label": "Stand-Vermerk", "default": "Diese Seite wächst mit unserer Forschung." },
+
+    { "type": "header", "content": "Farben und Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#364f56" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#f7f7f4" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 }
+  ],
+  "blocks": [
+    {
+      "type": "next",
+      "name": "Nächster Schritt",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Titel", "default": "Speichelproben" },
+        { "type": "textarea", "id": "body", "label": "Text", "default": "Kurze Beschreibung des Vorhabens." }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [{ "name": "Wissenschaft Ausblick" }]
+}
+{% endschema %}

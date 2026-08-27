@@ -1,0 +1,44 @@
+{% comment %}
+  ───────────────────────────────────────────────────────────────────────────
+  LIFETIME — Kapitel-Rubrik der Wissenschaftsseite
+  ───────────────────────────────────────────────────────────────────────────
+  Die strukturelle Signatur der Dossier-Welt (DESIGN.md § Components →
+  „Chapter Rubric"): Haarlinie oben, darunter auf der Grundlinie das
+  Kapitel-Label in der 12px-Uppercase-Stimme. Sie ersetzt den dekorativen
+  Kicker vollständig, deshalb tragen die Sections dieser Seite keinen
+  `kicker` im Heading-Stack.
+
+  Nur auf /pages/wissenschaft im Einsatz. Wer sie anderswo braucht, hebt sie
+  vorher in ein neutrales Snippet, statt hier Sonderfälle einzubauen.
+
+  ── Parameter ──────────────────────────────────────────────────────────────
+  number  (string) — Kapitelziffer, z. B. „01". Leer → nur das Label.
+  label   (string) — Kapitelname, z. B. „Das Feld". Leer → nichts gerendert.
+
+  ── Usage ──────────────────────────────────────────────────────────────────
+  {% render 'lt-wiss-rubric',
+     number: section.settings.rubric_number,
+     label: section.settings.rubric_label %}
+
+  ── Notes ──────────────────────────────────────────────────────────────────
+  • Farben und Haarlinie kommen über `--ltw-*` aus dem `{% style %}`-Block der
+    aufrufenden Section, damit dunkle Flächen ohne Sonder-CSS mitlaufen.
+  • Sind beide Felder leer, wird gar nichts ausgegeben (kein leerer Strich).
+{% endcomment %}
+
+{%- liquid
+  assign _r_number = number | default: '' | strip
+  assign _r_label = label | default: '' | strip
+-%}
+
+{%- if _r_number != blank or _r_label != blank -%}
+  <div class="ltw-rubric">
+    <span class="ltw-rubric__label">
+      {%- if _r_number != blank -%}
+        <b>{{ _r_number | escape }}</b>
+        {%- if _r_label != blank %} · {% endif -%}
+      {%- endif -%}
+      {{- _r_label | escape -}}
+    </span>
+  </div>
+{%- endif -%}

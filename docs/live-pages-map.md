@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-08-19
+last_review: 2026-08-27
 canonical_for: live-page-slug-to-template-mapping
 ---
 
@@ -114,6 +114,22 @@ Diese 5 Seiten sind das Fundament (siehe `CLAUDE.md` § Kanonisches Fundament). 
 | 3 | `/pages/science` | `templates/page.science.json` | `lt-science-proof-hero` → `lt-science-split` (warum) → `lt-benefits` → `lt-science-split` (epigenetik) → `lt-science-split` (genetik) → `lt-hp-science` → `lt-science-bento` → `lt-science-scope` → `crs-risk-free-close` → `crs-faq-accordion` → `crs-link-cards` |
 | 4 | `/pages/quiz-age` | `templates/page.quiz-age.json` | `sections/lt-pdp-quiz-v2.liquid` |
 | 5 | `/products/lifetime-nmn` (NMN Pulver) | `templates/product.nmn-pulver.json` | PDP-Stack |
+
+> **Neu: `/pages/wissenschaft` (2026-08-27, angelegt aber NICHT veröffentlicht).**
+> Eigenes Template `templates/page.wissenschaft.json`, eigener Section-Satz `lt-wiss-*`,
+> eigene Stylesheet-Datei `assets/lt-wissenschaft.css`, Page-ID 704531497335,
+> `templateSuffix: wissenschaft`, `isPublished: false` (Slug liefert deshalb 404).
+> Reihenfolge: `lt-wiss-hero` → `-kurz` → `-feld` → `-messung` → `-grenze` → `-messlatte`
+> → `-forschung` → `-personen` → `-ausblick` → `-quellen`. Bewusst **ohne jeden CTA**,
+> ohne Produktkachel, ohne Preis. Visueller Vertrag ist `docs/science-preview.html`.
+> **Das ist nicht der Ersatz für `/pages/science`.** Die beiden Seiten beantworten
+> verschiedene Fragen: `science` ist der Produkt-Funnel mit Kaufpfad, `wissenschaft` ist
+> das Forschungs-Dossier. Der Menüpunkt „Wissenschaft" zeigt weiterhin auf `/pages/science`
+> (BJ-Entscheid 27.08., Nav bleibt vorerst unangetastet).
+> Solange die Page unveröffentlicht ist, rendert das Template nur über
+> `?view=wissenschaft` auf einem beliebigen Page-Slug. Freigabe-Blocker vor dem
+> Veröffentlichen: Limmroth (zwei Stellen), Froböse, Summit-Foto (erkennbare Dritte),
+> Report-Screenshot ist Platzhalter, KI-Kennzeichnung der Hero-Bilder.
 
 > **Hero-Bildmaß vereinheitlicht (2026-07-30):** `lt-science-proof-hero` trägt jetzt dasselbe
 > Bildmaß wie `lt-science-hero` (Kollektions-Hero): Raster `3fr 2fr` statt `6fr 5fr`,

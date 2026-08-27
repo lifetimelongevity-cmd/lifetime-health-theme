@@ -1,0 +1,130 @@
+{% comment %}
+  LIFETIME — Wissenschaft · Kapitel 3 (Das Feld, Rubrik 01)
+  ─────────────────────────────────────────────────────────
+  Stand der Alternsforschung. Copy links, Porträt rechts in Graustufen.
+  Visueller Vertrag: docs/science-preview.html §3.
+
+  FREIGABE: Das Porträt zeigt Prof. Dr. med. Volker Limmroth. Es geht erst mit
+  seinem Einverständnis live, und die Rolle lautet exakt „ärztliche Validierung",
+  nicht Epigenetik-Kern. Bildrechte am Vortragsfoto sind vor Livegang zu klären.
+  Ohne Bild rendert das Kapitel sauber einspaltig weiter.
+
+  §12 Build Spec:
+  - Surface:         Paper A
+  - Dominant:        das Heading-Pair (headline_lg = --text-h1)
+  - Content pattern: asymmetrischer Zweispalter 1.15/0.85, Bild ohne Rahmen
+  - CTA:             keine
+  - Entfernt:        Kicker. Die Rubrik traegt die Kapitelkennung.
+  - Quality move:    Graustufen-Portraet ohne Media-Box, damit das Foto Dokument
+                     bleibt und nicht zum Lifestyle-Motiv wird
+{% endcomment %}
+
+{%- liquid
+  assign wf_anchor = section.settings.anchor_id
+  if wf_anchor == blank
+    assign wf_anchor = 'section-' | append: section.id
+  endif
+
+  assign wf_text = section.settings.color_text | default: '#26251e'
+  assign wf_pad_t = section.settings.padding_top | default: 80
+  assign wf_pad_b = section.settings.padding_bottom | default: 80
+  assign wf_pad_t_m = wf_pad_t | times: 0.8 | round
+  assign wf_pad_b_m = wf_pad_b | times: 0.8 | round
+-%}
+
+{{ 'lt-wissenschaft.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+  #{{ wf_anchor }} {
+    --ltw-bg:       {{ section.settings.color_bg | default: '#f7f7f4' }};
+    --ltw-text:     {{ wf_text }};
+    --ltw-text-sec: {{ wf_text | color_modify: 'alpha', 0.72 }};
+    --ltw-text-ter: {{ wf_text | color_modify: 'alpha', 0.66 }};
+    --ltw-hairline: {{ wf_text | color_modify: 'alpha', 0.12 }};
+    --crs-text:     {{ wf_text }};
+    --crs-text-sec: {{ wf_text | color_modify: 'alpha', 0.72 }};
+    --crs-text-ter: {{ wf_text | color_modify: 'alpha', 0.66 }};
+    padding-top:    {{ wf_pad_t }}px;
+    padding-bottom: {{ wf_pad_b }}px;
+    scroll-margin-top: 96px;
+  }
+
+  @media screen and (max-width: 767px) {
+    #{{ wf_anchor }} {
+      padding-top:    {{ wf_pad_t_m }}px;
+      padding-bottom: {{ wf_pad_b_m }}px;
+    }
+  }
+{% endstyle %}
+
+<section id="{{ wf_anchor }}" class="ltw ltw-feld">
+  <div class="ltw__container">
+    {% render 'lt-wiss-rubric',
+      number: section.settings.rubric_number,
+      label: section.settings.rubric_label %}
+
+    <div class="ltw-split">
+      <div class="ltw-split__copy">
+        {% render 'section-heading-crs',
+          heading: section.settings.heading,
+          subheading: section.settings.subheading,
+          align: 'left',
+          heading_tag: 'h2',
+          headline_lg: true,
+          extra_class: 'ltw-heading'
+        %}
+
+        {%- if section.settings.body != blank -%}
+          <div class="ltw-body ltw-body--lede rte">{{ section.settings.body }}</div>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.image != blank -%}
+        <figure class="ltw-split__figure">
+          {{ section.settings.image
+             | image_url: width: 900
+             | image_tag:
+               loading: 'lazy',
+               widths: '400, 600, 900',
+               sizes: '(min-width: 961px) 24rem, 90vw',
+               alt: section.settings.image_alt }}
+          {%- if section.settings.caption != blank -%}
+            <figcaption class="ltw-caption">{{ section.settings.caption | escape }}</figcaption>
+          {%- endif -%}
+        </figure>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Wissenschaft Feld",
+  "tag": "section",
+  "class": "lt-wiss-feld",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anker-ID", "info": "Ohne Wert bleibt die automatische ID." },
+
+    { "type": "header", "content": "Kapitel-Rubrik" },
+    { "type": "text", "id": "rubric_number", "label": "Kapitelziffer", "default": "01" },
+    { "type": "text", "id": "rubric_label", "label": "Kapitelname", "default": "Das Feld" },
+
+    { "type": "header", "content": "Text" },
+    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Die Wissenschaft war nie weiter." },
+    { "type": "textarea", "id": "subheading", "label": "Subline", "info": "Gleiche Größe wie die Überschrift, nur zurückgenommen." },
+    { "type": "richtext", "id": "body", "label": "Fließtext", "default": "<p>Kurzer erklärender Absatz.</p>" },
+
+    { "type": "header", "content": "Porträt" },
+    { "type": "image_picker", "id": "image", "label": "Bild", "info": "Wird quadratisch beschnitten und in Graustufen gezeigt. Ohne Bild läuft das Kapitel einspaltig." },
+    { "type": "text", "id": "image_alt", "label": "Alt-Text", "default": "Prof. Dr. med. Volker Limmroth bei einem Fachvortrag am Rednerpult" },
+    { "type": "textarea", "id": "caption", "label": "Bildunterschrift" },
+
+    { "type": "header", "content": "Farben und Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#f7f7f4" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 }
+  ],
+  "presets": [{ "name": "Wissenschaft Feld" }]
+}
+{% endschema %}

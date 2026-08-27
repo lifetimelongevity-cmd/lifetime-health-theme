@@ -1,0 +1,228 @@
+{% comment %}
+  LIFETIME — Wissenschaft · Kapitel 1 (Hero)
+  ──────────────────────────────────────────
+  Deckblatt der Wissenschaftsseite. Links das Heading-Pair (H1 der Seite) plus
+  Forschungs-Copy und Fakten-Zeile, rechts der Vorher-Nachher-Wipe als weisses
+  Blatt. Visueller Vertrag: docs/science-preview.html §1.
+
+  Der Wipe zeigt chronologisches Altern an einer Person, ausdruecklich KEIN
+  Produktergebnis. Reihenfolge jung → alt, damit die Darstellung nicht als
+  Wirkversprechen lesbar ist. Beide Aufnahmen sind KI-generiert, die
+  Kennzeichnung dafuer haengt am Setting `illustration_note`.
+
+  §12 Build Spec:
+  - Surface:         Paper A, hell
+  - Dominant:        das Heading-Pair (headline_xl = --text-display)
+  - Heading size:    --text-display, mobil --text-h1 (Seiten-Scope in lt-wissenschaft.css)
+  - Content pattern: asymmetrischer Zweispalter 1.05/0.95 + Papier-Blatt
+  - CTA:             keine. Die ganze Seite fuehrt bewusst keinen CTA.
+  - Entfernt:        Kicker (die Kapitel-Rubrik ersetzt ihn, der Hero traegt keine)
+  - Quality move:    der Regler ist ein echter range-Input ueber der ganzen
+                     Flaeche, damit Maus, Touch und Tastatur dasselbe bedienen
+{% endcomment %}
+
+{%- liquid
+  assign wh_anchor = section.settings.anchor_id
+  if wh_anchor == blank
+    assign wh_anchor = 'section-' | append: section.id
+  endif
+
+  assign wh_text = section.settings.color_text | default: '#26251e'
+  assign wh_pad_t = section.settings.padding_top | default: 80
+  assign wh_pad_b = section.settings.padding_bottom | default: 80
+  assign wh_pad_t_m = wh_pad_t | times: 0.8 | round
+  assign wh_pad_b_m = wh_pad_b | times: 0.8 | round
+
+  assign wh_start = section.settings.wipe_start | default: 50
+-%}
+
+{{ 'lt-wissenschaft.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+  #{{ wh_anchor }} {
+    --ltw-bg:       {{ section.settings.color_bg | default: '#f7f7f4' }};
+    --ltw-text:     {{ wh_text }};
+    --ltw-text-sec: {{ wh_text | color_modify: 'alpha', 0.72 }};
+    --ltw-text-ter: {{ wh_text | color_modify: 'alpha', 0.66 }};
+    --ltw-hairline: {{ wh_text | color_modify: 'alpha', 0.12 }};
+    --ltw-frame:    {{ section.settings.color_frame | default: '#f2f1ed' }};
+    --crs-text:     {{ wh_text }};
+    --crs-text-sec: {{ wh_text | color_modify: 'alpha', 0.72 }};
+    --crs-text-ter: {{ wh_text | color_modify: 'alpha', 0.66 }};
+    padding-top:    {{ wh_pad_t }}px;
+    padding-bottom: {{ wh_pad_b }}px;
+    scroll-margin-top: 96px;
+  }
+
+  @media screen and (max-width: 767px) {
+    #{{ wh_anchor }} {
+      padding-top:    {{ wh_pad_t_m }}px;
+      padding-bottom: {{ wh_pad_b_m }}px;
+    }
+  }
+{% endstyle %}
+
+<section id="{{ wh_anchor }}" class="ltw ltw-hero">
+  <div class="ltw__container ltw-hero__grid">
+    <div class="ltw-hero__copy-col">
+      {% render 'section-heading-crs',
+        heading: section.settings.headline,
+        subheading: section.settings.subheading,
+        align: 'left',
+        heading_tag: 'h1',
+        headline_xl: true,
+        extra_class: 'ltw-heading ltw-hero__intro'
+      %}
+
+      {%- if section.settings.body != blank -%}
+        <p class="ltw-hero__copy">{{ section.settings.body | escape | newline_to_br }}</p>
+      {%- endif -%}
+
+      {%- if section.blocks.size > 0 -%}
+        <ul class="ltw-hero__facts">
+          {%- for block in section.blocks -%}
+            {%- if block.settings.text != blank -%}
+              <li class="ltw-hero__fact" {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+
+    <figure class="ltw-hero__figure">
+      <lt-wiss-wipe>
+        <div class="ltw-ba" style="--ltw-ba-pos: {{ wh_start }}%">
+          {%- if section.settings.image_after != blank -%}
+            {{ section.settings.image_after
+               | image_url: width: 900
+               | image_tag:
+                 loading: 'eager',
+                 fetchpriority: 'high',
+                 widths: '400, 600, 900',
+                 sizes: '(min-width: 961px) 40vw, 90vw',
+                 class: 'ltw-ba__base',
+                 alt: section.settings.image_after_alt }}
+          {%- endif -%}
+
+          {%- if section.settings.image_before != blank -%}
+            {%- comment -%}
+              Das Overlay ist rein visuell: es zeigt dieselbe Person, die der
+              Basis-Alt-Text bereits beschreibt. Deshalb aria-hidden und leerer
+              Alt-Text, sonst liest der Screenreader die Person zweimal.
+            {%- endcomment -%}
+            <div class="ltw-ba__overlay" aria-hidden="true">
+              {{ section.settings.image_before
+                 | image_url: width: 900
+                 | image_tag: loading: 'eager', widths: '400, 600, 900', alt: '' }}
+            </div>
+          {%- endif -%}
+
+          <div class="ltw-ba__divider" aria-hidden="true">
+            <span class="ltw-ba__knob">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                <path d="M10 8 6 12l4 4M14 8l4 4-4 4"/>
+              </svg>
+            </span>
+          </div>
+
+          {%- if section.settings.tag_before != blank -%}
+            <span class="ltw-ba__tag ltw-ba__tag--left">{{ section.settings.tag_before | escape }}</span>
+          {%- endif -%}
+          {%- if section.settings.tag_after != blank -%}
+            <span class="ltw-ba__tag ltw-ba__tag--right">{{ section.settings.tag_after | escape }}</span>
+          {%- endif -%}
+
+          <input class="ltw-ba__range" type="range" min="0" max="100" step="1"
+                 value="{{ wh_start }}"
+                 aria-label="{{ section.settings.slider_label | escape }}">
+        </div>
+      </lt-wiss-wipe>
+
+      {%- if section.settings.caption != blank -%}
+        <figcaption class="ltw-caption">
+          {{ section.settings.caption | escape }}
+          {%- if section.settings.illustration_note != blank %} {{ section.settings.illustration_note | escape }}{% endif -%}
+        </figcaption>
+      {%- endif -%}
+    </figure>
+  </div>
+</section>
+
+{% javascript %}
+  /*
+    Vorher-Nachher-Wipe.
+    Der range-Input liegt unsichtbar ueber der ganzen Flaeche, deshalb bedienen
+    Maus, Touch und Tastatur (Pfeiltasten, Pos1/Ende) denselben Wert; es gibt
+    keinen zweiten Eingabepfad, den man synchron halten muesste.
+
+    prefers-reduced-motion: das Bauteil bewegt sich nur, solange jemand es
+    zieht. Es gibt keine Transition, keinen Auto-Play und keine Einblend-
+    Animation, also auch nichts zu unterdruecken. Wer hier spaeter eine
+    Transition ergaenzt, muss sie gegen die Media Query stellen.
+
+    Custom Element statt DOMContentLoaded-Handler: so greift der Upgrade auch
+    nach `shopify:section:load` im Theme-Editor, ohne Re-Init-Listener.
+  */
+  if (!customElements.get('lt-wiss-wipe')) {
+    customElements.define(
+      'lt-wiss-wipe',
+      class LtWissWipe extends HTMLElement {
+        connectedCallback() {
+          var frame = this.querySelector('.ltw-ba');
+          var range = this.querySelector('.ltw-ba__range');
+          if (!frame || !range) return;
+          var apply = function () {
+            frame.style.setProperty('--ltw-ba-pos', range.value + '%');
+          };
+          range.addEventListener('input', apply);
+          apply();
+        }
+      }
+    );
+  }
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Wissenschaft Hero",
+  "tag": "section",
+  "class": "lt-wiss-hero",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anker-ID", "info": "Ohne Wert bleibt die automatische ID." },
+
+    { "type": "header", "content": "Text" },
+    { "type": "textarea", "id": "headline", "label": "Headline", "default": "Wissenschaft ist für Populationen gemacht." },
+    { "type": "textarea", "id": "subheading", "label": "Subline", "info": "Gleiche Größe wie die Headline, nur zurückgenommen. Beides ist ein Block.", "default": "Gesundheit ist persönlich." },
+    { "type": "textarea", "id": "body", "label": "Fließtext", "default": "Wir forschen selbst an der schwierigeren Frage: Was bedeutet die Wissenschaft für dich?" },
+
+    { "type": "header", "content": "Vorher-Nachher-Regler" },
+    { "type": "image_picker", "id": "image_before", "label": "Bild links (jünger)" },
+    { "type": "image_picker", "id": "image_after", "label": "Bild rechts (älter)" },
+    { "type": "text", "id": "image_after_alt", "label": "Alt-Text", "info": "Beschreibt beide Aufnahmen; das linke Bild läuft als rein visuelles Overlay.", "default": "Dieselbe Frau mit ergrautem Haar, Aufnahme im Alter von etwa 60 Jahren" },
+    { "type": "text", "id": "tag_before", "label": "Marke links", "default": "40 Jahre" },
+    { "type": "text", "id": "tag_after", "label": "Marke rechts", "default": "60 Jahre" },
+    { "type": "range", "id": "wipe_start", "label": "Startposition", "min": 0, "max": 100, "step": 5, "unit": "%", "default": 50 },
+    { "type": "text", "id": "slider_label", "label": "Bedienhilfe-Text", "info": "Wird Screenreadern als Beschriftung des Reglers vorgelesen.", "default": "Regler: Ansicht zwischen 40 und 60 Jahren überblenden" },
+    { "type": "textarea", "id": "caption", "label": "Bildunterschrift", "default": "Zwanzig Jahre chronologisches Altern, sichtbar an einer Person. Wie schnell die Biologie dahinter altert, zeigt kein Foto." },
+    { "type": "text", "id": "illustration_note", "label": "Kennzeichnung", "info": "Hinweis, dass die Aufnahmen KI-generiert sind. Leer lassen heißt: keine Kennzeichnung.", "default": "Illustration, KI-generiert." },
+
+    { "type": "header", "content": "Farben und Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#f7f7f4" },
+    { "type": "color", "id": "color_frame", "label": "Bildfläche", "default": "#f2f1ed" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 }
+  ],
+  "blocks": [
+    {
+      "type": "fact",
+      "name": "Fakt",
+      "settings": [
+        { "type": "text", "id": "text", "label": "Text", "default": "Eigene Analyseumgebung seit Mitte 2023" }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [{ "name": "Wissenschaft Hero" }]
+}
+{% endschema %}

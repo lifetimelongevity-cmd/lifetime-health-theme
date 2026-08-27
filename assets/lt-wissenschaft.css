@@ -1,0 +1,1133 @@
+/* =============================================================================
+   LIFETIME — /pages/wissenschaft
+   Welt: „Klinisches Dossier" (DESIGN.md). Visueller Vertrag: docs/science-preview.html
+   -----------------------------------------------------------------------------
+   Eine Datei für die ganze Seite, weil die Seite ein Dokument ist: die zehn
+   Sections sind Kapitel desselben Dossiers und teilen Rubrik, Lesemaß, Papier-
+   und Haarlinien-Regel. Jede `lt-wiss-*`-Section lädt diese Datei per
+   stylesheet_tag; identische Link-Tags kosten genau einen Request.
+
+   Scope: alles hängt unter `.ltw`. Farben, Haarlinie und Flächen kommen als
+   `--ltw-*` aus dem `{% style %}`-Block der jeweiligen Section (Editor-Settings),
+   nie als Literal aus dieser Datei.
+
+   Regeln, die hier tragen:
+   • Papier-Regel — Schatten nur unter weißem Blatt, sonst Haarlinie (DESIGN.md).
+   • Messwert-Teal — Teal nur an gemessenen Zahlen, nie an CTA, Headline, Deko.
+   • Heading-Pair — Title + Subline sind ein Block; Größe/Gewicht/Zeilenhöhe
+     stehen ausschließlich in assets/crs-section-headings.css. Hier nur
+     max-width, margin und gap.
+   ============================================================================= */
+
+/* ── Seiten-Scope + Mobilstufe ───────────────────────────────────────────────
+   Das Theme skaliert --text-* nicht mit dem Viewport, die Dossier-Welt schon
+   (DESIGN.md: Display 48→36, Headline 36→28). Die Stufe wird deshalb hier im
+   Seiten-Scope gesetzt, nicht in theme.css: jede Größe rutscht eine Position im
+   Token-Raster nach unten. Als Literal notiert, weil eine Selbstreferenz
+   (--text-display: var(--text-h1)) im selben Block zyklisch auflösen würde.
+   Der Heading-Stack liest die Tokens von hier und schrumpft dadurch mit, ohne
+   dass eine Section font-size anfasst (das wäre der verbotene Griff). */
+.ltw {
+  background: var(--ltw-bg, var(--color-paper));
+  color: var(--ltw-text, var(--color-ink));
+}
+
+@media screen and (max-width: 767px) {
+  .ltw {
+    --text-display: 36px; /* = --text-h1 */
+    --text-h1:      28px; /* = --text-h2 */
+    --text-h2:      24px; /* = --text-h3 */
+    --text-h3:      20px; /* = --text-section */
+  }
+}
+
+.ltw__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--lt-page-gutter);
+}
+
+/* Lesemaß dieser Seite.
+   ACHTUNG, bewusste Abweichung vom Theme-Token --lt-measure (32rem ≈ 71 Zeichen):
+   das abgenommene Preview setzt den Fließtext auf 42rem (≈ 93 Zeichen). In den
+   Zweispaltern deckelt ohnehin die Spalte, spürbar wird der Wert nur in den
+   einspaltigen Kapiteln 05 und 07. Wer enger will, ändert genau diese Zeile. */
+.ltw {
+  --ltw-measure: 42rem;
+}
+
+/* ── Kapitel-Rubrik (Signatur der Dossier-Welt) ───────────────────────────── */
+.ltw-rubric {
+  border-top: 1px solid var(--ltw-hairline, rgba(38, 37, 30, 0.12));
+  padding-top: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.ltw-rubric__label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+}
+
+.ltw-rubric__label b {
+  font-weight: var(--weight-semibold);
+  color: var(--ltw-text, var(--color-ink));
+}
+
+/* ── Text-Primitive ──────────────────────────────────────────────────────── */
+.ltw-body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+}
+
+.ltw-body p {
+  margin: 0;
+  max-width: var(--ltw-measure);
+}
+
+.ltw-body p + p {
+  margin-top: var(--space-4);
+}
+
+/* Lede: der Einstiegsabsatz eines Kapitels, 18px. Keine zweite Hierarchie-
+   stufe, nur der Einstieg, und deshalb opt-in per Modifier: ein zweiter
+   Fliesstext-Block im selben Kapitel (Kapitel 05 hat einen) darf ihn nicht
+   automatisch mitbekommen. */
+.ltw-body--lede > p:first-child,
+.ltw-lede {
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-relaxed);
+  max-width: var(--ltw-measure);
+}
+
+/* Abstand vom Heading-Pair zum Fliesstext. Kapitel, die statt Text ein Raster
+   oder eine Figur anschliessen, bringen ihren Abstand selbst mit. */
+.ltw-heading + .ltw-body {
+  margin-top: var(--space-5);
+}
+
+.ltw-body--sec p {
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+}
+
+.ltw-caption {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-relaxed);
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+}
+
+.ltw-closer {
+  margin: var(--space-6) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-relaxed);
+  max-width: 44rem;
+}
+
+.ltw-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Der Heading-Stack darf von aussen nur Abstand und Breite bekommen. */
+.ltw-heading .crs-heading-stack__pair {
+  gap: var(--space-1);
+}
+
+/* =============================================================================
+   Kapitel 1 · Hero
+   ========================================================================== */
+.ltw-hero__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-7);
+  align-items: center;
+}
+
+@media screen and (min-width: 961px) {
+  .ltw-hero__grid {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: var(--space-8);
+  }
+}
+
+.ltw-hero__intro .crs-heading-stack__title {
+  max-width: 13em;
+}
+
+.ltw-hero__intro .crs-heading-stack__subtitle {
+  max-width: 16em;
+}
+
+.ltw-hero__copy {
+  margin: var(--space-5) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-relaxed);
+  max-width: 30em;
+}
+
+/* Fakten-Zeile: Trennung über Haarlinien, nicht über Boxen. */
+.ltw-hero__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3) 0;
+  margin-top: var(--space-7);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--ltw-hairline, rgba(38, 37, 30, 0.12));
+  list-style: none;
+}
+
+.ltw-hero__fact {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+  padding-right: var(--space-4);
+  margin-right: var(--space-4);
+  border-right: 1px solid var(--ltw-hairline, rgba(38, 37, 30, 0.12));
+}
+
+.ltw-hero__fact:last-child {
+  border-right: 0;
+  margin-right: 0;
+  padding-right: 0;
+}
+
+@media screen and (max-width: 767px) {
+  .ltw-hero__fact {
+    width: 100%;
+    border-right: 0;
+    margin-right: 0;
+    padding-right: 0;
+  }
+}
+
+/* Papier-Regel: weisses Blatt, deshalb Schatten und kein Rahmen. */
+.ltw-hero__figure {
+  margin: 0;
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-5);
+}
+
+/* ── Vorher-Nachher-Wipe ──────────────────────────────────────────────────
+   Chronologisches Altern, kein Produktergebnis. Der Regler ist ein echter
+   range-Input über der ganzen Fläche: Maus, Touch und Tastatur bedienen
+   dasselbe Element, ohne Zusatz-Handler. */
+/* Der Custom-Element-Wrapper ist reines Verhalten und darf das Layout des
+   Blatts nicht anfassen. */
+lt-wiss-wipe { display: block; }
+
+.ltw-ba {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--ltw-frame, var(--color-light-warm));
+  touch-action: pan-y;
+}
+
+.ltw-ba__base,
+.ltw-ba__overlay img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ltw-ba__overlay {
+  position: absolute;
+  inset: 0;
+  width: var(--ltw-ba-pos, 50%);
+  overflow: hidden;
+}
+
+/* Das Overlay-Bild darf nicht mitschrumpfen, sonst wandert das Gesicht beim
+   Ziehen. Deshalb feste Kantenlänge über die Höhe statt Breite in Prozent. */
+.ltw-ba__overlay img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: auto;
+  aspect-ratio: 1 / 1;
+}
+
+.ltw-ba__divider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--ltw-ba-pos, 50%);
+  width: 2px;
+  background: var(--color-white);
+  transform: translateX(-1px);
+  box-shadow: 0 0 0 1px rgba(38, 37, 30, 0.12);
+  pointer-events: none;
+}
+
+.ltw-ba__knob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-dark);
+}
+
+.ltw-ba__knob svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+.ltw-ba__tag {
+  position: absolute;
+  bottom: var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-white);
+  background: rgba(38, 37, 30, 0.55);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  pointer-events: none;
+}
+
+.ltw-ba__tag--left  { left: var(--space-4); }
+.ltw-ba__tag--right { right: var(--space-4); }
+
+.ltw-ba__range {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.ltw-ba__range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 44px;
+  height: 100%;
+  background: transparent;
+  cursor: ew-resize;
+}
+
+.ltw-ba__range::-moz-range-thumb {
+  width: 44px;
+  height: 100%;
+  background: transparent;
+  border: 0;
+  cursor: ew-resize;
+}
+
+.ltw-ba__range:focus { outline: none; }
+
+.ltw-ba__range:focus-visible {
+  outline: 2px solid var(--color-teal-dark);
+  outline-offset: 2px;
+}
+
+/* =============================================================================
+   Kapitel 2 · Das Wichtigste in Kürze
+   ========================================================================== */
+.ltw-tldr {
+  background: var(--ltw-card, var(--color-light-warm));
+  border: 1px solid var(--ltw-hairline, rgba(38, 37, 30, 0.12));
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  max-width: 52rem;
+}
+
+.ltw-tldr__list {
+  list-style: none;
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-4);
+}
+
+.ltw-tldr__list li {
+  position: relative;
+  padding-left: var(--space-5);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  max-width: var(--ltw-measure);
+}
+
+/* Marker neutral in Slate: Teal ist Mess- und Interaktionsfarbe, keine Deko. */
+.ltw-tldr__list li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em; /* optische Grundlinie des ersten Zeichens bei 1.6 Zeilenhöhe */
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-dark);
+}
+
+/* =============================================================================
+   Kapitel 3 · Das Feld (Copy + Porträt)
+   ========================================================================== */
+.ltw-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-7);
+  align-items: center;
+}
+
+@media screen and (min-width: 961px) {
+  .ltw-split {
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: var(--space-8);
+  }
+}
+
+.ltw-split__figure {
+  margin: 0;
+  max-width: 24rem;
+}
+
+@media screen and (min-width: 961px) {
+  .ltw-split__figure { margin-left: auto; }
+}
+
+.ltw-split__figure img {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  filter: grayscale(1);
+}
+
+/* =============================================================================
+   Kapitel 4 · Was wir messen
+   ========================================================================== */
+.ltw-measure__figure {
+  margin: var(--space-6) 0 0;
+}
+
+.ltw-measure__panels {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-7);
+  align-items: start;
+}
+
+.ltw-measure__cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-7);
+  margin-top: var(--space-6);
+}
+
+@media screen and (min-width: 768px) {
+  .ltw-measure__panels,
+  .ltw-measure__cols { grid-template-columns: 1fr 1fr; }
+}
+
+.ltw-measure__img {
+  width: 100%;
+  height: auto;
+  max-width: 30rem;
+  margin: 0 auto;
+  display: block;
+}
+
+.ltw-measure__sub {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+  margin-top: var(--space-4);
+  text-align: center;
+}
+
+.ltw-measure__note {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ltw-text-ter, var(--color-ink-muted));
+  margin-top: var(--space-2);
+  text-align: center;
+}
+
+.ltw-measure__col h3 {
+  font-family: var(--font-body);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-tight);
+  margin: 0;
+}
+
+.ltw-measure__col p {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+  margin: var(--space-2) 0 0;
+}
+
+.ltw-measure__transparency {
+  margin-top: var(--space-7);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--ltw-hairline, rgba(38, 37, 30, 0.12));
+}
+
+.ltw-measure__transparency p {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-relaxed);
+  max-width: 46rem;
+  margin: 0;
+}
+
+/* =============================================================================
+   Kapitel 5 · Die nächste Grenze (Diskordanz)
+   ========================================================================== */
+.ltw-frontier {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-7);
+  align-items: center;
+  margin-top: var(--space-6);
+}
+
+@media screen and (min-width: 961px) {
+  .ltw-frontier {
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: var(--space-8);
+  }
+}
+
+.ltw-frontier__figure { margin: 0; }
+
+.ltw-shot-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.ltw-shot-head__label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.ltw-shot-head__note {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+}
+
+/* Der Graph ist Inline-SVG, damit er skaliert und über diese Klassen themebar
+   bleibt. Im Markup steht kein einziger Farbwert. */
+.ltw-discord {
+  margin-top: var(--space-6);
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.ltw-discord .d-band     { fill: var(--color-teal); opacity: 0.12; }
+.ltw-discord .d-chrono   { stroke: var(--ltw-text, var(--color-ink)); opacity: 0.45; stroke-width: 1.5; }
+.ltw-discord .d-chrono-label { font-family: var(--font-body); font-size: 16px; fill: var(--color-text-secondary); }
+.ltw-discord .d-dots     { fill: var(--color-dark); }
+.ltw-discord .d-name     { font-family: var(--font-body); font-size: 16px; font-weight: var(--weight-bold); fill: var(--ltw-text, var(--color-ink)); }
+/* Messwert-Teal: die Zahlen sind Messwerte, deshalb Deep Teal. */
+.ltw-discord .d-value    { font-family: var(--font-heading); font-size: 18px; font-weight: var(--weight-bold); fill: var(--color-teal-dark); }
+.ltw-discord .d-axis,
+.ltw-discord .d-tick line { stroke: var(--color-gray-400); stroke-width: 1.5; }
+.ltw-discord .d-axis-label { font-family: var(--font-body); font-size: 16px; fill: var(--color-ink-muted); }
+
+.ltw-frontier__note {
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-relaxed);
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+  max-width: 44em;
+}
+
+.ltw-frontier__question {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-h3);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.01em;
+  margin: var(--space-6) 0 0;
+  max-width: 18em;
+}
+
+.ltw-frontier__text .ltw-closer { margin-top: var(--space-5); }
+
+/* =============================================================================
+   Kapitel 6 · Die Messlatte
+   ========================================================================== */
+.ltw-crit {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+  counter-reset: ltw-crit;
+}
+
+@media screen and (min-width: 768px) {
+  .ltw-crit { grid-template-columns: 1fr 1fr; }
+}
+
+.ltw-crit__card {
+  background: var(--ltw-card, var(--color-paper));
+  border: 1px solid var(--ltw-hairline, rgba(38, 37, 30, 0.12));
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  counter-increment: ltw-crit;
+}
+
+.ltw-crit__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* Icon-Container 48px lt. Card-Info-Spec. Icon monochrom über currentColor. */
+.ltw-crit__icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  background: var(--ltw-frame, var(--color-light-warm));
+  color: var(--color-dark);
+}
+
+.ltw-crit__icon svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.ltw-crit__title {
+  font-family: var(--font-body);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-tight);
+  margin: 0;
+}
+
+.ltw-crit__title::before {
+  content: counter(ltw-crit) "  ·  ";
+  color: var(--ltw-text-ter, var(--color-ink-muted));
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-body-sm);
+}
+
+.ltw-crit__body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+  margin: var(--space-3) 0 0;
+}
+
+/* =============================================================================
+   Kapitel 7 · Unsere Forschung
+   ========================================================================== */
+/* Papier-Regel: weisses Blatt, Schatten, kein Rahmen. */
+.ltw-shot {
+  margin: var(--space-6) 0;
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  padding: var(--space-5);
+  max-width: 52rem;
+}
+
+.ltw-shot__img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-top: var(--space-4);
+  border-radius: var(--radius-sm);
+}
+
+.ltw-shot__stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-4) var(--space-3);
+  margin-top: var(--space-5);
+}
+
+@media screen and (min-width: 768px) {
+  .ltw-shot__stats { grid-template-columns: repeat(3, 1fr); gap: var(--space-4); }
+}
+
+.ltw-hstat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* Tabular-Number-Regel: jede gemessene Zahl in der Headline-Schrift, 700,
+   tabular-nums, Messwert-Teal. */
+.ltw-hstat__value {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-h3);
+  line-height: var(--leading-stat);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-teal-dark);
+}
+
+.ltw-hstat__value em {
+  font-style: normal;
+  font-size: var(--text-body-sm);
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+}
+
+.ltw-hstat__label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-tight);
+  color: var(--ltw-text-ter, var(--color-ink-muted));
+}
+
+.ltw-shot__legend {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-relaxed);
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+  margin: var(--space-3) 0 0;
+  max-width: 44em;
+}
+
+/* Platzhalter-Flag. Sichtbar nur, solange das Setting es verlangt; vor
+   Livegang wird der Mock durch den echten Report-Screenshot ersetzt. */
+.ltw-shot__flag {
+  display: inline-block;
+  margin-top: var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+  border: 1px dashed var(--color-gray-400);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+}
+
+/* ── Forschungs-Timeline ─────────────────────────────────────────────────── */
+.ltw-rt {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  align-items: start;
+  margin-top: var(--space-8);
+}
+
+@media screen and (min-width: 768px) {
+  .ltw-rt {
+    grid-template-columns: 1fr 3fr;
+    gap: var(--space-8);
+  }
+}
+
+.ltw-rt__origin {
+  margin: 0;
+  max-width: 22rem;
+}
+
+.ltw-rt__origin img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-md);
+}
+
+.ltw-rt__origin figcaption { display: block; margin-top: var(--space-3); }
+
+.ltw-rt__origin-title {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body);
+  line-height: var(--leading-tight);
+}
+
+.ltw-rt__origin-body {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+  margin-top: var(--space-2);
+}
+
+.ltw-rt__label {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ltw-text-ter, var(--color-ink-muted));
+  margin-bottom: var(--space-5);
+}
+
+.ltw-rt__track {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+}
+
+@media screen and (min-width: 768px) {
+  .ltw-rt__track {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-5);
+  }
+}
+
+.ltw-rt__node { position: relative; }
+
+@media screen and (min-width: 768px) {
+  .ltw-rt__node {
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--ltw-hairline, rgba(38, 37, 30, 0.12));
+  }
+  .ltw-rt__node::before {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: 0;
+    width: 11px;
+    height: 11px;
+    border-radius: var(--radius-full);
+    background: var(--color-dark);
+    box-shadow: 0 0 0 4px var(--ltw-bg, var(--color-paper));
+  }
+  .ltw-rt__node--future { border-top-style: dashed; }
+  .ltw-rt__node--future::before {
+    background: var(--ltw-bg, var(--color-paper));
+    border: 2px solid var(--color-dark);
+  }
+}
+
+/* Mobil kippt die Zeitleiste in die Vertikale: Punkt links, Verbindung als
+   Haarlinie darunter. */
+@media screen and (max-width: 767px) {
+  .ltw-rt__node {
+    padding-left: var(--space-6);
+    padding-bottom: var(--space-6);
+  }
+  .ltw-rt__node::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    left: 0;
+    width: 11px;
+    height: 11px;
+    border-radius: var(--radius-full);
+    background: var(--color-dark);
+  }
+  .ltw-rt__node--future::before {
+    background: var(--ltw-bg, var(--color-paper));
+    border: 2px solid var(--color-dark);
+  }
+  .ltw-rt__node:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 4px;
+    bottom: -7px;
+    left: 5px;
+    width: 1px;
+    background: var(--ltw-hairline, rgba(38, 37, 30, 0.12));
+  }
+  .ltw-rt__node--future:not(:last-child)::after {
+    background: repeating-linear-gradient(var(--color-gray-400) 0 3px, transparent 3px 7px);
+  }
+}
+
+.ltw-rt__date {
+  display: block;
+  font-family: var(--font-heading);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-tight);
+  font-variant-numeric: tabular-nums;
+  color: var(--ltw-text, var(--color-ink));
+}
+
+.ltw-rt__title {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body);
+  line-height: var(--leading-tight);
+  margin-top: var(--space-2);
+}
+
+.ltw-rt__body {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+  margin-top: var(--space-2);
+}
+
+.ltw-research__closing { margin-top: var(--space-8); }
+
+/* =============================================================================
+   Kapitel 8 · Wer dafür einsteht
+   ========================================================================== */
+.ltw-people {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  margin-top: var(--space-6);
+}
+
+@media screen and (min-width: 768px) {
+  .ltw-people { grid-template-columns: 1fr 1fr; }
+}
+
+@media screen and (min-width: 961px) {
+  .ltw-people { grid-template-columns: repeat(3, 1fr); }
+}
+
+.ltw-person {
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.ltw-person__portrait {
+  aspect-ratio: 4 / 5;
+  background: var(--ltw-frame, var(--color-light-warm));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  filter: grayscale(1);
+}
+
+.ltw-person__portrait img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ltw-person__initials {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  color: var(--color-ink-muted);
+}
+
+.ltw-person__meta {
+  padding: var(--space-4) var(--space-5) var(--space-5);
+}
+
+.ltw-person__name {
+  font-family: var(--font-body);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body);
+  line-height: var(--leading-tight);
+  margin: 0;
+}
+
+.ltw-person__role {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  margin-top: var(--space-1);
+}
+
+.ltw-person__body {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--color-text-secondary);
+  margin: var(--space-2) 0 0;
+}
+
+/* =============================================================================
+   Kapitel 9 · Ausblick (dunkle Fläche)
+   ========================================================================== */
+.ltw-outlook__next {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  margin-top: var(--space-7);
+  max-width: 52rem;
+}
+
+@media screen and (min-width: 768px) {
+  .ltw-outlook__next { grid-template-columns: 1fr 1fr; }
+}
+
+.ltw-outlook__item {
+  border-top: 1px solid var(--ltw-hairline, rgba(247, 247, 244, 0.2));
+  padding-top: var(--space-4);
+}
+
+.ltw-outlook__item h3 {
+  font-family: var(--font-body);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-tight);
+  color: var(--ltw-text, var(--color-paper));
+  margin: 0;
+}
+
+.ltw-outlook__item p {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--ltw-text-sec, rgba(247, 247, 244, 0.72));
+  margin: var(--space-2) 0 0;
+}
+
+.ltw-outlook__claim {
+  font-family: var(--font-heading);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-h2);
+  line-height: var(--leading-tight);
+  letter-spacing: -0.01em;
+  color: var(--ltw-text, var(--color-paper));
+  margin: var(--space-8) 0 0;
+  max-width: 20em;
+}
+
+.ltw-outlook__stand {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-relaxed);
+  color: var(--ltw-text-ter, rgba(247, 247, 244, 0.66));
+  margin: var(--space-5) 0 0;
+}
+
+/* =============================================================================
+   Kapitel 10 · Quellen
+   ========================================================================== */
+/* Die beiden Überschriften dieses Kapitels laufen bewusst in der Label-Stimme,
+   nicht im Heading-Stack: es ist ein Apparat, kein Kapitel mit eigener These. */
+.ltw-sources__head {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.ltw-sources__head--further { margin-top: var(--space-7); }
+
+.ltw-sources__intro {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-relaxed);
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+  margin: var(--space-3) 0 0;
+  max-width: 44em;
+}
+
+.ltw-sources__group {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ltw-text-ter, var(--color-ink-muted));
+  margin: var(--space-6) 0 var(--space-3);
+}
+
+.ltw-sources__group:first-of-type { margin-top: var(--space-4); }
+
+.ltw-sources__list {
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+  max-width: 52rem;
+}
+
+.ltw-sources__list li {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-relaxed);
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+}
+
+/* Uhr-Name als Anker zur Diskordanz-Grafik: gleiche Labels wie im Chart. */
+.ltw-sources__list b {
+  color: var(--ltw-text, var(--color-ink));
+  font-weight: var(--weight-bold);
+}
+
+/* Linkfarbe ist Ink, Teal nur als Hover-Akzent (Messwert-Teal-Regel). */
+.ltw-sources__list a {
+  color: var(--ltw-text, var(--color-ink));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.no-touchevents .ltw-sources__list a:hover { color: var(--color-teal-dark); }
+
+.ltw-sources__list a:focus-visible {
+  outline: 2px solid var(--color-teal-dark);
+  outline-offset: 2px;
+}
+
+.ltw-sources__note {
+  font-size: var(--text-micro);
+  color: var(--ltw-text-ter, var(--color-ink-muted));
+}

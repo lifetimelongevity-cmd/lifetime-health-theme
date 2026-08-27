@@ -16,6 +16,10 @@
   kicker        (string)  — micro uppercase label above the title. Empty → omitted.
   align         (string)  — 'left' | 'center' | 'right'. Default 'left'.
   on_dark       (bool)    — true → adds `--on-dark` modifier for dark surfaces.
+  headline_xl   (bool)    — true → adds `--headline-xl` modifier (--text-display
+                            sizing). Nur fuer das H1 einer Dossier-Seite, die ihre
+                            eigene Mobilstufe fuer --text-display mitbringt.
+                            Schlaegt headline_lg und headline_md.
   headline_lg   (bool)    — true → adds `--headline-lg` modifier (--text-h1 sizing).
                             Dem echten H1 der Seite vorbehalten.
   headline_md   (bool)    — true → adds `--headline-md` modifier (--text-h2 sizing).
@@ -64,7 +68,7 @@
 -%}
 
 {%- if _crs_heading != blank or _crs_sub != blank or _crs_kicker != blank -%}
-  <div class="{% if _crs_extra != blank %}{{ _crs_extra }} {% endif %}crs-heading-stack crs-heading-stack--align-{{ _crs_align }}{% if on_dark %} crs-heading-stack--on-dark{% endif %}{% if headline_lg %} crs-heading-stack--headline-lg{% elsif headline_md %} crs-heading-stack--headline-md{% endif %}{% if _crs_modifier != blank %} crs-heading-stack--{{ _crs_modifier }}{% endif %}">
+  <div class="{% if _crs_extra != blank %}{{ _crs_extra }} {% endif %}crs-heading-stack crs-heading-stack--align-{{ _crs_align }}{% if on_dark %} crs-heading-stack--on-dark{% endif %}{% if headline_xl %} crs-heading-stack--headline-xl{% elsif headline_lg %} crs-heading-stack--headline-lg{% elsif headline_md %} crs-heading-stack--headline-md{% endif %}{% if _crs_modifier != blank %} crs-heading-stack--{{ _crs_modifier }}{% endif %}">
     {%- if _crs_kicker != blank -%}
       <p class="crs-heading-stack__kicker">{{ _crs_kicker | escape }}</p>
     {%- endif -%}

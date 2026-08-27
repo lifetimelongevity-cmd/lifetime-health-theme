@@ -1,0 +1,307 @@
+{% comment %}
+  LIFETIME — Wissenschaft · Kapitel 5 (Die nächste Grenze, Rubrik 03)
+  ───────────────────────────────────────────────────────────────────
+  Herzstück der Seite: der Diskordanz-Graph einer echten, pseudonymisierten
+  Probe. Grafik links, Text rechts. Visueller Vertrag: docs/science-preview.html §5.
+
+  Der Graph ist Inline-SVG und trägt KEINEN Farbwert im Markup; alle Farben
+  kommen über die `.ltw-discord`-Klassen aus assets/lt-wissenschaft.css. Die
+  x-Position jeder Uhr wird aus ihrem Wert gerechnet, nicht als Pixel gepflegt:
+  eine neue Probe ist damit ein Block-Edit, kein Liquid-Edit.
+
+  WHITE-LABEL: Das Label „EPI" steht für die eigene Analyse. Der Anbieter der
+  Uhr wird auf dieser Seite an keiner Stelle genannt.
+
+  §12 Build Spec:
+  - Surface:         Paper A
+  - Dominant:        der Diskordanz-Graph
+  - Heading size:    --text-h1 (headline_lg). Auf dieser Seite frei, weil
+                     das Seiten-H1 auf --text-display sitzt (DESIGN.md: Display 48
+                     fuer das Deckblatt, Headline 36 je Kapitel).
+  - Content pattern: asymmetrischer Zweispalter 1.15/0.85, Grafik links
+  - CTA:             keine
+  - Entfernt:        Legende. Die Uhrnamen stehen am Punkt, die Quellen im
+                     Kapitel 10 unter denselben Labels.
+  - Quality move:    Messwerte in Deep Teal und tabular, Achse in Gray-400 als
+                     reine Linie: die Zahl ist das Motiv, nicht das Diagramm
+{% endcomment %}
+
+{%- liquid
+  assign wg_anchor = section.settings.anchor_id
+  if wg_anchor == blank
+    assign wg_anchor = 'section-' | append: section.id
+  endif
+
+  assign wg_text = section.settings.color_text | default: '#26251e'
+  assign wg_pad_t = section.settings.padding_top | default: 80
+  assign wg_pad_b = section.settings.padding_bottom | default: 80
+  assign wg_pad_t_m = wg_pad_t | times: 0.8 | round
+  assign wg_pad_b_m = wg_pad_b | times: 0.8 | round
+
+  comment
+    Plotgeometrie. x0/x1 sind die Pixelkanten der Achse im viewBox-Raster,
+    ax_min/ax_max die Jahreswerte darauf. Alles Weitere leitet sich daraus ab,
+    damit ein anderer Achsenausschnitt nicht jede Koordinate von Hand braucht.
+  endcomment
+  assign wg_x0 = 40.0
+  assign wg_x1 = 502.9
+  assign wg_ax_min = section.settings.axis_min | times: 1.0
+  assign wg_ax_max = section.settings.axis_max | times: 1.0
+  assign wg_span = wg_ax_max | minus: wg_ax_min
+  if wg_span <= 0
+    assign wg_span = 30.0
+  endif
+  assign wg_ppy = wg_x1 | minus: wg_x0 | divided_by: wg_span
+
+  assign wg_chrono = section.settings.chrono_value | replace: ',', '.' | times: 1.0
+  assign wg_chrono_x = wg_chrono | minus: wg_ax_min | times: wg_ppy | plus: wg_x0 | round: 1
+
+  comment
+    Streuband: von der kleinsten bis zur groessten Uhr, links und rechts um
+    Punktradius plus Luft erweitert (12px = r 9 + 3).
+  endcomment
+  assign wg_min = 9999.0
+  assign wg_max = -9999.0
+  for block in section.blocks
+    assign _v = block.settings.value | replace: ',', '.' | times: 1.0
+    if _v < wg_min
+      assign wg_min = _v
+    endif
+    if _v > wg_max
+      assign wg_max = _v
+    endif
+  endfor
+  assign wg_band_x = wg_min | minus: wg_ax_min | times: wg_ppy | plus: wg_x0 | minus: 12 | round: 1
+  assign wg_band_x2 = wg_max | minus: wg_ax_min | times: wg_ppy | plus: wg_x0 | plus: 12 | round: 1
+  assign wg_band_w = wg_band_x2 | minus: wg_band_x | round: 1
+
+  assign wg_tick_step = section.settings.axis_step | times: 1.0
+  if wg_tick_step <= 0
+    assign wg_tick_step = 10.0
+  endif
+  assign wg_tick_count = wg_span | divided_by: wg_tick_step | floor
+-%}
+
+{{ 'lt-wissenschaft.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+  #{{ wg_anchor }} {
+    --ltw-bg:       {{ section.settings.color_bg | default: '#f7f7f4' }};
+    --ltw-text:     {{ wg_text }};
+    --ltw-text-sec: {{ wg_text | color_modify: 'alpha', 0.72 }};
+    --ltw-text-ter: {{ wg_text | color_modify: 'alpha', 0.66 }};
+    --ltw-hairline: {{ wg_text | color_modify: 'alpha', 0.12 }};
+    --crs-text:     {{ wg_text }};
+    --crs-text-sec: {{ wg_text | color_modify: 'alpha', 0.72 }};
+    --crs-text-ter: {{ wg_text | color_modify: 'alpha', 0.66 }};
+    padding-top:    {{ wg_pad_t }}px;
+    padding-bottom: {{ wg_pad_b }}px;
+    scroll-margin-top: 96px;
+  }
+
+  @media screen and (max-width: 767px) {
+    #{{ wg_anchor }} {
+      padding-top:    {{ wg_pad_t_m }}px;
+      padding-bottom: {{ wg_pad_b_m }}px;
+    }
+  }
+{% endstyle %}
+
+<section id="{{ wg_anchor }}" class="ltw ltw-grenze">
+  <div class="ltw__container">
+    {% render 'lt-wiss-rubric',
+      number: section.settings.rubric_number,
+      label: section.settings.rubric_label %}
+
+    {% render 'section-heading-crs',
+      heading: section.settings.heading,
+      subheading: section.settings.subheading,
+      align: 'left',
+      heading_tag: 'h2',
+      headline_lg: true,
+      extra_class: 'ltw-heading'
+    %}
+
+    <div class="ltw-frontier">
+      <figure class="ltw-frontier__figure">
+        <div class="ltw-shot-head">
+          {%- if section.settings.shot_label != blank -%}
+            <span class="ltw-shot-head__label">{{ section.settings.shot_label | escape }}</span>
+          {%- endif -%}
+          {%- if section.settings.shot_note != blank -%}
+            <span class="ltw-shot-head__note">{{ section.settings.shot_note | escape }}</span>
+          {%- endif -%}
+        </div>
+
+        {%- if section.blocks.size > 0 -%}
+          <svg class="ltw-discord" viewBox="0 62 620 268" role="img"
+               aria-label="{{ section.settings.chart_alt | escape }}">
+            <rect class="d-band" x="{{ wg_band_x }}" y="96" width="{{ wg_band_w }}" height="176" rx="8"/>
+
+            <line class="d-chrono" x1="{{ wg_chrono_x }}" y1="96" x2="{{ wg_chrono_x }}" y2="272" stroke-dasharray="5 5"/>
+            <text class="d-chrono-label" x="{{ wg_chrono_x }}" y="86" text-anchor="middle">{{ section.settings.chrono_label | escape }}</text>
+
+            <g class="d-dots">
+              {%- for block in section.blocks -%}
+                {%- liquid
+                  assign v = block.settings.value | replace: ',', '.' | times: 1.0
+                  assign cx = v | minus: wg_ax_min | times: wg_ppy | plus: wg_x0 | round: 1
+                -%}
+                <circle cx="{{ cx }}" cy="172" r="9"/>
+              {%- endfor -%}
+            </g>
+
+            {%- comment -%}
+              Die Beschriftungsspur je Uhr ist ein Block-Setting, weil sich
+              Punkte auf der Achse ueberlappen koennen und eine automatische
+              Verteilung genau dort raten muesste, wo der Graph lesbar bleiben
+              soll. Drei Spuren reichen fuer sechs Uhren.
+            {%- endcomment -%}
+            <g class="d-name">
+              {%- for block in section.blocks -%}
+                {%- liquid
+                  assign v = block.settings.value | replace: ',', '.' | times: 1.0
+                  assign cx = v | minus: wg_ax_min | times: wg_ppy | plus: wg_x0 | round: 1
+                  case block.settings.lane
+                    when 'below'
+                      assign ny = 200
+                    when 'below2'
+                      assign ny = 238
+                    else
+                      assign ny = 126
+                  endcase
+                -%}
+                <text x="{{ cx }}" y="{{ ny }}" text-anchor="middle">{{ block.settings.name | escape }}</text>
+              {%- endfor -%}
+            </g>
+
+            <g class="d-value">
+              {%- for block in section.blocks -%}
+                {%- liquid
+                  assign v = block.settings.value | replace: ',', '.' | times: 1.0
+                  assign cx = v | minus: wg_ax_min | times: wg_ppy | plus: wg_x0 | round: 1
+                  case block.settings.lane
+                    when 'below'
+                      assign vy = 220
+                    when 'below2'
+                      assign vy = 258
+                    else
+                      assign vy = 146
+                  endcase
+                -%}
+                <text x="{{ cx }}" y="{{ vy }}" text-anchor="middle">{{ block.settings.value | escape }}</text>
+              {%- endfor -%}
+            </g>
+
+            <line class="d-axis" x1="{{ wg_x0 }}" y1="288" x2="580" y2="288"/>
+            <g class="d-tick">
+              {%- for n in (0..wg_tick_count) -%}
+                {%- liquid
+                  assign tv = n | times: wg_tick_step | plus: wg_ax_min
+                  assign tx = tv | minus: wg_ax_min | times: wg_ppy | plus: wg_x0 | round: 1
+                -%}
+                <line x1="{{ tx }}" y1="288" x2="{{ tx }}" y2="295"/>
+              {%- endfor -%}
+            </g>
+            <g class="d-axis-label">
+              {%- for n in (0..wg_tick_count) -%}
+                {%- liquid
+                  assign tv = n | times: wg_tick_step | plus: wg_ax_min
+                  assign tx = tv | minus: wg_ax_min | times: wg_ppy | plus: wg_x0 | round: 1
+                -%}
+                <text x="{{ tx }}" y="316" text-anchor="middle">{{ tv | round }}</text>
+              {%- endfor -%}
+              {%- if section.settings.axis_unit != blank -%}
+                <text x="580" y="316" text-anchor="end">{{ section.settings.axis_unit | escape }}</text>
+              {%- endif -%}
+            </g>
+          </svg>
+        {%- endif -%}
+
+        {%- if section.settings.chart_note != blank -%}
+          <figcaption class="ltw-frontier__note">{{ section.settings.chart_note | escape }}</figcaption>
+        {%- endif -%}
+      </figure>
+
+      <div class="ltw-frontier__text">
+        {%- if section.settings.body != blank -%}
+          <div class="ltw-body ltw-body--lede rte">{{ section.settings.body }}</div>
+        {%- endif -%}
+
+        {%- if section.settings.question != blank -%}
+          <p class="ltw-frontier__question">{{ section.settings.question | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.closer != blank -%}
+          <p class="ltw-closer">{{ section.settings.closer | escape }}</p>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Wissenschaft Grenze",
+  "tag": "section",
+  "class": "lt-wiss-grenze",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anker-ID", "info": "Ohne Wert bleibt die automatische ID." },
+
+    { "type": "header", "content": "Kapitel-Rubrik" },
+    { "type": "text", "id": "rubric_number", "label": "Kapitelziffer", "default": "03" },
+    { "type": "text", "id": "rubric_label", "label": "Kapitelname", "default": "Die nächste Grenze" },
+
+    { "type": "header", "content": "Text" },
+    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Dein Fortschritt soll sichtbar werden." },
+    { "type": "textarea", "id": "subheading", "label": "Subline", "default": "Schnell und eindeutig." },
+    { "type": "richtext", "id": "body", "label": "Fließtext", "default": "<p>Kurzer erklärender Absatz.</p>" },
+    { "type": "textarea", "id": "question", "label": "Zwischenfrage", "default": "Welcher Wert ist deiner?" },
+    { "type": "textarea", "id": "closer", "label": "Abbinder", "default": "Genau daran arbeiten wir." },
+
+    { "type": "header", "content": "Graph: Kopfzeile" },
+    { "type": "text", "id": "shot_label", "label": "Label links", "default": "Epigenetische Uhren · Diskordanz" },
+    { "type": "text", "id": "shot_note", "label": "Label rechts", "default": "Probe LT-2026-0417 · pseudonymisiert" },
+
+    { "type": "header", "content": "Graph: Achse" },
+    { "type": "text", "id": "chrono_value", "label": "Chronologisches Alter", "default": "67" },
+    { "type": "text", "id": "chrono_label", "label": "Beschriftung der Linie", "default": "chronologisch 67" },
+    { "type": "range", "id": "axis_min", "label": "Achse von", "min": 20, "max": 80, "step": 5, "unit": "J", "default": 55 },
+    { "type": "range", "id": "axis_max", "label": "Achse bis", "min": 40, "max": 120, "step": 5, "unit": "J", "default": 85 },
+    { "type": "range", "id": "axis_step", "label": "Teilung", "min": 5, "max": 20, "step": 5, "unit": "J", "default": 10 },
+    { "type": "text", "id": "axis_unit", "label": "Einheit rechts", "default": "Jahre" },
+
+    { "type": "header", "content": "Graph: Bedienhilfe" },
+    { "type": "textarea", "id": "chart_alt", "label": "Beschreibung für Screenreader", "default": "Sechs epigenetische Uhren schätzen für dieselbe Probe unterschiedliche Werte." },
+    { "type": "textarea", "id": "chart_note", "label": "Bildunterschrift", "default": "Sechs epigenetische Uhren, dieselbe Probe." },
+
+    { "type": "header", "content": "Farben und Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#f7f7f4" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 }
+  ],
+  "blocks": [
+    {
+      "type": "clock",
+      "name": "Uhr",
+      "settings": [
+        { "type": "text", "id": "name", "label": "Name der Uhr", "default": "Horvath" },
+        { "type": "text", "id": "value", "label": "Wert", "info": "Komma oder Punkt, beides wird verstanden. Bestimmt die Position auf der Achse.", "default": "60,1" },
+        {
+          "type": "select", "id": "lane", "label": "Beschriftungsspur",
+          "info": "Verteilt die Labels, damit sich eng beieinander liegende Uhren nicht überdecken.",
+          "options": [
+            { "value": "above", "label": "Über der Achse" },
+            { "value": "below", "label": "Unter der Achse" },
+            { "value": "below2", "label": "Unter der Achse, zweite Reihe" }
+          ],
+          "default": "above"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [{ "name": "Wissenschaft Grenze" }]
+}
+{% endschema %}

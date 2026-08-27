@@ -1,0 +1,159 @@
+{% comment %}
+  LIFETIME — Wissenschaft · Kapitel 8 (Wer dafür einsteht, Rubrik 06)
+  ───────────────────────────────────────────────────────────────────
+  Graustufen-Porträts der Verantwortlichen. Visueller Vertrag:
+  docs/science-preview.html §8.
+
+  FREIGABEN, alle offen:
+  • Limmroth erscheint auf dieser Seite ZWEIMAL (Porträt in Kapitel 01 und hier).
+    Beide Stellen brauchen sein Einverständnis. Rolle exakt „ärztliche
+    Validierung", nicht als Epigenetik-Kern.
+  • Froböse nur live, wenn die Beirats-Rolle dokumentiert ist. Ein Zitat von ihm
+    gibt es nur nach wörtlicher Freigabe, deshalb hat dieser Block bewusst kein
+    Zitatfeld.
+  Ohne Foto zeigt die Karte die Initialen, das Layout bleibt gleich.
+
+  §12 Build Spec:
+  - Surface:         Paper A
+  - Dominant:        die Portraetreihe
+  - Heading size:    --text-h1 (headline_lg). Auf dieser Seite frei, weil
+                     das Seiten-H1 auf --text-display sitzt (DESIGN.md: Display 48
+                     fuer das Deckblatt, Headline 36 je Kapitel).
+  - Content pattern: card-info als Personenkarte, Portraet 4:5 in Graustufen
+  - CTA:             keine, auch keine Verlinkung auf /pages/aerzte
+  - Entfernt:        Zitate. Die Rolle traegt die Aussage, ein Zitat waere eine
+                     zweite Stimme im selben Kapitel.
+  - Quality move:    einheitlicher Schnitt und Graustufen ueber alle Karten,
+                     damit unterschiedliche Fotoquellen als ein Satz lesen
+{% endcomment %}
+
+{%- liquid
+  assign wp_anchor = section.settings.anchor_id
+  if wp_anchor == blank
+    assign wp_anchor = 'section-' | append: section.id
+  endif
+
+  assign wp_text = section.settings.color_text | default: '#26251e'
+  assign wp_pad_t = section.settings.padding_top | default: 80
+  assign wp_pad_b = section.settings.padding_bottom | default: 80
+  assign wp_pad_t_m = wp_pad_t | times: 0.8 | round
+  assign wp_pad_b_m = wp_pad_b | times: 0.8 | round
+-%}
+
+{{ 'lt-wissenschaft.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+  #{{ wp_anchor }} {
+    --ltw-bg:       {{ section.settings.color_bg | default: '#f7f7f4' }};
+    --ltw-text:     {{ wp_text }};
+    --ltw-text-sec: {{ wp_text | color_modify: 'alpha', 0.72 }};
+    --ltw-text-ter: {{ wp_text | color_modify: 'alpha', 0.66 }};
+    --ltw-hairline: {{ wp_text | color_modify: 'alpha', 0.12 }};
+    --ltw-frame:    {{ section.settings.color_frame | default: '#f2f1ed' }};
+    --crs-text:     {{ wp_text }};
+    --crs-text-sec: {{ wp_text | color_modify: 'alpha', 0.72 }};
+    --crs-text-ter: {{ wp_text | color_modify: 'alpha', 0.66 }};
+    padding-top:    {{ wp_pad_t }}px;
+    padding-bottom: {{ wp_pad_b }}px;
+    scroll-margin-top: 96px;
+  }
+
+  @media screen and (max-width: 767px) {
+    #{{ wp_anchor }} {
+      padding-top:    {{ wp_pad_t_m }}px;
+      padding-bottom: {{ wp_pad_b_m }}px;
+    }
+  }
+{% endstyle %}
+
+<section id="{{ wp_anchor }}" class="ltw ltw-personen">
+  <div class="ltw__container">
+    {% render 'lt-wiss-rubric',
+      number: section.settings.rubric_number,
+      label: section.settings.rubric_label %}
+
+    {% render 'section-heading-crs',
+      heading: section.settings.heading,
+      subheading: section.settings.subheading,
+      align: 'left',
+      heading_tag: 'h2',
+      headline_lg: true,
+      extra_class: 'ltw-heading'
+    %}
+
+    {%- if section.blocks.size > 0 -%}
+      <div class="ltw-people">
+        {%- for block in section.blocks -%}
+          <div class="ltw-person" {{ block.shopify_attributes }}>
+            <div class="ltw-person__portrait">
+              {%- if block.settings.image != blank -%}
+                {{ block.settings.image
+                   | image_url: width: 600
+                   | image_tag:
+                     loading: 'lazy',
+                     widths: '300, 450, 600',
+                     sizes: '(min-width: 961px) 22rem, (min-width: 768px) 45vw, 90vw',
+                     alt: block.settings.image_alt }}
+              {%- else -%}
+                <span class="ltw-person__initials" aria-hidden="true">{{ block.settings.initials | escape }}</span>
+              {%- endif -%}
+            </div>
+            <div class="ltw-person__meta">
+              {%- if block.settings.name != blank -%}
+                <p class="ltw-person__name">{{ block.settings.name | escape }}</p>
+              {%- endif -%}
+              {%- if block.settings.role != blank -%}
+                <div class="ltw-person__role">{{ block.settings.role | escape }}</div>
+              {%- endif -%}
+              {%- if block.settings.body != blank -%}
+                <p class="ltw-person__body">{{ block.settings.body | escape }}</p>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endfor -%}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Wissenschaft Personen",
+  "tag": "section",
+  "class": "lt-wiss-personen",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anker-ID", "info": "Ohne Wert bleibt die automatische ID." },
+
+    { "type": "header", "content": "Kapitel-Rubrik" },
+    { "type": "text", "id": "rubric_number", "label": "Kapitelziffer", "default": "06" },
+    { "type": "text", "id": "rubric_label", "label": "Kapitelname", "default": "Verantwortung" },
+
+    { "type": "header", "content": "Text" },
+    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Wer dafür einsteht." },
+    { "type": "textarea", "id": "subheading", "label": "Subline" },
+
+    { "type": "header", "content": "Farben und Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#f7f7f4" },
+    { "type": "color", "id": "color_frame", "label": "Porträtfläche", "default": "#f2f1ed" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 }
+  ],
+  "blocks": [
+    {
+      "type": "person",
+      "name": "Person",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Porträt", "info": "Wird 4:5 beschnitten und in Graustufen gezeigt. Ohne Bild erscheinen die Initialen." },
+        { "type": "text", "id": "image_alt", "label": "Alt-Text" },
+        { "type": "text", "id": "initials", "label": "Initialen", "default": "VL" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Prof. Dr. med. Volker Limmroth" },
+        { "type": "text", "id": "role", "label": "Rolle", "default": "Ärztliche Validierung" },
+        { "type": "textarea", "id": "body", "label": "Text", "default": "Kurze Beschreibung der Aufgabe." }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [{ "name": "Wissenschaft Personen" }]
+}
+{% endschema %}

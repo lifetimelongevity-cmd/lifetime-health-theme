@@ -1,0 +1,192 @@
+{% comment %}
+  LIFETIME — Wissenschaft · Kapitel 10 (Quellen und Weiterlesen)
+  ──────────────────────────────────────────────────────────────
+  Der Apparat der Seite: Primärliteratur zu den Uhren, die die Analyse rechnet,
+  Literatur zu Zuverlässigkeit und Diskordanz, danach die Blog-Links. Visueller
+  Vertrag: docs/science-preview.html §10.
+
+  Bewusst KEINE Journal-Logos: die Nennung ist die Quelle, ein Logo wäre
+  Autoritätsleihe.
+
+  Die beiden Überschriften laufen in der Label-Stimme (12px uppercase, Lato)
+  statt im Heading-Stack. Das ist kein Verstoss gegen die Heading-Regel, sondern
+  ihre Kehrseite: der Apparat trägt keine These und bekommt deshalb auch keine
+  Kapitel-Headline.
+
+  §12 Build Spec:
+  - Surface:         Paper B
+  - Dominant:        die Quellenliste selbst
+  - Heading size:    Label-Stimme, keine Display-Stufe
+  - Content pattern: gruppierte Definitionsliste, Links in Ink mit Unterstrich
+  - CTA:             keine. Die Blog-Links sind Weiterlesen, kein Angebot.
+  - Entfernt:        Journal-Logos, DOI-Badges, Zitierzahlen
+  - Quality move:    die Uhrnamen stehen fett und tragen exakt dieselben Labels
+                     wie der Graph in Kapitel 03, damit die Zuordnung ohne
+                     Nummerierung funktioniert
+{% endcomment %}
+
+{%- liquid
+  assign wq_anchor = section.settings.anchor_id
+  if wq_anchor == blank
+    assign wq_anchor = 'section-' | append: section.id
+  endif
+
+  assign wq_text = section.settings.color_text | default: '#26251e'
+  assign wq_pad_t = section.settings.padding_top | default: 48
+  assign wq_pad_b = section.settings.padding_bottom | default: 64
+  assign wq_pad_t_m = wq_pad_t | times: 0.8 | round
+  assign wq_pad_b_m = wq_pad_b | times: 0.8 | round
+
+  assign wq_links = section.blocks | where: 'type', 'link'
+-%}
+
+{{ 'lt-wissenschaft.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+  #{{ wq_anchor }} {
+    --ltw-bg:       {{ section.settings.color_bg | default: '#f2f1ed' }};
+    --ltw-text:     {{ wq_text }};
+    --ltw-text-sec: {{ wq_text | color_modify: 'alpha', 0.72 }};
+    --ltw-text-ter: {{ wq_text | color_modify: 'alpha', 0.66 }};
+    --ltw-hairline: {{ wq_text | color_modify: 'alpha', 0.12 }};
+    padding-top:    {{ wq_pad_t }}px;
+    padding-bottom: {{ wq_pad_b }}px;
+    scroll-margin-top: 96px;
+  }
+
+  @media screen and (max-width: 767px) {
+    #{{ wq_anchor }} {
+      padding-top:    {{ wq_pad_t_m }}px;
+      padding-bottom: {{ wq_pad_b_m }}px;
+    }
+  }
+{% endstyle %}
+
+<section id="{{ wq_anchor }}" class="ltw ltw-sources">
+  <div class="ltw__container">
+    {%- if section.settings.heading != blank -%}
+      <h2 class="ltw-sources__head">{{ section.settings.heading | escape }}</h2>
+    {%- endif -%}
+
+    {%- if section.settings.intro != blank -%}
+      <p class="ltw-sources__intro">{{ section.settings.intro | escape }}</p>
+    {%- endif -%}
+
+    {%- comment -%}
+      Gruppen und Quellen sind Bloecke derselben Liste; die Reihenfolge im
+      Editor bestimmt, welche Quelle unter welcher Gruppe steht (verschachtelte
+      Bloecke kann Shopify auf Section-Ebene nicht).
+
+      Gerendert wird deshalb nicht linear mit offenem und spaeter geschlossenem
+      <ul>, sondern je Gruppe eine eigene Liste, die per `offset` genau hinter
+      dem Gruppen-Block startet und beim naechsten Gruppen- oder Link-Block
+      abbricht. Ergebnis: jede Liste oeffnet und schliesst an derselben Stelle.
+    {%- endcomment -%}
+
+    {%- liquid
+      comment
+        Quellen, die noch vor der ersten Gruppe stehen. Ohne diesen Vorlauf
+        wuerden sie stumm verschwinden, sobald jemand den Gruppen-Block loescht.
+      endcomment
+      assign wq_head_count = 0
+      for block in section.blocks
+        if block.type == 'group'
+          break
+        endif
+        if block.type == 'source'
+          assign wq_head_count = wq_head_count | plus: 1
+        endif
+      endfor
+    -%}
+
+    {%- if wq_head_count > 0 -%}
+      <ul class="ltw-sources__list">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'group' -%}{%- break -%}{%- endif -%}
+          {%- if block.type == 'source' -%}
+            {% render 'lt-wiss-source-item', block: block %}
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'group' -%}
+        <h3 class="ltw-sources__group" {{ block.shopify_attributes }}>{{ block.settings.title | escape }}</h3>
+        <ul class="ltw-sources__list">
+          {%- for entry in section.blocks offset: forloop.index -%}
+            {%- if entry.type == 'group' or entry.type == 'link' -%}{%- break -%}{%- endif -%}
+            {%- if entry.type == 'source' -%}
+              {% render 'lt-wiss-source-item', block: entry %}
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    {%- endfor -%}
+
+    {%- if wq_links.size > 0 -%}
+      {%- if section.settings.further_heading != blank -%}
+        <h2 class="ltw-sources__head ltw-sources__head--further">{{ section.settings.further_heading | escape }}</h2>
+      {%- endif -%}
+      <ul class="ltw-sources__list">
+        {%- for block in wq_links -%}
+          <li {{ block.shopify_attributes }}>
+            <a href="{{ block.settings.url }}">{{ block.settings.label | escape }}</a>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Wissenschaft Quellen",
+  "tag": "section",
+  "class": "lt-wiss-quellen",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anker-ID", "info": "Ohne Wert bleibt die automatische ID." },
+
+    { "type": "header", "content": "Text" },
+    { "type": "text", "id": "heading", "label": "Überschrift", "default": "Quellen" },
+    { "type": "textarea", "id": "intro", "label": "Vorbemerkung", "default": "Jede Angabe verweist auf die begutachtete Originalarbeit." },
+    { "type": "text", "id": "further_heading", "label": "Überschrift Weiterlesen", "default": "Weiterlesen" },
+
+    { "type": "header", "content": "Farben und Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#f2f1ed" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 48 },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 64 }
+  ],
+  "blocks": [
+    {
+      "type": "group",
+      "name": "Gruppen-Titel",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Titel", "default": "Die Uhren in dieser Analyse" }
+      ]
+    },
+    {
+      "type": "source",
+      "name": "Quelle",
+      "settings": [
+        { "type": "text", "id": "clock_label", "label": "Uhr-Label", "info": "Nur bei Uhren setzen. Muss exakt so heißen wie im Diskordanz-Graphen." },
+        { "type": "textarea", "id": "citation", "label": "Zitation", "default": "Autor, A. et al.: Titel der Arbeit. Journal 1, 1–10 (2020)." },
+        { "type": "text", "id": "note", "label": "Zusatz", "info": "Zum Beispiel ein Preprint-Hinweis." },
+        { "type": "url", "id": "url", "label": "DOI-Link" },
+        { "type": "text", "id": "url_label", "label": "Link-Text", "default": "doi.org" }
+      ]
+    },
+    {
+      "type": "link",
+      "name": "Weiterlesen-Link",
+      "settings": [
+        { "type": "text", "id": "label", "label": "Titel", "default": "Beitrag aus dem Longevity-Blog" },
+        { "type": "url", "id": "url", "label": "Link" }
+      ]
+    }
+  ],
+  "max_blocks": 30,
+  "presets": [{ "name": "Wissenschaft Quellen" }]
+}
+{% endschema %}

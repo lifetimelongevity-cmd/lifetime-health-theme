@@ -1,0 +1,255 @@
+{% comment %}
+  LIFETIME — Wissenschaft · Kapitel 7 (Unsere Forschung, Rubrik 05)
+  ─────────────────────────────────────────────────────────────────
+  Die eigene Arbeit: Report-Karte mit den Kennzahlen einer Probe, danach das
+  Ausgangs-Foto links und die Forschungs-Timeline rechts. Visueller Vertrag:
+  docs/science-preview.html §7.
+
+  PLATZHALTER: Die Report-Karte zeigt aktuell Mock-Kennzahlen. Vor Livegang
+  entweder `report_image` mit dem echten, pseudonymisierten Screenshot belegen
+  oder die Kennzahlen ersetzen. Das Flag `placeholder_note` blendet den
+  Platzhalter-Hinweis ein; leer heisst: kein Hinweis, also live-tauglich.
+
+  FREIGABE: Auf dem Summit-Foto ist eine dritte Person erkennbar. Ohne deren
+  Einwilligung enger auf das Banner beschneiden oder das Bild weglassen.
+
+  §12 Build Spec:
+  - Surface:         Weiss
+  - Dominant:        die Report-Karte als weisses Blatt mit Schatten
+  - Heading size:    --text-h1 (headline_lg). Auf dieser Seite frei, weil
+                     das Seiten-H1 auf --text-display sitzt (DESIGN.md: Display 48
+                     fuer das Deckblatt, Headline 36 je Kapitel).
+  - Content pattern: Papier-Karte + Zeitleiste, Foto als Ausgangspunkt links
+  - CTA:             keine
+  - Entfernt:        Thumbnails an den Timeline-Knoten. Vier Bilder in einer
+                     Zeitleiste erschlagen die Kapitelaussage.
+  - Quality move:    Kennzahlen tabular in Deep Teal, Unsicherheit direkt am
+                     Wert statt in einer Fussnote
+{% endcomment %}
+
+{%- liquid
+  assign wr_anchor = section.settings.anchor_id
+  if wr_anchor == blank
+    assign wr_anchor = 'section-' | append: section.id
+  endif
+
+  assign wr_text = section.settings.color_text | default: '#26251e'
+  assign wr_pad_t = section.settings.padding_top | default: 80
+  assign wr_pad_b = section.settings.padding_bottom | default: 80
+  assign wr_pad_t_m = wr_pad_t | times: 0.8 | round
+  assign wr_pad_b_m = wr_pad_b | times: 0.8 | round
+
+  assign wr_stats = section.blocks | where: 'type', 'stat'
+  assign wr_nodes = section.blocks | where: 'type', 'node'
+-%}
+
+{{ 'lt-wissenschaft.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+  #{{ wr_anchor }} {
+    --ltw-bg:       {{ section.settings.color_bg | default: '#ffffff' }};
+    --ltw-text:     {{ wr_text }};
+    --ltw-text-sec: {{ wr_text | color_modify: 'alpha', 0.72 }};
+    --ltw-text-ter: {{ wr_text | color_modify: 'alpha', 0.66 }};
+    --ltw-hairline: {{ wr_text | color_modify: 'alpha', 0.12 }};
+    --crs-text:     {{ wr_text }};
+    --crs-text-sec: {{ wr_text | color_modify: 'alpha', 0.72 }};
+    --crs-text-ter: {{ wr_text | color_modify: 'alpha', 0.66 }};
+    padding-top:    {{ wr_pad_t }}px;
+    padding-bottom: {{ wr_pad_b }}px;
+    scroll-margin-top: 96px;
+  }
+
+  @media screen and (max-width: 767px) {
+    #{{ wr_anchor }} {
+      padding-top:    {{ wr_pad_t_m }}px;
+      padding-bottom: {{ wr_pad_b_m }}px;
+    }
+  }
+{% endstyle %}
+
+<section id="{{ wr_anchor }}" class="ltw ltw-research">
+  <div class="ltw__container">
+    {% render 'lt-wiss-rubric',
+      number: section.settings.rubric_number,
+      label: section.settings.rubric_label %}
+
+    {% render 'section-heading-crs',
+      heading: section.settings.heading,
+      subheading: section.settings.subheading,
+      align: 'left',
+      heading_tag: 'h2',
+      headline_lg: true,
+      extra_class: 'ltw-heading'
+    %}
+
+    {%- if section.settings.intro != blank -%}
+      <div class="ltw-body ltw-body--lede rte">{{ section.settings.intro }}</div>
+    {%- endif -%}
+
+    {%- comment -%}
+      Papier-Regel: das weisse Blatt ist das einzige Element dieses Kapitels,
+      das einen Schatten tragen darf.
+    {%- endcomment -%}
+    <figure class="ltw-shot">
+      <div class="ltw-shot-head">
+        {%- if section.settings.shot_label != blank -%}
+          <span class="ltw-shot-head__label">{{ section.settings.shot_label | escape }}</span>
+        {%- endif -%}
+        {%- if section.settings.shot_note != blank -%}
+          <span class="ltw-shot-head__note">{{ section.settings.shot_note | escape }}</span>
+        {%- endif -%}
+      </div>
+
+      {%- if section.settings.report_image != blank -%}
+        {{ section.settings.report_image
+           | image_url: width: 1200
+           | image_tag:
+             loading: 'lazy',
+             widths: '600, 900, 1200',
+             sizes: '(min-width: 768px) 52rem, 90vw',
+             class: 'ltw-shot__img',
+             alt: section.settings.report_image_alt }}
+      {%- elsif wr_stats.size > 0 -%}
+        <div class="ltw-shot__stats">
+          {%- for block in wr_stats -%}
+            <div class="ltw-hstat" {{ block.shopify_attributes }}>
+              <span class="ltw-hstat__value">
+                {{- block.settings.value | escape -}}
+                {%- if block.settings.value_suffix != blank -%}
+                  <em>&nbsp;{{ block.settings.value_suffix | escape }}</em>
+                {%- endif -%}
+              </span>
+              <span class="ltw-hstat__label">{{ block.settings.label | escape }}</span>
+            </div>
+          {%- endfor -%}
+        </div>
+      {%- endif -%}
+
+      {%- if section.settings.shot_legend != blank -%}
+        <p class="ltw-shot__legend">{{ section.settings.shot_legend | escape }}</p>
+      {%- endif -%}
+
+      {%- if section.settings.placeholder_note != blank -%}
+        <span class="ltw-shot__flag">{{ section.settings.placeholder_note | escape }}</span>
+      {%- endif -%}
+    </figure>
+
+    {%- if section.settings.body != blank -%}
+      <div class="ltw-body rte">{{ section.settings.body }}</div>
+    {%- endif -%}
+
+    {%- if wr_nodes.size > 0 or section.settings.origin_image != blank -%}
+      <div class="ltw-rt">
+        {%- if section.settings.origin_image != blank -%}
+          <figure class="ltw-rt__origin">
+            {{ section.settings.origin_image
+               | image_url: width: 900
+               | image_tag:
+                 loading: 'lazy',
+                 widths: '400, 600, 900',
+                 sizes: '(min-width: 768px) 22rem, 90vw',
+                 alt: section.settings.origin_image_alt }}
+            <figcaption>
+              {%- if section.settings.origin_title != blank -%}
+                <span class="ltw-rt__origin-title">{{ section.settings.origin_title | escape }}</span>
+              {%- endif -%}
+              {%- if section.settings.origin_body != blank -%}
+                <span class="ltw-rt__origin-body">{{ section.settings.origin_body | escape }}</span>
+              {%- endif -%}
+            </figcaption>
+          </figure>
+        {%- endif -%}
+
+        {%- if wr_nodes.size > 0 -%}
+          <div class="ltw-rt__timeline">
+            {%- if section.settings.timeline_label != blank -%}
+              <div class="ltw-rt__label">{{ section.settings.timeline_label | escape }}</div>
+            {%- endif -%}
+            <ol class="ltw-rt__track">
+              {%- for block in wr_nodes -%}
+                <li class="ltw-rt__node{% if block.settings.is_future %} ltw-rt__node--future{% endif %}" {{ block.shopify_attributes }}>
+                  <span class="ltw-rt__date">{{ block.settings.date | escape }}</span>
+                  <span class="ltw-rt__title">{{ block.settings.title | escape }}</span>
+                  <span class="ltw-rt__body">{{ block.settings.body | escape }}</span>
+                </li>
+              {%- endfor -%}
+            </ol>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+
+    {%- if section.settings.closing != blank -%}
+      <p class="ltw-lede ltw-research__closing">{{ section.settings.closing | escape }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Wissenschaft Forschung",
+  "tag": "section",
+  "class": "lt-wiss-forschung",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anker-ID", "info": "Ohne Wert bleibt die automatische ID." },
+
+    { "type": "header", "content": "Kapitel-Rubrik" },
+    { "type": "text", "id": "rubric_number", "label": "Kapitelziffer", "default": "05" },
+    { "type": "text", "id": "rubric_label", "label": "Kapitelname", "default": "Unsere Forschung" },
+
+    { "type": "header", "content": "Text" },
+    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Wir messen nicht nur biologisches Alter." },
+    { "type": "textarea", "id": "subheading", "label": "Subline", "default": "Wir erforschen, wie man es messen sollte." },
+    { "type": "richtext", "id": "intro", "label": "Einstieg (über der Karte)", "default": "<p>Kurzer erklärender Absatz.</p>" },
+    { "type": "richtext", "id": "body", "label": "Fließtext (unter der Karte)", "default": "<p>Kurzer erklärender Absatz.</p>" },
+    { "type": "textarea", "id": "closing", "label": "Schlusssatz", "default": "So entsteht das, was wir dir geben wollen." },
+
+    { "type": "header", "content": "Report-Karte" },
+    { "type": "text", "id": "shot_label", "label": "Label links", "default": "Konsolidiertes Ergebnis" },
+    { "type": "text", "id": "shot_note", "label": "Label rechts", "default": "Probe LT-2026-0417 · pseudonymisiert" },
+    { "type": "image_picker", "id": "report_image", "label": "Screenshot", "info": "Sobald hier der echte, pseudonymisierte Screenshot liegt, ersetzt er die Kennzahlen-Blöcke." },
+    { "type": "text", "id": "report_image_alt", "label": "Alt-Text des Screenshots", "default": "Konsolidiertes Ergebnis einer pseudonymisierten Probe" },
+    { "type": "textarea", "id": "shot_legend", "label": "Legende", "default": "Aus den Einzelschätzungen wird eine gewichtete Gesamtaussage." },
+    { "type": "text", "id": "placeholder_note", "label": "Platzhalter-Hinweis", "info": "Vor Livegang leeren. Solange hier Text steht, zeigt die Karte den gestrichelten Hinweis.", "default": "Platzhalter · wird durch echten Report-Screenshot ersetzt" },
+
+    { "type": "header", "content": "Ausgangspunkt (Bild links)" },
+    { "type": "image_picker", "id": "origin_image", "label": "Bild" },
+    { "type": "text", "id": "origin_image_alt", "label": "Alt-Text", "default": "Gespräch neben dem Banner des Longevity Summit Dublin 2023" },
+    { "type": "text", "id": "origin_title", "label": "Titel", "default": "Longevity Summit Dublin" },
+    { "type": "textarea", "id": "origin_body", "label": "Text", "default": "Der Ausgangspunkt, 2023." },
+
+    { "type": "header", "content": "Zeitleiste" },
+    { "type": "text", "id": "timeline_label", "label": "Label über der Zeitleiste", "default": "Forschungsverlauf" },
+
+    { "type": "header", "content": "Farben und Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#ffffff" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 }
+  ],
+  "blocks": [
+    {
+      "type": "stat",
+      "name": "Kennzahl",
+      "settings": [
+        { "type": "text", "id": "value", "label": "Wert", "default": "69,5" },
+        { "type": "text", "id": "value_suffix", "label": "Zusatz am Wert", "info": "Zum Beispiel die Unsicherheit.", "default": "± 7,3" },
+        { "type": "text", "id": "label", "label": "Beschriftung", "default": "Konsolidiertes Alter" }
+      ]
+    },
+    {
+      "type": "node",
+      "name": "Zeitleisten-Punkt",
+      "settings": [
+        { "type": "text", "id": "date", "label": "Jahr", "default": "2023" },
+        { "type": "text", "id": "title", "label": "Titel", "default": "Analyseumgebung aufgebaut" },
+        { "type": "textarea", "id": "body", "label": "Text", "default": "Kurze Beschreibung des Schritts." },
+        { "type": "checkbox", "id": "is_future", "label": "Noch offen", "info": "Zeichnet den Punkt hohl und die Linie gestrichelt.", "default": false }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [{ "name": "Wissenschaft Forschung" }]
+}
+{% endschema %}

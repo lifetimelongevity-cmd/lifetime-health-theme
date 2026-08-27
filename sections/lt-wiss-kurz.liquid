@@ -1,0 +1,110 @@
+{% comment %}
+  LIFETIME — Wissenschaft · Kapitel 2 (Das Wichtigste in Kürze)
+  ─────────────────────────────────────────────────────────────
+  Getönte Karte mit vier Kernaussagen, bewusst ohne Bild. Sie fasst die ganze
+  Seite zusammen, bevor die Kapitel sie auffalten. Visueller Vertrag:
+  docs/science-preview.html §2.
+
+  §12 Build Spec:
+  - Surface:         Weiss (Blattwechsel nach dem Deckblatt)
+  - Dominant:        die Karte als Block, nicht die Ueberschrift
+  - Heading size:    --text-h3 (der Zusammenfassung steht keine Kapitel-Headline zu)
+  - Content pattern: getoente Karte auf weisser Flaeche, Liste mit Slate-Punkten
+  - CTA:             keine
+  - Entfernt:        Rubrik und Kicker. Die Kuerze ist Vorspann, kein Kapitel.
+  - Quality move:    Punkte in Slate statt Teal, damit Teal Messfarbe bleibt
+{% endcomment %}
+
+{%- liquid
+  assign wk_anchor = section.settings.anchor_id
+  if wk_anchor == blank
+    assign wk_anchor = 'section-' | append: section.id
+  endif
+
+  assign wk_text = section.settings.color_text | default: '#26251e'
+  assign wk_pad_t = section.settings.padding_top | default: 80
+  assign wk_pad_b = section.settings.padding_bottom | default: 80
+  assign wk_pad_t_m = wk_pad_t | times: 0.8 | round
+  assign wk_pad_b_m = wk_pad_b | times: 0.8 | round
+-%}
+
+{{ 'lt-wissenschaft.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+  #{{ wk_anchor }} {
+    --ltw-bg:       {{ section.settings.color_bg | default: '#ffffff' }};
+    --ltw-text:     {{ wk_text }};
+    --ltw-text-sec: {{ wk_text | color_modify: 'alpha', 0.72 }};
+    --ltw-text-ter: {{ wk_text | color_modify: 'alpha', 0.66 }};
+    --ltw-hairline: {{ wk_text | color_modify: 'alpha', 0.12 }};
+    --ltw-card:     {{ section.settings.color_card_bg | default: '#f2f1ed' }};
+    --crs-text:     {{ wk_text }};
+    --crs-text-sec: {{ wk_text | color_modify: 'alpha', 0.72 }};
+    --crs-text-ter: {{ wk_text | color_modify: 'alpha', 0.66 }};
+    padding-top:    {{ wk_pad_t }}px;
+    padding-bottom: {{ wk_pad_b }}px;
+    scroll-margin-top: 96px;
+  }
+
+  @media screen and (max-width: 767px) {
+    #{{ wk_anchor }} {
+      padding-top:    {{ wk_pad_t_m }}px;
+      padding-bottom: {{ wk_pad_b_m }}px;
+    }
+  }
+{% endstyle %}
+
+<section id="{{ wk_anchor }}" class="ltw ltw-kurz">
+  <div class="ltw__container">
+    <div class="ltw-tldr">
+      {% render 'section-heading-crs',
+        heading: section.settings.heading,
+        align: 'left',
+        heading_tag: 'h2',
+        extra_class: 'ltw-heading'
+      %}
+
+      {%- if section.blocks.size > 0 -%}
+        <ul class="ltw-tldr__list">
+          {%- for block in section.blocks -%}
+            {%- if block.settings.text != blank -%}
+              <li {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</li>
+            {%- endif -%}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Wissenschaft Kürze",
+  "tag": "section",
+  "class": "lt-wiss-kurz",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anker-ID", "info": "Ohne Wert bleibt die automatische ID." },
+
+    { "type": "header", "content": "Text" },
+    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Das Wichtigste in Kürze" },
+
+    { "type": "header", "content": "Farben und Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#ffffff" },
+    { "type": "color", "id": "color_card_bg", "label": "Kartenfläche", "default": "#f2f1ed" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 }
+  ],
+  "blocks": [
+    {
+      "type": "point",
+      "name": "Kernaussage",
+      "settings": [
+        { "type": "textarea", "id": "text", "label": "Text", "default": "Kurze Kernaussage in einem Satz." }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [{ "name": "Wissenschaft Kürze" }]
+}
+{% endschema %}
