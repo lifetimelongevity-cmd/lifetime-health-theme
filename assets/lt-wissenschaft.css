@@ -132,6 +132,47 @@
   max-width: 44rem;
 }
 
+/* ── Knopf ───────────────────────────────────────────────────────────────────
+   Erster Knopf dieser Seite. Form und Masse nach DESIGN.md §Buttons: Pille,
+   48 px, 14px/600, Flaeche Clinical Slate. Teal bleibt Messfarbe und taucht
+   hier nicht auf, ausser im Fokusring, wo es als Systemfarbe gesetzt ist. */
+.ltw-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 14px var(--space-6);
+  border-radius: var(--radius-full);
+  background: var(--ltw-btn-bg, var(--color-dark));
+  color: var(--color-white);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  text-decoration: none;
+  transition: transform var(--ease-default), box-shadow var(--ease-default);
+}
+
+.no-touchevents .ltw-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.ltw-btn:focus-visible {
+  outline: 2px solid var(--color-teal-dark);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ltw-btn {
+    transition: none;
+  }
+
+  .no-touchevents .ltw-btn:hover {
+    transform: none;
+  }
+}
+
 .ltw-visually-hidden {
   position: absolute;
   width: 1px;
@@ -369,6 +410,58 @@ lt-wiss-wipe { display: block; }
 .ltw-ba__range:focus-visible {
   outline: 2px solid var(--color-teal-dark);
   outline-offset: 2px;
+}
+
+/* =============================================================================
+   Statement · Bild links, Haltung rechts
+   -----------------------------------------------------------------------------
+   Steht zwischen Deckblatt und Zusammenfassung und traegt das erste Bild der
+   Seite. Bewusst ohne Rubrik, die Nummern gehoeren den Kapiteln.
+   ========================================================================== */
+.ltw-statement__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  align-items: center;
+}
+
+@media screen and (min-width: 961px) {
+  .ltw-statement__grid {
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: var(--space-8);
+  }
+}
+
+.ltw-statement__grid--single .ltw-statement__copy {
+  max-width: var(--ltw-measure);
+}
+
+.ltw-statement__figure {
+  margin: 0;
+}
+
+/* 3:2 ist das Hausformat fuer Querformat-Fuellungen (design-governance.md §2c).
+   Kein Schatten: die Papier-Regel gibt Schatten nur weissen Blaettern. */
+.ltw-statement__figure img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+.ltw-statement__body {
+  margin-top: var(--space-5);
+}
+
+.ltw-statement__body p {
+  max-width: 34rem;
+}
+
+/* Der Knopf braucht mehr Luft als jedes andere Element der Section. */
+.ltw-statement .ltw-btn {
+  margin-top: var(--space-7);
 }
 
 /* =============================================================================

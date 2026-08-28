@@ -119,9 +119,12 @@ Diese 5 Seiten sind das Fundament (siehe `CLAUDE.md` § Kanonisches Fundament). 
 > Eigenes Template `templates/page.wissenschaft.json`, eigener Section-Satz `lt-wiss-*`,
 > eigene Stylesheet-Datei `assets/lt-wissenschaft.css`, Page-ID 704531497335,
 > `templateSuffix: wissenschaft`, `isPublished: false` (Slug liefert deshalb 404).
-> Reihenfolge: `lt-wiss-hero` → `-kurz` → `-feld` → `-messung` → `-grenze` → `-messlatte`
-> → `-forschung` → `-personen` → `-ausblick` → `-quellen`. Bewusst **ohne jeden CTA**,
-> ohne Produktkachel, ohne Preis. Visueller Vertrag ist `docs/science-preview.html`.
+> Reihenfolge: `lt-wiss-hero` → `-statement` → `-kurz` → `-feld` → `-messung` → `-grenze`
+> → `-messlatte` → `-forschung` → `-personen` → `-ausblick` → `-quellen`. Bewusst **ohne
+> Verkaufs-CTA**, ohne Produktkachel, ohne Preis. Der einzige Knopf der Seite sitzt in
+> `lt-wiss-statement` und ist ein Sprungziel auf `#forschung`, kein Kaufpfad.
+> Visueller Vertrag ist `docs/science-preview.html`; `lt-wiss-statement` hat dort kein
+> Gegenstück, die Section ist nach dem Preview entstanden (28.08.).
 > **Das ist nicht der Ersatz für `/pages/science`.** Die beiden Seiten beantworten
 > verschiedene Fragen: `science` ist der Produkt-Funnel mit Kaufpfad, `wissenschaft` ist
 > das Forschungs-Dossier. Der Menüpunkt „Wissenschaft" zeigt weiterhin auf `/pages/science`
@@ -129,7 +132,10 @@ Diese 5 Seiten sind das Fundament (siehe `CLAUDE.md` § Kanonisches Fundament). 
 > Solange die Page unveröffentlicht ist, rendert das Template nur über
 > `?view=wissenschaft` auf einem beliebigen Page-Slug. Freigabe-Blocker vor dem
 > Veröffentlichen: Limmroth (zwei Stellen), Froböse, Summit-Foto (erkennbare Dritte),
-> Report-Screenshot ist Platzhalter, KI-Kennzeichnung der Hero-Bilder.
+> Report-Screenshot ist Platzhalter, Herkunft und Lizenz des Laborfotos in
+> `lt-wiss-statement` (`science-labor-sw.jpg`, Person nur von hinten, deshalb bewusst
+> ohne Namens- oder Laborangabe in Alt-Text und Bildunterschrift).
+> **Erledigt 28.08.:** Die KI-generierten Hero-Bilder sind raus, der Hero läuft ohne Motiv.
 
 > **Hero-Bildmaß vereinheitlicht (2026-07-30):** `lt-science-proof-hero` trägt jetzt dasselbe
 > Bildmaß wie `lt-science-hero` (Kollektions-Hero): Raster `3fr 2fr` statt `6fr 5fr`,

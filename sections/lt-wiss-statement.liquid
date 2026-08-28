@@ -1,0 +1,135 @@
+{% comment %}
+  LIFETIME — Wissenschaft · Statement (Bild links, Haltung rechts)
+  ────────────────────────────────────────────────────────────────
+  Das erste Bild der Seite, seit der Hero ohne Motiv laeuft. Bild links,
+  Heading-Pair plus Fliesstext rechts, darunter ein Sprungziel in die Seite.
+  Traegt bewusst KEINE Kapitel-Rubrik: die Nummern 01 bis 07 gehoeren den
+  Kapiteln, diese Section steht wie "Das Wichtigste in Kuerze" davor.
+
+  Der Knopf ist der erste der Seite. Er ist ein Sprungziel, kein Verkaufs-CTA:
+  die Seite fuehrt weiterhin keinen. Leeres Label heisst kein Knopf.
+
+  §12 Build Spec:
+  - Surface:         Weiss (Blattwechsel nach dem hellen Deckblatt)
+  - Dominant:        das Bild, das Heading-Pair ist die Antwort darauf
+  - Heading size:    --text-h1 (headline_lg), wie alle Kapitel dieser Seite
+  - Content pattern: Zweispalter 1.1/0.9, Bild 3:2 (Hausformat Querformat,
+                     design-governance.md §2c)
+  - CTA:             Sprungziel als Pill in Clinical Slate (DESIGN.md §Buttons).
+                     Kein Teal, Teal bleibt Messfarbe.
+  - Entfernt:        Rubrik, Kicker
+  - Quality move:    kein Schatten unter dem Foto. Die Papier-Regel gibt
+                     Schatten nur weissen Blaettern, ein Foto ist keines.
+{% endcomment %}
+
+{%- liquid
+  assign ws_anchor = section.settings.anchor_id
+  if ws_anchor == blank
+    assign ws_anchor = 'section-' | append: section.id
+  endif
+
+  assign ws_text = section.settings.color_text | default: '#26251e'
+  assign ws_pad_t = section.settings.padding_top | default: 80
+  assign ws_pad_b = section.settings.padding_bottom | default: 80
+  assign ws_pad_t_m = ws_pad_t | times: 0.8 | round
+  assign ws_pad_b_m = ws_pad_b | times: 0.8 | round
+-%}
+
+{{ 'lt-wissenschaft.css' | asset_url | stylesheet_tag }}
+
+{% style %}
+  #{{ ws_anchor }} {
+    --ltw-bg:       {{ section.settings.color_bg | default: '#ffffff' }};
+    --ltw-text:     {{ ws_text }};
+    --ltw-text-sec: {{ ws_text | color_modify: 'alpha', 0.72 }};
+    --ltw-text-ter: {{ ws_text | color_modify: 'alpha', 0.66 }};
+    --ltw-hairline: {{ ws_text | color_modify: 'alpha', 0.12 }};
+    --ltw-btn-bg:   {{ section.settings.color_button | default: '#364f56' }};
+    --crs-text:     {{ ws_text }};
+    --crs-text-sec: {{ ws_text | color_modify: 'alpha', 0.72 }};
+    --crs-text-ter: {{ ws_text | color_modify: 'alpha', 0.66 }};
+    padding-top:    {{ ws_pad_t }}px;
+    padding-bottom: {{ ws_pad_b }}px;
+    scroll-margin-top: 96px;
+  }
+
+  @media screen and (max-width: 767px) {
+    #{{ ws_anchor }} {
+      padding-top:    {{ ws_pad_t_m }}px;
+      padding-bottom: {{ ws_pad_b_m }}px;
+    }
+  }
+{% endstyle %}
+
+<section id="{{ ws_anchor }}" class="ltw ltw-statement">
+  <div class="ltw__container">
+    <div class="ltw-statement__grid{% if section.settings.image == blank %} ltw-statement__grid--single{% endif %}">
+      {%- if section.settings.image != blank -%}
+        <figure class="ltw-statement__figure">
+          {{ section.settings.image
+             | image_url: width: 1352
+             | image_tag:
+               loading: 'lazy',
+               widths: '540, 800, 1100, 1352',
+               sizes: '(min-width: 961px) 55vw, 92vw',
+               alt: section.settings.image_alt }}
+          {%- if section.settings.caption != blank -%}
+            <figcaption class="ltw-caption">{{ section.settings.caption | escape }}</figcaption>
+          {%- endif -%}
+        </figure>
+      {%- endif -%}
+
+      <div class="ltw-statement__copy">
+        {% render 'section-heading-crs',
+          heading: section.settings.heading,
+          subheading: section.settings.subheading,
+          align: 'left',
+          heading_tag: 'h2',
+          headline_lg: true,
+          extra_class: 'ltw-heading'
+        %}
+
+        {%- if section.settings.body != blank -%}
+          <div class="ltw-body ltw-body--lede ltw-statement__body">{{ section.settings.body }}</div>
+        {%- endif -%}
+
+        {%- if section.settings.button_label != blank and section.settings.button_link != blank -%}
+          <a class="ltw-btn" href="{{ section.settings.button_link }}">{{ section.settings.button_label | escape }}</a>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Wissenschaft Statement",
+  "tag": "section",
+  "class": "lt-wiss-statement",
+  "settings": [
+    { "type": "text", "id": "anchor_id", "label": "Anker-ID", "info": "Ohne Wert bleibt die automatische ID." },
+
+    { "type": "header", "content": "Text" },
+    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Wir liefern nicht nur eine Zahl." },
+    { "type": "textarea", "id": "subheading", "label": "Subline", "info": "Gleiche Größe wie die Überschrift, nur zurückgenommen. Beides ist ein Block.", "default": "Wir arbeiten daran, dass du dich auf sie verlassen kannst." },
+    { "type": "richtext", "id": "body", "label": "Fließtext", "default": "<p>Ein biologisches Alter kannst du heute an vielen Stellen kaufen. Die schwierige Frage kommt danach: Wie verlässlich ist der Wert, und ab wann bedeutet eine Veränderung wirklich etwas?</p>" },
+
+    { "type": "header", "content": "Bild (linke Spalte)" },
+    { "type": "image_picker", "id": "image", "label": "Bild", "info": "Wird auf 3:2 beschnitten. Ohne Bild läuft die Section einspaltig." },
+    { "type": "text", "id": "image_alt", "label": "Alt-Text", "default": "Wissenschaftler im Labor an einem Analysegerät" },
+    { "type": "textarea", "id": "caption", "label": "Bildunterschrift (optional)" },
+
+    { "type": "header", "content": "Knopf" },
+    { "type": "text", "id": "button_label", "label": "Beschriftung", "info": "Leer lassen heißt: kein Knopf.", "default": "Unsere Forschung" },
+    { "type": "text", "id": "button_link", "label": "Ziel", "info": "Sprungziel auf dieser Seite (z. B. #forschung) oder ein Pfad.", "default": "#forschung" },
+
+    { "type": "header", "content": "Farben und Abstände" },
+    { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#ffffff" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
+    { "type": "color", "id": "color_button", "label": "Knopffläche", "default": "#364f56" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 }
+  ],
+  "presets": [{ "name": "Wissenschaft Statement" }]
+}
+{% endschema %}
