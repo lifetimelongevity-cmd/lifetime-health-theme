@@ -13,8 +13,11 @@
   - Surface:         Weiss (Blattwechsel nach dem hellen Deckblatt)
   - Dominant:        das Bild, das Heading-Pair ist die Antwort darauf
   - Heading size:    --text-h1 (headline_lg), wie alle Kapitel dieser Seite
-  - Content pattern: Zweispalter 1.1/0.9, Bild 3:2 (Hausformat Querformat,
-                     design-governance.md §2c)
+  - Content pattern: Zweispalter 0.85/1.15 auf 60rem, Bild 4:5 (dieselbe
+                     Geometrie wie "Das Wichtigste in Kuerze", BJ 28.08.: das
+                     Bild soll deutlich kleiner sein als die volle Spalte).
+                     Format ueber `image_ratio` umschaltbar, 4:5 und 3:2 sind
+                     die beiden Hausformate aus design-governance.md §2c.
   - CTA:             Sprungziel als Pill in Clinical Slate (DESIGN.md §Buttons).
                      Kein Teal, Teal bleibt Messfarbe.
   - Entfernt:        Rubrik, Kicker
@@ -45,6 +48,7 @@
     --ltw-text-ter: {{ ws_text | color_modify: 'alpha', 0.66 }};
     --ltw-hairline: {{ ws_text | color_modify: 'alpha', 0.12 }};
     --ltw-btn-bg:   {{ section.settings.color_button | default: '#364f56' }};
+    --ltw-statement-ratio: {{ section.settings.image_ratio | default: '4 / 5' }};
     --crs-text:     {{ ws_text }};
     --crs-text-sec: {{ ws_text | color_modify: 'alpha', 0.72 }};
     --crs-text-ter: {{ ws_text | color_modify: 'alpha', 0.66 }};
@@ -67,11 +71,11 @@
       {%- if section.settings.image != blank -%}
         <figure class="ltw-statement__figure">
           {{ section.settings.image
-             | image_url: width: 1352
+             | image_url: width: 900
              | image_tag:
                loading: 'lazy',
-               widths: '540, 800, 1100, 1352',
-               sizes: '(min-width: 961px) 55vw, 92vw',
+               widths: '400, 600, 900',
+               sizes: '(min-width: 961px) 32vw, 88vw',
                alt: section.settings.image_alt }}
           {%- if section.settings.caption != blank -%}
             <figcaption class="ltw-caption">{{ section.settings.caption | escape }}</figcaption>
@@ -115,7 +119,18 @@
     { "type": "richtext", "id": "body", "label": "Fließtext", "default": "<p>Ein biologisches Alter kannst du heute an vielen Stellen kaufen. Die schwierige Frage kommt danach: Wie verlässlich ist der Wert, und ab wann bedeutet eine Veränderung wirklich etwas?</p>" },
 
     { "type": "header", "content": "Bild (linke Spalte)" },
-    { "type": "image_picker", "id": "image", "label": "Bild", "info": "Wird auf 3:2 beschnitten. Ohne Bild läuft die Section einspaltig." },
+    { "type": "image_picker", "id": "image", "label": "Bild", "info": "Ohne Bild läuft die Section einspaltig." },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Bildformat",
+      "options": [
+        { "value": "4 / 5", "label": "Hochkant 4:5" },
+        { "value": "3 / 2", "label": "Quer 3:2" },
+        { "value": "1 / 1", "label": "Quadrat 1:1" }
+      ],
+      "default": "4 / 5"
+    },
     { "type": "text", "id": "image_alt", "label": "Alt-Text", "default": "Wissenschaftler im Labor an einem Analysegerät" },
     { "type": "textarea", "id": "caption", "label": "Bildunterschrift (optional)" },
 

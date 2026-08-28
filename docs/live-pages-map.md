@@ -133,7 +133,7 @@ Diese 5 Seiten sind das Fundament (siehe `CLAUDE.md` § Kanonisches Fundament). 
 > `?view=wissenschaft` auf einem beliebigen Page-Slug. Freigabe-Blocker vor dem
 > Veröffentlichen: Limmroth (zwei Stellen), Froböse, Summit-Foto (erkennbare Dritte),
 > Report-Screenshot ist Platzhalter, Herkunft des Laborfotos in `lt-wiss-statement`
-> (`science-labor-pipette-sw.jpg`, KI-generiert, deshalb bewusst ohne Namens- oder
+> (`science-labor-pipette-sw-hoch.jpg`, KI-generiert, deshalb bewusst ohne Namens- oder
 > Laborangabe in Alt-Text und Bildunterschrift; der Kittel trug im Original einen
 > erfundenen Namenszug samt Wappen, beides ist vor dem Upload herausretuschiert.
 > Offen ist, ob die Seite eine KI-Kennzeichnung fuer dieses Bild braucht).
