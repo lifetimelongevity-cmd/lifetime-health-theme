@@ -1,0 +1,901 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LIFETIME · Wissenschaft · Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --color-teal: #65C0B6;
+  --color-teal-dark: #4A8C85;
+  --color-dark: #364F56;
+  --color-dark-tile: #2D4249;
+  --color-white: #FFFFFF;
+  --color-surface-a: #F7F7F4;
+  --color-surface-b: #F2F1ED;
+  --color-ink: #26251E;
+  --color-ink-muted: #6B6B63; /* DESIGN.md: Label-Stimme 12-14px; Gray-400 ist keine Textfarbe */
+  --color-gray-600: #525252;
+  --color-gray-400: #A3A3A3;
+  --color-gray-200: #E5E5E5;
+  --on-dark: #F7F7F4;
+  --on-dark-muted: rgba(247, 247, 244, 0.72);
+  --on-dark-faint: rgba(247, 247, 244, 0.66);
+  --border-hairline: rgba(38, 37, 30, 0.12);
+
+  --font-heading: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  --font-body: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+
+  --text-display: 48px;
+  --text-h1: 36px;
+  --text-h2: 28px;
+  --text-h3: 24px;
+  --text-body-lg: 18px;
+  --text-body: 16px;
+  --text-body-sm: 14px;
+  --text-micro: 12px;
+
+  --leading-display: 1.1;
+  --leading-heading: 1.15;
+  --leading-tight: 1.25;
+  --leading-body: 1.4;
+  --leading-relaxed: 1.6;
+
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px;
+  --space-9: 80px; --space-10: 120px;
+
+  --radius-sm: 8px; --radius-md: 12px; --radius-full: 999px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --measure: 42rem;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-ink);
+  background: var(--color-surface-a);
+  -webkit-font-smoothing: antialiased;
+}
+img, svg { max-width: 100%; display: block; }
+a { color: inherit; }
+a:focus-visible { outline: 2px solid var(--color-teal-dark); outline-offset: 2px; }
+::selection { background: rgba(101, 192, 182, 0.35); }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+h1, h2, h3 { font-family: var(--font-heading); font-weight: 400; }
+h1 { font-size: var(--text-display); line-height: var(--leading-display); letter-spacing: -0.02em; }
+h2 { font-size: var(--text-h1); line-height: var(--leading-heading); letter-spacing: -0.01em; }
+h3 { font-size: var(--text-h3); line-height: var(--leading-tight); }
+
+p { max-width: var(--measure); }
+.lede { font-size: var(--text-body-lg); line-height: var(--leading-relaxed); }
+.body-copy p { margin-top: var(--space-4); line-height: var(--leading-relaxed); }
+.body-copy p:first-child { margin-top: 0; }
+h2 + .body-copy { margin-top: var(--space-5); }
+.closing-lede { margin-top: var(--space-6); }
+
+/* ============ Masthead (bewusst ohne CTA) ============ */
+.masthead {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--color-surface-a);
+  border-bottom: 1px solid var(--border-hairline);
+}
+.masthead-inner { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+.wordmark { font-weight: 700; font-size: var(--text-body-lg); letter-spacing: 0.18em; text-decoration: none; }
+.masthead-label { font-size: var(--text-micro); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-gray-600); }
+
+/* ============ Kapitel-Rubrik ============ */
+.rubric {
+  display: flex; align-items: baseline; justify-content: space-between; gap: var(--space-4);
+  border-top: 1px solid var(--border-hairline);
+  padding-top: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+.rubric-label {
+  font-size: var(--text-micro); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--color-gray-600);
+}
+.rubric-label b { color: var(--color-ink); font-weight: 600; }
+.on-dark .rubric { border-top-color: rgba(247,247,244,0.2); }
+.on-dark .rubric-label { color: var(--on-dark-muted); }
+.on-dark .rubric-label b { color: var(--on-dark); }
+
+section { padding: var(--space-9) 0; }
+.s-white { background: var(--color-white); }
+.s-warm-b { background: var(--color-surface-b); }
+.s-dark { background: var(--color-dark); color: var(--on-dark); }
+
+/* ============ 1 Hero ============ */
+.hero { padding: var(--space-9) 0; }
+.hero-grid { display: grid; grid-template-columns: 1.05fr 0.95fr; gap: var(--space-8); align-items: center; }
+.hero h1 { max-width: 13em; }
+/* Heading-Pair-Regel: Subline = gleiche Größe wie Headline, nur Opacity */
+.hero-sub {
+  font-family: var(--font-heading); font-weight: 400;
+  font-size: var(--text-display); line-height: var(--leading-display); letter-spacing: -0.02em;
+  color: rgba(38, 37, 30, 0.72);
+  margin-top: var(--space-1); max-width: 16em;
+}
+.hero-copy { font-size: var(--text-body-lg); line-height: var(--leading-relaxed); margin-top: var(--space-5); max-width: 30em; }
+/* Fakten-Zeile nach dem Cover-Trust-Muster des Dossiers */
+.hero-facts {
+  display: flex; flex-wrap: wrap; gap: var(--space-3) 0;
+  margin-top: var(--space-7); padding-top: var(--space-4);
+  border-top: 1px solid var(--border-hairline);
+}
+.hero-facts span {
+  font-size: var(--text-body-sm); color: var(--color-gray-600);
+  padding-right: var(--space-4); margin-right: var(--space-4);
+  border-right: 1px solid var(--border-hairline);
+}
+.hero-facts span:last-child { border-right: none; margin-right: 0; padding-right: 0; }
+/* Papier-Regel: weiße Karte = Schatten, kein Rahmen */
+.hero-figure {
+  background: var(--color-white);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-sm); padding: var(--space-5);
+}
+.figure-caption { font-size: var(--text-micro); color: var(--color-gray-600); margin-top: var(--space-3); line-height: var(--leading-relaxed); }
+
+/* Vorher-Nachher-Wipe (Alterungsreihe, kein Produktergebnis) */
+.ba {
+  position: relative; aspect-ratio: 1 / 1; overflow: hidden;
+  border-radius: var(--radius-sm); background: var(--color-surface-b);
+  touch-action: pan-y;
+}
+.ba img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ba-overlay { position: absolute; inset: 0; width: var(--ba-pos); overflow: hidden; }
+.ba-overlay img { width: 100%; height: 100%; }
+.ba-overlay > img { position: absolute; top: 0; left: 0; height: 100%; width: auto; aspect-ratio: 1 / 1; }
+.ba-divider {
+  position: absolute; top: 0; bottom: 0; left: var(--ba-pos);
+  width: 2px; background: var(--color-white); transform: translateX(-1px);
+  box-shadow: 0 0 0 1px rgba(38, 37, 30, 0.12);
+}
+.ba-knob {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: 44px; height: 44px; border-radius: var(--radius-full);
+  background: var(--color-white); box-shadow: var(--shadow-md);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-dark);
+}
+.ba-knob svg { width: 22px; height: 22px; }
+.ba-tag {
+  position: absolute; bottom: var(--space-4);
+  font-size: var(--text-micro); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--color-white); background: rgba(38, 37, 30, 0.55);
+  padding: var(--space-1) var(--space-3); border-radius: var(--radius-full);
+  pointer-events: none;
+}
+.ba-tag-left { left: var(--space-4); }
+.ba-tag-right { right: var(--space-4); }
+.ba-range {
+  position: absolute; inset: 0; width: 100%; height: 100%; margin: 0;
+  appearance: none; -webkit-appearance: none; background: transparent;
+  cursor: ew-resize;
+}
+.ba-range::-webkit-slider-thumb { -webkit-appearance: none; width: 44px; height: 100%; background: transparent; cursor: ew-resize; }
+.ba-range::-moz-range-thumb { width: 44px; height: 100%; background: transparent; border: 0; cursor: ew-resize; }
+.ba-range:focus { outline: none; }
+.ba:has(.ba-range:focus-visible) { outline: 2px solid var(--color-teal-dark); outline-offset: 2px; }
+
+/* Diskordanz-Auszug aus der Analyseumgebung */
+.report-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-4); margin-top: var(--space-5); }
+.hstat { display: flex; flex-direction: column; gap: var(--space-1); }
+.hstat-value {
+  font-family: var(--font-heading); font-weight: 700; font-size: var(--text-h3);
+  line-height: 1; font-variant-numeric: tabular-nums; color: var(--color-teal-dark);
+}
+.hstat-value em { font-style: normal; font-size: var(--text-body-sm); color: var(--color-gray-600); }
+.hstat-label { font-size: var(--text-micro); color: var(--color-ink-muted); line-height: var(--leading-tight); }
+.discord { margin-top: var(--space-6); width: 100%; height: auto; }
+.discord .d-band { fill: var(--color-teal); opacity: 0.12; }
+.discord .d-chrono { stroke: var(--color-ink); opacity: 0.45; stroke-width: 1.5; }
+.discord .d-chrono-label { font-family: var(--font-body); font-size: 16px; fill: var(--color-gray-600); }
+.discord .d-dots { fill: var(--color-dark); }
+.discord .d-name { font-family: var(--font-body); font-size: 16px; font-weight: 700; fill: var(--color-ink); }
+.discord .d-value { font-family: var(--font-heading); font-size: 18px; font-weight: 700; fill: var(--color-teal-dark); }
+.discord .d-axis, .discord .d-tick line { stroke: var(--color-gray-400); stroke-width: 1.5; }
+.discord .d-axis-label { font-family: var(--font-body); font-size: 16px; fill: var(--color-ink-muted); }
+
+/* Zweispalter Copy + Bild (Kapitel 01) */
+.split { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: var(--space-8); align-items: center; }
+.split-figure { max-width: 24rem; margin-left: auto; }
+.split-figure img {
+  width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
+  border-radius: var(--radius-md); filter: grayscale(1);
+}
+
+/* ============ 2 Kürze-Karte ============ */
+.tldr-card {
+  background: var(--color-surface-b); border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md); padding: var(--space-6);
+  max-width: 52rem;
+}
+.tldr-card h2 { font-size: var(--text-h3); }
+.tldr-list { list-style: none; margin-top: var(--space-5); display: grid; gap: var(--space-4); }
+.tldr-list li {
+  position: relative; padding-left: var(--space-5);
+  line-height: var(--leading-relaxed); max-width: var(--measure);
+}
+/* Marker neutral (Slate): Teal ist Mess-/Interaktionsfarbe, keine Deko */
+.tldr-list li::before {
+  content: ""; position: absolute; left: 0; top: 0.62em;
+  width: 8px; height: 8px; border-radius: var(--radius-full);
+  background: var(--color-dark);
+}
+
+/* ============ 4 Was wir messen ============ */
+.measure-figure { margin-top: var(--space-6); }
+.measure-panels { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-7); align-items: start; }
+.circos { width: 100%; height: auto; max-width: 30rem; margin: 0 auto; }
+.m-panel-sub { font-size: var(--text-body-sm); color: var(--color-gray-600); margin-top: var(--space-4); text-align: center; }
+.m-panel-note { font-size: var(--text-micro); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-ink-muted); margin-top: var(--space-2); text-align: center; }
+.measure-cols { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-7); margin-top: var(--space-6); }
+.measure-col h3 { font-family: var(--font-body); font-weight: 700; font-size: var(--text-body-lg); }
+.measure-col p { font-size: var(--text-body); color: var(--color-gray-600); line-height: var(--leading-relaxed); margin-top: var(--space-2); }
+.transparency {
+  margin-top: var(--space-7); padding-top: var(--space-5);
+  border-top: 1px solid var(--border-hairline);
+}
+.transparency p { font-size: var(--text-body-lg); line-height: var(--leading-relaxed); max-width: 46rem; }
+
+/* ============ 5 Die nächste Grenze ============ */
+.frontier-split { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: var(--space-8); align-items: center; margin-top: var(--space-6); }
+.frontier-figure { margin: 0; }
+.frontier-text .body-copy p:first-child { margin-top: 0; }
+.frontier-text .closer { margin-top: var(--space-5); }
+.frontier-question {
+  font-family: var(--font-heading); font-weight: 400;
+  font-size: var(--text-h3); line-height: var(--leading-tight); letter-spacing: -0.01em;
+  margin: var(--space-6) 0 0; max-width: 18em;
+}
+.frontier-note { font-size: var(--text-micro); color: var(--color-gray-600); line-height: var(--leading-relaxed); margin-top: var(--space-4); max-width: 44em; }
+.closer { font-size: var(--text-body-lg); line-height: var(--leading-relaxed); margin-top: var(--space-6); max-width: 44rem; }
+
+
+.timeline { margin-top: var(--space-8); }
+
+/* ============ Forschungs-Timeline (Kapitel 05) ============ */
+.timeline-label {
+  font-size: var(--text-micro); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--color-ink-muted); margin-bottom: var(--space-5);
+}
+.timeline-track {
+  list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-5);
+}
+.timeline-track--4 { grid-template-columns: repeat(4, 1fr); }
+.research-timeline { display: grid; grid-template-columns: 1fr 3fr; gap: var(--space-8); align-items: start; margin-top: var(--space-8); }
+.research-timeline .timeline { margin-top: 0; }
+.rt-origin { margin: 0; }
+.rt-origin img { display: block; width: 100%; height: auto; border-radius: var(--radius-md); }
+.rt-origin img { display: block; width: 100%; height: auto; border-radius: var(--radius-md); }
+.rt-origin figcaption { display: block; margin-top: var(--space-3); }
+.rt-origin-date { display: block; font-family: var(--font-heading); font-weight: 700; font-size: var(--text-body-lg); font-variant-numeric: tabular-nums; }
+.rt-origin-title { display: block; font-weight: 700; font-size: var(--text-body); margin-top: var(--space-1); }
+.rt-origin-body { display: block; font-size: var(--text-body-sm); color: var(--color-gray-600); line-height: var(--leading-relaxed); margin-top: var(--space-2); }
+.tl-thumb {
+  width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; border-radius: var(--radius-sm);
+  margin-top: var(--space-3); margin-bottom: var(--space-1);
+}
+.tl-node {
+  position: relative; padding-top: var(--space-6); counter-increment: none;
+  border-top: 1px solid var(--border-hairline);
+}
+.tl-node::before {
+  content: ""; position: absolute; top: -6px; left: 0;
+  width: 11px; height: 11px; border-radius: var(--radius-full);
+  background: var(--color-dark); box-shadow: 0 0 0 4px var(--color-white);
+}
+.tl-node.tl-future { border-top-style: dashed; }
+.tl-node.tl-future::before { background: var(--color-white); border: 2px solid var(--color-dark); }
+.tl-date {
+  display: block; font-family: var(--font-heading); font-weight: 700; font-size: var(--text-body-lg);
+  font-variant-numeric: tabular-nums; color: var(--color-ink);
+}
+.tl-title { display: block; font-weight: 700; font-size: var(--text-body); margin-top: var(--space-2); }
+.tl-body { display: block; font-size: var(--text-body-sm); color: var(--color-gray-600); line-height: var(--leading-relaxed); margin-top: var(--space-2); }
+
+/* ============ 6 Kriterien ============ */
+.criteria { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-5); margin-top: var(--space-6); counter-reset: crit; }
+.crit-card {
+  background: var(--color-surface-a); border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-md); padding: var(--space-5);
+  counter-increment: crit;
+}
+.crit-head { display: flex; align-items: center; gap: var(--space-3); }
+/* Icon-Container 48px lt. Card-Info-Spec, Icon monochrom Slate über currentColor */
+.crit-icon { width: 48px; height: 48px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); background: var(--color-surface-b); color: var(--color-dark); }
+.crit-icon svg { width: 24px; height: 24px; }
+.crit-title { font-weight: 700; font-size: var(--text-body-lg); }
+.crit-title::before { content: counter(crit) "  ·  "; color: var(--color-ink-muted); font-weight: 600; font-size: var(--text-body-sm); }
+.crit-body { font-size: var(--text-body); color: var(--color-gray-600); line-height: var(--leading-relaxed); margin-top: var(--space-3); }
+
+/* ============ 7 Unsere Forschung ============ */
+/* Papier-Regel: weißes Blatt = Schatten, kein Rahmen */
+.research-shot {
+  margin: var(--space-6) 0;
+  background: var(--color-white);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: var(--space-5);
+  max-width: 52rem;
+}
+.shot-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-4); flex-wrap: wrap; padding-bottom: var(--space-3); border-bottom: 1px solid var(--color-gray-200); }
+.shot-label { font-size: var(--text-micro); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.shot-note { font-size: var(--text-micro); color: var(--color-gray-600); }
+.shot-table { width: 100%; border-collapse: collapse; margin-top: var(--space-4); font-variant-numeric: tabular-nums; }
+.shot-table th {
+  text-align: left; font-size: var(--text-micro); font-weight: 600; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--color-ink-muted);
+  padding: var(--space-2) var(--space-3) var(--space-2) 0; border-bottom: 1px solid var(--color-gray-200);
+}
+.shot-table td { font-size: var(--text-body-sm); padding: var(--space-3) var(--space-3) var(--space-3) 0; border-bottom: 1px solid var(--color-surface-b); }
+.shot-table td.num { font-weight: 700; }
+.shot-table .consens td { background: var(--color-surface-a); font-weight: 700; }
+.shot-legend { font-size: var(--text-micro); color: var(--color-gray-600); line-height: var(--leading-relaxed); margin-top: var(--space-3); max-width: 44em; }
+.placeholder-flag {
+  display: inline-block; margin-top: var(--space-4);
+  font-size: var(--text-micro); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--color-gray-600); border: 1px dashed var(--color-gray-400);
+  border-radius: var(--radius-sm); padding: var(--space-1) var(--space-3);
+}
+
+/* ============ 8 Wer dafür einsteht ============ */
+.people { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-5); margin-top: var(--space-6); }
+.person { background: var(--color-white); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm); }
+.person-portrait {
+  aspect-ratio: 4 / 5; background: var(--color-surface-b);
+  display: flex; align-items: center; justify-content: center;
+  filter: grayscale(1);
+}
+.person-initials { font-family: var(--font-heading); font-size: var(--text-h1); font-weight: 700; color: var(--color-ink-muted); }
+.person-meta { padding: var(--space-4) var(--space-5) var(--space-5); }
+.person-name { font-weight: 700; font-size: var(--text-body); }
+.person-role { font-size: var(--text-micro); font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-ink-muted); margin-top: var(--space-1); }
+.person-body { font-size: var(--text-body-sm); color: var(--color-gray-600); line-height: var(--leading-relaxed); margin-top: var(--space-2); }
+.preview-only {
+  margin-top: var(--space-7); border: 1px dashed var(--color-gray-400); overflow-wrap: break-word;
+  border-radius: var(--radius-md); padding: var(--space-4) var(--space-5);
+  font-size: var(--text-body-sm); color: var(--color-gray-600); line-height: var(--leading-relaxed); max-width: 52rem;
+}
+.preview-only b { color: var(--color-ink); font-size: var(--text-micro); letter-spacing: 0.08em; text-transform: uppercase; }
+
+/* ============ 9 Ausklang (dunkel) ============ */
+.outlook p { color: var(--on-dark-muted); }
+.outlook .lede { color: var(--on-dark); }
+.outlook-next { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-6); margin-top: var(--space-7); max-width: 52rem; }
+.outlook-item { border-top: 1px solid rgba(247,247,244,0.25); padding-top: var(--space-4); }
+.outlook-item h3 { font-family: var(--font-body); font-weight: 700; font-size: var(--text-body-lg); color: var(--on-dark); }
+.outlook-item p { font-size: var(--text-body-sm); line-height: var(--leading-relaxed); margin-top: var(--space-2); }
+.outlook-claim {
+  font-family: var(--font-heading); font-weight: 400;
+  font-size: var(--text-h2); line-height: var(--leading-tight); letter-spacing: -0.01em;
+  color: var(--on-dark); margin-top: var(--space-8); max-width: 20em;
+}
+.outlook-stand { font-size: var(--text-micro); color: var(--on-dark-faint); margin-top: var(--space-5); }
+
+/* ============ 10 Quellen ============ */
+.sources { padding: var(--space-7) 0 var(--space-8); background: var(--color-surface-b); }
+.sources h2 { font-size: var(--text-body); font-family: var(--font-body); font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; }
+.sources h2.further { margin-top: var(--space-7); }
+.source-list { list-style: none; margin-top: var(--space-4); display: grid; gap: var(--space-3); max-width: 52rem; }
+.source-list li { font-size: var(--text-body-sm); color: var(--color-gray-600); line-height: var(--leading-relaxed); }
+/* Linkfarbe = Ink, Teal nur als Hover-Akzent */
+.source-list a { color: var(--color-ink); text-decoration: underline; text-underline-offset: 2px; }
+.source-list a:hover { color: var(--color-teal-dark); }
+.source-note { font-size: var(--text-micro); color: var(--color-gray-600); }
+/* Gruppen-Label innerhalb der Quellen: Label-Stimme (micro, ink-muted), nicht die Display-h3 */
+.source-group {
+  font-family: var(--font-body);
+  font-size: var(--text-micro); font-weight: 600; line-height: var(--leading-tight);
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-ink-muted);
+  margin-top: var(--space-6); margin-bottom: var(--space-3);
+}
+.source-group:first-of-type { margin-top: var(--space-4); }
+/* Uhr-Name als Anker zur Diskordanz-Grafik (gleiche Labels wie im Chart) */
+.source-list b { color: var(--color-ink); font-weight: 700; }
+.colophon { padding: var(--space-5) 0; border-top: 1px solid var(--border-hairline); background: var(--color-surface-b); }
+.colophon-inner { display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; font-size: var(--text-micro); color: var(--color-gray-600); }
+
+/* ============ Responsive ============ */
+@media (max-width: 960px) {
+  .hero-grid, .split { grid-template-columns: 1fr; gap: var(--space-7); }
+  .split-figure { margin-left: 0; }
+  .people { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 768px) {
+  :root { --text-display: 34px; --text-h1: 27px; --text-h2: 22px; --text-h3: 20px; }
+  section { padding: var(--space-8) 0; }
+  .container { padding: 0 16px; }
+  .measure-cols, .measure-panels, .criteria, .people, .outlook-next, .frontier-split { grid-template-columns: 1fr; }
+  .tl-origin { grid-template-columns: 1fr; gap: var(--space-5); }
+  .tl-origin-fig { max-width: 22rem; }
+  .research-timeline { grid-template-columns: 1fr; gap: var(--space-6); }
+  .rt-origin { max-width: 22rem; }
+  .timeline-track, .timeline-track--4 { grid-template-columns: 1fr; gap: 0; }
+  .tl-thumb { max-width: 20rem; }
+  .tl-node, .tl-node.tl-future { border-top: none; padding-top: 0; padding-left: var(--space-6); padding-bottom: var(--space-6); }
+  .tl-node::before { top: 4px; left: 0; }
+  .tl-node:not(:last-child)::after {
+    content: ""; position: absolute; top: 4px; bottom: -7px; left: 5px;
+    width: 1px; background: var(--border-hairline);
+  }
+  .tl-node.tl-future:not(:last-child)::after { background: repeating-linear-gradient(var(--color-gray-400) 0 3px, transparent 3px 7px); }
+  .hero-facts span { border-right: none; margin-right: 0; padding-right: 0; width: 100%; }
+  .report-stats { grid-template-columns: 1fr 1fr; gap: var(--space-4) var(--space-3); }
+  /* Mobil weicht die Generationsspalte, nie die Unsicherheit */
+  .shot-table th:nth-child(2), .shot-table td:nth-child(2) { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!--
+PREVIEW der Seite /pages/wissenschaft (Arbeitsstand, noch nicht Shopify).
+Story-Kette: Große Frage > Feld weiß viel (Gruppen) > wir messen DNA+Epigenetik >
+nächste Grenze Verlaufsmessung (Vier-Uhren-Moment) > Messlatte (4 Kriterien) >
+unsere Forschung > wer einsteht > wohin es geht > Quellen.
+Frame: Feld positiv, Einzelmessung funktioniert HEUTE. Forschungsthema = Rauschen
+vom Signal trennen, damit Fortschritt FRÜH sichtbar wird. Kein CTA auf der ganzen Seite.
+-->
+
+<header class="masthead">
+  <div class="container masthead-inner">
+    <a class="wordmark" href="https://www.lifetime-health.de/">LIFETIME</a>
+    <span class="masthead-label">Wissenschaft</span>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ 1 HERO · Bild rechts ============ -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <h1>Wissenschaft ist für Populationen gemacht.</h1>
+      <p class="hero-sub">Gesundheit ist persönlich.</p>
+      <p class="hero-copy">Deshalb erforschen wir, was der Durchschnitt nicht beantworten kann: Was bedeutet das für dich?</p>
+      <div class="hero-facts">
+        <span>Eigene Analyseumgebung seit Mitte 2023</span>
+        <span>Fachärztlich gegengeprüfte Auswertung</span>
+        <span>Validierung bis Ende 2027</span>
+      </div>
+    </div>
+<figure class="hero-figure">
+      <!-- Vorher-Nachher-Wipe: chronologisches Altern, KEIN Produktergebnis.
+           Reihenfolge bewusst jung -> alt, damit die Darstellung nicht als Wirkversprechen lesbar ist. -->
+      <div class="ba" style="--ba-pos: 50%">
+        <img class="ba-base" src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/frau-60er.jpg?v=1769008654" width="864" height="864"
+             alt="Dieselbe Frau mit ergrautem Haar, Aufnahme im Alter von etwa 60 Jahren">
+        <div class="ba-overlay" aria-hidden="true">
+          <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/frau-40er.jpg?v=1769008655" width="864" height="864" alt="">
+        </div>
+        <div class="ba-divider" aria-hidden="true">
+          <span class="ba-knob">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 8 6 12l4 4M14 8l4 4-4 4"/></svg>
+          </span>
+        </div>
+        <span class="ba-tag ba-tag-left">40 Jahre</span>
+        <span class="ba-tag ba-tag-right">60 Jahre</span>
+        <input class="ba-range" type="range" min="0" max="100" value="50" step="1"
+               aria-label="Regler: Ansicht zwischen 40 und 60 Jahren überblenden">
+      </div>
+      <figcaption class="figure-caption">Zwanzig Jahre chronologisches Altern, sichtbar an einer Person. Wie schnell die Biologie dahinter altert, zeigt kein Foto.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ 2 DAS WICHTIGSTE IN KÜRZE · getönte Karte, kein Bild ============ -->
+<section class="s-white">
+  <div class="container">
+    <div class="tldr-card">
+      <h2>Das Wichtigste in Kürze</h2>
+      <ul class="tldr-list">
+        <li>Epigenetische Uhren, Rechenmodelle, die aus deiner Probe dein biologisches Alter schätzen, machen Altern messbar, auch bei dir: Deine Messung liefert heute eine wissenschaftlich fundierte Standortbestimmung.</li>
+        <li>Noch wertvoller wird die Messung im Verlauf: Wer Bewegung, Ernährung oder Schlaf verändert, will das Ergebnis schnell sehen, nicht erst nach Jahren.</li>
+        <li>Damit kleine Veränderungen früh sichtbar werden, muss das biologische Signal sauber vom Messrauschen getrennt werden. Genau daran forschen wir, mit einer eigenen Analyseumgebung, die jede Probe durch ein breites Spektrum publizierter Uhren rechnet.</li>
+        <li>Unser Ziel: die verlässlichste Verlaufsmessung des biologischen Alters, die es für Einzelpersonen gibt.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3 DIE WISSENSCHAFT WAR NIE WEITER · kein Bild ============ -->
+<section>
+  <div class="container">
+    <div class="rubric"><span class="rubric-label"><b>01</b> · Das Feld</span></div>
+    <div class="split">
+      <div>
+        <h2>Die Wissenschaft war nie weiter.</h2>
+        <div class="body-copy">
+          <p class="lede">Kaum ein Bereich der Biomedizin hat sich so schnell entwickelt wie die Alternsforschung. Was lange als Schicksal galt, ist heute ein messbarer Prozess.</p>
+          <p>Das wichtigste Werkzeug sind epigenetische Uhren: Rechenmodelle, die aus dem Muster der DNA-Methylierung ein biologisches Alter schätzen. In großen Studien hängt dieses Alter enger mit Gesundheits- und Sterblichkeitsrisiken zusammen als das Geburtsdatum im Ausweis. Vielfach reproduziert, keine These mehr.</p>
+          <p>Gewonnen wurde dieses Wissen an Gruppen. Bei Einzelpersonen erlaubt es heute eine fundierte Standortbestimmung. Der nächste Schritt: daraus eine Verlaufsmessung machen, die Fortschritte früh und eindeutig zeigt. Genau dort arbeiten wir.</p>
+        </div>
+      </div>
+      <figure class="split-figure">
+        <img src="limmroth-vortrag.jpg"
+             width="900" height="900" loading="lazy"
+             alt="Prof. Dr. med. Volker Limmroth bei einem Fachvortrag am Rednerpult">
+        <figcaption class="figure-caption">Prof. Dr. med. Volker Limmroth ordnet ein, was aus diesem Forschungsstand medizinisch folgt.</figcaption>
+      </figure>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4 WAS WIR MESSEN · Grafik direkt unter der Überschrift ============ -->
+<section class="s-white">
+  <div class="container">
+    <div class="rubric"><span class="rubric-label"><b>02</b> · Die Messung</span></div>
+    <h2>Deine DNA zeigt den Bauplan.<br>Deine Epigenetik zeigt, was sich verändern kann.</h2>
+
+    <figure class="measure-figure">
+      <!-- Circos-Plots aus der eigenen Auswertung; Titel sind im Bild gesetzt, daher hier keine Doppelung. -->
+      <div class="measure-panels">
+        <div class="m-panel">
+          <img class="circos" src="circos-genetik.webp" width="900" height="900" loading="lazy"
+               alt="Circos-Darstellung Genetik: alle Chromosomen im Ring, graue Histogramme außen, farbige Verbindungslinien innen">
+          <div class="m-panel-sub">Der Bauplan. Ein Leben lang stabil.</div>
+          <div class="m-panel-note">Rund 700.000 Genorte</div>
+        </div>
+        <div class="m-panel">
+          <img class="circos" src="circos-epigenetik.webp" width="900" height="900" loading="lazy"
+               alt="Circos-Darstellung Epigenetik: dieselben Chromosomen, farbige Histogramme außen zeigen die Dichte der Methylierungsmarkierungen">
+          <div class="m-panel-sub">Die Markierungen. Verändern sich mit der Zeit.</div>
+          <div class="m-panel-note">Der dynamische Teil deiner Biologie</div>
+        </div>
+      </div>
+    </figure>
+
+    <div class="measure-cols">
+      <div class="measure-col">
+        <h3>Die DNA: dein Ausgangspunkt</h3>
+        <p>Deine DNA verändert sich ein Leben lang praktisch nicht. Wir lesen rund 700.000 Genorte und erfassen damit persönliche Prädispositionen: Anlagen, die du mitbringst und die den Rahmen setzen. Sie zeigen, womit du startest.</p>
+      </div>
+      <div class="measure-col">
+        <h3>Die Epigenetik: dein aktueller Stand</h3>
+        <p>Über der DNA liegt eine Schicht chemischer Markierungen. Sie entscheiden mit, welche Gene gerade abgelesen werden, und viele von ihnen verändern sich mit dem Alter systematisch. Wenn die DNA der Bauplan eines Hauses ist, ist die Epigenetik das Protokoll seiner Nutzung. Sie zeigt, wo du gerade stehst.</p>
+      </div>
+    </div>
+
+    <div class="transparency">
+      <p>Die Labortechnologie dahinter ist etabliert und tausendfach bewährt. Analysiert werden die Proben bei Eurofins Genomics, einem nach ISO 17025 akkreditierten Labor. Unsere eigene Arbeit beginnt dort, wo sie am wertvollsten ist: bei der Auswertung der Rohdaten und der Frage, wie aus einer Messung eine Aussage wird, auf die du dich verlassen kannst.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5 DIE NÄCHSTE GRENZE · Herzstück, Vier-Uhren-Grafik ============ -->
+<section>
+  <div class="container">
+    <div class="rubric"><span class="rubric-label"><b>03</b> · Die nächste Grenze</span></div>
+    <h2>Dein Fortschritt soll sichtbar werden.<br>Schnell und eindeutig.</h2>
+
+    <div class="frontier-split">
+      <figure class="frontier-figure">
+        <!-- HERZSTÜCK: echte Diskordanz einer Probe aus der eigenen Analyseumgebung -->
+        <div class="shot-head">
+        <span class="shot-label">Epigenetische Uhren · Diskordanz</span>
+        <span class="shot-note">Probe LT-2026-0417 · pseudonymisiert</span>
+      </div>
+        <svg class="discord" viewBox="0 62 620 268" role="img" aria-label="Sechs epigenetische Uhren schätzen für dieselbe Probe Werte zwischen 60,1 und 82,2 Jahren, das chronologische Alter liegt bei 67 Jahren">
+        <rect class="d-band" x="106.7" y="96" width="364.9" height="176" rx="8"/>
+
+        <line class="d-chrono" x1="225.1" y1="96" x2="225.1" y2="272" stroke-dasharray="5 5"/>
+        <text class="d-chrono-label" x="225.1" y="86" text-anchor="middle">chronologisch 67</text>
+
+        <g class="d-dots">
+          <circle cx="118.7" cy="172" r="9"/>
+          <circle cx="188.1" cy="172" r="9"/>
+          <circle cx="248.3" cy="172" r="9"/>
+          <circle cx="279.2" cy="172" r="9"/>
+          <circle cx="340.9" cy="172" r="9"/>
+          <circle cx="459.6" cy="172" r="9"/>
+        </g>
+
+        <g class="d-name">
+          <text x="118.7" y="126" text-anchor="middle">Horvath</text>
+          <text x="279.2" y="126" text-anchor="middle">PhenoAge</text>
+          <text x="459.6" y="126" text-anchor="middle">GrimAge 2</text>
+          <text x="188.1" y="200" text-anchor="middle">EPI</text>
+          <text x="340.9" y="200" text-anchor="middle">Hannum</text>
+          <text x="248.3" y="238" text-anchor="middle">Shireby</text>
+        </g>
+        <g class="d-value">
+          <text x="118.7" y="146" text-anchor="middle">60,1</text>
+          <text x="279.2" y="146" text-anchor="middle">70,5</text>
+          <text x="459.6" y="146" text-anchor="middle">82,2</text>
+          <text x="188.1" y="220" text-anchor="middle">64,6</text>
+          <text x="340.9" y="220" text-anchor="middle">74,5</text>
+          <text x="248.3" y="258" text-anchor="middle">68,5</text>
+        </g>
+
+        <line class="d-axis" x1="40" y1="288" x2="580" y2="288"/>
+        <g class="d-tick">
+          <line x1="40" y1="288" x2="40" y2="295"/>
+          <line x1="194.3" y1="288" x2="194.3" y2="295"/>
+          <line x1="348.6" y1="288" x2="348.6" y2="295"/>
+          <line x1="502.9" y1="288" x2="502.9" y2="295"/>
+        </g>
+        <g class="d-axis-label">
+          <text x="40" y="316" text-anchor="middle">55</text>
+          <text x="194.3" y="316" text-anchor="middle">65</text>
+          <text x="348.6" y="316" text-anchor="middle">75</text>
+          <text x="502.9" y="316" text-anchor="middle">85</text>
+          <text x="580" y="316" text-anchor="end">Jahre</text>
+        </g>
+      </svg>
+        <figcaption class="frontier-note">Sechs epigenetische Uhren, dieselbe Probe, 22 Jahre Spannweite. Genau diese Streuung muss eine Verlaufsmessung unterbieten, damit deine Veränderung sichtbar wird.</figcaption>
+      </figure>
+      <div class="frontier-text">
+        <div class="body-copy">
+          <p class="lede">Eine einzelne Messung beantwortet die Frage: Wo stehe ich? Das können epigenetische Uhren heute gut. Die wertvollere Frage kommt danach: Wirkt, was ich tue?</p>
+          <p>Je früher und feiner eine Veränderung sichtbar werden soll, desto präziser muss die Messung sein. Denn jede Messung trägt ein Rauschen, und verschiedene Uhren betonen verschiedene Facetten des Alterns. Dieselbe Probe kann deshalb je nach Modell unterschiedlich ausfallen.</p>
+        </div>
+        <p class="frontier-question">Welcher Wert ist deiner?</p>
+        <p class="closer">Wer diese Frage präzise beantwortet, macht Fortschritt sichtbar, sobald er entsteht. Genau daran arbeiten wir.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6 MESSLATTE · vier Kriterien, dezente Icons ============ -->
+<section class="s-warm-b">
+  <div class="container">
+    <div class="rubric"><span class="rubric-label"><b>04</b> · Die Messlatte</span></div>
+    <h2>Woran du eine Messung erkennst, der du vertrauen kannst.</h2>
+    <div class="criteria">
+      <div class="crit-card">
+        <div class="crit-head">
+          <span class="crit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 11a8 8 0 0 0-14.9-3M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.9 3M20 20v-4h-4"/>
+            </svg>
+          </span>
+          <span class="crit-title">Wiederholbarkeit</span>
+        </div>
+        <p class="crit-body">Dieselbe Probe, zweimal gemessen, muss zum selben Ergebnis führen. Erst dann ist eine Differenz zwischen zwei Terminen eine Aussage über dich und nicht über das Labor.</p>
+      </div>
+      <div class="crit-card">
+        <div class="crit-head">
+          <span class="crit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3 4 7l8 4 8-4-8-4z"/><path d="m4 12 8 4 8-4"/><path d="m4 17 8 4 8-4"/>
+            </svg>
+          </span>
+          <span class="crit-title">Plattformstabilität</span>
+        </div>
+        <p class="crit-body">Das Ergebnis darf nicht davon abhängen, mit welcher Technik oder in welcher Charge die Probe gemessen wurde. Eine gute Auswertung gleicht solche Unterschiede aus, statt sie an dich weiterzureichen.</p>
+      </div>
+      <div class="crit-card">
+        <div class="crit-head">
+          <span class="crit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 16 c 2 0 2 -6 4 -6 s 2 4 4 4 2 -8 4 -8 2 6 4 6 1 -2 2 -2"/><path d="M3 21h18" opacity="0.4"/>
+            </svg>
+          </span>
+          <span class="crit-title">Kriterium für echte Veränderung</span>
+        </div>
+        <p class="crit-body">Ein Anbieter sollte sagen können, ab welcher Differenz eine Veränderung als echt gilt und nicht als Zufallsschwankung. Ohne dieses Kriterium ist jeder Verlauf Interpretationssache.</p>
+      </div>
+      <div class="crit-card">
+        <div class="crit-head">
+          <span class="crit-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 5v14"/><path d="M8 5h8M8 19h8"/><path d="M17 12h4" opacity="0.4"/><path d="M3 12h4" opacity="0.4"/>
+            </svg>
+          </span>
+          <span class="crit-title">Offene Unsicherheit</span>
+        </div>
+        <p class="crit-body">Jede Messung hat eine Unsicherheit. Wer sie kennt, nennt sie. Ein Wert ohne Unsicherheitsangabe ist eine halbe Information.</p>
+      </div>
+    </div>
+    <p class="closer">Diese vier Punkte kannst du an jeden Alterstest anlegen, auch an unseren. Wie wir selbst daran arbeiten, zeigt der nächste Abschnitt.</p>
+  </div>
+</section>
+
+<!-- ============ 7 UNSERE FORSCHUNG · Screenshot nach dem ersten Absatz ============ -->
+<section class="s-white">
+  <div class="container">
+    <div class="rubric"><span class="rubric-label"><b>05</b> · Unsere Forschung</span></div>
+    <h2>Wir messen nicht nur biologisches Alter.<br>Wir erforschen, wie man es messen sollte.</h2>
+    <div class="body-copy">
+      <p class="lede">Seit Mitte 2023 betreiben wir eine eigene Analyseumgebung für Methylierungsdaten. Sie rechnet dieselbe Probe durch ein breites Spektrum publizierter epigenetischer Uhren: Modelle der ersten und zweiten Generation, messfehler-stabilisierte Varianten und Maße für die Alterungsgeschwindigkeit. Für jede Probe beziffern wir, wie gut die Modelle übereinstimmen und woher Abweichungen kommen.</p>
+    </div>
+
+    <!-- Bild: echter Report-Screenshot (pseudonymisiert). Unten Mock als Layout-Platzhalter. -->
+    <figure class="research-shot">
+      <div class="shot-head">
+        <span class="shot-label">Konsolidiertes Ergebnis</span>
+        <span class="shot-note">Probe LT-2026-0417 · pseudonymisiert</span>
+      </div>
+      <div class="report-stats">
+        <div class="hstat">
+          <span class="hstat-value">69,5 <em>±&nbsp;7,3</em></span>
+          <span class="hstat-label">Konsolidiertes Alter</span>
+        </div>
+        <div class="hstat">
+          <span class="hstat-value">67</span>
+          <span class="hstat-label">Chronologisches Alter</span>
+        </div>
+        <div class="hstat">
+          <span class="hstat-value">22,1</span>
+          <span class="hstat-label">Spannweite über sechs Uhren</span>
+        </div>
+      </div>
+      <p class="shot-legend">Aus den sechs Einzelschätzungen aus Kapitel 03 wird eine gewichtete Gesamtaussage. Konsolidierung nach Strategie median_mad; die Unsicherheit ist als MAD über die Kernuhren angegeben.</p>
+      <span class="placeholder-flag">Platzhalter · wird durch echten Report-Screenshot ersetzt</span>
+    </figure>
+
+    <div class="body-copy">
+      <p>Aus dieser Arbeit sind zwei Entwicklungen entstanden, für die es keinen fertigen Stand der Technik gab. Erstens ein gewichtetes Konsolidierungsverfahren, das mehrere Uhren zu einer Gesamtaussage zusammenführt, deren Wiederholbarkeit messbar über jeder Einzeluhr liegt. Zweitens ein statistisches Kriterium, das festlegt, wann eine Veränderung zwischen zwei Messungen als echt gilt.</p>
+      <p>Wir arbeiten dabei so, wie man es aus der Forschung kennt: mit vorab festgelegten, messbaren Zielen. Auch Ansätze, die wir verwerfen, werden dokumentiert.</p>
+
+    <div class="research-timeline">
+      <figure class="rt-origin">
+        <img src="summit-dublin-2023-full.webp" width="900" height="1200" loading="lazy"
+             alt="Gespräch neben dem Banner des Longevity Summit Dublin 2023">
+        <figcaption>
+          <span class="rt-origin-title">Longevity Summit Dublin</span>
+          <span class="rt-origin-body">Der Ausgangspunkt, 2023. Im Austausch mit führenden Forschern ist unsere Leitfrage entstanden.</span>
+        </figcaption>
+      </figure>
+
+      <div class="timeline">
+        <div class="timeline-label">Forschungsverlauf</div>
+        <ol class="timeline-track timeline-track--4">
+          <li class="tl-node">
+            <span class="tl-date">2023</span>
+            <span class="tl-title">Analyseumgebung aufgebaut</span>
+            <span class="tl-body">Die erste eigene Umgebung, die jede Probe durch ein breites Spektrum publizierter Uhren rechnet.</span>
+          </li>
+          <li class="tl-node">
+            <span class="tl-date">2024</span>
+            <span class="tl-title">Konsolidierungsverfahren</span>
+            <span class="tl-body">Mehrere Uhren werden zu einer gewichteten Gesamtaussage geführt, wiederholbarer als jede Einzeluhr.</span>
+          </li>
+          <li class="tl-node">
+            <span class="tl-date">2025</span>
+            <span class="tl-title">Kriterium für echte Veränderung</span>
+            <span class="tl-body">Eine statistische Schwelle trennt echte Veränderung vom Rauschen.</span>
+          </li>
+          <li class="tl-node tl-future">
+            <span class="tl-date">bis 2027</span>
+            <span class="tl-title">Validierung und Publikation</span>
+            <span class="tl-body">Prüfung gegen vorab festgelegte Zielgrößen, danach wissenschaftliche Veröffentlichung.</span>
+          </li>
+        </ol>
+      </div>
+    </div>
+      <p class="lede closing-lede">So entsteht das, was wir dir geben wollen: eine Verlaufsmessung, die deine Veränderung zeigt, sobald sie da ist, mit offenem Rechenweg.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8 WER DAFÜR EINSTEHT · Graustufen-Porträts ============ -->
+<section>
+  <div class="container">
+    <div class="rubric"><span class="rubric-label"><b>06</b> · Verantwortung</span></div>
+    <h2>Wer dafür einsteht.</h2>
+    <div class="people">
+      <div class="person">
+        <div class="person-portrait"><span class="person-initials">VL</span></div>
+        <div class="person-meta">
+          <div class="person-name">Prof. Dr. Volker Limmroth</div>
+          <div class="person-role">Ärztliche Validierung</div>
+          <p class="person-body">Prüft die medizinische Einordnung unserer Ergebnisse. Seit 2023 wird jede wesentliche Auswertungsentscheidung im wöchentlichen Jour fixe fachärztlich gegengeprüft.</p>
+        </div>
+      </div>
+      <div class="person">
+        <div class="person-portrait"><span class="person-initials">BJ</span></div>
+        <div class="person-meta">
+          <div class="person-name">Benedikt Junker</div>
+          <div class="person-role">Leitung Forschung &amp; Entwicklung</div>
+          <p class="person-body">Verantwortet den Aufbau der Analyseumgebung und die Entwicklung des Konsolidierungsverfahrens.</p>
+        </div>
+      </div>
+      <div class="person">
+        <div class="person-portrait"><span class="person-initials">IF</span></div>
+        <div class="person-meta">
+          <div class="person-name">Prof. Dr. Ingo Froböse</div>
+          <div class="person-role">Wissenschaftlicher Beirat</div>
+          <p class="person-body">Begleitet die Einordnung von Bewegung und Regeneration in die Verlaufsmessung.</p>
+        </div>
+      </div>
+    </div>
+    <div class="preview-only">
+      <b>Nur Preview, nicht für Live</b><br>
+      Limmroth-Nennung braucht sein Einverständnis (Rolle exakt als Validierung, nicht als Epigenetik-Kern) und gilt jetzt für ZWEI Stellen: Porträt in Kapitel 01 und diese Karte.
+      Froböse-Karte erst live, wenn Beirats-Rolle dokumentiert ist; sein Zitat existiert nur als Entwurf und braucht wörtliche Freigabe.
+      Porträts: Graustufen, einheitlicher Schnitt 4:5, echte Fotos folgen.
+    </div>
+  </div>
+</section>
+
+<!-- ============ 9 WOHIN WIR UNTERWEGS SIND · ruhiger Ausklang, kein Bild ============ -->
+<section class="s-dark on-dark outlook">
+  <div class="container">
+    <div class="rubric"><span class="rubric-label"><b>07</b> · Ausblick</span></div>
+    <h2>Wohin wir unterwegs sind.</h2>
+    <div class="body-copy">
+      <p class="lede">Bis Ende 2027 validieren wir unser Verfahren gegen vorab festgelegte Zielgrößen, mit einem klaren Ziel: dass du deine Veränderung früher und verlässlicher siehst als mit jeder Einzeluhr. Die Ergebnisse wollen wir wissenschaftlich publizieren.</p>
+    </div>
+    <div class="outlook-next">
+      <div class="outlook-item">
+        <h3>Speichelproben</h3>
+        <p>Optimierung des Verfahrens für Speichel als Probenmaterial, damit die Messung so einfach wird, wie sie präzise ist.</p>
+      </div>
+      <div class="outlook-item">
+        <h3>DNA und Epigenetik kombiniert</h3>
+        <p>Den angeborenen vom veränderbaren Anteil trennen, damit klar wird, was Lebensstil wirklich bewegt. Beides Kandidaten für Universitätskooperationen.</p>
+      </div>
+    </div>
+    <p class="outlook-claim">Wir messen uns an denselben vier Kriterien, die wir dir gegeben haben.</p>
+    <p class="outlook-stand">Diese Seite wächst mit unserer Forschung. Stand: August 2026.</p>
+  </div>
+</section>
+
+<!-- ============ 10 QUELLEN ============ -->
+<section class="sources">
+  <div class="container">
+    <h2>Quellen</h2>
+    <p class="source-note" style="margin-top: var(--space-3); max-width: 44em;">Primärliteratur zu den Uhren, die diese Analyse rechnet, und zu ihrer Zuverlässigkeit. Jede Angabe verweist auf die begutachtete Originalarbeit.</p>
+
+    <h3 class="source-group">Die Uhren in dieser Analyse</h3>
+    <ul class="source-list">
+      <li><b>Horvath</b> · Horvath, S.: DNA methylation age of human tissues and cell types. Genome Biology 14, R115 (2013). <a href="https://doi.org/10.1186/gb-2013-14-10-r115">doi.org/10.1186/gb-2013-14-10-r115</a></li>
+      <li><b>Hannum</b> · Hannum, G. et al.: Genome-wide methylation profiles reveal quantitative views of human aging rates. Molecular Cell 49, 359–367 (2013). <a href="https://doi.org/10.1016/j.molcel.2012.10.016">doi.org/10.1016/j.molcel.2012.10.016</a></li>
+      <li><b>PhenoAge</b> · Levine, M. E. et al.: An epigenetic biomarker of aging for lifespan and healthspan (DNAm PhenoAge). Aging (Albany NY) 10, 573–591 (2018). <a href="https://doi.org/10.18632/aging.101414">doi.org/10.18632/aging.101414</a></li>
+      <li><b>GrimAge 2</b> · Lu, A. T. et al.: DNA methylation GrimAge version 2. Aging (Albany NY) 14, 9484–9549 (2022). <a href="https://doi.org/10.18632/aging.204434">doi.org/10.18632/aging.204434</a></li>
+      <li><b>Shireby</b> · Shireby, G. L. et al.: Recalibrating the epigenetic clock: implications for assessing biological age in the human cortex. Brain 143, 3763–3775 (2020). <a href="https://doi.org/10.1093/brain/awaa334">doi.org/10.1093/brain/awaa334</a></li>
+    </ul>
+
+    <h3 class="source-group">Zuverlässigkeit, Diskordanz und klinische Aussagekraft</h3>
+    <ul class="source-list">
+      <li>Higgins-Chen, A. T. et al.: A computational solution for bolstering reliability of epigenetic clocks. Nature Aging 2, 644–661 (2022). <a href="https://doi.org/10.1038/s43587-022-00248-2">doi.org/10.1038/s43587-022-00248-2</a></li>
+      <li>Shokhirev, M. N. &amp; Johnson, A. A.: Analysis of variability and epigenetic age prediction across microarray and methylation sequencing technologies. GeroScience 47, 6631–6638 (2025). <a href="https://doi.org/10.1007/s11357-025-01824-1">doi.org/10.1007/s11357-025-01824-1</a></li>
+      <li>Garma, L. D. &amp; Quintela-Fandino, M.: Applicability of epigenetic age models to next-generation methylation arrays. Genome Medicine 16, 116 (2024). <a href="https://doi.org/10.1186/s13073-024-01387-4">doi.org/10.1186/s13073-024-01387-4</a></li>
+      <li>Bell, C. G. et al.: DNA methylation aging clocks: challenges and recommendations. Genome Biology 20, 249 (2019). <a href="https://doi.org/10.1186/s13059-019-1824-y">doi.org/10.1186/s13059-019-1824-y</a></li>
+      <li>Sehgal, R. et al.: Biological versus technical reliability of epigenetic clocks and implications for disease prognosis and intervention response. bioRxiv Preprint (2025). <span class="source-note">Noch nicht peer-reviewed.</span> <a href="https://doi.org/10.1101/2025.10.13.682176">doi.org/10.1101/2025.10.13.682176</a></li>
+      <li>Marioni, R. E. et al.: DNA methylation age of blood predicts all-cause mortality in later life. Genome Biology 16, 25 (2015). <a href="https://doi.org/10.1186/s13059-015-0584-6">doi.org/10.1186/s13059-015-0584-6</a></li>
+    </ul>
+
+    <h2 class="further">Weiterlesen</h2>
+    <ul class="source-list">
+      <li><a href="https://www.lifetime-health.de/blogs/longevity-blog/epigenetische-uhren">Epigenetische Uhren: was sie messen und wie sie sich unterscheiden</a></li>
+      <li><a href="https://www.lifetime-health.de/blogs/longevity-blog/wie-genau-ist-ein-epigenetischer-alterstest">Wie genau ist ein epigenetischer Alterstest? Was die Zahl aussagt</a></li>
+      <li><a href="https://www.lifetime-health.de/blogs/longevity-blog/genetischer-epigenetischer-test-unterschied">Genetischer vs. epigenetischer Test: der Unterschied</a></li>
+    </ul>
+  </div>
+</section>
+
+</main>
+
+<footer class="colophon">
+  <div class="container colophon-inner">
+    <span>LIFETIME · Wissenschaft</span>
+    <span>Preview-Stand August 2026 · noch nicht live</span>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.ba').forEach(function (ba) {
+  var range = ba.querySelector('.ba-range');
+  if (!range) return;
+  var apply = function () { ba.style.setProperty('--ba-pos', range.value + '%'); };
+  range.addEventListener('input', apply);
+  apply();
+});
+</script>
+</body>
+</html>

@@ -17,6 +17,11 @@
   gemeinsamen quadratischen Ausschnitt gerechnet (810 x 810, Restfehler unter
   2 px im Gesicht).
 
+  OHNE BILDPAAR: sind beide Bild-Settings leer, faellt die ganze Figur weg
+  (Blatt, Regler, Marken, Bildunterschrift). Der Hero laeuft dann einspaltig
+  als Textseite, statt ein leeres graues Quadrat zu zeigen. Sobald wieder ein
+  Bild gesetzt ist, kommt der Zweispalter von selbst zurueck.
+
   Wer hier Bilder tauscht, muss das Paar vorher wieder aufeinander ausrichten,
   sonst springt das Gesicht beim Ziehen. Zwei Bedingungen muessen halten:
   beide Dateien quadratisch und exakt gleich gross, und dieselbe Person an
@@ -47,6 +52,11 @@
   assign wh_pad_b_m = wh_pad_b | times: 0.8 | round
 
   assign wh_start = section.settings.wipe_start | default: 50
+
+  assign wh_has_media = false
+  if section.settings.image_before != blank or section.settings.image_after != blank
+    assign wh_has_media = true
+  endif
 -%}
 
 {{ 'lt-wissenschaft.css' | asset_url | stylesheet_tag }}
@@ -76,7 +86,7 @@
 {% endstyle %}
 
 <section id="{{ wh_anchor }}" class="ltw ltw-hero">
-  <div class="ltw__container ltw-hero__grid">
+  <div class="ltw__container ltw-hero__grid{% unless wh_has_media %} ltw-hero__grid--solo{% endunless %}">
     <div class="ltw-hero__copy-col">
       {% render 'section-heading-crs',
         heading: section.settings.headline,
@@ -102,6 +112,7 @@
       {%- endif -%}
     </div>
 
+    {%- if wh_has_media -%}
     <figure class="ltw-hero__figure">
       <lt-wiss-wipe>
         <div class="ltw-ba" style="--ltw-ba-pos: {{ wh_start }}%">
@@ -158,6 +169,7 @@
         </figcaption>
       {%- endif -%}
     </figure>
+    {%- endif -%}
   </div>
 </section>
 
@@ -206,7 +218,7 @@
     { "type": "header", "content": "Text" },
     { "type": "textarea", "id": "headline", "label": "Headline", "default": "Wissenschaft ist für Populationen gemacht." },
     { "type": "textarea", "id": "subheading", "label": "Subline", "info": "Gleiche Größe wie die Headline, nur zurückgenommen. Beides ist ein Block.", "default": "Gesundheit ist persönlich." },
-    { "type": "textarea", "id": "body", "label": "Fließtext", "default": "Wir forschen selbst an der schwierigeren Frage: Was bedeutet die Wissenschaft für dich?" },
+    { "type": "textarea", "id": "body", "label": "Fließtext", "default": "Deshalb erforschen wir, was der Durchschnitt nicht beantworten kann: Was bedeutet das für dich?" },
 
     { "type": "header", "content": "Vorher-Nachher-Regler" },
     { "type": "image_picker", "id": "image_before", "label": "Bild links (jünger)" },
