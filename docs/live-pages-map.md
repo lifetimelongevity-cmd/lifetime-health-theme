@@ -132,9 +132,11 @@ Diese 5 Seiten sind das Fundament (siehe `CLAUDE.md` § Kanonisches Fundament). 
 > Solange die Page unveröffentlicht ist, rendert das Template nur über
 > `?view=wissenschaft` auf einem beliebigen Page-Slug. Freigabe-Blocker vor dem
 > Veröffentlichen: Limmroth (zwei Stellen), Froböse, Summit-Foto (erkennbare Dritte),
-> Report-Screenshot ist Platzhalter, Herkunft und Lizenz des Laborfotos in
-> `lt-wiss-statement` (`science-labor-sw.jpg`, Person nur von hinten, deshalb bewusst
-> ohne Namens- oder Laborangabe in Alt-Text und Bildunterschrift).
+> Report-Screenshot ist Platzhalter, Herkunft des Laborfotos in `lt-wiss-statement`
+> (`science-labor-pipette-sw.jpg`, KI-generiert, deshalb bewusst ohne Namens- oder
+> Laborangabe in Alt-Text und Bildunterschrift; der Kittel trug im Original einen
+> erfundenen Namenszug samt Wappen, beides ist vor dem Upload herausretuschiert.
+> Offen ist, ob die Seite eine KI-Kennzeichnung fuer dieses Bild braucht).
 > **Erledigt 28.08.:** Die KI-generierten Hero-Bilder sind raus, der Hero läuft ohne Motiv.
 
 > **Hero-Bildmaß vereinheitlicht (2026-07-30):** `lt-science-proof-hero` trägt jetzt dasselbe
