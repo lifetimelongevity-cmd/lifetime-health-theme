@@ -35,6 +35,12 @@
   if section.settings.secondary_button_label != blank
     assign has_secondary_cta = true
   endif
+  assign fact_count = 0
+  for block in section.blocks
+    if block.type == 'fact'
+      assign fact_count = fact_count | plus: 1
+    endif
+  endfor
 -%}
 
 {% style %}
@@ -44,6 +50,8 @@
     --bento-text: {{ section.settings.color_text }};
     --bento-text-sec: {{ section.settings.color_text | color_modify: 'alpha', 0.72 }};
     --bento-border: {{ section.settings.color_text | color_modify: 'alpha', 0.12 }};
+    --bento-border-strong: {{ section.settings.color_text | color_modify: 'alpha', 0.78 }};
+    --bento-cpg-ink: {{ section.settings.cpg_ink | default: '#65c0b6' }};
     padding-top: {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
   }
@@ -98,7 +106,11 @@
         </div>
 
         <div class="science-bento__tile science-bento__tile--photo science-bento__tile--split-photo">
-          {%- if bento_image_src != blank -%}
+          {%- if section.settings.photo_as_cpg -%}
+            <div class="science-bento__cpg" data-bento-cpg data-cols="{{ section.settings.cpg_cols | default: 5 }}" data-rows="{{ section.settings.cpg_rows | default: 32 }}" role="img" aria-label="{{ bento_image_alt | escape }}">
+              <div class="science-bento__cpg-grid" aria-hidden="true"></div>
+            </div>
+          {%- elsif bento_image_src != blank -%}
             <img
               src="{{ bento_image_src }}"
               alt="{{ bento_image_alt | escape }}"
@@ -113,7 +125,7 @@
         </div>
       </div>
     {%- else -%}
-      <div class="science-bento__grid">
+      <div class="science-bento__grid{% if fact_count >= 3 %} science-bento__grid--four{% endif %}">
 
         {%- comment -%}── Kachel A: Große Kernaussage ──{%- endcomment -%}
         <div class="science-bento__tile science-bento__tile--statement">
@@ -131,9 +143,13 @@
           {%- endif -%}
         </div>
 
-        {%- comment -%}── Kachel B: Mood-Foto ──{%- endcomment -%}
+        {%- comment -%}── Kachel B: Mood-Foto oder animiertes CpG-Feld ──{%- endcomment -%}
         <div class="science-bento__tile science-bento__tile--photo">
-          {%- if bento_image_src != blank -%}
+          {%- if section.settings.photo_as_cpg -%}
+            <div class="science-bento__cpg" data-bento-cpg data-cols="{{ section.settings.cpg_cols | default: 5 }}" data-rows="{{ section.settings.cpg_rows | default: 32 }}" role="img" aria-label="{{ bento_image_alt | escape }}">
+              <div class="science-bento__cpg-grid" aria-hidden="true"></div>
+            </div>
+          {%- elsif bento_image_src != blank -%}
             <img
               src="{{ bento_image_src }}"
               alt="{{ bento_image_alt | escape }}"
@@ -169,6 +185,51 @@
   </div>
 </section>
 
+<script>
+(function () {
+  function build(el) {
+    if (el.dataset.bentoCpgReady) return;
+    el.dataset.bentoCpgReady = '1';
+    var grid = el.querySelector('.science-bento__cpg-grid');
+    if (!grid) return;
+    var cols = parseInt(el.dataset.cols, 10) || 5;
+    // Zeilen aus der echten Kachelhoehe ableiten, damit das Feld auf jedem
+    // Geraet fuellt statt ueberzulaufen. Fallback auf data-rows, falls die
+    // Kachel (noch) keine Hoehe hat.
+    var rowPx = 16;
+    var avail = el.getBoundingClientRect().height - 44;
+    var rows = avail > rowPx
+      ? Math.max(12, Math.round(avail / rowPx))
+      : (parseInt(el.dataset.rows, 10) || 30);
+    var n = cols * rows;
+    grid.style.gridTemplateColumns = 'repeat(' + cols + ', 1fr)';
+    var frag = document.createDocumentFragment();
+    for (var i = 0; i < n; i++) {
+      var s = document.createElement('span');
+      s.className = 'science-bento__cpg-id';
+      var d = '';
+      for (var j = 0; j < 8; j++) { d += Math.floor(Math.random() * 10); }
+      s.textContent = 'cg' + d;
+      var lo = 0.06 + Math.random() * 0.08;
+      var hi = lo + 0.12 + Math.random() * 0.22;
+      s.style.setProperty('--lo', lo.toFixed(3));
+      s.style.setProperty('--hi', hi.toFixed(3));
+      s.style.setProperty('--dur', (4 + Math.random() * 6).toFixed(2) + 's');
+      s.style.setProperty('--del', (-Math.random() * 8).toFixed(2) + 's');
+      if (Math.random() < 0.06) { s.classList.add('science-bento__cpg-id--flare'); }
+      frag.appendChild(s);
+    }
+    grid.appendChild(frag);
+  }
+  function init(root) {
+    (root || document).querySelectorAll('[data-bento-cpg]').forEach(build);
+  }
+  if (document.readyState !== 'loading') { init(); }
+  else { document.addEventListener('DOMContentLoaded', function () { init(); }); }
+  document.addEventListener('shopify:section:load', function (e) { init(e.target); });
+})();
+</script>
+
 {% stylesheet %}
   .science-bento {
     background: var(--bento-bg, #364f56);
@@ -198,7 +259,7 @@
     Desktop: 3 Spalten × 2 Zeilen
     Zeile 1: [Statement — 2 Spalten] [Foto — 1 Spalte, 2 Zeilen]
     Zeile 2: [Fact 1] [Fact 2] (Foto geht durch)
-    Bei mehr als 2 Facts: Fact 3 erscheint als dritte Zeile
+    Mit 3 Facts: links vier gleichwertige Karten im 2-mal-2-Raster
   */
   .science-bento__grid {
     display: grid;
@@ -210,6 +271,23 @@
   /* Kachel A: Statement — 2 Spalten breit */
   .science-bento__tile--statement {
     grid-column: span 2;
+  }
+
+  .science-bento__grid--four .science-bento__tile--statement {
+    grid-column: span 1;
+    padding: var(--space-6);
+  }
+
+  .science-bento__grid--four .science-bento__statement-value {
+    margin: 0;
+  }
+
+  .science-bento__grid--four .science-bento__statement {
+    margin-block-start: var(--space-2);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: var(--leading-relaxed);
+    color: var(--bento-text-sec);
   }
 
   /* Kachel B: Foto — 1 Spalte, 2 Zeilen hoch */
@@ -248,7 +326,7 @@
     font-weight: var(--weight-medium);
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(247, 247, 244, 0.66);
+    color: var(--bento-text-sec);
   }
 
   .science-bento__statement-value {
@@ -257,7 +335,7 @@
     font-size: var(--text-h1);
     font-weight: var(--weight-bold);
     line-height: 1;
-    color: #f7f7f4;
+    color: var(--bento-text);
   }
 
   .science-bento__statement {
@@ -266,7 +344,7 @@
     font-size: var(--text-h3);
     font-weight: var(--weight-regular);
     line-height: var(--leading-tight);
-    color: #f7f7f4;
+    color: var(--bento-text);
   }
 
   .science-bento__statement-sub {
@@ -275,7 +353,7 @@
     font-size: var(--text-h3);
     font-weight: var(--weight-regular);
     line-height: var(--leading-tight);
-    color: rgba(247, 247, 244, 0.66);
+    color: var(--bento-text-sec);
   }
 
   .science-bento__actions {
@@ -290,58 +368,58 @@
   }
 
   .science-bento__actions .button--solid {
-    background: #f7f7f4;
-    border-color: #f7f7f4;
-    color: #364f56;
+    background: var(--bento-text);
+    border-color: var(--bento-text);
+    color: var(--bento-bg);
   }
 
   .science-bento__actions .button--solid span {
-    color: #364f56;
+    color: var(--bento-bg);
   }
 
   .science-bento__actions .button--solid .button__icon svg path {
-    fill: #364f56;
+    fill: var(--bento-bg);
   }
 
   .science-bento__actions .button--outline {
     background: transparent;
-    border-color: rgba(247, 247, 244, 0.78);
-    color: #f7f7f4;
+    border-color: var(--bento-border-strong);
+    color: var(--bento-text);
   }
 
   .science-bento__actions .button--outline span {
-    color: #f7f7f4;
+    color: var(--bento-text);
   }
 
   .science-bento__actions .button--outline .button__icon svg path {
-    fill: #f7f7f4;
+    fill: var(--bento-text);
   }
 
   .no-touchevents .science-bento__actions .button--solid:hover {
-    background: #f7f7f4;
-    border-color: #f7f7f4;
-    color: #364f56;
+    background: var(--bento-text);
+    border-color: var(--bento-text);
+    color: var(--bento-bg);
   }
 
   .no-touchevents .science-bento__actions .button--solid:hover span {
-    color: #364f56;
+    color: var(--bento-bg);
   }
 
   .no-touchevents .science-bento__actions .button--solid:hover .button__icon svg path {
-    fill: #364f56;
+    fill: var(--bento-bg);
   }
 
   .no-touchevents .science-bento__actions .button--outline:hover {
-    border-color: #f7f7f4;
-    color: #f7f7f4;
+    border-color: var(--bento-text);
+    color: var(--bento-text);
   }
 
   .no-touchevents .science-bento__actions .button--outline:hover span {
-    color: #f7f7f4;
+    color: var(--bento-text);
   }
 
   .no-touchevents .science-bento__actions .button--outline:hover .button__icon svg path {
-    fill: #f7f7f4;
+    fill: var(--bento-text);
   }
 
   /* ─── FOTO TILE ─── */
@@ -370,6 +448,51 @@
     min-height: clamp(26rem, 42vw, 32rem);
   }
 
+  /* ─── CpG-FELD (ersetzt optional das Foto) ───
+     Feld aus Methylierungs-IDs, im Browser erzeugt, dezent flackernd.
+     Fuellt die Foto-Kachel; Rand weicher als die Mitte. */
+  .science-bento__cpg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .science-bento__cpg-grid {
+    position: absolute;
+    inset: 0;
+    padding: var(--space-5) var(--space-3);
+    display: grid;
+    gap: 2px var(--space-3);
+    align-content: space-between;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.66rem;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    color: var(--bento-cpg-ink, #65c0b6);
+    -webkit-mask-image: radial-gradient(130% 100% at 50% 45%, #000 52%, transparent 100%);
+            mask-image: radial-gradient(130% 100% at 50% 45%, #000 52%, transparent 100%);
+  }
+
+  .science-bento__cpg-id {
+    text-align: center;
+    opacity: 0.2;
+    animation: bento-cpg-twinkle var(--dur, 6s) ease-in-out var(--del, 0s) infinite;
+    will-change: opacity;
+  }
+
+  .science-bento__cpg-id--flare {
+    color: color-mix(in srgb, var(--bento-cpg-ink, #65c0b6) 55%, #ffffff);
+  }
+
+  @keyframes bento-cpg-twinkle {
+    0%, 100% { opacity: var(--lo, 0.1); }
+    50%      { opacity: var(--hi, 0.32); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .science-bento__cpg-id { animation: none; opacity: 0.2; }
+  }
+
   /* ─── FACT TILES ─── */
   .science-bento__tile--fact {
     background: var(--bento-tile-bg, rgba(255, 255, 255, 0.07));
@@ -389,7 +512,7 @@
     font-weight: var(--weight-medium);
     letter-spacing: 0.1em;
     text-transform: uppercase;
-    color: rgba(247, 247, 244, 0.66);
+    color: var(--bento-text-sec);
   }
 
   .science-bento__fact-value {
@@ -398,7 +521,7 @@
     font-size: var(--text-h1);
     font-weight: var(--weight-bold);
     line-height: 1;
-    color: #f7f7f4;
+    color: var(--bento-text);
   }
 
   .science-bento__fact-desc {
@@ -406,7 +529,7 @@
     font-family: var(--font-body);
     font-size: var(--text-body);
     line-height: var(--leading-relaxed);
-    color: rgba(247, 247, 244, 0.66);
+    color: var(--bento-text-sec);
   }
 
   /* ─── RESPONSIVE ─── */
@@ -640,10 +763,41 @@
       "content": "Kachel B — Mood-Foto"
     },
     {
+      "type": "checkbox",
+      "id": "photo_as_cpg",
+      "label": "Als animiertes CpG-Feld",
+      "info": "Ersetzt das Foto durch ein animiertes Feld aus Methylierungs-IDs (cg…).",
+      "default": false
+    },
+    {
+      "type": "color",
+      "id": "cpg_ink",
+      "label": "CpG-Feld: ID-Farbe",
+      "default": "#65c0b6"
+    },
+    {
+      "type": "range",
+      "id": "cpg_cols",
+      "label": "CpG-Feld: Spalten",
+      "min": 3,
+      "max": 8,
+      "step": 1,
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "cpg_rows",
+      "label": "CpG-Feld: Zeilen",
+      "min": 16,
+      "max": 44,
+      "step": 2,
+      "default": 32
+    },
+    {
       "type": "text",
       "id": "mood_image",
       "label": "Bild URL (shopify://shop_images/...)",
-      "info": "Mood-Bild: körpernahe Textur, atmosphärisch. Kein Produktfoto."
+      "info": "Mood-Bild: körpernahe Textur, atmosphärisch. Kein Produktfoto. Wird ignoriert, solange das CpG-Feld aktiv ist."
     },
     {
       "type": "text",

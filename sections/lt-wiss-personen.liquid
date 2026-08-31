@@ -1,30 +1,30 @@
 {% comment %}
-  LIFETIME — Wissenschaft · Kapitel 8 (Wer dafür einsteht, Rubrik 06)
+  LIFETIME — Wissenschaft · Kapitel 3 (Projektbeteiligte)
   ───────────────────────────────────────────────────────────────────
-  Graustufen-Porträts der Verantwortlichen. Visueller Vertrag:
+  Kompakte Graustufen-Porträts der Projektbeteiligten. Visueller Vertrag:
   docs/science-preview.html §8.
 
   FREIGABEN, alle offen:
   • Limmroth erscheint auf dieser Seite ZWEIMAL (Porträt in Kapitel 01 und hier).
-    Beide Stellen brauchen sein Einverständnis. Rolle exakt „ärztliche
-    Validierung", nicht als Epigenetik-Kern.
-  • Froböse nur live, wenn die Beirats-Rolle dokumentiert ist. Ein Zitat von ihm
-    gibt es nur nach wörtlicher Freigabe, deshalb hat dieser Block bewusst kein
-    Zitatfeld.
+    Beide Stellen brauchen sein Einverständnis. Die Rolle „Wissenschaftliche
+    Leitung" muss der dokumentierten Aufgabenteilung entsprechen.
+  • Froböse wird als wissenschaftliche Beratung geführt. Eine formale
+    Beirats-Rolle darf erst nach dokumentierter Mandatierung verwendet werden.
+    Ein Zitat gibt es nur nach wörtlicher Freigabe, deshalb hat dieser Block
+    bewusst kein Zitatfeld.
   Ohne Foto zeigt die Karte die Initialen, das Layout bleibt gleich.
 
   §12 Build Spec:
-  - Surface:         Paper A
+  - Surface:         Paper B, warm
   - Dominant:        die Portraetreihe
-  - Heading size:    --text-h1 (headline_lg). Auf dieser Seite frei, weil
-                     das Seiten-H1 auf --text-display sitzt (DESIGN.md: Display 48
-                     fuer das Deckblatt, Headline 36 je Kapitel).
-  - Content pattern: card-info als Personenkarte, Portraet 4:5 in Graustufen
+  - Heading size:    --text-h2 (headline_md), wie die Content-Sections auf
+                     /pages/science.
+  - Content pattern: kompakte Personenkarte, kleines Portraet 4:5 in Graustufen
   - CTA:             keine, auch keine Verlinkung auf /pages/aerzte
   - Entfernt:        Zitate. Die Rolle traegt die Aussage, ein Zitat waere eine
                      zweite Stimme im selben Kapitel.
-  - Quality move:    einheitlicher Schnitt und Graustufen ueber alle Karten,
-                     damit unterschiedliche Fotoquellen als ein Satz lesen
+  - Quality move:    einheitliche kleine Bildfenster statt bilddominanter
+                     Hochkantkarten; Rolle und Beitrag bleiben im Vordergrund
 {% endcomment %}
 
 {%- liquid
@@ -77,7 +77,7 @@
       subheading: section.settings.subheading,
       align: 'left',
       heading_tag: 'h2',
-      headline_lg: true,
+      headline_md: true,
       extra_class: 'ltw-heading'
     %}
 
@@ -88,12 +88,21 @@
             <div class="ltw-person__portrait">
               {%- if block.settings.image != blank -%}
                 {{ block.settings.image
-                   | image_url: width: 600
+                   | image_url: width: 320
                    | image_tag:
                      loading: 'lazy',
-                     widths: '300, 450, 600',
-                     sizes: '(min-width: 961px) 22rem, (min-width: 768px) 45vw, 90vw',
+                     widths: '160, 240, 320',
+                     sizes: '(min-width: 768px) 7rem, 5.5rem',
                      alt: block.settings.image_alt }}
+              {%- elsif block.settings.image_asset != blank -%}
+                <img
+                  src="{{ block.settings.image_asset | asset_url }}"
+                  alt="{{ block.settings.image_alt | escape }}"
+                  width="320"
+                  height="400"
+                  loading="lazy"
+                  decoding="async"
+                >
               {%- else -%}
                 <span class="ltw-person__initials" aria-hidden="true">{{ block.settings.initials | escape }}</span>
               {%- endif -%}
@@ -129,7 +138,7 @@
     { "type": "text", "id": "rubric_label", "label": "Kapitelname", "default": "Verantwortung" },
 
     { "type": "header", "content": "Text" },
-    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Wer dafür einsteht." },
+    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Wer arbeitet an diesem Projekt?" },
     { "type": "textarea", "id": "subheading", "label": "Subline" },
 
     { "type": "header", "content": "Farben und Abstände" },
@@ -144,11 +153,12 @@
       "type": "person",
       "name": "Person",
       "settings": [
-        { "type": "image_picker", "id": "image", "label": "Porträt", "info": "Wird 4:5 beschnitten und in Graustufen gezeigt. Ohne Bild erscheinen die Initialen." },
+        { "type": "image_picker", "id": "image", "label": "Porträt", "info": "Wird als kleines 4:5-Porträt in Graustufen gezeigt. Ohne Bild erscheinen die Initialen." },
+        { "type": "text", "id": "image_asset", "label": "Theme-Asset (optional)", "info": "Dateiname aus dem Theme-Ordner assets. Wird nur verwendet, wenn kein Porträt ausgewählt ist." },
         { "type": "text", "id": "image_alt", "label": "Alt-Text" },
         { "type": "text", "id": "initials", "label": "Initialen", "default": "VL" },
         { "type": "text", "id": "name", "label": "Name", "default": "Prof. Dr. med. Volker Limmroth" },
-        { "type": "text", "id": "role", "label": "Rolle", "default": "Ärztliche Validierung" },
+        { "type": "text", "id": "role", "label": "Rolle", "default": "Wissenschaftliche Leitung" },
         { "type": "textarea", "id": "body", "label": "Text", "default": "Kurze Beschreibung der Aufgabe." }
       ]
     }

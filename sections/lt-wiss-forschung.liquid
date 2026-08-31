@@ -1,30 +1,21 @@
 {% comment %}
-  LIFETIME — Wissenschaft · Kapitel 7 (Unsere Forschung, Rubrik 05)
-  ─────────────────────────────────────────────────────────────────
-  Die eigene Arbeit: Report-Karte mit den Kennzahlen einer Probe, danach das
-  Ausgangs-Foto links und die Forschungs-Timeline rechts. Visueller Vertrag:
-  docs/science-preview.html §7.
-
-  PLATZHALTER: Die Report-Karte zeigt aktuell Mock-Kennzahlen. Vor Livegang
-  entweder `report_image` mit dem echten, pseudonymisierten Screenshot belegen
-  oder die Kennzahlen ersetzen. Das Flag `placeholder_note` blendet den
-  Platzhalter-Hinweis ein; leer heisst: kein Hinweis, also live-tauglich.
-
-  FREIGABE: Auf dem Summit-Foto ist eine dritte Person erkennbar. Ohne deren
-  Einwilligung enger auf das Banner beschneiden oder das Bild weglassen.
+  LIFETIME — Wissenschaft · Unsere Forschung
+  ────────────────────────────────────────────
+  Die Kernforschung wird bewusst als Quercheck gezeigt, nicht als Antrag:
+  eine reale Analyseansicht und drei kurze Signale. Ausführliche Methodik,
+  Summit-Foto und Forschungs-Timeline sind im aktiven Template nicht belegt.
 
   §12 Build Spec:
-  - Surface:         Weiss
-  - Dominant:        die Report-Karte als weisses Blatt mit Schatten
-  - Heading size:    --text-h1 (headline_lg). Auf dieser Seite frei, weil
-                     das Seiten-H1 auf --text-display sitzt (DESIGN.md: Display 48
-                     fuer das Deckblatt, Headline 36 je Kapitel).
-  - Content pattern: Papier-Karte + Zeitleiste, Foto als Ausgangspunkt links
+  - Surface:         Paper B, warm
+  - Dominant:        die reale Analyseansicht als weisses Blatt mit Schatten
+  - Heading size:    --text-h2 (headline_md), wie die Content-Sections auf
+                     /pages/science.
+  - Content pattern: Copy/Signale links, Analyseansicht rechts
   - CTA:             keine
   - Entfernt:        Thumbnails an den Timeline-Knoten. Vier Bilder in einer
                      Zeitleiste erschlagen die Kapitelaussage.
-  - Quality move:    Kennzahlen tabular in Deep Teal, Unsicherheit direkt am
-                     Wert statt in einer Fussnote
+  - Quality move:    Forschung ist am Arbeitsartefakt erkennbar; keine
+                     Foerderkriterien oder Prozessdetails auf der Website
 {% endcomment %}
 
 {%- liquid
@@ -41,6 +32,8 @@
 
   assign wr_stats = section.blocks | where: 'type', 'stat'
   assign wr_nodes = section.blocks | where: 'type', 'node'
+  assign wr_signals = section.blocks | where: 'type', 'signal'
+  assign wr_report_asset = section.settings.report_asset | strip
 -%}
 
 {{ 'lt-wissenschaft.css' | asset_url | stylesheet_tag }}
@@ -74,66 +67,98 @@
       number: section.settings.rubric_number,
       label: section.settings.rubric_label %}
 
-    {% render 'section-heading-crs',
-      heading: section.settings.heading,
-      subheading: section.settings.subheading,
-      align: 'left',
-      heading_tag: 'h2',
-      headline_lg: true,
-      extra_class: 'ltw-heading'
-    %}
+    <div class="ltw-research__grid ltw-research__grid--media-left">
+      <div class="ltw-research__copy">
+        {% render 'section-heading-crs',
+          heading: section.settings.heading,
+          subheading: section.settings.subheading,
+          align: 'left',
+          heading_tag: 'h2',
+          headline_md: true,
+          extra_class: 'ltw-heading'
+        %}
 
-    {%- if section.settings.intro != blank -%}
-      <div class="ltw-body ltw-body--lede rte">{{ section.settings.intro }}</div>
-    {%- endif -%}
-
-    {%- comment -%}
-      Papier-Regel: das weisse Blatt ist das einzige Element dieses Kapitels,
-      das einen Schatten tragen darf.
-    {%- endcomment -%}
-    <figure class="ltw-shot">
-      <div class="ltw-shot-head">
-        {%- if section.settings.shot_label != blank -%}
-          <span class="ltw-shot-head__label">{{ section.settings.shot_label | escape }}</span>
+        {%- if section.settings.intro != blank -%}
+          <div class="ltw-body rte">{{ section.settings.intro }}</div>
         {%- endif -%}
-        {%- if section.settings.shot_note != blank -%}
-          <span class="ltw-shot-head__note">{{ section.settings.shot_note | escape }}</span>
+
+        {%- if wr_signals.size > 0 -%}
+          <ul class="ltw-research-signals" role="list" data-ltw-signals>
+            {%- for block in wr_signals -%}
+              <li class="ltw-research-signal" {{ block.shopify_attributes }}>
+                <span class="ltw-research-signal__node" aria-hidden="true"></span>
+                {%- if block.settings.title != blank -%}
+                  <h3 class="ltw-research-signal__title">{{ block.settings.title | escape }}</h3>
+                {%- endif -%}
+                {%- if block.settings.body != blank -%}
+                  <p class="ltw-research-signal__body">{{ block.settings.body | escape }}</p>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
         {%- endif -%}
       </div>
 
-      {%- if section.settings.report_image != blank -%}
-        {{ section.settings.report_image
-           | image_url: width: 1200
-           | image_tag:
-             loading: 'lazy',
-             widths: '600, 900, 1200',
-             sizes: '(min-width: 768px) 52rem, 90vw',
-             class: 'ltw-shot__img',
-             alt: section.settings.report_image_alt }}
-      {%- elsif wr_stats.size > 0 -%}
-        <div class="ltw-shot__stats">
-          {%- for block in wr_stats -%}
-            <div class="ltw-hstat" {{ block.shopify_attributes }}>
-              <span class="ltw-hstat__value">
-                {{- block.settings.value | escape -}}
-                {%- if block.settings.value_suffix != blank -%}
-                  <em>&nbsp;{{ block.settings.value_suffix | escape }}</em>
-                {%- endif -%}
-              </span>
-              <span class="ltw-hstat__label">{{ block.settings.label | escape }}</span>
-            </div>
-          {%- endfor -%}
-        </div>
-      {%- endif -%}
+      {%- comment -%}
+        Papier-Regel: das weisse Blatt ist das einzige Element dieses Kapitels,
+        das einen Schatten tragen darf.
+      {%- endcomment -%}
+      <figure class="ltw-shot">
+        {%- if section.settings.shot_label != blank or section.settings.shot_note != blank -%}
+          <div class="ltw-shot-head">
+            {%- if section.settings.shot_label != blank -%}
+              <span class="ltw-shot-head__label">{{ section.settings.shot_label | escape }}</span>
+            {%- endif -%}
+            {%- if section.settings.shot_note != blank -%}
+              <span class="ltw-shot-head__note">{{ section.settings.shot_note | escape }}</span>
+            {%- endif -%}
+          </div>
+        {%- endif -%}
 
-      {%- if section.settings.shot_legend != blank -%}
-        <p class="ltw-shot__legend">{{ section.settings.shot_legend | escape }}</p>
-      {%- endif -%}
+        {%- if section.settings.report_image != blank -%}
+          {{ section.settings.report_image
+             | image_url: width: 1200
+             | image_tag:
+               loading: 'lazy',
+               widths: '460, 700, 900, 1200',
+               sizes: '(min-width: 961px) 30rem, 90vw',
+               class: 'ltw-shot__img',
+               alt: section.settings.report_image_alt }}
+        {%- elsif wr_report_asset != blank -%}
+          <img
+            class="ltw-shot__img"
+            src="{{ wr_report_asset | asset_url }}"
+            alt="{{ section.settings.report_image_alt | escape }}"
+            width="1215"
+            height="866"
+            loading="lazy"
+            decoding="async"
+          >
+        {%- elsif wr_stats.size > 0 -%}
+          <div class="ltw-shot__stats">
+            {%- for block in wr_stats -%}
+              <div class="ltw-hstat" {{ block.shopify_attributes }}>
+                <span class="ltw-hstat__value">
+                  {{- block.settings.value | escape -}}
+                  {%- if block.settings.value_suffix != blank -%}
+                    <em>&nbsp;{{ block.settings.value_suffix | escape }}</em>
+                  {%- endif -%}
+                </span>
+                <span class="ltw-hstat__label">{{ block.settings.label | escape }}</span>
+              </div>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
 
-      {%- if section.settings.placeholder_note != blank -%}
-        <span class="ltw-shot__flag">{{ section.settings.placeholder_note | escape }}</span>
-      {%- endif -%}
-    </figure>
+        {%- if section.settings.shot_legend != blank -%}
+          <p class="ltw-shot__legend">{{ section.settings.shot_legend | escape }}</p>
+        {%- endif -%}
+
+        {%- if section.settings.placeholder_note != blank -%}
+          <span class="ltw-shot__flag">{{ section.settings.placeholder_note | escape }}</span>
+        {%- endif -%}
+      </figure>
+    </div>
 
     {%- if section.settings.body != blank -%}
       <div class="ltw-body rte">{{ section.settings.body }}</div>
@@ -186,6 +211,33 @@
   </div>
 </section>
 
+<script>
+(function () {
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function setup(root) {
+    (root || document).querySelectorAll('[data-ltw-signals]').forEach(function (ul) {
+      if (ul.dataset.ltwSignalsReady) return;
+      ul.dataset.ltwSignalsReady = '1';
+      // Ohne Bewegungswunsch oder ohne Observer bleibt der Endzustand stehen.
+      if (reduce || !('IntersectionObserver' in window)) return;
+      ul.classList.add('ltw-anim');
+      var io = new IntersectionObserver(function (entries) {
+        entries.forEach(function (e) {
+          if (e.isIntersecting) {
+            e.target.classList.add('is-in');
+            io.unobserve(e.target);
+          }
+        });
+      }, { threshold: 0.35 });
+      io.observe(ul);
+    });
+  }
+  if (document.readyState !== 'loading') { setup(); }
+  else { document.addEventListener('DOMContentLoaded', function () { setup(); }); }
+  document.addEventListener('shopify:section:load', function (e) { setup(e.target); });
+})();
+</script>
+
 {% schema %}
 {
   "name": "Wissenschaft Forschung",
@@ -199,9 +251,9 @@
     { "type": "text", "id": "rubric_label", "label": "Kapitelname", "default": "Unsere Forschung" },
 
     { "type": "header", "content": "Text" },
-    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Wir messen nicht nur biologisches Alter." },
-    { "type": "textarea", "id": "subheading", "label": "Subline", "default": "Wir erforschen, wie man es messen sollte." },
-    { "type": "richtext", "id": "intro", "label": "Einstieg (über der Karte)", "default": "<p>Kurzer erklärender Absatz.</p>" },
+    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Wie wird aus vielen Uhren ein verlässliches Signal?" },
+    { "type": "textarea", "id": "subheading", "label": "Subline" },
+    { "type": "richtext", "id": "intro", "label": "Einstieg (über der Karte)", "default": "<p>Epigenetische Uhren können dieselbe Probe unterschiedlich einordnen. Wir erforschen, wie sich diese Abweichungen systematisch erfassen und sinnvoll zusammenführen lassen.</p>" },
     { "type": "richtext", "id": "body", "label": "Fließtext (unter der Karte)", "default": "<p>Kurzer erklärender Absatz.</p>" },
     { "type": "textarea", "id": "closing", "label": "Schlusssatz", "default": "So entsteht das, was wir dir geben wollen." },
 
@@ -209,6 +261,7 @@
     { "type": "text", "id": "shot_label", "label": "Label links", "default": "Konsolidiertes Ergebnis" },
     { "type": "text", "id": "shot_note", "label": "Label rechts", "default": "Probe LT-2026-0417 · pseudonymisiert" },
     { "type": "image_picker", "id": "report_image", "label": "Screenshot", "info": "Sobald hier der echte, pseudonymisierte Screenshot liegt, ersetzt er die Kennzahlen-Blöcke." },
+    { "type": "text", "id": "report_asset", "label": "Theme-Asset-Dateiname", "info": "Alternative zum Bild-Picker, zum Beispiel proben-labor-app-lifetime-screenshot.webp." },
     { "type": "text", "id": "report_image_alt", "label": "Alt-Text des Screenshots", "default": "Konsolidiertes Ergebnis einer pseudonymisierten Probe" },
     { "type": "textarea", "id": "shot_legend", "label": "Legende", "default": "Aus den Einzelschätzungen wird eine gewichtete Gesamtaussage." },
     { "type": "text", "id": "placeholder_note", "label": "Platzhalter-Hinweis", "info": "Vor Livegang leeren. Solange hier Text steht, zeigt die Karte den gestrichelten Hinweis.", "default": "Platzhalter · wird durch echten Report-Screenshot ersetzt" },
@@ -229,6 +282,14 @@
     { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 160, "step": 8, "unit": "px", "default": 80 }
   ],
   "blocks": [
+    {
+      "type": "signal",
+      "name": "Forschungssignal",
+      "settings": [
+        { "type": "text", "id": "title", "label": "Titel", "default": "Mehrere Modelle, dieselbe Probe" },
+        { "type": "textarea", "id": "body", "label": "Text", "default": "Kurze Aussage zur eigenen Forschungsarbeit." }
+      ]
+    },
     {
       "type": "stat",
       "name": "Kennzahl",
