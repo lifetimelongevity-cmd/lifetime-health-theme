@@ -1,26 +1,23 @@
 {% comment %}
-  LIFETIME — Wissenschaft · Kapitel 2 (Das Wichtigste in Kürze)
-  ─────────────────────────────────────────────────────────────
-  Vier Kernaussagen, die die ganze Seite zusammenfassen, bevor die Kapitel sie
-  auffalten. Bild links, Text rechts.
-
-  Abweichung vom Preview (docs/science-preview.html §2, BJ 27.08.): dort stand
-  der Text als getoente Karte ueber die volle Breite und lief dadurch zu hoch
-  und zu breit. Zwei Spalten halbieren die Bauhoehe, und die schmalere Spalte
-  nimmt der Liste optisch das Gewicht. Die Karte faellt damit weg: auf der
-  weissen Flaeche, zwischen zwei Paper-A-Kapiteln, ist die Section ohnehin
-  schon abgesetzt, ein zweiter Rahmen darin waere doppelt gemoppelt und
-  widerspraeche der Haarlinien-Regel aus DESIGN.md.
+  LIFETIME — Wissenschaft · Die Messlatte
+  ─────────────────────────────────────────
+  Vier Pruefkriterien als typografische Liste: Titel plus kurzer Absatz je
+  Kriterium, getrennt durch Haarlinien statt Karten. Die fruehere card-info-
+  Variante (Icon in getoenter Kachel) war das einzige Karten-Icon-Raster der
+  Seite und ist entfallen; die ungenutzte Dublette lt-wiss-messlatte.liquid
+  wurde dabei geloescht. Die Section bleibt bewusst rubriklos und liest wie
+  die Statement-Section als Zwischenstueck zwischen den Kapiteln.
 
   §12 Build Spec:
-  - Surface:         Weiss (Blattwechsel nach dem Deckblatt)
-  - Dominant:        das Bild, die Liste ist die Beschriftung dazu
-  - Heading size:    --text-section (der Zusammenfassung steht keine
-                     Kapitel-Headline zu, die haben die Kapitel selbst)
-  - Content pattern: Zweispalter 0.85/1.15 auf 60rem, Bild 4:5, Slate-Punkte
+  - Surface:         Paper B, warm
+  - Dominant:        die 2×2-Kriterienliste
+  - Heading size:    --text-h2, wie die Content-Sections auf /pages/science
+  - Content pattern: typografische Haarlinien-Liste links, Microarray rechts
   - CTA:             keine
-  - Entfernt:        Rubrik, Kicker und die getoente Karte
-  - Quality move:    Punkte in Slate statt Teal, damit Teal Messfarbe bleibt
+  - Entfernt:        Karten, Icon-Kacheln und rund ein Drittel der Copy
+  - Quality move:    der Abbinder steht ueber einer Haarlinie in Dossierbreite
+                     und macht die Liste zum Massstab, an dem sich auch der
+                     eigene Test messen lassen muss
 {% endcomment %}
 
 {%- liquid
@@ -63,7 +60,33 @@
 
 <section id="{{ wk_anchor }}" class="ltw ltw-kurz">
   <div class="ltw__container">
+    {% render 'section-heading-crs',
+      heading: section.settings.heading,
+      subheading: section.settings.subheading,
+      align: 'left',
+      heading_tag: 'h2',
+      headline_md: true,
+      extra_class: 'ltw-heading ltw-kurz__heading'
+    %}
+
     <div class="ltw-kurz__grid{% if section.settings.image == blank %} ltw-kurz__grid--single{% endif %}">
+      <div class="ltw-kurz__copy">
+        {%- if section.blocks.size > 0 -%}
+          <ul class="ltw-crit" role="list">
+            {%- for block in section.blocks -%}
+              <li class="ltw-crit__item" {{ block.shopify_attributes }}>
+                {%- if block.settings.title != blank -%}
+                  <h3 class="ltw-crit__title">{{ block.settings.title | escape }}</h3>
+                {%- endif -%}
+                {%- if block.settings.body != blank -%}
+                  <p class="ltw-crit__body">{{ block.settings.body | escape }}</p>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
+
       {%- if section.settings.image != blank -%}
         <figure class="ltw-kurz__figure">
           {{ section.settings.image
@@ -71,49 +94,38 @@
              | image_tag:
                loading: 'lazy',
                widths: '460, 700, 1086',
-               sizes: '(min-width: 961px) 40vw, 90vw',
+               sizes: '(min-width: 961px) 34vw, 90vw',
                alt: section.settings.image_alt }}
           {%- if section.settings.caption != blank -%}
             <figcaption class="ltw-caption">{{ section.settings.caption | escape }}</figcaption>
           {%- endif -%}
         </figure>
       {%- endif -%}
-
-      <div class="ltw-kurz__copy">
-        {% render 'section-heading-crs',
-          heading: section.settings.heading,
-          align: 'left',
-          heading_tag: 'h2',
-          extra_class: 'ltw-heading'
-        %}
-
-        {%- if section.blocks.size > 0 -%}
-          <ul class="ltw-tldr__list">
-            {%- for block in section.blocks -%}
-              {%- if block.settings.text != blank -%}
-                <li {{ block.shopify_attributes }}>{{ block.settings.text | escape }}</li>
-              {%- endif -%}
-            {%- endfor -%}
-          </ul>
-        {%- endif -%}
-      </div>
     </div>
+
+    {%- if section.settings.closer != blank -%}
+      <div class="ltw-kurz__closer">
+        <p>{{ section.settings.closer | escape }}</p>
+      </div>
+    {%- endif -%}
   </div>
 </section>
 
 {% schema %}
 {
-  "name": "Wissenschaft Kürze",
+  "name": "Wissenschaft Messlatte",
   "tag": "section",
   "class": "lt-wiss-kurz",
   "settings": [
     { "type": "text", "id": "anchor_id", "label": "Anker-ID", "info": "Ohne Wert bleibt die automatische ID." },
 
     { "type": "header", "content": "Text" },
-    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Das Wichtigste in Kürze" },
+    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "Die Messlatte" },
+    { "type": "textarea", "id": "subheading", "label": "Subline", "info": "Gleiche Größe wie die Überschrift, nur zurückgenommen." },
+    { "type": "textarea", "id": "closer", "label": "Abbinder", "info": "Steht über einer Haarlinie am Ende der Section.", "default": "Diese vier Punkte kannst du an jeden Alterstest anlegen, auch an unseren." },
 
-    { "type": "header", "content": "Bild (linke Spalte)" },
-    { "type": "image_picker", "id": "image", "label": "Bild", "info": "Wird auf 4:5 beschnitten. Ohne Bild läuft die Zusammenfassung einspaltig." },
+    { "type": "header", "content": "Bild (rechte Spalte)" },
+    { "type": "image_picker", "id": "image", "label": "Bild", "info": "Wird auf 4:5 beschnitten. Ohne Bild läuft die Section einspaltig." },
     { "type": "text", "id": "image_alt", "label": "Alt-Text", "default": "Microarray-Chip unter blauem Licht" },
     { "type": "textarea", "id": "caption", "label": "Bildunterschrift (optional)" },
 
@@ -125,14 +137,15 @@
   ],
   "blocks": [
     {
-      "type": "point",
-      "name": "Kernaussage",
+      "type": "criterion",
+      "name": "Kriterium",
       "settings": [
-        { "type": "textarea", "id": "text", "label": "Text", "default": "Kurze Kernaussage in einem Satz." }
+        { "type": "text", "id": "title", "label": "Titel", "default": "Wiederholbarkeit" },
+        { "type": "textarea", "id": "body", "label": "Text", "default": "Kurzer erklärender Absatz." }
       ]
     }
   ],
-  "max_blocks": 6,
-  "presets": [{ "name": "Wissenschaft Kürze" }]
+  "max_blocks": 4,
+  "presets": [{ "name": "Wissenschaft Messlatte" }]
 }
 {% endschema %}

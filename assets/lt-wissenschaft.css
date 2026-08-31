@@ -1,10 +1,10 @@
 /* =============================================================================
    LIFETIME — /pages/wissenschaft
-   Welt: „Klinisches Dossier" (DESIGN.md). Visueller Vertrag: docs/science-preview.html
+   Visuelle Source of Truth: /pages/science
    -----------------------------------------------------------------------------
-   Eine Datei für die ganze Seite, weil die Seite ein Dokument ist: die zehn
-   Sections sind Kapitel desselben Dossiers und teilen Rubrik, Lesemaß, Papier-
-   und Haarlinien-Regel. Jede `lt-wiss-*`-Section lädt diese Datei per
+   Eine Datei für die ganze Seite: die Sections teilen Container, Typografie,
+   Lesemaß und Papierflächen mit der bestehenden Science-Seite. Jede
+   `lt-wiss-*`-Section lädt diese Datei per
    stylesheet_tag; identische Link-Tags kosten genau einen Request.
 
    Scope: alles hängt unter `.ltw`. Farben, Haarlinie und Flächen kommen als
@@ -19,26 +19,12 @@
      max-width, margin und gap.
    ============================================================================= */
 
-/* ── Seiten-Scope + Mobilstufe ───────────────────────────────────────────────
-   Das Theme skaliert --text-* nicht mit dem Viewport, die Dossier-Welt schon
-   (DESIGN.md: Display 48→36, Headline 36→28). Die Stufe wird deshalb hier im
-   Seiten-Scope gesetzt, nicht in theme.css: jede Größe rutscht eine Position im
-   Token-Raster nach unten. Als Literal notiert, weil eine Selbstreferenz
-   (--text-display: var(--text-h1)) im selben Block zyklisch auflösen würde.
-   Der Heading-Stack liest die Tokens von hier und schrumpft dadurch mit, ohne
-   dass eine Section font-size anfasst (das wäre der verbotene Griff). */
+/* ── Seiten-Scope ────────────────────────────────────────────────────────────
+   Die Preview verwendet dieselben unveränderten Typografie-Tokens wie
+   /pages/science: H1 = --text-h1, Content-Headings = --text-h2. */
 .ltw {
   background: var(--ltw-bg, var(--color-paper));
   color: var(--ltw-text, var(--color-ink));
-}
-
-@media screen and (max-width: 767px) {
-  .ltw {
-    --text-display: 36px; /* = --text-h1 */
-    --text-h1:      28px; /* = --text-h2 */
-    --text-h2:      24px; /* = --text-h3 */
-    --text-h3:      20px; /* = --text-section */
-  }
 }
 
 .ltw__container {
@@ -197,28 +183,30 @@
   align-items: center;
 }
 
-@media screen and (min-width: 961px) {
+@media screen and (min-width: 900px) {
   .ltw-hero__grid {
-    grid-template-columns: 1.05fr 0.95fr;
+    /* Gleiches 3/2-Raster wie der Hero von /pages/science. */
+    grid-template-columns: 3fr 2fr;
     gap: var(--space-8);
   }
 }
 
 /* Solo-Hero: kein Bild gesetzt, die Figur faellt weg. Der Zweispalter waere
-   sonst ein leeres Raster; stattdessen laeuft die Copy einspaltig und wird auf
-   Lesemass gedeckelt, damit die Fakten-Haarlinie nicht ueber 1200 px zieht. */
+   sonst ein leeres Raster; Headline und Intro nutzen deshalb dieselbe volle
+   Containerbreite wie die uebrigen einspaltigen Einstiege. */
 .ltw-hero__grid--solo {
   grid-template-columns: 1fr;
 }
 
-@media screen and (min-width: 961px) {
+@media screen and (min-width: 900px) {
   .ltw-hero__grid--solo {
     grid-template-columns: 1fr;
   }
 }
 
 .ltw-hero__grid--solo .ltw-hero__copy-col {
-  max-width: var(--ltw-measure);
+  width: 100%;
+  max-width: none;
 }
 
 .ltw-hero__intro .crs-heading-stack__title {
@@ -229,12 +217,21 @@
   max-width: 16em;
 }
 
+.ltw-hero__grid--solo .ltw-hero__intro .crs-heading-stack__title,
+.ltw-hero__grid--solo .ltw-hero__intro .crs-heading-stack__subtitle {
+  max-width: none;
+}
+
 .ltw-hero__copy {
   margin: var(--space-5) 0 0;
   font-family: var(--font-body);
   font-size: var(--text-body-lg);
   line-height: var(--leading-relaxed);
   max-width: 30em;
+}
+
+.ltw-hero__grid--solo .ltw-hero__copy {
+  max-width: none;
 }
 
 /* Fakten-Zeile: Trennung über Haarlinien, nicht über Boxen. */
@@ -273,9 +270,29 @@
   }
 }
 
-/* Papier-Regel: weisses Blatt, deshalb Schatten und kein Rahmen. */
 .ltw-hero__figure {
   margin: 0;
+  min-width: 0;
+}
+
+/* Statische Hero-Illustration: exakt dieselbe Form wie das Bild im Hero von
+   /pages/science. Das Asset bringt seine eigene feine Innenkontur mit. */
+.ltw-hero__media {
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  background: var(--ltw-frame, var(--color-light-warm));
+  border-radius: var(--radius-lg);
+}
+
+.ltw-hero__image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Papier-Regel fuer die optionale Vorher-Nachher-Alternative. */
+.ltw-hero__figure--wipe {
   background: var(--color-white);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-sm);
@@ -333,7 +350,7 @@ lt-wiss-wipe { display: block; }
   width: 2px;
   background: var(--color-white);
   transform: translateX(-1px);
-  box-shadow: 0 0 0 1px rgba(38, 37, 30, 0.12);
+  box-shadow: 0 0 0 1px var(--ltw-hairline, rgba(38, 37, 30, 0.12));
   pointer-events: none;
 }
 
@@ -425,13 +442,12 @@ lt-wiss-wipe { display: block; }
   align-items: center;
 }
 
-/* Dieselbe Geometrie wie Kapitel 2: schmalere Bildspalte, Block auf 60rem.
-   Das Bild soll ein Beleg neben der Aussage sein, keine Bildstrecke. */
-@media screen and (min-width: 961px) {
+/* Dieselbe 1/1-Geometrie und derselbe 900px-Umbruch wie die Splits auf
+   /pages/science. */
+@media screen and (min-width: 900px) {
   .ltw-statement__grid {
-    grid-template-columns: 0.85fr 1.15fr;
+    grid-template-columns: 1fr 1fr;
     gap: var(--space-8);
-    max-width: 60rem;
   }
 }
 
@@ -450,14 +466,14 @@ lt-wiss-wipe { display: block; }
   display: block;
   width: 100%;
   height: auto;
-  aspect-ratio: var(--ltw-statement-ratio, 4 / 5);
+  aspect-ratio: var(--ltw-statement-ratio, 3 / 2);
   object-fit: cover;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
 }
 
 /* Mobil steht das Bild ueber dem Text und darf dort nicht die halbe Seite
    fuellen, gleiche Deckelung wie in Kapitel 2. */
-@media screen and (max-width: 960px) {
+@media screen and (max-width: 899px) {
   .ltw-statement__figure {
     max-width: 22rem;
   }
@@ -477,96 +493,67 @@ lt-wiss-wipe { display: block; }
 }
 
 /* =============================================================================
-   Kapitel 2 · Das Wichtigste in Kürze
+   Die Messlatte · Kriterien links, Microarray rechts
    -----------------------------------------------------------------------------
-   Bild links, Zusammenfassung rechts. Die schmalere Textspalte ist hier die
-   eigentliche Massnahme: dieselbe Copy liest in rund 46 Zeichen Breite ruhiger
-   als ueber die volle Seite, und die Section baut nur noch halb so hoch.
-   Ohne Bild faellt die Section auf eine Spalte zurueck und deckelt den Text
-   selbst, damit er nicht ueber die ganze Breite laeuft.
+   Der Abschnitt nutzt die volle Dossierbreite. Das breitere linke Feld traegt
+   die typografische Kriterienliste, die Messaufnahme rechts bleibt ruhiger.
    ========================================================================== */
 .ltw-kurz__grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--space-6);
-  align-items: center;
+  align-items: start;
 }
 
-/* Der Block laeuft bewusst schmaler als der Container, so wie die
-   Zusammenfassung es vorher als 52rem-Karte auch tat. Bei voller Breite bliebe
-   rechts neben dem Lesemass eine tote Zone stehen; so ist die Kante gewollt.
-   60rem minus Spalte ergibt rund 32rem Textbreite, also genau das Lesemass des
-   Themes (--lt-measure).
+.ltw-kurz__heading {
+  margin-bottom: var(--space-6);
+}
 
-   Wichtig: die Deckelung sitzt auf dem Raster, NICHT auf `.ltw__container`.
-   Der Container traegt `margin: 0 auto`; ein max-width darauf zentriert den
-   Block und laesst die linke Inhaltskante gegenueber allen anderen Kapiteln
-   verspringen. Gutter und Container ergeben genau eine Kante, die bleibt. */
-@media screen and (min-width: 961px) {
+@media screen and (min-width: 900px) {
   .ltw-kurz__grid {
-    grid-template-columns: 0.85fr 1.15fr;
+    grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr);
     gap: var(--space-8);
-    max-width: 60rem;
+    align-items: stretch;
+  }
+
+  .ltw-kurz__figure {
+    min-height: 0;
   }
 }
 
 .ltw-kurz__grid--single .ltw-kurz__copy {
-  max-width: 52rem;
+  max-width: none;
 }
 
 .ltw-kurz__figure {
   margin: 0;
 }
 
-/* 4:5 ist das Hausformat fuer Hochkant-Spalten (design-governance.md §2c).
-   Das Motiv kommt als 3:4; die 4:5-Deckelung nimmt oben und unten je rund
-   45 px weg, kostet also praktisch nichts, haelt das Kapitel aber niedriger
-   als die Vorgaengerfassung mit der Karte. */
+/* 4:5 ist das Hausformat fuer Hochkant-Spalten (design-governance.md §2c). */
 .ltw-kurz__figure img {
   display: block;
   width: 100%;
   height: auto;
   aspect-ratio: 4 / 5;
   object-fit: cover;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
 }
 
-/* Mobil steht das Bild ueber dem Text und darf dort nicht die halbe Seite
-   fuellen; hochkant 3:4 ueber die volle Breite waere auf 375 px eine halbe
-   Bildschirmhoehe. */
-@media screen and (max-width: 960px) {
-  .ltw-kurz__figure {
-    max-width: 22rem;
+/* Desktop: Das Motiv folgt der von der Kriterienliste bestimmten Zeilenhöhe,
+   damit beide Spalten oben und unten exakt abschließen. */
+@media screen and (min-width: 900px) {
+  .ltw-kurz__figure img {
+    height: 100%;
+    aspect-ratio: auto;
   }
 }
 
-.ltw-tldr__list {
-  list-style: none;
-  margin: var(--space-5) 0 0;
-  padding: 0;
-  display: grid;
-  gap: var(--space-4);
-}
-
-.ltw-tldr__list li {
-  position: relative;
-  padding-left: var(--space-5);
-  font-family: var(--font-body);
-  font-size: var(--text-body);
-  line-height: var(--leading-relaxed);
-  max-width: 34rem;
-}
-
-/* Marker neutral in Slate: Teal ist Mess- und Interaktionsfarbe, keine Deko. */
-.ltw-tldr__list li::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0.62em; /* optische Grundlinie des ersten Zeichens bei 1.6 Zeilenhöhe */
-  width: 8px;
-  height: 8px;
-  border-radius: var(--radius-full);
-  background: var(--color-dark);
+/* Mobil steht das Bild nach den Kriterien und wird auf eine ruhige Breite
+   gedeckelt; die Aussage bleibt damit der Einstieg in den Abschnitt. */
+@media screen and (max-width: 899px) {
+  .ltw-kurz__figure {
+    max-width: 22rem;
+  }
 }
 
 /* =============================================================================
@@ -774,50 +761,28 @@ lt-wiss-wipe { display: block; }
 
 /* =============================================================================
    Kapitel 6 · Die Messlatte
+   -----------------------------------------------------------------------------
+   Typografische Liste statt Karten: jeder Eintrag beginnt mit einer Haarlinie.
+   Das Grid teilt die Zeilenhoehen, dadurch fluchten die Linien beider Spalten.
    ========================================================================== */
 .ltw-crit {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--space-5);
-  margin-top: var(--space-6);
-  counter-reset: ltw-crit;
+  margin-top: 0;
+  padding: 0;
+  list-style: none;
 }
 
 @media screen and (min-width: 768px) {
-  .ltw-crit { grid-template-columns: 1fr 1fr; }
+  .ltw-crit {
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-7);
+  }
 }
 
-.ltw-crit__card {
-  background: var(--ltw-card, var(--color-paper));
-  border: 1px solid var(--ltw-hairline, rgba(38, 37, 30, 0.12));
-  border-radius: var(--radius-md);
-  padding: var(--space-5);
-  counter-increment: ltw-crit;
-}
-
-.ltw-crit__head {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-/* Icon-Container 48px lt. Card-Info-Spec. Icon monochrom über currentColor. */
-.ltw-crit__icon {
-  width: 48px;
-  height: 48px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-  background: var(--ltw-frame, var(--color-light-warm));
-  color: var(--color-dark);
-}
-
-.ltw-crit__icon svg {
-  width: 24px;
-  height: 24px;
-  display: block;
+.ltw-crit__item {
+  padding: var(--space-5) 0;
+  border-top: 1px solid var(--ltw-hairline, rgba(38, 37, 30, 0.12));
 }
 
 .ltw-crit__title {
@@ -828,24 +793,58 @@ lt-wiss-wipe { display: block; }
   margin: 0;
 }
 
-.ltw-crit__title::before {
-  content: counter(ltw-crit) "  ·  ";
-  color: var(--ltw-text-ter, var(--color-ink-muted));
-  font-weight: var(--weight-semibold);
-  font-size: var(--text-body-sm);
-}
-
 .ltw-crit__body {
   font-family: var(--font-body);
   font-size: var(--text-body);
   line-height: var(--leading-relaxed);
   color: var(--ltw-text-sec, var(--color-text-secondary));
-  margin: var(--space-3) 0 0;
+  margin: var(--space-2) 0 0;
+}
+
+/* Abbinder in Dossierbreite, gleiches Motiv wie die Transparenz-Zeile in
+   Kapitel 4: eine Zeile ueber einer Haarlinie, keine Box. */
+.ltw-kurz__closer {
+  margin-top: var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--ltw-hairline, rgba(38, 37, 30, 0.12));
+}
+
+.ltw-kurz__closer p {
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-relaxed);
+  max-width: 46rem;
+  margin: 0;
 }
 
 /* =============================================================================
-   Kapitel 7 · Unsere Forschung
+   Unsere Forschung · Copy links, Analyseansicht rechts
    ========================================================================== */
+.ltw-research__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.ltw-research__copy {
+  min-width: 0;
+}
+
+@media screen and (min-width: 900px) {
+  .ltw-research__grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(18rem, 0.85fr);
+    gap: var(--space-8);
+  }
+
+  /* Bild links, Text rechts: Reihenfolge drehen, Text bleibt die breitere Spalte. */
+  .ltw-research__grid--media-left {
+    grid-template-columns: minmax(18rem, 0.85fr) minmax(0, 1.15fr);
+  }
+  .ltw-research__grid--media-left .ltw-shot { order: 1; }
+  .ltw-research__grid--media-left .ltw-research__copy { order: 2; }
+}
+
 /* Papier-Regel: weisses Blatt, Schatten, kein Rahmen. */
 .ltw-shot {
   margin: var(--space-6) 0;
@@ -856,12 +855,22 @@ lt-wiss-wipe { display: block; }
   max-width: 52rem;
 }
 
+.ltw-research__grid .ltw-shot {
+  margin: 0;
+  padding: var(--space-4);
+  max-width: none;
+}
+
 .ltw-shot__img {
   display: block;
   width: 100%;
   height: auto;
   margin-top: var(--space-4);
   border-radius: var(--radius-sm);
+}
+
+.ltw-shot > .ltw-shot__img:first-child {
+  margin-top: 0;
 }
 
 .ltw-shot__stats {
@@ -929,6 +938,127 @@ lt-wiss-wipe { display: block; }
   border-radius: var(--radius-sm);
   padding: var(--space-1) var(--space-3);
 }
+
+/* Drei kurze Belege statt einer zweiten Methodenerklaerung. Die offene
+   Haarlinie haelt den Abschnitt dossierartig und laesst der dichten
+   Analyseansicht den visuellen Vorrang. */
+.ltw-research-signals {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-5);
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media screen and (min-width: 768px) {
+  .ltw-research-signals {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+}
+
+.ltw-research__copy .ltw-research-signals {
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+.ltw-research-signal {
+  min-width: 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--ltw-hairline, rgba(38, 37, 30, 0.12));
+}
+
+.ltw-research-signal__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--ltw-text, var(--color-ink));
+}
+
+.ltw-research-signal__body {
+  max-width: 34rem;
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--ltw-text-sec, var(--color-text-secondary));
+}
+
+/* ── Konvergenz-Spine ────────────────────────────────────────────────────────
+   Delight: die drei Signale lesen als EIN Pfad, der in einer konsolidierten
+   Aussage zusammenläuft — die Section führt ihre eigene Frage vor (viele Uhren
+   → ein Signal). Sprache wie .ltw-discord: Haarlinie + Messwert-Teal, ein
+   einziger, dezenter Bewegungsmoment. Nur im einspaltigen Copy-Kontext aktiv. */
+.ltw-research-signal__node { display: none; }
+
+.ltw-research__copy .ltw-research-signals {
+  position: relative;
+}
+
+.ltw-research__copy .ltw-research-signal {
+  position: relative;
+  border-top: none;
+  padding-top: 0;
+  padding-left: var(--space-5);
+}
+
+/* Verbindungslinie von Knoten zu Knoten (nicht am letzten). */
+.ltw-research__copy .ltw-research-signal:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 0.5em;
+  width: 1px;
+  height: calc(100% + var(--space-4));
+  background: var(--ltw-hairline, rgba(38, 37, 30, 0.12));
+  transform-origin: top;
+}
+
+/* Der Knoten: Teal-Ring auf Papier; der letzte ist gefüllt = das Signal. */
+.ltw-research__copy .ltw-research-signal__node {
+  display: block;
+  position: absolute;
+  left: 0;
+  top: calc(0.5em - 4.5px);
+  width: 9px;
+  height: 9px;
+  border-radius: var(--radius-full, 999px);
+  background: var(--ltw-bg, #f7f7f4);
+  border: 2px solid var(--color-teal);
+}
+
+.ltw-research__copy .ltw-research-signal:last-child .ltw-research-signal__node {
+  background: var(--color-teal-dark);
+  border-color: var(--color-teal-dark);
+}
+
+/* Ein Bewegungsmoment: der Pfad zeichnet sich, die Knoten setzen nacheinander.
+   Der Anfangszustand gilt nur mit .ltw-anim (JS + Bewegung erlaubt); sonst steht
+   der Endzustand. */
+.ltw-research__copy .ltw-research-signals.ltw-anim .ltw-research-signal:not(:last-child)::before {
+  transform: scaleY(0);
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ltw-research__copy .ltw-research-signals.ltw-anim.is-in .ltw-research-signal:not(:last-child)::before {
+  transform: scaleY(1);
+}
+.ltw-research__copy .ltw-research-signals.ltw-anim .ltw-research-signal__node {
+  opacity: 0;
+  transform: scale(0.3);
+  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ltw-research__copy .ltw-research-signals.ltw-anim.is-in .ltw-research-signal__node {
+  opacity: 1;
+  transform: scale(1);
+}
+.ltw-research__copy .ltw-research-signals.ltw-anim.is-in .ltw-research-signal:nth-child(1) .ltw-research-signal__node { transition-delay: 0.05s; }
+.ltw-research__copy .ltw-research-signals.ltw-anim.is-in .ltw-research-signal:nth-child(2) .ltw-research-signal__node { transition-delay: 0.25s; }
+.ltw-research__copy .ltw-research-signals.ltw-anim.is-in .ltw-research-signal:nth-child(3) .ltw-research-signal__node { transition-delay: 0.45s; }
+.ltw-research__copy .ltw-research-signals.ltw-anim.is-in .ltw-research-signal:nth-child(1)::before { transition-delay: 0.12s; }
+.ltw-research__copy .ltw-research-signals.ltw-anim.is-in .ltw-research-signal:nth-child(2)::before { transition-delay: 0.32s; }
 
 /* ── Forschungs-Timeline ─────────────────────────────────────────────────── */
 .ltw-rt {
@@ -1094,7 +1224,7 @@ lt-wiss-wipe { display: block; }
 .ltw-research__closing { margin-top: var(--space-8); }
 
 /* =============================================================================
-   Kapitel 8 · Wer dafür einsteht
+   Kapitel 3 · Projektbeteiligte
    ========================================================================== */
 .ltw-people {
   display: grid;
@@ -1112,18 +1242,33 @@ lt-wiss-wipe { display: block; }
 }
 
 .ltw-person {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr);
+  gap: var(--space-4);
+  align-items: start;
+  min-width: 0;
+  padding: var(--space-4);
   background: var(--color-white);
   border-radius: var(--radius-md);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
 }
 
+@media screen and (min-width: 768px) {
+  .ltw-person {
+    grid-template-columns: 7rem minmax(0, 1fr);
+  }
+}
+
 .ltw-person__portrait {
+  width: 100%;
   aspect-ratio: 4 / 5;
+  overflow: hidden;
   background: var(--ltw-frame, var(--color-light-warm));
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--radius-sm);
   filter: grayscale(1);
 }
 
@@ -1136,29 +1281,28 @@ lt-wiss-wipe { display: block; }
 
 .ltw-person__initials {
   font-family: var(--font-heading);
-  font-size: var(--text-h1);
+  font-size: var(--text-h3);
   font-weight: var(--weight-bold);
   color: var(--color-ink-muted);
 }
 
 .ltw-person__meta {
-  padding: var(--space-4) var(--space-5) var(--space-5);
+  min-width: 0;
+  padding-top: var(--space-1);
 }
 
 .ltw-person__name {
-  font-family: var(--font-body);
-  font-weight: var(--weight-bold);
-  font-size: var(--text-body);
+  font-family: var(--font-heading);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-body-lg);
   line-height: var(--leading-tight);
   margin: 0;
 }
 
 .ltw-person__role {
   font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-semibold);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
   color: var(--color-ink-muted);
   margin-top: var(--space-1);
 }
@@ -1230,15 +1374,14 @@ lt-wiss-wipe { display: block; }
 /* =============================================================================
    Kapitel 10 · Quellen
    ========================================================================== */
-/* Die beiden Überschriften dieses Kapitels laufen bewusst in der Label-Stimme,
-   nicht im Heading-Stack: es ist ein Apparat, kein Kapitel mit eigener These. */
+/* Quellen bleiben ein normaler Inhaltsabschnitt: keine zusätzliche Label- oder
+   Eyebrow-Stimme neben der Hierarchie von /pages/science. */
 .ltw-sources__head {
-  font-family: var(--font-body);
-  font-size: var(--text-body);
-  font-weight: var(--weight-bold);
-  line-height: var(--leading-tight);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-heading);
+  letter-spacing: -0.01em;
   margin: 0;
 }
 
@@ -1246,7 +1389,7 @@ lt-wiss-wipe { display: block; }
 
 .ltw-sources__intro {
   font-family: var(--font-body);
-  font-size: var(--text-micro);
+  font-size: var(--text-body);
   line-height: var(--leading-relaxed);
   color: var(--ltw-text-sec, var(--color-text-secondary));
   margin: var(--space-3) 0 0;
@@ -1255,12 +1398,10 @@ lt-wiss-wipe { display: block; }
 
 .ltw-sources__group {
   font-family: var(--font-body);
-  font-size: var(--text-micro);
-  font-weight: var(--weight-semibold);
+  font-size: var(--text-body);
+  font-weight: var(--weight-bold);
   line-height: var(--leading-tight);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--ltw-text-ter, var(--color-ink-muted));
+  color: var(--ltw-text, var(--color-ink));
   margin: var(--space-6) 0 var(--space-3);
 }
 
@@ -1305,4 +1446,46 @@ lt-wiss-wipe { display: block; }
 .ltw-sources__note {
   font-size: var(--text-micro);
   color: var(--ltw-text-ter, var(--color-ink-muted));
+}
+
+/* Methodische Definitionen stehen bewusst am absoluten Seitenende. Sie
+   ordnen die Kennzahlen ein, ohne aus dem Dossier einen Methodenreport zu
+   machen. */
+.ltw-sources__footnotes {
+  max-width: 52rem;
+  margin-top: var(--space-8);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--ltw-hairline, rgba(38, 37, 30, 0.12));
+}
+
+.ltw-sources__footnotes-title {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+  color: var(--ltw-text, var(--color-ink));
+}
+
+.ltw-sources__footnotes-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ltw-sources__footnotes-list li {
+  display: grid;
+  grid-template-columns: 1.25rem minmax(0, 1fr);
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  line-height: var(--leading-relaxed);
+  color: var(--ltw-text-ter, var(--color-ink-muted));
+}
+
+.ltw-sources__footnotes-marker {
+  color: var(--ltw-text, var(--color-ink));
+  font-weight: var(--weight-bold);
 }
