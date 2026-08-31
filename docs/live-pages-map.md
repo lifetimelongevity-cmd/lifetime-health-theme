@@ -115,12 +115,20 @@ Diese 5 Seiten sind das Fundament (siehe `CLAUDE.md` § Kanonisches Fundament). 
 | 4 | `/pages/quiz-age` | `templates/page.quiz-age.json` | `sections/lt-pdp-quiz-v2.liquid` |
 | 5 | `/products/lifetime-nmn` (NMN Pulver) | `templates/product.nmn-pulver.json` | PDP-Stack |
 
+> **Update 2026-08-31: veröffentlicht unter `/pages/unsere-forschung`** (HTTP 200, Canonical
+> auf sich selbst, verifiziert per curl). Der `?view=wissenschaft`-Weg ist damit obsolet.
+> Erster interner Inbound-Link: `/pages/science`, Section `warum` (Soft-CTA „Unsere
+> Forschung" + Brückensatz im Body, Commit `bea3a5d`). Die Absätze unten beschreiben den
+> Stand vor der Veröffentlichung; Aufbau und Design-Entscheide gelten weiter.
+>
 > **Neu: `/pages/wissenschaft` (2026-08-27, angelegt aber NICHT veröffentlicht).**
 > Eigenes Template `templates/page.wissenschaft.json`, eigener Section-Satz `lt-wiss-*`,
 > eigene Stylesheet-Datei `assets/lt-wissenschaft.css`, Page-ID 704531497335,
 > `templateSuffix: wissenschaft`, `isPublished: false` (Slug liefert deshalb 404).
-> Reihenfolge: `lt-wiss-hero` → `-statement` → `-kurz` → `-feld` → `-messung` → `-grenze`
-> → `-messlatte` → `-forschung` → `-personen` → `-ausblick` → `-quellen`. Bewusst **ohne
+> Sichtbare Reihenfolge: `lt-wiss-hero` → `-statement` → `-kurz` (Die Messlatte) →
+> `-forschung` → `lt-science-bento` (drei Zahlenkarten) → `-messung` → `-personen` → `-quellen`.
+> `-feld`, `-grenze` und `-ausblick` sind im Template
+> reversibel deaktiviert. Bewusst **ohne
 > Verkaufs-CTA**, ohne Produktkachel, ohne Preis. Der einzige Knopf der Seite sitzt in
 > `lt-wiss-statement` und ist ein Sprungziel auf `#forschung`, kein Kaufpfad.
 > Visueller Vertrag ist `docs/science-preview.html`; `lt-wiss-statement` hat dort kein
@@ -132,12 +140,33 @@ Diese 5 Seiten sind das Fundament (siehe `CLAUDE.md` § Kanonisches Fundament). 
 > Solange die Page unveröffentlicht ist, rendert das Template nur über
 > `?view=wissenschaft` auf einem beliebigen Page-Slug. Freigabe-Blocker vor dem
 > Veröffentlichen: Limmroth (zwei Stellen), Froböse, Summit-Foto (erkennbare Dritte),
-> Report-Screenshot ist Platzhalter, Herkunft des Laborfotos in `lt-wiss-statement`
+> Herkunft des Laborfotos in `lt-wiss-statement`
 > (`science-labor-pipette-sw-hoch.jpg`, KI-generiert, deshalb bewusst ohne Namens- oder
 > Laborangabe in Alt-Text und Bildunterschrift; der Kittel trug im Original einen
 > erfundenen Namenszug samt Wappen, beides ist vor dem Upload herausretuschiert.
 > Offen ist, ob die Seite eine KI-Kennzeichnung fuer dieses Bild braucht).
 > **Erledigt 28.08.:** Die KI-generierten Hero-Bilder sind raus, der Hero läuft ohne Motiv.
+> Die Hero-Fakten sind entfernt; `-kurz` zeigt jetzt die vier Messlatten-Kriterien neben dem
+> Microarray-Motiv. `-forschung` verwendet mit
+> `assets/proben-labor-app-lifetime-screenshot.webp` eine reale Analyseansicht und ist auf drei
+> kurze Forschungssignale reduziert. Der Abschnitt steht direkt nach der Messlatte und läuft als
+> Zweispalter mit Copy links und kleiner Analyseansicht rechts; Mock-Kennzahlen, Summit-Foto und
+> Timeline rendern nicht mehr. „Das Feld“, „Die Messung“, „Die nächste Grenze“ und „Ausblick“
+> wurden zugunsten eines fokussierten Querchecks deaktiviert. Die Messlatte
+> führt jetzt mit einem gleich großen Heading-Pair; ihre Kartennummern sind entfernt, die Karten
+> stehen auf Weiß und das Microarray-Motiv schließt oben und unten bündig mit dem Kriterienraster
+> ab. Der Bento der bestehenden Science-Seite
+> steht als kompakter dunkler Streifen direkt unter der eigenen Forschung. Seine frühere
+> Eurofins-Textkachel ist als dritte Zahlenkarte zu rund 700.000 analysierten Genorten ausgeführt.
+> Die Personen-Section benennt die konkrete Arbeitsteilung als wissenschaftliche Leitung
+> (Limmroth), Aufbau und Umsetzung (Junker) sowie wissenschaftliche Beratung (Froböse). Ihre
+> vormals bilddominanten Hochkantkarten sind als kompakte Profile mit kleinen 4:5-Porträts gebaut.
+> **Visuelle Source of Truth (28.08.):** Für Container, Flächenrhythmus, Typografie und
+> Abschnittsabstände gilt `/pages/science`. Die Preview verwendet daher 36 px nur im Hero,
+> 28 px für alle Content-Heading-Paare und 16 px für Fließtext. Kapitelnummern, Rubrik-Eyebrows
+> und nummerierte Forschungssignale rendern nicht; helle und warme Papierflächen wechseln wie
+> auf der Referenzseite. Der Preview-Hero verwendet eine schematische Heatmap epigenetischer
+> Uhren im identischen `3fr 2fr`-Raster und 3:2-Bildmaß des Heroes von `/pages/science`.
 
 > **Hero-Bildmaß vereinheitlicht (2026-07-30):** `lt-science-proof-hero` trägt jetzt dasselbe
 > Bildmaß wie `lt-science-hero` (Kollektions-Hero): Raster `3fr 2fr` statt `6fr 5fr`,
