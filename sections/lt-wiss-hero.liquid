@@ -2,8 +2,9 @@
   LIFETIME — Wissenschaft · Kapitel 1 (Hero)
   ──────────────────────────────────────────
   Deckblatt der Wissenschaftsseite. Links das Heading-Pair (H1 der Seite) plus
-  Forschungs-Copy und Fakten-Zeile, rechts der Vorher-Nachher-Wipe als weisses
-  Blatt. Visueller Vertrag: docs/science-preview.html §1.
+  Forschungs-Copy, rechts bevorzugt eine statische Forschungsillustration im
+  3:2-Format des Heroes von /pages/science. Der Vorher-Nachher-Wipe bleibt als
+  Rueckfalloption erhalten.
 
   Der Wipe zeigt chronologisches Altern an einer Person, ausdruecklich KEIN
   Produktergebnis. Reihenfolge jung → alt, damit die Darstellung nicht als
@@ -17,10 +18,9 @@
   gemeinsamen quadratischen Ausschnitt gerechnet (810 x 810, Restfehler unter
   2 px im Gesicht).
 
-  OHNE BILDPAAR: sind beide Bild-Settings leer, faellt die ganze Figur weg
-  (Blatt, Regler, Marken, Bildunterschrift). Der Hero laeuft dann einspaltig
-  als Textseite, statt ein leeres graues Quadrat zu zeigen. Sobald wieder ein
-  Bild gesetzt ist, kommt der Zweispalter von selbst zurueck.
+  OHNE MEDIUM: Sind Illustration und Bildpaar leer, faellt die ganze Figur weg.
+  Der Hero laeuft dann einspaltig als Textseite, statt eine leere Bildflaeche
+  zu zeigen. Eine statische Illustration hat Vorrang vor dem Bildpaar.
 
   Wer hier Bilder tauscht, muss das Paar vorher wieder aufeinander ausrichten,
   sonst springt das Gesicht beim Ziehen. Zwei Bedingungen muessen halten:
@@ -30,11 +30,11 @@
 
   §12 Build Spec:
   - Surface:         Paper A, hell
-  - Dominant:        das Heading-Pair (headline_xl = --text-display)
-  - Heading size:    --text-display, mobil --text-h1 (Seiten-Scope in lt-wissenschaft.css)
-  - Content pattern: asymmetrischer Zweispalter 1.05/0.95 + Papier-Blatt
+  - Dominant:        das Heading-Pair (headline_lg = --text-h1)
+  - Heading size:    --text-h1, identisch zum H1 auf /pages/science
+  - Content pattern: 3/2-Zweispalter und 3:2-Medium wie /pages/science
   - CTA:             keine. Die ganze Seite fuehrt bewusst keinen CTA.
-  - Entfernt:        Kicker (die Kapitel-Rubrik ersetzt ihn, der Hero traegt keine)
+  - Entfernt:        Kicker, wie auf der aktuellen /pages/science-Referenz
   - Quality move:    der Regler ist ein echter range-Input ueber der ganzen
                      Flaeche, damit Maus, Touch und Tastatur dasselbe bedienen
 {% endcomment %}
@@ -53,8 +53,31 @@
 
   assign wh_start = section.settings.wipe_start | default: 50
 
+  assign wh_static_src = ''
+  assign wh_static_asset = section.settings.image_asset | strip
+  if wh_static_asset != blank
+    if wh_static_asset contains '://'
+      assign wh_static_src = wh_static_asset
+    else
+      assign wh_static_src = wh_static_asset | asset_url
+    endif
+  endif
+
+  assign wh_static_alt = section.settings.image_alt
+  if wh_static_alt == blank and section.settings.image != blank
+    assign wh_static_alt = section.settings.image.alt
+  endif
+  if wh_static_alt == blank
+    assign wh_static_alt = 'Schematische Heatmap epigenetischer Uhren'
+  endif
+
+  assign wh_has_static_media = false
+  if wh_static_src != blank or section.settings.image != blank
+    assign wh_has_static_media = true
+  endif
+
   assign wh_has_media = false
-  if section.settings.image_before != blank or section.settings.image_after != blank
+  if wh_has_static_media or section.settings.image_before != blank or section.settings.image_after != blank
     assign wh_has_media = true
   endif
 -%}
@@ -93,7 +116,7 @@
         subheading: section.settings.subheading,
         align: 'left',
         heading_tag: 'h1',
-        headline_xl: true,
+        headline_lg: true,
         extra_class: 'ltw-heading ltw-hero__intro'
       %}
 
@@ -113,8 +136,33 @@
     </div>
 
     {%- if wh_has_media -%}
-    <figure class="ltw-hero__figure">
-      <lt-wiss-wipe>
+    <figure class="ltw-hero__figure{% if wh_has_static_media %} ltw-hero__figure--static{% else %} ltw-hero__figure--wipe{% endif %}">
+      {%- if wh_has_static_media -%}
+        <div class="ltw-hero__media">
+          {%- if wh_static_src != blank -%}
+            <img
+              src="{{ wh_static_src }}"
+              alt="{{ wh_static_alt | escape }}"
+              class="ltw-hero__image"
+              width="1536"
+              height="1024"
+              loading="eager"
+              fetchpriority="high"
+            >
+          {%- else -%}
+            {{ section.settings.image
+               | image_url: width: 1200
+               | image_tag:
+                 loading: 'eager',
+                 fetchpriority: 'high',
+                 widths: '480, 720, 960, 1200',
+                 sizes: '(min-width: 900px) 40vw, 100vw',
+                 class: 'ltw-hero__image',
+                 alt: wh_static_alt }}
+          {%- endif -%}
+        </div>
+      {%- else -%}
+        <lt-wiss-wipe>
         <div class="ltw-ba" style="--ltw-ba-pos: {{ wh_start }}%">
           {%- if section.settings.image_after != blank -%}
             {{ section.settings.image_after
@@ -160,7 +208,8 @@
                  value="{{ wh_start }}"
                  aria-label="{{ section.settings.slider_label | escape }}">
         </div>
-      </lt-wiss-wipe>
+        </lt-wiss-wipe>
+      {%- endif -%}
 
       {%- if section.settings.caption != blank -%}
         <figcaption class="ltw-caption">
@@ -220,7 +269,12 @@
     { "type": "textarea", "id": "subheading", "label": "Subline", "info": "Gleiche Größe wie die Headline, nur zurückgenommen. Beides ist ein Block.", "default": "Gesundheit ist persönlich." },
     { "type": "textarea", "id": "body", "label": "Fließtext", "default": "Deshalb erforschen wir, was der Durchschnitt nicht beantworten kann: Was bedeutet das für dich?" },
 
-    { "type": "header", "content": "Vorher-Nachher-Regler" },
+    { "type": "header", "content": "Hero-Illustration" },
+    { "type": "image_picker", "id": "image", "label": "Bild" },
+    { "type": "text", "id": "image_asset", "label": "Theme-Datei oder volle Bild-URL", "info": "Hat Vorrang vor dem Bild-Picker." },
+    { "type": "text", "id": "image_alt", "label": "Alt-Text", "default": "Schematische Heatmap mit sieben epigenetischen Uhren und nach Alter sortierten Proben" },
+
+    { "type": "header", "content": "Alternative: Vorher-Nachher-Regler" },
     { "type": "image_picker", "id": "image_before", "label": "Bild links (jünger)" },
     { "type": "image_picker", "id": "image_after", "label": "Bild rechts (älter)" },
     { "type": "text", "id": "image_after_alt", "label": "Alt-Text", "info": "Beschreibt beide Aufnahmen; das linke Bild läuft als rein visuelles Overlay.", "default": "Dieselbe Frau mit ergrautem Haar, Aufnahme im Alter von etwa 60 Jahren" },

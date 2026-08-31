@@ -8,15 +8,13 @@
   Bewusst KEINE Journal-Logos: die Nennung ist die Quelle, ein Logo wäre
   Autoritätsleihe.
 
-  Die beiden Überschriften laufen in der Label-Stimme (12px uppercase, Lato)
-  statt im Heading-Stack. Das ist kein Verstoss gegen die Heading-Regel, sondern
-  ihre Kehrseite: der Apparat trägt keine These und bekommt deshalb auch keine
-  Kapitel-Headline.
+  Die Überschriften folgen der normalen Hierarchie von /pages/science. So
+  entsteht neben dem Inhalt keine zusätzliche Label- oder Eyebrow-Stimme.
 
   §12 Build Spec:
-  - Surface:         Paper B
+  - Surface:         Paper A, hell
   - Dominant:        die Quellenliste selbst
-  - Heading size:    Label-Stimme, keine Display-Stufe
+  - Heading size:    --text-h2, wie die Content-Sections auf /pages/science
   - Content pattern: gruppierte Definitionsliste, Links in Ink mit Unterstrich
   - CTA:             keine. Die Blog-Links sind Weiterlesen, kein Angebot.
   - Entfernt:        Journal-Logos, DOI-Badges, Zitierzahlen
@@ -38,6 +36,7 @@
   assign wq_pad_b_m = wq_pad_b | times: 0.8 | round
 
   assign wq_links = section.blocks | where: 'type', 'link'
+  assign wq_footnotes = section.blocks | where: 'type', 'footnote'
 -%}
 
 {{ 'lt-wissenschaft.css' | asset_url | stylesheet_tag }}
@@ -136,6 +135,22 @@
         {%- endfor -%}
       </ul>
     {%- endif -%}
+
+    {%- if wq_footnotes.size > 0 -%}
+      <div class="ltw-sources__footnotes" aria-labelledby="{{ wq_anchor }}-footnotes">
+        <h2 id="{{ wq_anchor }}-footnotes" class="ltw-sources__footnotes-title">
+          {{ section.settings.footnotes_heading | escape }}
+        </h2>
+        <ol class="ltw-sources__footnotes-list">
+          {%- for block in wq_footnotes -%}
+            <li {{ block.shopify_attributes }}>
+              <span class="ltw-sources__footnotes-marker" aria-hidden="true">{{ block.settings.marker | escape }}</span>
+              <span>{{ block.settings.body | escape }}</span>
+            </li>
+          {%- endfor -%}
+        </ol>
+      </div>
+    {%- endif -%}
   </div>
 </section>
 
@@ -151,6 +166,7 @@
     { "type": "text", "id": "heading", "label": "Überschrift", "default": "Quellen" },
     { "type": "textarea", "id": "intro", "label": "Vorbemerkung", "default": "Jede Angabe verweist auf die begutachtete Originalarbeit." },
     { "type": "text", "id": "further_heading", "label": "Überschrift Weiterlesen", "default": "Weiterlesen" },
+    { "type": "text", "id": "footnotes_heading", "label": "Überschrift Fußnoten", "default": "Methodische Fußnoten" },
 
     { "type": "header", "content": "Farben und Abstände" },
     { "type": "color", "id": "color_bg", "label": "Hintergrund", "default": "#f2f1ed" },
@@ -183,6 +199,14 @@
       "settings": [
         { "type": "text", "id": "label", "label": "Titel", "default": "Beitrag aus dem Longevity-Blog" },
         { "type": "url", "id": "url", "label": "Link" }
+      ]
+    },
+    {
+      "type": "footnote",
+      "name": "Methodische Fußnote",
+      "settings": [
+        { "type": "text", "id": "marker", "label": "Nummer", "default": "1" },
+        { "type": "textarea", "id": "body", "label": "Text", "default": "Kurze methodische Einordnung der Kennzahl." }
       ]
     }
   ],
