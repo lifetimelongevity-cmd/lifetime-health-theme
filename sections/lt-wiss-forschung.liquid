@@ -83,10 +83,9 @@
         {%- endif -%}
 
         {%- if wr_signals.size > 0 -%}
-          <ul class="ltw-research-signals" role="list" data-ltw-signals>
+          <ul class="ltw-research-signals" role="list">
             {%- for block in wr_signals -%}
               <li class="ltw-research-signal" {{ block.shopify_attributes }}>
-                <span class="ltw-research-signal__node" aria-hidden="true"></span>
                 {%- if block.settings.title != blank -%}
                   <h3 class="ltw-research-signal__title">{{ block.settings.title | escape }}</h3>
                 {%- endif -%}
@@ -210,33 +209,6 @@
     {%- endif -%}
   </div>
 </section>
-
-<script>
-(function () {
-  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function setup(root) {
-    (root || document).querySelectorAll('[data-ltw-signals]').forEach(function (ul) {
-      if (ul.dataset.ltwSignalsReady) return;
-      ul.dataset.ltwSignalsReady = '1';
-      // Ohne Bewegungswunsch oder ohne Observer bleibt der Endzustand stehen.
-      if (reduce || !('IntersectionObserver' in window)) return;
-      ul.classList.add('ltw-anim');
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
-          if (e.isIntersecting) {
-            e.target.classList.add('is-in');
-            io.unobserve(e.target);
-          }
-        });
-      }, { threshold: 0.35 });
-      io.observe(ul);
-    });
-  }
-  if (document.readyState !== 'loading') { setup(); }
-  else { document.addEventListener('DOMContentLoaded', function () { setup(); }); }
-  document.addEventListener('shopify:section:load', function (e) { setup(e.target); });
-})();
-</script>
 
 {% schema %}
 {

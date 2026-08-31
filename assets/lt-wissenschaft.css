@@ -274,6 +274,12 @@
   min-width: 0;
 }
 
+/* Kopfzeile ueber der Hero-Illustration: dieselbe Stimme wie .ltw-shot-head
+   in den Kapiteln, nur mit Abstand zum Medium darunter. */
+.ltw-hero__shot-head {
+  margin-bottom: var(--space-4);
+}
+
 /* Statische Hero-Illustration: exakt dieselbe Form wie das Bild im Hero von
    /pages/science. Das Asset bringt seine eigene feine Innenkontur mit. */
 .ltw-hero__media {
@@ -863,10 +869,15 @@ lt-wiss-wipe { display: block; }
   max-width: 52rem;
 }
 
+/* Im Forschungs-Zweispalter steht der Screenshot ohne weisses Blatt und ohne
+   Schatten (BJ-Entscheid 2026-09-01), wie die Fotos in den Kapiteln davor. */
 .ltw-research__grid .ltw-shot {
   margin: 0;
-  padding: var(--space-4);
+  padding: 0;
   max-width: none;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
 }
 
 .ltw-shot__img {
@@ -875,6 +886,11 @@ lt-wiss-wipe { display: block; }
   height: auto;
   margin-top: var(--space-4);
   border-radius: var(--radius-sm);
+}
+
+.ltw-research__grid .ltw-shot__img {
+  margin-top: 0;
+  border-radius: var(--radius-md);
 }
 
 .ltw-shot > .ltw-shot__img:first-child {
@@ -995,78 +1011,11 @@ lt-wiss-wipe { display: block; }
   color: var(--ltw-text, var(--color-ink));
 }
 
-/* ── Konvergenz-Spine ────────────────────────────────────────────────────────
-   Delight: die drei Signale lesen als EIN Pfad, der in einer konsolidierten
-   Aussage zusammenläuft — die Section führt ihre eigene Frage vor (viele Uhren
-   → ein Signal). Sprache wie .ltw-discord: Haarlinie + Messwert-Teal, ein
-   einziger, dezenter Bewegungsmoment. Nur im einspaltigen Copy-Kontext aktiv. */
+/* Der fruehere Konvergenz-Spine (Teal-Knoten + verbindende Linie) ist am
+   2026-09-01 per BJ-Entscheid entfernt: die drei Signale sind gleichrangige
+   Forschungslinien, keine Sequenz. Sie rendern jetzt ueberall wie die
+   Kriterienliste der Messlatte: Haarlinie oben, Titel, Text. */
 .ltw-research-signal__node { display: none; }
-
-.ltw-research__copy .ltw-research-signals {
-  position: relative;
-}
-
-.ltw-research__copy .ltw-research-signal {
-  position: relative;
-  border-top: none;
-  padding-top: 0;
-  padding-left: var(--space-5);
-}
-
-/* Verbindungslinie von Knoten zu Knoten (nicht am letzten). */
-.ltw-research__copy .ltw-research-signal:not(:last-child)::before {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 0.5em;
-  width: 1px;
-  height: calc(100% + var(--space-4));
-  background: var(--ltw-hairline, rgba(38, 37, 30, 0.12));
-  transform-origin: top;
-}
-
-/* Der Knoten: Teal-Ring auf Papier; der letzte ist gefüllt = das Signal. */
-.ltw-research__copy .ltw-research-signal__node {
-  display: block;
-  position: absolute;
-  left: 0;
-  top: calc(0.5em - 4.5px);
-  width: 9px;
-  height: 9px;
-  border-radius: var(--radius-full, 999px);
-  background: var(--ltw-bg, #f7f7f4);
-  border: 2px solid var(--color-teal);
-}
-
-.ltw-research__copy .ltw-research-signal:last-child .ltw-research-signal__node {
-  background: var(--color-teal-dark);
-  border-color: var(--color-teal-dark);
-}
-
-/* Ein Bewegungsmoment: der Pfad zeichnet sich, die Knoten setzen nacheinander.
-   Der Anfangszustand gilt nur mit .ltw-anim (JS + Bewegung erlaubt); sonst steht
-   der Endzustand. */
-.ltw-research__copy .ltw-research-signals.ltw-anim .ltw-research-signal:not(:last-child)::before {
-  transform: scaleY(0);
-  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.ltw-research__copy .ltw-research-signals.ltw-anim.is-in .ltw-research-signal:not(:last-child)::before {
-  transform: scaleY(1);
-}
-.ltw-research__copy .ltw-research-signals.ltw-anim .ltw-research-signal__node {
-  opacity: 0;
-  transform: scale(0.3);
-  transition: opacity 0.4s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.ltw-research__copy .ltw-research-signals.ltw-anim.is-in .ltw-research-signal__node {
-  opacity: 1;
-  transform: scale(1);
-}
-.ltw-research__copy .ltw-research-signals.ltw-anim.is-in .ltw-research-signal:nth-child(1) .ltw-research-signal__node { transition-delay: 0.05s; }
-.ltw-research__copy .ltw-research-signals.ltw-anim.is-in .ltw-research-signal:nth-child(2) .ltw-research-signal__node { transition-delay: 0.25s; }
-.ltw-research__copy .ltw-research-signals.ltw-anim.is-in .ltw-research-signal:nth-child(3) .ltw-research-signal__node { transition-delay: 0.45s; }
-.ltw-research__copy .ltw-research-signals.ltw-anim.is-in .ltw-research-signal:nth-child(1)::before { transition-delay: 0.12s; }
-.ltw-research__copy .ltw-research-signals.ltw-anim.is-in .ltw-research-signal:nth-child(2)::before { transition-delay: 0.32s; }
 
 /* ── Forschungs-Timeline ─────────────────────────────────────────────────── */
 .ltw-rt {
