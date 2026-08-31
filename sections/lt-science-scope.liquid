@@ -87,6 +87,11 @@
                   <li class="scp__example" {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</li>
                 {%- endif -%}
               {%- endfor -%}
+              {%- if section.settings.more_label != blank and section.settings.more_url != blank -%}
+                <li class="scp__example-more-item">
+                  <a class="scp__example scp__example--more" href="{{ section.settings.more_url | escape }}">{{ section.settings.more_label | escape }}</a>
+                </li>
+              {%- endif -%}
             </ul>
           </div>
         {%- endif -%}
@@ -180,6 +185,7 @@
   line-height: var(--leading-stat);
   font-weight: var(--weight-bold);
   letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
 @media screen and (min-width: 900px) {
@@ -237,6 +243,49 @@
   background: var(--color-surface-benefit);
 }
 
+/* „+ N weitere": ehrlicher Stichproben-Hinweis mit Tür zur Kategorienseite.
+   Als einziger Chip ein Link, deshalb als einziger mit Kontur statt Fläche. */
+.scp__example-more-item {
+  display: contents;
+}
+
+.scp__example--more {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--scp-text) 24%, transparent);
+  padding: calc(var(--space-2) - 1px) calc(var(--space-4) - 1px);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.scp__example--more:hover {
+  border-color: color-mix(in srgb, var(--scp-text) 48%, transparent);
+  background: var(--scp-chip, #f7f7f4);
+}
+
+.scp__example--more:focus-visible {
+  outline: 2px solid var(--color-dark);
+  outline-offset: 2px;
+}
+
+/* ── Einlauf-Moment ────────────────────────────────────────────
+   Gleiche Materiallogik wie der Draw-on-view der Science-Split-Charts:
+   die Evidenz kommt einmal an, wenn sie ins Bild kommt. Die Zahl zählt
+   hoch (JS), die Report-Chips füllen sich gestaffelt. Default (ohne JS,
+   bei Reduced Motion): alles statisch sichtbar. */
+.scp-ready .scp__example {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.scp-ready.scp-in .scp__example {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 0.35s ease-out var(--scp-d, 0s),
+    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1) var(--scp-d, 0s);
+}
+
 .scp__note {
   margin: var(--space-5) 0 0;
   font-family: var(--font-body);
@@ -279,6 +328,57 @@
   }
 }
 {% endstylesheet %}
+
+{% javascript %}
+  (function () {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (!('IntersectionObserver' in window)) return;
+    var bodies = document.querySelectorAll('.scp__body');
+    if (!bodies.length) return;
+
+    var io = new IntersectionObserver(
+      function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          var body = entry.target;
+          io.unobserve(body);
+          body.classList.add('scp-in');
+          var num = body.querySelector('[data-scp-count]');
+          if (num) {
+            var target = parseInt(num.getAttribute('data-scp-count'), 10);
+            var t0 = null;
+            var step = function (ts) {
+              if (t0 === null) t0 = ts;
+              var p = Math.min((ts - t0) / 900, 1);
+              var eased = p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
+              num.textContent = Math.round(target * eased);
+              if (p < 1) requestAnimationFrame(step);
+            };
+            requestAnimationFrame(step);
+          }
+        });
+      },
+      { threshold: 0.4 }
+    );
+
+    bodies.forEach(function (body) {
+      body.querySelectorAll('.scp__example').forEach(function (chip, i) {
+        chip.style.setProperty('--scp-d', i * 45 + 'ms');
+      });
+      var numEl = body.querySelector('.scp__number');
+      if (numEl) {
+        var val = numEl.textContent.trim();
+        if (/^\d+$/.test(val)) {
+          numEl.innerHTML =
+            '<span aria-hidden="true" data-scp-count="' + val + '">' + val + '</span>' +
+            '<span class="visually-hidden">' + val + '</span>';
+        }
+      }
+      body.classList.add('scp-ready');
+      io.observe(body);
+    });
+  })();
+{% endjavascript %}
 
 {% schema %}
 {
@@ -338,6 +438,17 @@
       "label": "Beschriftung Epigenetik-Reihe",
       "default": "Dazu sechs epigenetische Bereiche:",
       "info": "Steht über den Chips der Gruppe „Epigenetik\"."
+    },
+    {
+      "type": "text",
+      "id": "more_label",
+      "label": "Weitere-Chip (DNA-Reihe)",
+      "info": "Optionaler Link-Chip am Ende der DNA-Reihe, z. B. „+ 19 weitere\". Erscheint nur mit Link."
+    },
+    {
+      "type": "url",
+      "id": "more_url",
+      "label": "Weitere-Chip: Link"
     },
     { "type": "header", "content": "Text und Button" },
     {
