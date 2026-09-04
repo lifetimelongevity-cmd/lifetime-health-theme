@@ -1663,14 +1663,21 @@
           {{ lt_doctor_block }}
         {%- endunless -%}
 
-        {%- comment -%} Fallback-Pfad für Unentschlossene: leiser Kontakt-Link statt Kaufdruck.
-            Bewusst E-Mail statt Buchungstool (BJ-Entscheid 2026-08-08), Antwort kommt persönlich. {%- endcomment -%}
+        {%- comment -%} Fallback-Pfad für Unentschlossene: leiser Link statt Kaufdruck.
+            Bis 04.09.2026 ein mailto (BJ-Entscheid 2026-08-08, Antwort persönlich). Auf dem Desktop
+            ohne eingerichtetes Mailprogramm passiert beim Klick nichts, deshalb seit 04.09. (BJ)
+            wahlweise ein Link-Ziel: ist precheck_url gesetzt, führt der Link dorthin
+            (AGE&DNA: AGE Quiz), sonst weiter mailto. {%- endcomment -%}
         {%- if section.settings.precheck_text != blank -%}
           <div class="lt-pdp-hero__precheck">
             <span class="lt-pdp-hero__precheck-text">{{ section.settings.precheck_text | escape }}</span>
             <a
               class="lt-pdp-hero__precheck-link"
+              {%- if section.settings.precheck_url != blank %}
+              href="{{ section.settings.precheck_url }}"
+              {%- else %}
               href="mailto:{{ section.settings.precheck_email | default: 'info@lifetime-health.com' }}?subject={{ section.settings.precheck_subject | default: 'Frage vor dem Kauf' | url_escape }}"
+              {%- endif %}
             >{{ section.settings.precheck_link_label | default: 'Schreib uns' | escape }}</a>
           </div>
         {%- endif -%}
@@ -3900,6 +3907,12 @@
       "id": "precheck_link_label",
       "label": "Fallback — Link-Text",
       "info": "Standard: Schreib uns"
+    },
+    {
+      "type": "url",
+      "id": "precheck_url",
+      "label": "Fallback — Link-Ziel (statt E-Mail)",
+      "info": "Wenn gesetzt, führt der Link hierhin, etwa zum AGE Quiz. Leer = mailto an die Adresse unten."
     },
     {
       "type": "text",
