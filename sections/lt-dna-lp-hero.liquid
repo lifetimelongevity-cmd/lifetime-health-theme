@@ -1,0 +1,580 @@
+{% comment %}
+  lt-dna-lp-hero — Hero der AGE&DNA-Landingpage (Google-Ads-Search).
+  Ein Bildschirm nach Hormozi ($100M Leads, Layout 3): Callout, Headline, Subline,
+  Bestätigung (Kundenzitat mit Zahl), Preis, ein Knopf, Zeile was danach passiert,
+  Garantie am Knopf (Name fett, Body-Größe, mit Grund), vier Was-drin-ist-Zeilen
+  UNTER dem Knopf, drei Trust-Pillen. Bullets stehen unter dem Knopf, damit der
+  Knopf auf 390 px über dem Falz bleibt.
+
+  Medien: ein Karussell aus Blöcken, jede Folie mit Zweck (Kadenz 23.09.2026 nach
+  Mark Builds Brands: 1 Produkt klar, 2 Transformation als echte Kundenzahl,
+  3 was du bekommst, 4 häufigster Einwand, 5 Risiko-Umkehr, 6 Beweis). Drei
+  Blocktypen: image (Bild + Caption), result (zwei große Zahlen, Pass gegen
+  Körper), card (Kicker, Headline, Text, Name). Ohne Blöcke fällt die Section auf
+  das einzelne Bild aus den Settings zurück. Mobil steht das Karussell unter den
+  Pillen, Desktop rechts. Scroll-Snap, Punkte und Pfeile per kleinem Script.
+
+  Der Knopf geht per Cart-Permalink direkt in den Checkout (Gast-Checkout ist
+  aktiv, geprüft 22.09.2026). Preis und Rating kommen aus dem Produkt, nie aus
+  dem Template. Umbau 22.09.2026 nach Audit
+  lifetime-produktdetails/hormozi/2026-09-22_audit-dna-lp-v2.md § 11, Karussell
+  23.09.2026. Surface: --color-paper. Dominantes Element: die Headline.
+{% endcomment %}
+
+{%- liquid
+  assign product = all_products[section.settings.product]
+  assign variant = product.selected_or_first_available_variant
+  assign rating = product.metafields.loox.avg_rating.value | default: 0 | plus: 0
+  assign rating_count = product.metafields.loox.num_reviews.value | default: 0 | plus: 0
+  assign checkout_url = routes.cart_url | append: '/' | append: variant.id | append: ':1'
+  assign slides = section.blocks | size
+-%}
+
+<section id="lt-dna-hero-{{ section.id }}" class="lt-dna-hero">
+  <div class="lt-dna-hero__inner lt-dna-wrap">
+    <div class="lt-dna-hero__copy">
+      {%- if section.settings.callout != blank -%}
+        <p class="lt-dna-hero__callout">{{ section.settings.callout | escape }}</p>
+      {%- endif -%}
+      <h1 class="lt-dna-hero__headline">{{ section.settings.headline | escape }}</h1>
+      {%- if section.settings.subheadline != blank -%}
+        <p class="lt-dna-hero__sub">{{ section.settings.subheadline | escape }}</p>
+      {%- endif -%}
+      {%- if section.settings.proof_quote != blank -%}
+        <figure class="lt-dna-hero__proof">
+          <blockquote class="lt-dna-hero__proof-text">„{{ section.settings.proof_quote | escape }}“</blockquote>
+          {%- if section.settings.proof_name != blank -%}
+            <figcaption class="lt-dna-hero__proof-name">{{ section.settings.proof_name | escape }} · verifizierter Kauf</figcaption>
+          {%- endif -%}
+        </figure>
+      {%- endif -%}
+
+      <div class="lt-dna-hero__buy">
+        <div class="lt-dna-hero__price-row">
+          <span class="lt-dna-hero__price">{{ variant.price | money_without_trailing_zeros }}</span>
+          {%- if section.settings.price_note != blank -%}
+            <span class="lt-dna-hero__price-note">{{ section.settings.price_note | escape }}</span>
+          {%- endif -%}
+        </div>
+        <a class="lt-dna-btn" href="{{ checkout_url }}" data-lt-dna-checkout>{{ section.settings.cta_label | escape }}</a>
+        {%- if section.settings.cta_note != blank -%}
+          <p class="lt-dna-hero__cta-note">{{ section.settings.cta_note | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.guarantee != blank -%}
+          <p class="lt-dna-hero__guarantee">
+            <svg class="lt-dna-hero__guarantee-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3 5 6.5v5C5 16 8 20 12 21c4-1 7-5 7-9.5v-5L12 3Z" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span>{%- if section.settings.guarantee_name != blank -%}<strong class="lt-dna-hero__guarantee-name">{{ section.settings.guarantee_name | escape }}</strong> {% endif -%}{{ section.settings.guarantee | escape }}</span>
+          </p>
+        {%- endif -%}
+        {%- assign has_bullets = false -%}
+        {%- for i in (1..4) -%}
+          {%- assign bkey = 'bullet_' | append: i -%}
+          {%- if section.settings[bkey] != blank -%}{%- assign has_bullets = true -%}{%- endif -%}
+        {%- endfor -%}
+        {%- if has_bullets -%}
+          <ul class="lt-dna-hero__bullets" role="list">
+            {%- for i in (1..4) -%}
+              {%- assign bkey = 'bullet_' | append: i -%}
+              {%- if section.settings[bkey] != blank -%}
+                <li class="lt-dna-hero__bullet">
+                  <span class="lt-dna-hero__bullet-check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+                  <span>{{ section.settings[bkey] | escape }}</span>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+      </div>
+
+      <ul class="lt-dna-hero__trust" role="list">
+        {%- if section.settings.show_rating and rating_count > 0 -%}
+          <li class="lt-dna-hero__pill"><span class="lt-dna-hero__star" aria-hidden="true">★</span> {{ rating | replace: ".", "," }} · {{ rating_count }} Bewertungen</li>
+        {%- endif -%}
+        {%- for i in (1..3) -%}
+          {%- assign key = 'trust_' | append: i -%}
+          {%- if section.settings[key] != blank -%}
+            <li class="lt-dna-hero__pill">{{ section.settings[key] | escape }}</li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+
+    {%- if slides > 0 -%}
+      <div class="lt-dna-hero__media lt-dna-car" data-lt-dna-car>
+        <ul class="lt-dna-car__track" role="list" data-lt-dna-car-track>
+          {%- for block in section.blocks -%}
+            <li class="lt-dna-car__slide lt-dna-car__slide--{{ block.type }}" {{ block.shopify_attributes }} data-lt-dna-car-slide>
+              {%- case block.type -%}
+                {%- when 'image' -%}
+                  {%- if block.settings.image != blank -%}
+                    {%- if forloop.first -%}
+                      {{ block.settings.image | image_url: width: 1400 | image_tag: loading: 'eager', fetchpriority: 'high', widths: '480, 760, 1000, 1400', sizes: '(min-width: 990px) 44vw, 100vw', alt: block.settings.alt, class: 'lt-dna-car__img' }}
+                    {%- else -%}
+                      {{ block.settings.image | image_url: width: 1400 | image_tag: loading: 'lazy', widths: '480, 760, 1000, 1400', sizes: '(min-width: 990px) 44vw, 100vw', alt: block.settings.alt, class: 'lt-dna-car__img' }}
+                    {%- endif -%}
+                  {%- endif -%}
+                  {%- if block.settings.caption != blank -%}
+                    <p class="lt-dna-car__caption">{{ block.settings.caption | escape }}</p>
+                  {%- endif -%}
+                {%- when 'result' -%}
+                  <div class="lt-dna-car__result">
+                    {%- if block.settings.kicker != blank -%}
+                      <p class="lt-dna-car__kicker">{{ block.settings.kicker | escape }}</p>
+                    {%- endif -%}
+                    <div class="lt-dna-car__ages">
+                      <div class="lt-dna-car__age">
+                        <span class="lt-dna-car__age-num">{{ block.settings.age_pass | escape }}</span>
+                        <span class="lt-dna-car__age-label">{{ block.settings.label_pass | escape }}</span>
+                      </div>
+                      <div class="lt-dna-car__age lt-dna-car__age--bio">
+                        <span class="lt-dna-car__age-num">{{ block.settings.age_bio | escape }}</span>
+                        <span class="lt-dna-car__age-label">{{ block.settings.label_bio | escape }}</span>
+                      </div>
+                    </div>
+                    {%- if block.settings.quote != blank -%}
+                      <p class="lt-dna-car__quote">„{{ block.settings.quote | escape }}“</p>
+                    {%- endif -%}
+                    {%- if block.settings.name != blank -%}
+                      <p class="lt-dna-car__name">{{ block.settings.name | escape }}</p>
+                    {%- endif -%}
+                  </div>
+                {%- when 'card' -%}
+                  <div class="lt-dna-car__card{% if block.settings.dark %} lt-dna-car__card--dark{% endif %}">
+                    {%- if block.settings.kicker != blank -%}
+                      <p class="lt-dna-car__kicker">{{ block.settings.kicker | escape }}</p>
+                    {%- endif -%}
+                    {%- if block.settings.headline != blank -%}
+                      <p class="lt-dna-car__headline">{{ block.settings.headline | escape }}</p>
+                    {%- endif -%}
+                    {%- if block.settings.body != blank -%}
+                      <div class="lt-dna-car__body">{{ block.settings.body | escape | newline_to_br }}</div>
+                    {%- endif -%}
+                    {%- if block.settings.name != blank -%}
+                      <p class="lt-dna-car__name">{{ block.settings.name | escape }}</p>
+                    {%- endif -%}
+                  </div>
+              {%- endcase -%}
+            </li>
+          {%- endfor -%}
+        </ul>
+        {%- if slides > 1 -%}
+          <div class="lt-dna-car__nav">
+            <button type="button" class="lt-dna-car__btn" data-lt-dna-car-prev aria-label="Vorherige Folie"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m15 5-7 7 7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <ol class="lt-dna-car__dots" role="list" data-lt-dna-car-dots>
+              {%- for block in section.blocks -%}
+                <li><button type="button" class="lt-dna-car__dot{% if forloop.first %} is-active{% endif %}" data-lt-dna-car-dot="{{ forloop.index0 }}" aria-label="Folie {{ forloop.index }} von {{ slides }}"></button></li>
+              {%- endfor -%}
+            </ol>
+            <button type="button" class="lt-dna-car__btn" data-lt-dna-car-next aria-label="Nächste Folie"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m9 5 7 7-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
+        {%- endif -%}
+      </div>
+    {%- elsif section.settings.image != blank -%}
+      <div class="lt-dna-hero__media">
+        {{ section.settings.image | image_url: width: 1400 | image_tag: loading: 'eager', fetchpriority: 'high', widths: '480, 760, 1000, 1400', sizes: '(min-width: 990px) 44vw, 100vw', alt: section.settings.image_alt, class: 'lt-dna-hero__img' }}
+      </div>
+    {%- endif -%}
+  </div>
+</section>
+
+{%- if slides > 1 -%}
+<script>
+(function () {
+  var root = document.getElementById('lt-dna-hero-{{ section.id }}');
+  if (!root) return;
+  var car = root.querySelector('[data-lt-dna-car]');
+  if (!car || car.dataset.ltDnaCarReady) return;
+  car.dataset.ltDnaCarReady = '1';
+  var track = car.querySelector('[data-lt-dna-car-track]');
+  var slides = Array.prototype.slice.call(car.querySelectorAll('[data-lt-dna-car-slide]'));
+  var dots = Array.prototype.slice.call(car.querySelectorAll('[data-lt-dna-car-dot]'));
+  var current = 0;
+  function go(i) {
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    track.scrollTo({ left: slides[i].offsetLeft - track.offsetLeft, behavior: 'smooth' });
+  }
+  function sync() {
+    var x = track.scrollLeft + track.clientWidth / 2, best = 0, dist = Infinity;
+    slides.forEach(function (s, i) {
+      var c = s.offsetLeft - track.offsetLeft + s.clientWidth / 2, d = Math.abs(c - x);
+      if (d < dist) { dist = d; best = i; }
+    });
+    if (best !== current) {
+      current = best;
+      dots.forEach(function (d, i) { d.classList.toggle('is-active', i === current); });
+    }
+  }
+  car.querySelector('[data-lt-dna-car-prev]').addEventListener('click', function () { go(current - 1); });
+  car.querySelector('[data-lt-dna-car-next]').addEventListener('click', function () { go(current + 1); });
+  dots.forEach(function (d, i) { d.addEventListener('click', function () { go(i); }); });
+  var t;
+  track.addEventListener('scroll', function () { clearTimeout(t); t = setTimeout(sync, 60); }, { passive: true });
+})();
+</script>
+{%- endif -%}
+
+{% stylesheet %}
+.lt-dna-wrap { max-width: 72rem; margin: 0 auto; padding-left: var(--gutter-container, 20px); padding-right: var(--gutter-container, 20px); }
+.lt-dna-hero {
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+.lt-dna-hero__inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  padding-top: var(--space-6);
+  padding-bottom: var(--space-8);
+}
+.lt-dna-hero__copy, .lt-dna-hero__media { min-width: 0; }
+.lt-dna-hero__callout {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.02em;
+  color: var(--color-ink-muted);
+}
+.lt-dna-hero__headline {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: clamp(var(--text-h1), 6vw, var(--text-display));
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  letter-spacing: -0.01em;
+}
+.lt-dna-hero__sub {
+  margin: var(--space-4) 0 0;
+  max-width: 34rem;
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  line-height: var(--leading-body);
+  color: var(--color-ink-muted);
+}
+.lt-dna-hero__buy {
+  margin-top: var(--space-6);
+  max-width: 30rem;
+}
+.lt-dna-hero__price-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.lt-dna-hero__price {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+}
+.lt-dna-hero__price-note {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-ink-muted);
+}
+.lt-dna-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 52px;
+  padding: 14px var(--space-6);
+  border-radius: var(--radius-full);
+  background: var(--color-cta-bg);
+  color: var(--color-cta-text);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  text-decoration: none;
+  transition: transform var(--ease-default), opacity var(--ease-default);
+}
+.lt-dna-btn:hover { opacity: 0.92; }
+.lt-dna-btn:active { transform: scale(0.99); }
+.lt-dna-hero__proof {
+  margin: var(--space-4) 0 0;
+  max-width: 34rem;
+}
+.lt-dna-hero__proof-text {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-heading);
+  color: var(--color-ink);
+}
+.lt-dna-hero__proof-name {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-ink-muted);
+}
+.lt-dna-hero__cta-note {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-ink-muted);
+}
+.lt-dna-hero__guarantee {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-ink);
+}
+.lt-dna-hero__guarantee-name { font-weight: var(--weight-semibold); }
+.lt-dna-hero__guarantee-icon { flex: 0 0 20px; width: 20px; height: 20px; margin-top: 2px; color: var(--color-teal-dark); }
+.lt-dna-hero__bullets {
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.lt-dna-hero__bullet {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-ink);
+}
+.lt-dna-hero__bullet + .lt-dna-hero__bullet { margin-top: var(--space-2); }
+.lt-dna-hero__bullet-check { flex: 0 0 18px; width: 18px; height: 18px; margin-top: 3px; color: var(--color-teal-dark); }
+.lt-dna-hero__bullet-check svg { display: block; width: 100%; height: 100%; }
+.lt-dna-hero__trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-5) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.lt-dna-hero__pill {
+  padding: 6px var(--space-3);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-ink);
+}
+.lt-dna-hero__star { color: var(--color-star); }
+.lt-dna-hero__media {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface-secondary);
+}
+.lt-dna-hero__img { display: block; width: 100%; height: auto; }
+
+/* Karussell */
+.lt-dna-car { position: relative; width: 100%; max-width: 100%; background: transparent; overflow: visible; }
+.lt-dna-car__track {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0 0 var(--space-2);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.lt-dna-car__track::-webkit-scrollbar { display: none; }
+.lt-dna-car__slide {
+  flex: 0 0 88%;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+}
+.lt-dna-car__slide--image { background: var(--color-surface-secondary); }
+.lt-dna-car__img { display: block; width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: cover; }
+.lt-dna-car__caption {
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--color-ink-muted);
+}
+.lt-dna-car__result,
+.lt-dna-car__card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  flex: 1 1 auto;
+  min-height: 100%;
+  aspect-ratio: 1 / 1;
+  padding: var(--space-6);
+  color: var(--color-ink);
+}
+.lt-dna-car__result,
+.lt-dna-car__card--dark {
+  background: var(--color-surface-dark);
+  color: var(--color-cta-text);
+}
+.lt-dna-car__kicker {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.02em;
+  opacity: 0.8;
+}
+.lt-dna-car__ages { display: flex; gap: var(--space-5); align-items: flex-end; }
+.lt-dna-car__age { display: flex; flex-direction: column; }
+.lt-dna-car__age-num {
+  font-family: var(--font-heading);
+  font-size: clamp(3.5rem, 12vw, 5.5rem);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+  letter-spacing: -0.02em;
+  opacity: 0.55;
+}
+.lt-dna-car__age--bio .lt-dna-car__age-num { opacity: 1; }
+.lt-dna-car__age-label {
+  margin-top: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  opacity: 0.8;
+}
+.lt-dna-car__quote {
+  margin: var(--space-5) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+}
+.lt-dna-car__headline {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+}
+.lt-dna-car__body {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  opacity: 0.85;
+}
+.lt-dna-car__name {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  opacity: 0.7;
+}
+.lt-dna-car__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-2);
+}
+.lt-dna-car__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.lt-dna-car__btn svg { width: 18px; height: 18px; }
+.lt-dna-car__dots { display: flex; gap: var(--space-2); margin: 0; padding: 0; list-style: none; }
+.lt-dna-car__dot {
+  display: block;
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--color-border-strong);
+  cursor: pointer;
+}
+.lt-dna-car__dot.is-active { background: var(--color-ink); }
+@media screen and (min-width: 990px) {
+  .lt-dna-hero__media { max-width: 30rem; justify-self: end; width: 100%; }
+  .lt-dna-car__slide { flex-basis: 100%; }
+}
+@media screen and (min-width: 990px) {
+  .lt-dna-hero__inner {
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    align-items: center;
+    gap: var(--space-9);
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-9);
+  }
+  .lt-dna-btn { width: auto; min-width: 18rem; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT DNA-LP Hero",
+  "tag": "section",
+  "settings": [
+    { "type": "product", "id": "product", "label": "Produkt" },
+    { "type": "text", "id": "callout", "label": "Callout (eine Zeile über der Headline)", "default": "Du tust viel für deine Gesundheit. Weißt du, ob dein Körper es merkt?" },
+    { "type": "text", "id": "headline", "label": "Headline (Outcome mit Frist)", "default": "In 6 Wochen weißt du, wie alt dein Körper wirklich ist." },
+    { "type": "textarea", "id": "subheadline", "label": "Subline (Mechanismus, ohne-Satz, größter Zweifel)", "default": "Gemessen an deiner DNA, aus einer Speichelprobe. Ohne Arzttermin, ohne Blutabnahme. Und ohne dass du die Ergebnisse allein lesen musst: 45 Minuten per Video gehen wir sie durch, bis du weißt, was du als Erstes änderst." },
+    { "type": "text", "id": "proof_quote", "label": "Bestätigung: Kundenzitat mit Zahl (ohne Anführungszeichen)" },
+    { "type": "text", "id": "proof_name", "label": "Name zum Zitat" },
+    { "type": "text", "id": "price_note", "label": "Zusatz neben dem Preis", "default": "einmalig · auf Rechnung oder in Raten mit Klarna" },
+    { "type": "text", "id": "cta_label", "label": "Button", "default": "Test bestellen · Kit in 2 bis 3 Werktagen" },
+    { "type": "text", "id": "cta_note", "label": "Zeile unter dem Button (was danach passiert)" },
+    { "type": "text", "id": "guarantee_name", "label": "Garantie-Name (fett)", "default": "Auswertbar oder neu." },
+    { "type": "textarea", "id": "guarantee", "label": "Garantie am Knopf (Satz mit Grund)", "default": "Ist deine Probe nicht auswertbar, schicken wir dir ein neues Kit, ohne Formular. Versiegelt kannst du den Test 30 Tage zurückschicken und bekommst dein Geld." },
+    { "type": "text", "id": "bullet_1", "label": "Was du davon hast, Zeile 1 (unter dem Knopf)" },
+    { "type": "text", "id": "bullet_2", "label": "Zeile 2" },
+    { "type": "text", "id": "bullet_3", "label": "Zeile 3" },
+    { "type": "text", "id": "bullet_4", "label": "Zeile 4" },
+    { "type": "checkbox", "id": "show_rating", "label": "Loox-Rating als erste Pille", "default": true },
+    { "type": "text", "id": "trust_1", "label": "Trust-Pille 1", "default": "Eurofins Genomics, ISO 17025" },
+    { "type": "text", "id": "trust_2", "label": "Trust-Pille 2", "default": "Ergebnis 6 Wochen nach Probeneingang" },
+    { "type": "text", "id": "trust_3", "label": "Trust-Pille 3" },
+    { "type": "header", "content": "Rückfall ohne Karussell-Blöcke" },
+    { "type": "image_picker", "id": "image", "label": "Einzelbild (nur wenn keine Blöcke gesetzt sind)" },
+    { "type": "text", "id": "image_alt", "label": "Bild-Alt", "default": "Epigenetische Ergebnisse in der LIFETIME App" }
+  ],
+  "blocks": [
+    { "type": "image", "name": "Folie: Bild", "settings": [
+      { "type": "image_picker", "id": "image", "label": "Bild (quadratisch)" },
+      { "type": "text", "id": "alt", "label": "Alt-Text" },
+      { "type": "text", "id": "caption", "label": "Zweck der Folie in einem Satz (Caption)" }
+    ] },
+    { "type": "result", "name": "Folie: Ergebnis", "limit": 2, "settings": [
+      { "type": "text", "id": "kicker", "label": "Kicker", "default": "Ein echtes Ergebnis" },
+      { "type": "text", "id": "age_pass", "label": "Alter laut Pass", "default": "46" },
+      { "type": "text", "id": "label_pass", "label": "Label dazu", "default": "Jahre laut Pass" },
+      { "type": "text", "id": "age_bio", "label": "Biologisches Alter", "default": "38" },
+      { "type": "text", "id": "label_bio", "label": "Label dazu", "default": "Jahre biologisch" },
+      { "type": "text", "id": "quote", "label": "Zitat dazu (ohne Anführungszeichen)" },
+      { "type": "text", "id": "name", "label": "Name", "default": "Markus T. · verifizierter Kauf" }
+    ] },
+    { "type": "card", "name": "Folie: Karte (Text)", "settings": [
+      { "type": "text", "id": "kicker", "label": "Kicker (Einwand, Garantie, Beweis)" },
+      { "type": "text", "id": "headline", "label": "Headline" },
+      { "type": "textarea", "id": "body", "label": "Text (Zeilenumbruch erlaubt)" },
+      { "type": "text", "id": "name", "label": "Name oder Quelle" },
+      { "type": "checkbox", "id": "dark", "label": "Dunkle Karte", "default": false }
+    ] }
+  ],
+  "presets": [{ "name": "LT DNA-LP Hero" }]
+}
+{% endschema %}

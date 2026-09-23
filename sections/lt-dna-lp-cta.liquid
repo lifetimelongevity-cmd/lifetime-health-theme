@@ -1,0 +1,50 @@
+{% comment %}
+  lt-dna-lp-cta — Letzter Knopf, gleicher Wortlaut wie oben, eine Zeile Zusage.
+  Surface: --color-paper. Dominantes Element: der Knopf.
+{% endcomment %}
+
+{%- liquid
+  assign product = all_products[section.settings.product]
+  assign variant = product.selected_or_first_available_variant
+  assign checkout_url = routes.cart_url | append: '/' | append: variant.id | append: ':1'
+-%}
+
+<section class="lt-dna-cta">
+  <div class="lt-dna-cta__inner lt-dna-wrap">
+    <h2 class="lt-dna-cta__headline">{{ section.settings.heading | escape }}</h2>
+    {%- if section.settings.subheading != blank -%}
+      <p class="lt-dna-cta__sub">{{ section.settings.subheading | escape }}</p>
+    {%- endif -%}
+    <a class="lt-dna-btn" href="{{ checkout_url }}" data-lt-dna-checkout>{{ section.settings.cta_label | escape }} · {{ variant.price | money_without_trailing_zeros }}</a>
+    {%- if section.settings.guarantee != blank -%}
+      <p class="lt-dna-cta__guarantee">{{ section.settings.guarantee | escape }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+.lt-dna-wrap { max-width: 72rem; margin: 0 auto; padding-left: var(--gutter-container, 20px); padding-right: var(--gutter-container, 20px); }
+.lt-dna-cta { background: var(--color-paper); color: var(--color-ink); }
+.lt-dna-cta__inner { padding-top: var(--space-8); padding-bottom: var(--space-9); }
+.lt-dna-cta__headline, .lt-dna-cta__sub, .lt-dna-cta__guarantee { max-width: 40rem; }
+.lt-dna-cta__headline { margin: 0; font-family: var(--font-heading); font-size: var(--text-h2); font-weight: var(--weight-bold); line-height: var(--leading-heading); }
+.lt-dna-cta__sub { margin: var(--space-3) 0 0; font-family: var(--font-body); font-size: var(--text-body-lg); line-height: var(--leading-body); color: var(--color-ink-muted); }
+.lt-dna-cta .lt-dna-btn { margin-top: var(--space-6); display: flex; align-items: center; justify-content: center; width: 100%; min-height: 52px; padding: 14px var(--space-6); border-radius: var(--radius-full); background: var(--color-cta-bg); color: var(--color-cta-text); font-family: var(--font-body); font-size: var(--text-body); font-weight: var(--weight-semibold); text-decoration: none; }
+.lt-dna-cta__guarantee { margin: var(--space-3) 0 0; font-family: var(--font-body); font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--color-ink-muted); }
+@media screen and (min-width: 750px) { .lt-dna-cta .lt-dna-btn { display: inline-flex; width: auto; min-width: 18rem; } }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT DNA-LP CTA",
+  "tag": "section",
+  "settings": [
+    { "type": "product", "id": "product", "label": "Produkt" },
+    { "type": "text", "id": "heading", "label": "Headline", "default": "Der Unterschied zwischen raten und wissen." },
+    { "type": "text", "id": "subheading", "label": "Subline" },
+    { "type": "text", "id": "cta_label", "label": "Button", "default": "Test bestellen" },
+    { "type": "text", "id": "guarantee", "label": "Zeile unter dem Knopf" }
+  ],
+  "presets": [{ "name": "LT DNA-LP CTA" }]
+}
+{% endschema %}

@@ -1,0 +1,84 @@
+{% comment %}
+  lt-dna-lp-proof — Beweis in zwei Lagen: Zahlenleiste mit Methode, dann wörtliche
+  Kundenstimmen mit Zahl je Fall. Zwei Blocktypen (stat, quote). Keine Einzelsterne,
+  weil das Loox-Metafeld keine trägt (UWG: nur zeigen, was belegt ist).
+  Surface: --color-paper. Dominantes Element: die Zahlen.
+{% endcomment %}
+
+<section class="lt-dna-proof">
+  <div class="lt-dna-proof__inner lt-dna-wrap">
+    {% render 'section-heading-crs', heading: section.settings.heading, subheading: section.settings.subheading, align: 'left', headline_md: true, extra_class: 'lt-dna-proof__header' %}
+
+    {%- assign stats = section.blocks | where: 'type', 'stat' -%}
+    {%- if stats.size > 0 -%}
+      <ul class="lt-dna-proof__stats" role="list">
+        {%- for block in stats -%}
+          <li class="lt-dna-proof__stat" {{ block.shopify_attributes }}>
+            <span class="lt-dna-proof__num">{{ block.settings.number | escape }}</span>
+            <span class="lt-dna-proof__label">{{ block.settings.label | escape }}</span>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+
+    {%- assign quotes = section.blocks | where: 'type', 'quote' -%}
+    {%- if quotes.size > 0 -%}
+      <ul class="lt-dna-proof__quotes" role="list">
+        {%- for block in quotes -%}
+          <li class="lt-dna-proof__quote" {{ block.shopify_attributes }}>
+            <p class="lt-dna-proof__text">{{ block.settings.text | escape }}</p>
+            <p class="lt-dna-proof__name">{{ block.settings.name | escape }}{% if block.settings.verified %} <span class="lt-dna-proof__verified">· verifizierter Kauf</span>{% endif %}</p>
+          </li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+    {%- if section.settings.source != blank -%}
+      <p class="lt-dna-proof__source">{{ section.settings.source | escape }}</p>
+    {%- endif -%}
+  </div>
+</section>
+
+{% stylesheet %}
+.lt-dna-wrap { max-width: 72rem; margin: 0 auto; padding-left: var(--gutter-container, 20px); padding-right: var(--gutter-container, 20px); }
+.lt-dna-proof { background: var(--color-paper); color: var(--color-ink); }
+.lt-dna-proof__inner { padding-top: var(--space-8); padding-bottom: var(--space-8); }
+.lt-dna-proof__header { margin-bottom: var(--space-6); max-width: 40rem; }
+.lt-dna-proof__stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-4); margin: 0 0 var(--space-7); padding: 0; list-style: none; }
+.lt-dna-proof__stat { display: flex; flex-direction: column; gap: var(--space-1); padding: var(--space-4) 0; border-top: 1px solid var(--color-border-strong); }
+.lt-dna-proof__num { font-family: var(--font-heading); font-size: var(--text-h1); font-weight: var(--weight-bold); line-height: 1; }
+.lt-dna-proof__label { font-family: var(--font-body); font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--color-ink-muted); }
+.lt-dna-proof__quotes { display: grid; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.lt-dna-proof__quote { padding: var(--space-5); background: var(--color-surface-primary); border: 1px solid var(--color-border-default); border-radius: var(--radius-md); }
+.lt-dna-proof__text { margin: 0; font-family: var(--font-body); font-size: var(--text-body); line-height: var(--leading-relaxed); }
+.lt-dna-proof__name { margin: var(--space-3) 0 0; font-family: var(--font-body); font-size: var(--text-body-sm); font-weight: var(--weight-semibold); }
+.lt-dna-proof__verified { font-weight: var(--weight-regular); color: var(--color-ink-muted); }
+.lt-dna-proof__source { margin: var(--space-5) 0 0; font-family: var(--font-body); font-size: var(--text-micro); color: var(--color-ink-muted); }
+@media screen and (min-width: 750px) {
+  .lt-dna-proof__stats { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-5); }
+  .lt-dna-proof__quotes { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT DNA-LP Proof",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Headline", "default": "Was Kunden sagen." },
+    { "type": "text", "id": "subheading", "label": "Subline" },
+    { "type": "text", "id": "source", "label": "Quellenzeile", "default": "Bewertungen über Loox, verifizierte Käufer. Zahlen aus der Produktdokumentation." }
+  ],
+  "blocks": [
+    { "type": "stat", "name": "Zahl", "limit": 4, "settings": [
+      { "type": "text", "id": "number", "label": "Zahl", "default": "4,7" },
+      { "type": "text", "id": "label", "label": "Was sie heißt", "default": "von 5, aus 121 Bewertungen" }
+    ] },
+    { "type": "quote", "name": "Stimme", "limit": 6, "settings": [
+      { "type": "textarea", "id": "text", "label": "Wörtlich" },
+      { "type": "text", "id": "name", "label": "Name" },
+      { "type": "checkbox", "id": "verified", "label": "Verifizierter Kauf", "default": true }
+    ] }
+  ],
+  "presets": [{ "name": "LT DNA-LP Proof" }]
+}
+{% endschema %}

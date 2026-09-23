@@ -1,0 +1,79 @@
+{% comment %}
+  lt-dna-lp-outcomes — „Das weißt du danach": drei Outcomes als Karten.
+  Keine Icons (sie würden nur den Titel wiederholen). Surface: --color-surface-secondary.
+  Dominantes Element: die Section-Headline.
+{% endcomment %}
+
+<section class="lt-dna-out">
+  <div class="lt-dna-out__inner lt-dna-wrap">
+    {% render 'section-heading-crs', heading: section.settings.heading, subheading: section.settings.subheading, align: 'left', headline_md: true, extra_class: 'lt-dna-out__header' %}
+    <ul class="lt-dna-out__grid" role="list">
+      {%- for block in section.blocks -%}
+        <li class="lt-dna-out__card" {{ block.shopify_attributes }}>
+          <p class="lt-dna-out__num" aria-hidden="true">{{ forloop.index | prepend: '0' }}</p>
+          <h3 class="lt-dna-out__title">{{ block.settings.title | escape }}</h3>
+          {%- if block.settings.body != blank -%}
+            <p class="lt-dna-out__body">{{ block.settings.body | escape }}</p>
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% stylesheet %}
+.lt-dna-wrap { max-width: 72rem; margin: 0 auto; padding-left: var(--gutter-container, 20px); padding-right: var(--gutter-container, 20px); }
+.lt-dna-out { background: var(--color-surface-secondary); color: var(--color-ink); }
+.lt-dna-out__inner { padding-top: var(--space-8); padding-bottom: var(--space-8); }
+.lt-dna-out__header { margin-bottom: var(--space-6); max-width: 40rem; }
+.lt-dna-out__grid { display: grid; gap: var(--space-4); margin: 0; padding: 0; list-style: none; }
+.lt-dna-out__card {
+  padding: var(--space-5);
+  background: var(--color-surface-primary);
+  border: 1px solid var(--color-border-default);
+  border-radius: var(--radius-md);
+}
+.lt-dna-out__num {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.1em;
+  color: var(--color-ink-muted);
+}
+.lt-dna-out__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+.lt-dna-out__body {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-ink-muted);
+}
+@media screen and (min-width: 750px) {
+  .lt-dna-out__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-5); }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT DNA-LP Outcomes",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Headline", "default": "Das weißt du danach." },
+    { "type": "text", "id": "subheading", "label": "Subline" }
+  ],
+  "blocks": [
+    { "type": "outcome", "name": "Outcome", "limit": 4, "settings": [
+      { "type": "text", "id": "title", "label": "Titel", "default": "Wie alt dein Körper wirklich ist." },
+      { "type": "textarea", "id": "body", "label": "Eine Zeile dazu" }
+    ] }
+  ],
+  "presets": [{ "name": "LT DNA-LP Outcomes" }]
+}
+{% endschema %}

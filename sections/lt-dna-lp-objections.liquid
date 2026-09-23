@@ -1,0 +1,70 @@
+{% comment %}
+  lt-dna-lp-objections — Objection Handling, sichtbar statt Accordion.
+  Links der Einwand in Kundenworten, rechts die Antwort in zwei Sätzen.
+  Kein Aufklappen, kein Suchen: der Zweifel wird beantwortet, bevor er formuliert ist.
+  Surface: --color-surface-secondary. Dominantes Element: die Einwände.
+{% endcomment %}
+
+<section class="lt-dna-obj">
+  <div class="lt-dna-obj__inner lt-dna-wrap">
+    {% render 'section-heading-crs', heading: section.settings.heading, subheading: section.settings.subheading, align: 'left', headline_md: true, extra_class: 'lt-dna-obj__header' %}
+    <dl class="lt-dna-obj__list">
+      {%- for block in section.blocks -%}
+        <div class="lt-dna-obj__row" {{ block.shopify_attributes }}>
+          <dt class="lt-dna-obj__q">{{ block.settings.objection | escape }}</dt>
+          <dd class="lt-dna-obj__a">{{ block.settings.answer | escape }}</dd>
+        </div>
+      {%- endfor -%}
+    </dl>
+  </div>
+</section>
+
+{% stylesheet %}
+.lt-dna-wrap { max-width: 72rem; margin: 0 auto; padding-left: var(--gutter-container, 20px); padding-right: var(--gutter-container, 20px); }
+.lt-dna-obj { background: var(--color-surface-secondary); color: var(--color-ink); }
+.lt-dna-obj__inner { padding-top: var(--space-8); padding-bottom: var(--space-8); }
+.lt-dna-obj__header { margin-bottom: var(--space-5); max-width: 40rem; }
+.lt-dna-obj__list { margin: 0; }
+.lt-dna-obj__row {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-5) 0;
+  border-top: 1px solid var(--color-border-strong);
+}
+.lt-dna-obj__row:last-child { border-bottom: 1px solid var(--color-border-strong); }
+.lt-dna-obj__q {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-tight);
+}
+.lt-dna-obj__a {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  color: var(--color-ink-muted);
+}
+@media screen and (min-width: 750px) {
+  .lt-dna-obj__row { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: var(--space-6); }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT DNA-LP Objections",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Headline", "default": "Was du dich jetzt fragst." },
+    { "type": "text", "id": "subheading", "label": "Subline" }
+  ],
+  "blocks": [
+    { "type": "objection", "name": "Einwand", "limit": 8, "settings": [
+      { "type": "text", "id": "objection", "label": "Einwand in Kundenworten", "default": "Reicht Speichel?" },
+      { "type": "textarea", "id": "answer", "label": "Antwort, zwei Sätze" }
+    ] }
+  ],
+  "presets": [{ "name": "LT DNA-LP Objections" }]
+}
+{% endschema %}
