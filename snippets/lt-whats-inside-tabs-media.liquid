@@ -1,0 +1,35 @@
+{% doc %}
+  App-Screenshot rechts neben einem Tab von lt-page-whats-inside-tabs.
+
+  @param {image} [image] - Bild aus dem image_picker (hat Vorrang)
+  @param {string} [image_url] - Fallback-URL, wenn kein Bild gewaehlt ist
+  @param {string} [alt] - Alt-Text
+  @param {string} [fallback_alt] - Alt-Text, wenn `alt` leer ist (Tab-Überschrift)
+{% enddoc %}
+
+{%- if image != blank or image_url != blank -%}
+  <div class="lt-page-whats-inside-tabs__media">
+    <div class="lt-page-whats-inside-tabs__media-frame">
+      {%- if image != blank -%}
+        {{
+          image
+          | image_url: width: 600
+          | image_tag:
+            loading: 'lazy',
+            widths: '300, 450, 600',
+            sizes: '(min-width: 980px) 280px, 220px',
+            class: 'lt-page-whats-inside-tabs__image',
+            alt: alt | default: fallback_alt
+        }}
+      {%- else -%}
+        <img
+          src="{{ image_url | escape }}"
+          alt="{{ alt | default: fallback_alt | escape }}"
+          loading="lazy"
+          class="lt-page-whats-inside-tabs__image"
+          width="280"
+        >
+      {%- endif -%}
+    </div>
+  </div>
+{%- endif -%}
