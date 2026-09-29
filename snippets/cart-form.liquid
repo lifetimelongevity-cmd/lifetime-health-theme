@@ -63,15 +63,18 @@
 
 									{%- unless item.gift_card -%}
 										<div class="cart-item__price">
+											{%- comment -%} Labels passend zum Element: der fette Betrag ist der gezahlte (Sale),
+												der gestrichene der regulaere. Vorher vertauscht, Screenreader lasen 349 € als
+												regulaer und 449 € als Sale (Conversion-Plan 4.5). 2026-09-29 {%- endcomment -%}
 											{%- if item.final_line_price < item.original_line_price -%}
-												<span class="visually-hidden">{{ 'general.accessibility_labels.price.regular' | t }}</span>
-												<strong>{{ item.final_line_price | money | append: iso_code }}</strong>
 												<span class="visually-hidden">{{ 'general.accessibility_labels.price.sale' | t }}</span>
+												<strong>{{ item.final_line_price | money | append: iso_code }}</strong>
+												<span class="visually-hidden">{{ 'general.accessibility_labels.price.regular' | t }}</span>
 												<span><del>{{ item.original_line_price | money | append: iso_code }}</del></span>
 											{%- elsif item.variant.compare_at_price > item.variant.price -%}
-												<span class="visually-hidden">{{ 'general.accessibility_labels.price.regular' | t }}</span>
-												<strong>{{ item.final_line_price | money | append: iso_code }}</strong>
 												<span class="visually-hidden">{{ 'general.accessibility_labels.price.sale' | t }}</span>
+												<strong>{{ item.final_line_price | money | append: iso_code }}</strong>
+												<span class="visually-hidden">{{ 'general.accessibility_labels.price.regular' | t }}</span>
 												<span><del>{{ item.variant.compare_at_price | times: item.quantity | money | append: iso_code }}</del></span>
 											{%- else -%}
 												<span class="visually-hidden">{{ 'general.accessibility_labels.price.regular' | t }}</span>
@@ -197,6 +200,69 @@
 			
 									</div>
 
+									{%- liquid
+										# Einmalkauf auf Abo umstellen, ein Klick (Conversion-Plan 3.1, 29.09.2026).
+										# 15 Kunden zahlten fuer 30 g NMN einmalig 38,80 € mit Versand statt 28,90 €
+										# im Abo. Plan kommt aus der Allocation der Variante: NMN hat je Groesse eine
+										# eigene Appstle-Gruppe mit FESTEM Preis (Policy 'price'), die Supplements
+										# einen Prozent-Plan. Deshalb erst den Festpreis-Plan, sonst den ersten, wie
+										# in lt-pdp-hero. "Versandfrei" gilt fuer jeden Abo-Warenkorb (Auto-Discount
+										# "Gratisversand im Abo", alle Laender, ohne Schwelle), "jederzeit kuendbar"
+										# fuer jeden Plan (minCycles leer, geprueft 29.09.). Die Abo-Kasse hat kein
+										# Klarna, deshalb steht die Zahlart dabei.
+										assign lt_sw_alloc = false
+										unless item.selling_plan_allocation or item.gift_card
+											for alloc in item.variant.selling_plan_allocations
+												if alloc.selling_plan.price_adjustments.first.value_type == 'price'
+													assign lt_sw_alloc = alloc
+													break
+												endif
+											endfor
+											unless lt_sw_alloc
+												assign lt_sw_alloc = item.variant.selling_plan_allocations.first
+											endunless
+										endunless
+										if lt_sw_alloc
+											assign lt_sw_sub_total = lt_sw_alloc.price | times: item.quantity
+											if lt_sw_sub_total >= item.original_line_price
+												assign lt_sw_alloc = false
+											endif
+										endif
+									-%}
+									{%- if lt_sw_alloc -%}
+										{%- liquid
+											assign lt_sw_sub_label = lt_sw_sub_total | money | append: iso_code
+											assign lt_sw_once_label = item.original_line_price | money | append: iso_code
+											assign lt_sw_rhythm = lt_sw_alloc.selling_plan.name | remove: 'Lieferfrequenz:' | strip | replace_first: 'Alle ', 'alle ' | replace_first: 'Jeden ', 'jeden ' | replace_first: 'Jede ', 'jede '
+										-%}
+										<cart-sub-switch
+											class="cart-sub-switch element--has-border--body element--border-radius"
+											data-line-key="{{ item.key }}"
+											data-quantity="{{ item.quantity }}"
+											data-selling-plan="{{ lt_sw_alloc.selling_plan.id }}"
+										>
+											<p class="cart-sub-switch__offer text-size--small text-line-height--small">
+												{{- 'cart.lt_sub_switch_offer_html' | t: sub_price: lt_sw_sub_label, once_price: lt_sw_once_label -}}
+											</p>
+											<p class="cart-sub-switch__meta text-size--small text-color--opacity text-line-height--small">
+												{{- 'cart.lt_sub_switch_meta' | t: rhythm: lt_sw_rhythm -}}<br>
+												{{- 'cart.lt_sub_payment' | t -}}
+											</p>
+											{%- capture lt_sw_aria -%}
+												{{- 'cart.lt_sub_switch_cta' | t }}: {{ item.product.title }}, {{ 'cart.lt_sub_switch_offer_plain' | t: sub_price: lt_sw_sub_label, once_price: lt_sw_once_label -}}
+											{%- endcapture -%}
+											<button
+												type="button"
+												class="cart-sub-switch__action button button--small button--outline"
+												aria-label="{{ lt_sw_aria | strip | escape }}"
+												data-js-cart-sub-switch
+											>
+												<span class="button__text">{{ 'cart.lt_sub_switch_cta' | t }}</span>
+											</button>
+											<span class="cart-sub-switch__error text-size--small" data-js-cart-sub-switch-error role="status" aria-live="polite"></span>
+										</cart-sub-switch>
+									{%- endif -%}
+
 								</div>
 
 							</div>
@@ -228,6 +294,9 @@
 	{%- if settings.cart_upsell_enable -%}
 		<script src="{{ 'component-cart-upsell.js' | asset_url }}" defer></script>
 	{%- endif -%}
+	{%- comment -%} Ausserhalb jeder Bedingung, aus demselben Grund wie oben: bei anfangs
+			leerem Warenkorb muss das Element trotzdem registriert werden. {%- endcomment -%}
+	<script src="{{ 'component-cart-sub-switch.js' | asset_url }}" defer></script>
 
 	<span class="cart__count hidden" aria-hidden="true" data-cart-count>{{ cart.item_count }}</span>
 	<span class="cart__total hidden" aria-hidden="true" data-cart-total>{{ cart.total_price | money | append: iso_code }}</span>
