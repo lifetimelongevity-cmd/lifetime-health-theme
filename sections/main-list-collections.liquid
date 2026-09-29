@@ -14,6 +14,14 @@
     assign collection_count = 0
     assign isEmpty = true
 
+    comment
+      Ausblenden statt Depublizieren: Interne Kollektionen wie stack-eligible
+      muessen im Onlineshop veroeffentlicht bleiben, weil /pages/stack-builder sie
+      per collections['stack-eligible'] in Liquid liest. Die Handle-Liste steht im
+      Template (templates/list-collections.json), frontpage bleibt fest ausgeblendet.
+    endcomment
+    assign lc_hidden = section.settings.hidden_handles | default: '' | remove: ' ' | split: ','
+
     if section.settings.display_type == 'all'
       case section.settings.sort
         when 'products_high', 'products_low'
@@ -24,7 +32,7 @@
           assign list_collections = collections
       endcase
       for collection in list_collections
-        unless collection.handle == 'frontpage'
+        unless collection.handle == 'frontpage' or lc_hidden contains collection.handle
           assign collection_count = collection_count | plus: 1
         endunless
       endfor
@@ -77,7 +85,7 @@
           else
             assign custom_index = -1
             for collection in list_collections
-              if collection.handle == 'frontpage'
+              if collection.handle == 'frontpage' or lc_hidden contains collection.handle
                 continue
               else
                 assign custom_index = custom_index | plus: 1
@@ -94,7 +102,7 @@
           else
             assign custom_index = -1
             for collection in list_collections reversed
-              if collection.handle == 'frontpage'
+              if collection.handle == 'frontpage' or lc_hidden contains collection.handle
                 continue
               else
                 assign custom_index = custom_index | plus: 1
@@ -241,6 +249,12 @@
           "label": "t:sections.main-list-collections.settings.sort.options__6.label"
         }
       ]
+    },
+    {
+      "type": "text",
+      "id": "hidden_handles",
+      "label": "Ausgeblendete Kollektionen",
+      "info": "Handles, kommagetrennt. Nur bei \"Alle Kollektionen\". Für interne Kollektionen, die veröffentlicht bleiben müssen, z. B. stack-eligible für den Stack-Builder."
     }
   ],
   "blocks": [

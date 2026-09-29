@@ -1,7 +1,7 @@
 /*
    lt-product-card — die gemeinsame Produktkarte
-   Getragen von sections/lifetime-collection-grid.liquid (Katalog)
-   und sections/lt-collection-register.liquid (Register-Recto).
+   Getragen von sections/lifetime-collection-grid.liquid, also vom Katalog
+   (/collections/all) und von allen Kollektionsseiten (templates/collection.json).
 
    Ein Feldsatz, vier Layouts: sheet · sheet-wide · row · tile.
    Alle Werte über Theme-Tokens. Zwei Ausnahmen unten begründet.
@@ -21,6 +21,11 @@
 
   --ltc-hairline: rgba(38, 37, 30, 0.12);
 
+  /* Sterne im Bernstein der PDP (--color-star in theme.css, --lt-star in
+     lt-pdp.css), damit Katalog und Produktseite dieselbe Bewertung zeigen. */
+  --ltc-star: var(--color-star, #f4b740);
+  --ltc-star-off: rgba(38, 37, 30, 0.14);
+
   position: relative;
   display: grid;
   text-decoration: none;
@@ -28,7 +33,28 @@
   font-family: var(--font-body);
 }
 
-.ltc:focus-visible {
+/* -- Link über die ganze Karte
+   Der Titel ist das einzige <a>. Sein ::after legt sich über die Karte,
+   Bild, Text und Preis führen damit zur PDP. Der Warenkorb-Button liegt
+   mit z-index darüber und fängt nur seinen eigenen Klick. */
+.ltc__link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.ltc__link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+}
+
+.ltc__link:focus-visible {
+  outline: none;
+}
+
+.ltc__link:focus-visible::after {
   outline: 2px solid var(--color-teal-dark);
   outline-offset: 2px;
 }
@@ -118,26 +144,43 @@
   margin-top: var(--space-3);
 }
 
-/* -- Bewertung als Messwert
-   20px/700 statt 16px/700: Deep Teal misst auf Weiß 3,9:1 und trägt
-   damit erst ab 18,66px fett. Hält den festgelegten Teal, statt einen
-   dunkleren Ton zu erfinden, den das System nicht hat. */
+/* -- Bewertung mit Sternen
+   Fünf Sterne als Maske, die Füllung ist ein Balken mit der exakten Breite
+   (4,7 = 94 %). Die Zahl daneben ist Ink statt Teal: Die Sterne tragen jetzt
+   die Aussage, die Zahl ist nur noch die Beschriftung dazu. */
 .ltc__rating {
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.25em;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.ltc__stars {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  /* intrinsic: fünf Sternzellen à 16 × 15 px, Maß der PDP-Sterne */
+  width: 80px;
+  height: 15px;
+  background: var(--ltc-star-off);
+  -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-1 0 16 13'><path d='m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z'/></svg>") 0 0 / 16px 15px repeat-x;
+  mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-1 0 16 13'><path d='m7 0 1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0Z'/></svg>") 0 0 / 16px 15px repeat-x;
+}
+
+.ltc__starsOn {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--ltc-star);
 }
 
 .ltc__ratingValue {
-  font-family: var(--font-heading);
-  font-size: var(--text-section);
-  font-weight: var(--weight-bold);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
   line-height: 1;
   font-variant-numeric: tabular-nums;
-  color: var(--color-teal-dark);
+  color: var(--color-ink);
 }
 
-.ltc__ratingScale,
 .ltc__ratingCount {
   font-family: var(--font-body);
   font-size: var(--text-body-sm);
@@ -218,7 +261,27 @@
   background: var(--color-dark);
   color: var(--color-white);
   border: 1px solid var(--color-dark);
+  margin: 0;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+/* Der Warenkorb-Button ist ein echtes Bedienelement über dem Kartenlink. */
+.ltc__cta--atc {
+  position: relative;
+  z-index: 1;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.ltc__cta--atc:focus-visible {
+  outline: 2px solid var(--color-teal-dark);
+  outline-offset: 2px;
+}
+
+.ltc__cta--atc[aria-busy="true"] {
+  opacity: 0.6;
+  cursor: progress;
 }
 
 .ltc__cta--outline {
@@ -229,12 +292,17 @@
   border: 1px solid var(--color-dark);
 }
 
-.ltc:hover .ltc__cta {
+/* Hover auf der Karte hebt nur die CTA an, die selbst zur PDP führt. Der
+   Warenkorb-Button reagiert nur auf sich, sonst sähe ein Klick auf die
+   Karte aus wie ein Klick in den Warenkorb. */
+.ltc:hover .ltc__cta:not(.ltc__cta--atc),
+.ltc__cta--atc:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.ltc:hover .ltc__cta--outline {
+.ltc:hover .ltc__cta--outline:not(.ltc__cta--atc),
+.ltc__cta--outline.ltc__cta--atc:hover {
   background: var(--color-dark);
   color: var(--color-white);
   box-shadow: none;

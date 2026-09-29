@@ -459,11 +459,8 @@
     color: var(--color-ink-muted);
   }
 
-  /* Ladezustand der Warenkorb-Karten */
-  .section-{{ section.id }}-cg .ltc.is-loading {
-    opacity: 0.6;
-    pointer-events: none;
-  }
+  /* Ladezustand des Warenkorb-Buttons steht in lt-product-card.css
+     (.ltc__cta--atc[aria-busy]). Die Karte selbst bleibt klickbar. */
 </style>
 
 <script>
@@ -471,20 +468,22 @@
     var scope = document.querySelector('.section-{{ section.id }}-cg');
     if (!scope) return;
 
+    // Nur der Button legt in den Warenkorb. Bild und Titel sind der Link
+    // zur PDP (siehe snippets/lt-product-card.liquid).
     function handleClick(e) {
-      var card = e.currentTarget;
-      var id = card.getAttribute('data-lt-card-atc');
+      var btn = e.currentTarget;
+      var id = btn.getAttribute('data-lt-card-atc');
       if (!id) return;
       e.preventDefault();
-      if (card.classList.contains('is-loading')) return;
-      card.classList.add('is-loading');
+      if (btn.getAttribute('aria-busy') === 'true') return;
+      btn.setAttribute('aria-busy', 'true');
 
       var payload = JSON.stringify({
         items: [{ id: parseInt(id, 10), quantity: 1 }]
       });
       var headers = { 'Content-Type': 'application/json' };
 
-      function done() { card.classList.remove('is-loading'); }
+      function done() { btn.removeAttribute('aria-busy'); }
 
       // Theme-Helper bevorzugt — übernimmt Drawer-Open + Cart-Refresh
       if (typeof window.handleAddToCart === 'function') {
@@ -503,8 +502,8 @@
       }
     }
 
-    scope.querySelectorAll('[data-lt-card-atc]').forEach(function(card) {
-      card.addEventListener('click', handleClick);
+    scope.querySelectorAll('[data-lt-card-atc]').forEach(function(btn) {
+      btn.addEventListener('click', handleClick);
     });
   })();
 </script>

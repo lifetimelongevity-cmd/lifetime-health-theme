@@ -1,8 +1,14 @@
 {% doc %}
   Die gemeinsame Produktkarte für Katalog und Register. Ein Feldsatz, drei Layouts.
 
-  Rendert das komplette <a>-Element. Die Kaufpolitik (PDP oder Warenkorb) entscheidet
-  die aufrufende Section und reicht das Ergebnis über `href` und `atc_variant_id` durch.
+  Die Kaufpolitik (PDP oder Warenkorb) entscheidet die aufrufende Section und reicht
+  das Ergebnis über `href` und `atc_variant_id` durch.
+
+  Zwei Ziele, zwei Elemente: Der Titel ist der Link zur PDP und spannt seine
+  Klickfläche per ::after über die ganze Karte, Bild und Text führen also mit. Legt
+  die Karte in den Warenkorb, ist die CTA ein eigener <button>, der über dieser Fläche
+  liegt. Vorher war die ganze Karte ein <a>, und bei gesetzter Variant-ID legte jeder
+  Klick, auch auf Bild oder Titel, das Produkt ungefragt in den Warenkorb.
 
   Reihenfolge der Felder: Bild im Well, Kicker, Titel, Nutzenzeile, Bewertung,
   Preis, Streichpreis, Abo-Zeile, Preisnotiz, CTA.
@@ -106,6 +112,12 @@
     endif
   endif
 
+  comment
+    Sterne exakt statt auf halbe gerundet: 4,7 füllt 94 %, wie im Hero der PDP
+    (lt-pdp-hero, lt_star_pct). Gerundet stünden bei 4,7 fünf volle Sterne.
+  endcomment
+  assign ltc_star_pct = ltc_rating | times: 20 | round: 1
+
   assign ltc_on_sale = false
   if product.compare_at_price > product.price
     assign ltc_on_sale = true
@@ -149,14 +161,7 @@
   endcase
 -%}
 
-<a
-  class="ltc ltc--{{ ltc_variant }}{% unless product.available %} is-unavailable{% endunless %}"
-  href="{{ href }}"
-  {%- if atc_variant_id != blank %}
-    data-lt-card-atc="{{ atc_variant_id }}"
-    aria-label="{{ ltc_name | escape }}, {{ cta_label | escape }}"
-  {%- endif -%}
->
+<div class="ltc ltc--{{ ltc_variant }}{% unless product.available %} is-unavailable{% endunless %}">
 
   <span class="ltc__well">
     {%- if ltc_image != blank -%}
@@ -186,7 +191,7 @@
       <span class="ltc__kicker">{{ kicker | escape }}</span>
     {%- endif -%}
 
-    <span class="ltc__name">{{ ltc_name | escape }}</span>
+    <a class="ltc__name ltc__link" href="{{ href }}">{{ ltc_name | escape }}</a>
 
     {%- if ltc_sub != blank -%}
       <span class="ltc__sub">{{ ltc_sub }}</span>
@@ -200,10 +205,12 @@
               {{- ltc_rating }} von 5 Sternen
               {%- if ltc_rating_count != blank %}, {{ ltc_rating_count }} Bewertungen{% endif -%}
             </span>
+            <span class="ltc__stars" aria-hidden="true">
+              <span class="ltc__starsOn" style="width: {{ ltc_star_pct }}%"></span>
+            </span>
             <span class="ltc__ratingValue" aria-hidden="true">
               {{- ltc_rating | round: 1 | replace: '.', ',' -}}
             </span>
-            <span class="ltc__ratingScale" aria-hidden="true">/ 5</span>
             {%- if ltc_rating_count != blank -%}
               <span class="ltc__ratingCount" aria-hidden="true">({{ ltc_rating_count }})</span>
             {%- endif -%}
@@ -244,10 +251,21 @@
     {%- endif -%}
 
     {%- if product.available and cta_label != blank -%}
-      <span class="ltc__cta{% unless ltc_variant == 'sheet' %} ltc__cta--outline{% endunless %}">
-        {{- cta_label | escape -}}
-      </span>
+      {%- if atc_variant_id != blank -%}
+        <button
+          type="button"
+          class="ltc__cta ltc__cta--atc{% unless ltc_variant == 'sheet' %} ltc__cta--outline{% endunless %}"
+          data-lt-card-atc="{{ atc_variant_id }}"
+          aria-label="{{ ltc_name | escape }}: {{ cta_label | escape }}"
+        >
+          {{- cta_label | escape -}}
+        </button>
+      {%- else -%}
+        <span class="ltc__cta{% unless ltc_variant == 'sheet' %} ltc__cta--outline{% endunless %}">
+          {{- cta_label | escape -}}
+        </span>
+      {%- endif -%}
     {%- endif -%}
   </span>
 
-</a>
+</div>
