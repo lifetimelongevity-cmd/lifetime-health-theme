@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-08-27
+last_review: 2026-09-29
 canonical_for: live-page-slug-to-template-mapping
 ---
 
@@ -396,14 +396,29 @@ Der Kernsatz „Was die Studienlage nicht trägt, geht nicht online." steht gro�
 Anführungszeichen und ohne Zuschreibung: es ist LIFETIME-Text über ihn, kein Zitat, und
 seine Wortlaut-Freigabe ist weiter offen. Die Beitragsliste bleibt bewusst leise.
 
-## Kollektionsseiten (Stand 2026-08-19)
+## Kollektionsseiten (Stand 2026-09-29)
 
-Zwei Flächen, zwei Templates, **eine** Produktkarte.
+Drei Flächen, drei Templates, **eine** Produktkarte.
 
 | Slug | Template | Haupt-Section | Bemerkung |
 |---|---|---|---|
-| `/collections/all` | `templates/collection.katalog.json` | `lt-science-hero`, 2 × `lifetime-collection-grid`, `lt-katalog-index` | Kuratierter Katalog, 13 Produkte als Blöcke gepflegt (liest `collection.products` nicht) |
+| `/collections/all` | `templates/collection.katalog.json` | `lt-science-hero`, 2 × `lifetime-collection-grid`, `lt-katalog-index` | Kuratierter Katalog, 14 Produkte als Blöcke gepflegt (liest `collection.products` nicht). NAD⁺ seit 29.09. als erste Karte unter „Zellfunktion“ |
 | `/collections/<handle>` (12 weitere) | `templates/collection.json` | `lifetime-collection-grid` mit `source: collection` | Rendert `collection.products`, Titel als H1, Beschreibung als Absatz |
+| `/` (Startseite, Section `ergaenzen`) | `templates/index.json` | `lifetime-collection-grid`, Variante `row` | „Unsere Bestseller.“ nach dem Test-Block: NMN (Kennzeichnung wie PDP), Spermidin, NAD⁺, darunter „Alle Produkte ansehen“ (Settings `more_label`/`more_url`, leer rendert nichts) |
+| `/collections` (Kollektionsliste) | `templates/list-collections.json` | `main-list-collections` | Blendet per Setting `hidden_handles` die Kollektion `stack-eligible` aus. **Nicht depublizieren:** `/pages/stack-builder` liest sie per `collections['stack-eligible']` in Liquid |
+
+**Kaufweg der Karte seit 2026-09-29.** Die Karte ist ein `div`, nicht mehr ein `a`. Der
+Titel (`.ltc__link`) ist das einzige Link-Element und spannt seine Klickfläche per `::after`
+über die ganze Karte, Bild, Text und Preis führen also zur PDP. Legt die Karte in den
+Warenkorb (`link_behavior: cart`, nicht in `pdp_exception_handles`), ist die CTA ein
+eigener `<button data-lt-card-atc>` mit `z-index` darüber. Vorher legte jeder Klick auf
+eine Supplement-Karte, auch auf Bild oder Titel, das Produkt ungefragt in den Warenkorb.
+Bewertung mit fünf Sternen (exakte Füllung, `--color-star`), wie im PDP-Hero.
+
+**Kollektion „Bestseller“ am 2026-09-29 nach Zahlen neu befüllt** (Admin-API, BJ-Freigabe):
+NMN, Test, Spermidin, NAD⁺ nach Bestellungen der letzten 90 Tage (122 / 19 / 10 / 8).
+Vorher Test, NAD⁺, Fisetin, Kreatin, also ohne NMN. Verlinkt nur aus `lt-katalog-index`
+(erster Link) und der Kollektionsliste, in keinem Menü; 25 Aufrufe in 90 Tagen.
 
 `all` trägt im Admin `templateSuffix: "katalog"`. Slug und Suffix sind zwei verschiedene
 Dinge, wie bei der NMN-PDP auch.
@@ -419,8 +434,9 @@ hervorgehobenen Registereintrag), `row` (Registerzeile), `tile` (Raster, auf die
 Flächen nicht mehr benutzt). Wer die Karte ändert, ändert beide Flächen. Preis,
 Streichpreis, Abo-Preis, Bewertung und Kaufweg liegen im Snippet, nicht in den Sections.
 
-**`lifetime-collection-grid` wird von genau einem Template benutzt** (`collection.katalog.json`),
-geprüft über `templates/` und `sections/`. Änderungen daran treffen keine andere Seite.
+**`lifetime-collection-grid` läuft auf drei Templates** (`collection.katalog.json`,
+`collection.json`, seit 2026-09-29 auch `index.json`), geprüft über `templates/` und
+`sections/`. Wer die Section oder die Karte ändert, prüft alle drei.
 
 Am 2026-08-19 aus dem Katalog entfernt: `lifetime-collection-nav` (fünf Sprungmarken
 innerhalb derselben Seite, mobil 30px hohe Bedienelemente) und der Badge-Slot der Karte
