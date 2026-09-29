@@ -1781,12 +1781,15 @@
             Bis 04.09.2026 ein mailto (BJ-Entscheid 2026-08-08, Antwort persönlich). Auf dem Desktop
             ohne eingerichtetes Mailprogramm passiert beim Klick nichts, deshalb seit 04.09. (BJ)
             wahlweise ein Link-Ziel: ist precheck_url gesetzt, führt der Link dorthin
-            (AGE&DNA: AGE Quiz), sonst weiter mailto. {%- endcomment -%}
+            (AGE&DNA: bis 29.09. das AGE Quiz, seitdem die kostenfreie Beratung,
+            Conversion-Plan 4.3), sonst weiter mailto. Der Klick geht als
+            dataLayer-Event pdp_precheck_click raus. {%- endcomment -%}
         {%- if section.settings.precheck_text != blank -%}
           <div class="lt-pdp-hero__precheck">
             <span class="lt-pdp-hero__precheck-text">{{ section.settings.precheck_text | escape }}</span>
             <a
               class="lt-pdp-hero__precheck-link"
+              data-lt-precheck
               {%- if section.settings.precheck_url != blank %}
               href="{{ section.settings.precheck_url }}"
               {%- else %}
@@ -1794,6 +1797,26 @@
               {%- endif %}
             >{{ section.settings.precheck_link_label | default: 'Schreib uns' | escape }}</a>
           </div>
+          <script>
+            (function () {
+              if (window.__ltPrecheckBound) return;
+              window.__ltPrecheckBound = true;
+              document.addEventListener('click', function (e) {
+                var a = e.target.closest('[data-lt-precheck]');
+                if (!a) return;
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({ event: 'pdp_precheck_click', precheck_target: a.getAttribute('href') });
+              });
+            })();
+          </script>
+        {%- endif -%}
+
+        {%- if section.settings.report_strip_enable -%}
+          {%- render 'lt-pdp-report-strip',
+            section_id: section.id,
+            heading: section.settings.report_strip_heading,
+            facts: section.settings.report_strip_facts
+          -%}
         {%- endif -%}
 
         <script>
@@ -4280,6 +4303,29 @@
       "id": "precheck_subject",
       "label": "Fallback — Mail-Betreff",
       "info": "Vorbelegter Betreff der Mail. Standard: Frage vor dem Kauf"
+    },
+    {
+      "type": "header",
+      "content": "Beispiel-Report unter der Buy-Box"
+    },
+    {
+      "type": "checkbox",
+      "id": "report_strip_enable",
+      "label": "Beispiel-Report zeigen",
+      "default": false,
+      "info": "Drei Seiten eines Muster-Reports mit fiktiven Daten, dazu der ganze Report im Dialog. Bilder: assets/lt-beispiel-report-1.jpg bis -6.jpg. Nur für den AGE & DNA-Test gedacht."
+    },
+    {
+      "type": "text",
+      "id": "report_strip_heading",
+      "label": "Beispiel-Report, Überschrift",
+      "default": "So sieht deine Auswertung aus"
+    },
+    {
+      "type": "text",
+      "id": "report_strip_facts",
+      "label": "Beispiel-Report, Faktenzeile",
+      "default": "Alterungstempo (MethylPace) · Genetik in 23 Kategorien · Ergebnis rund 6 Wochen nach Eingang im Labor"
     },
     {
       "type": "header",

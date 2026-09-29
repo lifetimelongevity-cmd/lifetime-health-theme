@@ -1,0 +1,242 @@
+{%- comment -%}
+  Beispiel-Report unter der Buy-Box. Conversion-Plan 4.1, 2026-09-29.
+
+  Die Test-PDP machte aus 4,4 % der Aufrufe einen Warenkorb, die NMN-PDP aus
+  14 %. Für 349 € fehlte vor allem der Blick in das, was man bekommt. Die
+  Strecke zeigt drei Seiten eines Muster-Reports, der Link öffnet alle sechs.
+
+  Die Seiten sind ein Muster mit fiktiven Daten, gebaut aus der Report-Vorlage
+  in agedna-recommendations/. Jede Seite trägt oben das Band „Beispiel-Report ·
+  fiktive Beispieldaten". Bewusst weggelassen: die Seite mit ärztlichen
+  Schritten, Krankheitsbilder und jede NMN-Empfehlung (VSW-Vergleich).
+  Quelle der Bilder: assets/lt-beispiel-report-1.jpg bis -6.jpg.
+
+  Parameter:
+    section_id  Pflicht, für eindeutige IDs
+    heading     Überschrift (Default unten)
+    facts       Faktenzeile unter der Überschrift
+    link_label  Beschriftung des Links zum ganzen Report
+{%- endcomment -%}
+{%- liquid
+  assign rs_id = 'lt-report-' | append: section_id
+  assign rs_heading = heading | default: 'So sieht deine Auswertung aus'
+  assign rs_facts = facts | default: 'Alterungstempo (MethylPace) · Genetik in 23 Kategorien · Ergebnis rund 6 Wochen nach Eingang im Labor'
+  assign rs_link = link_label | default: 'Beispiel-Report ansehen (6 Seiten)'
+  assign rs_alts = 'Seite 1: biologisches Alter, Alterungstempo und Gedächtnisalter auf einen Blick|Seite 2: Stärken und Bereiche mit mehr Aufmerksamkeit|Seite 3: drei Schwerpunkte und was sie bewirken|Seite 4: konkrete Routinen für den Alltag|Seite 5: passende Ergänzungen zum Profil|Seite 6: Ausgangswert und nächste Messung' | split: '|'
+  assign rs_strip = '1,2,4' | split: ','
+-%}
+
+<div class="lt-report-strip">
+  <div class="lt-report-strip__head">
+    <p class="lt-report-strip__kicker">Beispiel-Report mit fiktiven Daten</p>
+    <h2 class="lt-report-strip__title">{{ rs_heading | escape }}</h2>
+    <p class="lt-report-strip__facts">{{ rs_facts | escape }}</p>
+  </div>
+
+  <ul class="lt-report-strip__track" role="list">
+    {%- for n in rs_strip -%}
+      {%- assign rs_i = n | plus: 0 | minus: 1 -%}
+      <li class="lt-report-strip__item">
+        <button
+          type="button"
+          class="lt-report-strip__page"
+          data-crs-dialog-open
+          data-lt-report-open="seite-{{ n }}"
+          aria-haspopup="dialog"
+          aria-controls="{{ rs_id }}"
+        >
+          <img
+            src="{{ 'lt-beispiel-report-' | append: n | append: '.jpg' | asset_url }}"
+            alt="Beispiel-Report, {{ rs_alts[rs_i] }}"
+            width="777"
+            height="1100"
+            loading="lazy"
+            decoding="async"
+          >
+        </button>
+      </li>
+    {%- endfor -%}
+  </ul>
+
+  <button
+    type="button"
+    class="lt-report-strip__link"
+    data-crs-dialog-open
+    data-lt-report-open="link"
+    aria-haspopup="dialog"
+    aria-controls="{{ rs_id }}"
+  >{{ rs_link | escape }}</button>
+
+  <dialog id="{{ rs_id }}" class="crs-micro-dialog lt-report-dialog" aria-modal="true" aria-labelledby="{{ rs_id }}-title">
+    <div class="crs-micro-dialog__inner">
+      <button type="button" class="crs-micro-dialog__close" data-crs-dialog-close aria-label="{{ 'general.accessibility_labels.close' | t }}"><span aria-hidden="true">×</span></button>
+      <p class="crs-micro-dialog__title" id="{{ rs_id }}-title">Beispiel-Report</p>
+      <p class="lt-report-dialog__note">Fiktive Beispieldaten, keine echte Person. Deine Auswertung enthält deine eigenen Werte.</p>
+      <ol class="lt-report-dialog__pages" role="list">
+        {%- for alt in rs_alts -%}
+          <li>
+            <img
+              src="{{ 'lt-beispiel-report-' | append: forloop.index | append: '.jpg' | asset_url }}"
+              alt="Beispiel-Report, {{ alt }}"
+              width="777"
+              height="1100"
+              loading="lazy"
+              decoding="async"
+            >
+          </li>
+        {%- endfor -%}
+      </ol>
+      <button type="button" class="lt-report-dialog__back" data-crs-dialog-close>Zurück zum Test</button>
+    </div>
+  </dialog>
+</div>
+
+<script>
+  (function () {
+    if (window.__ltReportStripBound) return;
+    window.__ltReportStripBound = true;
+    document.addEventListener('click', function (e) {
+      var btn = e.target.closest('[data-lt-report-open]');
+      if (!btn) return;
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: 'pdp_report_preview_open', report_preview_source: btn.getAttribute('data-lt-report-open') });
+    });
+  })();
+</script>
+
+<style>
+  .lt-report-strip {
+    margin-top: var(--space-6);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--lt-border, rgba(38, 37, 30, 0.1));
+  }
+  .lt-report-strip__head {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .lt-report-strip__kicker {
+    margin: 0;
+    font-size: var(--text-micro, 12px);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--lt-muted, rgba(38, 37, 30, 0.72));
+  }
+  .lt-report-strip__title {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: var(--text-h4, 20px);
+    font-weight: 400;
+    line-height: var(--leading-tight, 1.2);
+    color: var(--lt-text, #26251e);
+  }
+  .lt-report-strip__facts {
+    margin: 0;
+    font-size: var(--text-body-sm, 14px);
+    line-height: 1.45;
+    color: var(--lt-muted, rgba(38, 37, 30, 0.72));
+  }
+  .lt-report-strip__track {
+    list-style: none;
+    margin: var(--space-4) 0 0;
+    padding: 0;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: var(--space-3);
+  }
+  @media (max-width: 749px) {
+    .lt-report-strip__track {
+      grid-auto-columns: 42%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+      margin-right: calc(-1 * var(--space-5, 20px));
+      padding-right: var(--space-5, 20px);
+    }
+    .lt-report-strip__track::-webkit-scrollbar { display: none; }
+  }
+  .lt-report-strip__item { scroll-snap-align: start; }
+  .lt-report-strip__page {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 1px solid var(--lt-border, rgba(38, 37, 30, 0.1));
+    border-radius: var(--lt-radius-md, 4px);
+    background: var(--lt-surface-raised, var(--color-surface-primary));
+    overflow: hidden;
+    cursor: zoom-in;
+  }
+  .lt-report-strip__page img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+  .lt-report-strip__page:focus-visible,
+  .lt-report-strip__link:focus-visible {
+    outline: 2px solid var(--lt-text, #26251e);
+    outline-offset: 2px;
+  }
+  .lt-report-strip__link {
+    appearance: none;
+    -webkit-appearance: none;
+    margin-top: var(--space-3);
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: var(--text-body-sm, 14px);
+    color: var(--lt-text, #26251e);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+  }
+  .lt-report-dialog {
+    max-width: min(96vw, 40rem);
+    max-height: 92vh;
+  }
+  .lt-report-dialog .crs-micro-dialog__inner {
+    max-height: 92vh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .lt-report-dialog .crs-micro-dialog__close {
+    position: sticky;
+    top: 0;
+    float: right;
+    z-index: 1;
+    background: var(--color-surface-primary);
+  }
+  .lt-report-dialog__note {
+    margin: 0 0 var(--space-4);
+    font-size: var(--text-body-sm, 14px);
+    color: var(--color-text-secondary);
+  }
+  .lt-report-dialog__pages {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .lt-report-dialog__pages img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--color-border-default);
+    border-radius: var(--radius-sm, 4px);
+  }
+  .lt-report-dialog__back {
+    display: block;
+    width: 100%;
+    margin-top: var(--space-5);
+    padding: var(--space-3) var(--space-4);
+    border: 0;
+    border-radius: var(--lt-radius-md, 4px);
+    background: var(--lt-cta-bg, var(--color-dark));
+    color: var(--lt-on-dark, var(--color-surface-primary));
+    font: inherit;
+    cursor: pointer;
+  }
+</style>
