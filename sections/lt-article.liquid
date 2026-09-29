@@ -27,6 +27,10 @@
   • article.metafields.custom.reviewer_credential (Text)
   • article.metafields.custom.reviewed_date  (Datum) — zeigt "Aktualisiert am"
   • article.metafields.custom.sources        (Rich Text) — Quellen-Accordion
+  • <p class="lt-article__lead"> im Body     — Direktantwort (40–60 Wörter) auf die
+    Suchfrage. Wird aus dem Body gelöst und direkt unter der Byline VOR den
+    Takeaways gerendert, damit Snippet/KI-Übersicht sie als erste Aussage unter
+    dem H1 finden. Opt-in: Artikel ohne die Klasse bleiben unverändert.
   E-E-A-T-Regel: Byline-Zeilen erscheinen NUR, wenn Name gepflegt ist.
   Niemals Platzhalter-Credentials rendern.
 {% endcomment %}
@@ -53,6 +57,15 @@
   # Artikel mit gemischter H2/H3-Hierarchie bleiben unberührt. Quelltext im
   # Admin bleibt unverändert. Siehe docs/blog-design-best-practices.md.
   assign article_body = article.content
+
+  # Direktantwort-Lead (Opt-in über die Klasse, siehe Kopfkommentar).
+  assign lead_html = ''
+  if article_body contains '<p class="lt-article__lead">'
+    assign lead_inner = article_body | split: '<p class="lt-article__lead">' | last | split: '</p>' | first
+    assign lead_html = '<p class="lt-article__lead">' | append: lead_inner | append: '</p>'
+    assign article_body = article_body | remove_first: lead_html
+  endif
+
   assign h2_probe = article_body | split: '<h2'
   if h2_probe.size == 1
     assign article_body = article_body | replace: '<h3', '<h2' | replace: '</h3>', '</h2>'
@@ -163,6 +176,8 @@
         {%- endif -%}
       </p>
     </header>
+
+    {{- lead_html -}}
 
     {%- if mf.takeaways.value != blank -%}
       {%- capture newline_char %}
@@ -401,6 +416,14 @@
   font-weight: var(--weight-regular);
   line-height: var(--leading-heading);
   color: var(--color-text-primary);
+}
+
+.lt-article__lead {
+  margin: var(--space-6) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-article);
+  line-height: var(--leading-relaxed);
+  color: var(--color-ink);
 }
 
 .lt-article__takeaways {
