@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-07-29
+last_review: 2026-09-29
 canonical_for: pdp-section-system und live-reihenfolge
 ---
 
@@ -35,7 +35,7 @@ Template: `templates/product.nmn-pulver.json` (Suffix `nmn-pulver`, nicht aus de
 | 5 | `nmn_marktbefund` | `crs-metrics-row` | Vertrauen | Marktbefund NUS/GeroScience 2024 plus eigener Messwert |
 | 6 | `nmn_laborwerte` | `lt-pdp-laborwerte` | Vertrauen | Chargen-Messwerte, Labor, Akkreditierung, Prüfbericht-Link |
 | 7 | `lt_comparison_table` | `lt-comparison-table` | Vertrauen | Abgrenzung LIFETIME gegen typische Anbieter, sechs Zeilen |
-| 8 | `customer_reviews_nmn` | `crs-customer-reviews` | Vertrauen | 8 Reviews plus 5 Themen-Pills, sichtbar 4 |
+| 8 | `customer_reviews_nmn` | `crs-customer-reviews` | Vertrauen | Seit 29.09.2026 echte Loox-Texte (`review_source: loox`), Auswahl und Reihenfolge über `loox_pick`, ohne Verifiziert-Badge, dazu 5 Themen-Pills und der Loox-Schnitt. Neue Loox-Bewertungen rücken nicht automatisch nach (keine Verzehr- oder Wirkaussage auf der NMN-PDP) |
 | 9 | `risk_free_close` | `crs-risk-free-close` | Handlung | Abo-Close mit vier Trust-Zeilen und Preiszeile |
 | 10 | `faq_accordion` | `crs-faq-accordion` | Risikoreduktion | 9 Fragen, Novel Food an Position 1 |
 | 11 | `main_product_hidden` | `main-product` | keine | `"disabled": true`, rendert nicht (siehe unten) |
@@ -49,7 +49,7 @@ Template: `templates/product.age-dna-test.json`. 14 Einträge in `order`, davon 
 
 | # | Section-Key | Typ (`sections/*.liquid`) | Stufe | Rolle |
 |---|---|---|---|---|
-| 1 | `main` | `lt-pdp-hero` | Aufmerksamkeit + Handlung | Hero, Einmalkauf-Buybox (kein Abo-Toggle), Trust-Zeilen, Sticky-ATC |
+| 1 | `main` | `lt-pdp-hero` | Aufmerksamkeit + Handlung | Hero, Einmalkauf-Buybox (kein Abo-Toggle), Trust-Zeilen, Sticky-ATC. Unter der Buy-Box seit 29.09.2026 der Beratungslink (precheck, 15 Minuten kostenfrei) und die Beispiel-Report-Strecke (`report_strip_enable`, `snippets/lt-pdp-report-strip.liquid`) |
 | 2 | `logo_garden` | `crs-logo-garden` | Vertrauen | Medienlogos, kompakter gesetzt als auf der NMN-PDP |
 | 3 | `process_steps` | `lt-pdp-process-steps` | Verständnis | Ablauf in 4 Schritten, Kit bis Ergebnis |
 | 4 | `metrics_row` | `crs-metrics-row` | Verständnis | Umfang in Zahlen (187 DNA-Reports, 10 CpG-Gene, 5 Epigenetik-Reports) |
@@ -111,7 +111,10 @@ Warenkorb-Form) läuft über `lt-pdp-hero`.
 - Dieselbe Konvention gilt in `templates/product.json` und
   `templates/product.lifetime-age-folgetest.json`. Die älteren Supplement-Templates
   (`product.01_tmg.json` bis `product.12_nad-liposomal-2.json`) folgen ihr **nicht**, dort ist
-  `main_product_hidden` aktiv und rendert.
+  `main_product_hidden` aktiv und rendert, weil es Beschreibung, Nährwerte und Verzehrempfehlung
+  trägt. Seit 29.09.2026 sind in 01 und 03 bis 11 dort der `buy_buttons`-Block und
+  `sticky_add_to_cart` aus (vorher drei Warenkorb-Formulare pro Seite); gekauft wird nur über
+  `lt-pdp-hero`.
 
 ## Preisquelle (häufige Fehlannahme)
 
