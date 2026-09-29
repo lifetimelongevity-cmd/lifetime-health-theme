@@ -1220,3 +1220,35 @@ html[dir=ltr] .sticky-header {
     display: none;
   }
 }
+/* LIFETIME 2026-09-29: Klickflächen im Header auf 44 × 44 px, das übliche
+   Mindestmaß für Touch. Combine vergrößert die Fläche per ::after, mobil aber
+   nur auf 40 px, und der Menü-Knopf hatte gar keine (30 × 16 px). Der Abstand
+   zwischen den Symbolen wächst mit, sonst überlappen sich die Flächen und ein
+   Tipp am Rand trifft das Nachbarsymbol. */
+@media screen and (max-width: 1023px) {
+  .header__top .icon-button {
+    margin: 0 0.625rem;
+  }
+}
+/* Unter 360 px passen drei getrennte 44-px-Flächen nicht neben das Logo,
+   dort bleibt der alte Abstand (Flächen überlappen dann knapp). */
+@media screen and (max-width: 359px) {
+  .header__top .icon-button {
+    margin: 0 0.375rem;
+  }
+}
+@media screen and (max-width: 767px) {
+  .header__top .icon-button .button__icon:after {
+    width: 44px;
+    height: 44px;
+  }
+}
+.site-header .mobile-menu-button:after {
+  position: absolute;
+  content: "";
+  width: 44px;
+  height: 44px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
