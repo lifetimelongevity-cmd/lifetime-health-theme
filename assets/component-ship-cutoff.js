@@ -71,7 +71,8 @@ if (typeof customElements.get('lt-ship-cutoff') == 'undefined') {
         const left = cutoff - nowMinutes;
         const hours = Math.floor(left / 60);
         const minutes = left % 60;
-        const duration = hours > 0 ? `${hours} Std. ${minutes} Min.` : `${minutes} Min.`;
+        let duration = `${minutes} Min.`;
+        if (hours > 0) duration = minutes > 0 ? `${hours} Std. ${minutes} Min.` : `${hours} Std.`;
         target.textContent = `Heute verschickt, wenn du in ${duration} bestellst`;
       } else {
         const next = new Date(today);
