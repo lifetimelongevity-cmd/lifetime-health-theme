@@ -9,7 +9,10 @@
 
   Ohne gueltige Uhrzeit bleibt das Element versteckt. Die Frist ist nur dann
   zulaessig, wenn das Lager sie wirklich einhaelt (Anhang zu § 3 Abs. 3 UWG
-  Nr. 7), deshalb gibt es keinen Default.
+  Nr. 7), deshalb gibt es keinen Default. Cutoff 12:00 nach BJ (29.09.): bis
+  12/13 Uhr bestellt geht meist am selben Tag raus, spaetestens am Tag danach.
+  Deshalb "Meist ...". Sagt Hive den Versand am selben Tag fest zu, "Meist"
+  streichen.
 
   Markup: snippets/lt-ship-cutoff.liquid
 */
@@ -73,7 +76,7 @@ if (typeof customElements.get('lt-ship-cutoff') == 'undefined') {
         const minutes = left % 60;
         let duration = `${minutes} Min.`;
         if (hours > 0) duration = minutes > 0 ? `${hours} Std. ${minutes} Min.` : `${hours} Std.`;
-        target.textContent = `Heute verschickt, wenn du in ${duration} bestellst`;
+        target.textContent = `Meist heute verschickt, wenn du in ${duration} bestellst`;
       } else {
         const next = new Date(today);
         let steps = 0;
@@ -81,7 +84,7 @@ if (typeof customElements.get('lt-ship-cutoff') == 'undefined') {
           next.setUTCDate(next.getUTCDate() + 1);
           steps += 1;
         } while (!isShippingDay(next) && steps < 21);
-        target.textContent = steps === 1 ? 'Morgen verschickt' : `Am ${LT_DAYS[next.getUTCDay()]} verschickt`;
+        target.textContent = steps === 1 ? 'Meist morgen verschickt' : `Meist am ${LT_DAYS[next.getUTCDay()]} verschickt`;
       }
 
       this.hidden = false;

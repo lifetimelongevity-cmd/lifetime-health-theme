@@ -2,10 +2,31 @@
   # Auto-Empfehlungen können Produkte ausspielen, die im Erstkauf-Kontext schaden
   # (z. B. der günstigere AGE-Folgetest neben dem Ersttest). Blockliste kommt aus
   # den Theme-Einstellungen, damit sie im Editor sichtbar und prüfbar bleibt. 2026-07-30
-  assign lt_rec_exclude = settings.cart_recommendations_exclude | default: '' | remove: ' ' | split: ','
+  #
+  # Seit 29.09.2026 faellt ausserdem weg, was schon im Korb liegt oder das eine
+  # Angebot darueber bereits anbietet (feste Paare aus settings.cart_upsell_pairs,
+  # z. B. NMN > Kreatin), sonst stuende dasselbe Produkt zweimal im Drawer.
+  assign lt_rec_skip = settings.cart_recommendations_exclude | default: '' | remove: ' ' | prepend: ',' | append: ','
+  assign lt_rec_cart = ','
+  for item in cart.items
+    assign lt_rec_cart = lt_rec_cart | append: item.product.handle | append: ','
+  endfor
+  assign lt_rec_skip = lt_rec_skip | append: lt_rec_cart
+  assign lt_rec_pairs = settings.cart_upsell_pairs | default: '' | remove: ' ' | split: ','
+  for lt_rec_pair in lt_rec_pairs
+    assign lt_rec_pair_parts = lt_rec_pair | split: ':'
+    if lt_rec_pair_parts.size != 2
+      continue
+    endif
+    assign lt_rec_pair_from = lt_rec_pair_parts[0] | prepend: ',' | append: ','
+    if lt_rec_cart contains lt_rec_pair_from
+      assign lt_rec_skip = lt_rec_skip | append: lt_rec_pair_parts[1] | append: ','
+    endif
+  endfor
   assign lt_rec_kept = 0
   for lt_rec_product in recommendations.products
-    unless lt_rec_exclude contains lt_rec_product.handle
+    assign lt_rec_key = lt_rec_product.handle | prepend: ',' | append: ','
+    unless lt_rec_skip contains lt_rec_key
       assign lt_rec_kept = lt_rec_kept | plus: 1
     endunless
   endfor
@@ -27,7 +48,8 @@
     >
       <div class="grid grid--slider grid-2 grid--align-items-stretch" style="--col-gap:20px">
         {%- for product in recommendations.products -%}
-          {%- if lt_rec_exclude contains product.handle -%}{%- continue -%}{%- endif -%}
+          {%- assign lt_rec_key = product.handle | prepend: ',' | append: ',' -%}
+          {%- if lt_rec_skip contains lt_rec_key -%}{%- continue -%}{%- endif -%}
           <div class="product-item" data-js-product-item>
             <a href="{{ product.url }}">
               {%- liquid
