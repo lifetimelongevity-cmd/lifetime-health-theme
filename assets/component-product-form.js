@@ -852,18 +852,46 @@ if ( typeof ProductRecommendations !== 'function' ) {
       const SUCCESS = new Event('product-recommendations-loaded');
       const FAIL = new Event('product-recommendations-error');
 
+      // Ergaenzende Empfehlungen (intent=complementary) kommen aus gepflegten
+      // Kombinationen und fuellen die Plaetze oft nicht. data-fallback-url liefert
+      // dann aehnliche Produkte (intent=related), die hinten aufgefuellt werden,
+      // ohne Dubletten. Ohne data-fallback-url verhaelt sich das Element wie
+      // vorher. Conversion-Plan 3.4, 2026-09-29
+      const loadRoot = (url) => fetch(url)
+        .then(response => response.text())
+        .then(text => new DOMParser().parseFromString(text, 'text/html').querySelector('product-recommendations'));
+
+      const itemsOf = (root) => root ? Array.from(root.querySelectorAll('[data-js-product-item]')) : [];
+
+      const fillUp = (root) => {
+        const limit = parseInt(this.dataset.limit, 10) || 0;
+        const fallbackUrl = this.dataset.fallbackUrl;
+        if (!fallbackUrl || !limit || itemsOf(root).length >= limit) return Promise.resolve(root);
+        return loadRoot(fallbackUrl)
+          .then(fallback => {
+            const extra = itemsOf(fallback);
+            if (extra.length === 0) return root;
+            if (itemsOf(root).length === 0) return fallback;
+            const grid = root.querySelector('[data-js-product-item]').parentElement;
+            const seen = new Set(itemsOf(root).map(item => item.id));
+            extra.forEach(item => {
+              if (itemsOf(root).length >= limit || seen.has(item.id)) return;
+              seen.add(item.id);
+              grid.appendChild(item);
+            });
+            return root;
+          })
+          .catch(() => root);
+      };
+
       const handleIntersection = (entries, observer) => {
 
         if (!entries[0].isIntersecting) return;
         observer.unobserve(this);
 
-        fetch(this.dataset.url)
-          .then(response => response.text())
-          .then(text => {
-            const innerHTML = new DOMParser()
-                .parseFromString(text, 'text/html')
-                .querySelector('product-recommendations');
-
+        loadRoot(this.dataset.url)
+          .then(fillUp)
+          .then(innerHTML => {
 								if ( innerHTML && innerHTML.querySelectorAll('[data-js-product-item]').length > 0 ) {
               this.innerHTML = innerHTML.innerHTML;
               this.querySelectorAll('form').forEach(elm=>{

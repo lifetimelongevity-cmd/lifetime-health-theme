@@ -1,8 +1,38 @@
+{%- liquid
+  # Standard ist intent=complementary (Search & Discovery, Metafeld
+  # shopify--discovery--product_recommendation.complementary_products), weil die
+  # Ueberschriften "Wird oft zusammen gekauft" sagen und related nur Aehnliches
+  # liefert. Reichen die gepflegten Kombinationen nicht fuer alle Plaetze, fuellt
+  # component-product-form.js mit related auf (data-fallback-url). Conversion-Plan
+  # 3.4, 29.09.2026.
+  assign lt_rec_intent = section.settings.intent | default: 'complementary'
+  assign lt_rec_limit = section.settings.products_limit | default: 4
+  # Dieselbe Blockliste wie im Warenkorb (Folgetest, Bundles), eine Quelle.
+  assign lt_rec_exclude = settings.cart_recommendations_exclude | default: '' | remove: ' ' | split: ','
+  assign lt_rec_kept = 0
+  if recommendations.performed
+    for lt_rec_product in recommendations.products
+      unless lt_rec_exclude contains lt_rec_product.handle
+        assign lt_rec_kept = lt_rec_kept | plus: 1
+      endunless
+    endfor
+  endif
+  # Karten aus dem Auffuell-Abruf bekommen eigene Indizes, sonst kollidieren die
+  # Formular-IDs der Schnellkauf-Bloecke mit denen der ersten Karten.
+  assign lt_rec_index_offset = 0
+  if recommendations.intent == 'related' and lt_rec_intent == 'complementary'
+    assign lt_rec_index_offset = 10
+  endif
+-%}
 <product-recommendations
   class="product-recommendations"
-  data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit=4&intent=related"
+  data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ lt_rec_limit }}&intent={{ lt_rec_intent }}"
+  {%- if lt_rec_intent == 'complementary' %}
+  data-fallback-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ lt_rec_limit | plus: 2 }}&intent=related"
+  {%- endif %}
+  data-limit="{{ lt_rec_limit }}"
 >
-  {%- if recommendations.performed and recommendations.products_count > 0 -%}
+  {%- if recommendations.performed and lt_rec_kept > 0 -%}
     <div class="container--large container--vertical-space{% if section.settings.gutter_decrease %}-small{% endif %} {% if section.settings.section_background_color != "rgba(0,0,0,0)" or section.settings.section_background_gradient != blank %} container--has-background {% endif %} {% if section.settings.remove_bottom_margin %} container--negative-margin {% endif %} remove-empty-space">
       {%- render 'section-heading',
         heading: section.settings.heading,
@@ -40,7 +70,11 @@
       <div class="grid {% if section.settings.style == 'slider' %} grid--slider {% else %} grid--layout {% endif %} {{ grid_class_desktop }} {{ section.settings.layout_mobile }} {% if section.settings.layout_mobile_less_items %} reduce-recommendations-on-mobile {% endif %}">
         {%- liquid
           for recommendation in recommendations.products
-            render 'product-item', product: recommendation, section_blocks: section.blocks, index: forloop.index, layout: grid_class_desktop, mobile_layout: section.settings.layout_mobile
+            if lt_rec_exclude contains recommendation.handle
+              continue
+            endif
+            assign lt_rec_index = forloop.index | plus: lt_rec_index_offset
+            render 'product-item', product: recommendation, section_blocks: section.blocks, index: lt_rec_index, layout: grid_class_desktop, mobile_layout: section.settings.layout_mobile
           endfor
         -%}
       </div>
@@ -257,12 +291,38 @@
           "type": "text",
           "id": "button_label",
           "label": "t:sections.bundle-extra-words.sections.product_grid.blocks.product_link.settings.button_label.label",
-          "default": "View product"
+          "default": "Zum Produkt"
         }
       ]
     }
   ],
   "settings": [
+    {
+      "type": "select",
+      "id": "intent",
+      "label": "Empfehlungsart",
+      "info": "Ergänzend liest die in Search & Discovery gepflegten Kombinationen und füllt freie Plätze mit ähnlichen Produkten auf.",
+      "options": [
+        {
+          "value": "complementary",
+          "label": "Ergänzend (oft zusammen gekauft)"
+        },
+        {
+          "value": "related",
+          "label": "Ähnlich"
+        }
+      ],
+      "default": "complementary"
+    },
+    {
+      "type": "range",
+      "id": "products_limit",
+      "label": "Anzahl Produkte",
+      "min": 2,
+      "max": 6,
+      "step": 1,
+      "default": 4
+    },
     {
       "type": "header",
       "content": "t:sections.bundle-extra-words.sections.headings.name"

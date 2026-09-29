@@ -1269,6 +1269,58 @@
                 </span>
               </div>
             </div>
+            {%- comment -%}
+              Zusatzartikel-Häkchen unter der Kaufart (Conversion-Plan 3.3, 29.09.2026):
+              Kreatin steckt in 4 von 10 Mehrprodukt-Bestellungen mit NMN. Gated über
+              addon_product, nur das NMN-Template setzt es. Der Zusatz geht immer als
+              Einmalkauf in den Korb, zusammen mit der gewählten Größe/Kaufart in EINEM
+              /cart/add.js-Aufruf (items[], siehe Skript). „Dann versandfrei“ erscheint nur,
+              wenn genau dieser Zusatz den Korb über die Landesschwelle hebt: Einmalkauf,
+              kein Abo im Korb, vorher darunter, nachher darüber. Kein Wort zur Anwendung,
+              die NMN-Kennzeichnung bleibt unberührt. Liegt der Zusatz schon im Korb,
+              rendert die Zeile nicht.
+            {%- endcomment -%}
+            {%- assign lt_addon = section.settings.addon_product -%}
+            {%- if lt_addon != blank and lt_addon.available and lt_addon.id != product.id -%}
+              {%- liquid
+                assign lt_addon_variant = lt_addon.selected_or_first_available_variant
+                assign lt_addon_in_cart = false
+                assign lt_addon_cart_sub = false
+                for item in cart.items
+                  if item.product_id == lt_addon.id
+                    assign lt_addon_in_cart = true
+                  endif
+                  if item.selling_plan_allocation
+                    assign lt_addon_cart_sub = true
+                  endif
+                endfor
+                capture lt_addon_ship
+                  render 'lt-shipping-rule'
+                endcapture
+                assign lt_addon_ship = lt_addon_ship | split: '|'
+                assign lt_addon_free = lt_addon_ship[1] | plus: 0
+                assign lt_addon_name = section.settings.addon_label | default: lt_addon.title
+              -%}
+              {%- unless lt_addon_in_cart -%}
+                <label
+                  class="lt-addon"
+                  data-lt-addon
+                  data-variant-id="{{ lt_addon_variant.id }}"
+                  data-product-id="{{ lt_addon.id }}"
+                  data-price="{{ lt_addon_variant.price }}"
+                  data-ship-free="{{ lt_addon_free }}"
+                  data-cart-total="{{ cart.total_price }}"
+                  data-cart-sub="{{ lt_addon_cart_sub }}"
+                >
+                  <input type="checkbox" class="lt-addon__input" data-lt-addon-input>
+                  <span class="lt-addon__box" aria-hidden="true"></span>
+                  <span class="lt-addon__text">
+                    <span class="lt-addon__line">{{ section.settings.addon_kicker | escape }}: <strong>{{ lt_addon_name | escape }}</strong>, +{{ lt_addon_variant.price | money }}</span>
+                    <span class="lt-addon__note" data-lt-addon-ship hidden>{{ section.settings.addon_ship_note | escape }}</span>
+                  </span>
+                </label>
+              {%- endunless -%}
+            {%- endif -%}
             {%- else -%}
             {%- comment -%}
               Paket-Auswahl (Standalone-Pfad, z. B. Test vs. Test + Ergebnisgespräch):
@@ -1344,6 +1396,49 @@
                     {%- endif -%}
                   </label>
                 {%- endfor -%}
+                {%- comment -%}
+                  „Für zwei“ (Conversion-Plan 3.2, 29.09.2026): rund jede neunte Test-Bestellung
+                  enthält zwei Kits, im September zwei von neun. Die Karte legt die Basis-Variante
+                  mit Menge 2 in den Korb (applyPkg setzt data-quantity ins Mengenfeld). Kein
+                  Mengenrabatt und kein Decoy (BJ-Linie 22.09.): Preis und Streichpreis sind exakt
+                  das Doppelte der ersten Karte, die Karte nennt den Gesamtpreis. Gated über
+                  pkg_pair_enable, Default aus.
+                {%- endcomment -%}
+                {%- assign lt_pair_variant = product.variants.first -%}
+                {%- if section.settings.pkg_pair_enable and lt_pair_variant.available -%}
+                  {%- liquid
+                    # Immer die Basis-Variante (erste Karte), auch bei Deep-Link auf das Paket
+                    assign lt_pair_price = lt_pair_variant.price | times: 2
+                    assign lt_pair_compare = lt_pair_variant.compare_at_price | default: 0 | times: 2
+                  -%}
+                  <label class="lt-pkg__card" data-lt-pkg>
+                    <input
+                      type="radio"
+                      class="lt-pkg__input"
+                      name="lt-pkg-{{ section.id }}"
+                      value="{{ lt_pair_variant.id }}-x2"
+                      data-variant-id="{{ lt_pair_variant.id }}"
+                      data-quantity="2"
+                      data-once-price="{{ lt_pair_variant.price }}"
+                      data-compare-price="{{ lt_pair_variant.compare_at_price | default: 0 }}"
+                      data-size-short="{{ section.settings.pkg_pair_label | escape }}"
+                      data-stack-bundle="0"
+                    >
+                    <span class="lt-pkg__head">
+                      <span class="lt-pkg__radio" aria-hidden="true"></span>
+                      <span class="lt-pkg__name">{{ section.settings.pkg_pair_label | escape }}</span>
+                      <span class="lt-pkg__price">
+                        {%- if lt_pair_compare > lt_pair_price -%}
+                          <del class="lt-pkg__compare">{{ lt_pair_compare | money_without_trailing_zeros }}</del>
+                        {%- endif %}
+                        {{- lt_pair_price | money_without_trailing_zeros -}}
+                      </span>
+                    </span>
+                    {%- if section.settings.pkg_pair_note != blank -%}
+                      <span class="lt-pkg__note">{{ section.settings.pkg_pair_note | escape }}</span>
+                    {%- endif -%}
+                  </label>
+                {%- endif -%}
               </div>
               {%- comment -%} Aktionskarte statt Banner-Box plus Preiszeilen-Dublette (CRO 16.08.,
                   Kartenform BJ 16.08.): die Karten tragen die Preise (Karte 1 inklusive
@@ -1967,8 +2062,13 @@
       function applyPkg(inp) {
         if (!inp) return;
         if (pkgVariantInput && inp.dataset.variantId) pkgVariantInput.value = inp.dataset.variantId;
-        const once = parseInt(inp.dataset.oncePrice, 10) || 0;
-        const cmp = parseInt(inp.dataset.comparePrice, 10) || 0;
+        // Menge je Karte: „Für zwei“ traegt data-quantity="2" (3.2), alle anderen 1.
+        // Preise und Streichpreise rechnen danach mit der Summe, damit CTA, Sticky
+        // und Kassenzettel dasselbe sagen wie die Karte.
+        const pkgQty = Math.max(1, parseInt(inp.dataset.quantity, 10) || 1);
+        if (quantityInput) quantityInput.value = String(pkgQty);
+        const once = (parseInt(inp.dataset.oncePrice, 10) || 0) * pkgQty;
+        const cmp = (parseInt(inp.dataset.comparePrice, 10) || 0) * pkgQty;
         const hasCmp = cmp > once;
         // Ersparnis gilt je Paket; ohne gueltigen Compare aus, sonst stuende
         // "Du sparst 50 €" der Basis neben dem gewaehlten 449er-Paket.
@@ -2006,7 +2106,7 @@
         }
         // Sticky-Bar synchron: Preis + Paket-Chip (nur der Zusatz, "Test" allein
         // traegt neben dem Produkttitel keine Information)
-        syncStickyAtcPrice(false, 1, once, 0, once, cmp);
+        syncStickyAtcPrice(false, pkgQty, once, 0, once, cmp);
         const short = inp.dataset.sizeShort || '';
         let chip = '';
         if (short && short !== pkgBaseShort) {
@@ -2449,6 +2549,97 @@
         baseSize.checked = true;
         applySize(baseSize);
       }
+    }
+    // --------------------------------------------------------------------
+
+    // --- Zusatzartikel-Häkchen (Conversion-Plan 3.3) ---------------------
+    // Ist das Häkchen gesetzt, schreibt der Submit-Hook Hauptartikel und Zusatz als
+    // items[] ins Formular und schaltet id/quantity/selling_plan fuer genau diesen
+    // Submit ab. component-product-form.js serialisiert synchron und schickt EINEN
+    // /cart/add.js-Aufruf; Drawer, Fehlermeldung und Screenreader-Ansage laufen
+    // unveraendert. Capture-Listener, damit er vor dem Theme-Handler greift.
+    const addon = section.querySelector('[data-lt-addon]');
+    const addonInput = addon ? addon.querySelector('[data-lt-addon-input]') : null;
+    const addonShip = addon ? addon.querySelector('[data-lt-addon-ship]') : null;
+    const addonForm = section.querySelector('form[data-type="add-to-cart-form"]');
+    const addonCart = addon
+      ? { total: parseInt(addon.dataset.cartTotal, 10) || 0, sub: addon.dataset.cartSub === 'true', items: [] }
+      : null;
+
+    function updateAddonShip() {
+      if (!addon || !addonShip) return;
+      const free = parseInt(addon.dataset.shipFree, 10) || 0;
+      const price = parseInt(addon.dataset.price, 10) || 0;
+      const active = section.querySelector('.lt-bb-card__input:checked');
+      const kind = active ? active.closest('[data-lt-bb-card]')?.dataset.bbKind : null;
+      let show = false;
+      // Nur beim Einmalkauf und ohne Abo im Korb: jedes Abo liefert ohnehin versandfrei.
+      if (free > 0 && kind === 'once' && !addonCart.sub) {
+        const qty = Math.max(1, parseInt(active.dataset.quantity, 10) || 1);
+        const before = addonCart.total + (parseInt(active.dataset.oncePrice, 10) || 0) * qty;
+        show = before < free && before + price >= free;
+      }
+      addonShip.hidden = !show;
+    }
+
+    function refreshAddonCart() {
+      if (!addon) return;
+      fetch('/cart.js', { headers: { Accept: 'application/json' } })
+        .then(r => r.json())
+        .then(cart => {
+          addonCart.total = cart.total_price || 0;
+          addonCart.sub = (cart.items || []).some(i => i.selling_plan_allocation);
+          const inCart = (cart.items || []).some(i => String(i.product_id) === addon.dataset.productId);
+          if (inCart) {
+            addon.hidden = true;
+            if (addonInput) addonInput.checked = false;
+          }
+          updateAddonShip();
+        })
+        .catch(() => {});
+    }
+
+    if (addon && addonInput && addonForm) {
+      section.addEventListener('change', function (e) {
+        if (e.target && e.target.matches('.lt-bb-card__input, .lt-size__input')) {
+          window.setTimeout(updateAddonShip, 0);
+        }
+      });
+      if (onceCardEl) onceCardEl.addEventListener('click', () => window.setTimeout(updateAddonShip, 0));
+
+      addonForm.addEventListener('submit', function () {
+        if (!addonInput.checked || addon.hidden) return;
+        const idEl = addonForm.querySelector('[name="id"]');
+        const qtyEl = addonForm.querySelector('[name="quantity"]');
+        const planEl = addonForm.querySelector('[name="selling_plan"]');
+        if (!idEl || !idEl.value) return;
+        const extra = [];
+        const put = (name, value) => {
+          const el = document.createElement('input');
+          el.type = 'hidden';
+          el.name = name;
+          el.value = value;
+          addonForm.appendChild(el);
+          extra.push(el);
+        };
+        put('items[0][id]', idEl.value);
+        put('items[0][quantity]', (qtyEl && qtyEl.value) || '1');
+        if (planEl && planEl.value) put('items[0][selling_plan]', planEl.value);
+        put('items[1][id]', addon.dataset.variantId);
+        put('items[1][quantity]', '1');
+        const base = [idEl, qtyEl, planEl].filter(Boolean);
+        base.forEach(el => { el.disabled = true; });
+        // Nach der synchronen Serialisierung zuruecksetzen, der naechste Submit
+        // startet wieder vom normalen Formular.
+        window.setTimeout(() => {
+          extra.forEach(el => el.remove());
+          base.forEach(el => { el.disabled = false; });
+        }, 0);
+      }, true);
+
+      const addonProductForm = addonForm.closest('product-form');
+      if (addonProductForm) addonProductForm.addEventListener('add-to-cart', refreshAddonCart);
+      refreshAddonCart();
     }
     // --------------------------------------------------------------------
 
@@ -3391,6 +3582,75 @@
   color: var(--lt-muted, rgba(38, 37, 30, 0.55));
 }
 
+/* Zusatzartikel-Häkchen unter der Kaufart (Conversion-Plan 3.3). Leise Zeile statt
+   dritter Karte: die Kaufart bleibt die Entscheidung, der Zusatz ist ein Ja/Nein.
+   Box in Geometrie und Strichstaerke wie .lt-pkg__radio, nur eckig. 2026-09-29 */
+.lt-addon {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-top: var(--space-3, 12px);
+  padding: 10px var(--space-4, 16px);
+  border: 1px solid var(--lt-border, rgba(38,37,30,0.1));
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--lt-text, #26251e);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.lt-addon[hidden] { display: none; }
+.no-touchevents .lt-addon:hover { border-color: rgba(38, 37, 30, 0.3); }
+.lt-addon:has(.lt-addon__input:checked) {
+  background: var(--lt-surface-raised);
+  border-color: var(--lt-text, #26251e);
+}
+.lt-addon__input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+.lt-addon__box {
+  flex: 0 0 auto;
+  position: relative;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  border: 1.5px solid rgba(38, 37, 30, 0.45);
+  border-radius: 3px;
+  background: var(--lt-surface-raised);
+}
+.lt-addon__input:checked + .lt-addon__box {
+  border-color: var(--lt-text, #26251e);
+  background: var(--lt-text, #26251e);
+}
+.lt-addon__input:checked + .lt-addon__box::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid var(--lt-on-dark, #fff);
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+.lt-addon__input:focus-visible + .lt-addon__box {
+  outline: 2px solid var(--lt-text, #26251e);
+  outline-offset: 2px;
+}
+.lt-addon__text {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  font-size: var(--text-body-sm, 14px);
+  line-height: 1.4;
+}
+.lt-addon__line strong { font-weight: 500; }
+.lt-addon__note {
+  color: var(--lt-muted, rgba(38,37,30,0.72));
+}
+.lt-addon__note[hidden] { display: none; }
 {% endstylesheet %}
 
 {% schema %}
@@ -4376,6 +4636,58 @@
       "label": "Streichpreis im Sticky-Warenkorb",
       "info": "Deaktivieren, wenn nur der aktuelle Preis angezeigt werden soll (z. B. schmale Mobile-Ansicht).",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "Zusatzartikel-Häkchen (Abo-Kaufbox)"
+    },
+    {
+      "type": "product",
+      "id": "addon_product",
+      "label": "Zusatzartikel",
+      "info": "Leer = kein Häkchen. Geht immer als Einmalkauf in den Warenkorb, zusammen mit der gewählten Kaufart. Liegt er schon im Warenkorb, erscheint die Zeile nicht."
+    },
+    {
+      "type": "text",
+      "id": "addon_label",
+      "label": "Name im Häkchen",
+      "info": "Leer = Produkttitel."
+    },
+    {
+      "type": "text",
+      "id": "addon_kicker",
+      "label": "Einleitung",
+      "default": "Oft zusammen bestellt"
+    },
+    {
+      "type": "text",
+      "id": "addon_ship_note",
+      "label": "Versandhinweis",
+      "info": "Erscheint nur, wenn genau dieser Zusatz den Warenkorb über die Versandschwelle des Landes hebt.",
+      "default": "Dann versandfrei"
+    },
+    {
+      "type": "header",
+      "content": "Paketkarte „Für zwei“ (Standalone-Paketwahl)"
+    },
+    {
+      "type": "checkbox",
+      "id": "pkg_pair_enable",
+      "label": "Dritte Karte „Für zwei“ zeigen",
+      "info": "Legt die erste Variante mit Menge 2 in den Warenkorb. Preis und Streichpreis sind genau das Doppelte, kein Mengenrabatt.",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "pkg_pair_label",
+      "label": "Name der Karte",
+      "default": "Für zwei"
+    },
+    {
+      "type": "text",
+      "id": "pkg_pair_note",
+      "label": "Notiz der Karte",
+      "default": "2 Kits, jede Person mit eigenem Ergebnis in der App."
     }
   ],
   "presets": [
