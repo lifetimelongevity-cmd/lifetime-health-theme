@@ -1,34 +1,39 @@
 {%- comment -%}
-  Beispiel-Report unter der Buy-Box. Conversion-Plan 4.1, 2026-09-29.
+  Management Summary auf Anfrage, unter der Buy-Box. Conversion-Plan 4.1,
+  2026-09-29.
 
   Die Test-PDP machte aus 4,4 % der Aufrufe einen Warenkorb, die NMN-PDP aus
   14 %. Für 349 € fehlte vor allem der Blick in das, was man bekommt. Die
-  Strecke zeigt drei Seiten eines Muster-Reports, der Link öffnet alle sechs.
+  Strecke zeigt drei Seiten einer Muster-Summary, der Link öffnet alle sechs.
 
-  Die Seiten sind ein Muster mit fiktiven Daten, gebaut aus der Report-Vorlage
-  in agedna-recommendations/. Jede Seite trägt oben das Band „Beispiel-Report ·
-  fiktive Beispieldaten". Bewusst weggelassen: die Seite mit ärztlichen
+  BJ 29.09.: Die Summary heißt „Management Summary“, sie gibt es auf Anfrage
+  und sie wird individuell erstellt. Deshalb nie „Beispiel-Report“ und nie so
+  formuliert, als läge sie jedem Test bei.
+
+  Die Seiten sind ein Muster mit fiktiven Daten, gebaut aus der Vorlage in
+  agedna-recommendations/. Jede Seite trägt oben das Band „Management Summary ·
+  Muster mit fiktiven Daten". Bewusst weggelassen: die Seite mit ärztlichen
   Schritten, Krankheitsbilder und jede NMN-Empfehlung (VSW-Vergleich).
-  Quelle der Bilder: assets/lt-beispiel-report-1.jpg bis -6.jpg.
+  Quelle der Bilder: assets/lt-summary-muster-1.jpg bis -6.jpg.
 
   Parameter:
     section_id  Pflicht, für eindeutige IDs
     heading     Überschrift (Default unten)
-    facts       Faktenzeile unter der Überschrift
-    link_label  Beschriftung des Links zum ganzen Report
+    facts       Zeile unter der Überschrift
+    link_label  Beschriftung des Links zum ganzen Muster
 {%- endcomment -%}
 {%- liquid
   assign rs_id = 'lt-report-' | append: section_id
-  assign rs_heading = heading | default: 'So sieht deine Auswertung aus'
-  assign rs_facts = facts | default: 'Alterungstempo (MethylPace) · Genetik in 23 Kategorien · Ergebnis rund 6 Wochen nach Eingang im Labor'
-  assign rs_link = link_label | default: 'Beispiel-Report ansehen (6 Seiten)'
+  assign rs_heading = heading | default: 'Deine Ergebnisse, auf das Wesentliche verdichtet'
+  assign rs_facts = facts | default: 'Wir erstellen sie nach deinem Ergebnis individuell aus deinen Werten.'
+  assign rs_link = link_label | default: 'Muster ansehen'
   assign rs_alts = 'Seite 1: biologisches Alter, Alterungstempo und Gedächtnisalter auf einen Blick|Seite 2: Stärken und Bereiche mit mehr Aufmerksamkeit|Seite 3: drei Schwerpunkte und was sie bewirken|Seite 4: konkrete Routinen für den Alltag|Seite 5: passende Ergänzungen zum Profil|Seite 6: Ausgangswert und nächste Messung' | split: '|'
   assign rs_strip = '1,2,4' | split: ','
 -%}
 
 <div class="lt-report-strip">
   <div class="lt-report-strip__head">
-    <p class="lt-report-strip__kicker">Beispiel-Report mit fiktiven Daten</p>
+    <p class="lt-report-strip__kicker">Management Summary auf Anfrage</p>
     <h2 class="lt-report-strip__title">{{ rs_heading | escape }}</h2>
     <p class="lt-report-strip__facts">{{ rs_facts | escape }}</p>
   </div>
@@ -46,8 +51,8 @@
           aria-controls="{{ rs_id }}"
         >
           <img
-            src="{{ 'lt-beispiel-report-' | append: n | append: '.jpg' | asset_url }}"
-            alt="Beispiel-Report, {{ rs_alts[rs_i] }}"
+            src="{{ 'lt-summary-muster-' | append: n | append: '.jpg' | asset_url }}"
+            alt="Muster der Management Summary mit fiktiven Daten, {{ rs_alts[rs_i] }}"
             width="777"
             height="1100"
             loading="lazy"
@@ -70,14 +75,14 @@
   <dialog id="{{ rs_id }}" class="crs-micro-dialog lt-report-dialog" aria-modal="true" aria-labelledby="{{ rs_id }}-title">
     <div class="crs-micro-dialog__inner">
       <button type="button" class="crs-micro-dialog__close" data-crs-dialog-close aria-label="{{ 'general.accessibility_labels.close' | t }}"><span aria-hidden="true">×</span></button>
-      <p class="crs-micro-dialog__title" id="{{ rs_id }}-title">Beispiel-Report</p>
-      <p class="lt-report-dialog__note">Fiktive Beispieldaten, keine echte Person. Deine Auswertung enthält deine eigenen Werte.</p>
+      <p class="crs-micro-dialog__title" id="{{ rs_id }}-title">Management Summary, Muster</p>
+      <p class="lt-report-dialog__note">Muster mit fiktiven Daten, keine echte Person. Deine Summary erstellen wir auf Anfrage individuell aus deinen Werten.</p>
       <ol class="lt-report-dialog__pages" role="list">
         {%- for alt in rs_alts -%}
           <li>
             <img
-              src="{{ 'lt-beispiel-report-' | append: forloop.index | append: '.jpg' | asset_url }}"
-              alt="Beispiel-Report, {{ alt }}"
+              src="{{ 'lt-summary-muster-' | append: forloop.index | append: '.jpg' | asset_url }}"
+              alt="Muster der Management Summary mit fiktiven Daten, {{ alt }}"
               width="777"
               height="1100"
               loading="lazy"

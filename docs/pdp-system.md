@@ -49,7 +49,7 @@ Template: `templates/product.age-dna-test.json`. 14 Einträge in `order`, davon 
 
 | # | Section-Key | Typ (`sections/*.liquid`) | Stufe | Rolle |
 |---|---|---|---|---|
-| 1 | `main` | `lt-pdp-hero` | Aufmerksamkeit + Handlung | Hero, Einmalkauf-Buybox (kein Abo-Toggle), Trust-Zeilen, Sticky-ATC. Unter der Buy-Box seit 29.09.2026 der Beratungslink (precheck, 15 Minuten kostenfrei) und die Beispiel-Report-Strecke (`report_strip_enable`, `snippets/lt-pdp-report-strip.liquid`) |
+| 1 | `main` | `lt-pdp-hero` | Aufmerksamkeit + Handlung | Hero, Einmalkauf-Buybox (kein Abo-Toggle), Trust-Zeilen, Sticky-ATC. Unter der Buy-Box seit 29.09.2026 der Beratungslink (precheck, 15 Minuten kostenfrei) und die Strecke „Management Summary auf Anfrage“ mit drei Muster-Seiten (`report_strip_enable`, `snippets/lt-pdp-report-strip.liquid`); die echte Summary wird auf Anfrage individuell erstellt, liegt also nicht jedem Test bei |
 | 2 | `logo_garden` | `crs-logo-garden` | Vertrauen | Medienlogos, kompakter gesetzt als auf der NMN-PDP |
 | 3 | `process_steps` | `lt-pdp-process-steps` | Verständnis | Ablauf in 4 Schritten, Kit bis Ergebnis |
 | 4 | `metrics_row` | `crs-metrics-row` | Verständnis | Umfang in Zahlen (187 DNA-Reports, 10 CpG-Gene, 5 Epigenetik-Reports) |
