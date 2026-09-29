@@ -16,6 +16,10 @@ class CartRecommendations extends HTMLElement {
             .querySelector('[data-js-cart-recommendations-performed]');
           if ( innerHTML && innerHTML.querySelectorAll('[data-js-product-item]').length > 0 ) {
           	this.innerHTML = innerHTML.innerHTML;
+          } else {
+            // Leere Antwort heisst "nichts empfehlen", nicht "alten Stand behalten":
+            // sonst blieben Empfehlungen zu einem laengst entfernten Artikel stehen. 2026-09-29
+            this.innerHTML = '';
           }
 				})
 		}

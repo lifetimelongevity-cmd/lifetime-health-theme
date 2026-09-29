@@ -92,7 +92,33 @@
                     {% endif %}
                   >
                 {%- endif -%}
-                {{ ann_text | escape }}
+                {%- comment -%}
+                  Klarna gilt nur ohne Abo, die Abo-Kasse bietet nur Karte und PayPal
+                  (Conversion-Plan 2.2, 29.09.2026). Der Klarna-Teil des Textes wird deshalb
+                  samt Trenner als eigenes Segment ausgezeichnet und per CSS ausgeblendet,
+                  solange auf der PDP die Abo-Karte gewaehlt ist (lt-pdp-hero). Wechselt der
+                  Kunde auf Einmalkauf, erscheint er wieder.
+                {%- endcomment -%}
+                {%- assign ann_segments = ann_text | split: ' · ' -%}
+                {%- if ann_segments.size > 1 and ann_text contains 'Klarna' -%}
+                  {%- assign ann_skip_sep = false -%}
+                  {%- for ann_seg in ann_segments -%}
+                    {%- if ann_seg contains 'Klarna' -%}
+                      <span class="announcement__seg--klarna">
+                        {%- unless forloop.first %} · {% endunless -%}
+                        {{- ann_seg | escape -}}
+                        {%- if forloop.first %} · {% endif -%}
+                      </span>
+                      {%- if forloop.first -%}{%- assign ann_skip_sep = true -%}{%- endif -%}
+                    {%- else -%}
+                      {%- unless forloop.first or ann_skip_sep %} · {% endunless -%}
+                      {{- ann_seg | escape -}}
+                      {%- assign ann_skip_sep = false -%}
+                    {%- endif -%}
+                  {%- endfor -%}
+                {%- else -%}
+                  {{ ann_text | escape }}
+                {%- endif -%}
                 {%- if block.settings.link != blank -%}</a>{%- endif -%}
               </span>
             {%- endfor -%}
@@ -118,6 +144,9 @@
   </announcement-bar>
 
   {% style %}
+    body:has(.lt-bb-card--sub .lt-bb-card__input:checked) #announcement-{{ section.id }} .announcement__seg--klarna {
+      display: none;
+    }
     {%- if section.settings.bar_txtcolor != 'rgba(0,0,0,0)' -%}
       #announcement-{{ section.id }} .announcement-bar, #announcement-{{ section.id }} a, #announcement-{{ section.id }} .localization-form__item-text {
         color: {{ section.settings.bar_txtcolor }};

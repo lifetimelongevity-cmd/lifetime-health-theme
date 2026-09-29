@@ -224,6 +224,102 @@ html[dir=ltr] .cart-notice__slider-bar {
   margin-top: 0.9375rem !important;
 }
 
+/* Drawer-Fuss kompakt (Conversion-Plan 2.2, 2026-09-29). Der feste Fuss belegte
+   mobil 50 %, mit Abo 76 % der Hoehe; Angebot und Karussell lagen darunter.
+   Hinweise eingeklappt auf den ersten, Wallets in einer Zeile, Abo-Zustimmung
+   auf eine Zeile gekuerzt. */
+.cart__hints {
+  margin-top: 0.75rem;
+}
+.cart__hints-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  list-style: none;
+  opacity: 0.64;
+}
+.cart__hints-summary::-webkit-details-marker {
+  display: none;
+}
+.cart__hints-icon {
+  display: flex;
+  transition: transform 150ms linear;
+}
+.cart__hints-icon svg path {
+  fill: currentColor;
+}
+.cart__hints[open] .cart__hints-icon {
+  transform: rotate(180deg);
+}
+.cart__hints .cart__trust {
+  margin-top: 0.25rem;
+}
+.cart__hints + .flex-buttons {
+  margin-top: 0.9375rem !important;
+}
+
+.cart__ship-cutoff {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.375rem;
+  font-size: calc(13px / 16 * var(--base-body-primary-size) + 0px);
+  line-height: 1.4;
+}
+.cart__ship-cutoff[hidden] {
+  display: none;
+}
+.cart__ship-cutoff svg {
+  flex: 0 0 auto;
+  opacity: 0.7;
+}
+
+/* Wallets in einer Zeile: Shopify rendert sie in einem geschlossenen Shadow-DOM,
+   Form nur ueber die offiziellen Custom Properties. Hoehe und Radius wie der
+   Checkout-Button darueber. */
+.additional-checkout-buttons--row {
+  --shopify-accelerated-checkout-button-inline-size: 44px;
+  --shopify-accelerated-checkout-button-block-size: 44px;
+  --shopify-accelerated-checkout-button-border-radius: var(--border-radius-buttons);
+  --shopify-accelerated-checkout-row-gap: 0.5rem;
+}
+.additional-checkout-buttons--row #shopify-buyer-consent {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  overflow: hidden;
+  margin-top: 0.5rem;
+  font-size: calc(11px / 16 * var(--base-body-primary-size) + 0px);
+  line-height: 1.45;
+  opacity: 0.64;
+}
+#AjaxCartSubtotal:has(.cart__consent-toggle[open]) .additional-checkout-buttons--row #shopify-buyer-consent {
+  display: block;
+}
+.cart__consent-toggle summary {
+  cursor: pointer;
+  list-style: none;
+  opacity: 0.64;
+  text-decoration: underline;
+  text-underline-offset: 0.125em;
+}
+.cart__consent-toggle summary::-webkit-details-marker {
+  display: none;
+}
+.cart__consent-toggle[open] summary {
+  display: none;
+}
+
+/* Reine Test-Warenkoerbe (Marker aus snippets/cart-upsell.liquid, 2.1):
+   Summe, Vertrauenszeile, Kasse. Kein Versandbalken (der Test ist immer
+   versandfrei, das sagt die Versandzeile), keine Empfehlungen. */
+#AjaxCartForm:has([data-lt-cart-kind="test-only"]) .cart-notice,
+#site-cart-sidebar:has([data-lt-cart-kind="test-only"]) #cart-recommendations-sidebar {
+  display: none;
+}
+
 #site-cart-sidebar .cart-continue {
   margin-top: 1.5rem;
 }

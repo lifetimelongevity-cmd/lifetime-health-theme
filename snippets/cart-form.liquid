@@ -24,10 +24,15 @@
 					break
 				endif
 			endfor
+			# Schwelle je Land aus lt-shipping-rule (Conversion-Plan 2.5), in Cent
+			capture lt_ship_rule
+				render 'lt-shipping-rule'
+			endcapture
+			assign lt_ship_rule = lt_ship_rule | split: '|'
 		-%}
 		<div class="cart-notice text-size--small hide-if-empty-cart">
 			<shipping-notice
-				data-free-shipping="{{ settings.cart_free_shipping_amount | times: 100 }}"
+				data-free-shipping="{{ lt_ship_rule[1] | plus: 0 }}"
 				data-cart-total="{{ cart.total_price }}"
 				data-has-subscription="{{ cart_has_sub }}"
 			>

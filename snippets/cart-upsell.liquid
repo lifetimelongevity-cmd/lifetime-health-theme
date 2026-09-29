@@ -1,19 +1,30 @@
 {% comment %}
   Renders genau EIN Post-ATC-Angebot im Warenkorb, in dieser Reihenfolge:
 
-  1. Groessen-Upgrade. Gibt es zu einer Position eine teurere Variante desselben
-     Produkts, wird der Wechsel angeboten (NMN 30 g auf 60 g, AGE&DNA-Test auf
-     Test + Ergebnisgespraech). Das ist der staerkste Hebel, weil 90 % der
-     Bestellungen ohnehin dasselbe Produkt enthalten und der Wechsel keine
-     zweite Kaufentscheidung verlangt.
-  2. Cross-Sell aus settings.cart_upsell_products. Unterhalb der Versandschwelle
+  0. Abo-Wechsel. Liegt nicht hier, sondern an der Warenkorbzeile selbst
+     (snippets/cart-form.liquid, <cart-sub-switch>, Conversion-Plan 3.1): er
+     aendert die Position, statt ein zweites Produkt anzubieten, und zaehlt
+     deshalb nicht als Angebot. Die Karte hier bleibt daneben stehen.
+  1. Feste Paare aus settings.cart_upsell_pairs ("von:zu"). Seit 29.09.2026
+     bekommt NMN Kreatin statt Resveratrol (22 Adds, 1 Checkout) und statt des
+     Groessenwechsels: Kreatin ist der haeufigste Zweitartikel in NMN-Bestellungen
+     und hebt den 30-g-Einmalkauf ueber die DE-Versandschwelle.
+  2. Groessen-Upgrade. Gibt es zu einer Position eine teurere Variante desselben
+     Produkts, wird der Wechsel angeboten (AGE&DNA-Test auf Test +
+     Ergebnisgespraech, NMN nur noch, wenn Kreatin schon im Korb liegt).
+  3. Cross-Sell aus settings.cart_upsell_products. Unterhalb der Versandschwelle
      gewinnt das guenstigste Produkt, das die Luecke wirklich schliesst. Der
      naheliegende Vorschlag ist hier eine Falle: bei 30 g NMN fehlen 15,10 € und
      TMG kostet 14,90 €, ein Kunde landet damit 20 Cent unter der Schwelle und
      zahlt trotzdem Versand.
 
-  Bewusst nur ein Angebot. Die Mehrfach-Auswahl steht darunter in
-  sections/cart-recommendations.liquid.
+  Reine Test-Warenkoerbe (nur Handles aus settings.cart_test_handles) bekommen
+  keinen Cross-Sell und kein Paar: Summe, Vertrauenszeile, Kasse. Das Upgrade auf
+  das Ergebnisgespraech bleibt, bis settings.cart_test_hide_upgrade es abschaltet
+  (BJ entscheidet, Conversion-Plan 2.1). Der Marker data-lt-cart-kind steuert per
+  CSS auch Versandbalken und Empfehlungs-Karussell (component-cart.css).
+
+  Versandschwelle je Land aus snippets/lt-shipping-rule.liquid (2.5).
 
   Ausgeschlossen bleiben Abo-Positionen (ein Variantentausch wuerde den
   Appstle-Vertrag brechen) und Positionen, deren Zielvariante schon im Korb
@@ -27,11 +38,33 @@
 {% endcomment %}
 
 {%- liquid
+  # Handles im Korb als ,a,b,-Kette, damit die Enthalten-Pruefung ohne
+  # verschachtelte Schleifen auskommt.
+  assign lt_cart_handles = ','
+  assign lt_cart_variants = ','
+  assign lt_test_keys = settings.cart_test_handles | default: '' | remove: ' ' | prepend: ',' | append: ','
+  assign lt_test_only = false
+  if cart.item_count > 0 and lt_test_keys != ',,'
+    assign lt_test_only = true
+  endif
+  for item in cart.items
+    assign lt_cart_handles = lt_cart_handles | append: item.product.handle | append: ','
+    assign lt_cart_variants = lt_cart_variants | append: item.variant.id | append: ','
+    assign lt_item_key = item.product.handle | prepend: ',' | append: ','
+    unless lt_test_keys contains lt_item_key
+      assign lt_test_only = false
+    endunless
+  endfor
+
   assign lt_up_on = false
   if settings.cart_upsell_enable and cart.item_count > 0
     assign lt_up_on = true
   endif
 -%}
+
+{%- if lt_test_only -%}
+  <span class="cart-kind-marker" data-lt-cart-kind="test-only" hidden></span>
+{%- endif -%}
 
 {%- if lt_up_on -%}
   {%- liquid
@@ -40,22 +73,79 @@
       assign iso_code = localization.country.currency.iso_code | prepend: ' '
     endif
 
-    # Handles im Korb als ,a,b,-Kette, damit die Enthalten-Pruefung ohne
-    # verschachtelte Schleifen auskommt.
-    assign lt_cart_handles = ','
-    assign lt_cart_variants = ','
-    for item in cart.items
-      assign lt_cart_handles = lt_cart_handles | append: item.product.handle | append: ','
-      assign lt_cart_variants = lt_cart_variants | append: item.variant.id | append: ','
-    endfor
+    # ---- Versandluecke, Schwelle je Land (2.5) ----
+    # Abo im Korb: Bestellung ist per Auto-Discount versandfrei, keine Luecke.
+    assign lt_gap = 0
+    if settings.cart_free_shipping
+      assign lt_has_sub = false
+      for item in cart.items
+        if item.selling_plan_allocation
+          assign lt_has_sub = true
+          break
+        endif
+      endfor
+      unless lt_has_sub
+        capture lt_ship_rule
+          render 'lt-shipping-rule'
+        endcapture
+        assign lt_ship_rule = lt_ship_rule | split: '|'
+        assign lt_threshold = lt_ship_rule[1] | plus: 0
+        if lt_threshold > 0 and cart.total_price < lt_threshold
+          assign lt_gap = lt_threshold | minus: cart.total_price
+        endif
+      endunless
+    endif
 
-    # ---- 1. Groessen-Upgrade ----
+    # ---- 1. Feste Paare, erstes passendes Paar der Liste gewinnt ----
+    assign lt_cs = false
+    assign lt_cs_closes_gap = false
+    unless lt_test_only
+      assign lt_pairs = settings.cart_upsell_pairs | default: '' | remove: ' ' | split: ','
+      for lt_pair in lt_pairs
+        assign lt_pair_parts = lt_pair | split: ':'
+        if lt_pair_parts.size != 2
+          continue
+        endif
+        assign lt_pair_from = lt_pair_parts[0] | prepend: ',' | append: ','
+        assign lt_pair_to = lt_pair_parts[1] | prepend: ',' | append: ','
+        unless lt_cart_handles contains lt_pair_from
+          continue
+        endunless
+        if lt_cart_handles contains lt_pair_to
+          continue
+        endif
+        assign p = all_products[lt_pair_parts[1]]
+        if p == empty
+          continue
+        endif
+        unless p.available
+          continue
+        endunless
+        assign lt_cs = p
+        if lt_gap > 0 and p.price >= lt_gap
+          assign lt_cs_closes_gap = true
+        endif
+        break
+      endfor
+    endunless
+
+    # ---- 2. Groessen-Upgrade, nur ohne Paar ----
     assign lt_up_variant = false
     assign lt_up_from = false
     assign lt_up_item = false
     assign lt_up_gain = 0
+    assign lt_up_allowed = true
+    if lt_cs
+      assign lt_up_allowed = false
+    endif
+    if lt_test_only and settings.cart_test_hide_upgrade
+      assign lt_up_allowed = false
+    endif
 
     for item in cart.items
+      unless lt_up_allowed
+        break
+      endunless
       if item.selling_plan_allocation
         continue
       endif
@@ -103,28 +193,16 @@
       endif
     endfor
 
-    # ---- 2. Cross-Sell, nur wenn kein Upgrade moeglich ----
-    assign lt_cs = false
-    assign lt_cs_closes_gap = false
-    assign lt_gap = 0
+    # ---- 3. Cross-Sell, nur ohne Paar und Upgrade, nie bei reinen Tests ----
+    if lt_test_only
+      assign lt_up_skip_cs = true
+    elsif lt_cs or lt_up_variant
+      assign lt_up_skip_cs = true
+    else
+      assign lt_up_skip_cs = false
+    endif
 
-    unless lt_up_variant
-
-      if settings.cart_free_shipping
-        assign lt_has_sub = false
-        for item in cart.items
-          if item.selling_plan_allocation
-            assign lt_has_sub = true
-            break
-          endif
-        endfor
-        unless lt_has_sub
-          assign lt_threshold = settings.cart_free_shipping_amount | times: 100
-          if cart.total_price < lt_threshold
-            assign lt_gap = lt_threshold | minus: cart.total_price
-          endif
-        endunless
-      endif
+    unless lt_up_skip_cs
 
       assign lt_cs_handles = settings.cart_upsell_products | default: '' | remove: ' ' | split: ','
 

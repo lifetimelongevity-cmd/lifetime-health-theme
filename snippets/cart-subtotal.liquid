@@ -28,11 +28,15 @@
 						break
 					endif
 				endfor
+				capture lt_ship_rule
+					render 'lt-shipping-rule'
+				endcapture
+				assign lt_ship_rule = lt_ship_rule | split: '|'
 			-%}
 			<div class="sidebar-widget sidebar-widget--outline gutter-regular margin-bottom--regular">
 				<div class="sidebar-widget__content">
 					<shipping-notice
-						data-free-shipping="{{ settings.cart_free_shipping_amount | times: 100 }}"
+						data-free-shipping="{{ lt_ship_rule[1] | plus: 0 }}"
 						data-cart-total="{{ cart.total_price }}"
 						data-has-subscription="{{ cart_has_sub }}"
 					>
@@ -169,7 +173,12 @@
 					endif
 				endfor
 
-				assign lt_free_threshold = settings.cart_free_shipping_amount | times: 100
+				# Schwelle je Land (Conversion-Plan 2.5), gleiche Quelle wie Balken und Buy-Box
+				capture lt_ship_rule
+					render 'lt-shipping-rule'
+				endcapture
+				assign lt_ship_rule = lt_ship_rule | split: '|'
+				assign lt_free_threshold = lt_ship_rule[1] | plus: 0
 
 				if settings.cart_free_shipping and cart_has_sub
 					echo 'cart.policies.lt_taxes_included_shipping_free' | t
@@ -177,7 +186,8 @@
 					echo 'cart.policies.lt_taxes_included_shipping_free' | t
 				elsif settings.cart_free_shipping
 					assign lt_free_threshold_label = lt_free_threshold | money_without_trailing_zeros
-					echo 'cart.policies.lt_taxes_included_shipping_free_from' | t: amount: lt_free_threshold_label
+					assign lt_ship_cost_label = lt_ship_rule[0] | plus: 0 | money
+					echo 'cart.policies.lt_taxes_included_shipping_free_from' | t: amount: lt_free_threshold_label, cost: lt_ship_cost_label
 				elsif cart.taxes_included and shop.shipping_policy.body != blank
 					echo 'cart.policies.taxes_included_and_shipping_policy_html' | t: link: shop.shipping_policy.url
 				elsif cart.taxes_included
@@ -189,6 +199,8 @@
 				endif
 			-%}
 		</div>
+
+		{%- render 'lt-ship-cutoff', class: 'cart__ship-cutoff hide-if-empty-cart' -%}
 
 		{%- if settings.cart_terms_checkbox -%}
 			<terms-checkbox>
@@ -208,17 +220,57 @@
 			Belege, der gesamte Vertrauensaufbau der PDP endete beim Klick. Text kommt aus
 			den Theme-Einstellungen, damit er auffindbar und pruefbar bleibt und nicht als
 			Claim im Liquid versteckt liegt. 2026-07-30
+
+			Seit 29.09.2026 (Conversion-Plan 2.2): Die Zahlart-Zeile steht vorne und gilt nur
+			ohne Abo, weil die Abo-Kasse nur Karte und PayPal anbietet. Im Drawer ist die
+			Zeile auf den ersten Hinweis eingeklappt: Der feste Fuss belegte mobil rund 70 %
+			der Hoehe und schob Angebot und Artikel aus dem Blick.
 		{%- endcomment -%}
 		{%- liquid
-			assign lt_cart_trust_1 = settings.cart_trust_1 | strip
-			assign lt_cart_trust_2 = settings.cart_trust_2 | strip
-			assign lt_cart_trust_3 = settings.cart_trust_3 | strip
+			assign lt_hint_src = ''
+			if cart_has_sub
+				assign lt_hint = 'cart.lt_sub_payment' | t
+				if lt_hint contains 'ranslation missing'
+					assign lt_hint = 'Zahlung per Karte oder PayPal'
+				endif
+			else
+				assign lt_hint = settings.cart_payment_note | strip
+			endif
+			if lt_hint != blank
+				assign lt_hint_src = lt_hint_src | append: lt_hint | append: '||'
+			endif
+			assign lt_hint = settings.cart_trust_1 | strip
+			if lt_hint != blank
+				assign lt_hint_src = lt_hint_src | append: lt_hint | append: '||'
+			endif
+			assign lt_hint = settings.cart_trust_2 | strip
+			if lt_hint != blank
+				assign lt_hint_src = lt_hint_src | append: lt_hint | append: '||'
+			endif
+			assign lt_hint = settings.cart_trust_3 | strip
+			if lt_hint != blank
+				assign lt_hint_src = lt_hint_src | append: lt_hint | append: '||'
+			endif
+			assign lt_hints = lt_hint_src | split: '||'
 		-%}
-		{%- if lt_cart_trust_1 != blank or lt_cart_trust_2 != blank or lt_cart_trust_3 != blank -%}
+		{%- if lt_hints.size > 1 and type != 'page' -%}
+			<details class="cart__hints text-size--small hide-if-empty-cart">
+				<summary class="cart__hints-summary">
+					<span class="cart__hints-first">{{ lt_hints.first | escape }}</span>
+					<span class="visually-hidden">, weitere Hinweise</span>
+					<span class="cart__hints-icon" aria-hidden="true">{%- render 'theme-symbols', icon: 'chevron' -%}</span>
+				</summary>
+				<ul class="cart__trust text-color--opacity">
+					{%- for lt_hint in lt_hints offset: 1 -%}
+						<li>{{ lt_hint | escape }}</li>
+					{%- endfor -%}
+				</ul>
+			</details>
+		{%- elsif lt_hints.size > 0 -%}
 			<ul class="cart__trust text-color--opacity text-size--small hide-if-empty-cart">
-				{%- if lt_cart_trust_1 != blank -%}<li>{{ lt_cart_trust_1 | escape }}</li>{%- endif -%}
-				{%- if lt_cart_trust_2 != blank -%}<li>{{ lt_cart_trust_2 | escape }}</li>{%- endif -%}
-				{%- if lt_cart_trust_3 != blank -%}<li>{{ lt_cart_trust_3 | escape }}</li>{%- endif -%}
+				{%- for lt_hint in lt_hints -%}
+					<li>{{ lt_hint | escape }}</li>
+				{%- endfor -%}
 			</ul>
 		{%- endif -%}
 
@@ -240,7 +292,17 @@
 		{%- unless template contains 'order' -%}  
 			{%- if settings.cart_drawer_actions contains 'show-checkout' or type == 'page' -%}
 				{%- if additional_checkout_buttons and settings.cart_additional_buttons -%}
-					<div class="additional-checkout-buttons additional-checkout-buttons--vertical">{{ content_for_additional_checkout_buttons }}</div>
+					{%- comment -%} Im Drawer ohne --vertical: Shopify legt die Wallets dann in eine
+						Zeile, solange der Platz reicht, und stapelt sonst selbst (2.2). Shopify haengt
+						bei Abo-Warenkoerben den Zustimmungstext (#shopify-buyer-consent) an; er ist im
+						Drawer auf eine Zeile eingeklappt, der Schalter darunter klappt ihn auf.
+						Screenreader lesen ihn ungekuerzt. {%- endcomment -%}
+					<div class="additional-checkout-buttons{% if type == 'page' %} additional-checkout-buttons--vertical{% else %} additional-checkout-buttons--row{% endif %}">{{ content_for_additional_checkout_buttons }}</div>
+					{%- if cart_has_sub and type != 'page' -%}
+						<details class="cart__consent-toggle text-size--small">
+							<summary>Abo-Bedingungen lesen</summary>
+						</details>
+					{%- endif -%}
 				{%- endif -%}
 			{%- endif -%}
 		{%- endunless -%}
