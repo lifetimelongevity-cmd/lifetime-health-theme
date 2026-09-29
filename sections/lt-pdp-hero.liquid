@@ -359,7 +359,7 @@
           {%- if lt_trust_1 != blank or lt_trust_2 != blank or lt_trust_3 != blank or lt_trust_4 != blank -%}
           <div class="lt-pdp-hero__trust lt-trust">
             {%- if lt_trust_1 != blank -%}
-              <div class="lt-pdp-hero__trust-item">
+              <div class="lt-pdp-hero__trust-item{% if lt_trust_1 contains 'Klarna' %} lt-pdp-hero__trust-item--klarna{% endif %}">
                 {%- if section.settings.trust_1_icon != blank -%}
                   {{
                     section.settings.trust_1_icon
@@ -373,7 +373,7 @@
               </div>
             {%- endif -%}
             {%- if lt_trust_2 != blank -%}
-              <div class="lt-pdp-hero__trust-item">
+              <div class="lt-pdp-hero__trust-item{% if lt_trust_2 contains 'Klarna' %} lt-pdp-hero__trust-item--klarna{% endif %}">
                 {%- if section.settings.trust_2_icon != blank -%}
                   {{
                     section.settings.trust_2_icon
@@ -387,7 +387,7 @@
               </div>
             {%- endif -%}
             {%- if lt_trust_3 != blank -%}
-              <div class="lt-pdp-hero__trust-item">
+              <div class="lt-pdp-hero__trust-item{% if lt_trust_3 contains 'Klarna' %} lt-pdp-hero__trust-item--klarna{% endif %}">
                 {%- if section.settings.trust_3_icon != blank -%}
                   {{
                     section.settings.trust_3_icon
@@ -408,7 +408,7 @@
               die Extra-Haarlinie waere dort nur Tufte-Rauschen.
             {%- endcomment -%}
             {%- if lt_trust_4 != blank -%}
-              <div class="lt-pdp-hero__trust-item{% if section.settings.trust_4_as_note %} lt-pdp-hero__trust-item--note{% endif %}">
+              <div class="lt-pdp-hero__trust-item{% if section.settings.trust_4_as_note %} lt-pdp-hero__trust-item--note{% endif %}{% if lt_trust_4 contains 'Klarna' %} lt-pdp-hero__trust-item--klarna{% endif %}">
                 {%- if section.settings.trust_4_icon != blank -%}
                   {{
                     section.settings.trust_4_icon
@@ -1246,10 +1246,15 @@
                           <span class="lt-bb-card__badge lt-bb-card__badge--sale" data-lt-bb-sale-badge hidden></span>
                         </span>
                         {%- if lt_show_sizes -%}
-                          {%- comment -%} Versandstatus je gewählter Größe statt statischem „ab 49 €": über der DE-Schwelle
-                              positiv „Versandkostenfrei", darunter der Fakt. Schwelle/Kosten: §7 nmn-angebotsarchitektur;
-                              bei Versandänderung hier UND im JS (applySize) mitziehen. {%- endcomment -%}
-                          <span class="lt-bb-card__sub" data-lt-once-subline>{% if lt_active_variant.price >= 4900 %}Versandkostenfrei{% else %}zzgl. Versand ab 4,90 €{% endif %}</span>
+                          {%- comment -%} Versandstatus je gewählter Größe statt statischem „ab 49 €": über der Schwelle
+                              positiv „Versandkostenfrei", darunter der Fakt. Schwelle und Kosten je Land kommen aus
+                              snippets/lt-shipping-rule.liquid (Theme-Einstellungen, seit 29.09. statt fest 4900/„4,90 €“);
+                              applySize liest sie aus den data-Attributen. {%- endcomment -%}
+                          {%- capture lt_ship_rule -%}{%- render 'lt-shipping-rule' -%}{%- endcapture -%}
+                          {%- assign lt_ship_rule = lt_ship_rule | split: '|' -%}
+                          {%- assign lt_ship_cost = lt_ship_rule[0] | plus: 0 -%}
+                          {%- assign lt_ship_free = lt_ship_rule[1] | plus: 0 -%}
+                          <span class="lt-bb-card__sub" data-lt-once-subline data-ship-free="{{ lt_ship_free }}" data-ship-cost-label="{{ lt_ship_cost | money | escape }}">{% if lt_active_variant.price >= lt_ship_free %}Versandkostenfrei{% else %}zzgl. {{ lt_ship_cost | money }} Versand{% endif %}</span>
                         {%- else -%}
                           <span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>
                         {%- endif -%}
@@ -1542,9 +1547,23 @@
                   </span>
                 </button>
               </div>
+              {%- comment -%} Express-Kasse direkt unter dem Test-CTA (Conversion-Plan 2.1, 29.09.):
+                  beim Test kamen von 23 Warenkorb-Adds 7 an der Kasse an, bei NMN 61 von 78.
+                  Shop Pay, Apple Pay und PayPal ueberspringen Warenkorb und Drawer ganz. Nur im
+                  Paket-Pfad (Standalone ohne Abo), die Abo-PDPs brauchen den Plan-Kontext der
+                  Buy-Box. Die Buttons lesen id und quantity aus diesem Formular, folgen also
+                  der Paketwahl. {%- endcomment -%}
+              {%- if lt_show_packages and lt_atc_available and section.settings.show_express_checkout -%}
+                <div class="lt-pdp-hero__express">
+                  {{ form | payment_button }}
+                </div>
+              {%- endif -%}
             </div>
           {%- endform -%}
         </product-form>
+        {%- if section.settings.show_ship_cutoff -%}
+          {%- render 'lt-ship-cutoff', class: 'lt-pdp-hero__ship-cutoff' -%}
+        {%- endif -%}
 
         {%- comment -%} Reihenfolge unter dem CTA (BJ 16.08.): erst die Bezahl- und
             Absicherungszone (Garantie, Klarna, Zahlarten), dann der Kassenzettel. Wer den
@@ -2371,7 +2390,7 @@
         appstleWidget.setAttribute('data-variant-id', sizeInput.dataset.variantId);
       }
       // Sublines je Größe: Abo-Karte = Liefertakt (Plan-Name), Einmal-Karte = Versandstatus
-      // (DE-Schwelle 49 €/4,90 €, siehe SSR-Kommentar an data-lt-once-subline)
+      // (Schwelle und Kosten je Land aus lt-shipping-rule, siehe SSR an data-lt-once-subline)
       const subSublineEl = section.querySelector('[data-lt-sub-subline]');
       if (subSublineEl) {
         const plan = ltPlans.find(p => String(p.id) === (sizeInput.dataset.planId || ''));
@@ -2380,7 +2399,10 @@
       const onceSublineEl = section.querySelector('[data-lt-once-subline]');
       if (onceSublineEl) {
         const oncePriceCents = parseInt(sizeInput.dataset.oncePrice, 10) || 0;
-        onceSublineEl.textContent = oncePriceCents >= 4900 ? 'Versandkostenfrei' : 'zzgl. Versand ab 4,90 €';
+        const shipFreeCents = parseInt(onceSublineEl.dataset.shipFree, 10) || 0;
+        onceSublineEl.textContent = oncePriceCents >= shipFreeCents
+          ? 'Versandkostenfrei'
+          : `zzgl. ${onceSublineEl.dataset.shipCostLabel} Versand`;
       }
       section.querySelectorAll('[data-lt-size]').forEach(pill => {
         const inp = pill.querySelector('.lt-size__input');
@@ -2828,6 +2850,54 @@
 .lt-pdp-hero__payment-note svg {
   flex: 0 0 auto;
   opacity: 0.6;
+}
+
+/* Die Abo-Kasse bietet nur Karte und PayPal (Befund 29.09.). Eine Vertrauenszeile
+   mit Klarna gilt deshalb nur, solange nicht die Abo-Karte gewaehlt ist; das
+   Liquid markiert sie am Text. Die Ankuendigungsleiste folgt derselben Regel
+   (sections/announcement-bar.liquid). */
+.lt-pdp-hero:has(.lt-bb-card--sub .lt-bb-card__input:checked) .lt-pdp-hero__trust-item--klarna {
+  display: none;
+}
+
+/* Express-Kasse unter dem Test-CTA (2.1): gleiche Hoehe und Pillenform wie der CTA,
+   damit die beiden Wege als ein Paar lesbar bleiben. */
+.lt-pdp-hero__express {
+  margin-top: var(--space-2);
+}
+.lt-pdp-hero__express .shopify-payment-button__button {
+  min-height: 48px;
+  height: 48px;
+  border-radius: 999px;
+  overflow: hidden;
+  text-transform: none;
+}
+.lt-pdp-hero__express .shopify-payment-button__more-options {
+  margin-top: var(--space-1);
+  font-size: 0.8125rem;
+  color: var(--lt-muted);
+  text-decoration: underline;
+  text-underline-offset: 0.125em;
+}
+
+/* Versandfrist (2.3): eine Zeile unter dem CTA, rechnet im Browser. */
+.lt-pdp-hero__ship-cutoff {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  margin-top: var(--space-2);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: var(--lt-text);
+  text-align: center;
+}
+.lt-pdp-hero__ship-cutoff[hidden] {
+  display: none;
+}
+.lt-pdp-hero__ship-cutoff .lt-ship-cutoff__icon {
+  flex: 0 0 auto;
+  opacity: 0.7;
 }
 
 .lt-pdp-hero__guarantee--cancel[hidden] {
@@ -3867,6 +3937,20 @@
       "label": "Paket-Auswahl anzeigen (Varianten)",
       "info": "Für Einmal-Kauf-Produkte ohne Abo (Standalone-Preis): eine Karte pro Variante, z. B. Test vs. Test + Ergebnisgespräch. Preis kommt dynamisch aus der Variante. Nicht zusammen mit Abo-/Größen-Auswahl verwenden.",
       "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "show_express_checkout",
+      "label": "Express-Kasse unter dem Button (nur Paket-Auswahl)",
+      "info": "Shop Pay, Apple Pay, PayPal direkt unter dem Kauf-Button, ohne Umweg über den Warenkorb.",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_ship_cutoff",
+      "label": "Versandfrist unter dem Button",
+      "info": "Restzeit bis zum Versand-Cutoff. Erscheint nur, wenn in den Theme-Einstellungen (Warenkorb > Versandfrist) eine Uhrzeit steht.",
+      "default": true
     },
     {
       "type": "text",

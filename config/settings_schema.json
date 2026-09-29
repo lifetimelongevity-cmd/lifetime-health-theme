@@ -916,6 +916,30 @@
         "info": "Kommagetrennt, in absteigender Priorität. Fehlt zum Gratisversand noch etwas, gewinnt das günstigste Produkt der Liste, das die Lücke tatsächlich schließt. Produkte, die knapp darunter liegen, werden übersprungen."
       },
       {
+        "type": "text",
+        "id": "cart_upsell_pairs",
+        "visible_if": "{{ settings.cart_upsell_enable == true }}",
+        "label": "Feste Paare (Handle:Handle)",
+        "info": "Kommagetrennt, z. B. lifetime-nmn:kreatin-monohydrat-pulver. Liegt das erste Produkt im Warenkorb, wird das zweite angeboten, noch vor dem Größenwechsel. Liegt es schon im Korb, greift die normale Reihenfolge."
+      },
+      {
+        "type": "header",
+        "content": "Reine Test-Warenkörbe"
+      },
+      {
+        "type": "text",
+        "id": "cart_test_handles",
+        "label": "Test-Produkte (Handles)",
+        "info": "Kommagetrennt. Besteht der Warenkorb nur aus diesen Produkten, zeigt der Drawer weder Empfehlungen noch Cross-Sell noch Versandbalken: Summe, Vertrauenszeile, Kasse."
+      },
+      {
+        "type": "checkbox",
+        "id": "cart_test_hide_upgrade",
+        "label": "Bei reinen Test-Warenkörben auch das Upgrade ausblenden",
+        "info": "Betrifft die Karte „Auf Test + Ergebnisgespräch wechseln“. Aus = Karte bleibt stehen.",
+        "default": false
+      },
+      {
         "type": "header",
         "content": "t:sections.product-recommendations.settings.header__1.content"
       },
@@ -962,12 +986,64 @@
         "default": false
       },
       {
+        "type": "header",
+        "content": "Versand je Land"
+      },
+      {
+        "type": "paragraph",
+        "content": "Eine Quelle für Versandbalken und Versandzeile im Warenkorb, die Einmalkauf-Zeile der Buy-Box und die Upsell-Logik. Das Land kommt aus der Shopify-Lokalisierung. Beträge in Euro, z. B. 4,90. Muss mit den Versandzonen im Admin übereinstimmen."
+      },
+      {
         "type": "text",
-        "id": "cart_free_shipping_amount",
-        "visible_if": "{{ settings.cart_free_shipping == true }}",
-        "label": "t:sections.local-extra-words.settings_schema.cart.shipping.amount.label",
-        "info": "t:sections.local-extra-words.settings_schema.cart.shipping.amount.info",
-        "default": "50"
+        "id": "shipping_zone_1_cost",
+        "label": "Zone 1 (Deutschland und alle übrigen): Versandkosten",
+        "default": "4,90"
+      },
+      {
+        "type": "text",
+        "id": "shipping_zone_1_free",
+        "label": "Zone 1: versandkostenfrei ab",
+        "default": "49"
+      },
+      {
+        "type": "text",
+        "id": "shipping_zone_2_countries",
+        "label": "Zone 2: Länder (ISO-Codes)",
+        "info": "Kommagetrennt, z. B. AT,CH,NL,IT. Liechtenstein wird bewusst nicht beliefert.",
+        "default": "AT,CH,NL,IT"
+      },
+      {
+        "type": "text",
+        "id": "shipping_zone_2_cost",
+        "label": "Zone 2: Versandkosten",
+        "default": "8,90"
+      },
+      {
+        "type": "text",
+        "id": "shipping_zone_2_free",
+        "label": "Zone 2: versandkostenfrei ab",
+        "default": "59"
+      },
+      {
+        "type": "header",
+        "content": "Versandfrist"
+      },
+      {
+        "type": "paragraph",
+        "content": "Zeile mit Restzeit bis zum Versand-Cutoff in Buy-Box und Warenkorb, Montag bis Freitag, Feiertage ausgenommen. Nach dem Cutoff nennt sie den nächsten Versandtag. Nur eine Uhrzeit eintragen, die das Lager wirklich einhält (Anhang zu § 3 Abs. 3 UWG Nr. 7)."
+      },
+      {
+        "type": "text",
+        "id": "ship_cutoff_time",
+        "label": "Versand-Cutoff (HH:MM, deutsche Zeit)",
+        "info": "Leer = keine Zeile, nirgends."
+      },
+      {
+        "type": "textarea",
+        "id": "ship_cutoff_holidays",
+        "label": "Feiertage ohne Versand (JJJJ-MM-TT)",
+        "info": "Kommagetrennt. Vorbelegt mit den bundesweiten Feiertagen, Landesfeiertage am Lagerstandort ergänzen.",
+        "default": "2026-10-03,2026-12-25,2026-12-26,2027-01-01,2027-03-26,2027-03-29,2027-05-01,2027-05-06,2027-05-17,2027-10-03,2027-12-25,2027-12-26"
       },
       {
         "type": "header",
@@ -975,7 +1051,13 @@
       },
       {
         "type": "paragraph",
-        "content": "Erscheint direkt über dem Checkout-Button. Nur ausgefüllte Zeilen werden gerendert. Nur Aussagen eintragen, die shopweit gelten."
+        "content": "Erscheint direkt über dem Checkout-Button, eingeklappt auf eine Zeile. Nur ausgefüllte Zeilen werden gerendert. Nur Aussagen eintragen, die shopweit gelten."
+      },
+      {
+        "type": "text",
+        "id": "cart_payment_note",
+        "label": "Zahlart-Zeile (nur ohne Abo)",
+        "info": "Steht vorne in der Vertrauenszeile, aber nur bei Warenkörben ohne Abo: Die Abo-Kasse bietet nur Karte und PayPal. Bei Abo-Warenkörben steht stattdessen „Zahlung per Karte oder PayPal“."
       },
       {
         "type": "text",

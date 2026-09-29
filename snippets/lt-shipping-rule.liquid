@@ -1,0 +1,38 @@
+{%- comment -%}
+  Versandregel fuer das Land des Besuchers, die eine Quelle fuer Drawer,
+  PDP-Versandzeile und Upsell-Logik (Conversion-Plan 2.5, 2026-09-29).
+  Vorher stand die DE-Regel an drei Stellen fest verdrahtet (4900 / "4,90 €"),
+  Kunden aus AT, CH, NL und IT sahen "frei ab 49 €" und zahlten unter 59 €
+  an der Kasse 8,90 €.
+
+  Werte kommen aus den Theme-Einstellungen (Warenkorb > Versand je Land),
+  Land aus localization.country. Laender ohne Zone fallen auf Zone 1 zurueck:
+  Der Shop liefert bewusst nicht nach Liechtenstein, das ist kein Defekt.
+
+  Ausgabe: "Kosten|Schwelle|Land", Betraege in Cent, z. B. "490|4900|DE".
+
+  Usage:
+  {%- capture lt_ship -%}{%- render 'lt-shipping-rule' -%}{%- endcapture -%}
+  {%- assign lt_ship = lt_ship | split: '|' -%}
+  {%- assign lt_ship_cost = lt_ship[0] | plus: 0 -%}
+  {%- assign lt_ship_free = lt_ship[1] | plus: 0 -%}
+{%- endcomment -%}
+{%- liquid
+  assign lt_country = localization.country.iso_code | default: 'DE' | upcase
+  assign lt_country_key = lt_country | prepend: ',' | append: ','
+  assign lt_zone_2 = settings.shipping_zone_2_countries | default: '' | upcase | remove: ' ' | prepend: ',' | append: ','
+
+  if lt_zone_2 contains lt_country_key
+    assign lt_cost = settings.shipping_zone_2_cost
+    assign lt_free = settings.shipping_zone_2_free
+  else
+    assign lt_cost = settings.shipping_zone_1_cost
+    assign lt_free = settings.shipping_zone_1_free
+  endif
+
+  # Eingabe in Euro mit Komma ("4,90", "49"), Ausgabe in Cent
+  assign lt_cost = lt_cost | default: '0' | strip | replace: ',', '.' | times: 100 | round
+  assign lt_free = lt_free | default: '0' | strip | replace: ',', '.' | times: 100 | round
+
+  echo lt_cost | append: '|' | append: lt_free | append: '|' | append: lt_country
+-%}

@@ -1,0 +1,27 @@
+{% comment %}
+  Versandfrist-Zeile fuer Buy-Box und Warenkorb (Conversion-Plan 2.3).
+  Rendert nichts, solange in den Theme-Einstellungen kein Cutoff steht.
+  Text und Rechnung: assets/component-ship-cutoff.js
+
+  Accepts:
+  - class: {String} zusaetzliche Klasse fuer die Platzierung
+
+  Usage:
+  {% render 'lt-ship-cutoff', class: 'lt-pdp-hero__ship-cutoff' %}
+{% endcomment %}
+{%- assign lt_cutoff = settings.ship_cutoff_time | strip -%}
+{%- if lt_cutoff != blank -%}
+  <lt-ship-cutoff
+    class="lt-ship-cutoff {{ class }}"
+    data-cutoff="{{ lt_cutoff | escape }}"
+    data-holidays="{{ settings.ship_cutoff_holidays | strip_newlines | remove: ' ' | escape }}"
+    hidden
+  >
+    <svg class="lt-ship-cutoff__icon" width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <circle cx="7" cy="7" r="5.25" stroke="currentColor" stroke-width="1.1"></circle>
+      <path d="M7 4.25V7l1.9 1.25" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"></path>
+    </svg>
+    <span data-lt-ship-cutoff-text></span>
+  </lt-ship-cutoff>
+  <script src="{{ 'component-ship-cutoff.js' | asset_url }}" defer></script>
+{%- endif -%}
