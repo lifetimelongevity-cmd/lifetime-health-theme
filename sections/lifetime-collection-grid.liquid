@@ -242,6 +242,17 @@
 
   </div>
 
+  {%- comment -%}
+    Optionaler Weiterlink unter dem Band, etwa von der Startseite in den
+    Katalog. Leer gelassen rendert nichts, Katalog und Kollektionsseiten
+    setzen ihn nicht.
+  {%- endcomment -%}
+  {%- if section.settings.more_label != blank and section.settings.more_url != blank -%}
+    <p class="cg-more">
+      <a class="cg-moreLink" href="{{ section.settings.more_url }}">{{ section.settings.more_label | escape }}</a>
+    </p>
+  {%- endif -%}
+
   {%- endif -%}
 
 </div>
@@ -418,6 +429,21 @@
     line-height: 1.6;
     color: var(--color-gray-600);
     max-width: 32rem;
+  }
+
+  .section-{{ section.id }}-cg .cg-more {
+    margin: var(--space-5) 0 0;
+  }
+
+  .section-{{ section.id }}-cg .cg-moreLink {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    font-weight: var(--weight-semibold);
+    color: var(--color-dark);
+    text-underline-offset: 3px;
   }
 
   .section-{{ section.id }}-cg .cg-emptyLink {
@@ -629,6 +655,17 @@
       "id": "soldout_label",
       "label": "Hinweis bei nicht verfügbar",
       "default": "Nicht verfügbar"
+    },
+    {
+      "type": "text",
+      "id": "more_label",
+      "label": "Link unter dem Band",
+      "info": "Nur bei Quelle Blöcke. Leer lassen, wenn kein Link, z. B. auf der Startseite \"Alle Produkte ansehen\"."
+    },
+    {
+      "type": "url",
+      "id": "more_url",
+      "label": "Ziel des Links"
     },
     {
       "type": "header",
