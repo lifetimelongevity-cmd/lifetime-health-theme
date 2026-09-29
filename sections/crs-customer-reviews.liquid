@@ -57,11 +57,34 @@
   assign cr_loox_texts = ''
   assign cr_loox_used = 0
 
+  # Auswahl aus Loox (2026-09-29). Eine Zeile je Bewertung, gefunden ueber
+  # einen Ausschnitt ihres Textes. Ist das Feld gefuellt, rendern nur diese
+  # Bewertungen, in der Reihenfolge der Zeilen.
+  #
+  # Warum: Auf der NMN-PDP darf keine Verzehr- oder Wirkaussage stehen
+  # (VSW-Vergleich), und eine sichtbare Kundenaussage wird dem Anbieter als
+  # eigene Werbung zugerechnet. Ohne Auswahl rueckt jede neue Loox-Bewertung
+  # ungeprueft nach oben, auch „merke schon mehr Energie". Die Texte kommen
+  # trotzdem live aus dem Metafeld: wird eine Bewertung in Loox geloescht,
+  # verschwindet sie auch hier. Leeres Feld heisst Verhalten wie bisher.
+  assign cr_loox_pick = section.settings.loox_pick | strip | newline_to_br | split: '<br />'
+  assign cr_loox_has_pick = false
+  for cr_p in cr_loox_pick
+    assign cr_p_s = cr_p | strip
+    if cr_p_s != blank
+      assign cr_loox_has_pick = true
+      break
+    endif
+  endfor
+  assign cr_all_names = ''
+  assign cr_all_texts = ''
+  assign cr_all_count = 0
+
   if cr_source == 'loox'
     assign cr_loox_raw = product.metafields.loox.reviews | default: ''
     assign cr_loox_chunks = cr_loox_raw | split: '<div class="review">'
     for chunk in cr_loox_chunks offset: 1
-      if cr_loox_used >= cr_loox_max
+      if cr_loox_has_pick == false and cr_all_count >= cr_loox_max
         break
       endif
 
@@ -107,10 +130,42 @@
       endif
 
       # Trennzeichen, die in keinem Namen und keinem Bewertungstext vorkommen.
-      assign cr_loox_names = cr_loox_names | append: cr_n | append: '||'
-      assign cr_loox_texts = cr_loox_texts | append: cr_t | append: '||'
-      assign cr_loox_used = cr_loox_used | plus: 1
+      assign cr_all_names = cr_all_names | append: cr_n | append: '||'
+      assign cr_all_texts = cr_all_texts | append: cr_t | append: '||'
+      assign cr_all_count = cr_all_count | plus: 1
     endfor
+
+    if cr_loox_has_pick
+      assign cr_all_name_list = cr_all_names | split: '||'
+      assign cr_all_text_list = cr_all_texts | split: '||'
+      assign cr_picked = ','
+      for cr_p in cr_loox_pick
+        if cr_loox_used >= cr_loox_max
+          break
+        endif
+        assign cr_p_s = cr_p | strip
+        if cr_p_s == blank
+          continue
+        endif
+        for cr_cand in cr_all_text_list
+          assign cr_idx = ',' | append: forloop.index0 | append: ','
+          if cr_picked contains cr_idx
+            continue
+          endif
+          if cr_cand contains cr_p_s
+            assign cr_loox_names = cr_loox_names | append: cr_all_name_list[forloop.index0] | append: '||'
+            assign cr_loox_texts = cr_loox_texts | append: cr_cand | append: '||'
+            assign cr_loox_used = cr_loox_used | plus: 1
+            assign cr_picked = cr_picked | append: forloop.index0 | append: ','
+            break
+          endif
+        endfor
+      endfor
+    else
+      assign cr_loox_names = cr_all_names
+      assign cr_loox_texts = cr_all_texts
+      assign cr_loox_used = cr_all_count
+    endif
   endif
 
   assign cr_loox_name_list = cr_loox_names | split: '||'
@@ -1018,6 +1073,12 @@
       "unit": "Z.",
       "default": 0,
       "info": "0 lässt jede Bewertung mit Text durch. Höhere Werte blenden Einwortbewertungen wie „Vielen Dank!\" aus, die eine Karte füllen, ohne etwas zu belegen."
+    },
+    {
+      "type": "textarea",
+      "id": "loox_pick",
+      "label": "Auswahl aus Loox",
+      "info": "Leer: die neuesten Bewertungen. Gefüllt: nur diese, in dieser Reihenfolge. Eine Zeile je Bewertung, ein wörtlicher Ausschnitt aus ihrem Text genügt. Pflicht auf der NMN-PDP, dort darf keine Verzehr- oder Wirkaussage stehen."
     }
   ],
   "blocks": [
