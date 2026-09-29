@@ -1,0 +1,77 @@
+{%- comment -%}
+  Chat-Blase (Shopify Inbox) auf PDPs mit lt-pdp-hero, nur mobil.
+  Conversion-Plan 4.5, 2026-09-29.
+
+  Die Blase sitzt fest unten rechts. Mobil lag sie auf der NMN-PDP genau auf
+  dem Ende der Hinweiszeile „Forschungs-/Analysezwecke · Nicht zum Verzehr",
+  sobald die Trust-Liste unten im Bild stand, und nach dem Einfahren der
+  Sticky-Leiste auf deren Kaufbutton.
+
+  1. Laeuft die Trust-Liste durch das untere Band, in dem die Blase sitzt,
+     tritt die Blase kurz zurueck.
+  2. Ist die Sticky-Leiste eingefahren, rueckt die Blase ueber sie.
+
+  Angesprochen wird nur ::part(activator), der Knopf der Blase. Das Chatfenster
+  selbst bleibt unberuehrt, damit ein geoeffneter Chat nicht mitwandert.
+{%- endcomment -%}
+<style>
+  @media (max-width: 749px) {
+    shopify-chat::part(activator) {
+      transform: translateY(calc(-1 * var(--lt-chat-lift, 0px)));
+      transition: transform 0.2s ease, opacity 0.2s ease;
+    }
+    html.lt-chat-quiet shopify-chat::part(activator) {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+</style>
+<script>
+  (function () {
+    var trust = document.querySelector('.lt-pdp-hero__trust');
+    var bar = document.getElementById('lt-sticky-atc');
+    if (!trust && !bar) return;
+
+    var mq = window.matchMedia('(max-width: 749px)');
+    var root = document.documentElement;
+    var trustInBand = false;
+    var BAND = 140;
+
+    function update() {
+      if (!mq.matches) {
+        root.classList.remove('lt-chat-quiet');
+        root.style.removeProperty('--lt-chat-lift');
+        return;
+      }
+      root.classList.toggle('lt-chat-quiet', trustInBand);
+      var lift = 0;
+      if (bar && bar.classList.contains('visible')) {
+        lift = Math.max(0, bar.offsetHeight - 8);
+      }
+      root.style.setProperty('--lt-chat-lift', lift + 'px');
+    }
+
+    var io = null;
+    function observeTrust() {
+      if (!trust || !('IntersectionObserver' in window)) return;
+      if (io) io.disconnect();
+      io = new IntersectionObserver(function (entries) {
+        trustInBand = entries[entries.length - 1].isIntersecting;
+        update();
+      }, { rootMargin: '-' + Math.max(0, window.innerHeight - BAND) + 'px 0px 0px 0px' });
+      io.observe(trust);
+    }
+
+    observeTrust();
+    window.addEventListener('resize', observeTrust);
+    if (bar) {
+      new MutationObserver(update).observe(bar, { attributes: true, attributeFilter: ['class'] });
+    }
+    if (mq.addEventListener) {
+      mq.addEventListener('change', update);
+    } else if (mq.addListener) {
+      mq.addListener(update);
+    }
+    update();
+  })();
+</script>
