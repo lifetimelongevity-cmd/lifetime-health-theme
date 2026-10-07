@@ -60,14 +60,23 @@
     <div class="ltw-visual">
       {%- if section.settings.right_type == 'image' -%}
         {%- if section.settings.image != blank -%}
-          {{
-            section.settings.image
-            | image_url: width: 1200
-            | image_tag:
-              loading: 'lazy',
-              class: 'ltw-visual__img',
-              alt: section.settings.image.alt | escape
-          }}
+          {%- comment -%} Hero-Bild = größtes Element im ersten Bildschirm: sofort laden, nicht lazy {%- endcomment -%}
+          <figure class="ltw-visual__figure">
+            {{
+              section.settings.image
+              | image_url: width: 1600
+              | image_tag:
+                loading: 'eager',
+                fetchpriority: 'high',
+                widths: '600, 900, 1200, 1600',
+                sizes: '(min-width: 1025px) 50vw, 100vw',
+                class: 'ltw-visual__img',
+                alt: section.settings.image.alt | escape
+            }}
+            {%- if section.settings.dash_note != blank -%}
+              <figcaption class="ltw-visual__note">{{ section.settings.dash_note | escape }}</figcaption>
+            {%- endif -%}
+          </figure>
         {%- else -%}
           <div class="ltw-visual__placeholder">{{ 'image' | placeholder_svg_tag: 'ltw-placeholder-svg' }}</div>
         {%- endif -%}
@@ -435,12 +444,25 @@
 }
 
 /* Image variant */
+/* Ergebniskarten stecken im Bild: nie beschneiden, nur die Höhe begrenzen */
+.ltw-visual__figure {
+  margin: 0;
+  max-width: 100%;
+}
+
 .ltw-visual__img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: calc(100svh - 180px);
   border-radius: 4px;
   display: block;
+}
+
+.ltw-visual__note {
+  margin-top: var(--space-2);
+  font-size: var(--text-micro);
+  color: var(--hero-text-sec);
 }
 
 .ltw-visual__placeholder {
@@ -800,8 +822,8 @@
     {
       "type": "text",
       "id": "dash_note",
-      "label": "Hinweis unter der Alterskarte",
-      "info": "z. B. Beispieldarstellung. Leer lassen blendet die Zeile aus."
+      "label": "Hinweis unter Bild bzw. Alterskarte",
+      "info": "z. B. Beispielwerte. Gilt für Bild und Dashboard. Leer lassen blendet die Zeile aus."
     }
   ],
   "blocks": [
