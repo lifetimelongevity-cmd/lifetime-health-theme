@@ -1,0 +1,231 @@
+{% comment %}
+  lt-hp-video-vsl — Video-Band mit Prof. Limmroth (Startseite v2, Oktober 2026).
+  Dunkles Teal (--color-dark), links Heading-Paar als Statement (--text-display),
+  Zitat und Name, rechts der Short im Hochformat. YouTube lädt erst nach Klick
+  (youtube-nocookie), vorher nur Vorschaubild und Play-Knopf.
+  Angaben zur Person nur nach docs/limmroth-faktenblatt.md.
+  Vorlage: docs/startseite-v2/startseite.html#video
+{% endcomment %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --ltvsl-pt: {{ section.settings.padding_top }}px;
+    --ltvsl-pb: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<div class="ltvsl">
+  <div class="ltvsl__wrap">
+    <div class="ltvsl__text">
+      {% render 'section-heading-crs',
+        heading: section.settings.heading,
+        subheading: section.settings.subheading,
+        on_dark: true,
+        headline_xl: true,
+        extra_class: 'ltvsl__kopf'
+      %}
+      {%- if section.settings.quote != blank -%}
+        <p class="ltvsl__zitat">„{{ section.settings.quote | escape }}“</p>
+      {%- endif -%}
+      {%- if section.settings.name != blank -%}
+        <p class="ltvsl__name">
+          {{- section.settings.name | escape -}}
+          {%- if section.settings.role != blank -%}<span>{{ section.settings.role | escape }}</span>{%- endif -%}
+        </p>
+      {%- endif -%}
+    </div>
+
+    {%- if section.settings.video_id != blank -%}
+      <div class="ltvsl__player" data-ltvsl-video="{{ section.settings.video_id | escape }}" data-ltvsl-title="{{ section.settings.video_title | escape }}">
+        {%- if section.settings.poster != blank -%}
+          {{
+            section.settings.poster
+            | image_url: width: 760
+            | image_tag:
+              loading: 'lazy',
+              widths: '380, 760',
+              sizes: '(min-width: 861px) 380px, 340px',
+              class: 'ltvsl__poster',
+              alt: section.settings.poster.alt
+          }}
+        {%- endif -%}
+        <button type="button" class="ltvsl__play" aria-label="{{ section.settings.play_label | escape }}">
+          {%- comment -%} ph:play-thin {%- endcomment -%}
+          <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 256 256" aria-hidden="true" focusable="false"><path fill="currentColor" d="M230.32 117.9L86.24 29.79a11.91 11.91 0 0 0-12.17-.23A11.71 11.71 0 0 0 68 39.89v176.22a11.71 11.71 0 0 0 6.07 10.33a11.91 11.91 0 0 0 12.17-.23l144.08-88.11a11.82 11.82 0 0 0 0-20.2m-4.18 13.37L82.06 219.39a4 4 0 0 1-4.07.07a3.77 3.77 0 0 1-2-3.35V39.89a3.77 3.77 0 0 1 2-3.35a4 4 0 0 1 4.07.07l144.08 88.12a3.8 3.8 0 0 1 0 6.54"/></svg>
+        </button>
+        {%- if section.settings.hint != blank -%}
+          <p class="ltvsl__hinweis">{{ section.settings.hint | escape }}</p>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+.ltvsl {
+  /* Heading-Paar auf Dunkel: Paper statt Reinweiß, Unterzeile 0.72 (Typo-System Startseite v2) */
+  --color-text-on-dark: var(--color-paper);
+  --color-text-on-dark-muted: rgba(247, 247, 244, 0.72);
+  background:
+    radial-gradient(circle at 78% 50%, rgba(101, 192, 182, 0.16), rgba(54, 79, 86, 0) 50%),
+    var(--color-dark);
+  color: var(--color-paper);
+  padding: var(--ltvsl-pt, 104px) 0 var(--ltvsl-pb, 104px);
+}
+.ltvsl__wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 40px;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: var(--space-9);
+  align-items: center;
+}
+.ltvsl__zitat {
+  margin: var(--space-6) 0 0;
+  max-width: 520px;
+  font-family: var(--font-heading);
+  font-size: var(--text-h3);
+  line-height: 1.35;
+  color: var(--color-paper);
+}
+.ltvsl__name {
+  margin: 20px 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  color: var(--color-paper);
+}
+.ltvsl__name span {
+  display: block;
+  margin-top: 3px;
+  font-size: var(--text-body-sm);
+  line-height: 1.45;
+  color: var(--color-text-on-dark-muted);
+}
+.ltvsl__player {
+  position: relative;
+  aspect-ratio: 9 / 16;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-ink);
+  box-shadow: 0 30px 60px rgba(15, 28, 32, 0.45);
+}
+.ltvsl__poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 62% center;
+}
+.ltvsl__player::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 55%, rgba(0, 0, 0, 0.55) 100%);
+  pointer-events: none;
+}
+.ltvsl__player.is-playing::after { display: none; }
+.ltvsl__play {
+  position: absolute;
+  left: 50%;
+  top: 76%;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  width: 84px;
+  height: 84px;
+  border-radius: var(--radius-full);
+  border: 0;
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--color-ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform var(--ease-default);
+}
+.ltvsl__play:hover { transform: translate(-50%, -50%) scale(1.05); }
+.ltvsl__play:focus-visible { outline: 2px solid var(--color-paper); outline-offset: 4px; }
+.ltvsl__hinweis {
+  position: absolute;
+  left: var(--space-4);
+  right: var(--space-4);
+  bottom: 14px;
+  z-index: 1;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: 1.4;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.78);
+}
+.ltvsl__player iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+@media (max-width: 1024px) { .ltvsl__wrap { padding: 0 24px; } }
+@media (max-width: 860px) {
+  .ltvsl { --text-display: 32px; padding: var(--space-8) 0; }
+  .ltvsl__wrap { grid-template-columns: 1fr; gap: var(--space-6); }
+  .ltvsl__zitat { margin-top: var(--space-5); font-size: var(--text-section); }
+  .ltvsl__player { width: 100%; max-width: 340px; margin: 0 auto; }
+}
+@media (max-width: 640px) { .ltvsl__wrap { padding: 0 20px; } }
+@media (prefers-reduced-motion: reduce) {
+  .ltvsl__play { transition: none; }
+  .ltvsl__play:hover { transform: translate(-50%, -50%); }
+}
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  if (window.__ltVslBound) return;
+  window.__ltVslBound = true;
+
+  /* YouTube erst nach Klick laden (youtube-nocookie), vorher keine Anfrage an Google. */
+  document.addEventListener('click', function (e) {
+    var btn = e.target.closest('.ltvsl__play');
+    if (!btn) return;
+    var player = btn.closest('[data-ltvsl-video]');
+    if (!player) return;
+    var f = document.createElement('iframe');
+    f.src = 'https://www.youtube-nocookie.com/embed/' + encodeURIComponent(player.dataset.ltvslVideo) + '?autoplay=1&playsinline=1&rel=0';
+    f.title = player.dataset.ltvslTitle || 'Video';
+    f.allow = 'autoplay; encrypted-media; picture-in-picture';
+    f.allowFullscreen = true;
+    player.innerHTML = '';
+    player.classList.add('is-playing');
+    player.appendChild(f);
+    f.focus();
+  });
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "HP Video Limmroth",
+  "tag": "section",
+  "class": "section lt-hp-video-vsl",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Überschrift", "default": "Dein biologisches Alter ist messbar." },
+    { "type": "text", "id": "subheading", "label": "Unterzeile (gleich groß, nur heller)", "default": "Und beeinflussbar." },
+    { "type": "text", "id": "quote", "label": "Zitat (ohne Anführungszeichen)", "default": "Longevity beginnt mit Daten, nicht mit Annahmen." },
+    { "type": "text", "id": "name", "label": "Name", "default": "Prof. Dr. med. Volker Limmroth" },
+    { "type": "text", "id": "role", "label": "Rolle", "default": "Chefarzt der Neurologie, Köln-Merheim · Chief Scientific Officer LIFETIME", "info": "Nur Angaben aus docs/limmroth-faktenblatt.md" },
+    { "type": "header", "content": "Video" },
+    { "type": "text", "id": "video_id", "label": "YouTube-ID", "default": "Tm8yZ40wmTY" },
+    { "type": "text", "id": "video_title", "label": "Titel des Videos (für Screenreader)", "default": "Prof. Dr. Limmroth im Podcast" },
+    { "type": "image_picker", "id": "poster", "label": "Vorschaubild (Hochformat)" },
+    { "type": "text", "id": "play_label", "label": "Beschriftung Play-Knopf (Screenreader)", "default": "Video mit Prof. Dr. Limmroth abspielen" },
+    { "type": "text", "id": "hint", "label": "Hinweis unter dem Knopf", "default": "Mit dem Klick lädst du das Video von YouTube." },
+    { "type": "header", "content": "Abstände Desktop" },
+    { "type": "range", "id": "padding_top", "label": "Oben", "min": 0, "max": 160, "step": 8, "default": 104, "unit": "px" },
+    { "type": "range", "id": "padding_bottom", "label": "Unten", "min": 0, "max": 160, "step": 8, "default": 104, "unit": "px" }
+  ],
+  "presets": [{ "name": "HP Video Limmroth" }]
+}
+{% endschema %}

@@ -1,0 +1,309 @@
+{% comment %}
+  lt-hp-normbereich — „Alles im Normbereich.“ (Startseite v2, Oktober 2026).
+  Links eine Befundkarte wie vom Hausarzt (vier Werte, Beurteilung), rechts ein
+  Foto mit zwei DNA-Karten im Wortlaut der App. Die DNA-Karten bilden die App nach:
+  Schrift Urbanist (nur hier, selbst gehostet), gelber Balken, Pfeil im Kreis.
+  Wortlaut der Karten von BJ bestätigt am 08.10.2026.
+  Ersetzt auf der Startseite lt-hp-problem-v2 (die Datei bleibt liegen).
+  Vorlage: docs/startseite-v2/startseite.html#normbereich
+{% endcomment %}
+
+{% style %}
+  @font-face {
+    font-family: 'LT Urbanist';
+    src: url({{ 'lt-urbanist.woff2' | asset_url }}) format('woff2');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+  #shopify-section-{{ section.id }} {
+    --ltp-pt: {{ section.settings.padding_top }}px;
+    --ltp-pb: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<div class="ltp">
+  <div class="ltp__wrap">
+    {% render 'section-heading-crs',
+      heading: section.settings.heading,
+      subheading: section.settings.subheading,
+      align: 'center',
+      headline_md: true,
+      modifier: 'homepage-truth',
+      extra_class: 'ltp__kopf'
+    %}
+
+    <div class="ltp__paar">
+      <div class="ltp__karte ltp__befund">
+        {%- if section.settings.label_befund != blank -%}
+          <p class="ltp__label">{{ section.settings.label_befund | escape }}</p>
+        {%- endif -%}
+        <table>
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'wert' -%}
+              <tr {{ block.shopify_attributes }}>
+                <th scope="row">{{ block.settings.name | escape }}</th>
+                <td class="ltp__wert">{{ block.settings.value | escape }} <span>{{ block.settings.unit | escape }}</span></td>
+                <td class="ltp__ok">
+                  {%- comment -%} ph:check-thin {%- endcomment -%}
+                  <svg width="16" height="16" viewBox="0 0 256 256" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m226.83 74.83l-128 128a4 4 0 0 1-5.66 0l-56-56a4 4 0 0 1 5.66-5.66L96 194.34L221.17 69.17a4 4 0 1 1 5.66 5.66"/></svg>
+                  {{ block.settings.status | escape }}
+                </td>
+              </tr>
+            {%- endif -%}
+          {%- endfor -%}
+        </table>
+        {%- if section.settings.beurteilung != blank -%}
+          <p class="ltp__beurteilung"><span>{{ section.settings.beurteilung_label | escape }}</span>{{ section.settings.beurteilung | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      <div class="ltp__karte ltp__bild">
+        {%- if section.settings.image != blank -%}
+          {{
+            section.settings.image
+            | image_url: width: 1200
+            | image_tag:
+              loading: 'lazy',
+              widths: '600, 900, 1122',
+              sizes: '(min-width: 769px) 50vw, 100vw',
+              alt: section.settings.image.alt
+          }}
+        {%- endif -%}
+        {%- if section.settings.label_gene != blank -%}
+          <p class="ltp__label">{{ section.settings.label_gene | escape }}</p>
+        {%- endif -%}
+        <div class="ltp__glas">
+          {%- for block in section.blocks -%}
+            {%- if block.type == 'gen' -%}
+              <div {{ block.shopify_attributes }}>
+                <p>{{ block.settings.title | escape }}</p>
+                <i style="--w: {{ block.settings.percent }}%" aria-hidden="true"></i>
+                <em>{{ block.settings.text | escape }}</em>
+                {%- comment -%} Pfeil im Kreis wie in der App, bewusst kein Phosphor-Icon {%- endcomment -%}
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10.5"/><path d="M7.5 12h9M13 8.5l3.5 3.5-3.5 3.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+    </div>
+
+    {%- if section.settings.note != blank -%}
+      <p class="ltp__note">{{ section.settings.note | escape }}</p>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+.ltp {
+  background: var(--color-paper);
+  padding: var(--ltp-pt, 96px) 0 var(--ltp-pb, 96px);
+}
+.ltp__wrap { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+.ltp__kopf { margin: 0 auto 40px; }
+.ltp__paar { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-4); }
+.ltp__karte { position: relative; border-radius: var(--radius-lg); overflow: hidden; min-height: 620px; }
+.ltp__label {
+  position: absolute;
+  top: var(--space-5);
+  left: var(--space-5);
+  z-index: 1;
+  margin: 0;
+  padding: 9px 14px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: 1;
+}
+
+/* Befundkarte */
+.ltp__befund {
+  background: var(--color-white);
+  border: 1px solid #e4e2db;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 96px 40px 56px;
+}
+.ltp__befund .ltp__label { color: var(--color-ink-muted); background: #f2f1ed; }
+.ltp__befund table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  color: var(--color-ink);
+}
+.ltp__befund th,
+.ltp__befund td {
+  text-align: left;
+  font-weight: var(--weight-regular);
+  padding: 22px 0;
+  border-bottom: 1px solid #ecebe6;
+}
+.ltp__befund tr:first-child th,
+.ltp__befund tr:first-child td { border-top: 1px solid #ecebe6; }
+.ltp__befund .ltp__wert { font-variant-numeric: tabular-nums; white-space: nowrap; padding-right: var(--space-4); }
+.ltp__wert span { font-size: var(--text-body-sm); color: var(--color-ink-muted); }
+.ltp__befund .ltp__ok {
+  text-align: right;
+  white-space: nowrap;
+  font-size: var(--text-body-sm);
+  color: var(--color-ink-muted);
+}
+.ltp__ok svg { vertical-align: -2px; margin-right: var(--space-1); }
+.ltp__beurteilung {
+  margin: 36px 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-bold);
+  color: var(--color-ink);
+}
+.ltp__beurteilung span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+
+/* Fotokarte mit DNA-Glaskarten (App-Nachbau) */
+.ltp__bild img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ltp__bild::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(38, 37, 30, 0.35) 0%, rgba(38, 37, 30, 0) 30%);
+}
+.ltp__bild .ltp__label { color: var(--color-ink); background: rgba(250, 248, 244, 0.9); }
+.ltp__glas {
+  position: absolute;
+  left: var(--space-5);
+  right: var(--space-5);
+  bottom: var(--space-5);
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  font-family: 'LT Urbanist', var(--font-body);
+}
+.ltp__glas > div {
+  position: relative;
+  padding: 18px 18px var(--space-4);
+  background: rgba(250, 248, 244, 0.86);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 14px;
+  color: #1f2b2e;
+  box-shadow: 0 8px 24px rgba(38, 37, 30, 0.12);
+}
+.ltp__glas p { margin: 0; min-height: 46px; font-size: 19px; line-height: 1.2; font-weight: var(--weight-medium); }
+.ltp__glas i {
+  position: relative;
+  display: block;
+  height: 12px;
+  margin: 14px 0 12px;
+  border-radius: var(--radius-full);
+  background: #e6e6e3;
+  overflow: hidden;
+}
+.ltp__glas i::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--w);
+  border-radius: var(--radius-full);
+  background: #fbc21b;
+}
+.ltp__glas em {
+  display: block;
+  padding-right: 34px;
+  font-style: normal;
+  font-size: var(--text-body-sm);
+  line-height: 1.3;
+  color: #3a4446;
+}
+.ltp__glas svg { position: absolute; right: 14px; bottom: 14px; color: #7fd0c3; }
+
+.ltp__note {
+  margin: 28px 0 0;
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: 1.45;
+  color: var(--color-ink-muted);
+}
+
+@media (max-width: 1024px) { .ltp__wrap { padding: 0 24px; } }
+/* Kapitel-Stufe mobil 24 px (Typo-System Startseite v2) */
+@media (max-width: 860px) { .ltp { --text-h2: 24px; } }
+@media (max-width: 768px) {
+  .ltp { padding: var(--space-8) 0; }
+  .ltp__paar { grid-template-columns: 1fr; }
+  .ltp__karte { min-height: 0; }
+  .ltp__befund { padding: 72px 20px 28px; }
+  .ltp__label { top: var(--space-4); left: var(--space-4); }
+  .ltp__befund th,
+  .ltp__befund td { padding: 14px 0; font-size: var(--text-body-sm); }
+  .ltp__befund .ltp__wert { padding-right: var(--space-2); }
+  .ltp__beurteilung { margin-top: var(--space-5); font-size: var(--text-body); }
+  .ltp__bild { aspect-ratio: 4 / 5; }
+  .ltp__glas { left: 14px; right: 14px; bottom: 14px; gap: var(--space-2); }
+  .ltp__glas > div { padding: 14px var(--space-3) var(--space-3); }
+  .ltp__glas p { font-size: 15px; min-height: 36px; }
+  .ltp__glas i { height: 9px; margin: 10px 0 var(--space-2); }
+  .ltp__glas em { font-size: var(--text-micro); padding-right: 22px; }
+  .ltp__glas svg { right: var(--space-2); bottom: 10px; width: 18px; height: 18px; }
+}
+@media (max-width: 640px) { .ltp__wrap { padding: 0 20px; } }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "HP Normbereich",
+  "tag": "section",
+  "class": "section lt-hp-normbereich",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Überschrift", "default": "Alles im Normbereich." },
+    { "type": "text", "id": "subheading", "label": "Unterzeile (gleich groß, nur heller)", "default": "Nur nicht, was in deinen Genen steht." },
+    { "type": "header", "content": "Befundkarte" },
+    { "type": "text", "id": "label_befund", "label": "Etikett", "default": "Was dein Check-up zeigt" },
+    { "type": "text", "id": "beurteilung_label", "label": "Beschriftung Beurteilung", "default": "Beurteilung" },
+    { "type": "text", "id": "beurteilung", "label": "Beurteilung", "default": "Alle Werte im Normbereich." },
+    { "type": "header", "content": "Fotokarte" },
+    { "type": "image_picker", "id": "image", "label": "Foto (Hochformat)" },
+    { "type": "text", "id": "label_gene", "label": "Etikett", "default": "Was deine Gene dazu sagen" },
+    { "type": "text", "id": "note", "label": "Hinweis unter den Karten", "default": "Ergänzt deinen Check-up. Ersetzt ihn nicht." },
+    { "type": "header", "content": "Abstände Desktop" },
+    { "type": "range", "id": "padding_top", "label": "Oben", "min": 0, "max": 160, "step": 8, "default": 96, "unit": "px" },
+    { "type": "range", "id": "padding_bottom", "label": "Unten", "min": 0, "max": 160, "step": 8, "default": 96, "unit": "px" }
+  ],
+  "blocks": [
+    {
+      "type": "wert",
+      "name": "Laborwert",
+      "settings": [
+        { "type": "text", "id": "name", "label": "Wert", "default": "Blutdruck" },
+        { "type": "text", "id": "value", "label": "Messwert", "default": "122/80" },
+        { "type": "text", "id": "unit", "label": "Einheit", "default": "mmHg" },
+        { "type": "text", "id": "status", "label": "Status", "default": "im Normbereich" }
+      ]
+    },
+    {
+      "type": "gen",
+      "name": "DNA-Karte",
+      "limit": 2,
+      "settings": [
+        { "type": "text", "id": "title", "label": "Report", "default": "Cholesterin" },
+        { "type": "range", "id": "percent", "label": "Balken", "min": 0, "max": 100, "step": 1, "default": 50, "unit": "%" },
+        { "type": "text", "id": "text", "label": "Kurzbefund (Wortlaut der App)", "default": "Erhöhtes Risiko für hohe Cholesterinwerte" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "HP Normbereich" }]
+}
+{% endschema %}

@@ -1,0 +1,146 @@
+{% comment %}
+  lt-hp-ablauf — „So läuft's.“ (Startseite v2, Oktober 2026).
+  Ohne Bild, vier Spalten mit Phosphor-thin-Icon (36 px, currentColor, ohne Kreis),
+  Zeitangabe als graues Label, Titel, kurzer Text. Mobil eine Liste mit Icon links.
+  Ersetzt auf der Startseite lt-hp-journey; die Fragen von dort stehen jetzt in lt-hp-fragen.
+  Vorlage: docs/startseite-v2/startseite.html#ablauf
+{% endcomment %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --lta-pt: {{ section.settings.padding_top }}px;
+    --lta-pb: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<div class="lta">
+  <div class="lta__wrap">
+    {% render 'section-heading-crs',
+      heading: section.settings.heading,
+      subheading: section.settings.subheading,
+      headline_md: true,
+      modifier: 'homepage-truth',
+      extra_class: 'lta__kopf'
+    %}
+    <ol class="lta__liste">
+      {%- for block in section.blocks -%}
+        <li {{ block.shopify_attributes }}>
+          <span class="lta__icon">
+            {%- case block.settings.icon -%}
+              {%- when 'package' -%}
+                <svg viewBox="0 0 256 256" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m221.76 69.66l-88-48.18a12 12 0 0 0-11.52 0l-88 48.18A12 12 0 0 0 28 80.18v95.64a12 12 0 0 0 6.24 10.52l88 48.18a11.95 11.95 0 0 0 11.52 0l88-48.18a12 12 0 0 0 6.24-10.52V80.18a12 12 0 0 0-6.24-10.52M126.08 28.5a3.94 3.94 0 0 1 3.84 0L216.67 76L178.5 96.89a4 4 0 0 0-.58-.4l-88-48.18Zm1.92 96L39.33 76l42.23-23.13l88.67 48.54Zm-89.92 54.8a4 4 0 0 1-2.08-3.5V83.29l88 48.16v94.91Zm179.84 0l-85.92 47v-94.85l40-21.89V152a4 4 0 0 0 8 0v-46.82l40-21.89v92.53a4 4 0 0 1-2.08 3.5Z"/></svg>
+              {%- when 'test-tube' -%}
+                <svg viewBox="0 0 256 256" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m234.83 89.18l-60-60a4 4 0 0 0-5.66 0L39.94 158.41a40.78 40.78 0 0 0 57.66 57.67L210.16 103.5l23.1-7.7a4 4 0 0 0 1.57-6.62M91.94 210.42a32.77 32.77 0 1 1-46.34-46.35L75 134.63c9.2-3.38 23.94-5.08 43.11 4.93c12.09 6.31 22.74 8.48 31.66 8.48c1.64 0 3.2-.09 4.73-.22Zm114.8-114.21a4.06 4.06 0 0 0-1.57 1L165 137.39c-9.2 3.38-23.94 5.08-43.11-4.93c-14.3-7.47-26.58-9.13-36.38-8.27L172 37.66l52.6 52.6Z"/></svg>
+              {%- when 'cpu' -%}
+                <svg viewBox="0 0 256 256" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M152 100h-48a4 4 0 0 0-4 4v48a4 4 0 0 0 4 4h48a4 4 0 0 0 4-4v-48a4 4 0 0 0-4-4m-4 48h-40v-40h40Zm84 0h-20v-40h20a4 4 0 0 0 0-8h-20V56a12 12 0 0 0-12-12h-44V24a4 4 0 0 0-8 0v20h-40V24a4 4 0 0 0-8 0v20H56a12 12 0 0 0-12 12v44H24a4 4 0 0 0 0 8h20v40H24a4 4 0 0 0 0 8h20v44a12 12 0 0 0 12 12h44v20a4 4 0 0 0 8 0v-20h40v20a4 4 0 0 0 8 0v-20h44a12 12 0 0 0 12-12v-44h20a4 4 0 0 0 0-8m-28 52a4 4 0 0 1-4 4H56a4 4 0 0 1-4-4V56a4 4 0 0 1 4-4h144a4 4 0 0 1 4 4Z"/></svg>
+              {%- when 'device-mobile' -%}
+                <svg viewBox="0 0 256 256" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M176 20H80a20 20 0 0 0-20 20v176a20 20 0 0 0 20 20h96a20 20 0 0 0 20-20V40a20 20 0 0 0-20-20M68 60h120v136H68Zm12-32h96a12 12 0 0 1 12 12v12H68V40a12 12 0 0 1 12-12m96 200H80a12 12 0 0 1-12-12v-12h120v12a12 12 0 0 1-12 12"/></svg>
+            {%- endcase -%}
+          </span>
+          <div>
+            {%- if block.settings.zeit != blank -%}<p class="lta__zeit">{{ block.settings.zeit | escape }}</p>{%- endif -%}
+            <h3 class="lta__titel">{{ block.settings.title | escape }}</h3>
+            {%- if block.settings.text != blank -%}<p class="lta__txt">{{ block.settings.text | escape }}</p>{%- endif -%}
+          </div>
+        </li>
+      {%- endfor -%}
+    </ol>
+  </div>
+</div>
+
+{% stylesheet %}
+.lta {
+  background: var(--color-paper);
+  padding: var(--lta-pt, 96px) 0 var(--lta-pb, 72px);
+}
+.lta__wrap { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+.lta__kopf { margin-bottom: 40px; }
+.lta__liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-6);
+}
+.lta__liste li {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-top: 28px;
+  border-top: 1px solid #dcdad3;
+  color: var(--color-ink);
+}
+.lta__icon { flex: 0 0 36px; width: 36px; height: 36px; margin-top: 2px; color: inherit; }
+.lta__icon svg { display: block; width: 36px; height: 36px; }
+.lta__zeit {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink-muted);
+}
+.lta__titel {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  color: var(--color-ink);
+}
+.lta__txt {
+  margin: 6px 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: var(--leading-relaxed);
+  color: var(--color-ink-muted);
+}
+@media (max-width: 1024px) { .lta__wrap { padding: 0 24px; } }
+/* Kapitel-Stufe mobil 24 px (Typo-System Startseite v2) */
+@media (max-width: 860px) { .lta { --text-h2: 24px; } }
+@media (max-width: 900px) {
+  .lta { padding: var(--space-8) 0 40px; }
+  .lta__liste { grid-template-columns: 1fr; gap: 0; }
+  .lta__liste li { flex-direction: row; gap: var(--space-4); padding: 18px 0; border-top-color: #e4e2db; }
+  .lta__liste li:last-child { border-bottom: 1px solid #e4e2db; }
+}
+@media (max-width: 640px) { .lta__wrap { padding: 0 20px; } }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "HP Ablauf",
+  "tag": "section",
+  "class": "section lt-hp-ablauf",
+  "max_blocks": 6,
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Überschrift", "default": "So läuft's." },
+    { "type": "text", "id": "subheading", "label": "Unterzeile (gleich groß, nur heller)", "default": "Kein Arzttermin, kein Laborbesuch." },
+    { "type": "header", "content": "Abstände Desktop" },
+    { "type": "range", "id": "padding_top", "label": "Oben", "min": 0, "max": 160, "step": 8, "default": 96, "unit": "px" },
+    { "type": "range", "id": "padding_bottom", "label": "Unten", "min": 0, "max": 160, "step": 8, "default": 72, "unit": "px" }
+  ],
+  "blocks": [
+    {
+      "type": "schritt",
+      "name": "Schritt",
+      "settings": [
+        { "type": "select", "id": "icon", "label": "Icon (Phosphor thin)", "default": "package", "options": [
+          { "value": "package", "label": "Paket" },
+          { "value": "test-tube", "label": "Röhrchen" },
+          { "value": "cpu", "label": "Labor / Analyse" },
+          { "value": "device-mobile", "label": "Handy" }
+        ] },
+        { "type": "text", "id": "zeit", "label": "Zeitangabe", "default": "01 · 2–3 Werktage" },
+        { "type": "text", "id": "title", "label": "Titel", "default": "Schritt" },
+        { "type": "textarea", "id": "text", "label": "Text", "default": "Kurzer Text" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "HP Ablauf" }]
+}
+{% endschema %}

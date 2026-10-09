@@ -1,0 +1,286 @@
+{% comment %}
+  lt-hp-stimmen — Kundenstimmen als Karussell (Startseite v2, Oktober 2026).
+  Erste Karte mit Foto, alle weiteren im dunklen Teal-Verlauf. Wortlaut aus Loox
+  (Metafeld loox.reviews des AGE&DNA-Tests), von BJ am 08.10.2026 als echt bestätigt.
+  Sterne und Anzahl live aus product.metafields.loox (avg_rating, num_reviews).
+  Bewusst ohne 124er-Befragung, Retest-Verläufe und Begleitprogramm-Hinweis.
+  Ersetzt auf der Startseite lt-hp-social-proof (die Datei bleibt liegen).
+  Vorlage: docs/startseite-v2/startseite.html#stimmen
+{% endcomment %}
+
+{%- liquid
+  assign p = section.settings.product
+  assign schnitt = section.settings.rating_fallback
+  assign anzahl = section.settings.count_fallback
+  if p != blank
+    if p.metafields.loox.avg_rating != blank
+      assign schnitt = p.metafields.loox.avg_rating.value | append: '' | replace: '.', ','
+    endif
+    if p.metafields.loox.num_reviews != blank
+      assign anzahl = p.metafields.loox.num_reviews.value | append: ''
+    endif
+  endif
+-%}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --ltk-pt: {{ section.settings.padding_top }}px;
+    --ltk-pb: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<div class="ltk" data-ltk>
+  <div class="ltk__kopf">
+    <div>
+      {% render 'section-heading-crs',
+        heading: section.settings.heading,
+        headline_md: true,
+        modifier: 'homepage-truth'
+      %}
+      <p class="ltk__sterne"><b>{{ schnitt }} von 5</b> · {{ anzahl }} Bewertungen</p>
+    </div>
+    <div class="ltk__pfeile">
+      <button type="button" data-r="-1" aria-label="Zurück">
+        {%- comment -%} ph:arrow-left-thin {%- endcomment -%}
+        <svg width="20" height="20" viewBox="0 0 256 256" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M220 128a4 4 0 0 1-4 4H49.66l65.17 65.17a4 4 0 0 1-5.66 5.66l-72-72a4 4 0 0 1 0-5.66l72-72a4 4 0 0 1 5.66 5.66L49.66 124H216a4 4 0 0 1 4 4"/></svg>
+      </button>
+      <button type="button" data-r="1" aria-label="Weiter">
+        {%- comment -%} ph:arrow-right-thin {%- endcomment -%}
+        <svg width="20" height="20" viewBox="0 0 256 256" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m218.83 130.83l-72 72a4 4 0 0 1-5.66-5.66L206.34 132H40a4 4 0 0 1 0-8h166.34l-65.17-65.17a4 4 0 0 1 5.66-5.66l72 72a4 4 0 0 1 0 5.66"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <ul class="ltk__spur" role="list">
+    {%- for block in section.blocks -%}
+      {%- assign foto = false -%}
+      {%- if block.settings.stil == 'foto' and block.settings.image != blank -%}{%- assign foto = true -%}{%- endif -%}
+      <li class="ltk__karte {% if foto %}ltk__karte--foto{% else %}ltk__karte--verlauf{% endif %}{% if block.settings.zahl != blank %} ltk__karte--zahl{% endif %}" {{ block.shopify_attributes }}>
+        {%- if foto -%}
+          {{
+            block.settings.image
+            | image_url: width: 800
+            | image_tag: loading: 'lazy', widths: '400, 800', sizes: '380px', class: 'ltk__foto', alt: ''
+          }}
+        {%- endif -%}
+        {%- if block.settings.zahl != blank -%}
+          <p class="ltk__zahl">{{ block.settings.zahl | escape }}</p>
+          {%- if block.settings.zahl_label != blank -%}<p class="ltk__zl">{{ block.settings.zahl_label | escape }}</p>{%- endif -%}
+        {%- else -%}
+          <p class="ltk__anf" aria-hidden="true">„</p>
+        {%- endif -%}
+        <p class="ltk__txt">{{ block.settings.text | escape }}</p>
+        <p class="ltk__name">{{ block.settings.name | escape }}{% if block.settings.source != blank %}<span>{{ block.settings.source | escape }}</span>{% endif %}</p>
+      </li>
+    {%- endfor -%}
+  </ul>
+
+  {%- if section.settings.link_label != blank -%}
+    <div class="ltk__fuss">
+      <a href="{{ section.settings.link_url | default: '/products/lifetime-age-dna#reviews' }}">{{ section.settings.link_label | replace: '[anzahl]', anzahl | escape }}</a>
+    </div>
+  {%- endif -%}
+</div>
+
+{% stylesheet %}
+.ltk {
+  --ltk-rand: max(40px, calc((100vw - 1200px) / 2));
+  background: var(--color-paper);
+  padding: var(--ltk-pt, 96px) 0 var(--ltk-pb, 96px);
+}
+.ltk__kopf {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-5);
+  max-width: 1280px;
+  margin: 0 auto var(--space-6);
+  padding: 0 40px;
+}
+.ltk__sterne {
+  margin: 10px 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+.ltk__sterne b { font-weight: var(--weight-regular); color: var(--color-ink); font-variant-numeric: tabular-nums; }
+.ltk__pfeile { display: flex; gap: var(--space-2); }
+.ltk__pfeile button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  border: 1px solid #dcdad3;
+  background: var(--color-white);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+.ltk__pfeile button:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+.ltk__spur {
+  list-style: none;
+  margin: 0;
+  padding: 0 var(--ltk-rand);
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 0 var(--ltk-rand);
+  scrollbar-width: none;
+}
+.ltk__spur::-webkit-scrollbar { display: none; }
+.ltk__karte {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 380px;
+  height: 440px;
+  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  scroll-snap-align: start;
+  color: var(--color-paper);
+}
+.ltk__karte--verlauf {
+  background:
+    radial-gradient(circle at 85% 0%, rgba(101, 192, 182, 0.16), rgba(101, 192, 182, 0) 55%),
+    linear-gradient(165deg, #34494f 0%, #1f2e33 100%);
+}
+.ltk__karte--foto { background-color: #3a3833; color: var(--color-white); }
+.ltk__foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ltk__karte--foto::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(20, 19, 17, 0.45) 0%, rgba(20, 19, 17, 0.08) 34%, rgba(20, 19, 17, 0.25) 55%, rgba(20, 19, 17, 0.82) 100%);
+}
+.ltk__karte--foto > p { position: relative; z-index: 2; }
+.ltk__zahl {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-stat);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-stat);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.ltk__zl {
+  margin: 10px 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+.ltk__anf {
+  height: 40px;
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 96px;
+  line-height: 0.6;
+  opacity: 0.35;
+}
+.ltk__txt {
+  margin: auto 0 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  line-height: 1.35;
+  letter-spacing: -0.005em;
+}
+.ltk__karte--zahl .ltk__txt { font-size: var(--text-body-lg); line-height: 1.4; }
+.ltk__name {
+  margin: var(--space-5) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  line-height: 1.5;
+}
+.ltk__name span { display: block; margin-top: 2px; font-size: var(--text-body-sm); line-height: 1.45; opacity: 0.72; }
+.ltk__fuss { max-width: 1280px; margin: var(--space-5) auto 0; padding: 0 40px; }
+.ltk__fuss a {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-ink);
+  text-decoration: none;
+  text-underline-offset: 3px;
+}
+.ltk__fuss a:hover, .ltk__fuss a:focus-visible { text-decoration: underline; }
+/* Kapitel-Stufe mobil 24 px (Typo-System Startseite v2) */
+@media (max-width: 860px) { .ltk { --text-h2: 24px; } }
+@media (max-width: 1024px) {
+  .ltk { --ltk-rand: 24px; }
+  .ltk__kopf, .ltk__fuss { padding: 0 24px; }
+}
+@media (max-width: 768px) {
+  .ltk { padding: var(--space-8) 0; }
+  .ltk__pfeile { display: none; }
+  .ltk__karte { flex-basis: 82vw; height: 400px; padding: var(--space-5); }
+  .ltk__txt { font-size: var(--text-body-lg); }
+  .ltk__zahl { font-size: var(--text-display); }
+}
+@media (max-width: 640px) {
+  .ltk { --ltk-rand: 20px; }
+  .ltk__kopf, .ltk__fuss { padding: 0 20px; }
+}
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  if (window.__ltStimmenBound) return;
+  window.__ltStimmenBound = true;
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest('.ltk__pfeile button');
+    if (!b) return;
+    var root = b.closest('[data-ltk]');
+    var spur = root && root.querySelector('.ltk__spur');
+    var karte = spur && spur.querySelector('.ltk__karte');
+    if (!karte) return;
+    var schritt = karte.getBoundingClientRect().width + 16;
+    var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    spur.scrollBy({ left: (+b.dataset.r) * schritt, behavior: ruhig ? 'auto' : 'smooth' });
+  });
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "HP Kundenstimmen",
+  "tag": "section",
+  "class": "section lt-hp-stimmen",
+  "max_blocks": 12,
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Überschrift", "default": "Was sich nach dem Ergebnis geändert hat" },
+    { "type": "product", "id": "product", "label": "Produkt für Sterne und Anzahl (Loox)" },
+    { "type": "text", "id": "rating_fallback", "label": "Schnitt, falls kein Produkt", "default": "4,7" },
+    { "type": "text", "id": "count_fallback", "label": "Anzahl, falls kein Produkt", "default": "121" },
+    { "type": "text", "id": "link_label", "label": "Link unter dem Karussell", "default": "Alle [anzahl] Bewertungen lesen →", "info": "[anzahl] wird durch die Loox-Anzahl ersetzt." },
+    { "type": "url", "id": "link_url", "label": "Ziel des Links" },
+    { "type": "header", "content": "Abstände Desktop" },
+    { "type": "range", "id": "padding_top", "label": "Oben", "min": 0, "max": 160, "step": 8, "default": 96, "unit": "px" },
+    { "type": "range", "id": "padding_bottom", "label": "Unten", "min": 0, "max": 160, "step": 8, "default": 96, "unit": "px" }
+  ],
+  "blocks": [
+    {
+      "type": "stimme",
+      "name": "Stimme",
+      "settings": [
+        { "type": "select", "id": "stil", "label": "Karte", "default": "verlauf", "options": [
+          { "value": "foto", "label": "Foto (nur erste Karte)" },
+          { "value": "verlauf", "label": "Teal-Verlauf" }
+        ] },
+        { "type": "image_picker", "id": "image", "label": "Foto" },
+        { "type": "text", "id": "zahl", "label": "Zahl (optional, z. B. 46 → 38)" },
+        { "type": "text", "id": "zahl_label", "label": "Beschriftung der Zahl", "default": "chronologisch → biologisch" },
+        { "type": "textarea", "id": "text", "label": "Zitat (Loox-Wortlaut)", "default": "Zitat" },
+        { "type": "text", "id": "name", "label": "Name", "default": "Vorname N." },
+        { "type": "text", "id": "source", "label": "Quelle", "default": "Bewertung auf Loox" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "HP Kundenstimmen" }]
+}
+{% endschema %}

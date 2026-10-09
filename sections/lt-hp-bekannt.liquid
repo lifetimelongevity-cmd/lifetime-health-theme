@@ -1,0 +1,123 @@
+{% comment %}
+  lt-hp-bekannt — Logo-Wand „Bekannt aus“ direkt unter dem Hero (Startseite v2, Oktober 2026).
+  Fünf gleich große Kacheln, Logos einheitlich grau. Die Höhe je Logo ist ein
+  Block-Setting, weil die Bildmarken optisch verschieden schwer sind.
+  Ersetzt auf der Startseite Ticker und crs-logo-garden; crs-logo-garden bleibt
+  auf PDPs und Quiz-Seiten unverändert im Einsatz.
+  Vorlage: docs/startseite-v2/startseite.html#bekannt
+{% endcomment %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --ltl-pt: {{ section.settings.padding_top }}px;
+    --ltl-pb: {{ section.settings.padding_bottom }}px;
+    --ltl-kachel: {{ section.settings.color_tile }};
+  }
+{% endstyle %}
+
+<div class="ltl">
+  <div class="ltl__wrap">
+    {%- if section.settings.heading != blank -%}
+      <p class="ltl__titel">{{ section.settings.heading | escape }}</p>
+    {%- endif -%}
+    <ul class="ltl__wand" role="list">
+      {%- for block in section.blocks -%}
+        <li class="ltl__kachel" {{ block.shopify_attributes }}>
+          {%- if block.settings.image != blank -%}
+            {%- capture logo_style -%}height:{{ block.settings.height }}px{%- endcapture -%}
+            {{
+              block.settings.image
+              | image_url: width: 480
+              | image_tag:
+                loading: 'lazy',
+                widths: '240, 480',
+                sizes: '200px',
+                alt: block.settings.alt,
+                style: logo_style
+            }}
+          {%- endif -%}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+
+{% stylesheet %}
+.ltl {
+  background: var(--color-paper);
+  padding: var(--ltl-pt, 0) 0 var(--ltl-pb, 88px);
+}
+/* Kante wie crs-hero-typewriter: 1280 mit 40 / 24 / 20 px Rand */
+.ltl__wrap { max-width: 1280px; margin: 0 auto; padding: 0 40px; }
+.ltl__titel {
+  margin: 0 0 var(--space-5);
+  text-align: center;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+}
+.ltl__wand {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+}
+.ltl__kachel {
+  background: var(--ltl-kachel);
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  padding: 0 var(--space-4);
+}
+.ltl__kachel img {
+  display: block;
+  width: auto;
+  max-width: 72%;
+  object-fit: contain;
+  opacity: 0.9;
+}
+@media (max-width: 1024px) { .ltl__wrap { padding: 0 24px; } }
+@media (max-width: 768px) {
+  .ltl { padding: var(--space-2) 0 56px; }
+  .ltl__wand { grid-template-columns: 1fr 1fr; }
+  .ltl__kachel { height: 76px; }
+  .ltl__kachel:nth-child(5) { grid-column: span 2; }
+  .ltl__kachel img { max-height: 30px; max-width: 78%; }
+}
+@media (max-width: 640px) { .ltl__wrap { padding: 0 20px; } }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "HP Bekannt aus",
+  "tag": "section",
+  "class": "section lt-hp-bekannt",
+  "max_blocks": 8,
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Beschriftung", "default": "Bekannt aus" },
+    { "type": "color", "id": "color_tile", "label": "Kachel", "default": "#efeee9" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben (Desktop)", "min": 0, "max": 160, "step": 8, "default": 0, "unit": "px" },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten (Desktop)", "min": 0, "max": 160, "step": 8, "default": 88, "unit": "px" }
+  ],
+  "blocks": [
+    {
+      "type": "logo",
+      "name": "Logo",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Logo (grau, freigestellt)" },
+        { "type": "text", "id": "alt", "label": "Alt-Text", "default": "Logo" },
+        { "type": "range", "id": "height", "label": "Höhe Desktop", "min": 16, "max": 60, "step": 1, "default": 30, "unit": "px", "info": "Optischer Ausgleich zwischen Bildmarken. Mobil höchstens 30 px." }
+      ]
+    }
+  ],
+  "presets": [{ "name": "HP Bekannt aus" }]
+}
+{% endschema %}
