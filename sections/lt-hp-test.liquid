@@ -62,14 +62,16 @@
           <p class="lttb__kopfzeile">{{ section.settings.col1_label | escape }}</p>
           {%- for item in epi -%}
             {%- assign t = item | strip -%}
-            {%- if t != blank -%}<p>{{ t | escape }}</p>{%- endif -%}
+            {%- assign erstes = t | slice: 0 -%}
+            {%- if t != blank -%}<p{% if erstes == '+' %} class="lttb__mehr"{% endif %}>{{ t | escape }}</p>{%- endif -%}
           {%- endfor -%}
         </div>
         <div class="lttb__spalte lttb__spalte--dna">
           <p class="lttb__kopfzeile">{{ section.settings.col2_label | escape }}</p>
           {%- for item in dna -%}
             {%- assign t = item | strip -%}
-            {%- if t != blank -%}<p>{{ t | escape }}</p>{%- endif -%}
+            {%- assign erstes = t | slice: 0 -%}
+            {%- if t != blank -%}<p{% if erstes == '+' %} class="lttb__mehr"{% endif %}>{{ t | escape }}</p>{%- endif -%}
           {%- endfor -%}
         </div>
       </div>
@@ -165,6 +167,12 @@
   text-transform: uppercase;
   color: var(--color-text-on-dark-muted);
 }
+.lttb__spalte .lttb__mehr {
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  letter-spacing: 0;
+  color: var(--color-text-on-dark-muted);
+}
 .lttb__spalte--epi { right: calc(50% + 250px); text-align: right; }
 .lttb__spalte--dna { left: calc(50% + 250px); }
 .lttb__app {
@@ -231,6 +239,7 @@
   .lttb__spalte { position: static; width: auto; transform: none; }
   .lttb__spalte--epi { text-align: left; }
   .lttb__spalte p { margin-bottom: var(--space-2); font-size: var(--text-body-lg); }
+  .lttb__spalte .lttb__mehr { font-size: var(--text-body-sm); }
   .lttb__spalte .lttb__kopfzeile { margin-bottom: var(--space-3); }
   .lttb__app { margin: 20px 0 var(--space-5); }
   .lttb__kauf { flex-direction: column; gap: 14px; }

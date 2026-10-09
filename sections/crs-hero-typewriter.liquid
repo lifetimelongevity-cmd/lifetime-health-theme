@@ -54,6 +54,29 @@
         </div>
       {%- endif -%}
 
+      {%- comment -%}
+        Weg der Probe: Röhrchen ··· Labor ··· Handy. Beim Laden läuft einmal ein Punkt
+        vom Röhrchen zum Handy und legt die Linie hinter sich; bei reduzierter Bewegung statisch.
+        Icons: Phosphor thin (test-tube, device-mobile), dieselben wie im Ablauf.
+      {%- endcomment -%}
+      {%- if section.settings.weg_a_zahl != blank and section.settings.weg_b_zahl != blank -%}
+        <div class="ltw-weg">
+          <svg class="ltw-weg__icon ltw-weg__icon--a" viewBox="0 0 256 256" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m234.83 89.18l-60-60a4 4 0 0 0-5.66 0L39.94 158.41a40.78 40.78 0 0 0 57.66 57.67L210.16 103.5l23.1-7.7a4 4 0 0 0 1.57-6.62M91.94 210.42a32.77 32.77 0 1 1-46.34-46.35L75 134.63c9.2-3.38 23.94-5.08 43.11 4.93c12.09 6.31 22.74 8.48 31.66 8.48c1.64 0 3.2-.09 4.73-.22Zm114.8-114.21a4.06 4.06 0 0 0-1.57 1L165 137.39c-9.2 3.38-23.94 5.08-43.11-4.93c-14.3-7.47-26.58-9.13-36.38-8.27L172 37.66l52.6 52.6Z"/></svg>
+          <p class="ltw-weg__text ltw-weg__text--a">
+            <span class="ltw-weg__zahl">{{ section.settings.weg_a_zahl | escape }}</span>
+            {{ section.settings.weg_a_text | escape }}
+          </p>
+          <span class="ltw-weg__strecke">
+            {%- if section.settings.weg_label != blank -%}<span class="ltw-weg__label">{{ section.settings.weg_label | escape }}</span>{%- endif -%}
+          </span>
+          <svg class="ltw-weg__icon ltw-weg__icon--b" viewBox="0 0 256 256" aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M176 20H80a20 20 0 0 0-20 20v176a20 20 0 0 0 20 20h96a20 20 0 0 0 20-20V40a20 20 0 0 0-20-20M68 60h120v136H68Zm12-32h96a12 12 0 0 1 12 12v12H68V40a12 12 0 0 1 12-12m96 200H80a12 12 0 0 1-12-12v-12h120v12a12 12 0 0 1-12 12"/></svg>
+          <p class="ltw-weg__text ltw-weg__text--b">
+            <span class="ltw-weg__zahl">{{ section.settings.weg_b_zahl | escape }}</span>
+            {{ section.settings.weg_b_text | escape }}
+          </p>
+        </div>
+      {%- endif -%}
+
     </div>
 
     {%- comment -%} RIGHT — image or dashboard card {%- endcomment -%}
@@ -431,6 +454,103 @@
   opacity: 0.9;
 }
 
+/* Weg der Probe unter den Knöpfen: Röhrchen ··· Labor ··· Handy, Zahlen darunter */
+.ltw-weg {
+  --weg-icon: 36px;
+  --weg-tinte: var(--hero-text, #26251e);
+  --weg-leise: #6b6b63;
+  --weg-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  display: grid;
+  grid-template-columns: var(--weg-icon) 1fr var(--weg-icon);
+  grid-template-rows: var(--weg-icon) auto;
+  column-gap: 16px;
+  row-gap: 16px;
+  width: min(100%, 460px);
+  margin-top: 40px;
+  color: var(--weg-tinte);
+}
+.ltw-weg__icon { display: block; width: var(--weg-icon); height: var(--weg-icon); }
+.ltw-weg__icon--a { grid-area: 1 / 1; }
+.ltw-weg__icon--b { grid-area: 1 / 3; transform-origin: 50% 70%; }
+.ltw-weg__strecke { grid-area: 1 / 2; position: relative; align-self: center; height: 3px; }
+/* Punktlinie: liegt still, wenn keine Bewegung läuft */
+.ltw-weg__strecke::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(38, 37, 30, 0.55) 1.3px, transparent 1.8px) 0 50% / 9px 3px repeat-x;
+}
+/* der Punkt, der die Probe ist */
+.ltw-weg__strecke::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 7px;
+  height: 7px;
+  margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%;
+  background: var(--weg-tinte);
+  opacity: 0;
+}
+.ltw-weg__label {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  transform: translateX(-50%);
+  padding: 0 6px;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--weg-leise);
+}
+.ltw-weg__text {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: 1.35;
+  color: var(--weg-leise);
+}
+.ltw-weg__text--a { grid-area: 2 / 1 / 3 / 3; justify-self: start; }
+.ltw-weg__text--b { grid-area: 2 / 2 / 3 / 4; justify-self: end; text-align: right; }
+.ltw-weg__zahl {
+  display: block;
+  margin-bottom: 3px;
+  font-family: var(--font-heading);
+  font-size: var(--text-h3, 24px);
+  font-weight: var(--weight-regular);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--weg-tinte);
+}
+
+/* Einmal beim Laden: der Punkt läuft los und legt die Linie, das Handy nimmt ihn an */
+@media (prefers-reduced-motion: no-preference) {
+  .ltw-weg__strecke::before { animation: ltw-weg-linie 1.5s var(--weg-ease) 0.7s both; }
+  .ltw-weg__strecke::after { animation: ltw-weg-punkt 1.5s var(--weg-ease) 0.7s both; }
+  .ltw-weg__icon--b { animation: ltw-weg-ankunft 0.7s var(--weg-ease) 1.75s both; }
+}
+@keyframes ltw-weg-linie {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0 0 0); }
+}
+@keyframes ltw-weg-punkt {
+  0%   { left: 0;    opacity: 0; }
+  8%   {             opacity: 1; }
+  82%  {             opacity: 1; }
+  100% { left: 100%; opacity: 0; }
+}
+@keyframes ltw-weg-ankunft {
+  0%   { transform: scale(1)    rotate(0deg); }
+  35%  { transform: scale(1.14) rotate(-6deg); }
+  100% { transform: scale(1)    rotate(0deg); }
+}
+
 .ltw-btn__icon {
   font-size: 1rem;
   line-height: 1;
@@ -655,6 +775,18 @@
   .ltw-heading-group {
     margin-bottom: 24px;
   }
+
+  .ltw-weg {
+    --weg-icon: 30px;
+    width: 100%;
+    margin-top: 32px;
+    column-gap: 12px;
+    row-gap: 12px;
+  }
+
+  .ltw-weg__zahl {
+    font-size: var(--text-section, 20px);
+  }
 }
 {% endstylesheet %}
 
@@ -762,6 +894,41 @@
       "id": "cta_secondary_anchor",
       "label": "Sekundärer CTA Anker",
       "info": "Anchor-Link, z.B. #shopify-section-loop"
+    },
+    {
+      "type": "header",
+      "content": "Weg der Probe unter den Knöpfen"
+    },
+    {
+      "type": "paragraph",
+      "content": "Röhrchen links, Handy rechts, Punktlinie dazwischen. Beide Zahlen leer lassen = ausblenden."
+    },
+    {
+      "type": "text",
+      "id": "weg_a_zahl",
+      "label": "Links: Zahl",
+      "info": "z. B. 5 Minuten"
+    },
+    {
+      "type": "text",
+      "id": "weg_a_text",
+      "label": "Links: Text"
+    },
+    {
+      "type": "text",
+      "id": "weg_label",
+      "label": "Über der Linie"
+    },
+    {
+      "type": "text",
+      "id": "weg_b_zahl",
+      "label": "Rechts: Zahl",
+      "info": "z. B. 6 Wochen"
+    },
+    {
+      "type": "text",
+      "id": "weg_b_text",
+      "label": "Rechts: Text"
     },
     {
       "type": "checkbox",
