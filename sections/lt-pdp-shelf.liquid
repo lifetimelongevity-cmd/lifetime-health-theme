@@ -97,13 +97,18 @@
                   {%- endif -%}
                 </span>
                 <span class="lt-shelf__name">{{ block.settings.name | escape }}</span>
-                <span class="lt-shelf__verdict">
+                {%- comment -%} Eigenes Urteil je Dose (BJ 12.10.: "erhöhtes Risiko für
+                    Mangel", "voraussichtlich kein Effekt bei dir"); die zwei
+                    Section-Texte sind nur der Rückfall. {%- endcomment -%}
+                {%- assign sh_verdict = block.settings.verdict_text | strip -%}
+                {%- if sh_verdict == blank -%}
                   {%- if sh_fit -%}
-                    {{ section.settings.label_fit | escape }}
+                    {%- assign sh_verdict = section.settings.label_fit -%}
                   {%- else -%}
-                    {{ section.settings.label_skip | escape }}
+                    {%- assign sh_verdict = section.settings.label_skip -%}
                   {%- endif -%}
-                </span>
+                {%- endif -%}
+                <span class="lt-shelf__verdict">{{ sh_verdict | escape }}</span>
               </li>
             {%- endfor -%}
           </ul>
@@ -498,6 +503,12 @@
             { "value": "skip", "label": "kann weg" }
           ],
           "default": "skip"
+        },
+        {
+          "type": "text",
+          "id": "verdict_text",
+          "label": "Urteil (eigener Text)",
+          "info": "Leer: Standardtext der Section (passt / kann weg)."
         }
       ]
     }
