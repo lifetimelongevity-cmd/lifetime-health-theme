@@ -1,0 +1,454 @@
+{%- comment -%}
+  Ablauf in drei Schritten als gezeichneter Weg (AGE&DNA-PDP, BJ 12.10.2026).
+
+  Ersetzt dort crs-metrics-row ("Eine Speichelprobe reicht."): drei weisse
+  Karten mit grossen Ziffern, die bei mittlerer Breite 2+1 umbrachen. Hier
+  traegt eine Linie die Reihenfolge, die Ziffern entfallen. Die Linie
+  verbindet Piktogramme (Roehrchen, Versand, App) und zieht sich beim
+  Scrollen von Schritt zu Schritt; jeder Knoten wird farbig, sobald sie ihn
+  erreicht.
+
+  Bewegung nur per CSS (animation-timeline: view()), kein JavaScript. Ohne
+  Unterstuetzung oder bei prefers-reduced-motion steht der Endzustand da:
+  Linie gezogen, Knoten farbig. Desktop waagerecht, unter 750px senkrecht.
+{%- endcomment -%}
+{%- liquid
+  assign lp_head = section.settings.heading | strip
+  assign lp_sub = section.settings.subheading | strip
+  if lp_head == '__none__'
+    assign lp_head = ''
+  endif
+  if lp_sub == '__none__'
+    assign lp_sub = ''
+  endif
+  assign lp_md = false
+  assign lp_lg = false
+  if section.settings.heading_size == 'feature'
+    assign lp_md = true
+  elsif section.settings.heading_size == 'product_title'
+    assign lp_lg = true
+  endif
+-%}
+{% style %}
+  #lt-proc-{{ section.id }} {
+    --lp-bg: {{ section.settings.color_bg }};
+    padding-top: min({{ section.settings.padding_top }}px, 15vw);
+    padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
+  }
+{% endstyle %}
+
+<div class="lt-proc" id="lt-proc-{{ section.id }}">
+  <div class="lt-proc__container">
+    {%- if lp_head != blank or lp_sub != blank -%}
+      {% render 'section-heading-crs',
+        heading: lp_head,
+        subheading: lp_sub,
+        align: section.settings.content_align,
+        headline_md: lp_md,
+        headline_lg: lp_lg,
+        extra_class: 'lt-proc__head'
+      %}
+    {%- endif -%}
+
+    {%- if section.blocks.size > 0 -%}
+      <ol class="lt-proc__steps" data-count="{{ section.blocks.size }}" role="list">
+        {%- for block in section.blocks -%}
+          <li class="lt-proc__step" {{ block.shopify_attributes }}>
+            <span class="lt-proc__node" aria-hidden="true">
+              {%- case block.settings.icon -%}
+                {%- when 'tube' -%}
+                  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="10.5" y="3.5" width="11" height="5" rx="1.5"/>
+                    <path d="M12 8.5v15.5a4 4 0 0 0 8 0V8.5"/>
+                    <path d="M12 18.5h8"/>
+                    <path d="M14.5 22.5h3" opacity=".55"/>
+                  </svg>
+                {%- when 'parcel' -%}
+                  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="4.5" y="8.5" width="23" height="16" rx="2"/>
+                    <path d="M5 9.5l11 8 11-8"/>
+                    <path d="M5 24l8-7M27 24l-8-7" opacity=".55"/>
+                  </svg>
+                {%- when 'lab' -%}
+                  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12.5 4.5h7M13.5 4.5v8.5L6.8 24.6A2 2 0 0 0 8.5 27.5h15a2 2 0 0 0 1.7-2.9L18.5 13V4.5"/>
+                    <path d="M9.5 20h13"/>
+                  </svg>
+                {%- else -%}
+                  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="8.5" y="3.5" width="15" height="25" rx="3"/>
+                    <path d="M14 6.5h4"/>
+                    <path d="M11.5 20.5l3.5-3.5 2.5 2 3.5-4.5"/>
+                    <path d="M11.5 24h9" opacity=".55"/>
+                  </svg>
+              {%- endcase -%}
+            </span>
+            <div class="lt-proc__text">
+              {%- if block.settings.title != blank -%}
+                <h3 class="lt-proc__title">{{ block.settings.title | escape }}</h3>
+              {%- endif -%}
+              {%- if block.settings.detail != blank -%}
+                <p class="lt-proc__detail">{{ block.settings.detail | escape }}</p>
+              {%- endif -%}
+            </div>
+          </li>
+        {%- endfor -%}
+      </ol>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+/* ===================================================
+   Ablauf als gezeichneter Weg — lt-pdp-process.liquid
+   =================================================== */
+
+.lt-proc {
+  --lp-node: 72px;
+  --lp-gap: var(--space-6);
+  --lp-ink: #26251e;
+  --lp-muted: rgba(38, 37, 30, 0.72);
+  --lp-rest: rgba(38, 37, 30, 0.4);
+  --lp-hair: rgba(38, 37, 30, 0.14);
+  --lp-on: var(--color-teal-dark, #4a8c85);
+  background: var(--lp-bg, #f2f1ed);
+}
+
+.lt-proc__container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.lt-proc__head {
+  margin-bottom: var(--space-8);
+}
+
+.lt-proc__steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--lp-cols, 3), minmax(0, 1fr));
+  gap: var(--lp-gap);
+  view-timeline-name: --lt-proc;
+  view-timeline-axis: block;
+}
+
+.lt-proc__steps[data-count="2"] { --lp-cols: 2; }
+.lt-proc__steps[data-count="4"] { --lp-cols: 4; }
+
+.lt-proc__step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin: 0;
+}
+
+/* Wegstueck zum naechsten Knoten: zwei Lagen. ::before ist der gepunktete
+   Ruhezustand, ::after die gezogene Linie darueber. Beide laufen von der
+   rechten Kante dieses Knotens bis zur linken Kante des naechsten. */
+.lt-proc__step:not(:last-child)::before,
+.lt-proc__step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: calc(var(--lp-node) / 2);
+  left: calc(50% + var(--lp-node) / 2 + var(--space-2));
+  width: calc(100% + var(--lp-gap) - var(--lp-node) - 2 * var(--space-2));
+  height: 0;
+}
+
+.lt-proc__step:not(:last-child)::before {
+  border-top: 1.5px dotted var(--lp-hair);
+}
+
+.lt-proc__step:not(:last-child)::after {
+  border-top: 1.5px solid var(--lp-on);
+  transform-origin: left center;
+}
+
+.lt-proc__node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: var(--lp-node);
+  height: var(--lp-node);
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 1.5px var(--lp-on), 0 6px 18px -8px rgba(38, 37, 30, 0.18);
+  color: var(--lp-on);
+}
+
+.lt-proc__node svg {
+  width: 34px;
+  height: 34px;
+}
+
+.lt-proc__text {
+  margin-top: var(--space-5);
+  max-width: 17rem;
+}
+
+.lt-proc__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-section, 20px);
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: -0.005em;
+  color: var(--lp-ink);
+  text-wrap: balance;
+}
+
+.lt-proc__detail {
+  margin: var(--space-2) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body, 16px);
+  line-height: 1.45;
+  color: var(--lp-muted);
+  text-wrap: pretty;
+}
+
+/* Mobil senkrecht: Knoten links, Text rechts, das Wegstueck laeuft unter
+   dem Knoten bis zum naechsten. */
+@media (max-width: 749px) {
+  .lt-proc {
+    --lp-node: 56px;
+    --lp-gap: var(--space-6);
+  }
+
+  .lt-proc__head {
+    margin-bottom: var(--space-7);
+  }
+
+  /* Gleich hohe Schritte, damit die Wegstuecke gleich lang werden. */
+  .lt-proc__steps {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 1fr;
+  }
+
+  .lt-proc__step {
+    display: grid;
+    grid-template-columns: var(--lp-node) minmax(0, 1fr);
+    column-gap: var(--space-4);
+    align-items: start;
+    text-align: left;
+  }
+
+  .lt-proc__node svg {
+    width: 28px;
+    height: 28px;
+  }
+
+  .lt-proc__text {
+    margin-top: 0;
+    padding-top: var(--space-2);
+    max-width: none;
+  }
+
+  .lt-proc__title {
+    font-size: var(--text-body-lg, 18px);
+  }
+
+  .lt-proc__step:not(:last-child)::before,
+  .lt-proc__step:not(:last-child)::after {
+    top: calc(var(--lp-node) + var(--space-2));
+    left: calc(var(--lp-node) / 2);
+    width: 0;
+    height: calc(100% + var(--lp-gap) - var(--lp-node) - 2 * var(--space-2));
+  }
+
+  .lt-proc__step:not(:last-child)::before {
+    border-top: 0;
+    border-left: 1.5px dotted var(--lp-hair);
+  }
+
+  .lt-proc__step:not(:last-child)::after {
+    border-top: 0;
+    border-left: 1.5px solid var(--lp-on);
+    transform-origin: center top;
+  }
+}
+
+/* Der eine Moment der Section: die Linie zieht sich mit dem Scrollen,
+   jeder Knoten leuchtet auf, wenn sie ihn erreicht. Endzustand ist der
+   Grundzustand oben, deshalb nur mit Unterstuetzung und ohne
+   Reduced-Motion. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .lt-proc__step:not(:last-child)::after,
+    .lt-proc__node {
+      animation-timeline: --lt-proc;
+      animation-fill-mode: both;
+      animation-timing-function: linear;
+      animation-duration: auto;
+    }
+
+    .lt-proc__step:not(:last-child)::after {
+      animation-name: lt-proc-draw-x;
+    }
+
+    .lt-proc__node {
+      animation-name: lt-proc-node-on;
+      animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Die Bereiche haengen an "contain": 0 % heisst, die Liste ist gerade
+       ganz im Bild, 50 % heisst, sie steht in der Bildschirmmitte. Bis dahin
+       ist der Weg gezogen, auf jeder Breite. Die Reihenfolge entsteht nur
+       ueber die versetzten Bereiche. */
+    .lt-proc__step:nth-child(1) .lt-proc__node { animation-range: contain 0% contain 6%; }
+    .lt-proc__step:nth-child(1)::after         { animation-range: contain 6% contain 20%; }
+    .lt-proc__step:nth-child(2) .lt-proc__node { animation-range: contain 20% contain 26%; }
+    .lt-proc__step:nth-child(2)::after         { animation-range: contain 26% contain 40%; }
+    .lt-proc__step:nth-child(3) .lt-proc__node { animation-range: contain 40% contain 46%; }
+    .lt-proc__step:nth-child(3)::after         { animation-range: contain 46% contain 56%; }
+    .lt-proc__step:nth-child(4) .lt-proc__node { animation-range: contain 56% contain 62%; }
+
+    @media (max-width: 749px) {
+      .lt-proc__step:not(:last-child)::after {
+        animation-name: lt-proc-draw-y;
+      }
+    }
+  }
+}
+
+@keyframes lt-proc-draw-x {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+@keyframes lt-proc-draw-y {
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
+}
+
+@keyframes lt-proc-node-on {
+  from {
+    color: var(--lp-rest);
+    box-shadow: 0 0 0 1px var(--lp-hair), 0 6px 18px -8px rgba(38, 37, 30, 0);
+    transform: scale(0.94);
+  }
+  to {
+    color: var(--lp-on);
+    box-shadow: 0 0 0 1.5px var(--lp-on), 0 6px 18px -8px rgba(38, 37, 30, 0.18);
+    transform: scale(1);
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Ablauf gezeichnet",
+  "tag": "section",
+  "class": "section-lt-pdp-process",
+  "settings": [
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrund",
+      "default": "#f2f1ed"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift-Größe",
+      "options": [
+        { "value": "section", "label": "Section (20)" },
+        { "value": "feature", "label": "Feature (28)" },
+        { "value": "product_title", "label": "Produkttitel (36)" }
+      ],
+      "default": "feature"
+    },
+    {
+      "type": "select",
+      "id": "content_align",
+      "label": "Ausrichtung (Überschrift)",
+      "options": [
+        { "value": "left", "label": "Links" },
+        { "value": "center", "label": "Zentriert" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Eine Speichelprobe reicht."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subline",
+      "info": "__none__ blendet sie aus.",
+      "default": "__none__"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "step",
+      "name": "Schritt",
+      "settings": [
+        {
+          "type": "select",
+          "id": "icon",
+          "label": "Piktogramm",
+          "options": [
+            { "value": "tube", "label": "Röhrchen" },
+            { "value": "parcel", "label": "Versand" },
+            { "value": "lab", "label": "Labor" },
+            { "value": "phone", "label": "App" }
+          ],
+          "default": "tube"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Titel",
+          "default": "Probe nehmen"
+        },
+        {
+          "type": "text",
+          "id": "detail",
+          "label": "Ein Satz dazu",
+          "default": "Zu Hause in fünf Minuten, ohne Arzttermin."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "Ablauf gezeichnet",
+      "blocks": [
+        { "type": "step", "settings": { "icon": "tube" } },
+        { "type": "step", "settings": { "icon": "parcel", "title": "Zurückschicken", "detail": "Kostenlos per Post ans Labor." } },
+        { "type": "step", "settings": { "icon": "phone", "title": "Ergebnis lesen", "detail": "Nach sechs Wochen in deiner App." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

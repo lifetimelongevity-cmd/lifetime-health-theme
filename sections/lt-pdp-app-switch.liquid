@@ -1,0 +1,688 @@
+{%- comment -%}
+  Ergebnisse mit Umschalter am Handy (AGE&DNA-PDP, BJ 12.10.2026).
+
+  Ersetzt dort crs-feature-grid ("Was angelegt ist, und wo du heute
+  stehst."): sechs gleiche Karten, mobil rund 1.500 px hoch, drei davon
+  Ergebnisse, drei App-Funktionen. Die Headline nennt schon die zwei Teile
+  (DNA = angelegt, Epigenetik = heute), deshalb ordnet die Section danach:
+  zwei Reiter, ein Klick tauscht Handy-Screen und Liste. Die App-Funktionen
+  stehen als eine Zeile darunter.
+
+  Ohne JavaScript bleiben die Reiter versteckt und beide Listen offen
+  untereinander; das Handy zeigt dann den Screen des Standard-Reiters.
+  Klicks gehen als dataLayer-Event pdp_app_switch raus.
+{%- endcomment -%}
+{%- liquid
+  assign as_head = section.settings.heading | strip
+  assign as_sub = section.settings.subheading | strip
+  if as_sub == '__none__'
+    assign as_sub = ''
+  endif
+  assign as_md = false
+  assign as_lg = false
+  if section.settings.heading_size == 'feature'
+    assign as_md = true
+  elsif section.settings.heading_size == 'product_title'
+    assign as_lg = true
+  endif
+  assign as_default = section.settings.default_tab | minus: 1
+  if as_default < 0 or as_default >= section.blocks.size
+    assign as_default = 0
+  endif
+-%}
+{% style %}
+  #lt-as-{{ section.id }} {
+    --as-bg: {{ section.settings.color_bg }};
+    padding-top: min({{ section.settings.padding_top }}px, 15vw);
+    padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
+  }
+{% endstyle %}
+
+<lt-app-switch class="lt-as" id="lt-as-{{ section.id }}">
+  <div class="lt-as__container">
+    <div class="lt-as__layout">
+      <div class="lt-as__media">
+        <div class="lt-as__phone">
+          {%- for block in section.blocks -%}
+            {%- if block.settings.image != blank -%}
+              {%- assign as_alt = block.settings.image_alt | default: block.settings.label -%}
+              <img
+                class="lt-as__screen"
+                src="{{ block.settings.image | image_url: width: 720 }}"
+                srcset="{{ block.settings.image | image_url: width: 360 }} 360w, {{ block.settings.image | image_url: width: 540 }} 540w, {{ block.settings.image | image_url: width: 720 }} 720w, {{ block.settings.image | image_url: width: 1000 }} 1000w"
+                sizes="(min-width: 980px) 340px, 270px"
+                width="{{ block.settings.image.width }}"
+                height="{{ block.settings.image.height }}"
+                alt="{{ as_alt | escape }}"
+                loading="lazy"
+                data-lt-as-screen="{{ forloop.index0 }}"
+                data-active="{% if forloop.index0 == as_default %}true{% else %}false{% endif %}"
+              >
+            {%- endif -%}
+          {%- endfor -%}
+        </div>
+      </div>
+
+      <div class="lt-as__content">
+        {%- if as_head != blank or as_sub != blank -%}
+          {% render 'section-heading-crs',
+            heading: as_head,
+            subheading: as_sub,
+            align: 'left',
+            headline_md: as_md,
+            headline_lg: as_lg,
+            extra_class: 'lt-as__head'
+          %}
+        {%- endif -%}
+
+        {%- if section.blocks.size > 1 -%}
+          <div class="lt-as__tabs" role="tablist" aria-label="{{ as_head | escape }}" hidden data-lt-as-tabs>
+            <span class="lt-as__thumb" aria-hidden="true"></span>
+            {%- for block in section.blocks -%}
+              <button
+                type="button"
+                class="lt-as__tab"
+                role="tab"
+                id="lt-as-tab-{{ block.id }}"
+                aria-controls="lt-as-panel-{{ block.id }}"
+                aria-selected="{% if forloop.index0 == as_default %}true{% else %}false{% endif %}"
+                tabindex="{% if forloop.index0 == as_default %}0{% else %}-1{% endif %}"
+                data-lt-as-tab="{{ forloop.index0 }}"
+                {{ block.shopify_attributes }}
+              >
+                {{- block.settings.label | escape -}}
+              </button>
+            {%- endfor -%}
+          </div>
+        {%- endif -%}
+
+        <div class="lt-as__panels">
+          {%- for block in section.blocks -%}
+            <div
+              class="lt-as__panel"
+              role="tabpanel"
+              id="lt-as-panel-{{ block.id }}"
+              aria-labelledby="lt-as-tab-{{ block.id }}"
+              data-lt-as-panel="{{ forloop.index0 }}"
+              data-active="{% if forloop.index0 == as_default %}true{% else %}false{% endif %}"
+            >
+              {%- if block.settings.caption != blank -%}
+                <p class="lt-as__caption">{{ block.settings.caption | escape }}</p>
+              {%- endif -%}
+              <ul class="lt-as__list" role="list">
+                {%- for i in (1..3) -%}
+                  {%- capture as_key %}line_{{ i }}{% endcapture -%}
+                  {%- assign as_line = block.settings[as_key] | strip -%}
+                  {%- if as_line != blank -%}
+                    <li class="lt-as__item" style="--i: {{ forloop.index0 }}">{{ as_line | escape }}</li>
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            </div>
+          {%- endfor -%}
+        </div>
+
+        {%- assign as_app = section.settings.app_items | strip -%}
+        {%- if as_app != blank -%}
+          {%- assign as_app_items = as_app | split: ',' -%}
+          <div class="lt-as__app">
+            {%- if section.settings.app_label != blank -%}
+              <p class="lt-as__app-label">{{ section.settings.app_label | escape }}</p>
+            {%- endif -%}
+            <ul class="lt-as__app-list" role="list">
+              {%- for item in as_app_items -%}
+                {%- assign as_item = item | strip -%}
+                {%- assign as_item_lc = as_item | downcase -%}
+                <li class="lt-as__app-item">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    {%- if as_item_lc contains 'coach' -%}
+                      <path d="M4 4.5h12a1.5 1.5 0 0 1 1.5 1.5v6.5A1.5 1.5 0 0 1 16 14H9l-3.5 2.5V14H4a1.5 1.5 0 0 1-1.5-1.5V6A1.5 1.5 0 0 1 4 4.5Z"/>
+                      <path d="M6.5 8.5h7M6.5 11h4.5"/>
+                    {%- elsif as_item_lc contains 'face' or as_item_lc contains 'haut' -%}
+                      <path d="M3 7V4.5A1.5 1.5 0 0 1 4.5 3H7M13 3h2.5A1.5 1.5 0 0 1 17 4.5V7M17 13v2.5a1.5 1.5 0 0 1-1.5 1.5H13M7 17H4.5A1.5 1.5 0 0 1 3 15.5V13"/>
+                      <circle cx="10" cy="9.5" r="3.25"/>
+                      <path d="M7.5 15c.6-1.2 1.5-1.75 2.5-1.75s1.9.55 2.5 1.75"/>
+                    {%- else -%}
+                      <path d="M5.5 2.5h6.5l3.5 3.5v10a1.5 1.5 0 0 1-1.5 1.5h-8.5A1.5 1.5 0 0 1 4 16V4a1.5 1.5 0 0 1 1.5-1.5Z"/>
+                      <path d="M12 2.5V6h3.5M7 10h6M7 13h4"/>
+                    {%- endif -%}
+                  </svg>
+                  <span>{{ as_item | escape }}</span>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {%- endif -%}
+
+        {%- if section.settings.cta_label != blank and section.settings.cta_url != blank -%}
+          <div class="lt-as__actions">
+            <a href="{{ section.settings.cta_url }}" class="lt-as__cta">{{ section.settings.cta_label | escape }}</a>
+          </div>
+        {%- endif -%}
+      </div>
+    </div>
+  </div>
+</lt-app-switch>
+
+<script>
+  (function () {
+    if (customElements.get('lt-app-switch')) return;
+    class LtAppSwitch extends HTMLElement {
+      connectedCallback() {
+        this.tabs = [...this.querySelectorAll('[data-lt-as-tab]')];
+        this.panels = [...this.querySelectorAll('[data-lt-as-panel]')];
+        this.screens = [...this.querySelectorAll('[data-lt-as-screen]')];
+        this.thumb = this.querySelector('.lt-as__thumb');
+        if (this.tabs.length < 2) return;
+        this.querySelector('[data-lt-as-tabs]').hidden = false;
+        this.classList.add('is-enhanced');
+        const start = Math.max(0, this.tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true'));
+        this.select(start, false);
+        requestAnimationFrame(() => this.classList.add('is-ready'));
+        // Beide Screens frueh laden, damit der erste Wechsel nicht auf das Bild wartet.
+        this.screens.forEach((img) => { img.loading = 'eager'; });
+        this.tabs.forEach((tab, i) => {
+          tab.addEventListener('click', () => this.select(i, true));
+          tab.addEventListener('keydown', (e) => {
+            const dir = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+            if (!dir) return;
+            e.preventDefault();
+            const next = (i + dir + this.tabs.length) % this.tabs.length;
+            this.select(next, true);
+            this.tabs[next].focus();
+          });
+        });
+        this._ro = new ResizeObserver(() => this.placeThumb());
+        this._ro.observe(this.tabs[0].parentElement);
+      }
+
+      disconnectedCallback() {
+        if (this._ro) this._ro.disconnect();
+      }
+
+      placeThumb() {
+        const tab = this.tabs[this.current];
+        if (!tab || !this.thumb) return;
+        this.thumb.style.setProperty('--x', tab.offsetLeft + 'px');
+        this.thumb.style.setProperty('--w', tab.offsetWidth + 'px');
+      }
+
+      select(index, byUser) {
+        if (byUser && index === this.current) return;
+        this.current = index;
+        this.tabs.forEach((tab, i) => {
+          const on = i === index;
+          tab.setAttribute('aria-selected', on);
+          tab.tabIndex = on ? 0 : -1;
+        });
+        this.panels.forEach((panel, i) => {
+          const on = i === index;
+          panel.dataset.active = on;
+          panel.hidden = !on;
+        });
+        this.screens.forEach((img) => {
+          img.dataset.active = Number(img.dataset.ltAsScreen) === index;
+        });
+        this.placeThumb();
+        if (byUser) {
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({ event: 'pdp_app_switch', app_switch_tab: this.tabs[index].textContent.trim() });
+        }
+      }
+    }
+    customElements.define('lt-app-switch', LtAppSwitch);
+  })();
+</script>
+
+{% stylesheet %}
+/* ===================================================
+   Ergebnisse mit Umschalter — lt-pdp-app-switch.liquid
+   =================================================== */
+
+lt-app-switch {
+  display: block;
+}
+
+.lt-as {
+  --as-ink: #26251e;
+  --as-muted: rgba(38, 37, 30, 0.72);
+  --as-hair: rgba(38, 37, 30, 0.12);
+  --as-on: var(--color-teal-dark, #4a8c85);
+  --as-dark: var(--color-dark, #364f56);
+  --as-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--as-bg, #f7f7f4);
+}
+
+.lt-as__container {
+  max-width: var(--lt-page-max, 1280px);
+  margin: 0 auto;
+  padding: 0 var(--lt-page-gutter, 16px);
+}
+
+.lt-as__layout {
+  display: grid;
+  gap: var(--space-7);
+  align-items: center;
+}
+
+@media (min-width: 980px) {
+  .lt-as__layout {
+    grid-template-columns: minmax(300px, 400px) minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+/* Handy: alle Screens liegen im selben Rasterfeld uebereinander, nur der
+   aktive ist sichtbar. Der Wechsel blendet weich ueber und laesst den
+   alten Screen leicht zuruecktreten. */
+.lt-as__media {
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+
+.lt-as__phone {
+  display: grid;
+  width: min(100%, 340px);
+  filter: drop-shadow(0 24px 32px rgba(38, 37, 30, 0.14));
+}
+
+.lt-as__screen {
+  grid-area: 1 / 1;
+  display: block;
+  width: 100%;
+  height: auto;
+  opacity: 0;
+  transform: scale(0.965) translateY(6px);
+  filter: blur(4px);
+  transition:
+    opacity 0.45s var(--as-ease),
+    transform 0.6s var(--as-ease),
+    filter 0.45s var(--as-ease);
+  pointer-events: none;
+}
+
+.lt-as__screen[data-active='true'] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  pointer-events: auto;
+}
+
+.lt-as__content {
+  min-width: 0;
+}
+
+.lt-as__head {
+  margin-bottom: var(--space-6);
+}
+
+/* Reiter: ein Segment-Schalter mit gleitendem Daumen. */
+.lt-as__tabs {
+  position: relative;
+  display: inline-flex;
+  padding: 4px;
+  border-radius: 999px;
+  background: rgba(38, 37, 30, 0.06);
+  margin-bottom: var(--space-6);
+}
+
+.lt-as__tabs[hidden] {
+  display: none;
+}
+
+.lt-as__thumb {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 0;
+  width: var(--w, 0);
+  transform: translateX(var(--x, 0));
+  border-radius: 999px;
+  background: var(--as-dark);
+  box-shadow: 0 4px 12px -4px rgba(54, 79, 86, 0.45);
+  transition: transform 0.5s var(--as-ease), width 0.5s var(--as-ease);
+}
+
+.lt-as:not(.is-ready) .lt-as__thumb {
+  transition: none;
+}
+
+.lt-as__tab {
+  position: relative;
+  z-index: 1;
+  min-height: 44px;
+  padding: 0 var(--space-5);
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm, 14px);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--as-muted);
+  cursor: pointer;
+  transition: color 0.3s var(--as-ease);
+}
+
+.lt-as__tab:hover {
+  color: var(--as-ink);
+}
+
+.lt-as__tab[aria-selected='true'] {
+  color: var(--color-text-on-dark, #f7f7f4);
+}
+
+.lt-as__tab:focus-visible {
+  outline: 2px solid var(--as-on);
+  outline-offset: 3px;
+}
+
+/* Liste: Haarlinien statt Karten. */
+.lt-as__caption {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm, 14px);
+  line-height: 1.45;
+  color: var(--as-muted);
+}
+
+.lt-as__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--as-hair);
+}
+
+.lt-as__item {
+  padding: var(--space-4) 0;
+  border-bottom: 1px solid var(--as-hair);
+  font-family: var(--font-heading);
+  font-size: var(--text-body-lg, 18px);
+  line-height: 1.35;
+  color: var(--as-ink);
+}
+
+/* Ohne JavaScript stehen beide Listen untereinander. */
+.lt-as:not(.is-enhanced) .lt-as__panel + .lt-as__panel {
+  margin-top: var(--space-6);
+}
+
+.lt-as.is-enhanced .lt-as__panels {
+  display: grid;
+}
+
+.lt-as.is-enhanced .lt-as__panel {
+  grid-area: 1 / 1;
+}
+
+.lt-as.is-enhanced .lt-as__panel[data-active='true'] .lt-as__item {
+  animation: lt-as-in 0.5s var(--as-ease) both;
+  animation-delay: calc(var(--i, 0) * 50ms);
+}
+
+@keyframes lt-as-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+/* App-Zeile */
+.lt-as__app {
+  margin-top: var(--space-6);
+}
+
+.lt-as__app-label {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm, 14px);
+  color: var(--as-muted);
+}
+
+.lt-as__app-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+}
+
+.lt-as__app-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-body);
+  font-size: var(--text-body, 16px);
+  line-height: 1.4;
+  color: var(--as-ink);
+}
+
+.lt-as__app-item svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  color: var(--as-on);
+}
+
+.lt-as__actions {
+  margin-top: var(--space-6);
+}
+
+.lt-as__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.75rem 1.25rem;
+  border-radius: 999px;
+  background: var(--as-dark);
+  border: 1px solid var(--as-dark);
+  color: var(--color-text-on-dark, #f7f7f4);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.lt-as__cta:hover,
+.lt-as__cta:focus-visible {
+  opacity: 0.86;
+}
+
+@media (max-width: 979px) {
+  .lt-as__layout {
+    gap: var(--space-6);
+  }
+
+  /* Mobil: Ueberschrift und Reiter oben, dann Handy, dann Liste. Die
+     Content-Spalte loest sich dafuer auf, ihre Teile ordnen sich ins
+     Raster der Section. */
+  .lt-as__content {
+    display: contents;
+  }
+
+  .lt-as__head { order: 1; margin-bottom: 0; }
+  .lt-as__tabs { order: 2; margin-bottom: 0; justify-self: start; }
+  .lt-as__media { order: 3; }
+  .lt-as__panels { order: 4; }
+  .lt-as__app { order: 5; margin-top: 0; }
+  .lt-as__actions { order: 6; margin-top: 0; }
+
+  .lt-as__phone {
+    width: min(72%, 270px);
+  }
+
+  .lt-as__item {
+    font-size: var(--text-body, 16px);
+    padding: var(--space-3) 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lt-as__screen,
+  .lt-as__thumb,
+  .lt-as__tab {
+    transition: none;
+  }
+
+  .lt-as.is-enhanced .lt-as__panel[data-active='true'] .lt-as__item {
+    animation: none;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Ergebnisse Umschalter",
+  "tag": "section",
+  "class": "section-lt-pdp-app-switch",
+  "settings": [
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift-Größe",
+      "options": [
+        { "value": "section", "label": "Section (20)" },
+        { "value": "feature", "label": "Feature (28)" },
+        { "value": "product_title", "label": "Produkttitel (36)" }
+      ],
+      "default": "feature"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Was angelegt ist, und wo du heute stehst."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subline",
+      "info": "__none__ blendet sie aus.",
+      "default": "Alle Ergebnisse landen in einer App."
+    },
+    {
+      "type": "range",
+      "id": "default_tab",
+      "label": "Reiter beim Laden",
+      "min": 1,
+      "max": 3,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "header",
+      "content": "App-Zeile"
+    },
+    {
+      "type": "text",
+      "id": "app_label",
+      "label": "Einleitung",
+      "default": "Dazu in der App"
+    },
+    {
+      "type": "text",
+      "id": "app_items",
+      "label": "Funktionen, kommagetrennt",
+      "info": "Icons nach Stichwort: Coach, Face/Haut, sonst Dokument.",
+      "default": "AI Health Coach, Face Scan Hautanalyse, PDF für deinen Arzt"
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Knopf",
+      "default": "Alle Details ansehen"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Knopf-Ziel"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "tab",
+      "name": "Reiter",
+      "settings": [
+        {
+          "type": "text",
+          "id": "label",
+          "label": "Reiter",
+          "default": "Genetik"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Handy-Screen"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Alt-Text"
+        },
+        {
+          "type": "text",
+          "id": "caption",
+          "label": "Einordnung über der Liste"
+        },
+        {
+          "type": "text",
+          "id": "line_1",
+          "label": "Zeile 1",
+          "default": "23 Kategorien, über 150 Einzelergebnisse"
+        },
+        {
+          "type": "text",
+          "id": "line_2",
+          "label": "Zeile 2"
+        },
+        {
+          "type": "text",
+          "id": "line_3",
+          "label": "Zeile 3"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 3,
+  "presets": [
+    {
+      "name": "Ergebnisse Umschalter",
+      "blocks": [
+        { "type": "tab" },
+        { "type": "tab", "settings": { "label": "Epigenetik", "line_1": "Biologisches Alter in Jahren" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
