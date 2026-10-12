@@ -1,0 +1,517 @@
+{%- comment -%}
+  Wirkstoff-Regal (AGE&DNA-PDP, BJ 12.10.2026).
+
+  Ersetzt dort crs-expert-quotes ("Danach weisst du, wo du ansetzt."): drei
+  Karten, von denen zwei inzwischen weiter oben stehen (Bereichsalter im
+  Umschalter, zweite Messung im Reiter Epigenetik). Uebrig bleibt der eine
+  Gedanke, der Geld spart: der Test sagt, welche Wirkstoffe zu dir passen.
+
+  Gezeichnet als Regal mit Dosen. Beim Scrollen kommt jede Dose an die
+  Reihe: was passt, bekommt ein Haekchen, der Rest tritt zurueck. Nur CSS
+  (animation-timeline: view()); ohne Unterstuetzung oder bei reduzierter
+  Bewegung steht das Endbild da. Als Beispiel markiert, die Wirkstoffe sind
+  die, die die Seite schon nennt.
+{%- endcomment -%}
+{%- liquid
+  assign sh_head = section.settings.heading | strip
+  assign sh_sub = section.settings.subheading | strip
+  if sh_sub == '__none__'
+    assign sh_sub = ''
+  endif
+  assign sh_md = false
+  assign sh_lg = false
+  if section.settings.heading_size == 'feature'
+    assign sh_md = true
+  elsif section.settings.heading_size == 'product_title'
+    assign sh_lg = true
+  endif
+-%}
+{% style %}
+  #lt-shelf-{{ section.id }} {
+    --sh-bg: {{ section.settings.color_bg }};
+    padding-top: min({{ section.settings.padding_top }}px, 15vw);
+    padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
+  }
+{% endstyle %}
+
+<div class="lt-shelf" id="lt-shelf-{{ section.id }}">
+  <div class="lt-shelf__container">
+    <div class="lt-shelf__layout">
+      <div class="lt-shelf__copy">
+        {%- if sh_head != blank or sh_sub != blank -%}
+          {% render 'section-heading-crs',
+            heading: sh_head,
+            subheading: sh_sub,
+            align: 'left',
+            headline_md: sh_md,
+            headline_lg: sh_lg,
+            extra_class: 'lt-shelf__head'
+          %}
+        {%- endif -%}
+        {%- if section.settings.body != blank -%}
+          <p class="lt-shelf__body">{{ section.settings.body | escape }}</p>
+        {%- endif -%}
+      </div>
+
+      {%- if section.blocks.size > 0 -%}
+        <figure class="lt-shelf__figure">
+          <ul class="lt-shelf__row" role="list" data-count="{{ section.blocks.size }}">
+            {%- for block in section.blocks -%}
+              {%- assign sh_fit = false -%}
+              {%- if block.settings.verdict == 'fit' -%}
+                {%- assign sh_fit = true -%}
+              {%- endif -%}
+              <li class="lt-shelf__item{% if sh_fit %} lt-shelf__item--fit{% else %} lt-shelf__item--skip{% endif %}" {{ block.shopify_attributes }}>
+                <span class="lt-shelf__jar" aria-hidden="true">
+                  {%- case block.settings.shape -%}
+                    {%- when 'dropper' -%}
+                      <svg viewBox="0 0 80 100" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+                        <rect x="35" y="6" width="10" height="15" rx="5"/>
+                        <rect x="31" y="21" width="18" height="10" rx="2"/>
+                        <path d="M31 31h18l6 11v50a6 6 0 0 1-6 6H31a6 6 0 0 1-6-6V42Z"/>
+                        <rect x="25" y="56" width="30" height="22" class="lt-shelf__label"/>
+                        <path d="M32 64h16M32 70h10" opacity=".5"/>
+                      </svg>
+                    {%- when 'capsules' -%}
+                      <svg viewBox="0 0 80 100" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+                        <rect x="20" y="24" width="40" height="11" rx="2.5"/>
+                        <path d="M22 35h36v57a6 6 0 0 1-6 6H28a6 6 0 0 1-6-6Z"/>
+                        <rect x="22" y="52" width="36" height="26" class="lt-shelf__label"/>
+                        <g transform="rotate(-35 40 65)">
+                          <rect x="31" y="61" width="18" height="8" rx="4"/>
+                          <path d="M40 61v8" opacity=".5"/>
+                        </g>
+                      </svg>
+                    {%- else -%}
+                      <svg viewBox="0 0 80 100" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round">
+                        <rect x="11" y="28" width="58" height="13" rx="3"/>
+                        <path d="M14 41h52v51a6 6 0 0 1-6 6H20a6 6 0 0 1-6-6Z"/>
+                        <rect x="14" y="56" width="52" height="24" class="lt-shelf__label"/>
+                        <path d="M24 64h32M24 71h20" opacity=".5"/>
+                      </svg>
+                  {%- endcase -%}
+                  {%- if sh_fit -%}
+                    <span class="lt-shelf__badge">
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 10.5l3 3 6-6.5"/></svg>
+                    </span>
+                  {%- endif -%}
+                </span>
+                <span class="lt-shelf__name">{{ block.settings.name | escape }}</span>
+                <span class="lt-shelf__verdict">
+                  {%- if sh_fit -%}
+                    {{ section.settings.label_fit | escape }}
+                  {%- else -%}
+                    {{ section.settings.label_skip | escape }}
+                  {%- endif -%}
+                </span>
+              </li>
+            {%- endfor -%}
+          </ul>
+          {%- if section.settings.note != blank -%}
+            <figcaption class="lt-shelf__note">{{ section.settings.note | escape }}</figcaption>
+          {%- endif -%}
+        </figure>
+      {%- endif -%}
+    </div>
+  </div>
+</div>
+
+{% stylesheet %}
+/* ===================================================
+   Wirkstoff-Regal — lt-pdp-shelf.liquid
+   =================================================== */
+
+.lt-shelf {
+  --sh-ink: #26251e;
+  --sh-muted: rgba(38, 37, 30, 0.72);
+  --sh-hair: rgba(38, 37, 30, 0.14);
+  --sh-on: var(--color-teal-dark, #4a8c85);
+  --sh-on-text: var(--color-teal-text, #3a736d);
+  --sh-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  background: var(--sh-bg, #f7f7f4);
+}
+
+.lt-shelf__container {
+  max-width: var(--lt-page-max, 1280px);
+  margin: 0 auto;
+  padding: 0 var(--lt-page-gutter, 16px);
+}
+
+.lt-shelf__layout {
+  display: grid;
+  gap: var(--space-7);
+  align-items: center;
+}
+
+@media (min-width: 980px) {
+  .lt-shelf__layout {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+    gap: var(--space-8);
+  }
+}
+
+.lt-shelf__head {
+  margin-bottom: var(--space-4);
+}
+
+.lt-shelf__body {
+  max-width: 32rem;
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body, 16px);
+  line-height: 1.55;
+  color: var(--sh-muted);
+}
+
+/* Regal: Dosen stehen auf einer Planke. Jede Dose zeichnet ihr eigenes
+   Plankenstueck (::after, per order zwischen Dose und Name); die Stuecke
+   greifen um den halben Spaltenabstand ueber und stossen zu einer Planke
+   zusammen. Linie plus schmale Kante, mehr Tiefe braucht die Zeichnung
+   nicht. */
+.lt-shelf__figure {
+  margin: 0;
+}
+
+.lt-shelf__row {
+  --sh-gap: var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(var(--sh-cols, 3), minmax(0, 1fr));
+  column-gap: var(--sh-gap);
+  align-items: end;
+  view-timeline-name: --lt-shelf;
+  view-timeline-axis: block;
+}
+
+.lt-shelf__row[data-count='2'] { --sh-cols: 2; }
+.lt-shelf__row[data-count='4'] { --sh-cols: 4; }
+
+/* Subgrid: alle Dosen teilen sich dieselben vier Zeilen (Dose, Planke,
+   Name, Urteil). Sonst schiebt ein zweizeiliges Urteil seine Dose nach
+   oben und die Planke bricht. */
+.lt-shelf__row {
+  grid-template-rows: auto auto auto auto;
+}
+
+.lt-shelf__item {
+  display: grid;
+  grid-row: span 4;
+  grid-template-rows: subgrid;
+  row-gap: 0;
+  justify-items: center;
+  text-align: center;
+}
+
+.lt-shelf__jar { align-self: end; }
+.lt-shelf__verdict { align-self: start; }
+
+.lt-shelf__item::after {
+  content: '';
+  order: 1;
+  justify-self: stretch;
+  height: 10px;
+  margin: 0 calc(var(--sh-gap) / -2) var(--space-4);
+  border-top: 1.5px solid rgba(38, 37, 30, 0.55);
+  background: linear-gradient(180deg, rgba(38, 37, 30, 0.07), rgba(38, 37, 30, 0));
+}
+
+.lt-shelf__item:first-child::after {
+  margin-left: calc(-1 * var(--space-4));
+  border-bottom-left-radius: 4px;
+}
+
+.lt-shelf__item:last-child::after {
+  margin-right: calc(-1 * var(--space-4));
+  border-bottom-right-radius: 4px;
+}
+
+.lt-shelf__jar {
+  position: relative;
+  display: block;
+  width: min(100%, 132px);
+  margin-bottom: -1px;
+  color: var(--sh-ink);
+}
+
+.lt-shelf__jar > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.lt-shelf__label {
+  fill: #fff;
+}
+
+.lt-shelf__item--fit .lt-shelf__jar {
+  color: var(--sh-on);
+}
+
+.lt-shelf__item--skip .lt-shelf__jar {
+  opacity: 0.38;
+}
+
+.lt-shelf__badge {
+  position: absolute;
+  top: 14%;
+  right: 4%;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--sh-on);
+  color: #fff;
+  box-shadow: 0 6px 14px -6px rgba(54, 79, 86, 0.6);
+}
+
+.lt-shelf__badge svg {
+  width: 18px;
+  height: 18px;
+}
+
+.lt-shelf__name {
+  order: 2;
+  font-family: var(--font-heading);
+  font-size: var(--text-body-lg, 18px);
+  line-height: 1.3;
+  color: var(--sh-ink);
+}
+
+.lt-shelf__verdict {
+  order: 3;
+  margin-top: 2px;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm, 14px);
+  line-height: 1.4;
+  color: var(--sh-muted);
+}
+
+.lt-shelf__item--fit .lt-shelf__verdict {
+  color: var(--sh-on-text);
+  font-weight: 600;
+}
+
+.lt-shelf__note {
+  margin: var(--space-6) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm, 14px);
+  line-height: 1.45;
+  color: var(--sh-muted);
+}
+
+@media (max-width: 749px) {
+  .lt-shelf__row {
+    --sh-gap: var(--space-3);
+  }
+
+  .lt-shelf__jar {
+    width: min(100%, 104px);
+  }
+
+  .lt-shelf__badge {
+    width: 26px;
+    height: 26px;
+  }
+
+  .lt-shelf__badge svg {
+    width: 15px;
+    height: 15px;
+  }
+
+  .lt-shelf__name {
+    font-size: var(--text-body, 16px);
+  }
+
+  .lt-shelf__verdict {
+    font-size: 13px;
+  }
+}
+
+/* Der eine Moment: Dose fuer Dose faellt das Urteil, sobald das Regal
+   ins Bild laeuft. Endzustand ist der Grundzustand oben. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .lt-shelf__item .lt-shelf__jar,
+    .lt-shelf__item .lt-shelf__verdict,
+    .lt-shelf__badge {
+      animation-timeline: --lt-shelf;
+      animation-fill-mode: both;
+      animation-duration: auto;
+      animation-timing-function: var(--sh-ease);
+    }
+
+    .lt-shelf__item--skip .lt-shelf__jar { animation-name: lt-shelf-skip; }
+    .lt-shelf__item--fit .lt-shelf__jar { animation-name: lt-shelf-fit; }
+    .lt-shelf__badge { animation-name: lt-shelf-badge; }
+    .lt-shelf__verdict { animation-name: lt-shelf-verdict; }
+
+    .lt-shelf__item:nth-child(1) .lt-shelf__jar,
+    .lt-shelf__item:nth-child(1) .lt-shelf__verdict,
+    .lt-shelf__item:nth-child(1) .lt-shelf__badge { animation-range: contain 4% contain 16%; }
+    .lt-shelf__item:nth-child(2) .lt-shelf__jar,
+    .lt-shelf__item:nth-child(2) .lt-shelf__verdict,
+    .lt-shelf__item:nth-child(2) .lt-shelf__badge { animation-range: contain 16% contain 28%; }
+    .lt-shelf__item:nth-child(3) .lt-shelf__jar,
+    .lt-shelf__item:nth-child(3) .lt-shelf__verdict,
+    .lt-shelf__item:nth-child(3) .lt-shelf__badge { animation-range: contain 28% contain 40%; }
+    .lt-shelf__item:nth-child(4) .lt-shelf__jar,
+    .lt-shelf__item:nth-child(4) .lt-shelf__verdict,
+    .lt-shelf__item:nth-child(4) .lt-shelf__badge { animation-range: contain 40% contain 52%; }
+  }
+}
+
+@keyframes lt-shelf-skip {
+  from { opacity: 1; color: var(--sh-ink); }
+  to   { opacity: 0.38; color: var(--sh-ink); }
+}
+
+@keyframes lt-shelf-fit {
+  from { color: var(--sh-ink); transform: translateY(0); }
+  60%  { transform: translateY(-6px); }
+  to   { color: var(--sh-on); transform: translateY(0); }
+}
+
+@keyframes lt-shelf-badge {
+  from { opacity: 0; transform: scale(0.4); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes lt-shelf-verdict {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: none; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Wirkstoff-Regal",
+  "tag": "section",
+  "class": "section-lt-pdp-shelf",
+  "settings": [
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 160,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    },
+    {
+      "type": "select",
+      "id": "heading_size",
+      "label": "Überschrift-Größe",
+      "options": [
+        { "value": "section", "label": "Section (20)" },
+        { "value": "feature", "label": "Feature (28)" },
+        { "value": "product_title", "label": "Produkttitel (36)" }
+      ],
+      "default": "feature"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Danach weißt du, wo du ansetzt."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subline",
+      "info": "__none__ blendet sie aus.",
+      "default": "Der Test hat eigene Reports zu Wirkstoffen."
+    },
+    {
+      "type": "textarea",
+      "id": "body",
+      "label": "Text",
+      "default": "Du siehst, welche Wirkstoffe zu deinen Werten passen und welche nicht. Das reicht, um dein Regal auszumisten."
+    },
+    {
+      "type": "text",
+      "id": "label_fit",
+      "label": "Urteil: passt",
+      "default": "passt zu dir"
+    },
+    {
+      "type": "text",
+      "id": "label_skip",
+      "label": "Urteil: passt nicht",
+      "default": "kannst du weglassen"
+    },
+    {
+      "type": "text",
+      "id": "note",
+      "label": "Hinweis unter dem Regal",
+      "default": "Beispiel. Was zu dir passt, steht in deinem Report."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "jar",
+      "name": "Wirkstoff",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Kreatin"
+        },
+        {
+          "type": "select",
+          "id": "shape",
+          "label": "Form",
+          "options": [
+            { "value": "tub", "label": "Dose (Pulver)" },
+            { "value": "dropper", "label": "Tropfflasche" },
+            { "value": "capsules", "label": "Kapseldose" }
+          ],
+          "default": "tub"
+        },
+        {
+          "type": "select",
+          "id": "verdict",
+          "label": "Im Beispiel",
+          "options": [
+            { "value": "fit", "label": "passt" },
+            { "value": "skip", "label": "kann weg" }
+          ],
+          "default": "skip"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 4,
+  "presets": [
+    {
+      "name": "Wirkstoff-Regal",
+      "blocks": [
+        { "type": "jar", "settings": { "name": "Kreatin", "shape": "tub", "verdict": "fit" } },
+        { "type": "jar", "settings": { "name": "Vitamin D", "shape": "dropper" } },
+        { "type": "jar", "settings": { "name": "Omega-3", "shape": "capsules" } }
+      ]
+    }
+  ]
+}
+{% endschema %}
