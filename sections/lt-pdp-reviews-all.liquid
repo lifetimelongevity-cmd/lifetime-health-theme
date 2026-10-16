@@ -11,6 +11,11 @@
   Aufklapp-Mechanik. Statt die Hersteller-Section für alle Templates
   umzubauen, nimmt diese Section den Block auf und legt ein <details> darum.
 
+  POSITION (16.10. nachgezogen): direkt unter den Bewertungskarten statt
+  unter der FAQ. Dort stand die Zeile ohne Bezug und sah aus wie eine
+  verrutschte FAQ-Frage (BJ). Der Link „Alle Bewertungen lesen" unter den
+  Karten ist dafuer raus, die Zeile hier ist derselbe Weg.
+
   WARUM ZUGEKLAPPT
   Loox sortiert nach Datum. Ausgeklappt standen auf der PDP 1.831 px Widget
   hinter dem Abschluss, oben immer die jüngste Bewertung, egal wie sie
@@ -120,6 +125,11 @@
   outline-offset: 3px;
   border-radius: var(--radius-sm);
 }
+/* Safari zeigt den Fokusring auch nach einem Klick auf summary. Nach Maus
+   oder Finger bleibt er aus, ueber die Tastatur kommt er wie gehabt. */
+.ltra__summary[data-ltra-pointer]:focus-visible {
+  outline: none;
+}
 
 .ltra__summary-icon {
   display: inline-flex;
@@ -166,6 +176,15 @@
     fromHash();
   }
   window.addEventListener('hashchange', fromHash);
+  document.addEventListener('pointerdown', function (e) {
+    var s = e.target.closest('.ltra__summary');
+    if (s) s.setAttribute('data-ltra-pointer', '');
+  });
+  document.addEventListener('keydown', function () {
+    document.querySelectorAll('.ltra__summary[data-ltra-pointer]').forEach(function (s) {
+      s.removeAttribute('data-ltra-pointer');
+    });
+  });
 
   /* Links auf derselben Seite: vor der Navigation öffnen, damit der Sprung
      auf der aufgeklappten Section landet. Steht der Hash schon in der URL,
