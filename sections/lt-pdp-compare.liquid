@@ -15,9 +15,11 @@
 
   lt-comparison-table bleibt unveraendert, sie laeuft auf Spermidin und NMN.
 
-  Ein Moment beim Scrollen: Zeile fuer Zeile setzt sich das Haekchen.
-  Nur CSS (animation-timeline: view()); ohne Unterstuetzung oder bei
-  reduzierter Bewegung steht das Endbild da.
+  Beruhigt 16.10.2026 nach BJ-Feedback (zu viele Unterschiede): beide
+  Spalten gleich breit, Werte links und rechts in derselben Schrift und
+  Groesse, Haekchen und Kreuz gleich gross und beide gefuellt. Was die
+  Seiten unterscheidet, sind nur noch das weisse Blatt und die Tonwerte.
+  Die Scroll-Animation der Haekchen ist raus, das Bild steht.
   Desktop: Ueberschrift links, Tabelle rechts. Unter 980px untereinander.
 {%- endcomment -%}
 {%- liquid
@@ -84,7 +86,7 @@
                 </span>
                 <span class="lt-cmp__cell lt-cmp__cell--other" role="cell">
                   <span class="lt-cmp__mark lt-cmp__mark--no" aria-hidden="true">
-                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"><path d="M6.5 6.5l7 7M13.5 6.5l-7 7"/></svg>
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6.5 6.5l7 7M13.5 6.5l-7 7"/></svg>
                   </span>
                   <span class="lt-cmp__text">{{ block.settings.other | escape }}</span>
                 </span>
@@ -108,12 +110,10 @@
 .lt-cmp {
   --cp-ink: var(--color-ink, #26251e);
   --cp-muted: rgba(38, 37, 30, 0.72);
-  --cp-faint: rgba(38, 37, 30, 0.6);
   --cp-hair: rgba(38, 37, 30, 0.12);
   --cp-on: var(--color-teal-dark, #4a8c85);
   --cp-paper: var(--color-white, #fff);
   --cp-inset: var(--space-4);
-  --cp-ease: cubic-bezier(0.16, 1, 0.3, 1);
   background: var(--cp-bg, #f2f1ed);
 }
 
@@ -159,7 +159,7 @@
    dem Wert. */
 .lt-cmp__table {
   display: grid;
-  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.4fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr) minmax(0, 1fr);
   column-gap: var(--space-5);
 }
 
@@ -192,8 +192,6 @@
 
 .lt-cmp__rows {
   grid-row: 2;
-  view-timeline-name: --lt-cmp;
-  view-timeline-axis: block;
 }
 
 .lt-cmp__col {
@@ -202,10 +200,12 @@
   line-height: 1.3;
 }
 
+.lt-cmp__col {
+  font-weight: 700;
+}
+
 .lt-cmp__col--ours {
   padding: 0 var(--cp-inset);
-  font-weight: 700;
-  letter-spacing: 0.08em;
   color: var(--cp-ink);
 }
 
@@ -239,35 +239,32 @@
 }
 
 .lt-cmp__text {
-  line-height: 1.35;
+  font-family: var(--font-body);
+  font-size: var(--text-body, 16px);
+  line-height: 1.4;
   text-wrap: pretty;
 }
 
 .lt-cmp__cell--ours .lt-cmp__text {
-  font-family: var(--font-heading);
-  font-size: var(--text-body-lg, 18px);
   color: var(--cp-ink);
 }
 
 .lt-cmp__cell--other .lt-cmp__text {
-  font-family: var(--font-body);
-  font-size: var(--text-body, 16px);
   color: var(--cp-muted);
-  padding-top: 1px;
 }
 
 .lt-cmp__mark {
   display: grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
   margin-top: 1px;
   border-radius: var(--radius-full, 999px);
 }
 
 .lt-cmp__mark svg {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
 }
 
 .lt-cmp__mark--yes {
@@ -275,11 +272,11 @@
   color: var(--cp-paper);
 }
 
-/* Gegenstueck zum Haekchen: gleiche Groesse, nur Kontur. Strich auf 0.6
-   statt 0.4, damit das Zeichen die 3:1 fuer Grafik haelt. */
+/* Gegenstueck zum Haekchen: gleiche Groesse, gleiche Form, gefuellt,
+   nur im Grauton. */
 .lt-cmp__mark--no {
-  box-shadow: inset 0 0 0 1px var(--cp-hair);
-  color: var(--cp-faint);
+  background: var(--cp-hair);
+  color: var(--cp-muted);
 }
 
 .lt-cmp__note {
@@ -302,7 +299,7 @@
   }
 
   .lt-cmp__table {
-    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     column-gap: var(--space-3);
   }
 
@@ -344,51 +341,22 @@
     gap: var(--space-2);
   }
 
-  .lt-cmp__cell--ours .lt-cmp__text {
-    font-size: var(--text-body, 16px);
-  }
-
-  .lt-cmp__cell--other .lt-cmp__text {
+  .lt-cmp__text {
     font-size: var(--text-body-sm, 14px);
-    padding-top: 2px;
   }
 
   .lt-cmp__mark {
     width: 18px;
     height: 18px;
-    margin-top: 2px;
+    margin-top: 0;
   }
 
   .lt-cmp__mark svg {
-    width: 12px;
-    height: 12px;
+    width: 11px;
+    height: 11px;
   }
 }
 
-/* Der eine Moment: Zeile fuer Zeile setzt sich das Haekchen, sobald die
-   Tabelle ins Bild laeuft. Endzustand ist der Grundzustand oben. */
-@supports (animation-timeline: view()) {
-  @media (prefers-reduced-motion: no-preference) {
-    .lt-cmp__mark--yes {
-      animation-name: lt-cmp-yes;
-      animation-timeline: --lt-cmp;
-      animation-fill-mode: both;
-      animation-duration: auto;
-      animation-timing-function: var(--cp-ease);
-    }
-
-    .lt-cmp__row:nth-child(1) .lt-cmp__mark--yes { animation-range: contain 0% contain 12%; }
-    .lt-cmp__row:nth-child(2) .lt-cmp__mark--yes { animation-range: contain 8% contain 20%; }
-    .lt-cmp__row:nth-child(3) .lt-cmp__mark--yes { animation-range: contain 16% contain 28%; }
-    .lt-cmp__row:nth-child(4) .lt-cmp__mark--yes { animation-range: contain 24% contain 36%; }
-    .lt-cmp__row:nth-child(5) .lt-cmp__mark--yes { animation-range: contain 32% contain 44%; }
-  }
-}
-
-@keyframes lt-cmp-yes {
-  from { opacity: 0; transform: scale(0.4); }
-  to   { opacity: 1; transform: scale(1); }
-}
 {% endstylesheet %}
 
 {% schema %}
