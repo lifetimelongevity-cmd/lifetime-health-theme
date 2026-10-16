@@ -4,9 +4,14 @@
   Ersetzt dort lt-comparison-table: vier Spalten, die auf dem Handy zu 16
   Zeilen untereinander wurden (1678 px auf 375 px), die meisten Felder der
   anderen Tests nur "Nein" oder "Keine". Hier zwei Spalten, eine Zeile je
-  Unterschied, Haarlinien statt Karten wie in lt-pdp-app-switch. Die drei
+  Unterschied, Haarlinien statt Karten. Die drei
   Spalten der Wettbewerber sind zu "andere Tests" zusammengefasst, ihre Texte
   stammen aus der alten Tabelle.
+
+  Ueberarbeitet 16.10.2026 nach BJ-Feedback (Pille mit Schatten zu schwer,
+  rechte Spalte verloren): die LIFETIME-Spalte liegt jetzt auf einem
+  durchgehenden weissen Blatt, Kopf ohne Pille, Merkmal mobil im Blatt statt
+  als Versalzeile, das Kreuz als Kontur-Gegenstueck zum Haekchen.
 
   lt-comparison-table bleibt unveraendert, sie laeuft auf Spermidin und NMN.
 
@@ -61,6 +66,7 @@
 
       {%- if section.blocks.size > 0 -%}
         <div class="lt-cmp__table" role="table" aria-label="{{ section.settings.label_ours | escape }} / {{ section.settings.label_other | escape }}">
+          <span class="lt-cmp__sheet" aria-hidden="true"></span>
           <div class="lt-cmp__cols" role="row">
             <span class="lt-cmp__corner" role="columnheader"><span class="visually-hidden">{{ section.settings.label_row | escape }}</span></span>
             <span class="lt-cmp__col lt-cmp__col--ours" role="columnheader">{{ section.settings.label_ours | escape }}</span>
@@ -100,11 +106,13 @@
    =================================================== */
 
 .lt-cmp {
-  --cp-ink: #26251e;
+  --cp-ink: var(--color-ink, #26251e);
   --cp-muted: rgba(38, 37, 30, 0.72);
-  --cp-hair: rgba(38, 37, 30, 0.14);
+  --cp-faint: rgba(38, 37, 30, 0.6);
+  --cp-hair: rgba(38, 37, 30, 0.12);
   --cp-on: var(--color-teal-dark, #4a8c85);
-  --cp-dark: #364f56;
+  --cp-paper: var(--color-white, #fff);
+  --cp-inset: var(--space-4);
   --cp-ease: cubic-bezier(0.16, 1, 0.3, 1);
   background: var(--cp-bg, #f2f1ed);
 }
@@ -133,7 +141,7 @@
 }
 
 .lt-cmp__body {
-  max-width: 32rem;
+  max-width: var(--lt-measure, 32rem);
   margin: 0;
   font-family: var(--font-body);
   font-size: var(--text-body, 16px);
@@ -142,12 +150,25 @@
 }
 
 /* Tabelle: ein Raster fuer Kopf und Zeilen (Subgrid), damit die Spalten
-   ueber alle Zeilen buendig bleiben. Desktop drei Spalten (Merkmal, wir,
-   andere), Handy zwei: das Merkmal steht als kleine Zeile darueber. */
+   ueber alle Zeilen buendig bleiben. Die LIFETIME-Spalte liegt auf einem
+   weissen Blatt, das vom Kopf bis zur letzten Zeile durchlaeuft; die
+   Spalte der anderen bleibt auf dem Grund. Das Blatt ist das einzige
+   Element mit Schatten (Papier-Regel aus DESIGN.md).
+   Desktop drei Spalten (Merkmal, wir, andere). Handy zwei: das Merkmal
+   steht im Blatt ueber dem eigenen Wert, die andere Spalte fluchtet mit
+   dem Wert. */
 .lt-cmp__table {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.25fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.4fr) minmax(0, 1fr);
   column-gap: var(--space-5);
+}
+
+.lt-cmp__sheet {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  border-radius: var(--radius-md, 12px);
+  background: var(--cp-paper);
+  box-shadow: var(--shadow-sm), var(--shadow-md);
 }
 
 .lt-cmp__cols,
@@ -158,68 +179,73 @@
   grid-template-columns: subgrid;
 }
 
+.lt-cmp__cols,
 .lt-cmp__rows {
-  border-top: 1px solid var(--cp-hair);
-  view-timeline-name: --lt-cmp;
-  view-timeline-axis: block;
+  position: relative;
 }
 
 .lt-cmp__cols {
+  grid-row: 1;
   align-items: end;
-  padding-bottom: var(--space-3);
+  padding: var(--space-5) 0 var(--space-4);
+}
+
+.lt-cmp__rows {
+  grid-row: 2;
+  view-timeline-name: --lt-cmp;
+  view-timeline-axis: block;
 }
 
 .lt-cmp__col {
   font-family: var(--font-body);
   font-size: var(--text-body-sm, 14px);
   line-height: 1.3;
-  color: var(--cp-muted);
 }
 
 .lt-cmp__col--ours {
-  justify-self: start;
-  padding: 6px var(--space-3);
-  border-radius: 999px;
-  background: var(--cp-dark);
-  color: #fff;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  box-shadow: 0 4px 12px -4px rgba(54, 79, 86, 0.45);
+  padding: 0 var(--cp-inset);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--cp-ink);
 }
 
 .lt-cmp__col--other {
-  padding: 6px 0;
+  color: var(--cp-muted);
 }
 
 .lt-cmp__row {
-  padding: var(--space-4) 0;
-  border-bottom: 1px solid var(--cp-hair);
   align-items: start;
+  padding: var(--space-5) 0;
+  border-top: 1px solid var(--cp-hair);
 }
 
 .lt-cmp__label {
   font-family: var(--font-body);
-  font-size: var(--text-body-sm, 14px);
-  line-height: 1.4;
+  font-size: var(--text-body, 16px);
+  line-height: 1.35;
   color: var(--cp-muted);
-  padding-top: 3px;
+  padding-top: 1px;
 }
 
 .lt-cmp__cell {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--space-2);
+  gap: var(--space-3);
   align-items: start;
 }
 
+.lt-cmp__cell--ours {
+  padding: 0 var(--cp-inset);
+}
+
 .lt-cmp__text {
-  line-height: 1.4;
+  line-height: 1.35;
+  text-wrap: pretty;
 }
 
 .lt-cmp__cell--ours .lt-cmp__text {
   font-family: var(--font-heading);
   font-size: var(--text-body-lg, 18px);
-  line-height: 1.35;
   color: var(--cp-ink);
 }
 
@@ -236,7 +262,7 @@
   width: 22px;
   height: 22px;
   margin-top: 1px;
-  border-radius: 50%;
+  border-radius: var(--radius-full, 999px);
 }
 
 .lt-cmp__mark svg {
@@ -246,15 +272,19 @@
 
 .lt-cmp__mark--yes {
   background: var(--cp-on);
-  color: #fff;
+  color: var(--cp-paper);
 }
 
+/* Gegenstueck zum Haekchen: gleiche Groesse, nur Kontur. Strich auf 0.6
+   statt 0.4, damit das Zeichen die 3:1 fuer Grafik haelt. */
 .lt-cmp__mark--no {
-  color: rgba(38, 37, 30, 0.4);
+  box-shadow: inset 0 0 0 1px var(--cp-hair);
+  color: var(--cp-faint);
 }
 
 .lt-cmp__note {
   grid-column: 1 / -1;
+  grid-row: 3;
   margin: var(--space-4) 0 0;
   font-family: var(--font-body);
   font-size: var(--text-body-sm, 14px);
@@ -267,29 +297,51 @@
     gap: var(--space-5);
   }
 
+  .lt-cmp {
+    --cp-inset: var(--space-3);
+  }
+
   .lt-cmp__table {
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-    column-gap: var(--space-4);
+    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    column-gap: var(--space-3);
+  }
+
+  .lt-cmp__sheet {
+    grid-column: 1;
   }
 
   .lt-cmp__corner {
     display: none;
   }
 
-  .lt-cmp__label {
-    grid-column: 1 / -1;
-    padding: 0 0 var(--space-2);
-    font-size: var(--text-micro, 12px);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+  .lt-cmp__cols {
+    padding: var(--space-4) 0 var(--space-3);
   }
 
   .lt-cmp__row {
-    padding: var(--space-3) 0 var(--space-4);
+    padding: var(--space-4) 0;
+    row-gap: var(--space-1);
+  }
+
+  .lt-cmp__label {
+    grid-column: 1;
+    grid-row: 1;
+    padding: 0 var(--cp-inset);
+    font-size: var(--text-body-sm, 14px);
+  }
+
+  .lt-cmp__cell--ours {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .lt-cmp__cell--other {
+    grid-column: 2;
+    grid-row: 2;
   }
 
   .lt-cmp__cell {
-    gap: 6px;
+    gap: var(--space-2);
   }
 
   .lt-cmp__cell--ours .lt-cmp__text {
@@ -298,6 +350,7 @@
 
   .lt-cmp__cell--other .lt-cmp__text {
     font-size: var(--text-body-sm, 14px);
+    padding-top: 2px;
   }
 
   .lt-cmp__mark {
