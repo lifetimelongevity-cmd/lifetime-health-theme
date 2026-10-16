@@ -30,6 +30,10 @@
   # und 532px von 3+2 auf 4+1 umbrechen, also genau auf die Waise, die sie
   # hier verhindern soll.
   assign crs_lg_four_up = false
+  # Leiste: eine Zeile statt Kacheln, unter Desktop als ruhiger Ticker.
+  # Default bleibt grid, damit Startseite-Altstaende, NMN-, Spermidin- und
+  # Quiz-Templates unveraendert rendern; eingeschaltet nur per Template.
+  assign crs_lg_layout = section.settings.layout | default: 'grid'
   for lg_block in section.blocks
     if lg_block.settings.hide_below_desktop
       assign crs_lg_four_up = true
@@ -49,6 +53,60 @@
   }
 {% endstyle %}
 
+{%- if crs_lg_layout == 'strip' -%}
+<div class="lg-section lg-section--strip" id="section-{{ section.id }}">
+  <div class="lg-container lg-strip">
+    {%- if crs_lg_head != blank -%}
+      <p class="lg-strip__label">{{ crs_lg_head | escape }}</p>
+    {%- endif -%}
+    {%- if section.blocks.size > 0 -%}
+      <div class="lg-strip__viewport">
+        {%- comment -%}
+          Zwei identische Saetze, translateX(-50%) = genau ein Satz: der Ticker
+          laeuft nahtlos ohne JS. Der zweite Satz ist fuer Screenreader stumm
+          und ab Desktop sowie bei reduzierter Bewegung ausgeblendet.
+        {%- endcomment -%}
+        <ul class="lg-strip__track" role="list" style="--lg-count: {{ section.blocks.size }}">
+          {%- for n in (1..2) -%}
+            {%- for block in section.blocks -%}
+              <li class="lg-strip__item{% if n == 2 %} lg-strip__item--dup{% endif %}"{% if n == 2 %} aria-hidden="true"{% else %} {{ block.shopify_attributes }}{% endif %}>
+                {%- if block.settings.url != blank and n == 1 -%}
+                  <a href="{{ block.settings.url }}" class="lg-strip__link" target="_blank" rel="noopener">
+                {%- endif -%}
+                {%- if block.settings.image != blank -%}
+                  {%- capture lg_logo_style -%}--lg-r: {{ block.settings.image.aspect_ratio | default: 3.5 }}{%- endcapture -%}
+                  {%- capture lg_logo_class -%}lg-strip__logo{% if block.settings.keep_shading %} lg-strip__logo--shaded{% endif %}{%- endcapture -%}
+                  {%- if n == 1 -%}
+                    {%- assign lg_logo_alt = block.settings.alt | escape -%}
+                  {%- else -%}
+                    {%- assign lg_logo_alt = '' -%}
+                  {%- endif -%}
+                  {{
+                    block.settings.image
+                    | image_url: width: 400
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '200, 400',
+                      sizes: '200px',
+                      class: lg_logo_class,
+                      style: lg_logo_style,
+                      alt: lg_logo_alt
+                  }}
+                {%- else -%}
+                  <span class="lg-logo-placeholder">{{ block.settings.alt | escape }}</span>
+                {%- endif -%}
+                {%- if block.settings.url != blank and n == 1 -%}
+                  </a>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          {%- endfor -%}
+        </ul>
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+{%- else -%}
 <div class="lg-section" id="section-{{ section.id }}">
   <div class="lg-container">
 
@@ -101,6 +159,7 @@
 
   </div>
 </div>
+{%- endif -%}
 
 {% stylesheet %}
 /* ===================================================
@@ -246,6 +305,163 @@
     max-height: 32px;
   }
 }
+
+/* ===================================================
+   Variante Leiste (layout: strip)
+   Eine Zeile ohne Kacheln. Unter 1025px laeuft sie als ruhiger Ticker,
+   darueber steht sie still, weil fuenf Logos plus Beschriftung dort in eine
+   Zeile passen. Ausgemessen am 16.10.2026 fuer die AGE&DNA-PDP: die
+   Kachel-Variante war mobil 416px hoch, die Leiste bleibt unter 150px.
+   =================================================== */
+
+.lg-section--strip {
+  /* Logohoehe bei Seitenverhaeltnis 3,5:1. Breitere Wortmarken werden
+     niedriger, kompaktere Bildmarken hoeher, damit alle optisch gleich
+     schwer wirken (siehe .lg-strip__logo). */
+  --lg-logo-h: 1.625rem;
+}
+
+.lg-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.lg-strip__label {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--crs-text-ter);
+  white-space: nowrap;
+}
+
+.lg-strip__viewport {
+  width: 100%;
+  overflow: hidden;
+  /* Weiche Kanten statt hartem Schnitt: der Ticker laeuft sichtbar weiter */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
+}
+
+.lg-strip__track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  /* rund 7s je Logo, also etwa 20px pro Sekunde: ruhig genug zum Lesen */
+  animation: lg-strip-scroll calc(var(--lg-count, 5) * 7s) linear infinite;
+}
+
+.lg-strip__viewport:hover .lg-strip__track {
+  animation-play-state: paused;
+}
+
+@keyframes lg-strip-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Gleiches Padding links und rechts: beide Saetze sind exakt gleich breit,
+   sonst springt der Ticker am Ende jeder Runde. */
+.lg-strip__item {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-5);
+}
+
+.lg-strip__link {
+  display: flex;
+  align-items: center;
+}
+
+/* Einheitliche Tonfarbe: brightness(0) macht jede freigestellte Bildmarke
+   zur Silhouette, die Deckkraft legt sie auf rund #454544 (Kontrast gut 9:1
+   auf #f7f7f4). Vorher standen die Logos zwischen Luminanz 120 (KStA) und
+   200 (SWR1), SWR1 war deshalb kaum lesbar.
+   Hoehe: Wurzel-Ausgleich ueber das Seitenverhaeltnis (--lg-r aus Liquid),
+   gedeckelt auf 70 bis 130 Prozent. Die erste Deklaration ist der Fallback
+   fuer Browser ohne pow(). */
+.lg-strip__logo {
+  display: block;
+  width: auto;
+  max-width: none;
+  height: var(--lg-logo-h);
+  height: clamp(
+    calc(var(--lg-logo-h) * 0.7),
+    calc(var(--lg-logo-h) * pow(calc(3.5 / var(--lg-r, 3.5)), 0.35)),
+    calc(var(--lg-logo-h) * 1.3)
+  );
+  filter: brightness(0);
+  opacity: 0.7;
+}
+
+/* Fuer Logos mit hellen Innenflaechen (SAT.1-Ball): als Silhouette wuerden
+   die weissen Streifen zur schwarzen Scheibe. Graustufen abgedunkelt treffen
+   denselben Ton, die Flaechen bleiben lesbar. */
+.lg-strip__logo--shaded {
+  filter: grayscale(1) brightness(0.5);
+  opacity: 1;
+}
+
+@media (min-width: 1025px) {
+  .lg-section--strip {
+    --lg-logo-h: 1.875rem;
+  }
+
+  .lg-strip {
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--space-5);
+  }
+
+  .lg-strip__viewport {
+    width: auto;
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .lg-strip__track {
+    animation: none;
+  }
+
+  .lg-strip__item--dup {
+    display: none;
+  }
+}
+
+/* Reduzierte Bewegung: kein Ticker, sondern eine Reihe zum Wischen */
+@media (prefers-reduced-motion: reduce) {
+  .lg-strip__track {
+    animation: none;
+  }
+
+  .lg-strip__item--dup {
+    display: none;
+  }
+
+  .lg-strip__viewport {
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .lg-strip__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lg-strip__item {
+    scroll-snap-align: start;
+  }
+}
 {% endstylesheet %}
 
 {% schema %}
@@ -254,6 +470,21 @@
   "tag": "section",
   "class": "crs-logo-garden",
   "settings": [
+    {
+      "type": "header",
+      "content": "Darstellung"
+    },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Darstellung",
+      "options": [
+        { "value": "grid", "label": "Kacheln" },
+        { "value": "strip", "label": "Leiste (eine Zeile)" }
+      ],
+      "default": "grid",
+      "info": "Leiste: ohne Kacheln, Logos in einem Ton, mobil als ruhiger Ticker. Die Überschrift wird zur kleinen Beschriftung, Kicker und Unterüberschrift entfallen."
+    },
     {
       "type": "header",
       "content": "Farben"
@@ -382,6 +613,13 @@
           "label": "Unter Desktop ausblenden",
           "default": false,
           "info": "Für das fünfte Logo, damit im Tablet- und Mobilbereich vier Logos in einer Zeile stehen."
+        },
+        {
+          "type": "checkbox",
+          "id": "keep_shading",
+          "label": "Helle Flächen behalten",
+          "default": false,
+          "info": "Nur Darstellung Leiste. Für Logos mit weißen Innenflächen (z. B. SAT.1), die als einfarbige Silhouette zur Scheibe würden."
         }
       ]
     }

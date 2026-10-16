@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logo-Leiste AGE&amp;DNA</title>
+<!-- Statische Vorschau fuer crs-logo-garden, Darstellung "Leiste" (layout: strip).
+     CSS 1:1 aus dem {% stylesheet %} der Section gezogen, Logos vom Live-CDN.
+     Oben die neue Leiste wie im AGE&DNA-Template (32/32 px), darunter zum
+     Vergleich die bisherige Kachel-Variante (24/56 px). -->
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-5:24px;--space-6:32px;--space-7:48px;--text-micro:12px;--weight-semibold:600;--font-body:'Lato',-apple-system,BlinkMacSystemFont,sans-serif;--lt-page-max:1280px;--lt-page-gutter:16px}
+@media (min-width:750px){:root{--lt-page-gutter:24px}}
+body{margin:0;background:#f7f7f4;font-family:var(--font-body);color:#26251e}
+.note{font:12px/1.4 var(--font-body);color:#6b6b63;padding:8px 16px;background:#efeee9;margin:0}
+.fake{height:120px;background:#fff;display:flex;align-items:center;justify-content:center;color:#6b6b63;font-size:12px}
+.crs-heading-stack__title{font-size:28px;line-height:1.2;margin:0;font-weight:400;text-align:center}
+#section-strip{--crs-bg:#f7f7f4;--crs-card-bg:#f2f1ed;--crs-text:#26251e;--crs-text-sec:rgba(38,37,30,.72);--crs-text-ter:rgba(38,37,30,.66);--crs-border:rgba(38,37,30,.05);padding-top:min(32px,15vw);padding-bottom:min(32px,15vw)}
+#section-grid{--crs-bg:#f7f7f4;--crs-card-bg:#f2f1ed;--crs-text:#26251e;--crs-text-sec:rgba(38,37,30,.72);--crs-text-ter:rgba(38,37,30,.66);--crs-border:rgba(38,37,30,.05);padding-top:min(24px,15vw);padding-bottom:min(56px,15vw)}
+
+/* ===================================================
+   Logo Garden — crs-logo-garden.liquid
+   =================================================== */
+
+.lg-section {
+  background: var(--crs-bg, #f7f7f4);
+}
+
+.lg-container {
+  max-width: var(--lt-page-max, 1280px);
+  margin: 0 auto;
+  padding: 0 var(--lt-page-gutter, 16px);
+}
+
+.lg-section-head {
+  margin-bottom: var(--space-7);
+}
+
+/* Dokumentierte Ausnahme zur linksbuendigen Heading-Regel, nur fuer die
+   Presse-Leiste: die Logo-Reihe ist ein zentrierter Flex-Block, gegen den eine
+   linke Headline sichtbar kippt. 481px ist genau die Grenze, ab der die Logos
+   diese zentrierte Reihe bilden — darunter fuellt das 2x2 die volle Breite und
+   eine linke Headline steht richtig. (0,2,0) schlaegt crs-heading-stack--align-*
+   (0,1,0) unabhaengig von der Reihenfolge der gebuendelten Stylesheets. */
+@media (min-width: 481px) {
+  .lg-section-head.lg-section-head--center-desktop {
+    text-align: center;
+    align-items: center;
+  }
+}
+
+/* Logos — zentriert (flex), unabhängig von der Anzahl */
+.lg-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch;
+  gap: var(--space-2);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Card */
+.lg-card {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: min(11rem, 42vw);
+  height: 4rem;
+  background: var(--crs-card-bg, #f2f1ed);
+  border: 1px solid var(--crs-border, rgba(38, 37, 30, 0.05));
+  border-radius: 4px;
+  overflow: hidden;
+  transition: opacity 0.18s ease;
+}
+
+.lg-card:hover {
+  opacity: .8;
+}
+
+.lg-card-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 12px 16px;
+  text-decoration: none;
+}
+
+/* Logo image */
+/* max-height war 28px bei opacity .65. Zusammen mit der fast identischen
+   Karten- und Seitenflaeche waren SAT.1 und SWR1 praktisch unsichtbar.
+   36px nutzt die Karteninnenhoehe aus (4rem minus 2x12px Padding), sodass
+   quadratischere Logos nicht mehr gegen die schmalen Wortmarken abfallen. */
+.lg-logo {
+  max-width: 100%;
+  max-height: 36px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+  filter: grayscale(1);
+  opacity: .85;
+  transition: opacity 0.18s ease, filter 0.18s ease;
+}
+
+.lg-card:hover .lg-logo {
+  opacity: 1;
+  filter: grayscale(.4);
+}
+
+/* Fallback text when no image */
+.lg-logo-placeholder {
+  font-size: .75rem;
+  color: var(--crs-text-sec, rgba(38,37,30,0.6));
+  text-align: center;
+  padding: 8px;
+  line-height: 1.3;
+}
+
+/* Einzelne Logos unter Desktop ausblenden. Fuenf Logos brechen im Tablet-
+   Bereich zu 4+1 um, und ein einzelner Nachzuegler in Zeile zwei ist die
+   unruhigste aller Varianten. Vier passen in eine Zeile, unter 480px in ein
+   sauberes 2x2. */
+@media (max-width: 900px) {
+  .lg-card--hide-below-desktop {
+    display: none;
+  }
+}
+
+@media (max-width: 1024px) {
+  .lg-card {
+    width: min(10rem, 22vw);
+    height: 4.5rem;
+  }
+
+  /* Nur fuer Leisten, die unter Desktop auf vier Logos gehen. 22vw rechnet
+     gegen den Viewport und ignoriert das Container-Padding, dadurch brechen
+     vier Karten unter 533px auf 3+1 um. calc(25% - gap) rechnet gegen die
+     echte Zeilenbreite und passt immer. Ueber 600px liefern beide Formeln
+     praktisch dieselben Werte, die Deckelung bei 10rem bleibt.
+     (0,2,0) schlaegt .lg-card (0,1,0). */
+  .lg-grid--four-up .lg-card {
+    width: min(10rem, calc(25% - var(--space-2)));
+  }
+}
+
+@media (max-width: 480px) {
+  .lg-card {
+    flex: 0 0 calc(50% - var(--space-2));
+    width: calc(50% - var(--space-2));
+    max-width: calc(50% - var(--space-2));
+    height: 5rem;
+  }
+
+  .lg-logo {
+    max-height: 32px;
+  }
+}
+
+/* ===================================================
+   Variante Leiste (layout: strip)
+   Eine Zeile ohne Kacheln. Unter 1025px laeuft sie als ruhiger Ticker,
+   darueber steht sie still, weil fuenf Logos plus Beschriftung dort in eine
+   Zeile passen. Ausgemessen am 16.10.2026 fuer die AGE&DNA-PDP: die
+   Kachel-Variante war mobil 416px hoch, die Leiste bleibt unter 150px.
+   =================================================== */
+
+.lg-section--strip {
+  /* Logohoehe bei Seitenverhaeltnis 3,5:1. Breitere Wortmarken werden
+     niedriger, kompaktere Bildmarken hoeher, damit alle optisch gleich
+     schwer wirken (siehe .lg-strip__logo). */
+  --lg-logo-h: 1.625rem;
+}
+
+.lg-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.lg-strip__label {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-semibold);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--crs-text-ter);
+  white-space: nowrap;
+}
+
+.lg-strip__viewport {
+  width: 100%;
+  overflow: hidden;
+  /* Weiche Kanten statt hartem Schnitt: der Ticker laeuft sichtbar weiter */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0, #000 8%, #000 92%, transparent 100%);
+}
+
+.lg-strip__track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  /* rund 7s je Logo, also etwa 20px pro Sekunde: ruhig genug zum Lesen */
+  animation: lg-strip-scroll calc(var(--lg-count, 5) * 7s) linear infinite;
+}
+
+.lg-strip__viewport:hover .lg-strip__track {
+  animation-play-state: paused;
+}
+
+@keyframes lg-strip-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* Gleiches Padding links und rechts: beide Saetze sind exakt gleich breit,
+   sonst springt der Ticker am Ende jeder Runde. */
+.lg-strip__item {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 var(--space-5);
+}
+
+.lg-strip__link {
+  display: flex;
+  align-items: center;
+}
+
+/* Einheitliche Tonfarbe: brightness(0) macht jede freigestellte Bildmarke
+   zur Silhouette, die Deckkraft legt sie auf rund #454544 (Kontrast gut 9:1
+   auf #f7f7f4). Vorher standen die Logos zwischen Luminanz 120 (KStA) und
+   200 (SWR1), SWR1 war deshalb kaum lesbar.
+   Hoehe: Wurzel-Ausgleich ueber das Seitenverhaeltnis (--lg-r aus Liquid),
+   gedeckelt auf 70 bis 130 Prozent. Die erste Deklaration ist der Fallback
+   fuer Browser ohne pow(). */
+.lg-strip__logo {
+  display: block;
+  width: auto;
+  max-width: none;
+  height: var(--lg-logo-h);
+  height: clamp(
+    calc(var(--lg-logo-h) * 0.7),
+    calc(var(--lg-logo-h) * pow(calc(3.5 / var(--lg-r, 3.5)), 0.35)),
+    calc(var(--lg-logo-h) * 1.3)
+  );
+  filter: brightness(0);
+  opacity: 0.7;
+}
+
+/* Fuer Logos mit hellen Innenflaechen (SAT.1-Ball): als Silhouette wuerden
+   die weissen Streifen zur schwarzen Scheibe. Graustufen abgedunkelt treffen
+   denselben Ton, die Flaechen bleiben lesbar. */
+.lg-strip__logo--shaded {
+  filter: grayscale(1) brightness(0.5);
+  opacity: 1;
+}
+
+@media (min-width: 1025px) {
+  .lg-section--strip {
+    --lg-logo-h: 1.875rem;
+  }
+
+  .lg-strip {
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--space-5);
+  }
+
+  .lg-strip__viewport {
+    width: auto;
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .lg-strip__track {
+    animation: none;
+  }
+
+  .lg-strip__item--dup {
+    display: none;
+  }
+}
+
+/* Reduzierte Bewegung: kein Ticker, sondern eine Reihe zum Wischen */
+@media (prefers-reduced-motion: reduce) {
+  .lg-strip__track {
+    animation: none;
+  }
+
+  .lg-strip__item--dup {
+    display: none;
+  }
+
+  .lg-strip__viewport {
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+  }
+
+  .lg-strip__viewport::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lg-strip__item {
+    scroll-snap-align: start;
+  }
+}
+
+</style></head><body>
+<p class="note">Neu: Darstellung „Leiste“ (crs-logo-garden, layout: strip)</p>
+<div class="fake">Buy-Box (main)</div>
+<div class="lg-section lg-section--strip" id="section-strip"><div class="lg-container lg-strip"><p class="lg-strip__label">Bekannt aus</p><div class="lg-strip__viewport"><ul class="lg-strip__track" role="list" style="--lg-count: 5"><li class="lg-strip__item"><img src="https://www.lifetime-health.de/cdn/shop/files/1_b5d8bee0-0588-4cab-8e38-b3eee8285532.png?width=400" class="lg-strip__logo" style="--lg-r: 3.846" alt="RTL Punkt 12"></li><li class="lg-strip__item"><img src="https://www.lifetime-health.de/cdn/shop/files/ksta-logo-grau-nobg.png?width=400" class="lg-strip__logo" style="--lg-r: 8.511" alt="Kölner Stadt-Anzeiger"></li><li class="lg-strip__item"><img src="https://www.lifetime-health.de/cdn/shop/files/swr1-logo.png?width=400" class="lg-strip__logo" style="--lg-r: 4.04" alt="SWR1"></li><li class="lg-strip__item"><img src="https://www.lifetime-health.de/cdn/shop/files/Kein_Titel_600_x_400_px_2.png?width=400" class="lg-strip__logo lg-strip__logo--shaded" style="--lg-r: 2.0" alt="SAT.1"></li><li class="lg-strip__item"><img src="https://www.lifetime-health.de/cdn/shop/files/3_9df4d585-1a85-4c48-80bb-c8585a85cce7.png?width=400" class="lg-strip__logo" style="--lg-r: 3.846" alt="maxima"></li><li class="lg-strip__item lg-strip__item--dup" aria-hidden="true"><img src="https://www.lifetime-health.de/cdn/shop/files/1_b5d8bee0-0588-4cab-8e38-b3eee8285532.png?width=400" class="lg-strip__logo" style="--lg-r: 3.846" alt=""></li><li class="lg-strip__item lg-strip__item--dup" aria-hidden="true"><img src="https://www.lifetime-health.de/cdn/shop/files/ksta-logo-grau-nobg.png?width=400" class="lg-strip__logo" style="--lg-r: 8.511" alt=""></li><li class="lg-strip__item lg-strip__item--dup" aria-hidden="true"><img src="https://www.lifetime-health.de/cdn/shop/files/swr1-logo.png?width=400" class="lg-strip__logo" style="--lg-r: 4.04" alt=""></li><li class="lg-strip__item lg-strip__item--dup" aria-hidden="true"><img src="https://www.lifetime-health.de/cdn/shop/files/Kein_Titel_600_x_400_px_2.png?width=400" class="lg-strip__logo lg-strip__logo--shaded" style="--lg-r: 2.0" alt=""></li><li class="lg-strip__item lg-strip__item--dup" aria-hidden="true"><img src="https://www.lifetime-health.de/cdn/shop/files/3_9df4d585-1a85-4c48-80bb-c8585a85cce7.png?width=400" class="lg-strip__logo" style="--lg-r: 3.846" alt=""></li></ul></div></div></div>
+<div class="fake">lt-pdp-process</div>
+<p class="note">Vorher: Kacheln (Default, bleibt auf allen anderen Seiten)</p>
+<div class="lg-section" id="section-grid"><div class="lg-container"><div class="lg-section-head crs-heading-stack crs-heading-stack--align-center crs-heading-stack--headline-md"><div class="crs-heading-stack__pair"><h2 class="crs-heading-stack__title">Bekannt aus</h2></div></div><ul class="lg-grid" role="list"><li class="lg-card"><img src="https://www.lifetime-health.de/cdn/shop/files/1_b5d8bee0-0588-4cab-8e38-b3eee8285532.png?width=400" class="lg-logo" alt="RTL Punkt 12"></li><li class="lg-card"><img src="https://www.lifetime-health.de/cdn/shop/files/ksta-logo-grau-nobg.png?width=400" class="lg-logo" alt="Kölner Stadt-Anzeiger"></li><li class="lg-card"><img src="https://www.lifetime-health.de/cdn/shop/files/swr1-logo.png?width=400" class="lg-logo" alt="SWR1"></li><li class="lg-card"><img src="https://www.lifetime-health.de/cdn/shop/files/Kein_Titel_600_x_400_px_2.png?width=400" class="lg-logo" alt="SAT.1"></li><li class="lg-card"><img src="https://www.lifetime-health.de/cdn/shop/files/3_9df4d585-1a85-4c48-80bb-c8585a85cce7.png?width=400" class="lg-logo" alt="maxima"></li></ul></div></div>
+<script>
+// Hoehen messen, fuer die Pruefung
+window.lgMeasure=()=>['section-strip','section-grid'].map(id=>id+': '+Math.round(document.getElementById(id).getBoundingClientRect().height)+'px');
+</script>
+</body></html>
