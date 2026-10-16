@@ -31,6 +31,16 @@
   if cp_sub == '__none__'
     assign cp_sub = ''
   endif
+
+  # [price] = guenstigste Variante des Produkts, live aus Shopify (BJ 16.10.:
+  # steigt der Preis, aendert sich die Zahl mit). Ohne Produkt bleibt nichts
+  # stehen statt eines leeren Platzhalters.
+  assign cp_price = ''
+  if product
+    assign cp_price = product.price | money_without_trailing_zeros | replace: ' ', ' '
+  endif
+  assign cp_head = cp_head | replace: '[price]', cp_price
+  assign cp_sub = cp_sub | replace: '[price]', cp_price
   assign cp_md = false
   assign cp_lg = false
   if section.settings.heading_size == 'feature'
@@ -418,7 +428,7 @@
       "type": "text",
       "id": "subheading",
       "label": "Subline",
-      "info": "__none__ blendet sie aus.",
+      "info": "__none__ blendet sie aus. [price] setzt den aktuellen Produktpreis ein.",
       "default": "LIFETIME misst beides."
     },
     {
