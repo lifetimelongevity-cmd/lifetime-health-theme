@@ -242,7 +242,15 @@
 {%- endcapture -%}
 
 <div class="cr-section" id="section-{{ section.id }}">
-  <div class="cr-container">
+  {%- comment -%}
+    Ziel der Hero-Sterne (2026-10-16). Der Sterne-Knopf in lt-pdp-hero scrollt
+    zu `#lt-reviews` und erst ohne diesen Anker zur Loox-App-Section. Auf der
+    AGE&DNA-PDP steht das Loox-Widget seit 16.10. zugeklappt unter der FAQ,
+    der Sprung soll deshalb hier landen, beim echten Schnitt und den
+    ausgewaehlten Stimmen. Die id sitzt bewusst auf dem inneren Container und
+    nicht auf dem Wrapper: der Style-Block oben zielt auf `#section-<id>`.
+  {%- endcomment -%}
+  <div class="cr-container"{% if section.settings.hero_anchor %} id="lt-reviews"{% endif %}>
 
     {%- comment -%} ── Section header ─────────────────────────────── {%- endcomment -%}
     {%- if cr_kicker != blank or cr_head != blank or cr_sub != blank -%}
@@ -570,6 +578,10 @@
   max-width: var(--lt-page-max, 1280px);
   margin: 0 auto;
   padding: 0 var(--lt-page-gutter, 16px);
+}
+
+.cr-container[id] {
+  scroll-margin-top: var(--space-9);
 }
 
 /* ── Section header ───────────────────────────────────────── */
@@ -1079,6 +1091,13 @@
       "id": "loox_pick",
       "label": "Auswahl aus Loox",
       "info": "Leer: die neuesten Bewertungen. Gefüllt: nur diese, in dieser Reihenfolge. Eine Zeile je Bewertung, ein wörtlicher Ausschnitt aus ihrem Text genügt. Pflicht auf der NMN-PDP, dort darf keine Verzehr- oder Wirkaussage stehen."
+    },
+    {
+      "type": "checkbox",
+      "id": "hero_anchor",
+      "label": "Ziel der Hero-Sterne",
+      "default": false,
+      "info": "Der Sterne-Knopf im Produkt-Hero springt hierher statt zum Loox-Widget. Nur in einer Section je Seite aktivieren."
     }
   ],
   "blocks": [
