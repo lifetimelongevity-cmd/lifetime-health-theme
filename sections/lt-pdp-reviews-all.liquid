@@ -1,0 +1,250 @@
+{%- comment -%}
+  ───────────────────────────────────────────────────────────────────────────
+  LIFETIME — Alle Bewertungen (Loox-Widget, einklappbar)
+  ───────────────────────────────────────────────────────────────────────────
+  Angelegt 2026-10-16 für die AGE&DNA-PDP.
+
+  WARUM EINE EIGENE SECTION
+  Das Loox-Widget ist ein App-Block. App-Blöcke liegen immer in einer Section,
+  die `@app` annimmt, und rendern dort per `{% render block %}`. Die
+  Combine-Section `apps` gibt dafür nur einen nackten Container her, ohne
+  Aufklapp-Mechanik. Statt die Hersteller-Section für alle Templates
+  umzubauen, nimmt diese Section den Block auf und legt ein <details> darum.
+
+  WARUM ZUGEKLAPPT
+  Loox sortiert nach Datum. Ausgeklappt standen auf der PDP 1.831 px Widget
+  hinter dem Abschluss, oben immer die jüngste Bewertung, egal wie sie
+  ausfällt. Die tragenden Stimmen und der echte Schnitt stehen seit
+  2026-10-16 serverseitig in `crs-customer-reviews` (review_source: loox).
+  Diese Section ist der Weg zu allen Bewertungen, nicht die Bühne dafür.
+  Wer alle lesen will, klappt auf und sieht alle, auch die schlechten.
+
+  WARUM <details> UND KEIN max-height-ACCORDION
+  Das Widget ist ein iframe, das seine Höhe per postMessage meldet. Geprüft
+  am 16.10.: In einem zugeklappten <details> lädt das iframe erst beim
+  Aufklappen und meldet dann die richtige Höhe für die tatsächliche Breite
+  (375 px: 1.736 px). Kein Höhenfehler, und die Seite spart den Loox-Aufruf
+  für alle, die nicht aufklappen. Das serverseitige Loox-Feed im Block
+  bleibt im DOM und damit für Suchmaschinen lesbar.
+
+  ANKER
+  `#reviews` öffnet die Section, als Hash in der URL und als Link
+  auf derselben Seite (z. B. der CTA unter den Bewertungskarten). Der Name
+  ist nicht frei gewählt: Die Startseite (`lt-hp-stimmen` in index.json)
+  verlinkt „Alle … Bewertungen lesen" seit jeher auf
+  /products/lifetime-age-dna#reviews, und bis 16.10. gab es dieses Ziel auf
+  der PDP nicht. Im Theme-Editor steht die Section offen, damit der
+  App-Block bearbeitbar bleibt.
+  ───────────────────────────────────────────────────────────────────────────
+{%- endcomment -%}
+
+{%- liquid
+  assign ra_count = product.metafields.loox.num_reviews.value | default: 0 | plus: 0
+  assign ra_label = section.settings.label | strip
+  if ra_count > 0
+    assign ra_count_s = ra_count | append: ''
+    assign ra_label = ra_label | replace: '[count]', ra_count_s
+  else
+    assign ra_label = ra_label | replace: '[count] ', '' | replace: '[count]', ''
+  endif
+  if ra_label == blank
+    assign ra_label = 'Alle Bewertungen lesen'
+  endif
+-%}
+
+{% style %}
+  #section-{{ section.id }} {
+    --ltra-bg:   {{ section.settings.color_bg }};
+    --ltra-text: {{ section.settings.color_text }};
+    --ltra-icon: {{ section.settings.color_text | color_modify: 'alpha', 0.66 }};
+    --ltra-rule: {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
+    padding-top:    min({{ section.settings.padding_top }}px, 15vw);
+    padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
+  }
+{% endstyle %}
+
+<div class="ltra" id="section-{{ section.id }}">
+  <div class="ltra__container">
+    <details class="ltra__details" id="reviews" data-ltra{% if request.design_mode %} open{% endif %}>
+      <summary class="ltra__summary">
+        <span class="ltra__summary-text">{{ ra_label | escape }}</span>
+        <span class="ltra__summary-icon" aria-hidden="true">{% render 'crs-chevron' %}</span>
+      </summary>
+      <div class="ltra__panel">
+        {%- for block in section.blocks -%}
+          {%- render block -%}
+        {%- endfor -%}
+      </div>
+    </details>
+  </div>
+</div>
+
+{% stylesheet %}
+.ltra {
+  background: var(--ltra-bg, #f7f7f4);
+}
+
+.ltra__container {
+  max-width: var(--lt-page-max, 1280px);
+  margin: 0 auto;
+  padding: 0 var(--lt-page-gutter, 16px);
+}
+
+.ltra__details {
+  border-top: 1px solid var(--ltra-rule, rgba(38, 37, 30, 0.08));
+  border-bottom: 1px solid var(--ltra-rule, rgba(38, 37, 30, 0.08));
+  scroll-margin-top: var(--space-9);
+}
+
+.ltra__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-body);
+  color: var(--ltra-text, #26251e);
+}
+
+.ltra__summary::-webkit-details-marker {
+  display: none;
+}
+
+.ltra__summary:focus-visible {
+  outline: 2px solid var(--ltra-text, #26251e);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+
+.ltra__summary-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--ltra-icon, rgba(38, 37, 30, 0.66));
+  transition: transform var(--ease-default);
+}
+
+.ltra__details[open] .ltra__summary-icon {
+  transform: rotate(180deg);
+}
+
+.ltra__panel {
+  padding-bottom: var(--space-5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ltra__summary-icon {
+    transition: none;
+  }
+}
+{% endstylesheet %}
+
+{% javascript %}
+(function () {
+  if (window.__ltraBound) return;
+  window.__ltraBound = true;
+
+  var HASH = '#reviews';
+
+  function openTarget() {
+    var el = document.querySelector('[data-ltra]' + HASH);
+    if (el && !el.open) el.open = true;
+    return el;
+  }
+
+  function fromHash() {
+    if (window.location.hash === HASH) openTarget();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fromHash);
+  } else {
+    fromHash();
+  }
+  window.addEventListener('hashchange', fromHash);
+
+  /* Links auf derselben Seite: vor der Navigation öffnen, damit der Sprung
+     auf der aufgeklappten Section landet. Steht der Hash schon in der URL,
+     feuert kein hashchange, dann scrollt der Handler selbst. */
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href*="' + HASH + '"]');
+    if (!a || a.hash !== HASH || a.pathname !== window.location.pathname) return;
+    var el = openTarget();
+    if (el && window.location.hash === HASH) {
+      e.preventDefault();
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+})();
+{% endjavascript %}
+
+{% schema %}
+{
+  "name": "Alle Bewertungen (Loox)",
+  "tag": "section",
+  "class": "lt-pdp-reviews-all",
+  "settings": [
+    {
+      "type": "text",
+      "id": "label",
+      "label": "Beschriftung",
+      "default": "Alle [count] Bewertungen lesen",
+      "info": "[count] wird durch die Zahl aus Loox ersetzt (loox.num_reviews). Fehlt die Zahl, fällt der Platzhalter weg."
+    },
+    {
+      "type": "header",
+      "content": "Farben"
+    },
+    {
+      "type": "color",
+      "id": "color_bg",
+      "label": "Hintergrund",
+      "default": "#f7f7f4"
+    },
+    {
+      "type": "color",
+      "id": "color_text",
+      "label": "Textfarbe",
+      "default": "#26251e"
+    },
+    {
+      "type": "header",
+      "content": "Abstände"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Abstand oben",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Abstand unten",
+      "min": 0,
+      "max": 120,
+      "step": 8,
+      "unit": "px",
+      "default": 80
+    }
+  ],
+  "blocks": [
+    {
+      "type": "@app"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Alle Bewertungen (Loox)"
+    }
+  ]
+}
+{% endschema %}
