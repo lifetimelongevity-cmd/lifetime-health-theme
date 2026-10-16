@@ -80,9 +80,21 @@
               {%- if template contains 'product' and block.settings.product_text != blank -%}
                 {%- assign ann_source = block.settings.product_text -%}
               {%- endif -%}
+              {%- comment -%}
+                [garantie] = die staerkste Zusage, die fuer dieses Produkt stimmt
+                (Rueckerstattungsrichtlinie, BJ 16.10.2026): Tests und Bundles haben
+                30 Tage Rueckgaberecht, alle anderen Produkte zusaetzlich die
+                90-Tage-Zufriedenheitsgarantie. Die Richtlinie nimmt Diagnostik/Tests
+                und rabattierte Bundles davon aus.
+              {%- endcomment -%}
+              {%- assign ann_guarantee = '90 Tage Zufriedenheitsgarantie' -%}
+              {%- if product.category.name == 'Medizinische Tests' or product.handle contains 'bundle' -%}
+                {%- assign ann_guarantee = '30 Tage Rückgaberecht' -%}
+              {%- endif -%}
               {%- assign ann_text = ann_source
                   | replace: '[rating]', ann_loox_rating
-                  | replace: '[count]', ann_loox_count -%}
+                  | replace: '[count]', ann_loox_count
+                  | replace: '[garantie]', ann_guarantee -%}
               <span class="announcement" {{ block.shopify_attributes }}>
                 {%- if block.settings.link != blank -%}
                   <a
@@ -268,8 +280,8 @@
           "type": "text",
           "id": "product_text",
           "label": "Produktseiten-Text",
-          "info": "Nur auf Produktseiten sichtbar, ersetzt den Text oben. Leer lassen = Standardtext (mit [rating]/[count]) auch auf Produktseiten.",
-          "default": "Lieferung in 2–3 Werktagen · Kauf auf Rechnung (Klarna) · 30 Tage Geld-zurück-Garantie"
+          "info": "Nur auf Produktseiten sichtbar, ersetzt den Text oben. Leer lassen = Standardtext (mit [rating]/[count]) auch auf Produktseiten. [garantie] setzt je Produkt 30 Tage Rückgaberecht (Tests, Bundles) oder 90 Tage Zufriedenheitsgarantie ein.",
+          "default": "Lieferung in 2–3 Werktagen · Kauf auf Rechnung (Klarna) · [garantie]"
         },
         {
           "type": "url",
