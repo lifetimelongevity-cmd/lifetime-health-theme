@@ -1,3 +1,29 @@
+{%- comment -%}
+  Startseiten-Hero. Seit 22.10.2026 mit Testsatz, Loox-Sternen, Faktenzeile und Quiz-Link
+  (Vorlage docs/entwurf-startseite-2026-10-22.html, nur der Hero wurde übernommen).
+  Sterne, Anzahl und Preis kommen aus dem gewählten Produkt (Loox-Metafelder avg_rating,
+  num_reviews), die Fallback-Settings greifen nur ohne Produkt.
+{%- endcomment -%}
+
+{%- liquid
+  assign p = section.settings.product
+  assign schnitt = section.settings.rating_fallback
+  assign anzahl = section.settings.count_fallback
+  assign preis = section.settings.preis_fallback
+  if p != blank
+    if p.metafields.loox.avg_rating != blank
+      assign schnitt = p.metafields.loox.avg_rating.value | append: '' | replace: '.', ','
+    endif
+    if p.metafields.loox.num_reviews != blank
+      assign anzahl = p.metafields.loox.num_reviews.value | append: ''
+    endif
+    assign preis = p.price | money_without_trailing_zeros
+  endif
+  assign schnitt_zahl = schnitt | replace: ',', '.' | plus: 0.0
+  assign sterne_text = section.settings.sterne_label | replace: '[schnitt]', schnitt | replace: '[anzahl]', anzahl
+  assign fakten_text = section.settings.fakten | replace: '[preis]', preis
+-%}
+
 {% style %}
   #section-{{ section.id }} {
     --hero-text:     {{ section.settings.color_text | default: '#26251e' }};
@@ -19,7 +45,7 @@
 
     {%- comment -%} LEFT — text + CTA {%- endcomment -%}
     <div class="ltw-content">
-      <div class="ltw-heading-group crs-heading-stack{% if section.settings.use_section_heading_size %} crs-heading-stack--headline-lg{% endif %} crs-heading-stack--homepage-truth">
+      <div class="ltw-heading-group crs-heading-stack{% if section.settings.use_section_heading_size %} crs-heading-stack--headline-lg{% endif %} crs-heading-stack--homepage-truth{% if section.settings.lead != blank %} ltw-heading-group--mit-lead{% endif %}">
 
         {%- if section.settings.eyebrow != blank -%}
           <p class="ltw-eyebrow">{{ section.settings.eyebrow | escape }}</p>
@@ -34,6 +60,33 @@
           {%- endif -%}
         </div>
       </div>
+
+      {%- if section.settings.lead != blank -%}
+        <p class="ltw-lead">{{ section.settings.lead | escape }}</p>
+      {%- endif -%}
+
+      {%- comment -%}
+        Fünf Sterne in Teal, der letzte anteilig gefüllt (4,7 = 70 %). Kein Link,
+        die Zahl steht als Text daneben. Gradient-IDs tragen die Section-ID, damit
+        zwei Heros auf einer Seite sich nicht in die Quere kommen.
+      {%- endcomment -%}
+      {%- if section.settings.sterne_label != blank and schnitt != blank -%}
+        <p class="ltw-sterne">
+          <span class="ltw-sterne__reihe" aria-hidden="true">
+            {%- for i in (1..5) -%}
+              {%- assign anteil = schnitt_zahl | minus: i | plus: 1 | times: 100 | round | at_least: 0 | at_most: 100 -%}
+              {%- if anteil >= 100 -%}
+                <svg viewBox="0 0 20 20" class="ltw-stern"><path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L10 14.9l-5.3 2.8 1.1-5.9L1.5 7.7l5.9-.8z"/></svg>
+              {%- elsif anteil <= 0 -%}
+                <svg viewBox="0 0 20 20" class="ltw-stern ltw-stern--leer"><path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L10 14.9l-5.3 2.8 1.1-5.9L1.5 7.7l5.9-.8z"/></svg>
+              {%- else -%}
+                <svg viewBox="0 0 20 20" class="ltw-stern"><defs><linearGradient id="ltw-stern-{{ section.id }}-{{ i }}"><stop offset="{{ anteil }}%" stop-color="currentColor"/><stop offset="{{ anteil }}%" stop-color="currentColor" stop-opacity=".25"/></linearGradient></defs><path fill="url(#ltw-stern-{{ section.id }}-{{ i }})" d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L10 14.9l-5.3 2.8 1.1-5.9L1.5 7.7l5.9-.8z"/></svg>
+              {%- endif -%}
+            {%- endfor -%}
+          </span>
+          <span class="ltw-sterne__text">{{ sterne_text }}</span>
+        </p>
+      {%- endif -%}
 
       {%- if section.settings.cta_label != blank -%}
         <div class="ltw-cta">
@@ -52,6 +105,10 @@
             </a>
           {%- endif -%}
         </div>
+      {%- endif -%}
+
+      {%- if fakten_text != blank -%}
+        <p class="ltw-fakten">{{ fakten_text }}</p>
       {%- endif -%}
 
       {%- comment -%}
@@ -156,6 +213,10 @@
         </div>
       {%- endif -%}
     </div>
+
+    {%- if section.settings.quiz_label != blank and section.settings.quiz_url != blank -%}
+      <a class="ltw-quiz" href="{{ section.settings.quiz_url }}">{{ section.settings.quiz_label | escape }}</a>
+    {%- endif -%}
 
   </div>
 </section>
@@ -367,6 +428,16 @@
   max-width: min(65ch, 100%);
 }
 
+/* Drei Grid-Kinder: Text, Bild, Quiz-Link. Desktop: Text und Quiz-Link in der linken
+   Spalte, Text sitzt unten an der Zeilengrenze, der Link oben darunter, das Bild
+   spannt beide Zeilen. Mobil (eine Spalte): Text, Bild, Quiz-Link. */
+.ltw-content { grid-column: 1; grid-row: 1; align-self: end; }
+.ltw-visual  { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+.ltw-quiz    { grid-column: 1; grid-row: 2; align-self: start; }
+.ltw-container { row-gap: 0; }
+.ltw-section--no-visual .ltw-content { grid-column: 1; }
+.ltw-section--no-visual .ltw-quiz { grid-column: 1; }
+
 /* Left column */
 .ltw-content {
   display: flex;
@@ -418,11 +489,89 @@
   color: var(--hero-text-sec, rgba(22,21,20,.72));
 }
 
+/* Testsatz unter dem Heading-Paar (17 px: zwischen Body und Body-lg, bewusst) */
+.ltw-heading-group--mit-lead {
+  margin-bottom: var(--space-4);
+}
+
+.ltw-lead {
+  --ltw-lead-size: 17px;
+  margin: 0;
+  max-width: 34em;
+  font-family: var(--font-body);
+  font-size: var(--ltw-lead-size);
+  font-weight: var(--weight-regular);
+  line-height: 1.5;
+  color: var(--hero-text, #26251e);
+}
+
+/* Sterne-Zeile: fünf Sterne in Teal, Zahl daneben */
+.ltw-sterne {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: 1.3;
+  color: #6b6b63;
+}
+
+.ltw-sterne__reihe {
+  display: inline-flex;
+  gap: 2px;
+  color: var(--color-dark, #364f56);
+}
+
+.ltw-stern {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  display: block;
+}
+
+.ltw-stern--leer { opacity: .25; }
+
+.ltw-sterne__text {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Faktenzeile unter dem Knopf */
+.ltw-fakten {
+  margin: var(--space-3) 0 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+  color: #6b6b63;
+}
+
+/* Quiz-Link: unterstrichener Textlink */
+.ltw-quiz {
+  display: inline-block;
+  justify-self: start;
+  margin-top: var(--space-5);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--hero-text, #26251e);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+
+.ltw-quiz:hover { opacity: .7; }
+
 /* CTA */
 .ltw-cta {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.ltw-sterne + .ltw-cta,
+.ltw-lead + .ltw-cta {
+  margin-top: var(--space-5);
 }
 
 .ltw-btn {
@@ -762,15 +911,23 @@
   .ltw-container {
     grid-template-columns: 1fr;
     gap: 48px;
+    row-gap: 48px;
     padding: 0 24px;
   }
+
+  .ltw-content { grid-column: 1; grid-row: 1; align-self: auto; }
+  .ltw-visual  { grid-column: 1; grid-row: 2; }
+  .ltw-quiz    { grid-column: 1; grid-row: 3; margin-top: calc(var(--space-5) - 48px); }
 }
 
 @media (max-width: 640px) {
   .ltw-container {
     padding: 0 20px;
     gap: 36px;
+    row-gap: 36px;
   }
+
+  .ltw-quiz { margin-top: calc(var(--space-5) - 36px); }
 
   .ltw-heading-group {
     margin-bottom: 24px;
@@ -894,6 +1051,69 @@
       "id": "cta_secondary_anchor",
       "label": "Sekundärer CTA Anker",
       "info": "Anchor-Link, z.B. #shopify-section-loop"
+    },
+    {
+      "type": "header",
+      "content": "Testsatz, Sterne und Fakten"
+    },
+    {
+      "type": "textarea",
+      "id": "lead",
+      "label": "Testsatz unter der Überschrift",
+      "info": "Leer lassen = ausblenden."
+    },
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Produkt für Sterne, Anzahl und Preis (Loox)"
+    },
+    {
+      "type": "text",
+      "id": "rating_fallback",
+      "label": "Schnitt, falls kein Produkt",
+      "default": "4,7"
+    },
+    {
+      "type": "text",
+      "id": "count_fallback",
+      "label": "Anzahl, falls kein Produkt",
+      "default": "122"
+    },
+    {
+      "type": "text",
+      "id": "sterne_label",
+      "label": "Text neben den Sternen",
+      "default": "[schnitt] von 5 · [anzahl] Bewertungen zum Test",
+      "info": "[schnitt] und [anzahl] werden durch die Loox-Werte ersetzt. Leer lassen = Sterne ausblenden."
+    },
+    {
+      "type": "text",
+      "id": "preis_fallback",
+      "label": "Preis, falls kein Produkt",
+      "default": "349 €"
+    },
+    {
+      "type": "text",
+      "id": "fakten",
+      "label": "Faktenzeile unter dem Knopf",
+      "default": "[preis] einmalig · Speichel, zu Hause · Ergebnis in 6 Wochen",
+      "info": "[preis] wird durch den Produktpreis ersetzt. Leer lassen = ausblenden."
+    },
+    {
+      "type": "header",
+      "content": "Quiz-Link"
+    },
+    {
+      "type": "text",
+      "id": "quiz_label",
+      "label": "Linktext",
+      "default": "Passt der Test zu mir? In zwei Minuten geklärt",
+      "info": "Unterstrichener Textlink, mobil unter dem Bild, Desktop unter der Faktenzeile. Leer lassen = ausblenden."
+    },
+    {
+      "type": "url",
+      "id": "quiz_url",
+      "label": "Linkziel"
     },
     {
       "type": "header",
