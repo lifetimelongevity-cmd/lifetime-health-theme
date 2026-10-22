@@ -35,9 +35,11 @@
     requestAnimationFrame(frame);
   }
 
-  const STEPS = ['intro', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'loading', 'result'];
+  // 2026-10-22: `gate` (E-Mail vor dem Ergebnis) sitzt zwischen loading und result.
+  // Wer die Adresse im selben Browser schon abgegeben hat, überspringt es (isUnlocked).
+  const STEPS = ['intro', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'loading', 'gate', 'result'];
   const QUESTION_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8'];
-  const FULLSCREEN_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'loading', 'result'];
+  const FULLSCREEN_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'loading', 'gate', 'result'];
   const TOTAL_QUESTIONS = QUESTION_STEPS.length;
   const AUTO_ADVANCE_MS = 300;
   const LOADING_DURATION_MS = 3000;
@@ -442,8 +444,16 @@
     }
 
     tryClose() {
-      // Aus dem Result: direkt schließen ohne Confirm (Quiz ist abgeschlossen)
+      // Aus dem Result: kurze Rückfrage, sonst ist das Ergebnis still weg (Norman, 22.10.).
       if (this.state.step === 'result') {
+        if (!window.confirm('Ergebnis schließen? Es wird hier nicht gespeichert, der Link dazu ist per Mail unterwegs.')) return;
+        this.state = createInitialState();
+        this.goto('intro');
+        return;
+      }
+      // Aus dem Gate: die Antworten sind ausgewertet, die Rückfrage sagt, was verloren geht.
+      if (this.state.step === 'gate') {
+        if (!window.confirm('Quiz wirklich abbrechen? Dein Ergebnis geht verloren.')) return;
         this.state = createInitialState();
         this.goto('intro');
         return;
@@ -594,20 +604,30 @@
       if (!STEPS.includes(step)) return;
       this.state.step = step;
 
-      // Result-Hook: Top-3 ist bereits berechnet — Result-Page rendern,
-      // Customer-Tags vorbereiten + quiz_completed-Event dispatchen
+      // Result-Hook: Top-3 ist bereits berechnet, Result-Page rendern.
       if (step === 'result') {
         this.renderResult();
-        this.state.tags = buildCustomerTags(this.state.topThree, this.state.answers);
-        dispatchQuizCompleted(this.state);
       }
 
-      // Loading-Hook: Scoring berechnen + Auto-Übergang zu Result nach 3s
+      // Loading-Hook: Scoring berechnen + Auto-Übergang nach 3s. Ziel ist das Gate;
+      // wer die Adresse schon einmal abgegeben hat, landet direkt im Ergebnis.
       if (step === 'loading') {
         this.state.scores = computeScores(this.state.answers);
         this.state.topThree = getTopThree(this.state.scores, this.state.answers.age);
+        // quiz_completed feuert hier, sobald alle Antworten da sind, nicht erst nach dem
+        // Gate: so bleibt der Trichter started → completed → gate_view → email_submitted
+        // mit den Zahlen vor dem 22.10. vergleichbar.
+        this.state.tags = buildCustomerTags(this.state.topThree, this.state.answers);
+        dispatchQuizCompleted(this.state);
         if (this.loadingTimer) clearTimeout(this.loadingTimer);
-        this.loadingTimer = window.setTimeout(() => this.goto('result'), LOADING_DURATION_MS);
+        const next = (isUnlocked() || this.state.submitted) ? 'result' : 'gate';
+        this.loadingTimer = window.setTimeout(() => this.goto(next), LOADING_DURATION_MS);
+      }
+
+      // Gate-Hook: Formular zurücksetzen, Sichtbarkeit tracken (quiz_gate_view).
+      if (step === 'gate') {
+        this.resetGate();
+        pushDataLayer({ event: 'quiz_gate_view', quiz_top1: (this.state.topThree || [])[0] || '' });
       }
 
       this.render();
@@ -629,6 +649,7 @@
 
       this.root.classList.toggle('lt-quiz--in-questions', inQuestion);
       this.root.classList.toggle('lt-quiz--in-loading', current === 'loading');
+      this.root.classList.toggle('lt-quiz--in-gate', current === 'gate');
       this.root.classList.toggle('lt-quiz--in-result', current === 'result');
       this.root.classList.toggle('lt-quiz--fullscreen', inFullscreen);
       document.body.classList.toggle('lt-quiz-fullscreen', inFullscreen);
@@ -637,7 +658,7 @@
       if (this.progressBar) {
         this.progressBar.style.width = qIdx >= 0
           ? `${((qIdx + 1) / TOTAL_QUESTIONS) * 100}%`
-          : current === 'loading' || current === 'result' ? '100%' : '0%';
+          : current === 'loading' || current === 'gate' || current === 'result' ? '100%' : '0%';
       }
       if (this.progressLabel) {
         this.progressLabel.textContent = qIdx >= 0 ? `${qIdx + 1} / ${TOTAL_QUESTIONS}` : '';
@@ -714,8 +735,9 @@
         });
       }
 
-      // 2 — Alle drei Themen als Blöcke in EINER Karte. Das Schloss steckt in jedem
-      // Block; CSS zeigt es nur im gesperrten Zustand bei Thema 2 und 3.
+      // 2 — Alle drei Themen als Blöcke in EINER Karte, offen: Titel, Marker, ein Satz
+      // (`teaser`). Die E-Mail ist im Gate schon abgegeben, hier wird nichts mehr
+      // gesperrt; die Erklärung im Detail liefert weiter der Longevity-Plan (22.10.2026).
       const themesEl = result.querySelector('[data-result-themes]');
       if (themesEl) {
         themesEl.innerHTML = '';
@@ -733,49 +755,23 @@
               (iconName
                 ? `<span class="lt-quiz-result-theme__icon" aria-hidden="true"><i class="ph-thin ph-${iconName}"></i></span>`
                 : '') +
-              `<h4 class="lt-quiz-result-theme__title">${escapeHtml(def.title)}</h4>` +
-              `<span class="lt-quiz-result-theme__lock" aria-hidden="true"><i class="ph-thin ph-lock-simple"></i></span>` +
+              `<h4 class="lt-quiz-result-theme__title">${escapeHtml(def.topic || def.title)}</h4>` +
             `</header>` +
             (markers ? `<div class="lt-quiz-result-theme__markers" aria-label="Relevante Gen-Marker">${markers}</div>` : '') +
-            `<p class="lt-quiz-result-theme__lead">${escapeHtml(def.short)}</p>`;
+            (def.teaser ? `<p class="lt-quiz-result-theme__lead">${escapeHtml(def.teaser)}</p>` : '');
           themesEl.appendChild(article);
         });
       }
 
-      // 2b — Gate-Zustand. Seit 07.08. klappt das Gate nicht mehr auf: Die drei Themen im
-      // Detail liefert die Report-Seite, hier bleibt der Anriss stehen. Ein Durchlauf im
-      // selben Tab startet deshalb wieder mit dem Formular — ohne die frischen Antworten
-      // gäbe es sonst einen Erfolgs-Block mit totem Link.
-      const formEl = result.querySelector('[data-result-form]');
-      const successEl = result.querySelector('[data-result-success]');
-      if (formEl) formEl.hidden = false;
-      if (successEl) successEl.hidden = true;
+      // 2b — Plan-Link mit den Quiz-Parametern (Fallback ist die generische Seite).
+      const planLink = result.querySelector('[data-result-plan-link]');
+      if (planLink) {
+        planLink.setAttribute('href', buildPlanUrl(this.klaviyo.planPath, top, computeBioAge(this.state.answers), this.state.answers));
+      }
 
-      // 3 — Scope-Pills: Union der Top-3 dnaCategories markieren
-      const NEED_CATEGORIES_LOCAL = {
-        sleep:       ['schlaf', 'stress', 'mental-health', 'supplements'],
-        energy:      ['vitamine', 'supplements', 'schlaf', 'stoffwechsel'],
-        stress:      ['stress', 'psychologisch', 'mental-health', 'schlaf'],
-        weight:      ['stoffwechsel', 'sensitivitaeten', 'vitamine', 'stress'],
-        training:    ['fitness', 'verletzung-regeneration', 'supplements', 'stoffwechsel'],
-        cognition:   ['mental-health', 'schlaf', 'vitamine', 'psychologisch'],
-        skin:        ['haare', 'vitamine', 'supplements', 'gesunde-alterung'],
-        supplements: ['vitamine', 'supplements', 'sensitivitaeten', 'stoffwechsel'],
-        heart:       ['herz', 'stoffwechsel', 'vitamine', 'supplements'],
-        bioage:      ['gesunde-alterung', 'stoffwechsel', 'supplements', 'vitamine'],
-      };
-      const activeCats = new Set();
-      top.forEach((n) => (NEED_CATEGORIES_LOCAL[n] || []).forEach((c) => activeCats.add(c)));
-
-      // Nur die passenden Bereiche bleiben sichtbar (CSS blendet den Rest aus) —
-      // 16 Pills waren als Wand länger als der Nutzen, den sie transportieren.
-      result.querySelectorAll('[data-scope-cat]').forEach((pill) => {
-        pill.classList.toggle('is-relevant', activeCats.has(pill.dataset.scopeCat));
-      });
-
-      // 4 — Alle PDP-CTAs (früh + Card + sticky) mit top1 anreichern.
+      // 4 — Den PDP-CTA mit top1 anreichern (seit 22.10. nur noch einer: result_main).
       //
-      // Seit 2026-08-08 zeigen die drei CTAs direkt auf /products/lifetime-age-dna?qz=1
+      // Seit 2026-08-08 zeigt der CTA direkt auf /products/lifetime-age-dna?qz=1
       // (Preis-Konsistenz mit Plan-Seite und Mails; Code nur noch befristet in F2 M5/M6).
       // Der redirect-Zweig unten bleibt: Er greift, falls ein CTA je wieder über eine
       // /discount/-URL läuft, und ist dieselbe Logik wie in lt-longevity-plan.js
@@ -794,40 +790,56 @@
         pdpCta.setAttribute('href', url.pathname + url.search);
       });
 
-      // 5 — Sichtbarkeits-Tracking auf den Haupt-Ask (2026-07-22).
-      // Trennt "hat die Frage gesehen und abgelehnt" von "ist nie hingekommen". Ohne das
-      // Signal waren 12,3 % PDP-Klicks und 1 form_start auf 261 Abschlüsse nicht deutbar.
-      // Feuert einmal pro Result-Ansicht, sobald der Card-CTA vollständig im Viewport ist.
-      const askCta = result.querySelector('[data-result-pdp-cta="result_card"]');
-      if (askCta && !this._askSeenBound && typeof IntersectionObserver === 'function') {
-        this._askSeenBound = true;
+      // 5 — Sichtbarkeits-Tracking auf den einen Ask (2026-07-22, geschärft 22.10.).
+      // Bis 22.10. hing der Observer am Knopf der dunklen Karte auf dem dritten Bildschirm
+      // mit threshold 1; das Event maß Scrolltiefe, nicht „Ask gesehen" (19 % seit KW 33).
+      // Jetzt: der eine Kauf-Knopf, halb im Viewport reicht. Einmal pro Result-Ansicht.
+      const askCta = result.querySelector('[data-result-pdp-cta="result_main"]');
+      if (askCta && typeof IntersectionObserver === 'function') {
+        if (this._askObserver) this._askObserver.disconnect();
         const askObserver = new IntersectionObserver((entries) => {
           if (!entries.some((entry) => entry.isIntersecting)) return;
           askObserver.disconnect();
+          this._askObserver = null;
           pushDataLayer({
             event: 'quiz_result_cta_seen',
             quiz_top1: top[0] || '',
           });
-        }, { threshold: 1 });
+        }, { threshold: 0.5 });
         askObserver.observe(askCta);
+        this._askObserver = askObserver;
       }
     }
 
     bindResultCta() {
-      const form = this.root.querySelector('[data-result-form]');
-      const successEl = this.root.querySelector('[data-result-success]');
+      const form = this.root.querySelector('[data-gate-form]');
       if (form) {
         form.addEventListener('submit', (e) => {
           e.preventDefault();
-          this.submitQuizCustomer(form, successEl);
+          this.submitQuizCustomer(form);
         });
       }
     }
 
-    async submitQuizCustomer(form, successEl) {
-      const emailEl = form.querySelector('[data-result-email]');
+    // Gate frisch zeigen: Fehler weg, Knopf aktiv, Feld fokussiert (ohne Scroll-Sprung).
+    resetGate() {
+      const form = this.root.querySelector('[data-gate-form]');
+      if (!form) return;
+      const errorEl = form.querySelector('[data-gate-error]');
+      const submitBtn = form.querySelector('[data-gate-submit]');
+      const emailEl = form.querySelector('[data-gate-email]');
+      if (errorEl) errorEl.hidden = true;
+      if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Ergebnis anzeigen'; }
+      if (emailEl && !emailEl.value && window.matchMedia && !window.matchMedia('(max-width: 880px)').matches) {
+        try { emailEl.focus({ preventScroll: true }); } catch (e) {}
+      }
+    }
+
+    // Gate-Submit: Adresse an Klaviyo (oder Shopify-Fallback), dann das Ergebnis.
+    async submitQuizCustomer(form) {
+      const emailEl = form.querySelector('[data-gate-email]');
       const submitBtn = form.querySelector('button[type="submit"]');
-      const errorEl = form.querySelector('[data-result-error]');
+      const errorEl = form.querySelector('[data-gate-error]');
       const email = emailEl ? emailEl.value.trim() : '';
 
       if (!EMAIL_RE.test(email)) {
@@ -883,14 +895,6 @@
 
         this.state.email = email;
         this.state.submitted = true;
-        form.hidden = true;
-        if (successEl) successEl.hidden = false;
-
-        // BJ 07.08.: Die Belohnung ist der Report, nicht ein Aufklappen an Ort und Stelle.
-        // Der Link steht sofort da, ohne Umweg über die Bestätigungsmail — was das Gate
-        // verspricht, wird auf der Stelle eingelöst. Die Themen bleiben hier angerissen.
-        const planLink = this.root.querySelector('[data-result-plan-link]');
-        if (planLink) planLink.setAttribute('href', planUrl);
         persistUnlock();
 
         pushDataLayer({
@@ -901,10 +905,13 @@
           quiz_age_group: ageGroup(this.state.answers.age),
           quiz_capture_target: isKlaviyoConfigured(this.klaviyo) ? 'klaviyo' : 'shopify',
         });
+
+        // Was das Gate verspricht, kommt auf der Stelle: das Ergebnis.
+        this.goto('result');
       } catch (err) {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.textContent = originalLabel || 'Freischalten';
+          submitBtn.textContent = originalLabel || 'Ergebnis anzeigen';
         }
         if (errorEl) {
           errorEl.textContent = 'Etwas ist schiefgelaufen. Bitte versuch es nochmal.';

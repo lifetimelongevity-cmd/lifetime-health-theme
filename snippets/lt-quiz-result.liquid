@@ -1,58 +1,41 @@
 {%- comment -%}
   LIFETIME — Quiz v2 Result-Page
 
-  2026-07-23 (2. Straffung) — Text weiter runter, Design-System-Konformitaet:
-    · Header ist nur noch der Kicker. H1 (die drei Topic-Namen) und Sub sind raus,
-      die Topic-Namen stehen ohnehin in der Themen-Karte.
-    · Vergleichszeilen "Diese Vorschau / Der Labortest" entfernt. Das Vorschau-Framing
-      traegt jetzt der Kicker plus das Kartenlabel "Geschaetztes biologisches Alter"
-      plus der CTA "Dein echtes Alter messen lassen".
-    · Die drei Themen liegen in EINER Karte statt in drei. Thema 1 zeigt rund einen
-      Satz und blendet dann aus, Thema 2 + 3 nur die Titelzeile mit Schloss.
-    · Farben/Groessen auf das Design-System gezogen: die frei erfundene Teal-Toenung
-      ist raus, der E-Mail-Block nutzt Benefit Surface (#E6F4F1, Border wie in
-      .cursor/rules/design-components.mdc "Benefit Surface"), der Submit-Button
-      folgt dem cta-Spec (dark bg, weisse Schrift), Icon-Container 48 px mit
-      Benefit-Bg und teal-dark Icon, Groessen ueber die Text-Tokens.
+  2026-10-22 (Denkschulen-Runde Quiz, Leitschule Five Rights, dazu Hicks und Norman):
+    · Die E-Mail ist hier schon drin (snippets/lt-quiz-gate.liquid, Schritt davor).
+      Deshalb gibt es auf dem Ergebnis genau EINE Handlung: den Test. Vorher standen
+      fünf Knöpfe auf 2.286 px, drei davon mit demselben Ziel; der Sticky-Knopf hatte
+      4 Klicks in 90 Tagen, die dunkle Karte mit 16 Pills lag auf dem dritten
+      Bildschirm, den 81 % nie erreichten (quiz_result_cta_seen seit KW 33).
+    · Die drei Themen stehen offen: Titel, Gen-Marker, ein Satz (`teaser`). Kein Blur,
+      kein Schloss mehr, die Erklärung im Detail liefert weiter der Longevity-Plan.
+    · Kicker „Dein Ergebnis" statt „Deine Quiz-Vorschau": das Label der Karte sagt
+      schon, dass die Zahl geschätzt ist.
+    · Raus: Kauf-Knopf in der Bio-Karte, E-Mail-Block, Scope-Pills, dunkle CTA-Karte
+      mit Produktbild, Sticky-CTA. Die Section-Settings cta_image* sind damit weg.
 
-  Alles Neue ist unter .lt-quiz-result__themes-card gescoped, weil sections/lt-doctor-quiz
-  sich dieselbe CSS-Datei und die .lt-quiz-result-theme-Klassen teilt.
+  Datenhooks für assets/lt-quiz-v2.js: data-result-*, data-bioage-*.
 
-  Datenhooks fuer assets/lt-quiz-v2.js: data-result-*, data-bioage-*, data-scope-cat.
-
-  CTA-Links: Ziel-URL bewusst OHNE utm_*-Parameter. Interne UTMs starten in GA4 eine
+  CTA-Link: Ziel-URL bewusst OHNE utm_*-Parameter. Interne UTMs starten in GA4 eine
   neue Session (source=quiz) und nehmen Paid/Organic die Conversion-Attribution.
-  qz=1 triggert den Quiz-Banner in lt-pdp-hero, die CTA-Variante trackt
-  assets/lt-quiz-v2.js bereits als quiz_pdp_click (quiz_pdp_source).
-
-  2026-08-08: CTAs zeigen direkt auf die PDP, nicht mehr auf /discount/QUIZ-ALTER-10.
-  Grund (Funnel-Abgleich 08.08., lifetime-klaviyo/best-practices-highticket-funnel-2026…md):
-  Result-Page, Plan-Seite und Mails müssen denselben Preis zeigen (349 €). Der stille
-  10 %-Abzug hier unterlief Mail 5 (Preis-Verteidigung) und ankert auf Rabatt in einem
-  Moment ohne Kaufabsicht. Der Code wandert als BEFRISTETER Abschluss in F2 M5/M6
-  (quiz-report-konzept.md § Rabattcode) — dort ist er die eine ehrliche Deadline.
+  qz=1 triggert den Quiz-Banner in lt-pdp-hero, der Klick läuft als quiz_pdp_click
+  (quiz_pdp_source = result_main). Seit 08.08. direkt auf die PDP, nicht auf einen
+  /discount/-Link: Result, Plan-Seite und Mails zeigen denselben Preis (349 €), der
+  befristete Code lebt in F2 M5/M6.
 {%- endcomment -%}
-
-{%- assign _cta_image = cta_image | default: 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-8585364.png?v=1768563330' -%}
-{%- assign _cta_image_bonus = cta_image_bonus | default: 'https://cdn.shopify.com/s/files/1/0621/2173/8340/files/33eea4ca-2b8c-40f6-8a00-abced1d6c5b2-1762948710197.png?v=1762948715' -%}
 
 <div class="lt-quiz-result" data-quiz-result>
 
-  {%- comment -%} 1 — Einordnung als Vorschau, mehr braucht es vor der Karte nicht {%- endcomment -%}
+  {%- comment -%} 1 — Kicker, mehr braucht es vor der Karte nicht {%- endcomment -%}
   <section class="lt-quiz-result__header">
-    <p class="lt-quiz-result__kicker">Deine Quiz-Vorschau</p>
+    <p class="lt-quiz-result__kicker">Dein Ergebnis</p>
   </section>
 
-  {%- comment -%} 2 — Bio-Alter (Pass | Biologisch) als Hero {%- endcomment -%}
+  {%- comment -%} 2 — Bio-Alter (Chronologisch | Biologisch), der Höhepunkt {%- endcomment -%}
   <section class="lt-quiz-result__bioage" data-result-bioage>
     <p class="lt-quiz-result__bioage-label">Geschätztes biologisches Alter</p>
     <div class="lt-quiz-result__bioage-numbers">
       <div class="lt-quiz-result__bioage-side">
-        {%- comment -%}
-          „Chronologisch" statt „Pass" seit 07.08.2026: Der Satz unter den Zahlen
-          spricht vom chronologischen Alter, und /pages/dein-longevity-plan zeigt
-          dieselbe Karte. Zwei Woerter fuer dieselbe Zahl waren Drift.
-        {%- endcomment -%}
         <span class="lt-quiz-result__bioage-side-label">Chronologisch</span>
         <span class="lt-quiz-result__bioage-num" data-bioage-pass>—</span>
       </div>
@@ -62,7 +45,7 @@
       </div>
     </div>
 
-    {%- comment -%} Ruhige Delta-Skala: Pass = Mitte (50%), Bio-Marker gleitet per JS auf Zielposition {%- endcomment -%}
+    {%- comment -%} Ruhige Delta-Skala: Chronologisch = Mitte (50 %), Bio-Marker gleitet per JS {%- endcomment -%}
     <div class="lt-quiz-result__bioage-scale" aria-hidden="true">
       <span class="lt-quiz-result__bioage-scale-fill" data-bioage-scale-fill></span>
       <span class="lt-quiz-result__bioage-scale-dot lt-quiz-result__bioage-scale-dot--pass"></span>
@@ -70,137 +53,42 @@
     </div>
 
     <p class="lt-quiz-result__bioage-delta" data-bioage-delta></p>
-
-    <a
-      class="lt-quiz-result__cta-primary lt-quiz-result__bioage-cta"
-      href="/products/lifetime-age-dna?qz=1"
-      data-result-pdp-cta="result_bioage"
-    >
-      Dein echtes Alter messen lassen
-    </a>
   </section>
 
-  {%- comment -%}
-    3 — Alle drei Themen in einer Karte, als Anriss. Thema 1 blendet nach rund einem Satz
-    aus, Thema 2 + 3 stehen unscharf hinter dem Schloss. Aufgeklappt wird hier seit dem
-    07.08. nicht mehr: Die Themen im Detail liefert der Report, sonst gibt es die Inhalte
-    zweimal und der Report hat keinen Grund mehr.
-  {%- endcomment -%}
-  <section class="lt-quiz-result__themes-card" data-result-gate>
-    <p class="lt-quiz-result__themes-kicker">Deine genetischen Themen</p>
+  {%- comment -%} 3 — Die drei Themen, offen und kurz. Rendert assets/lt-quiz-v2.js. {%- endcomment -%}
+  <section class="lt-quiz-result__themes-card is-unlocked">
+    <p class="lt-quiz-result__themes-kicker">Deine drei Themen</p>
 
     <div class="lt-quiz-result__themes" data-result-themes>
       {%- comment -%} Crawlbarer Fallback, den renderResult beim Rendern ersetzt {%- endcomment -%}
       <p class="lt-quiz-result__themes-fallback">Dein AGE &amp; DNA-Test analysiert deine drei wichtigsten Themen im Detail, von Schlaf, Energie und Stoffwechsel bis Herzgesundheit, und zeigt, welche genetischen Marker dahinterstehen und was sie konkret für dich bedeuten.</p>
     </div>
 
-    <div class="lt-quiz-unlock" data-result-unlock>
-      <form class="lt-quiz-unlock__form" data-result-form novalidate>
-        {%- comment -%}
-          Gate-Versprechen (BJ 07.08.): GENAU EINS, und es wird sofort eingelöst — die drei
-          Themen. Kein eBook, kein Rabattcode, und auch kein „Plan kommt per Mail". Was hier
-          versprochen wird, muss auf der Stelle da sein, sonst hängt das Versprechen an einem
-          Flow, der erst noch live gehen muss. Der Ergebnis-Link aus der Sequenz ist ein Bonus,
-          den die Mail selbst erklärt. Quelle: lifetime-klaviyo/quiz-report-konzept.md § Rabattcode.
-        {%- endcomment -%}
-        <p class="lt-quiz-unlock__lead">Trag deine E-Mail ein, dann bekommst du deinen Longevity-Plan mit allen drei Themen.</p>
-        <label class="lt-quiz-unlock__label" for="lt-quiz-unlock-email">E-Mail-Adresse</label>
-        <div class="lt-quiz-unlock__field">
-          <input
-            id="lt-quiz-unlock-email"
-            type="email"
-            required
-            placeholder="deine@email.de"
-            autocomplete="email"
-            class="lt-quiz-unlock__input"
-            data-result-email
-          >
-          <button type="submit" class="lt-quiz-unlock__submit">Freischalten</button>
-        </div>
-        <p class="lt-quiz-unlock__error" data-result-error hidden role="alert"></p>
-        <p class="lt-quiz-unlock__note">Mit dem Absenden willigst du ein, dass wir dir den Link zu deinem Longevity-Plan und in den Tagen darauf E-Mails rund um deine Themen und unsere Produkte schicken. Abmeldung jederzeit mit einem Klick.</p>
-      </form>
-
-      {%- comment -%}
-        Ein Ziel, sofort erreichbar (BJ 07.08.): der Report. Den href setzt
-        assets/lt-quiz-v2.js mit den Quiz-Parametern, der Fallback hier ist die generische
-        Fassung.
-
-        Seit BJ-Entscheid 07.08. läuft die Liste `Quiz-Leads` auf **Single-Opt-in**: keine
-        Bestätigungsmail, der Lead ist sofort eingetragen und F2 startet unmittelbar. Die Texte
-        hier dürfen deshalb keine Bestätigung mehr erwähnen.
-
-        Geschärft 2026-08-08 (F2 ist seit 07.08. live): Die Mail ist keine Vermutung mehr,
-        M1 geht bei Single-Opt-in sofort raus. Der Satz nennt sie deshalb direkt.
-      {%- endcomment -%}
-      <div class="lt-quiz-unlock__success" hidden data-result-success>
-        <p class="lt-quiz-unlock__success-line">Dein Longevity-Plan ist fertig.</p>
-        <a
-          class="lt-quiz-unlock__success-cta"
-          href="/pages/dein-longevity-plan"
-          data-result-plan-link
-        >
-          Longevity-Plan öffnen
-        </a>
-        <p class="lt-quiz-unlock__success-note">Der Link ist auch gerade per Mail zu dir unterwegs. Gespeichert wird dein Ergebnis nirgends sonst.</p>
-      </div>
-    </div>
+    {%- comment -%}
+      Der Plan ist die Belohnung für die Adresse (BJ 07.08.), hier nur der Weg dorthin.
+      Den href setzt assets/lt-quiz-v2.js mit den Quiz-Parametern.
+    {%- endcomment -%}
+    <p class="lt-quiz-result__plan-line">
+      Mehr zu jedem Thema steht in deinem
+      <a href="/pages/dein-longevity-plan" data-result-plan-link>Longevity-Plan</a>,
+      der Link ist auch per Mail unterwegs.
+    </p>
   </section>
 
-  {%- comment -%}
-    4 — Der Ask. Traegt auch die Breite des Tests: die zu den Themen passenden
-    DNA-Bereiche als Pills (JS markiert via .is-relevant, CSS blendet den Rest aus).
-  {%- endcomment -%}
-  <section class="lt-quiz-result__cta-section">
-    <div class="lt-quiz-result__cta-card">
-      <div class="lt-quiz-result__cta-media" aria-hidden="true">
-        <div class="lt-quiz-result__cta-media-stack">
-          <img class="lt-quiz-result__cta-media-primary"
-               src="{{ _cta_image }}" alt="" loading="lazy" decoding="async">
-          <img class="lt-quiz-result__cta-media-bonus"
-               src="{{ _cta_image_bonus }}" alt="" loading="lazy" decoding="async">
-        </div>
-      </div>
-      <div class="lt-quiz-result__cta-content">
-        <p class="lt-quiz-result__cta-kicker">Dein nächster Schritt</p>
-        <h3 class="lt-quiz-result__cta-text">
-          Vom Schätzwert zum Messwert.
-        </h3>
-        <p class="lt-quiz-result__cta-sub">
-          DNA-Ergebnisse in 23 Kategorien plus dein epigenetisches Profil. Diese Themen passen direkt zu deinen Antworten:
-        </p>
-        <ul class="lt-quiz-result__pills" data-result-scope-pills>
-          {%- assign cats = 'gesunde-alterung|Gesunde Alterung,supplements|Supplements,vitamine|Vitamine,sensitivitaeten|Sensitivitäten,stoffwechsel|Stoffwechsel,fitness|Fitness,verletzung-regeneration|Verletzung & Regeneration,mental-health|Mental Health,psychologisch|Psychologisch,schlaf|Schlaf,stress|Stress,herz|Herz,atemwege|Atemwege,augen|Augen,haare|Haare,niere|Niere' | split: ',' -%}
-          {%- for c in cats -%}
-            {%- assign parts = c | split: '|' -%}
-            <li class="lt-quiz-result__pill" data-scope-cat="{{ parts[0] }}">{{ parts[1] }}</li>
-          {%- endfor -%}
-        </ul>
-        <a
-          class="lt-quiz-result__cta-primary"
-          href="/products/lifetime-age-dna?qz=1"
-          data-result-pdp-cta="result_card"
-        >
-          Test bestellen · 349&nbsp;€
-        </a>
-        {%- comment -%}
-          Risk-Reversal am Entscheidungspunkt (BJ-Freigabe 08.08.: die 30 Tage
-          gelten). Klarna nur qualitativ, die konkrete Rate bleibt beim Widget.
-        {%- endcomment -%}
-        <p class="lt-quiz-result__cta-trust">30 Tage Widerrufsrecht · auf Wunsch in Raten mit Klarna</p>
-      </div>
-    </div>
+  {%- comment -%} 4 — Die eine Handlung: der Test {%- endcomment -%}
+  <section class="lt-quiz-result__test">
+    <p class="lt-quiz-result__test-kicker">Dein nächster Schritt</p>
+    <h3 class="lt-quiz-result__test-title">Vom Schätzwert zum Messwert.</h3>
+    <p class="lt-quiz-result__test-sub">Der AGE &amp; DNA-Test bestimmt dein biologisches Alter im Labor und liest aus einer Speichelprobe, welche Gen-Varianten hinter deinen drei Themen stehen.</p>
+    <a
+      class="lt-quiz-result__cta-primary"
+      href="/products/lifetime-age-dna?qz=1"
+      data-result-pdp-cta="result_main"
+    >
+      Test bestellen · 349&nbsp;€
+    </a>
+    {%- comment -%} Risk-Reversal am Entscheidungspunkt (BJ-Freigabe 08.08.: die 30 Tage gelten) {%- endcomment -%}
+    <p class="lt-quiz-result__test-trust">30 Tage Widerrufsrecht · auf Wunsch in Raten mit Klarna</p>
   </section>
-
-  {%- comment -%} Sticky Kauf-CTA (Mobile): immer erreichbar im Result-Scroll {%- endcomment -%}
-  <a
-    class="lt-quiz-result__sticky-cta"
-    href="/products/lifetime-age-dna?qz=1"
-    data-result-pdp-cta="result_sticky"
-    aria-label="Zum AGE und DNA-Test bestellen, 349 Euro"
-  >
-    <span class="lt-quiz-result__sticky-cta-label">Zum AGE&amp;DNA-Test</span>
-    <span class="lt-quiz-result__sticky-cta-price">349&nbsp;€</span>
-  </a>
 
 </div>

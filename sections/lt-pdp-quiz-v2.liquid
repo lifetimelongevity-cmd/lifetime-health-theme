@@ -2,7 +2,8 @@
   LIFETIME — AGE & DNA Quiz v2 (Skeleton, Step 1+2)
   ──────────────────────────────────────────────────
   Implementiert Schritt 1 + 2 aus docs/lifetime-quiz-spec.md:
-    1. Section-Skeleton + State-Maschine (intro → q1..q7 → loading → result)
+    1. Section-Skeleton + State-Maschine (intro → q1..q8 → loading → gate → result;
+       das Gate ist seit 22.10.2026 die E-Mail-Abfrage VOR dem Ergebnis)
     2. Slider-Frage (Q1 Schlaf) als Snippet, voll funktionsfähig
 
   Layout-Architektur ist bereits final (40/60-Grid + Fullscreen-Modus),
@@ -245,12 +246,18 @@
       {%- render 'lt-quiz-loading' -%}
     </div>
 
+    {%- comment -%}
+      ── Gate: E-Mail vor dem Ergebnis (BJ 22.10.2026) ──────────────────
+      Reihenfolge loading → gate → result. Wer die Adresse im selben Browser schon
+      abgegeben hat, überspringt das Gate (assets/lt-quiz-v2.js § isUnlocked).
+    {%- endcomment -%}
+    <div class="lt-quiz__step lt-quiz__step--gate" data-quiz-step="gate" hidden>
+      {%- render 'lt-quiz-gate' -%}
+    </div>
+
     {%- comment -%} ── Result-Page ─────────────────────────────────────── {%- endcomment -%}
     <div class="lt-quiz__step lt-quiz__step--result" data-quiz-step="result" hidden>
-      {%- render 'lt-quiz-result',
-          cta_image: section.settings.cta_image,
-          cta_image_bonus: section.settings.cta_image_bonus
-      -%}
+      {%- render 'lt-quiz-result' -%}
     </div>
 
   </div>
@@ -371,24 +378,6 @@
       "label": "Report-Seite (Longevity-Plan)",
       "info": "Ziel des personalisierten Links, der als Property quiz_plan_url an Klaviyo geht.",
       "default": "/pages/dein-longevity-plan"
-    },
-    {
-      "type": "header",
-      "content": "Result-CTA-Bilder"
-    },
-    {
-      "type": "text",
-      "id": "cta_image",
-      "label": "CTA-Bild Primär (Test-Kit, URL)",
-      "info": "Größeres Hauptbild rechts in der Result-CTA-Card",
-      "default": "https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-8585364.png?v=1768563330"
-    },
-    {
-      "type": "text",
-      "id": "cta_image_bonus",
-      "label": "CTA-Bild Bonus (Longevity-Guide, URL)",
-      "info": "Kleineres Bonus-Bild überlappend unten-links",
-      "default": "https://cdn.shopify.com/s/files/1/0621/2173/8340/files/33eea4ca-2b8c-40f6-8a00-abced1d6c5b2-1762948710197.png?v=1762948715"
     },
     {
       "type": "header",

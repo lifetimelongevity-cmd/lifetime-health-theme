@@ -40,6 +40,18 @@ Bei Drift: Live gewinnt. Hier nachpflegen, sobald ein Mapping sich ändert.
 | `/pages/quiz-age?view=quiz-age-lp` | **AGE Quiz Ads-LP** (Ziel der Google-Ads-Kampagne 01, nicht im Menü) | `templates/page.quiz-age-lp.json` | identisch zu `page.quiz-age.json` | `snippets/lt-quiz-result.liquid` |
 | `/pages/dein-longevity-plan` | **Longevity-Plan** (Report-Seite des Quiz-Funnels, nicht im Menü) | `templates/page.dein-longevity-plan.json` | `lt-longevity-plan` → `lt-hp-video-authority` → `lt-hp-cta-close` | – |
 
+> **E-Mail vor dem Ergebnis seit 2026-10-22 (im Repo, noch nicht gepusht):** Reihenfolge
+> `q8 → loading → gate → result`. Das Gate (`snippets/lt-quiz-gate.liquid`) fragt die
+> Adresse ab, bevor das Ergebnis erscheint; wer sie im selben Browser schon abgegeben hat
+> (`localStorage lt_quiz_result_unlocked`), überspringt es. Das Ergebnis hat danach genau
+> eine Handlung, den Test (`data-result-pdp-cta="result_main"`); Bio-Karten-Knopf, E-Mail-Block,
+> Scope-Pills, dunkle CTA-Karte und Sticky-CTA sind raus, die drei Themen stehen offen (Titel,
+> Marker, `teaser`). Neue Events: `quiz_gate_view`; `quiz_result_cta_seen` beobachtet jetzt den
+> einen Kauf-Knopf mit Schwelle 0,5 statt den Knopf der dunklen Karte mit Schwelle 1.
+> Hintergrund und Zahlen: Denkschulen-Runde 22.10.2026, Entwurf
+> `docs/entwurf-quiz-ergebnis-2026-10-22.html` (der Entwurf zeigt noch die weiche Variante
+> mit E-Mail-Feld auf dem Ergebnis; BJ hat danach den harten Schnitt gewählt).
+
 > **Zwei Quiz-Templates seit 2026-08-10:** `page.quiz-age.json` rendert wieder mit normalem
 > Header/Footer (`theme.liquid`) für Site-Besucher über den Menüpunkt „AGE Quiz".
 > `page.quiz-age-lp.json` ist die inhaltsgleiche Kopie mit `"layout": "theme.quiz-lp"`
@@ -120,6 +132,24 @@ Diese 5 Seiten sind das Fundament (siehe `CLAUDE.md` § Kanonisches Fundament). 
 > Erster interner Inbound-Link: `/pages/science`, Section `warum` (Soft-CTA „Unsere
 > Forschung" + Brückensatz im Body, Commit `bea3a5d`). Die Absätze unten beschreiben den
 > Stand vor der Veröffentlichung; Aufbau und Design-Entscheide gelten weiter.
+>
+> **Update 2026-09-08: Forschungsverlauf als leise Zeitleiste.** Section `forschung`
+> (`lt-wiss-forschung`) trägt jetzt vier `node`-Blöcke (`t1`–`t4`: 2023 · 2024 bis 2025 ·
+> 2026 · 2027 offen), die unter den drei Forschungssignalen als Haarlinie mit vier Punkten
+> rendern, ohne Label und ohne Ausgangspunkt-Bild. Dafür in `assets/lt-wissenschaft.css` die
+> Regel `.ltw-rt > .ltw-rt__timeline:only-child { grid-column: 1 / -1 }`, sonst säße die Leiste
+> allein in der schmalen 1fr-Spalte. Gesellschaftsnamen (Digajet GmbH, Diga Health GmbH) nur im
+> grauen Fließtext von zwei Punkten, kein EPICONS-Name. Anlass: Paetzold (Forschungszulage), die
+> Seite soll die im Antrag genannte Gruppenstruktur nachvollziehbar machen. Fußzeile auf
+> „Stand: September 2026". Vorschau per `shopify theme dev` im Chrome geprüft, Push über den
+> Theme Manager durch BJ.
+>
+> **Update 2026-09-03: Froböse vorerst raus.** Block `p3` in `templates/page.wissenschaft.json`
+> (`lt-wiss-personen`) trägt `"disabled": true`, per CLI `--only` live gepusht und über fünf
+> Abrufe verifiziert (null Treffer, vier Personen rendern). BJ klärt die Rolle final ab;
+> Reaktivierung = Flag entfernen, Daten und Porträt-Asset (`lt-person-ingo-froboese.webp`)
+> bleiben im Template. Bis dahin ist die Aussage „wissenschaftliche Beratung (Froböse)" unten
+> nicht mehr Live-Stand.
 >
 > **Neu: `/pages/wissenschaft` (2026-08-27, angelegt aber NICHT veröffentlicht).**
 > Eigenes Template `templates/page.wissenschaft.json`, eigener Section-Satz `lt-wiss-*`,
@@ -261,7 +291,7 @@ geprüft. „Wörter" = sichtbarer Text der Template-Sections, ohne Header/Foote
 | `/pages/stack-2026-04` | `page.stack-mailout.json` | `lt-stack-mailout` | 17 | Mailout-Einstieg, leitet automatisch in den Warenkorb weiter |
 | `/pages/lifetime-app-account-loeschen` | `page.lifetime-app-account.json` (**Suffix ≠ Slug**) | `rich-text` (`main-page` disabled) | ca. 120 | App-Store-Pflichtseite (Apple/Google verlangen öffentliche Account-Deletion-URL): Anleitung zur Kontolöschung in der LIFETIME App. **Vorsicht beim Template-Cleanup:** Das Template wurde am 2026-04-24 als vermeintliche Waise gelöscht, die publizierte Page rendert dann leer (die Referenz steht nur im `templateSuffix` der Shopify-Page, nicht im Repo). Am 2026-07-30 aus `d5a970c` wiederhergestellt |
 | `/pages/lifetime-app-bestaetigen` | `page.lifetime-app.json` (**Suffix ≠ Slug**) | `rich-text` | ca. 30 | App-Double-Opt-in-Zielseite („Vielen Dank, dass Sie Ihre E-Mail bestätigt haben"). Gleiche Cleanup-Vorsicht wie bei der Account-Lösch-Seite |
-| `/pages/instagram` | `page.instagram.json` | `lt-link-hub` (`main-page` disabled) | ca. 30 | **Link-in-Bio-Seite, live seit 2026-07-30**, ersetzt `linktr.ee/lifetimelongevity` als Ziel der Instagram-Bio. Page-ID 704421331319, Metafield `seo.hidden=1`: **bewusst noindex und nicht in der Sitemap**, beim Sitemap-Abgleich also nicht als „fehlend" werten. Die Bio-URL in Instagram trägt die UTMs (`?utm_source=instagram&utm_medium=social&utm_campaign=linkinbio`), die Karten-Links bewusst nicht (GA4-Session-Attribution, Begründung im Section-Kommentar). Karten-Klicks pushen `linkinbio_click` in den dataLayer |
+| `/pages/links` | `page.links.json` | `lt-link-hub` (`main-page` disabled) | ca. 30 | **Link-in-Bio-Seite, live seit 2026-07-30**, bis 2026-09-03 unter `/pages/instagram` (Instagram-Bio); seit 03.09.2026 Handle und Template-Suffix `links`, Ziel der TikTok-Bio (`@lifetimelongevity`), `/pages/instagram` leitet per 301 hierher (Instagram-Account deaktiviert). Ersetzt `linktr.ee/lifetimelongevity`. Page-ID 704421331319, Metafield `seo.hidden=1`: **bewusst noindex und nicht in der Sitemap**, beim Sitemap-Abgleich also nicht als „fehlend" werten. Die Bio-URL in TikTok trägt die UTMs (`?utm_source=tiktok&utm_medium=social&utm_campaign=linkinbio`), die Karten-Links bewusst nicht (GA4-Session-Attribution, Begründung im Section-Kommentar). Karten-Klicks pushen `linkinbio_click` in den dataLayer |
 
 ### Rechtstexte (alle auf dem Default `templates/page.json`)
 
