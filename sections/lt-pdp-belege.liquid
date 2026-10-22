@@ -1,0 +1,431 @@
+{% comment %}
+  ───────────────────────────────────────────────────────────────────────────
+  LIFETIME — PDP Belege (drei kleine Karten mit Lade)
+  ───────────────────────────────────────────────────────────────────────────
+  Gebaut 2026-10-22 aus dem Denkschulen-Entwurf der NMN-PDP
+  (docs/entwurf-nmn-pdp-2026-10-22.html, Leitschule Progressive Disclosure).
+  Ersetzt auf der NMN-PDP sechs Belege-Sections (Logo-Garten, Novel Food,
+  Feature-Grid, Marktbefund, Laborwerte, Vergleichstabelle, Kundenstimmen)
+  durch drei Karten: Was drin ist · Der Rohstoff · Was Kunden sagen.
+  Erste Ebene je Karte: ein Urteil in zwei, drei Zeilen. Herleitung in der Lade.
+
+  Maschinenlesbar (GEO): die Messwerte stehen als echte Tabelle im DOM, auch
+  wenn die Lade zu ist, und zusätzlich als JSON-LD ProductGroup.additionalProperty
+  mit derselben @id wie snippets/microdata-schema.liquid, damit beide Knoten
+  zusammenfallen. Werte nie als Bild.
+
+  Feste Reihenfolge der Karten, je Karte ein Schalter. Blöcke: "messwert"
+  (Zeilen der Labortabelle) und "stimme" (Zitate). Keine verschachtelten Blöcke.
+{% endcomment %}
+
+{%- liquid
+  assign bg_text = section.settings.color_text | default: '#26251e'
+  assign bg_heading = section.settings.heading | strip
+  assign bg_sub = section.settings.subheading | strip
+  assign bg_kicker = section.settings.kicker | strip
+  if bg_heading == '__none__'
+    assign bg_heading = ''
+  endif
+  if bg_sub == '__none__'
+    assign bg_sub = ''
+  endif
+  if bg_kicker == '__none__'
+    assign bg_kicker = ''
+  endif
+
+  assign bg_messwerte = section.blocks | where: 'type', 'messwert'
+  assign bg_stimmen = section.blocks | where: 'type', 'stimme'
+
+  assign bg_rating = product.metafields.loox.avg_rating | default: 0 | plus: 0
+  assign bg_count = product.metafields.loox.num_reviews | default: 0 | plus: 0
+
+  assign bg_cards = 0
+  if section.settings.show_labor
+    assign bg_cards = bg_cards | plus: 1
+  endif
+  if section.settings.show_rohstoff
+    assign bg_cards = bg_cards | plus: 1
+  endif
+  if section.settings.show_stimmen
+    assign bg_cards = bg_cards | plus: 1
+  endif
+-%}
+
+{% style %}
+  #section-{{ section.id }} {
+    --ltbg-bg:       {{ section.settings.color_bg }};
+    --ltbg-card-bg:  {{ section.settings.color_card_bg }};
+    --ltbg-text:     {{ bg_text }};
+    --ltbg-text-sec: {{ bg_text | color_modify: 'alpha', 0.72 }};
+    --ltbg-text-ter: {{ bg_text | color_modify: 'alpha', 0.56 }};
+    --ltbg-border:   {{ bg_text | color_modify: 'alpha', 0.05 }};
+    --ltbg-rule:     {{ bg_text | color_modify: 'alpha', 0.08 }};
+    padding-top:    min({{ section.settings.padding_top }}px, 10vw);
+    padding-bottom: min({{ section.settings.padding_bottom }}px, 10vw);
+  }
+{% endstyle %}
+
+<div class="ltbg" id="section-{{ section.id }}">
+  <div class="ltbg__container">
+    {% render 'section-heading-crs',
+      heading: bg_heading,
+      subheading: bg_sub,
+      kicker: bg_kicker,
+      align: section.settings.content_align,
+      headline_md: true,
+      extra_class: 'ltbg__header'
+    %}
+
+    {%- if bg_cards > 0 -%}
+    <div class="ltbg__grid ltbg__grid--{{ bg_cards }}">
+
+      {%- if section.settings.show_labor -%}
+      <article class="ltbg__card">
+        {%- if section.settings.labor_title != blank -%}
+          <h2 class="ltbg__label">{{ section.settings.labor_title | escape }}</h2>
+        {%- endif -%}
+        {%- if section.settings.labor_value != blank -%}
+          <p class="ltbg__big">
+            {{ section.settings.labor_value | escape }}
+            {%- if section.settings.labor_value_label != blank -%}
+              <span class="ltbg__big-label">{{ section.settings.labor_value_label | escape }}</span>
+            {%- endif -%}
+          </p>
+        {%- endif -%}
+        {%- if section.settings.labor_meta != blank -%}
+          <p class="ltbg__meta">{{ section.settings.labor_meta | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.labor_text != blank -%}
+          <p class="ltbg__text">{{ section.settings.labor_text | escape }}</p>
+        {%- endif -%}
+
+        {%- if bg_messwerte.size > 0 or section.settings.labor_provenance != blank or section.settings.labor_compare != blank -%}
+        <details class="ltbg__details">
+          <summary class="ltbg__summary">
+            <span>{{ section.settings.labor_details_label | default: 'Einzelwerte und Prüfdetails' | escape }}</span>
+            <span class="ltbg__chevron" aria-hidden="true">{% render 'crs-chevron' %}</span>
+          </summary>
+          <div class="ltbg__body">
+            {%- if bg_messwerte.size > 0 -%}
+            <table class="ltbg__table">
+              <caption class="ltbg__caption">
+                Prüfbericht {{ product.title | escape }}
+                {%- if section.settings.labor_batch != blank %}, Charge {{ section.settings.labor_batch | escape }}{% endif -%}
+                {%- if section.settings.labor_lab != blank %}, {{ section.settings.labor_lab | escape }}{% endif -%}
+                {%- if section.settings.labor_tested_on != blank %}, geprüft am {{ section.settings.labor_tested_on | escape }}{% endif -%}
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Parameter</th>
+                  <th scope="col">Methode</th>
+                  <th scope="col" class="ltbg__td-right">Ergebnis</th>
+                </tr>
+              </thead>
+              <tbody>
+                {%- for block in bg_messwerte -%}
+                  <tr {{ block.shopify_attributes }}>
+                    <th scope="row">{{ block.settings.parameter | escape }}</th>
+                    <td class="ltbg__td-muted">{{ block.settings.method | escape }}</td>
+                    <td class="ltbg__td-right">{{ block.settings.result | escape }}</td>
+                  </tr>
+                {%- endfor -%}
+              </tbody>
+            </table>
+            {%- endif -%}
+            {%- if section.settings.labor_provenance != blank -%}
+              <p>{{ section.settings.labor_provenance | escape }}</p>
+            {%- endif -%}
+            {%- if section.settings.labor_compare != blank -%}
+              <div class="rte">{{ section.settings.labor_compare }}</div>
+            {%- endif -%}
+            {%- if section.settings.labor_reports_label != blank and section.settings.labor_reports_url != blank -%}
+              <p><a href="{{ section.settings.labor_reports_url }}">{{ section.settings.labor_reports_label | escape }}</a></p>
+            {%- endif -%}
+          </div>
+        </details>
+        {%- endif -%}
+      </article>
+      {%- endif -%}
+
+      {%- if section.settings.show_rohstoff -%}
+      <article class="ltbg__card">
+        {%- if section.settings.rohstoff_title != blank -%}
+          <h2 class="ltbg__label">{{ section.settings.rohstoff_title | escape }}</h2>
+        {%- endif -%}
+        {%- if section.settings.rohstoff_name != blank -%}
+          <p class="ltbg__big">{{ section.settings.rohstoff_name | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.rohstoff_meta != blank -%}
+          <p class="ltbg__meta">{{ section.settings.rohstoff_meta | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.rohstoff_text != blank -%}
+          <p class="ltbg__text">{{ section.settings.rohstoff_text | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.person_name != blank -%}
+          <div class="ltbg__person">
+            {%- if section.settings.person_image != blank -%}
+              {{ section.settings.person_image | image_url: width: 96 | image_tag: loading: 'lazy', class: 'ltbg__person-img', alt: '' }}
+            {%- elsif section.settings.person_image_url != blank -%}
+              <img src="{{ section.settings.person_image_url | escape }}" alt="" loading="lazy" class="ltbg__person-img" width="48" height="48">
+            {%- endif -%}
+            <div>
+              <p class="ltbg__person-name">{{ section.settings.person_name | escape }}</p>
+              {%- if section.settings.person_role != blank -%}
+                <p class="ltbg__person-role">{{ section.settings.person_role | escape }}</p>
+              {%- endif -%}
+            </div>
+          </div>
+        {%- endif -%}
+        {%- assign bg_rohstoff_plain = section.settings.rohstoff_details_body | strip_html | strip -%}
+        {%- if bg_rohstoff_plain != blank -%}
+        <details class="ltbg__details">
+          <summary class="ltbg__summary">
+            <span>{{ section.settings.rohstoff_details_label | default: 'Mehr' | escape }}</span>
+            <span class="ltbg__chevron" aria-hidden="true">{% render 'crs-chevron' %}</span>
+          </summary>
+          <div class="ltbg__body rte">{{ section.settings.rohstoff_details_body }}</div>
+        </details>
+        {%- endif -%}
+      </article>
+      {%- endif -%}
+
+      {%- if section.settings.show_stimmen -%}
+      <article class="ltbg__card">
+        {%- if section.settings.stimmen_title != blank -%}
+          <h2 class="ltbg__label">{{ section.settings.stimmen_title | escape }}</h2>
+        {%- endif -%}
+        {%- if bg_stimmen.size > 0 -%}
+          <ul class="ltbg__quotes">
+            {%- for block in bg_stimmen -%}
+              <li class="ltbg__quote" {{ block.shopify_attributes }}>
+                <p class="ltbg__quote-text">{{ block.settings.text | escape }}</p>
+                {%- if block.settings.name != blank -%}
+                  <p class="ltbg__quote-name">{{ block.settings.name | escape }}</p>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+        {%- if bg_count > 0 -%}
+          <p class="ltbg__meta ltbg__meta--foot">
+            {%- if section.settings.stimmen_link_url != blank -%}
+              <a href="{{ section.settings.stimmen_link_url }}">{{ bg_rating | round: 1 | replace: '.', ',' }} von 5 aus {{ bg_count }} Bewertungen</a>
+            {%- else -%}
+              {{ bg_rating | round: 1 | replace: '.', ',' }} von 5 aus {{ bg_count }} Bewertungen
+            {%- endif -%}
+          </p>
+        {%- endif -%}
+      </article>
+      {%- endif -%}
+
+    </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{%- if section.settings.jsonld_enable and section.settings.show_labor and bg_messwerte.size > 0 -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ProductGroup",
+  "@id": "{{ product.url }}#product",
+  "name": {{ product.title | json }},
+  "additionalProperty": [
+    {%- if section.settings.labor_batch != blank -%}
+    { "@type": "PropertyValue", "name": "Charge", "value": {{ section.settings.labor_batch | json }} },
+    {%- endif -%}
+    {%- if section.settings.labor_lab != blank -%}
+    { "@type": "PropertyValue", "name": "Prüflabor", "value": {{ section.settings.labor_lab | json }} },
+    {%- endif -%}
+    {%- if section.settings.labor_tested_on != blank -%}
+    { "@type": "PropertyValue", "name": "Prüfdatum", "value": {{ section.settings.labor_tested_on | json }} },
+    {%- endif -%}
+    {%- for block in bg_messwerte -%}
+    { "@type": "PropertyValue", "name": {{ block.settings.parameter | json }}, "value": {{ block.settings.result | json }}{% if block.settings.method != blank %}, "measurementMethod": {{ block.settings.method | json }}{% endif %} }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+  ]
+  {%- if section.settings.labor_report_pdf != blank -%}
+  ,
+  "subjectOf": { "@type": "DigitalDocument", "name": "Prüfbericht", "url": {{ section.settings.labor_report_pdf | json }} }
+  {%- endif -%}
+}
+</script>
+{%- endif -%}
+
+{% stylesheet %}
+.ltbg { background: var(--ltbg-bg, #f2f1ed); color: var(--ltbg-text, #26251e); }
+.ltbg__container {
+  max-width: var(--lt-page-max, 1280px);
+  margin: 0 auto;
+  padding: 0 var(--lt-page-gutter, 16px);
+}
+.ltbg__header { margin-bottom: var(--space-6); }
+.ltbg__grid { display: grid; gap: var(--space-3); align-items: start; }
+@media (min-width: 840px) {
+  .ltbg__grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ltbg__grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+.ltbg__card {
+  background: var(--ltbg-card-bg, #fff);
+  border: 1px solid var(--ltbg-border, rgba(38, 37, 30, 0.05));
+  border-radius: 4px;
+  padding: var(--space-5);
+  min-width: 0;
+}
+/* Karten-Oberzeile: klein, Versalien, gedämpft. Bewusst kein Heading-Stack,
+   die Karten sind Karten, keine Sections. !important gegen globale h2-Regeln. */
+.ltbg__label {
+  font-family: var(--font-body) !important;
+  font-size: var(--text-micro) !important;
+  font-weight: var(--weight-regular) !important;
+  letter-spacing: 0.06em !important;
+  line-height: var(--leading-tight) !important;
+  text-transform: uppercase;
+  color: var(--ltbg-text-sec);
+  margin: 0 !important;
+}
+.ltbg__big {
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-regular);
+  letter-spacing: -0.02em;
+  line-height: var(--leading-heading);
+  margin: var(--space-2) 0 0;
+}
+.ltbg__big-label {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  letter-spacing: 0;
+  color: var(--ltbg-text-sec);
+  margin-left: var(--space-2);
+}
+.ltbg__meta {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--ltbg-text-sec);
+  margin: var(--space-2) 0 0;
+}
+.ltbg__meta--foot { margin-top: var(--space-3); }
+.ltbg__meta a { color: var(--color-dark); }
+.ltbg__text {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  margin: var(--space-2) 0 0;
+}
+.ltbg__person { display: flex; gap: var(--space-3); align-items: center; margin-top: var(--space-3); }
+.ltbg__person-img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex: none; }
+.ltbg__person-name { margin: 0; font-weight: var(--weight-bold); font-size: var(--text-body); line-height: var(--leading-tight); }
+.ltbg__person-role { margin: 2px 0 0; font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--ltbg-text-sec); }
+.ltbg__details { margin-top: var(--space-3); border-top: 1px solid var(--ltbg-rule); }
+.ltbg__summary {
+  display: flex; justify-content: space-between; align-items: center; gap: var(--space-2);
+  padding: var(--space-3) 0 0; cursor: pointer; list-style: none;
+  font-size: var(--text-body-sm); font-weight: var(--weight-semibold); color: var(--color-dark);
+}
+.ltbg__summary::-webkit-details-marker { display: none; }
+.ltbg__chevron { display: inline-flex; width: 16px; height: 16px; transition: transform 0.2s ease; }
+.ltbg__chevron svg { width: 100%; height: 100%; }
+.ltbg__details[open] .ltbg__chevron { transform: rotate(180deg); }
+.ltbg__body { padding-top: var(--space-3); font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--ltbg-text-sec); }
+.ltbg__body p { margin: 0 0 var(--space-2); }
+.ltbg__body a { color: var(--color-dark); }
+.ltbg__table { width: 100%; border-collapse: collapse; font-size: var(--text-body-sm); line-height: var(--leading-tight); text-align: left; margin-bottom: var(--space-3); }
+.ltbg__caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.ltbg__table th, .ltbg__table td { padding: var(--space-2) 0; border-bottom: 1px solid var(--ltbg-rule); font-weight: var(--weight-regular); vertical-align: baseline; color: var(--ltbg-text); }
+.ltbg__table thead th { color: var(--ltbg-text-ter); font-size: var(--text-micro); }
+.ltbg__td-muted { color: var(--ltbg-text-ter); }
+.ltbg__td-right { text-align: right; white-space: nowrap; }
+.ltbg__quotes { list-style: none; margin: var(--space-2) 0 0; padding: 0; }
+.ltbg__quote { padding: var(--space-3) 0; border-top: 1px solid var(--ltbg-rule); }
+.ltbg__quote:first-child { border-top: 0; padding-top: 0; }
+.ltbg__quote-text { margin: 0; font-size: var(--text-body); line-height: var(--leading-body); }
+.ltbg__quote-name { margin: var(--space-1) 0 0; font-size: var(--text-body-sm); color: var(--ltbg-text-ter); }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "PDP Belege-Karten",
+  "tag": "section",
+  "class": "lt-pdp-belege",
+  "settings": [
+    { "type": "header", "content": "Farben" },
+    { "type": "color", "id": "color_bg", "label": "Seiten-Hintergrund", "default": "#f2f1ed" },
+    { "type": "color", "id": "color_card_bg", "label": "Karten-Hintergrund", "default": "#ffffff" },
+    { "type": "color", "id": "color_text", "label": "Textfarbe", "default": "#26251e" },
+    { "type": "header", "content": "Abstände" },
+    { "type": "range", "id": "padding_top", "label": "Abstand oben", "min": 0, "max": 120, "step": 8, "unit": "px", "default": 32 },
+    { "type": "range", "id": "padding_bottom", "label": "Abstand unten", "min": 0, "max": 120, "step": 8, "unit": "px", "default": 32 },
+    { "type": "header", "content": "Überschrift (optional)" },
+    { "type": "select", "id": "content_align", "label": "Ausrichtung", "options": [ { "value": "left", "label": "Links" }, { "value": "center", "label": "Zentriert" } ], "default": "left" },
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "__none__", "info": "__none__ = ausblenden" },
+    { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "__none__", "info": "__none__ = ausblenden" },
+    { "type": "textarea", "id": "subheading", "label": "Unterüberschrift", "default": "__none__", "info": "__none__ = ausblenden" },
+
+    { "type": "header", "content": "Karte 1: Was drin ist" },
+    { "type": "checkbox", "id": "show_labor", "label": "Karte anzeigen", "default": true },
+    { "type": "text", "id": "labor_title", "label": "Oberzeile", "default": "Was drin ist" },
+    { "type": "text", "id": "labor_value", "label": "Große Zahl", "default": "100,1 %" },
+    { "type": "text", "id": "labor_value_label", "label": "Bezeichnung der Zahl", "default": "NMN-Gehalt" },
+    { "type": "text", "id": "labor_meta", "label": "Herkunftszeile", "default": "Charge 20250917 · Limbach Analytics, Mainz · 1H-NMR" },
+    { "type": "text", "id": "labor_text", "label": "Satz", "default": "Schwermetalle: 4 von 4 unter der Bestimmungsgrenze." },
+    { "type": "text", "id": "labor_details_label", "label": "Lade-Beschriftung", "default": "Einzelwerte und Prüfdetails" },
+    { "type": "text", "id": "labor_batch", "label": "Charge", "default": "20250917", "info": "Für Tabellen-Caption und JSON-LD" },
+    { "type": "text", "id": "labor_lab", "label": "Labor", "default": "Limbach Analytics, Arotop Laboratorien Mainz, DAkkS-akkreditiert nach DIN EN ISO/IEC 17025" },
+    { "type": "text", "id": "labor_tested_on", "label": "Geprüft am", "default": "11.11.2025" },
+    { "type": "textarea", "id": "labor_provenance", "label": "Satz unter der Tabelle", "default": "Geprüft am 11.11.2025, DAkkS-akkreditiert nach DIN EN ISO/IEC 17025. Die Chargennummer steht auf der Rückseite deines Beutels." },
+    { "type": "richtext", "id": "labor_compare", "label": "Vergleich (optional)", "info": "Zum Beispiel der Marktbefund mit Link zum Artikel" },
+    { "type": "text", "id": "labor_reports_label", "label": "Link-Text Prüfberichte", "default": "Alle Prüfberichte je Charge" },
+    { "type": "url", "id": "labor_reports_url", "label": "Link Prüfberichte" },
+    { "type": "url", "id": "labor_report_pdf", "label": "Prüfbericht-PDF (für JSON-LD)" },
+    { "type": "checkbox", "id": "jsonld_enable", "label": "Messwerte als JSON-LD ausgeben", "default": true, "info": "ProductGroup.additionalProperty mit derselben @id wie das Produkt-Schema" },
+
+    { "type": "header", "content": "Karte 2: Der Rohstoff" },
+    { "type": "checkbox", "id": "show_rohstoff", "label": "Karte anzeigen", "default": true },
+    { "type": "text", "id": "rohstoff_title", "label": "Oberzeile", "default": "Der Rohstoff" },
+    { "type": "text", "id": "rohstoff_name", "label": "Name groß", "default": "Uthever®" },
+    { "type": "text", "id": "rohstoff_meta", "label": "Herkunftszeile", "default": "Patentiert, Herkunft dokumentiert, nach GMP hergestellt" },
+    { "type": "textarea", "id": "rohstoff_text", "label": "Satz", "default": "Der erste NMN-Rohstoff mit positivem EU-Gutachten. Die Mitgliedstaaten haben der Zulassung am 25. September 2026 zugestimmt." },
+    { "type": "image_picker", "id": "person_image", "label": "Person: Bild" },
+    { "type": "url", "id": "person_image_url", "label": "Person: Bild-URL (Fallback)" },
+    { "type": "text", "id": "person_name", "label": "Person: Name", "default": "Prof. Dr. med. Volker Limmroth" },
+    { "type": "text", "id": "person_role", "label": "Person: Rolle", "default": "Chefarzt Neurologie, prüft, was wir zu NMN veröffentlichen" },
+    { "type": "text", "id": "rohstoff_details_label", "label": "Lade-Beschriftung", "default": "Zulassungsstand und Firma" },
+    { "type": "richtext", "id": "rohstoff_details_body", "label": "Lade-Inhalt" },
+
+    { "type": "header", "content": "Karte 3: Was Kunden sagen" },
+    { "type": "checkbox", "id": "show_stimmen", "label": "Karte anzeigen", "default": true },
+    { "type": "text", "id": "stimmen_title", "label": "Oberzeile", "default": "Was Kunden sagen" },
+    { "type": "url", "id": "stimmen_link_url", "label": "Link auf alle Bewertungen (optional)", "info": "Schnitt und Anzahl kommen aus den Loox-Metafeldern" }
+  ],
+  "blocks": [
+    {
+      "type": "messwert",
+      "name": "Messwert (Karte 1)",
+      "settings": [
+        { "type": "text", "id": "parameter", "label": "Parameter", "default": "Blei" },
+        { "type": "text", "id": "method", "label": "Methode", "default": "ASU § 64 LFGB" },
+        { "type": "text", "id": "result", "label": "Ergebnis", "default": "< 0,05 mg/kg" }
+      ]
+    },
+    {
+      "type": "stimme",
+      "name": "Kundenstimme (Karte 3)",
+      "settings": [
+        { "type": "textarea", "id": "text", "label": "Zitat", "default": "Klar deklariert, Laborwerte einsehbar. Genau das will ich." },
+        { "type": "text", "id": "name", "label": "Name", "default": "Hans-Werner G." }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "PDP Belege-Karten",
+      "blocks": [
+        { "type": "messwert", "settings": { "parameter": "NMN-Gehalt", "method": "1H-NMR", "result": "100,1 ± 1,3 %" } },
+        { "type": "messwert", "settings": { "parameter": "Blei", "method": "ASU § 64 LFGB", "result": "< 0,05 mg/kg" } },
+        { "type": "stimme", "settings": { "text": "Klar deklariert, Laborwerte einsehbar. Genau das will ich.", "name": "Hans-Werner G." } }
+      ]
+    }
+  ]
+}
+{% endschema %}

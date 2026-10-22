@@ -129,7 +129,8 @@
 
 <section
   id="lt-pdp-hero-{{ section.id }}"
-  class="lt-pdp-hero-section"
+  class="lt-pdp-hero-section{% if section.settings.bb_compact %} lt-pdp-hero-section--compact{% endif %}"
+  data-lt-compact="{% if section.settings.bb_compact %}1{% else %}0{% endif %}"
   data-lt-sticky-show-compare="{% if lt_sticky_show_compare_price %}1{% else %}0{% endif %}"
 >
   <div class="lt-pdp-hero__container">
@@ -1092,6 +1093,11 @@
                         Grundpreis-Basen gleichzeitig) trägt nicht mehr, weil nur eine Basis gezeigt wird
                         und sie beim Moduswechsel mitgeht. Grundpreis €/100 g bleibt in den Karten. {%- endcomment -%}
                     <span class="lt-size__name">{{ variant.title | escape }}</span>
+                    {%- if section.settings.bb_compact -%}
+                      {%- comment -%} Kompakte Kaufzone (22.10.2026): Einmalpreis der Größe statt Prozent,
+                          statisch wie im freigegebenen Entwurf; der Abo-Preis steht in der Abo-Kachel. {%- endcomment -%}
+                      <span class="lt-size__price">{{ variant.price | money }}</span>
+                    {%- endif -%}
                     <span class="lt-size__save" data-lt-size-save{% unless v_save_now > 0 %} hidden{% endunless %}>{% if v_save_now > 0 %}−{{ v_save_now }} %{% endif %}</span>
                   </label>
                 {%- endfor -%}
@@ -1141,7 +1147,13 @@
                           <span class="lt-bb-card__title">{{ bb_sub1_title | escape }}</span>
                           <span class="lt-bb-card__badge lt-bb-card__badge--strong" data-lt-bb-badge>{%- assign lt_badge_delta = lt_active_variant.price | minus: lt_abo_sub -%}{%- if lt_badge_delta > 0 -%}SPARE {{ lt_badge_delta | money_without_trailing_zeros }}{%- endif -%}</span>
                         </span>
-                        {%- if lt_show_sizes and lt_abo_alloc -%}
+                        {%- if section.settings.bb_compact and lt_show_sizes and lt_abo_alloc -%}
+                          {%- comment -%} Kompakt: Kachel sagt nur „Jederzeit kündbar“, der Takt wandert in die
+                              Hinweiszeile unter den Kacheln. Der Plan-Name bleibt versteckt im DOM, weil applySize
+                              ihn beim Größenwechsel nachschreibt und das Kompakt-JS ihn dort liest. {%- endcomment -%}
+                          <span class="lt-bb-card__sub">{{ bb_sub1_sub | escape }}</span>
+                          <span data-lt-sub-subline hidden>{{ lt_abo_alloc.selling_plan.name | escape }}</span>
+                        {%- elsif lt_show_sizes and lt_abo_alloc -%}
                           {%- comment -%} Subline = echter Liefertakt der gewählten Größe (Plan-Name, z. B. „Alle 2 Monate");
                               JS zieht sie beim Größenwechsel nach. Der Takt ist je Größe fix vorbelegt, nicht frei wählbar. {%- endcomment -%}
                           <span class="lt-bb-card__sub" data-lt-sub-subline>{{ lt_abo_alloc.selling_plan.name | escape }}</span>
@@ -1254,7 +1266,12 @@
                           {%- assign lt_ship_rule = lt_ship_rule | split: '|' -%}
                           {%- assign lt_ship_cost = lt_ship_rule[0] | plus: 0 -%}
                           {%- assign lt_ship_free = lt_ship_rule[1] | plus: 0 -%}
-                          <span class="lt-bb-card__sub" data-lt-once-subline data-ship-free="{{ lt_ship_free }}" data-ship-cost-label="{{ lt_ship_cost | money | escape }}">{% if lt_active_variant.price >= lt_ship_free %}Versandkostenfrei{% else %}zzgl. {{ lt_ship_cost | money }} Versand{% endif %}</span>
+                          {%- if section.settings.bb_compact -%}
+                            <span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>
+                            <span data-lt-once-subline data-ship-free="{{ lt_ship_free }}" data-ship-cost-label="{{ lt_ship_cost | money | escape }}" hidden>{% if lt_active_variant.price >= lt_ship_free %}Versandkostenfrei{% else %}zzgl. {{ lt_ship_cost | money }} Versand{% endif %}</span>
+                          {%- else -%}
+                            <span class="lt-bb-card__sub" data-lt-once-subline data-ship-free="{{ lt_ship_free }}" data-ship-cost-label="{{ lt_ship_cost | money | escape }}">{% if lt_active_variant.price >= lt_ship_free %}Versandkostenfrei{% else %}zzgl. {{ lt_ship_cost | money }} Versand{% endif %}</span>
+                          {%- endif -%}
                         {%- else -%}
                           <span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>
                         {%- endif -%}
@@ -1269,6 +1286,12 @@
                 </span>
               </div>
             </div>
+            {%- if section.settings.bb_compact -%}
+              {%- comment -%} Kompakt: eine Zeile Takt und Versand des gewählten Modus, darunter der
+                  Grundpreis genau einmal (PAngV), beides aus dem Kompakt-JS. {%- endcomment -%}
+              <p class="lt-bb__hint" data-lt-bb-hint aria-live="polite"></p>
+              <p class="lt-bb__unitline" data-lt-bb-unitline></p>
+            {%- endif -%}
             {%- comment -%}
               Zusatzartikel-Häkchen unter der Kaufart (Conversion-Plan 3.3, 29.09.2026):
               Kreatin steckt in 4 von 10 Mehrprodukt-Bestellungen mit NMN. Gated über
@@ -1687,7 +1710,25 @@
         {%- if lt_payment_note != blank and lt_payment_note_rendered != true -%}
           {%- assign lt_payment_note_post_cta = true -%}
         {%- endif -%}
-        {%- if lt_show_cancel_after_cta or section.settings.show_guarantee_badge or lt_payment_note_post_cta -%}
+        {%- if section.settings.bb_compact -%}
+          {%- comment -%} Kompakte Kaufzone (22.10.2026): unter dem Knopf nur der Ersparnis-Chip
+              (dynamisch, Kompakt-JS) und eine Zeile Versand plus Garantie. Die Garantie öffnet
+              weiter das Popup, Kündbarkeit steht in der Abo-Kachel, Zahlarten entfallen hier. {%- endcomment -%}
+          <div class="lt-pdp-hero__post-cta lt-pdp-hero__post-cta--compact">
+            <span class="lt-save-chip" data-lt-save-chip hidden></span>
+            <p class="lt-pdp-hero__post-line">
+              {%- if section.settings.compact_ship_text != blank -%}<span>{{ section.settings.compact_ship_text | escape }}</span>{%- endif -%}
+              {%- if section.settings.show_guarantee_badge -%}
+                {%- if section.settings.compact_ship_text != blank %}<span aria-hidden="true"> · </span>{% endif -%}
+                {%- if lt_guarantee_popup_plain != '' -%}
+                  <button type="button" class="lt-pdp-hero__post-line-btn" data-crs-dialog-open aria-haspopup="dialog" aria-controls="crs-lt-hero-guarantee-{{ section.id }}">{{ lt_guarantee_line | escape }}</button>
+                {%- else -%}
+                  <span>{{ lt_guarantee_line | escape }}</span>
+                {%- endif -%}
+              {%- endif -%}
+            </p>
+          </div>
+        {%- elsif lt_show_cancel_after_cta or section.settings.show_guarantee_badge or lt_payment_note_post_cta -%}
           <div class="lt-pdp-hero__post-cta">
             {%- if lt_show_cancel_after_cta -%}
               {%- assign lt_cancel_hidden_initially = false -%}
@@ -1766,7 +1807,7 @@
             den Kassenzettel oder den Trust-Block getrennt zu werden. Der Kontakt-Fallback
             schliesst die Spalte ab, weil er der leiseste Ausgang ist und nicht zwischen den
             Belegen stehen soll. {%- endcomment -%}
-        {%- if shop.enabled_payment_types.size > 1 -%}
+        {%- if shop.enabled_payment_types.size > 1 and section.settings.bb_compact != true -%}
           {%- assign lt_payment_limit = shop.enabled_payment_types.size | minus: 1 -%}
           <div class="lt-payment-icons" aria-label="Zahlungsmethoden">
             {%- for type in shop.enabled_payment_types limit: lt_payment_limit -%}
@@ -1951,6 +1992,7 @@
     id="lt-sticky-atc"
     data-single
     data-lt-pdp-hero-sticky
+    {% if section.settings.bb_compact %}data-lt-sticky-gate{% endif %}
     data-id="product-{{ section.id }}"
     class="sticky-add-to-cart lt-sticky-atc sticky-add-to-cart--default-to-first-variant-{{ default_to_first_variant }}"
   >
@@ -2686,6 +2728,82 @@
         if (inp) inp.dispatchEvent(new Event('change', { bubbles: true }));
       });
     }
+    // --- Kompakte Kaufzone (Entwurf 22.10.2026), nur wenn bb_compact gesetzt ----------
+    // Liest den Zustand aus dem DOM (Größen-Radios, Karten-Radio, Plan-Name, Versandstatus)
+    // und schreibt Hinweiszeile, Grundpreis, Ersparnis-Chip und das Sticky-Label.
+    // Hängt am CTA-Text (MutationObserver), der bei jedem Sync neu geschrieben wird, und
+    // greift sonst nirgends in applySize/syncFromCard ein.
+    (function () {
+      if (section.getAttribute('data-lt-compact') !== '1') return;
+      var ctaText = section.querySelector('[data-js-product-add-to-cart-text]');
+      var hint = section.querySelector('[data-lt-bb-hint]');
+      var unitLine = section.querySelector('[data-lt-bb-unitline]');
+      var chip = section.querySelector('[data-lt-save-chip]');
+      function refresh() {
+        var activeCard = section.querySelector('.lt-bb-card__input:checked');
+        var cardEl = activeCard ? activeCard.closest('[data-lt-bb-card]') : null;
+        var isSub = !(cardEl && cardEl.dataset.bbKind === 'once');
+        var sizes = Array.prototype.slice.call(section.querySelectorAll('.lt-size__input'));
+        var active = sizes.filter(function (i) { return i.checked; })[0] || sizes[0];
+        var onceC = active ? parseInt(active.dataset.oncePrice, 10) : NaN;
+        var subC = active ? parseInt(active.dataset.subPrice, 10) : NaN;
+        var current = isSub ? subC : onceC;
+        if (hint) {
+          if (isSub) {
+            var plan = section.querySelector('[data-lt-sub-subline]');
+            var planName = plan ? plan.textContent.trim() : '';
+            if (planName) planName = planName.charAt(0).toLowerCase() + planName.slice(1);
+            hint.textContent = planName ? 'Lieferung ' + planName + ', versandfrei.' : 'Versandfrei.';
+          } else {
+            var once = section.querySelector('[data-lt-once-subline]');
+            var free = once ? parseInt(once.dataset.shipFree, 10) : NaN;
+            var costLabel = once ? once.dataset.shipCostLabel : '';
+            if (!isNaN(free) && !isNaN(onceC) && onceC < free && costLabel) {
+              hint.textContent = 'Zzgl. ' + costLabel + ' Versand, versandfrei ab ' + formatPrice(free) + '.';
+            } else {
+              hint.textContent = 'Versandfrei.';
+            }
+          }
+        }
+        if (unitLine) {
+          var g = active ? parseInt(active.dataset.grams, 10) : NaN;
+          unitLine.textContent = (!isNaN(current) && g > 0) ? formatPrice(Math.round(current / g * 100)) + '/100 g' : '';
+        }
+        if (chip) {
+          var base = sizes[0];
+          var baseC = base ? parseInt(base.dataset.oncePrice, 10) : NaN;
+          var baseG = base ? parseInt(base.dataset.grams, 10) : NaN;
+          var g2 = active ? parseInt(active.dataset.grams, 10) : NaN;
+          var saved = (!isNaN(baseC) && baseG > 0 && g2 > 0 && !isNaN(current)) ? Math.round(baseC * g2 / baseG) - current : 0;
+          if (saved > 0) { chip.textContent = 'Du sparst ' + formatPrice(saved); chip.hidden = false; }
+          else { chip.hidden = true; }
+        }
+        var stickyText = document.querySelector('#lt-sticky-atc .lt-sticky-btn .button__text');
+        if (stickyText && ctaText) stickyText.textContent = ctaText.textContent.trim();
+      }
+      if (ctaText && window.MutationObserver) {
+        new MutationObserver(refresh).observe(ctaText, { childList: true, characterData: true, subtree: true });
+      }
+      section.addEventListener('change', function (e) {
+        var t = e.target;
+        if (t && (t.classList.contains('lt-size__input') || t.classList.contains('lt-bb-card__input'))) refresh();
+      });
+      refresh();
+      // Sticky-Leiste erst, wenn der Hero-Knopf nach oben aus dem Bild ist (vorher deckt
+      // sie mobil den ersten Bildschirm ab und sagt „In den Warenkorb“, bevor jemand die
+      // Kaufart gesehen hat).
+      var atc = section.querySelector('#lt-hero-atc');
+      function gate() {
+        var sticky = document.getElementById('lt-sticky-atc');
+        if (!sticky || !atc) return;
+        sticky.classList.toggle('lt-sticky-atc--held', atc.getBoundingClientRect().bottom > 0);
+      }
+      window.addEventListener('scroll', gate, { passive: true });
+      window.addEventListener('resize', gate);
+      gate();
+      setTimeout(gate, 400);
+    })();
+
   })();
 </script>
 
@@ -3002,6 +3120,47 @@
 }
 
 /* Inline-Dialog-Trigger (Trust-4) — wirkt wie verlinkter Text, nicht wie Button */
+/* Kompakte Kaufzone (Entwurf 22.10.2026, nur mit bb_compact): Pills mit Preis statt
+   Prozent, zwei Modus-Kacheln nebeneinander ohne Vorteilsliste, Hinweiszeile und ein
+   Grundpreis darunter, Ersparnis-Chip und eine Zeile unter dem Knopf, Sticky erst nach
+   dem Knopf. Alles unter der Root-Klasse, andere PDPs bleiben unberührt. */
+.lt-pdp-hero-section--compact .lt-size__save { display: none !important; }
+.lt-pdp-hero-section--compact .lt-size__pill { min-height: 56px; }
+.lt-pdp-hero-section--compact .lt-size__price { display: block; margin-top: 2px; font-size: 14px; line-height: 1.1; color: var(--lt-muted, #525252); }
+.lt-pdp-hero-section--compact .lt-bb { display: grid !important; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lt-pdp-hero-section--compact .lt-bb__or { display: none !important; }
+.lt-pdp-hero-section--compact .lt-bb-card__flag,
+.lt-pdp-hero-section--compact .lt-bb-card__badge,
+.lt-pdp-hero-section--compact .lt-bb-card__compare,
+.lt-pdp-hero-section--compact .lt-bb-card__unit,
+.lt-pdp-hero-section--compact .lt-bb-card__perks,
+.lt-pdp-hero-section--compact .lt-bb-card__radio { display: none !important; }
+.lt-pdp-hero-section--compact .lt-bb-card { margin: 0 !important; min-width: 0; }
+.lt-pdp-hero-section--compact .lt-bb-card:not(.is-selected) { background: var(--lt-surface-raised, #fff) !important; }
+.lt-pdp-hero-section--compact .lt-bb-card__body { padding: var(--space-3) !important; }
+.lt-pdp-hero-section--compact .lt-bb-card__head { display: block !important; }
+.lt-pdp-hero-section--compact .lt-bb-card__row { display: flex !important; flex-wrap: wrap; align-items: baseline; gap: 0 6px; }
+.lt-pdp-hero-section--compact .lt-bb-card__meta { display: contents; }
+.lt-pdp-hero-section--compact .lt-bb-card__title-row { order: 1; }
+.lt-pdp-hero-section--compact .lt-bb-card__prices { order: 2; display: block !important; text-align: left !important; }
+.lt-pdp-hero-section--compact .lt-bb-card__sub { order: 3; flex-basis: 100%; margin-top: 2px; font-size: var(--text-body-sm); color: var(--lt-muted, #525252); }
+.lt-pdp-hero-section--compact .lt-bb-card__title,
+.lt-pdp-hero-section--compact .lt-bb-card:not(.is-selected) .lt-bb-card__title { font-size: 16px; font-weight: 700 !important; }
+.lt-pdp-hero-section--compact .lt-bb-card .lt-bb-card__current,
+.lt-pdp-hero-section--compact .lt-bb-card.is-selected .lt-bb-card__current,
+.lt-pdp-hero-section--compact .lt-bb-card:not(.is-selected) .lt-bb-card__current { font-size: 16px !important; font-weight: 700 !important; color: var(--lt-text, #26251e) !important; }
+.lt-pdp-hero-section--compact .lt-bb__hint { margin: var(--space-2) 0 0; font-size: 15px; line-height: 1.4; color: var(--lt-muted, #525252); }
+.lt-pdp-hero-section--compact .lt-bb__unitline { margin: 2px 0 0; font-size: 13px; line-height: 1.3; color: rgba(38, 37, 30, 0.56); }
+.lt-pdp-hero-section--compact .lt-bb__unitline:empty { display: none; }
+.lt-pdp-hero-section--compact .lt-pdp-hero__post-cta--compact { gap: var(--space-2); margin-top: var(--space-3); }
+.lt-pdp-hero-section--compact .lt-save-chip { display: inline-block; padding: 4px 12px; border: 1px solid rgba(101, 192, 182, 0.45); border-radius: 4px; background: var(--color-benefit-bg, #e6f4f1); font-size: 15px; font-weight: 700; line-height: 1.4; color: var(--lt-text, #26251e); }
+.lt-pdp-hero-section--compact .lt-save-chip[hidden] { display: none; }
+.lt-pdp-hero-section--compact .lt-pdp-hero__post-line { margin: 0; font-size: 15px; line-height: 1.4; color: var(--lt-muted, #525252); text-align: center; }
+.lt-pdp-hero-section--compact .lt-pdp-hero__post-line-btn { appearance: none; -webkit-appearance: none; background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 0.125em; }
+.lt-pdp-hero-section--compact .lt-pdp-hero__trust { border-top: 0 !important; border-bottom: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; margin-top: var(--space-3) !important; }
+.lt-pdp-hero-section--compact .lt-pdp-hero__trust-item--note { margin-top: 0; }
+#lt-sticky-atc[data-lt-sticky-gate].lt-sticky-atc--held { visibility: hidden !important; pointer-events: none !important; }
+
 /* Compliance-Fussnote: abgesetzt von den drei Vorteils-Zeilen darueber, damit
    sie nicht als vierter Vorteil gelesen wird. Trennung ueber Weissraum und
    eine neutrale Haarlinie, nicht ueber Farbe. */
@@ -4219,6 +4378,23 @@
       "label": "Preis-Block separat anzeigen",
       "info": "Deaktivieren wenn der Preis ausschließlich im Value Stack (letzte zwei Zeilen) erscheinen soll. Bei Einmal-Kauf-Produkten ohne Abo auf false setzen.",
       "default": true
+    },
+    {
+      "type": "header",
+      "content": "Kompakte Kaufzone (Entwurf 22.10.2026)"
+    },
+    {
+      "type": "checkbox",
+      "id": "bb_compact",
+      "label": "Kompakte Kaufzone",
+      "default": false,
+      "info": "Pills mit Preis statt Prozent, zwei Kacheln nebeneinander ohne Vorteilsliste, eine Hinweiszeile plus Grundpreis darunter, Ersparnis-Chip und eine Zeile unter dem Knopf, keine Zahlarten-Icons, Sticky erst nach dem Knopf mit demselben Label. Nur für Produkte mit Größen-Auswahl und Abo gedacht (NMN)."
+    },
+    {
+      "type": "text",
+      "id": "compact_ship_text",
+      "label": "Kompakt: Versandzeile unter dem Knopf",
+      "default": "Versand in 1–2 Werktagen"
     },
     {
       "type": "checkbox",
