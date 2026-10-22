@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entwurf Quiz-Ergebnis 2026-10-22</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #26251e;
+    --ink-muted: #6b6a63;
+    --ground: #f7f7f4;
+    --ground-2: #f2f1ed;
+    --white: #ffffff;
+    --line: #e4e3dd;
+    --teal: #364f56;
+    --mint: #65c0b6;
+    --benefit: #e6f4f1;
+    --benefit-line: #c9e4df;
+    --warm: #d9594c;
+    --font-head: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --font-body: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif;
+    --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px; --s10: 40px;
+    --r: 16px; --r-full: 999px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--ground); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
+
+  /* Vorschau-Rahmen, nicht Teil der Seite */
+  .dev { position: sticky; top: 0; z-index: 50; background: var(--ink); color: #fff; font-size: 13px; padding: 10px 16px; display: flex; gap: 16px; flex-wrap: wrap; align-items: center; }
+  .dev strong { font-weight: 700; margin-right: 4px; }
+  .dev label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .dev input { accent-color: var(--mint); }
+  .stage { display: flex; justify-content: center; padding: 24px 0 64px; }
+  .phone { width: 390px; max-width: 100%; background: var(--ground); min-height: 844px; position: relative; }
+  @media (min-width: 420px) { .phone { box-shadow: 0 0 0 1px var(--line); border-radius: 24px; overflow: hidden; } }
+
+  /* Seite */
+  .top { position: absolute; top: var(--s3); right: var(--s4); }
+  .close { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: var(--white); color: var(--ink-muted); font-size: 18px; line-height: 1; display: grid; place-items: center; }
+  .wrap { padding: var(--s5) var(--s4) var(--s10); }
+  .kicker { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-muted); margin: 0 0 var(--s3); line-height: 36px; }
+
+  .card { background: var(--white); border: 1px solid var(--line); border-radius: var(--r); padding: var(--s4); }
+  .card + .card, .card + .block, .block + .card { margin-top: var(--s3); }
+
+  .bio-label { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-muted); text-align: center; margin: 0 0 var(--s4); }
+  .bio-nums { display: flex; justify-content: center; gap: var(--s10); }
+  .bio-side { text-align: center; }
+  .bio-side small { display: block; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-muted); margin-bottom: 2px; }
+  .bio-side b { display: block; font-family: var(--font-head); font-weight: 400; font-size: 44px; line-height: 1; }
+  .bio-side--bio b { color: var(--warm); }
+  .scale { position: relative; height: 2px; background: var(--line); margin: var(--s4) var(--s6) var(--s3); }
+  .scale i { position: absolute; top: -5px; width: 12px; height: 12px; border-radius: 50%; background: var(--white); border: 2px solid var(--ink-muted); transform: translateX(-50%); }
+  .scale i.bio { border-color: var(--warm); background: var(--warm); }
+  .scale em { position: absolute; top: 0; height: 2px; background: var(--warm); }
+  .bio-text { text-align: center; font-size: 14px; color: var(--ink-muted); margin: 0; }
+  .bio-text strong { color: var(--warm); font-weight: 700; }
+
+  .themes { list-style: none; margin: 0; padding: 0; }
+  .themes li { display: flex; align-items: baseline; justify-content: space-between; gap: var(--s3); padding: 9px 0; border-top: 1px solid var(--line); }
+  .themes li:first-child { border-top: 0; padding-top: 0; }
+  .themes li:last-child { padding-bottom: 0; }
+  .themes .t { font-family: var(--font-head); font-size: 17px; }
+  .genes { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+  .genes span { font-size: 11px; letter-spacing: .04em; padding: 2px 8px; border-radius: var(--r-full); background: var(--ground-2); color: var(--ink-muted); }
+
+  .ask { background: var(--benefit); border: 1px solid var(--benefit-line); border-radius: var(--r); padding: var(--s4); }
+  .ask p { margin: 0 0 var(--s3); font-size: 15px; }
+  .ask input { width: 100%; height: 50px; border: 1px solid var(--benefit-line); border-radius: var(--r-full); padding: 0 var(--s5); font: inherit; font-size: 16px; background: var(--white); color: var(--ink); }
+  .ask input::placeholder { color: #9a998f; }
+  .btn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 50px; margin-top: var(--s2); border: 0; border-radius: var(--r-full); background: var(--teal); color: #fff; font: inherit; font-size: 16px; font-weight: 700; text-decoration: none; }
+  .btn--ghost { background: var(--white); color: var(--ink); border: 1px solid var(--line); font-weight: 700; }
+  .fine { font-size: 12px; color: var(--ink-muted); margin: var(--s3) 0 0; line-height: 1.45; }
+
+  .side { display: flex; align-items: center; justify-content: space-between; gap: var(--s4); }
+  .side p { margin: 0; font-size: 14px; }
+  .side p b { display: block; font-family: var(--font-head); font-weight: 400; font-size: 17px; margin-bottom: 2px; }
+  .side a { white-space: nowrap; font-weight: 700; color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--ink); padding-bottom: 1px; }
+
+  .done { text-align: center; }
+  .done .t { font-family: var(--font-head); font-size: 20px; margin: 0 0 var(--s3); }
+
+  /* Zustände */
+  [data-only] { display: none; }
+  .phone[data-v="a"] [data-only="a"], .phone[data-v="b"] [data-only="b"] { display: block; }
+  .phone[data-v="a"] li[data-only="a"] { display: flex; }
+  .phone.sent [data-when="before"] { display: none; }
+  .phone:not(.sent) [data-when="after"] { display: none; }
+</style>
+</head>
+<body>
+
+<div class="dev">
+  <strong>Vorschau-Schalter</strong>
+  <label><input type="radio" name="v" value="a" checked> A · E-Mail zuerst</label>
+  <label><input type="radio" name="v" value="b"> B · Kauf zuerst</label>
+  <label><input type="checkbox" id="sent"> nach dem Absenden</label>
+</div>
+
+<div class="stage">
+<div class="phone" id="phone" data-v="a">
+
+  <div class="top"><button class="close" aria-label="Schließen">×</button></div>
+
+  <main class="wrap">
+    <p class="kicker">Dein Ergebnis</p>
+
+    <!-- 1 · Höhepunkt: die Zahl -->
+    <section class="card">
+      <p class="bio-label">Geschätztes biologisches Alter</p>
+      <div class="bio-nums">
+        <div class="bio-side"><small>Chronologisch</small><b>48</b></div>
+        <div class="bio-side bio-side--bio"><small>Biologisch</small><b>53</b></div>
+      </div>
+      <div class="scale" aria-hidden="true"><em style="left:50%;width:21%"></em><i style="left:50%"></i><i class="bio" style="left:71%"></i></div>
+      <p class="bio-text">Rund <strong>5 Jahre</strong> über deinem chronologischen Alter, geschätzt aus deinen Antworten.</p>
+
+      <!-- B: Kauf als Haupthandlung direkt an der Zahl -->
+      <div data-only="b">
+        <a class="btn" href="/products/lifetime-age-dna?qz=1" style="margin-top:var(--s5)">Echtes Alter messen lassen · 349 €</a>
+        <p class="fine" style="text-align:center">Im Labor bestimmt, nicht geschätzt. 30 Tage Widerrufsrecht.</p>
+      </div>
+    </section>
+
+    <!-- 2 · Die drei Themen, offen und kurz -->
+    <section class="card">
+      <p class="kicker" style="margin-bottom:var(--s2);line-height:1.4">Deine drei Themen</p>
+      <ul class="themes">
+        <li><span class="t">Schlaf</span><span class="genes"><span>PER3</span><span>CYP1A2</span><span>ADORA2A</span></span></li>
+        <li><span class="t">Energie</span><span class="genes"><span>MTHFR</span><span>VDR</span><span>IL6</span><span>TLR4</span></span></li>
+        <li><span class="t">Stress</span><span class="genes"><span>COMT</span><span>BDNF</span></span></li>
+      </ul>
+    </section>
+
+    <!-- 3 · Die eine Handlung: E-Mail (A: Haupthandlung, B: Nebenhandlung) -->
+    <section class="ask block">
+      <div data-when="before">
+        <p data-only="a" style="display:block">Was hinter deinen drei Themen steckt und welche Gene es entscheiden, steht in deinem Longevity-Plan.</p>
+        <p data-only="b">Dein Longevity-Plan erklärt deine drei Themen und die Gene dahinter.</p>
+        <input type="email" placeholder="deine@email.de" autocomplete="email" aria-label="E-Mail-Adresse">
+        <button class="btn" type="button">Plan öffnen</button>
+        <p class="fine">Sofort auf dem Bildschirm, der Link dazu per Mail. In den Tagen danach sechs Mails zu deinen Themen und unserem Test. Abmelden jederzeit.</p>
+      </div>
+      <div data-when="after" class="done">
+        <p class="t">Dein Longevity-Plan ist fertig.</p>
+        <a class="btn" href="/pages/dein-longevity-plan">Longevity-Plan öffnen</a>
+        <p class="fine">Der Link ist auch per Mail unterwegs. Sonst wird dein Ergebnis nirgends gespeichert.</p>
+      </div>
+    </section>
+
+    <!-- 4 · A: der Test als zweiter Weg, klein -->
+    <section class="card side" data-only="a" style="display:none">
+      <p><b>Lieber messen statt schätzen?</b>Der AGE &amp; DNA-Test bestimmt dein biologisches Alter im Labor. 349 €, 30 Tage Widerrufsrecht.</p>
+      <a href="/products/lifetime-age-dna?qz=1">Zum Test →</a>
+    </section>
+  </main>
+</div>
+</div>
+
+<script>
+  const phone = document.getElementById('phone');
+  document.querySelectorAll('input[name=v]').forEach(r => r.addEventListener('change', () => { phone.dataset.v = r.value; fix(); }));
+  document.getElementById('sent').addEventListener('change', e => phone.classList.toggle('sent', e.target.checked));
+  function fix() {
+    // Inline-Styles der A-Elemente folgen dem Schalter
+    const a = phone.dataset.v === 'a';
+    phone.querySelectorAll('[data-only="a"]').forEach(el => el.style.display = a ? (el.classList.contains('side') ? 'flex' : 'block') : 'none');
+  }
+  fix();
+</script>
+</body>
+</html>
