@@ -49,7 +49,7 @@
   .pill{background:var(--card);border:1px solid var(--line);border-radius:var(--r-s);padding:var(--s3) var(--s2);text-align:center;cursor:pointer}
   .pill b{display:block;font-size:1.05rem}
   .pill small{display:block;color:var(--ink-2);font-size:var(--t-small)}
-  .pill i{display:block;font-style:normal;color:var(--ink-3);font-size:.75rem;margin-top:2px}
+  .pill i{display:block;font-style:normal;color:var(--teal);font-size:.8125rem;margin-top:2px}
   .pill.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
   .modes{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s4)}
   .mode{background:var(--card);border:1px solid var(--line);border-radius:var(--r-s);padding:var(--s3) var(--s3);cursor:pointer;text-align:left}
@@ -172,16 +172,17 @@
       <div class="box">
         <div class="lbl">Größe</div>
         <div class="sizes" id="sizes">
-          <button class="pill on" data-g="30" data-once="33.90" data-sub="28.90" data-takt="2"><b>30 g</b><small>33,90 €</small><i>113,00 €/100 g</i></button>
-          <button class="pill" data-g="60" data-once="59.90" data-sub="49.90" data-takt="4"><b>60 g</b><small>59,90 €</small><i>99,83 €/100 g</i></button>
-          <button class="pill" data-g="90" data-once="80.90" data-sub="68.90" data-takt="6"><b>90 g</b><small>80,90 €</small><i>89,89 €/100 g</i></button>
+          <button class="pill on" data-g="30" data-once="33.90" data-sub="28.90" data-takt="2"><b>30 g</b><small>33,90 €</small><i>&nbsp;</i></button>
+          <button class="pill" data-g="60" data-once="59.90" data-sub="49.90" data-takt="4"><b>60 g</b><small>59,90 €</small><i>spart 7,90 €</i></button>
+          <button class="pill" data-g="90" data-once="80.90" data-sub="68.90" data-takt="6"><b>90 g</b><small>80,90 €</small><i>spart 20,80 €</i></button>
         </div>
 
         <div class="modes" id="modes">
-          <button class="mode on" data-mode="sub"><b>Im Abo <span style="display:inline;color:var(--ink)" id="p-sub">28,90 €</span></b><span>Jederzeit kündbar</span></button>
+          <button class="mode on" data-mode="sub"><b>Im Abo <span style="display:inline;color:var(--ink)" id="p-sub">28,90 €</span></b><span id="s-sub">spart 5,00 €, jederzeit kündbar</span></button>
           <button class="mode" data-mode="once"><b>Einmalig <span style="display:inline;color:var(--ink)" id="p-once">33,90 €</span></b><span>Ohne Bindung</span></button>
         </div>
         <p class="hint" id="hint">Lieferung alle 2 Monate, versandfrei. Kündbar auch nach der ersten Lieferung.</p>
+        <p class="hint" id="unit" style="color:var(--ink-3);font-size:.8125rem;margin-top:var(--s1)">96,33 €/100 g</p>
 
         <button class="cta" id="cta">Abo starten, 28,90 €</button>
         <p class="under">Versand in 1–2 Werktagen · 30 Tage Geld zurück</p>
@@ -291,6 +292,8 @@
     document.getElementById('st-cta').textContent=label;
     document.getElementById('p-sub').textContent=eur(state.sub);
     document.getElementById('p-once').textContent=eur(state.once);
+    document.getElementById('s-sub').textContent='spart '+eur(state.once-state.sub)+', jederzeit kündbar';
+    document.getElementById('unit').textContent=eur(p/(+state.g)*100)+'/100 g';
     document.getElementById('st-title').textContent='NMN-Pulver '+state.g+' g';
     document.getElementById('st-sub').textContent=state.mode==='sub'?'Im Abo, alle '+state.takt+' Monate':'Einmalig';
     document.getElementById('hint').textContent=state.mode==='sub'
