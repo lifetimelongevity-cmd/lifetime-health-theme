@@ -1537,6 +1537,13 @@
             data-ajax-cart
             data-js-product-form
           {% endif %}
+          {%- comment -%} Direktweg zur Kasse (22.10.2026, Conversion Top-4): der Kauf-Button legt in
+              den Warenkorb und oeffnet sofort die Kasse, der Drawer bleibt zu. Nur im Test-Template
+              gesetzt (reiner Test-Warenkorb). Sticky klickt denselben Button, laeuft also mit.
+              component-product-form.js liest das Attribut nach dem erfolgreichen /cart/add.js. {%- endcomment -%}
+          {% if section.settings.direct_checkout %}
+            data-direct-checkout
+          {% endif %}
         >
           {%- form 'product',
             product,
@@ -4236,6 +4243,13 @@
     },
     {
       "type": "checkbox",
+      "id": "direct_checkout",
+      "label": "Kauf-Button direkt zur Kasse",
+      "info": "Legt in den Warenkorb und öffnet sofort die Kasse, der Warenkorb-Drawer bleibt zu (Buy-Box und Sticky). Für reine Test-Käufe gedacht. Beschriftung der Buttons passend wählen, z. B. „Test bestellen“. Express-Kasse bleibt unberührt.",
+      "default": false
+    },
+    {
+      "type": "checkbox",
       "id": "show_ship_cutoff",
       "label": "Versandfrist unter dem Button",
       "info": "Restzeit bis zum Versand-Cutoff. Erscheint nur, wenn in den Theme-Einstellungen (Warenkorb > Versandfrist) eine Uhrzeit steht.",
@@ -4657,7 +4671,7 @@
       "type": "text",
       "id": "cta_label",
       "label": "Haupt-Button",
-      "info": "Der Button legt in den Warenkorb, er führt nicht direkt zum Checkout. Beschriftung entsprechend wählen.",
+      "info": "Der Button legt in den Warenkorb. Mit „Kauf-Button direkt zur Kasse“ geht es sofort weiter zur Kasse. Beschriftung entsprechend wählen.",
       "default": "Jetzt kaufen →"
     },
     {

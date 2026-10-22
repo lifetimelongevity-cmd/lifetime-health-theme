@@ -176,7 +176,9 @@
     return call.then(function (response) {
       if (!response.ok) return response;
       // Antwort klonen, damit der aufrufende Code seinen Body unangetastet bekommt.
-      track(action, response).catch(function () { /* Tracking darf den Kauf nie blockieren */ });
+      // Zusage nach aussen reichen: der Direktweg zur Kasse (component-product-form.js,
+      // data-direct-checkout) wartet darauf, bevor er die Seite verlaesst. 2026-10-22
+      window.__ltKlaviyoAtcPending = track(action, response).catch(function () { /* Tracking darf den Kauf nie blockieren */ });
       return response;
     });
   };

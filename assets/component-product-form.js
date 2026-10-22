@@ -737,7 +737,13 @@ if ( typeof ProductForm !== 'function' ) {
 							}
 							return fetch('?section_id=helper-cart');
 						} else {
-							if ( this.cartType == 'page' ) {
+							if ( this.hasAttribute('data-direct-checkout') ) {
+								// Direktweg zur Kasse (lt-pdp-hero, Setting direct_checkout, 22.10.2026):
+								// kein Drawer, kein add-to-cart-Event. Der Button bleibt im Ladezustand,
+								// bis die Kasse laedt.
+								this._goToCheckout(submitButton);
+								return false;
+							} else if ( this.cartType == 'page' ) {
 								document.location.href = KROWN.settings.routes.cart_url;
 								return false;
 							} else if ( this.cartType == 'popup' ) {
@@ -799,6 +805,22 @@ if ( typeof ProductForm !== 'function' ) {
 					});
 
 			}
+		}
+
+		_goToCheckout(submitButton) {
+			// Erst Klaviyo "Added to Cart" (lt-klaviyo-atc.js haengt die Zusage an
+			// window.__ltKlaviyoAtcPending) und den Shopify-Pixel (GA4 add_to_cart)
+			// abschliessen lassen, dann wechseln. Hoechstens 1,5 s warten, Tracking
+			// darf den Kauf nie aufhalten.
+			const go = () => {
+				if ( submitButton ) submitButton.classList.add('working');
+				document.location.href = '/checkout';
+			};
+			const pending = window.__ltKlaviyoAtcPending;
+			const settle = pending && typeof pending.then === 'function'
+				? Promise.race([pending, new Promise(resolve => setTimeout(resolve, 1500))])
+				: Promise.resolve();
+			settle.then(() => setTimeout(go, 250), () => setTimeout(go, 250));
 		}
 
 		_serializeForm(form) {
