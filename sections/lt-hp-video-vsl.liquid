@@ -33,6 +33,15 @@
           {%- if section.settings.role != blank -%}<span>{{ section.settings.role | escape }}</span>{%- endif -%}
         </p>
       {%- endif -%}
+      {%- comment -%} Forschungs-Absatz unter der Rollenzeile (BJ 22.10.2026, aus dem Entwurf vom 22.10.) {%- endcomment -%}
+      {%- if section.settings.forschung_text != blank -%}
+        <div class="ltvsl__forschung">
+          <p class="ltvsl__forschung-text">{{ section.settings.forschung_text | escape | newline_to_br }}</p>
+          {%- if section.settings.forschung_link_label != blank and section.settings.forschung_link_url != blank -%}
+            <a class="ltvsl__forschung-link" href="{{ section.settings.forschung_link_url }}">{{ section.settings.forschung_link_label | escape }}</a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
     </div>
 
     {%- if section.settings.video_id != blank -%}
@@ -103,6 +112,29 @@
   line-height: 1.45;
   color: var(--color-text-on-dark-muted);
 }
+.ltvsl__forschung {
+  margin-top: var(--space-5);
+  max-width: 520px;
+}
+.ltvsl__forschung-text {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--color-text-on-dark-muted);
+}
+.ltvsl__forschung-link {
+  display: inline-block;
+  margin-top: var(--space-3);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--color-paper);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 1px;
+}
+.ltvsl__forschung-link:hover { opacity: .8; }
 .ltvsl__player {
   position: relative;
   aspect-ratio: 9 / 16;
@@ -216,6 +248,10 @@
     { "type": "text", "id": "quote", "label": "Zitat (ohne Anführungszeichen)", "default": "Longevity beginnt mit Daten, nicht mit Annahmen." },
     { "type": "text", "id": "name", "label": "Name", "default": "Prof. Dr. med. Volker Limmroth" },
     { "type": "text", "id": "role", "label": "Rolle", "default": "Chefarzt der Neurologie, Köln-Merheim · Chief Scientific Officer LIFETIME", "info": "Nur Angaben aus docs/limmroth-faktenblatt.md" },
+    { "type": "header", "content": "Forschungs-Absatz unter der Rollenzeile" },
+    { "type": "textarea", "id": "forschung_text", "label": "Absatz", "default": "Ein biologisches Alter bekommst du an vielen Stellen. Wir erforschen, ab wann eine Veränderung echt ist und kein Zufall. Was wir finden, veröffentlichen wir.", "info": "Leer lassen = Absatz und Link ausblenden." },
+    { "type": "text", "id": "forschung_link_label", "label": "Linktext", "default": "Wie wir forschen →" },
+    { "type": "url", "id": "forschung_link_url", "label": "Linkziel" },
     { "type": "header", "content": "Video" },
     { "type": "text", "id": "video_id", "label": "YouTube-ID", "default": "Tm8yZ40wmTY" },
     { "type": "text", "id": "video_title", "label": "Titel des Videos (für Screenreader)", "default": "Prof. Dr. Limmroth im Podcast" },
