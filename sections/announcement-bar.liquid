@@ -91,10 +91,23 @@
               {%- if product.category.name == 'Medizinische Tests' or product.handle contains 'bundle' -%}
                 {%- assign ann_guarantee = '30 Tage Rückgaberecht' -%}
               {%- endif -%}
+              {%- comment -%}
+                [labor] = der Beleg, den Kunden an diesem Produkt am meisten schaetzen
+                (BJ 22.10.2026, ersetzt die Garantiezeile auf Produktseiten): beim Test
+                das Labor, bei NMN der Rohstoff, sonst das Siegelwort. Kurz halten, die
+                Leiste ist mobil einzeilig.
+              {%- endcomment -%}
+              {%- assign ann_labor = 'Laborgeprüft' -%}
+              {%- if product.category.name == 'Medizinische Tests' -%}
+                {%- assign ann_labor = 'Analyse bei Eurofins' -%}
+              {%- elsif product.handle contains 'nmn' -%}
+                {%- assign ann_labor = 'Uthever®, laborgeprüft' -%}
+              {%- endif -%}
               {%- assign ann_text = ann_source
                   | replace: '[rating]', ann_loox_rating
                   | replace: '[count]', ann_loox_count
-                  | replace: '[garantie]', ann_guarantee -%}
+                  | replace: '[garantie]', ann_guarantee
+                  | replace: '[labor]', ann_labor -%}
               <span class="announcement" {{ block.shopify_attributes }}>
                 {%- if block.settings.link != blank -%}
                   <a
@@ -280,7 +293,7 @@
           "type": "text",
           "id": "product_text",
           "label": "Produktseiten-Text",
-          "info": "Nur auf Produktseiten sichtbar, ersetzt den Text oben. Leer lassen = Standardtext (mit [rating]/[count]) auch auf Produktseiten. [garantie] setzt je Produkt 30 Tage Rückgaberecht (Tests, Bundles) oder 90 Tage Zufriedenheitsgarantie ein.",
+          "info": "Nur auf Produktseiten sichtbar, ersetzt den Text oben. Leer lassen = Standardtext (mit [rating]/[count]) auch auf Produktseiten. [garantie] setzt je Produkt 30 Tage Rückgaberecht (Tests, Bundles) oder 90 Tage Zufriedenheitsgarantie ein. [labor] setzt je Produkt „Analyse bei Eurofins“ (Tests), „Uthever®, laborgeprüft“ (NMN) oder „Laborgeprüft“ ein.",
           "default": "Lieferung in 2–3 Werktagen · Kauf auf Rechnung (Klarna) · [garantie]"
         },
         {
