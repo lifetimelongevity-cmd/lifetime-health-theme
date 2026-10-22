@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entwurf NMN-PDP 2026-10-22</title>
+<meta name="description" content="Entwurf der NMN-Produktseite nach Progressive Disclosure, Hicks Gesetz und Don Norman. Nur Vorschau, kein Produktivcode.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#26251e; --ink-2:#5e5c54; --ink-3:#8a887f;
+    --bg:#f7f7f4; --bg-2:#f2f1ed; --card:#ffffff; --line:#e3e1da;
+    --teal:#364f56; --teal-ink:#ffffff; --mint:#65c0b6; --mint-bg:#e9f5f3;
+    --r:12px; --r-s:8px;
+    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px;
+    --t-title:1.75rem; --t-text:1rem; --t-small:.875rem;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:Lato,system-ui,sans-serif;font-size:var(--t-text);line-height:1.5;color:var(--ink);background:var(--bg)}
+  a{color:inherit}
+  h1,h2,h3,p{margin:0}
+  button{font:inherit;color:inherit}
+  .wrap{max-width:1040px;margin:0 auto;padding:0 var(--s4)}
+
+  /* Header, nur Platzhalter fuer den Rahmen */
+  .hd{height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:var(--bg)}
+  .logo{font-size:1.4rem;letter-spacing:.22em}
+  .logo b{font-weight:700}.logo span{font-weight:400}
+  .hd__r{display:flex;gap:var(--s4);color:var(--ink-2);font-size:var(--t-small)}
+
+  /* Hero */
+  .hero{padding:var(--s4) 0 var(--s6)}
+  .gal{background:var(--teal);border-radius:var(--r);aspect-ratio:4/3;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .gal img{height:88%;width:auto;display:block}
+  .rating{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s4);font-size:var(--t-small);color:var(--ink-2)}
+  .rating .stars{color:#e8b43a;letter-spacing:.05em}
+  .rating b{color:var(--ink)}
+  h1{font-size:var(--t-title);line-height:1.15;font-weight:700;margin-top:var(--s2)}
+  .sub{margin-top:var(--s2);color:var(--ink-2)}
+  .sub a{color:var(--teal);text-decoration:underline;text-underline-offset:3px}
+
+  /* Buybox */
+  .box{margin-top:var(--s5)}
+  .lbl{font-size:var(--t-small);color:var(--ink-2);margin-bottom:var(--s2)}
+  .sizes{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2)}
+  .pill{background:var(--card);border:1px solid var(--line);border-radius:var(--r-s);padding:var(--s3) var(--s2);text-align:center;cursor:pointer}
+  .pill b{display:block;font-size:1.05rem}
+  .pill small{display:block;color:var(--ink-2);font-size:var(--t-small)}
+  .pill i{display:block;font-style:normal;color:var(--ink-3);font-size:.75rem;margin-top:2px}
+  .pill.on{border-color:var(--teal);box-shadow:inset 0 0 0 1px var(--teal)}
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2);margin-top:var(--s4)}
+  .mode{background:var(--card);border:1px solid var(--line);border-radius:var(--r-s);padding:var(--s3) var(--s3);cursor:pointer;text-align:left}
+  .mode b{display:block}
+  .mode span{display:block;font-size:var(--t-small);color:var(--ink-2)}
+  .mode.on{border-color:var(--teal);box-shadow:inset 0 0 0 1px var(--teal);background:var(--mint-bg)}
+  .hint{margin-top:var(--s2);font-size:var(--t-small);color:var(--ink-2)}
+  .cta{display:block;width:100%;margin-top:var(--s4);padding:var(--s4);border:0;border-radius:999px;background:var(--teal);color:var(--teal-ink);font-weight:700;font-size:1.05rem;cursor:pointer}
+  .under{margin-top:var(--s3);font-size:var(--t-small);color:var(--ink-2);text-align:center}
+  .pay{margin-top:var(--s2);font-size:.75rem;color:var(--ink-3);text-align:center}
+
+  /* Laden */
+  details{border-top:1px solid var(--line)}
+  details:last-of-type{border-bottom:1px solid var(--line)}
+  summary{list-style:none;cursor:pointer;padding:var(--s3) 0;display:flex;justify-content:space-between;gap:var(--s3)}
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:"+";color:var(--ink-3);flex:none}
+  details[open] summary::after{content:"–"}
+  .d-body{padding:0 0 var(--s4);color:var(--ink-2);font-size:var(--t-small)}
+  .d-body p+p{margin-top:var(--s2)}
+  .d-body a{color:var(--teal)}
+  .why{margin-top:var(--s4)}
+  .why summary{font-size:var(--t-small);color:var(--ink-2);justify-content:center}
+  .why summary::after{content:"";}
+  .why summary u{text-decoration-style:dotted;text-underline-offset:3px}
+
+  /* Belege */
+  .proof{padding:var(--s6) 0;background:var(--bg-2)}
+  .cards{display:grid;gap:var(--s3)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4)}
+  .card h2{font-size:var(--t-small);color:var(--ink-2);font-weight:400;text-transform:uppercase;letter-spacing:.06em}
+  .big{font-size:2rem;font-weight:700;line-height:1.1;margin-top:var(--s2)}
+  .big small{font-size:var(--t-small);font-weight:400;color:var(--ink-2)}
+  .card p{margin-top:var(--s2)}
+  .card p.m{color:var(--ink-2);font-size:var(--t-small)}
+  .card details{margin-top:var(--s3);border-bottom:0}
+  .card details:last-of-type{border-bottom:0}
+  .card summary{padding:var(--s2) 0;font-size:var(--t-small);color:var(--teal)}
+  table{border-collapse:collapse;width:100%;font-size:var(--t-small)}
+  td{padding:var(--s1) 0;vertical-align:top}
+  td:last-child{text-align:right;white-space:nowrap}
+  .q{border-top:1px solid var(--line);padding:var(--s3) 0}
+  .q:first-of-type{border-top:0;padding-top:0}
+  .q p{margin:0}
+  .q small{display:block;color:var(--ink-3);margin-top:var(--s1)}
+  .person{display:flex;gap:var(--s3);align-items:center;margin-top:var(--s2)}
+  .person img{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:none}
+  .person b{display:block}
+  .person span{font-size:var(--t-small);color:var(--ink-2)}
+
+  /* FAQ */
+  .faq{padding:var(--s6) 0 var(--s8)}
+  .faq h2{font-size:1.25rem;margin-bottom:var(--s3)}
+  .faq summary{font-weight:700}
+
+  /* Sticky */
+  .sticky{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:var(--s3) var(--s4);display:flex;align-items:center;gap:var(--s3);transform:translateY(110%);transition:transform .2s}
+  .sticky.show{transform:none}
+  .sticky .meta{flex:1;font-size:var(--t-small);color:var(--ink-2);line-height:1.3}
+  .sticky .meta b{display:block;color:var(--ink)}
+  .sticky .cta{width:auto;margin:0;padding:var(--s3) var(--s5)}
+
+  .ft{padding:var(--s6) 0;border-top:1px solid var(--line);font-size:var(--t-small);color:var(--ink-3)}
+
+  @media (min-width:840px){
+    :root{--t-title:2.25rem}
+    .hero{padding:var(--s6) 0 var(--s7)}
+    .hero .wrap{display:grid;grid-template-columns:1fr 1fr;gap:var(--s7);align-items:start}
+    .gal{position:sticky;top:var(--s5);aspect-ratio:1/1}
+    .gal img{width:78%;height:auto}
+    .rating{margin-top:0}
+    .cards{grid-template-columns:repeat(3,1fr);align-items:start}
+    .faq .wrap{max-width:680px}
+  }
+</style>
+</head>
+<body>
+
+<header class="hd wrap">
+  <div class="logo"><span>LIFE</span><b>TIME</b></div>
+  <div class="hd__r"><span>Suche</span><span>Warenkorb</span><span>Menü</span></div>
+</header>
+
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div class="gal">
+      <img src="https://www.lifetime-health.de/cdn/shop/files/01-nmn-pulver-uthever-30g-vorderseite_grande.jpg" alt="LIFETIME NMN-Pulver, Beutel mit 30 g">
+    </div>
+
+    <div>
+      <div class="rating"><span class="stars">★★★★★</span> <b>4,7</b> · 239 Bewertungen</div>
+      <h1>NMN-Pulver mit Laborbericht</h1>
+      <p class="sub">Uthever®, jede Charge in Mainz nachgemessen. <a href="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/Pruefbericht_L-25-09126.pdf" target="_blank" rel="noopener">Prüfbericht ansehen</a></p>
+
+      <div class="box">
+        <div class="lbl">Größe</div>
+        <div class="sizes" id="sizes">
+          <button class="pill on" data-g="30" data-once="33.90" data-sub="28.90" data-takt="2"><b>30 g</b><small>33,90 €</small><i>113,00 €/100 g</i></button>
+          <button class="pill" data-g="60" data-once="59.90" data-sub="49.90" data-takt="4"><b>60 g</b><small>59,90 €</small><i>99,83 €/100 g</i></button>
+          <button class="pill" data-g="90" data-once="80.90" data-sub="68.90" data-takt="6"><b>90 g</b><small>80,90 €</small><i>89,89 €/100 g</i></button>
+        </div>
+
+        <div class="modes" id="modes">
+          <button class="mode on" data-mode="sub"><b>Im Abo <span style="display:inline;color:var(--ink)" id="p-sub">28,90 €</span></b><span>Jederzeit kündbar</span></button>
+          <button class="mode" data-mode="once"><b>Einmalig <span style="display:inline;color:var(--ink)" id="p-once">33,90 €</span></b><span>Ohne Bindung</span></button>
+        </div>
+        <p class="hint" id="hint">Lieferung alle 2 Monate, versandfrei. Kündbar auch nach der ersten Lieferung.</p>
+
+        <button class="cta" id="cta">Abo starten, 28,90 €</button>
+        <p class="under">Meist morgen verschickt · 30 Tage Geld zurück</p>
+        <p class="pay">PayPal · Klarna Rechnung · Apple Pay · Kreditkarte</p>
+
+        <details class="why">
+          <summary><u>Nur zu Forschungs- und Analysezwecken. Warum?</u></summary>
+          <div class="d-body">
+            <p>NMN gilt in der EU als Novel Food und ist als Lebensmittel noch nicht zugelassen. Am 25. September 2026 haben die Mitgliedstaaten der Zulassung zugestimmt, die Verordnung im Amtsblatt steht aus. Bis dahin geben wir NMN ausschließlich zu Forschungs- und Analysezwecken ab, ohne Verzehrempfehlung.</p>
+            <p><a href="/pages/nmn-deutschland">Rechtsstand im Detail</a></p>
+          </div>
+        </details>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="proof">
+  <div class="wrap cards">
+
+    <div class="card">
+      <h2>Was drin ist</h2>
+      <div class="big">100,1 % <small>NMN-Gehalt</small></div>
+      <p class="m">Charge 20250917 · Limbach Analytics, Mainz · 1H-NMR</p>
+      <p>Schwermetalle: 4 von 4 unter der Bestimmungsgrenze.</p>
+      <details>
+        <summary>Einzelwerte und Prüfdetails</summary>
+        <div class="d-body">
+          <table>
+            <tr><td>NMN-Gehalt</td><td>100,1 ± 1,3 %</td></tr>
+            <tr><td>Blei</td><td>&lt; 0,05 mg/kg</td></tr>
+            <tr><td>Cadmium</td><td>&lt; 0,005 mg/kg</td></tr>
+            <tr><td>Arsen</td><td>&lt; 0,01 mg/kg</td></tr>
+            <tr><td>Quecksilber</td><td>&lt; 0,01 mg/kg</td></tr>
+          </table>
+          <p>Geprüft am 11.11.2025, DAkkS-akkreditiert nach DIN EN ISO/IEC 17025. Die Chargennummer steht auf der Rückseite deines Beutels.</p>
+          <p>Zum Vergleich: Von 18 Handelsprodukten, die die National University of Singapore 2024 nachgemessen hat, enthielten einige gar kein NMN. <a href="/blogs/longevity-blog/nmn-gehalt-marktanalysen">Die Untersuchung</a></p>
+          <p><a href="/pages/nmn-pruefberichte">Alle Prüfberichte je Charge</a></p>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>Wer dahintersteht</h2>
+      <div class="person">
+        <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/volker-podcast.png" alt="">
+        <div><b>Prof. Dr. med. Volker Limmroth</b><span>Chefarzt Neurologie, prüft alles, was wir zu NMN veröffentlichen</span></div>
+      </div>
+      <details>
+        <summary>Rohstoff, Herstellung, Firma</summary>
+        <div class="d-body">
+          <p>Uthever®: patentierter Markenrohstoff mit dokumentierter Herkunft, der erste NMN-Rohstoff mit positivem EFSA-Gutachten.</p>
+          <p>Hergestellt nach GMP-Standard, jede Charge mit eigener Nummer.</p>
+          <p>LIFETIME ist die Diga Health GmbH, Köln, Amtsgericht Köln HRB 64399.</p>
+        </div>
+      </details>
+    </div>
+
+    <div class="card">
+      <h2>Was Kunden sagen</h2>
+      <div class="q" style="margin-top:var(--s2)"><p>Habe einiges verglichen. Hier ist die Reinheit am transparentesten dokumentiert.</p><small>Hannelore M.</small></div>
+      <div class="q"><p>Klar deklariert, Laborwerte einsehbar. Genau das will ich.</p><small>Hans-Werner G.</small></div>
+      <div class="q"><p>Bestelle alle drei Monate nach. Alles klappt zuverlässig.</p><small>Christa V.</small></div>
+      <details>
+        <summary>Alle 239 Bewertungen</summary>
+        <div class="d-body"><p>Hier öffnet sich im Theme das Loox-Widget mit allen Bewertungen, Schnitt 4,7.</p></div>
+      </details>
+    </div>
+
+  </div>
+</section>
+
+<section class="faq">
+  <div class="wrap">
+    <h2>Häufige Fragen</h2>
+    <details><summary>Ist NMN in Deutschland legal?</summary><div class="d-body"><p>Ja, der Kauf ist legal. Als Lebensmittel ist NMN in der EU noch nicht zugelassen, deshalb geben wir es zu Forschungs- und Analysezwecken ab. <a href="/blogs/longevity-blog/ist-nmn-in-deutschland-legal">Der ganze Rechtsstand</a></p></div></details>
+    <details><summary>Gibt es eine Verzehrempfehlung?</summary><div class="d-body"><p>Nein. Wir geben keine Einnahme- oder Dosierungsempfehlung.</p></div></details>
+    <details><summary>Kann ich das Abo jederzeit kündigen?</summary><div class="d-body"><p>Ja. Pausieren, ändern oder kündigen im Kundenkonto, ohne Frist, ohne Anruf, auch direkt nach der ersten Lieferung.</p></div></details>
+    <details><summary>Wie funktioniert die Geld-zurück-Garantie?</summary><div class="d-body"><p>Hält deine erste Lieferung nicht, was wir hier beschreiben, bekommst du innerhalb von 30 Tagen den vollen Betrag zurück. Eine E-Mail genügt. Gilt einmalig und im Abo, das Widerrufsrecht bleibt unberührt.</p></div></details>
+    <details><summary>Wie lagere ich das Pulver?</summary><div class="d-body"><p>Kühl, trocken, lichtgeschützt, nach dem Öffnen luftdicht verschließen. Haltbar etwa 24 Monate ab Herstellung, Datum auf der Rückseite.</p></div></details>
+  </div>
+</section>
+</main>
+
+<footer class="ft wrap">Entwurf 22.10.2026. Footer wie im Theme.</footer>
+
+<div class="sticky" id="sticky">
+  <div class="meta"><b id="st-title">NMN-Pulver 30 g</b><span id="st-sub">Im Abo, alle 2 Monate</span></div>
+  <button class="cta" id="st-cta">Abo starten, 28,90 €</button>
+</div>
+
+<script>
+(function(){
+  var sizes=document.querySelectorAll('#sizes .pill'), modes=document.querySelectorAll('#modes .mode');
+  var state={g:'30',once:33.90,sub:28.90,takt:'2',mode:'sub'};
+  function eur(n){return n.toFixed(2).replace('.',',')+' €';}
+  function render(){
+    var p=state.mode==='sub'?state.sub:state.once;
+    var label=(state.mode==='sub'?'Abo starten, ':'Einmalig kaufen, ')+eur(p);
+    document.getElementById('cta').textContent=label;
+    document.getElementById('st-cta').textContent=label;
+    document.getElementById('p-sub').textContent=eur(state.sub);
+    document.getElementById('p-once').textContent=eur(state.once);
+    document.getElementById('st-title').textContent='NMN-Pulver '+state.g+' g';
+    document.getElementById('st-sub').textContent=state.mode==='sub'?'Im Abo, alle '+state.takt+' Monate':'Einmalig';
+    document.getElementById('hint').textContent=state.mode==='sub'
+      ?'Lieferung alle '+state.takt+' Monate, versandfrei. Kündbar auch nach der ersten Lieferung.'
+      :(state.once<49?'Zzgl. 4,90 € Versand, versandfrei ab 49 €.':'Versandfrei.');
+  }
+  sizes.forEach(function(b){b.addEventListener('click',function(){
+    sizes.forEach(function(x){x.classList.remove('on')}); b.classList.add('on');
+    state.g=b.dataset.g; state.once=+b.dataset.once; state.sub=+b.dataset.sub; state.takt=b.dataset.takt; render();
+  })});
+  modes.forEach(function(b){b.addEventListener('click',function(){
+    modes.forEach(function(x){x.classList.remove('on')}); b.classList.add('on'); state.mode=b.dataset.mode; render();
+  })});
+  var st=document.getElementById('sticky'), cta=document.getElementById('cta');
+  new IntersectionObserver(function(e){ st.classList.toggle('show', !e[0].isIntersecting && e[0].boundingClientRect.top<0); },{threshold:0}).observe(cta);
+  render();
+})();
+</script>
+</body>
+</html>
