@@ -65,7 +65,7 @@
     --ltbg-card-bg:  {{ section.settings.color_card_bg }};
     --ltbg-text:     {{ bg_text }};
     --ltbg-text-sec: {{ bg_text | color_modify: 'alpha', 0.72 }};
-    --ltbg-text-ter: {{ bg_text | color_modify: 'alpha', 0.56 }};
+    --ltbg-text-ter: {{ bg_text | color_modify: 'alpha', 0.66 }}; /* 0.56 lag bei 3,7:1, 0.66 hält AA für 12–14 px */
     --ltbg-border:   {{ bg_text | color_modify: 'alpha', 0.05 }};
     --ltbg-rule:     {{ bg_text | color_modify: 'alpha', 0.08 }};
     padding-top:    min({{ section.settings.padding_top }}px, 10vw);
@@ -85,7 +85,7 @@
     %}
 
     {%- if bg_cards > 0 -%}
-    <div class="ltbg__grid ltbg__grid--{{ bg_cards }}">
+    <div class="ltbg__grid">
 
       {%- if section.settings.show_labor -%}
       <article class="ltbg__card">
@@ -291,7 +291,7 @@
 .ltbg__card {
   background: var(--ltbg-card-bg, #fff);
   border: 1px solid var(--ltbg-border, rgba(38, 37, 30, 0.05));
-  border-radius: 4px;
+  border-radius: 4px; /* bewusst wie die Hero-Karten dieser PDP (lt-pdp-hero setzt 4px), nicht --radius-sm */
   padding: var(--space-5);
   min-width: 0;
 }
@@ -337,7 +337,7 @@
   color: var(--ltbg-text-sec);
   margin: var(--space-2) 0 0;
 }
-.ltbg__big-label a { color: inherit; text-decoration-color: var(--ltbg-rule); text-underline-offset: 3px; }
+.ltbg__big-label a { color: inherit; text-decoration-color: var(--ltbg-text-ter); text-underline-offset: 3px; transition: color var(--ease-default); }
 .ltbg__big-label a:hover { color: var(--ltbg-text); }
 .ltbg__meta {
   font-size: var(--text-body-sm);
@@ -360,9 +360,11 @@
   display: flex; justify-content: space-between; align-items: center; gap: var(--space-2);
   padding: var(--space-3) 0 0; cursor: pointer; list-style: none;
   font-size: var(--text-body-sm); font-weight: var(--weight-semibold); color: var(--color-dark);
+  transition: color var(--ease-default);
 }
+.ltbg__summary:hover { color: var(--color-teal-text); }
 .ltbg__summary::-webkit-details-marker { display: none; }
-.ltbg__summary:focus-visible { outline: 2px solid var(--color-teal-dark); outline-offset: 2px; border-radius: 2px; }
+.ltbg__summary:focus-visible { outline: 2px solid var(--color-teal-dark); outline-offset: 2px; }
 .ltbg__chevron { display: inline-flex; width: 16px; height: 16px; transition: transform 0.2s ease; }
 .ltbg__chevron svg { width: 100%; height: 100%; }
 .ltbg__details[open] .ltbg__chevron { transform: rotate(180deg); }
@@ -373,7 +375,7 @@
 .ltbg__caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .ltbg__table th, .ltbg__table td { padding: var(--space-2) 0; border-bottom: 1px solid var(--ltbg-rule); font-weight: var(--weight-regular); vertical-align: baseline; color: var(--ltbg-text); }
 .ltbg__table thead th { color: var(--ltbg-text-ter); font-size: var(--text-micro); }
-.ltbg__td-muted { color: var(--ltbg-text-ter); }
+.ltbg__table .ltbg__td-muted { color: var(--ltbg-text-ter); }
 .ltbg__td-right { text-align: right; white-space: nowrap; }
 .ltbg__quotes { list-style: none; margin: var(--space-3) 0 0; padding: 0; }
 .ltbg__quote { padding: var(--space-3) 0; border-top: 1px solid var(--ltbg-rule); }
