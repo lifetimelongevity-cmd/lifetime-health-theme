@@ -2207,6 +2207,93 @@
     }
     // ----------------------------------------------------------------------
 
+    // Steht VOR dem buyBox-Early-Return (22.10.2026, AGE&DNA): der Standalone-Pfad hat
+    // keine [data-lt-buy-box], dort liefen Chip, Sticky-Gate und Sticky-Label sonst nie.
+    // formatPrice ist eine Funktionsdeklaration weiter unten und damit gehoisted.
+    // --- Kompakte Kaufzone (Entwurf 22.10.2026), nur wenn bb_compact gesetzt ----------
+    // Liest den Zustand aus dem DOM (Größen-Radios, Karten-Radio, Plan-Name, Versandstatus)
+    // und schreibt Hinweiszeile, Grundpreis, Ersparnis-Chip und das Sticky-Label.
+    // Hängt am CTA-Text (MutationObserver), der bei jedem Sync neu geschrieben wird, und
+    // greift sonst nirgends in applySize/syncFromCard ein.
+    (function () {
+      if (section.getAttribute('data-lt-compact') !== '1') return;
+      var ctaText = section.querySelector('[data-js-product-add-to-cart-text]');
+      var hint = section.querySelector('[data-lt-bb-hint]');
+      var unitLine = section.querySelector('[data-lt-bb-unitline]');
+      var chip = section.querySelector('[data-lt-save-chip]');
+      function refresh() {
+        var activeCard = section.querySelector('.lt-bb-card__input:checked');
+        var cardEl = activeCard ? activeCard.closest('[data-lt-bb-card]') : null;
+        var isSub = !(cardEl && cardEl.dataset.bbKind === 'once');
+        var sizes = Array.prototype.slice.call(section.querySelectorAll('.lt-size__input'));
+        var active = sizes.filter(function (i) { return i.checked; })[0] || sizes[0];
+        var onceC = active ? parseInt(active.dataset.oncePrice, 10) : NaN;
+        var subC = active ? parseInt(active.dataset.subPrice, 10) : NaN;
+        var current = isSub ? subC : onceC;
+        if (hint) {
+          if (isSub) {
+            var plan = section.querySelector('[data-lt-sub-subline]');
+            var planName = plan ? plan.textContent.trim() : '';
+            if (planName) planName = planName.charAt(0).toLowerCase() + planName.slice(1);
+            hint.textContent = planName ? 'Lieferung ' + planName + ', versandfrei.' : 'Versandfrei.';
+          } else {
+            var once = section.querySelector('[data-lt-once-subline]');
+            var free = once ? parseInt(once.dataset.shipFree, 10) : NaN;
+            var costLabel = once ? once.dataset.shipCostLabel : '';
+            if (!isNaN(free) && !isNaN(onceC) && onceC < free && costLabel) {
+              hint.textContent = 'Zzgl. ' + costLabel + ' Versand, versandfrei ab ' + formatPrice(free) + '.';
+            } else {
+              hint.textContent = 'Versandfrei.';
+            }
+          }
+        }
+        if (unitLine) {
+          var g = active ? parseInt(active.dataset.grams, 10) : NaN;
+          unitLine.textContent = (!isNaN(current) && g > 0) ? formatPrice(Math.round(current / g * 100)) + '/100 g' : '';
+        }
+        if (chip && !sizes.length) {
+          // Standalone-Pfad ohne Größen (AGE&DNA-Test, 22.10.2026): die Ersparnis steht
+          // serverseitig in der Preiszeile (data-lt-direct-savings). Sie wandert als Chip
+          // unter den Knopf, wie bei NMN, die Preiszeile zeigt sie dann nicht mehr doppelt.
+          var direct = section.querySelector('[data-lt-direct-savings]');
+          var directTxt = direct ? direct.textContent.trim() : '';
+          if (directTxt) { chip.textContent = directTxt; chip.hidden = false; direct.hidden = true; }
+          else { chip.hidden = true; }
+        } else if (chip) {
+          var base = sizes[0];
+          var baseC = base ? parseInt(base.dataset.oncePrice, 10) : NaN;
+          var baseG = base ? parseInt(base.dataset.grams, 10) : NaN;
+          var g2 = active ? parseInt(active.dataset.grams, 10) : NaN;
+          var saved = (!isNaN(baseC) && baseG > 0 && g2 > 0 && !isNaN(current)) ? Math.round(baseC * g2 / baseG) - current : 0;
+          if (saved > 0) { chip.textContent = 'Du sparst ' + formatPrice(saved); chip.hidden = false; }
+          else { chip.hidden = true; }
+        }
+        var stickyText = document.querySelector('#lt-sticky-atc .lt-sticky-btn .button__text');
+        if (stickyText && ctaText) stickyText.textContent = ctaText.textContent.trim();
+      }
+      if (ctaText && window.MutationObserver) {
+        new MutationObserver(refresh).observe(ctaText, { childList: true, characterData: true, subtree: true });
+      }
+      section.addEventListener('change', function (e) {
+        var t = e.target;
+        if (t && (t.classList.contains('lt-size__input') || t.classList.contains('lt-bb-card__input'))) refresh();
+      });
+      refresh();
+      // Sticky-Leiste erst, wenn der Hero-Knopf nach oben aus dem Bild ist (vorher deckt
+      // sie mobil den ersten Bildschirm ab und sagt „In den Warenkorb“, bevor jemand die
+      // Kaufart gesehen hat).
+      var atc = section.querySelector('#lt-hero-atc');
+      function gate() {
+        var sticky = document.getElementById('lt-sticky-atc');
+        if (!sticky || !atc) return;
+        sticky.classList.toggle('lt-sticky-atc--held', atc.getBoundingClientRect().bottom > 0);
+      }
+      window.addEventListener('scroll', gate, { passive: true });
+      window.addEventListener('resize', gate);
+      gate();
+      setTimeout(gate, 400);
+    })();
+
     if (!buyBox) return;
 
     const supplyDays = Math.max(1, parseFloat(buyBox.dataset.supplyDays) || 30);
@@ -2728,81 +2815,6 @@
         if (inp) inp.dispatchEvent(new Event('change', { bubbles: true }));
       });
     }
-    // --- Kompakte Kaufzone (Entwurf 22.10.2026), nur wenn bb_compact gesetzt ----------
-    // Liest den Zustand aus dem DOM (Größen-Radios, Karten-Radio, Plan-Name, Versandstatus)
-    // und schreibt Hinweiszeile, Grundpreis, Ersparnis-Chip und das Sticky-Label.
-    // Hängt am CTA-Text (MutationObserver), der bei jedem Sync neu geschrieben wird, und
-    // greift sonst nirgends in applySize/syncFromCard ein.
-    (function () {
-      if (section.getAttribute('data-lt-compact') !== '1') return;
-      var ctaText = section.querySelector('[data-js-product-add-to-cart-text]');
-      var hint = section.querySelector('[data-lt-bb-hint]');
-      var unitLine = section.querySelector('[data-lt-bb-unitline]');
-      var chip = section.querySelector('[data-lt-save-chip]');
-      function refresh() {
-        var activeCard = section.querySelector('.lt-bb-card__input:checked');
-        var cardEl = activeCard ? activeCard.closest('[data-lt-bb-card]') : null;
-        var isSub = !(cardEl && cardEl.dataset.bbKind === 'once');
-        var sizes = Array.prototype.slice.call(section.querySelectorAll('.lt-size__input'));
-        var active = sizes.filter(function (i) { return i.checked; })[0] || sizes[0];
-        var onceC = active ? parseInt(active.dataset.oncePrice, 10) : NaN;
-        var subC = active ? parseInt(active.dataset.subPrice, 10) : NaN;
-        var current = isSub ? subC : onceC;
-        if (hint) {
-          if (isSub) {
-            var plan = section.querySelector('[data-lt-sub-subline]');
-            var planName = plan ? plan.textContent.trim() : '';
-            if (planName) planName = planName.charAt(0).toLowerCase() + planName.slice(1);
-            hint.textContent = planName ? 'Lieferung ' + planName + ', versandfrei.' : 'Versandfrei.';
-          } else {
-            var once = section.querySelector('[data-lt-once-subline]');
-            var free = once ? parseInt(once.dataset.shipFree, 10) : NaN;
-            var costLabel = once ? once.dataset.shipCostLabel : '';
-            if (!isNaN(free) && !isNaN(onceC) && onceC < free && costLabel) {
-              hint.textContent = 'Zzgl. ' + costLabel + ' Versand, versandfrei ab ' + formatPrice(free) + '.';
-            } else {
-              hint.textContent = 'Versandfrei.';
-            }
-          }
-        }
-        if (unitLine) {
-          var g = active ? parseInt(active.dataset.grams, 10) : NaN;
-          unitLine.textContent = (!isNaN(current) && g > 0) ? formatPrice(Math.round(current / g * 100)) + '/100 g' : '';
-        }
-        if (chip) {
-          var base = sizes[0];
-          var baseC = base ? parseInt(base.dataset.oncePrice, 10) : NaN;
-          var baseG = base ? parseInt(base.dataset.grams, 10) : NaN;
-          var g2 = active ? parseInt(active.dataset.grams, 10) : NaN;
-          var saved = (!isNaN(baseC) && baseG > 0 && g2 > 0 && !isNaN(current)) ? Math.round(baseC * g2 / baseG) - current : 0;
-          if (saved > 0) { chip.textContent = 'Du sparst ' + formatPrice(saved); chip.hidden = false; }
-          else { chip.hidden = true; }
-        }
-        var stickyText = document.querySelector('#lt-sticky-atc .lt-sticky-btn .button__text');
-        if (stickyText && ctaText) stickyText.textContent = ctaText.textContent.trim();
-      }
-      if (ctaText && window.MutationObserver) {
-        new MutationObserver(refresh).observe(ctaText, { childList: true, characterData: true, subtree: true });
-      }
-      section.addEventListener('change', function (e) {
-        var t = e.target;
-        if (t && (t.classList.contains('lt-size__input') || t.classList.contains('lt-bb-card__input'))) refresh();
-      });
-      refresh();
-      // Sticky-Leiste erst, wenn der Hero-Knopf nach oben aus dem Bild ist (vorher deckt
-      // sie mobil den ersten Bildschirm ab und sagt „In den Warenkorb“, bevor jemand die
-      // Kaufart gesehen hat).
-      var atc = section.querySelector('#lt-hero-atc');
-      function gate() {
-        var sticky = document.getElementById('lt-sticky-atc');
-        if (!sticky || !atc) return;
-        sticky.classList.toggle('lt-sticky-atc--held', atc.getBoundingClientRect().bottom > 0);
-      }
-      window.addEventListener('scroll', gate, { passive: true });
-      window.addEventListener('resize', gate);
-      gate();
-      setTimeout(gate, 400);
-    })();
 
   })();
 </script>
@@ -4388,7 +4400,7 @@
       "id": "bb_compact",
       "label": "Kompakte Kaufzone",
       "default": false,
-      "info": "Pills mit Preis statt Prozent, zwei Kacheln nebeneinander ohne Vorteilsliste, eine Hinweiszeile plus Grundpreis darunter, Ersparnis-Chip und eine Zeile unter dem Knopf, keine Zahlarten-Icons, Sticky erst nach dem Knopf mit demselben Label. Nur für Produkte mit Größen-Auswahl und Abo gedacht (NMN)."
+      "info": "Pills mit Preis statt Prozent, zwei Kacheln nebeneinander ohne Vorteilsliste, eine Hinweiszeile plus Grundpreis darunter, Ersparnis-Chip und eine Zeile unter dem Knopf, keine Zahlarten-Icons, Sticky erst nach dem Knopf mit demselben Label. Für Größen plus Abo (NMN) und für den Standalone-Preis ohne Paketwahl (AGE&DNA-Test, Chip aus dem Streichpreis)."
     },
     {
       "type": "text",
