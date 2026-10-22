@@ -580,33 +580,40 @@ body.lt-quiz-fullscreen .header-spacer {
   box-shadow: 0 0 0 10px color-mix(in srgb, currentColor 16%, transparent);
 }
 
-/* ── Slider-Labels ─────────────────────────────────────────────── */
+/* ── Slider-Labels: exakt unter den Punkten (22.10.2026) ───────────────────
+   Vorher ein Grid mit gleich breiten Spalten: deren Mitten liegen bei 10/30/50/70/90 %
+   der Rail, die Punkte bei 0/25/50/75/100 %, also stand jede Beschriftung leicht
+   versetzt. Jetzt sitzt jede Beschriftung absolut an der Punkt-Position und ist auf
+   sie zentriert. Am Handy (drei Anker) dürfen die beiden Enden höchstens 30 px über
+   den Punkt hinausragen (Rail-Rand 22 px plus 8 px vom Container-Rand), damit nichts am
+   Rand klebt; „Sehr schlecht" sitzt dadurch 8 px rechts der Mitte (gemessen 22.10. bei
+   390 px). Am Desktop (fünf Beschriftungen) ist Platz, dort exakt zentriert. */
 .lt-quiz-slider__labels {
-  display: grid;
-  margin-top: var(--space-4);
-  padding: 0 22px;       /* deckungsgleich mit Rail-Margin */
+  position: relative;
+  height: 1.35em;
+  margin: var(--space-4) 22px 0;  /* deckungsgleich mit Rail-Margin */
   font-size: 14px;
   line-height: 1.35;
   color: var(--color-text-secondary);
 }
 
-.lt-quiz-slider__labels--full {
-  grid-template-columns: repeat(5, 1fr);
+.lt-quiz-slider__labels > span {
+  position: absolute;
+  top: 0;
+  white-space: nowrap;
+  transform: translateX(-50%);
 }
-.lt-quiz-slider__labels--full > span {
-  text-align: center;
-  /* leichte Verschiebung an den Enden, damit Labels unter den Dots zentriert sitzen */
-}
-.lt-quiz-slider__labels--full > span:first-child { text-align: left; margin-left: -10px; }
-.lt-quiz-slider__labels--full > span:last-child  { text-align: right; margin-right: -10px; }
 
-.lt-quiz-slider__labels--anchors {
-  display: none;
-  grid-template-columns: 1fr 1fr 1fr;
-}
-.lt-quiz-slider__labels--anchors > span:nth-child(1) { text-align: left; }
-.lt-quiz-slider__labels--anchors > span:nth-child(2) { text-align: center; }
-.lt-quiz-slider__labels--anchors > span:nth-child(3) { text-align: right; }
+.lt-quiz-slider__labels--full > span:nth-child(1) { left: 0%; }
+.lt-quiz-slider__labels--full > span:nth-child(2) { left: 25%; }
+.lt-quiz-slider__labels--full > span:nth-child(3) { left: 50%; }
+.lt-quiz-slider__labels--full > span:nth-child(4) { left: 75%; }
+.lt-quiz-slider__labels--full > span:nth-child(5) { left: 100%; }
+
+.lt-quiz-slider__labels--anchors { display: none; }
+.lt-quiz-slider__labels--anchors > span:nth-child(1) { left: 0%;   transform: translateX(max(-50%, -30px)); }
+.lt-quiz-slider__labels--anchors > span:nth-child(2) { left: 50%; }
+.lt-quiz-slider__labels--anchors > span:nth-child(3) { left: 100%; transform: translateX(min(-50%, calc(-100% + 30px))); }
 
 /* ── Hint — Card-Info-Pattern (white bg, light border, padding) ── */
 .lt-quiz__hint {
@@ -1422,7 +1429,7 @@ body.lt-quiz-fullscreen .header-spacer {
   .lt-quiz-slider__rail { margin: 0 18px; }
   .lt-quiz-slider__labels { padding: 0 18px; font-size: 13px; }
   .lt-quiz-slider__labels--full { display: none; }
-  .lt-quiz-slider__labels--anchors { display: grid; }
+  .lt-quiz-slider__labels--anchors { display: block; }
 
   .lt-quiz-cards--single,
   .lt-quiz-cards--multi {

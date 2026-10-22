@@ -46,6 +46,7 @@
   data-klaviyo-list-id="{{ section.settings.klaviyo_list_id | escape }}"
   data-klaviyo-source="{{ section.settings.klaviyo_source | escape }}"
   data-plan-url="{{ section.settings.plan_url | escape }}"
+  data-auto-start="{{ section.settings.auto_start }}"
 >
   {%- comment -%} Full-bleed Progress-Rail (außerhalb Container, edge-to-edge) {%- endcomment -%}
   <div class="lt-quiz__rail" aria-hidden="true">
@@ -248,8 +249,7 @@
 
     {%- comment -%}
       ── Gate: E-Mail vor dem Ergebnis (BJ 22.10.2026) ──────────────────
-      Reihenfolge loading → gate → result. Wer die Adresse im selben Browser schon
-      abgegeben hat, überspringt das Gate (assets/lt-quiz-v2.js § isUnlocked).
+      Reihenfolge loading → gate → result, in jedem Durchlauf (kein Überspringen).
     {%- endcomment -%}
     <div class="lt-quiz__step lt-quiz__step--gate" data-quiz-step="gate" hidden>
       {%- render 'lt-quiz-gate' -%}
@@ -280,6 +280,13 @@
     {
       "type": "header",
       "content": "Intro"
+    },
+    {
+      "type": "checkbox",
+      "id": "auto_start",
+      "label": "Direkt in Frage 1 starten (ohne Intro)",
+      "info": "An seit 22.10.2026: Besucher landen sofort im Quiz, das Intro erscheint nur nach dem Schließen.",
+      "default": true
     },
     {
       "type": "text",

@@ -42,8 +42,8 @@ Bei Drift: Live gewinnt. Hier nachpflegen, sobald ein Mapping sich ändert.
 
 > **E-Mail vor dem Ergebnis seit 2026-10-22 (im Repo, noch nicht gepusht):** Reihenfolge
 > `q8 → loading → gate → result`. Das Gate (`snippets/lt-quiz-gate.liquid`) fragt die
-> Adresse ab, bevor das Ergebnis erscheint; wer sie im selben Browser schon abgegeben hat
-> (`localStorage lt_quiz_result_unlocked`), überspringt es. Das Ergebnis hat danach genau
+> Adresse ab, bevor das Ergebnis erscheint, in jedem Durchlauf (das Überspringen per
+> localStorage ist am selben Tag wieder raus). Das Ergebnis hat danach genau
 > eine Handlung, den Test (`data-result-pdp-cta="result_main"`); Bio-Karten-Knopf, E-Mail-Block,
 > Scope-Pills, dunkle CTA-Karte und Sticky-CTA sind raus, die drei Themen stehen offen (Titel,
 > Marker, `teaser`). Neue Events: `quiz_gate_view`; `quiz_result_cta_seen` beobachtet jetzt den
@@ -51,6 +51,11 @@ Bei Drift: Live gewinnt. Hier nachpflegen, sobald ein Mapping sich ändert.
 > Hintergrund und Zahlen: Denkschulen-Runde 22.10.2026, Entwurf
 > `docs/entwurf-quiz-ergebnis-2026-10-22.html` (der Entwurf zeigt noch die weiche Variante
 > mit E-Mail-Feld auf dem Ergebnis; BJ hat danach den harten Schnitt gewählt).
+
+> **Direktstart seit 2026-10-22:** Section-Setting `auto_start` (Default an) lässt die Seite
+> ohne Intro in Frage 1 beginnen; das Intro erscheint nur nach dem Schließen (×).
+> `quiz_started` ist damit praktisch gleich `page_view`, der erste echte Trichterschritt ist
+> `quiz_completed`. Slider-Beschriftungen sitzen seit demselben Tag exakt unter den Punkten.
 
 > **Zwei Quiz-Templates seit 2026-08-10:** `page.quiz-age.json` rendert wieder mit normalem
 > Header/Footer (`theme.liquid`) für Site-Besucher über den Menüpunkt „AGE Quiz".

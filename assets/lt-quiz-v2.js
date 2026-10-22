@@ -35,8 +35,8 @@
     requestAnimationFrame(frame);
   }
 
-  // 2026-10-22: `gate` (E-Mail vor dem Ergebnis) sitzt zwischen loading und result.
-  // Wer die Adresse im selben Browser schon abgegeben hat, überspringt es (isUnlocked).
+  // 2026-10-22: `gate` (E-Mail vor dem Ergebnis) sitzt zwischen loading und result,
+  // für jeden Durchlauf, ohne Ausnahme.
   const STEPS = ['intro', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'loading', 'gate', 'result'];
   const QUESTION_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8'];
   const FULLSCREEN_STEPS = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'loading', 'gate', 'result'];
@@ -273,12 +273,9 @@
     return { chronoAge, bioAge, delta: Math.round(delta), direction };
   }
 
-  // Gate-Persistenz: wer die E-Mail schon abgegeben hat, sieht die Tiefe direkt wieder.
+  // Marker „Adresse abgegeben" im Browser. Seit 22.10.2026 nur noch gesetzt, nicht mehr
+  // gelesen: das Gate kommt in jedem Durchlauf.
   const UNLOCK_KEY = 'lt_quiz_result_unlocked';
-
-  function isUnlocked() {
-    try { return localStorage.getItem(UNLOCK_KEY) === '1'; } catch (e) { return false; }
-  }
 
   function persistUnlock() {
     try { localStorage.setItem(UNLOCK_KEY, '1'); } catch (e) {}
@@ -377,17 +374,23 @@
       this.checkAutoStart();
     }
 
-    // Deep-Link: /pages/meine-routine#quiz oder ?start=quiz startet das Quiz direkt
+    // Direktstart. Seit 22.10.2026 (BJ): die Seite startet ohne Intro in Frage 1, wenn
+    // die Section das Setting `auto_start` trägt (Default an). Das Intro bleibt im Markup
+    // und erscheint nur noch nach dem Schließen (×). Deep-Links #quiz / ?start=quiz /
+    // ?quiz=1 starten weiterhin, auch wenn das Setting aus ist.
+    // Messung: mit Direktstart ist quiz_started praktisch gleich page_view; der erste
+    // echte Schritt im Trichter ist dann quiz_completed.
     checkAutoStart() {
       const hash = window.location.hash || '';
       const search = new URLSearchParams(window.location.search);
-      const wantsStart =
+      const byUrl =
         hash === '#quiz' ||
         hash === '#quiz-start' ||
         search.get('start') === 'quiz' ||
         search.get('quiz') === '1';
-      if (wantsStart) {
-        pushDataLayer({ event: 'quiz_started', quiz_start_source: 'url_param' });
+      const bySetting = this.root.dataset.autoStart === 'true';
+      if (byUrl || bySetting) {
+        pushDataLayer({ event: 'quiz_started', quiz_start_source: byUrl ? 'url_param' : 'auto' });
         this.goto('q1');
       }
     }
@@ -620,8 +623,11 @@
         this.state.tags = buildCustomerTags(this.state.topThree, this.state.answers);
         dispatchQuizCompleted(this.state);
         if (this.loadingTimer) clearTimeout(this.loadingTimer);
-        const next = (isUnlocked() || this.state.submitted) ? 'result' : 'gate';
-        this.loadingTimer = window.setTimeout(() => this.goto(next), LOADING_DURATION_MS);
+        // Immer über das Gate (BJ 22.10., nachgeschärft): kein Überspringen per
+        // localStorage. Alte Browser trugen die Markierung aus dem weichen Gate und
+        // kamen sonst ohne Adresse ins Ergebnis. Klaviyo nimmt eine bekannte Adresse
+        // ohne Doppel-Eintrag an.
+        this.loadingTimer = window.setTimeout(() => this.goto('gate'), LOADING_DURATION_MS);
       }
 
       // Gate-Hook: Formular zurücksetzen, Sichtbarkeit tracken (quiz_gate_view).
