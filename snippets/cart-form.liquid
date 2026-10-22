@@ -29,7 +29,17 @@
 				render 'lt-shipping-rule'
 			endcapture
 			assign lt_ship_rule = lt_ship_rule | split: '|'
+			assign lt_ship_threshold = lt_ship_rule[1] | plus: 0
+			# Balken nur, solange er etwas zu tun hat (22.10.2026, Drawer "Kasse zuerst"):
+			# ueber der Schwelle oder mit Abo sagt die Versandzeile unter der Summe schon
+			# "Versandkostenfrei", der volle Balken darueber war eine zweite Zeile ohne Inhalt.
+			# Das Snippet wird bei jedem Cart-Update neu gerendert, die Bedingung bleibt aktuell.
+			assign lt_show_notice = false
+			if cart_has_sub == false and lt_ship_threshold > 0 and cart.total_price < lt_ship_threshold
+				assign lt_show_notice = true
+			endif
 		-%}
+		{%- if lt_show_notice -%}
 		<div class="cart-notice text-size--small hide-if-empty-cart">
 			<shipping-notice
 				data-free-shipping="{{ lt_ship_rule[1] | plus: 0 }}"
@@ -42,6 +52,7 @@
 				</span>
 			</shipping-notice>
 		</div>
+		{%- endif -%}
 		<script src="{{ 'component-shipping-notice.js' | asset_url }}" defer></script>
 	{%- endif -%}
 
@@ -288,13 +299,14 @@
 	</form>
 
 	{%- comment -%}
-		Innerhalb von #AjaxCartForm, damit der Vorschlag bei jedem Cart-Update
-		neu berechnet wird (component-cart.js ersetzt hier das komplette innerHTML).
-		Das Script liegt bewusst ausserhalb der Bedingung: per innerHTML nachgeladene
-		<script>-Tags fuehrt der Browser nicht aus, bei anfangs leerem Warenkorb waere
-		das Custom Element sonst nie registriert und der Button tot.
+		Das eine Angebot (cart-upsell) steht seit 22.10.2026 im Drawer-Fuss unter Kasse
+		und Express-Buttons (snippets/cart-subtotal.liquid, type sidebar): Kasse zuerst,
+		danach hoechstens eine Zeile. #AjaxCartSubtotal wird bei jedem Cart-Update genauso
+		ersetzt wie #AjaxCartForm (component-cart.js, refreshCart), der Vorschlag bleibt
+		aktuell. Das Script liegt bewusst ausserhalb der Bedingung: per innerHTML
+		nachgeladene <script>-Tags fuehrt der Browser nicht aus, bei anfangs leerem
+		Warenkorb waere das Custom Element sonst nie registriert und der Button tot.
 	{%- endcomment -%}
-	{%- render 'cart-upsell', type: 'sidebar' -%}
 	{%- if settings.cart_upsell_enable -%}
 		<script src="{{ 'component-cart-upsell.js' | asset_url }}" defer></script>
 	{%- endif -%}

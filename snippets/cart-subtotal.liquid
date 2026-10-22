@@ -200,7 +200,11 @@
 			-%}
 		</div>
 
-		{%- render 'lt-ship-cutoff', class: 'cart__ship-cutoff hide-if-empty-cart' -%}
+		{%- comment -%} Versandfrist nur auf der Cart-Seite: im Drawer steht sie seit 22.10.2026
+			nicht mehr (Kasse zuerst), die PDP traegt sie unter dem Kauf-Button. {%- endcomment -%}
+		{%- if type == 'page' -%}
+			{%- render 'lt-ship-cutoff', class: 'cart__ship-cutoff hide-if-empty-cart' -%}
+		{%- endif -%}
 
 		{%- if settings.cart_terms_checkbox -%}
 			<terms-checkbox>
@@ -308,6 +312,14 @@
 					{%- endif -%}
 				{%- endif -%}
 			{%- endif -%}
+		{%- endunless -%}
+
+		{%- comment -%} Genau ein Angebot, nach Kasse und Express-Buttons (22.10.2026): Paar NMN zu
+			Kreatin, sonst Groessenwechsel, sonst Cross-Sell, Reihenfolge in snippets/cart-upsell.liquid.
+			Vorher stand es in #AjaxCartForm ueber dem Fuss. Die Cart-Seite rendert es weiter in
+			snippets/cart-form-page.liquid. {%- endcomment -%}
+		{%- unless type == 'page' -%}
+			{%- render 'cart-upsell', type: 'sidebar' -%}
 		{%- endunless -%}
 
 	</div>

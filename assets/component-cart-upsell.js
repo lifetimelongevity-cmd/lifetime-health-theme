@@ -9,7 +9,8 @@
     Ein zweistufiger Weg (erst entfernen, dann hinzufuegen) wuerde bei einem
     Fehler im zweiten Schritt den Warenkorb kleiner zuruecklassen als vorher.
 
-  Das Markup liegt in #AjaxCartForm und wird bei jedem Cart-Update komplett neu
+  Das Markup liegt im Drawer in #AjaxCartSubtotal (seit 22.10.2026, vorher #AjaxCartForm),
+  auf der Cart-Seite in #AjaxCartForm, und wird bei jedem Cart-Update komplett neu
   gerendert. Deshalb keine globalen Listener: connectedCallback bindet sich
   selbst, wenn die neue Instanz in den DOM kommt.
 */
