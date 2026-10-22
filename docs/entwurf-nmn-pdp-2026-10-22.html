@@ -59,6 +59,9 @@
   .hint{margin-top:var(--s2);font-size:var(--t-small);color:var(--ink-2)}
   .cta{display:block;width:100%;margin-top:var(--s4);height:48px;padding:0 var(--s4);border:0;border-radius:999px;background:var(--teal);color:var(--teal-ink);font-weight:500;font-size:.9375rem;cursor:pointer}
   .under{margin-top:var(--s3);font-size:var(--t-small);color:var(--ink-2);text-align:center}
+  .save{margin-top:var(--s3);text-align:center}
+  .save span{display:inline-block;background:var(--mint-bg);border:1px solid #c9e4e0;border-radius:var(--r);padding:var(--s1) var(--s3);font-weight:700;font-size:var(--t-small)}
+  .save+.under{margin-top:var(--s2)}
   .pay{margin-top:var(--s2);font-size:.75rem;color:var(--ink-3);text-align:center}
 
   /* Laden */
@@ -166,8 +169,8 @@
 
     <div>
       <div class="rating"><span class="stars">★★★★★</span> <b>4,7</b> · 239 Bewertungen</div>
-      <h1>NMN-Pulver mit Laborbericht <span>Uthever®, erstes NMN mit EU-Gutachten</span></h1>
-      <p class="sub">Jede Charge in Mainz nachgemessen. <a href="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/Pruefbericht_L-25-09126.pdf" target="_blank" rel="noopener">Prüfbericht ansehen</a></p>
+      <h1>NMN-Pulver <span>Uthever®, laborgeprüft</span></h1>
+      <p class="sub"><a href="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/Pruefbericht_L-25-09126.pdf" target="_blank" rel="noopener">Prüfbericht je Charge ansehen</a></p>
 
       <div class="box">
         <div class="lbl">Größe</div>
@@ -181,13 +184,12 @@
           <button class="mode on" data-mode="sub"><b>Im Abo <span style="display:inline;color:var(--ink)" id="p-sub">28,90 €</span></b><span>Jederzeit kündbar</span></button>
           <button class="mode" data-mode="once"><b>Einmalig <span style="display:inline;color:var(--ink)" id="p-once">33,90 €</span></b><span>Ohne Bindung</span></button>
         </div>
-        <p class="hint" id="hint">Lieferung alle 2 Monate, versandfrei. Kündbar auch nach der ersten Lieferung.</p>
+        <p class="hint" id="hint">Lieferung alle 2 Monate, versandfrei.</p>
         <p class="hint" id="unit" style="color:var(--ink-3);font-size:.8125rem;margin-top:var(--s1)">96,33 €/100 g</p>
 
         <button class="cta" id="cta">Abo starten, 28,90 €</button>
-        <p class="under" id="save" style="color:var(--ink)">Du sparst 5,00 € gegenüber dem Einmalkauf.</p>
+        <p class="save" id="save"><span>Du sparst 5,00 €</span></p>
         <p class="under">Versand in 1–2 Werktagen · 30 Tage Geld zurück</p>
-        <p class="pay">PayPal · Klarna Rechnung · Apple Pay · Kreditkarte</p>
 
         <details class="why">
           <summary><u>Nur zu Forschungs- und Analysezwecken. Warum?</u></summary>
@@ -295,12 +297,12 @@
     document.getElementById('p-once').textContent=eur(state.once);
     var ref=33.90*(+state.g/30), saved=ref-p, sv=document.getElementById('save');
     sv.hidden=saved<0.005;
-    sv.textContent='Du sparst '+eur(saved)+(state.g==='30'?' gegenüber dem Einmalkauf.':' gegenüber dem Einmalkauf in 30-g-Beuteln.');
+    sv.firstElementChild.textContent='Du sparst '+eur(saved);
     document.getElementById('unit').textContent=eur(p/(+state.g)*100)+'/100 g';
     document.getElementById('st-title').textContent='NMN-Pulver '+state.g+' g';
     document.getElementById('st-sub').textContent=state.mode==='sub'?'Im Abo, alle '+state.takt+' Monate':'Einmalig';
     document.getElementById('hint').textContent=state.mode==='sub'
-      ?'Lieferung alle '+state.takt+' Monate, versandfrei. Kündbar auch nach der ersten Lieferung.'
+      ?'Lieferung alle '+state.takt+' Monate, versandfrei.'
       :(state.once<49?'Zzgl. 4,90 € Versand, versandfrei ab 49 €.':'Versandfrei.');
   }
   sizes.forEach(function(b){b.addEventListener('click',function(){
