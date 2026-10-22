@@ -16,6 +16,14 @@
 
   Feste Reihenfolge der Karten, je Karte ein Schalter, immer untereinander. Blöcke: "messwert"
   (Zeilen der Labortabelle) und "stimme" (Zitate). Keine verschachtelten Blöcke.
+
+  Bolder-Pass 2026-10-22 (/impeccable bolder): Die Messwerte sind die Hauptdarsteller.
+  100,1 % und 4,7 stehen in Stat-Größe, fett, in Messwert-Teal und mit Tabellenziffern
+  (Messwert-Teal-Regel aus DESIGN.md); der Rohstoffname steht in derselben Stufe, aber
+  regular und in Tinte, weil er kein Messwert ist. Die Bewertung ist in Karte 3 vom Fuß
+  nach oben gewandert. Ab 840 px wird jede Karte eine Zeile: Kennzahl links in fester
+  Spalte, Herleitung rechts hinter einer Haarlinie, drei Kennzahlen untereinander wie
+  eine Tabelle in Section-Größe. Unter 840 px bleibt der Stapel.
 {% endcomment %}
 
 {%- liquid
@@ -81,140 +89,155 @@
 
       {%- if section.settings.show_labor -%}
       <article class="ltbg__card">
-        {%- if section.settings.labor_title != blank -%}
-          <h2 class="ltbg__label">{{ section.settings.labor_title | escape }}</h2>
-        {%- endif -%}
-        {%- if section.settings.labor_value != blank -%}
-          <p class="ltbg__big">
-            {{ section.settings.labor_value | escape }}
-            {%- if section.settings.labor_value_label != blank -%}
-              <span class="ltbg__big-label">{{ section.settings.labor_value_label | escape }}</span>
-            {%- endif -%}
-          </p>
-        {%- endif -%}
-        {%- if section.settings.labor_meta != blank -%}
-          <p class="ltbg__meta">{{ section.settings.labor_meta | escape }}</p>
-        {%- endif -%}
-        {%- if section.settings.labor_text != blank -%}
-          <p class="ltbg__text">{{ section.settings.labor_text | escape }}</p>
-        {%- endif -%}
+        <div class="ltbg__head">
+          {%- if section.settings.labor_title != blank -%}
+            <h2 class="ltbg__label">{{ section.settings.labor_title | escape }}</h2>
+          {%- endif -%}
+          {%- if section.settings.labor_value != blank -%}
+            <p class="ltbg__big ltbg__big--num">
+              {{ section.settings.labor_value | escape }}
+              {%- if section.settings.labor_value_label != blank -%}
+                <span class="ltbg__big-label">{{ section.settings.labor_value_label | escape }}</span>
+              {%- endif -%}
+            </p>
+          {%- endif -%}
+          {%- if section.settings.labor_meta != blank -%}
+            <p class="ltbg__meta">{{ section.settings.labor_meta | escape }}</p>
+          {%- endif -%}
+        </div>
+        <div class="ltbg__main">
+          {%- if section.settings.labor_text != blank -%}
+            <p class="ltbg__text">{{ section.settings.labor_text | escape }}</p>
+          {%- endif -%}
 
-        {%- if bg_messwerte.size > 0 or section.settings.labor_provenance != blank or section.settings.labor_compare != blank -%}
-        <details class="ltbg__details">
-          <summary class="ltbg__summary">
-            <span>{{ section.settings.labor_details_label | default: 'Einzelwerte und Prüfdetails' | escape }}</span>
-            <span class="ltbg__chevron" aria-hidden="true">{% render 'crs-chevron' %}</span>
-          </summary>
-          <div class="ltbg__body">
-            {%- if bg_messwerte.size > 0 -%}
-            <table class="ltbg__table">
-              <caption class="ltbg__caption">
-                Prüfbericht {{ product.title | escape }}
-                {%- if section.settings.labor_batch != blank %}, Charge {{ section.settings.labor_batch | escape }}{% endif -%}
-                {%- if section.settings.labor_lab != blank %}, {{ section.settings.labor_lab | escape }}{% endif -%}
-                {%- if section.settings.labor_tested_on != blank %}, geprüft am {{ section.settings.labor_tested_on | escape }}{% endif -%}
-              </caption>
-              <thead>
-                <tr>
-                  <th scope="col">Parameter</th>
-                  <th scope="col">Methode</th>
-                  <th scope="col" class="ltbg__td-right">Ergebnis</th>
-                </tr>
-              </thead>
-              <tbody>
-                {%- for block in bg_messwerte -%}
-                  <tr {{ block.shopify_attributes }}>
-                    <th scope="row">{{ block.settings.parameter | escape }}</th>
-                    <td class="ltbg__td-muted">{{ block.settings.method | escape }}</td>
-                    <td class="ltbg__td-right">{{ block.settings.result | escape }}</td>
+          {%- if bg_messwerte.size > 0 or section.settings.labor_provenance != blank or section.settings.labor_compare != blank -%}
+          <details class="ltbg__details">
+            <summary class="ltbg__summary">
+              <span>{{ section.settings.labor_details_label | default: 'Einzelwerte und Prüfdetails' | escape }}</span>
+              <span class="ltbg__chevron" aria-hidden="true">{% render 'crs-chevron' %}</span>
+            </summary>
+            <div class="ltbg__body">
+              {%- if bg_messwerte.size > 0 -%}
+              <table class="ltbg__table">
+                <caption class="ltbg__caption">
+                  Prüfbericht {{ product.title | escape }}
+                  {%- if section.settings.labor_batch != blank %}, Charge {{ section.settings.labor_batch | escape }}{% endif -%}
+                  {%- if section.settings.labor_lab != blank %}, {{ section.settings.labor_lab | escape }}{% endif -%}
+                  {%- if section.settings.labor_tested_on != blank %}, geprüft am {{ section.settings.labor_tested_on | escape }}{% endif -%}
+                </caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Parameter</th>
+                    <th scope="col">Methode</th>
+                    <th scope="col" class="ltbg__td-right">Ergebnis</th>
                   </tr>
-                {%- endfor -%}
-              </tbody>
-            </table>
-            {%- endif -%}
-            {%- if section.settings.labor_provenance != blank -%}
-              <p>{{ section.settings.labor_provenance | escape }}</p>
-            {%- endif -%}
-            {%- if section.settings.labor_compare != blank -%}
-              <div class="rte">{{ section.settings.labor_compare }}</div>
-            {%- endif -%}
-            {%- if section.settings.labor_reports_label != blank and section.settings.labor_reports_url != blank -%}
-              <p><a href="{{ section.settings.labor_reports_url }}">{{ section.settings.labor_reports_label | escape }}</a></p>
-            {%- endif -%}
-          </div>
-        </details>
-        {%- endif -%}
+                </thead>
+                <tbody>
+                  {%- for block in bg_messwerte -%}
+                    <tr {{ block.shopify_attributes }}>
+                      <th scope="row">{{ block.settings.parameter | escape }}</th>
+                      <td class="ltbg__td-muted">{{ block.settings.method | escape }}</td>
+                      <td class="ltbg__td-right">{{ block.settings.result | escape }}</td>
+                    </tr>
+                  {%- endfor -%}
+                </tbody>
+              </table>
+              {%- endif -%}
+              {%- if section.settings.labor_provenance != blank -%}
+                <p>{{ section.settings.labor_provenance | escape }}</p>
+              {%- endif -%}
+              {%- if section.settings.labor_compare != blank -%}
+                <div class="rte">{{ section.settings.labor_compare }}</div>
+              {%- endif -%}
+              {%- if section.settings.labor_reports_label != blank and section.settings.labor_reports_url != blank -%}
+                <p><a href="{{ section.settings.labor_reports_url }}">{{ section.settings.labor_reports_label | escape }}</a></p>
+              {%- endif -%}
+            </div>
+          </details>
+          {%- endif -%}
+        </div>
       </article>
       {%- endif -%}
 
       {%- if section.settings.show_rohstoff -%}
       <article class="ltbg__card">
-        {%- if section.settings.rohstoff_title != blank -%}
-          <h2 class="ltbg__label">{{ section.settings.rohstoff_title | escape }}</h2>
-        {%- endif -%}
-        {%- if section.settings.rohstoff_name != blank -%}
-          <p class="ltbg__big">{{ section.settings.rohstoff_name | escape }}</p>
-        {%- endif -%}
-        {%- if section.settings.rohstoff_meta != blank -%}
-          <p class="ltbg__meta">{{ section.settings.rohstoff_meta | escape }}</p>
-        {%- endif -%}
-        {%- if section.settings.rohstoff_text != blank -%}
-          <p class="ltbg__text">{{ section.settings.rohstoff_text | escape }}</p>
-        {%- endif -%}
-        {%- if section.settings.person_name != blank -%}
-          <div class="ltbg__person">
-            {%- if section.settings.person_image != blank -%}
-              {{ section.settings.person_image | image_url: width: 96 | image_tag: loading: 'lazy', class: 'ltbg__person-img', alt: '' }}
-            {%- elsif section.settings.person_image_url != blank -%}
-              <img src="{{ section.settings.person_image_url | escape }}" alt="" loading="lazy" class="ltbg__person-img" width="48" height="48">
-            {%- endif -%}
-            <div>
-              <p class="ltbg__person-name">{{ section.settings.person_name | escape }}</p>
-              {%- if section.settings.person_role != blank -%}
-                <p class="ltbg__person-role">{{ section.settings.person_role | escape }}</p>
+        <div class="ltbg__head">
+          {%- if section.settings.rohstoff_title != blank -%}
+            <h2 class="ltbg__label">{{ section.settings.rohstoff_title | escape }}</h2>
+          {%- endif -%}
+          {%- if section.settings.rohstoff_name != blank -%}
+            <p class="ltbg__big">{{ section.settings.rohstoff_name | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.rohstoff_meta != blank -%}
+            <p class="ltbg__meta">{{ section.settings.rohstoff_meta | escape }}</p>
+          {%- endif -%}
+        </div>
+        <div class="ltbg__main">
+          {%- if section.settings.rohstoff_text != blank -%}
+            <p class="ltbg__text">{{ section.settings.rohstoff_text | escape }}</p>
+          {%- endif -%}
+          {%- if section.settings.person_name != blank -%}
+            <div class="ltbg__person">
+              {%- if section.settings.person_image != blank -%}
+                {{ section.settings.person_image | image_url: width: 96 | image_tag: loading: 'lazy', class: 'ltbg__person-img', alt: '' }}
+              {%- elsif section.settings.person_image_url != blank -%}
+                <img src="{{ section.settings.person_image_url | escape }}" alt="" loading="lazy" class="ltbg__person-img" width="48" height="48">
               {%- endif -%}
+              <div>
+                <p class="ltbg__person-name">{{ section.settings.person_name | escape }}</p>
+                {%- if section.settings.person_role != blank -%}
+                  <p class="ltbg__person-role">{{ section.settings.person_role | escape }}</p>
+                {%- endif -%}
+              </div>
             </div>
-          </div>
-        {%- endif -%}
-        {%- assign bg_rohstoff_plain = section.settings.rohstoff_details_body | strip_html | strip -%}
-        {%- if bg_rohstoff_plain != blank -%}
-        <details class="ltbg__details">
-          <summary class="ltbg__summary">
-            <span>{{ section.settings.rohstoff_details_label | default: 'Mehr' | escape }}</span>
-            <span class="ltbg__chevron" aria-hidden="true">{% render 'crs-chevron' %}</span>
-          </summary>
-          <div class="ltbg__body rte">{{ section.settings.rohstoff_details_body }}</div>
-        </details>
-        {%- endif -%}
+          {%- endif -%}
+          {%- assign bg_rohstoff_plain = section.settings.rohstoff_details_body | strip_html | strip -%}
+          {%- if bg_rohstoff_plain != blank -%}
+          <details class="ltbg__details">
+            <summary class="ltbg__summary">
+              <span>{{ section.settings.rohstoff_details_label | default: 'Mehr' | escape }}</span>
+              <span class="ltbg__chevron" aria-hidden="true">{% render 'crs-chevron' %}</span>
+            </summary>
+            <div class="ltbg__body rte">{{ section.settings.rohstoff_details_body }}</div>
+          </details>
+          {%- endif -%}
+        </div>
       </article>
       {%- endif -%}
 
       {%- if section.settings.show_stimmen -%}
       <article class="ltbg__card">
-        {%- if section.settings.stimmen_title != blank -%}
-          <h2 class="ltbg__label">{{ section.settings.stimmen_title | escape }}</h2>
-        {%- endif -%}
-        {%- if bg_stimmen.size > 0 -%}
-          <ul class="ltbg__quotes">
-            {%- for block in bg_stimmen -%}
-              <li class="ltbg__quote" {{ block.shopify_attributes }}>
-                <p class="ltbg__quote-text">{{ block.settings.text | escape }}</p>
-                {%- if block.settings.name != blank -%}
-                  <p class="ltbg__quote-name">{{ block.settings.name | escape }}</p>
+        <div class="ltbg__head">
+          {%- if section.settings.stimmen_title != blank -%}
+            <h2 class="ltbg__label">{{ section.settings.stimmen_title | escape }}</h2>
+          {%- endif -%}
+          {%- if bg_count > 0 -%}
+            <p class="ltbg__big ltbg__big--num">
+              {{ bg_rating | round: 1 | replace: '.', ',' }}
+              <span class="ltbg__big-label">
+                {%- if section.settings.stimmen_link_url != blank -%}
+                  <a href="{{ section.settings.stimmen_link_url }}">von 5 · {{ bg_count }} Bewertungen</a>
+                {%- else -%}
+                  von 5 · {{ bg_count }} Bewertungen
                 {%- endif -%}
-              </li>
-            {%- endfor -%}
-          </ul>
-        {%- endif -%}
-        {%- if bg_count > 0 -%}
-          <p class="ltbg__meta ltbg__meta--foot">
-            {%- if section.settings.stimmen_link_url != blank -%}
-              <a href="{{ section.settings.stimmen_link_url }}">{{ bg_rating | round: 1 | replace: '.', ',' }} von 5 aus {{ bg_count }} Bewertungen</a>
-            {%- else -%}
-              {{ bg_rating | round: 1 | replace: '.', ',' }} von 5 aus {{ bg_count }} Bewertungen
-            {%- endif -%}
-          </p>
-        {%- endif -%}
+              </span>
+            </p>
+          {%- endif -%}
+        </div>
+        <div class="ltbg__main">
+          {%- if bg_stimmen.size > 0 -%}
+            <ul class="ltbg__quotes">
+              {%- for block in bg_stimmen -%}
+                <li class="ltbg__quote" {{ block.shopify_attributes }}>
+                  <p class="ltbg__quote-text">{{ block.settings.text | escape }}</p>
+                  {%- if block.settings.name != blank -%}
+                    <p class="ltbg__quote-name">{{ block.settings.name | escape }}</p>
+                  {%- endif -%}
+                </li>
+              {%- endfor -%}
+            </ul>
+          {%- endif -%}
+        </div>
       </article>
       {%- endif -%}
 
@@ -262,8 +285,9 @@
 .ltbg__header { margin-bottom: var(--space-6); }
 /* Karten immer untereinander, auch auf dem Desktop (BJ 22.10.): nebeneinander
    enden drei verschieden hohe Karten auf drei Höhen und lassen unten weiße Ecken.
-   Auf dem Desktop in Lesebreite, zentriert wie die FAQ darunter. */
-.ltbg__grid { display: grid; gap: var(--space-3); max-width: 720px; margin: 0 auto; }
+   Auf dem Desktop wird jede Karte eine Zeile (Kennzahl links, Herleitung rechts),
+   deshalb breiter als die FAQ-Lesebreite, aber nicht die volle Seite. */
+.ltbg__grid { display: grid; gap: var(--space-3); max-width: 960px; margin: 0 auto; }
 .ltbg__card {
   background: var(--ltbg-card-bg, #fff);
   border: 1px solid var(--ltbg-border, rgba(38, 37, 30, 0.05));
@@ -271,6 +295,7 @@
   padding: var(--space-5);
   min-width: 0;
 }
+.ltbg__head, .ltbg__main { min-width: 0; }
 /* Karten-Oberzeile: klein, Versalien, gedämpft. Bewusst kein Heading-Stack,
    die Karten sind Karten, keine Sections. !important gegen globale h2-Regeln. */
 .ltbg__label {
@@ -283,33 +308,46 @@
   color: var(--ltbg-text-sec);
   margin: 0 !important;
 }
+/* Die Kennzahl: Stat-Stufe (48 px mobil, 56 px ab 840 px). Messwerte fett, in
+   Messwert-Teal und mit Tabellenziffern; der Rohstoffname regular und in Tinte,
+   weil er kein Messwert ist (Messwert-Teal-Regel). */
 .ltbg__big {
   font-family: var(--font-heading);
-  font-size: var(--text-h2);
+  font-size: var(--text-display);
   font-weight: var(--weight-regular);
   letter-spacing: -0.02em;
-  line-height: var(--leading-heading);
-  margin: var(--space-2) 0 0;
+  line-height: var(--leading-stat);
+  margin: var(--space-3) 0 0;
+}
+.ltbg__big--num {
+  font-weight: var(--weight-bold);
+  color: var(--color-teal-dark);
+  font-variant-numeric: tabular-nums;
 }
 .ltbg__big-label {
+  display: block;
   font-family: var(--font-body);
   font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  font-variant-numeric: normal;
   letter-spacing: 0;
+  line-height: var(--leading-body);
   color: var(--ltbg-text-sec);
-  margin-left: var(--space-2);
+  margin: var(--space-2) 0 0;
 }
+.ltbg__big-label a { color: inherit; text-decoration-color: var(--ltbg-rule); text-underline-offset: 3px; }
+.ltbg__big-label a:hover { color: var(--ltbg-text); }
 .ltbg__meta {
   font-size: var(--text-body-sm);
   line-height: var(--leading-body);
   color: var(--ltbg-text-sec);
   margin: var(--space-2) 0 0;
 }
-.ltbg__meta--foot { margin-top: var(--space-3); }
 .ltbg__meta a { color: var(--color-dark); }
 .ltbg__text {
   font-size: var(--text-body);
   line-height: var(--leading-body);
-  margin: var(--space-2) 0 0;
+  margin: var(--space-3) 0 0;
 }
 .ltbg__person { display: flex; gap: var(--space-3); align-items: center; margin-top: var(--space-3); }
 .ltbg__person-img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex: none; }
@@ -322,23 +360,47 @@
   font-size: var(--text-body-sm); font-weight: var(--weight-semibold); color: var(--color-dark);
 }
 .ltbg__summary::-webkit-details-marker { display: none; }
+.ltbg__summary:focus-visible { outline: 2px solid var(--color-teal-dark); outline-offset: 2px; border-radius: 2px; }
 .ltbg__chevron { display: inline-flex; width: 16px; height: 16px; transition: transform 0.2s ease; }
 .ltbg__chevron svg { width: 100%; height: 100%; }
 .ltbg__details[open] .ltbg__chevron { transform: rotate(180deg); }
 .ltbg__body { padding-top: var(--space-3); font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--ltbg-text-sec); }
 .ltbg__body p { margin: 0 0 var(--space-2); }
 .ltbg__body a { color: var(--color-dark); }
-.ltbg__table { width: 100%; border-collapse: collapse; font-size: var(--text-body-sm); line-height: var(--leading-tight); text-align: left; margin-bottom: var(--space-3); }
+.ltbg__table { width: 100%; border-collapse: collapse; font-size: var(--text-body-sm); line-height: var(--leading-tight); text-align: left; margin-bottom: var(--space-3); font-variant-numeric: tabular-nums; }
 .ltbg__caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 .ltbg__table th, .ltbg__table td { padding: var(--space-2) 0; border-bottom: 1px solid var(--ltbg-rule); font-weight: var(--weight-regular); vertical-align: baseline; color: var(--ltbg-text); }
 .ltbg__table thead th { color: var(--ltbg-text-ter); font-size: var(--text-micro); }
 .ltbg__td-muted { color: var(--ltbg-text-ter); }
 .ltbg__td-right { text-align: right; white-space: nowrap; }
-.ltbg__quotes { list-style: none; margin: var(--space-2) 0 0; padding: 0; }
+.ltbg__quotes { list-style: none; margin: var(--space-3) 0 0; padding: 0; }
 .ltbg__quote { padding: var(--space-3) 0; border-top: 1px solid var(--ltbg-rule); }
 .ltbg__quote:first-child { border-top: 0; padding-top: 0; }
+.ltbg__quote:last-child { padding-bottom: 0; }
 .ltbg__quote-text { margin: 0; font-size: var(--text-body); line-height: var(--leading-body); }
 .ltbg__quote-name { margin: var(--space-1) 0 0; font-size: var(--text-body-sm); color: var(--ltbg-text-ter); }
+
+/* Ab 840 px: jede Karte eine Zeile. Kennzahl links in fester Spalte, Herleitung
+   rechts hinter einer Haarlinie. Drei Kennzahlen untereinander lesen sich wie
+   eine Tabelle in Section-Größe. */
+@media (min-width: 840px) {
+  .ltbg__card {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: var(--space-6);
+    padding: var(--space-6);
+    align-items: start;
+  }
+  .ltbg__big { font-size: var(--text-stat); }
+  .ltbg__main {
+    border-left: 1px solid var(--ltbg-rule);
+    padding-left: var(--space-6);
+    /* Erste Zeile rechts auf Höhe der Kennzahl, nicht der Oberzeile */
+    padding-top: calc(var(--text-micro) * var(--leading-tight) + var(--space-3));
+  }
+  .ltbg__main > :first-child { margin-top: 0; }
+  .ltbg__text { font-size: var(--text-body-lg); }
+}
 {% endstylesheet %}
 
 {% schema %}
