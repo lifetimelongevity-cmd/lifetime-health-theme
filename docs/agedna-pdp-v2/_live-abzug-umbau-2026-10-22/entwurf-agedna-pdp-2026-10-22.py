@@ -6,7 +6,7 @@ Aufruf aus lifetime-health-theme/:
   python3 docs/entwurf-agedna-pdp-2026-10-22.py          # nutzt den Abzug *-quelle.html
   python3 docs/entwurf-agedna-pdp-2026-10-22.py --neu    # zieht die Live-PDP neu
 
-Ergebnis: docs/entwurf-agedna-pdp-2026-10-22.html
+Ergebnis: docs/agedna-pdp-v2/_live-abzug-umbau-2026-10-22/entwurf-live-abzug-umbau.html (Zwischenstand vom 22.10. nachmittags, von BJ als zu nah an live verworfen)
 Ansehen:  http://localhost:8789/entwurf-agedna-pdp-2026-10-22.html (?quiz=1 zeigt die Quiz-Zeile)
 
 Grundsatz: Jede Section ist die echte Theme-Section der Live-Seite (gleiche Bausteine wie auf
@@ -25,10 +25,10 @@ import urllib.request
 
 ORDNER = pathlib.Path(__file__).resolve().parent
 QUELLE = ORDNER / 'entwurf-agedna-pdp-2026-10-22-quelle.html'
-ZIEL = ORDNER / 'entwurf-agedna-pdp-2026-10-22.html'
+ZIEL = ORDNER / 'entwurf-live-abzug-umbau.html'
 PDP_URL = 'https://www.lifetime-health.de/products/lifetime-age-dna'
 
-ERGEBNISBILD = 'agedna-pdp-v2/bilder/hero-sport-alter-quadrat.webp'
+ERGEBNISBILD = '../bilder/hero-sport-alter-quadrat.webp'
 KACHEL = 'product-8585364.png?v=1768563330'
 KIT = 'Product-gallery_tst.png?v=1777229670'
 
@@ -204,8 +204,17 @@ STIL = '''
   .lt-quiz-zeile b { font-weight: 700; }
   .lt-proc__promise { margin: 32px 0 0; font-size: 16px; line-height: 1.45; color: rgba(38, 37, 30, .72); }
   .lt-entwurf-hinweis { padding: 16px 20px; font-size: 12px; color: rgba(38, 37, 30, .5); text-align: center; }
+  .lt-entwurf-hinweis a { color: #26251e; }
+  /* ?diff=1: Änderungen markieren */
+  body.diff-an [data-entwurf] { outline: 2px dashed #b9432e; outline-offset: 6px; position: relative; }
+  body.diff-an [data-entwurf]::before { content: attr(data-entwurf); position: absolute; left: 0; top: -22px; z-index: 5; padding: 2px 8px; background: #b9432e; color: #fff; font: 600 11px/1.4 Lato, sans-serif; letter-spacing: .02em; border-radius: 4px; white-space: nowrap; }
+  body.diff-an .lt-entwurf-weg { display: block !important; margin: 0 auto; padding: 16px 20px; max-width: 640px; list-style: none; font-size: 14px; color: #26251e; }
+  body.diff-an .lt-entwurf-weg li { padding: 4px 0; border-top: 1px solid rgba(38, 37, 30, .12); }
+  body.diff-an .lt-entwurf-weg li:first-child { border: 0; font-weight: 700; }
+  body.diff-an .lt-entwurf-weg li + li::before { content: "– "; color: #b9432e; }
 </style>
 <script>
+  if (new URLSearchParams(location.search).get('diff') === '1') document.documentElement.addEventListener('DOMContentLoaded', function () {}), document.addEventListener('DOMContentLoaded', function () { document.body.classList.add('diff-an'); });
   if (new URLSearchParams(location.search).get('quiz') === '1') {
     document.addEventListener('DOMContentLoaded', function () {
       var z = document.querySelector('.lt-quiz-zeile'); if (z) z.hidden = false;
@@ -213,6 +222,35 @@ STIL = '''
   }
 </script>
 </head>'''
+
+
+MARKEN = [
+    ('<div class="lt-pdp-hero__gallery-wrap', 'Bild 1: Ergebnis statt Kachel'),
+    ('<p class="lt-pdp-hero__proof"', 'neu: Beweiszeile'),
+    ('<div class="lt-pdp-hero__bullets', 'Bullets neu, 3. nennt das Gespräch'),
+    ('<div data-update-block="price-compact-main"', 'Preis offen, Paketwahl 349/449 weg'),
+    ('<p class="lt-pdp-hero__anchor"', 'neu: Preis-Anker'),
+    ('<button\n                  id="lt-hero-atc"', 'Knopf: Test bestellen'),
+    ('<div class="lt-pdp-hero__guarantee"', 'Garantie mit Namen'),
+    ('<div class="lt-pdp-hero__trust lt-trust"', 'Trust-Zeilen 2 und 4 neu'),
+    ('<div class="lt-founder-credentials"', 'Limmroth: belegte Angaben'),
+    ('<p class="lt-proc__promise"', 'neu: Prozesszusage'),
+    ('<span class="lt-cmp__text">Gespräch und AI Health Coach</span>', 'Vergleich: Gespräch'),
+    ('<div class="cr-head', 'Titel neu, Pills weg'),
+    ('<div class="faq-right"', 'FAQ 12 auf 6, Kaufstopper zuerst'),
+    ('<div class="rfc-copy', 'Schluss neu, Kit-Bild'),
+]
+
+
+def markiere(h):
+    """?diff=1: jede geänderte Stelle bekommt data-entwurf mit Beschriftung."""
+    for tag, text in MARKEN:
+        if h.count(tag) != 1:
+            raise SystemExit(f'[Marke] erwartet 1x, gefunden {h.count(tag)}x: {tag[:60]!r}')
+        kopf = tag.split(' ')[0] if tag.startswith('<button') else tag.split(' ', 1)[0]
+        rest = tag[len(kopf):]
+        h = h.replace(tag, f'{kopf} data-entwurf="{text}"{rest}')
+    return h
 
 
 def main():
@@ -237,8 +275,11 @@ def main():
     fehlt = [k for k in reihenfolge if k not in secs]
     if fehlt:
         raise SystemExit(f'Sections fehlen im Abzug: {fehlt}')
-    neu_main = vor + ''.join(secs[k] for k in reihenfolge)
-    neu_main += '<p class="lt-entwurf-hinweis">Entwurf 22.10.2026 nach /denkschule, gebaut aus dem Live-Abzug. Keine Live-Seite. <a href="?quiz=1">?quiz=1</a> zeigt die Zeile für Quiz-Absolventen.</p>'
+    neu_main = markiere(vor + ''.join(secs[k] for k in reihenfolge))
+    neu_main += ('<ul class="lt-entwurf-weg" hidden><li>Nicht mehr auf der Seite:</li><li>Paketwahl „Test + Ergebnisgespräch 449 €“</li>'
+                 '<li>CTA-Band „Finde heraus, wo du heute stehst“</li><li>Wirkstoff-Regal „Was zu dir passt“</li>'
+                 '<li>fünf Themen-Pills über den Bewertungen</li><li>sechs der zwölf Fragen</li><li>Marketing-Kachel als Bild 1</li></ul>')
+    neu_main += '<p class="lt-entwurf-hinweis">Entwurf 22.10.2026 nach /denkschule, gebaut aus dem Live-Abzug. Keine Live-Seite. <a href="?quiz=1">?quiz=1</a> zeigt die Zeile für Quiz-Absolventen, <a href="?diff=1">?diff=1</a> markiert jede Änderung gegenüber live.</p>'
 
     # Vorlade-Link der alten Kachel im Kopf ebenfalls auf das Ergebnisbild
     kopf = re.sub(r'https?://www\.lifetime-health\.de/cdn/shop/files/product-8585364\.png\?[^" ,]*', ERGEBNISBILD, kopf)
