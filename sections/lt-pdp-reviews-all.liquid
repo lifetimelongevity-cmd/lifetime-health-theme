@@ -63,6 +63,9 @@
     --ltra-text: {{ section.settings.color_text }};
     --ltra-icon: {{ section.settings.color_text | color_modify: 'alpha', 0.66 }};
     --ltra-rule: {{ section.settings.color_text | color_modify: 'alpha', 0.08 }};
+    {%- if section.settings.max_width > 0 %}
+    --ltra-max: {{ section.settings.max_width }}px;
+    {%- endif %}
     padding-top:    min({{ section.settings.padding_top }}px, 15vw);
     padding-bottom: min({{ section.settings.padding_bottom }}px, 15vw);
   }
@@ -90,7 +93,7 @@
 }
 
 .ltra__container {
-  max-width: var(--lt-page-max, 1280px);
+  max-width: var(--ltra-max, var(--lt-page-max, 1280px));
   margin: 0 auto;
   padding: 0 var(--lt-page-gutter, 16px);
 }
@@ -213,6 +216,17 @@
       "label": "Beschriftung",
       "default": "Alle [count] Bewertungen lesen",
       "info": "[count] wird durch die Zahl aus Loox ersetzt (loox.num_reviews). Fehlt die Zahl, fällt der Platzhalter weg."
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Breite",
+      "min": 0,
+      "max": 1280,
+      "step": 40,
+      "unit": "px",
+      "default": 0,
+      "info": "0 = volle Seitenbreite. 960 auf der NMN-PDP, damit die Zeile unter den Belege-Karten in deren Breite steht."
     },
     {
       "type": "header",

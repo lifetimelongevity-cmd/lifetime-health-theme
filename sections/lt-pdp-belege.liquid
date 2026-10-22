@@ -24,6 +24,20 @@
   nach oben gewandert. Ab 840 px wird jede Karte eine Zeile: Kennzahl links in fester
   Spalte, Herleitung rechts hinter einer Haarlinie, drei Kennzahlen untereinander wie
   eine Tabelle in Section-Größe. Unter 840 px bleibt der Stapel.
+
+  Karte 3 seit 22.10. abends (BJ: „man hat nicht das Gefühl, dass das echte
+  Bewertungen sind“): je Stimme Sterne, Name, Loox-Kennzeichen und Monat, wie die
+  Bewertungskarten der AGE&DNA-PDP (crs-customer-reviews, Blöcke) und die
+  Startseite (lt-hp-stimmen, „Bewertung auf Loox“). Sterne, Datum und Kennzeichen
+  stammen aus dem öffentlichen Loox-Widget der jeweiligen Bewertung und werden
+  je Block gepflegt, das Metafeld loox.reviews trägt sie nicht. Unter den Stimmen
+  der Weg zu allen: Link auf #reviews, die Lade lt-pdp-reviews-all direkt unter
+  dieser Section (gleicher Aufbau wie auf der AGE&DNA-PDP).
+
+  AGE&DNA-PDP 2026-10-22: Der Test hat keine Messwerte, sondern Bereiche. Dafür der
+  Blocktyp "bereich" (Bereich · Werte · Ändert sich), der in Karte 1 als zweite Tabelle
+  rendert und ebenfalls ins JSON-LD geht. Karte 2 bekommt eine optionale Zeile unter
+  der großen Zahl (rohstoff_name_label, bei NMN leer). Default leer, NMN bleibt gleich.
 {% endcomment %}
 
 {%- liquid
@@ -43,9 +57,18 @@
 
   assign bg_messwerte = section.blocks | where: 'type', 'messwert'
   assign bg_stimmen = section.blocks | where: 'type', 'stimme'
+  assign bg_bereiche = section.blocks | where: 'type', 'bereich'
+  assign bg_jsonld_rows = bg_messwerte.size | plus: bg_bereiche.size
 
   assign bg_rating = product.metafields.loox.avg_rating | default: 0 | plus: 0
   assign bg_count = product.metafields.loox.num_reviews | default: 0 | plus: 0
+  assign bg_count_s = bg_count | append: ''
+  assign bg_more_label = section.settings.stimmen_link_label | strip
+  if bg_count > 0
+    assign bg_more_label = bg_more_label | replace: '[anzahl]', bg_count_s
+  else
+    assign bg_more_label = bg_more_label | replace: '[anzahl] ', '' | replace: '[anzahl]', ''
+  endif
 
   assign bg_cards = 0
   if section.settings.show_labor
@@ -110,7 +133,7 @@
             <p class="ltbg__text">{{ section.settings.labor_text | escape }}</p>
           {%- endif -%}
 
-          {%- if bg_messwerte.size > 0 or section.settings.labor_provenance != blank or section.settings.labor_compare != blank -%}
+          {%- if bg_jsonld_rows > 0 or section.settings.labor_provenance != blank or section.settings.labor_compare != blank -%}
           <details class="ltbg__details">
             <summary class="ltbg__summary">
               <span>{{ section.settings.labor_details_label | default: 'Einzelwerte und Prüfdetails' | escape }}</span>
@@ -143,6 +166,27 @@
                 </tbody>
               </table>
               {%- endif -%}
+              {%- if bg_bereiche.size > 0 -%}
+              <table class="ltbg__table ltbg__table--bereiche">
+                <caption class="ltbg__caption">Bereiche und Werte {{ product.title | escape }}</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Bereich</th>
+                    <th scope="col">Werte</th>
+                    <th scope="col" class="ltbg__td-right">Ändert sich</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {%- for block in bg_bereiche -%}
+                    <tr {{ block.shopify_attributes }}>
+                      <th scope="row">{{ block.settings.bereich | escape }}</th>
+                      <td>{{ block.settings.werte | escape }}</td>
+                      <td class="ltbg__td-right">{% if block.settings.aendert_sich %}ja{% else %}nein{% endif %}</td>
+                    </tr>
+                  {%- endfor -%}
+                </tbody>
+              </table>
+              {%- endif -%}
               {%- if section.settings.labor_provenance != blank -%}
                 <p>{{ section.settings.labor_provenance | escape }}</p>
               {%- endif -%}
@@ -166,7 +210,12 @@
             <h2 class="ltbg__label">{{ section.settings.rohstoff_title | escape }}</h2>
           {%- endif -%}
           {%- if section.settings.rohstoff_name != blank -%}
-            <p class="ltbg__big">{{ section.settings.rohstoff_name | escape | replace: '®', '<sup class="ltbg__reg">®</sup>' }}</p>
+            <p class="ltbg__big">
+              {{- section.settings.rohstoff_name | escape | replace: '®', '<sup class="ltbg__reg">®</sup>' -}}
+              {%- if section.settings.rohstoff_name_label != blank -%}
+                <span class="ltbg__big-label">{{ section.settings.rohstoff_name_label | escape }}</span>
+              {%- endif -%}
+            </p>
           {%- endif -%}
           {%- if section.settings.rohstoff_meta != blank -%}
             <p class="ltbg__meta">{{ section.settings.rohstoff_meta | escape }}</p>
@@ -214,13 +263,7 @@
           {%- if bg_count > 0 -%}
             <p class="ltbg__big ltbg__big--num">
               {{ bg_rating | round: 1 | replace: '.', ',' }}
-              <span class="ltbg__big-label">
-                {%- if section.settings.stimmen_link_url != blank -%}
-                  <a href="{{ section.settings.stimmen_link_url }}">von 5 · {{ bg_count }} Bewertungen</a>
-                {%- else -%}
-                  von 5 · {{ bg_count }} Bewertungen
-                {%- endif -%}
-              </span>
+              <span class="ltbg__big-label">von 5 · {{ bg_count }} Bewertungen</span>
             </p>
           {%- endif -%}
         </div>
@@ -228,14 +271,47 @@
           {%- if bg_stimmen.size > 0 -%}
             <ul class="ltbg__quotes">
               {%- for block in bg_stimmen -%}
+                {%- assign bg_stars = block.settings.rating | default: 5 | plus: 0 -%}
                 <li class="ltbg__quote" {{ block.shopify_attributes }}>
+                  {%- if bg_stars > 0 -%}
+                    <span class="ltbg__stars" role="img" aria-label="{{ bg_stars }} von 5 Sternen">
+                      {%- for i in (1..5) -%}
+                        {%- if i <= bg_stars -%}
+                          <svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg>
+                        {%- else -%}
+                          <svg class="ltbg__star ltbg__star--empty" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" stroke="currentColor" stroke-width="0.9" fill="none"/></svg>
+                        {%- endif -%}
+                      {%- endfor -%}
+                    </span>
+                  {%- endif -%}
                   <p class="ltbg__quote-text">{{ block.settings.text | escape }}</p>
-                  {%- if block.settings.name != blank -%}
-                    <p class="ltbg__quote-name">{{ block.settings.name | escape }}</p>
+                  {%- if block.settings.name != blank or block.settings.verified or block.settings.date != blank -%}
+                    <p class="ltbg__quote-meta">
+                      {%- if block.settings.name != blank -%}
+                        <span class="ltbg__quote-name">{{ block.settings.name | escape }}</span>
+                      {%- endif -%}
+                      {%- if block.settings.verified -%}
+                        <span class="ltbg__verified">
+                          <svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><circle cx="5.5" cy="5.5" r="5.5" fill="var(--color-teal)"/><path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                          {{- section.settings.verified_label | default: 'Verifiziert' | escape -}}
+                        </span>
+                      {%- endif -%}
+                      {%- if block.settings.date != blank -%}
+                        <span class="ltbg__quote-date">{{ block.settings.date | escape }}</span>
+                      {%- endif -%}
+                    </p>
                   {%- endif -%}
                 </li>
               {%- endfor -%}
             </ul>
+          {%- endif -%}
+          {%- if bg_more_label != blank and section.settings.stimmen_link_url != blank -%}
+            <p class="ltbg__more">
+              <a href="{{ section.settings.stimmen_link_url }}">
+                <span>{{ bg_more_label | escape }}</span>
+                <span class="ltbg__chevron" aria-hidden="true">{% render 'crs-chevron' %}</span>
+              </a>
+            </p>
           {%- endif -%}
         </div>
       </article>
@@ -246,7 +322,7 @@
   </div>
 </div>
 
-{%- if section.settings.jsonld_enable and section.settings.show_labor and bg_messwerte.size > 0 -%}
+{%- if section.settings.jsonld_enable and section.settings.show_labor and bg_jsonld_rows > 0 -%}
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -265,6 +341,10 @@
     {%- endif -%}
     {%- for block in bg_messwerte -%}
     { "@type": "PropertyValue", "name": {{ block.settings.parameter | json }}, "value": {{ block.settings.result | json }}{% if block.settings.method != blank %}, "measurementMethod": {{ block.settings.method | json }}{% endif %} }{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}
+    {%- if bg_messwerte.size > 0 and bg_bereiche.size > 0 -%},{%- endif -%}
+    {%- for block in bg_bereiche -%}
+    { "@type": "PropertyValue", "name": {{ block.settings.bereich | json }}, "value": {{ block.settings.werte | json }} }{% unless forloop.last %},{% endunless %}
     {%- endfor -%}
   ]
   {%- if section.settings.labor_report_pdf != blank -%}
@@ -337,8 +417,6 @@
   color: var(--ltbg-text-sec);
   margin: var(--space-2) 0 0;
 }
-.ltbg__big-label a { color: inherit; text-decoration-color: var(--ltbg-text-ter); text-underline-offset: 3px; transition: color var(--ease-default); }
-.ltbg__big-label a:hover { color: var(--ltbg-text); }
 .ltbg__meta {
   font-size: var(--text-body-sm);
   line-height: var(--leading-body);
@@ -377,12 +455,41 @@
 .ltbg__table thead th { color: var(--ltbg-text-ter); font-size: var(--text-micro); }
 .ltbg__table .ltbg__td-muted { color: var(--ltbg-text-ter); }
 .ltbg__td-right { text-align: right; white-space: nowrap; }
+.ltbg__table + .ltbg__table { margin-top: var(--space-3); }
+.ltbg__body ol { margin: 0 0 var(--space-2); padding-left: 1.25em; }
+.ltbg__body li { margin: 0 0 var(--space-1); }
+/* Stimmen: Sterne oben, Zitat, darunter Name · Kennzeichen · Monat. Sterne wie in
+   crs-customer-reviews (12 statt 14 px, die Karte ist kleiner), Kennzeichen in
+   Text-Teal (AA bei 12 px), Monat tertiär. */
 .ltbg__quotes { list-style: none; margin: var(--space-3) 0 0; padding: 0; }
-.ltbg__quote { padding: var(--space-3) 0; border-top: 1px solid var(--ltbg-rule); }
+.ltbg__quote { padding: var(--space-4) 0; border-top: 1px solid var(--ltbg-rule); }
 .ltbg__quote:first-child { border-top: 0; padding-top: 0; }
-.ltbg__quote:last-child { padding-bottom: 0; }
+.ltbg__stars { display: inline-flex; gap: 2px; color: var(--color-star); margin-bottom: var(--space-2); }
+.ltbg__star { display: block; }
+.ltbg__star--empty { color: var(--ltbg-text-ter); }
 .ltbg__quote-text { margin: 0; font-size: var(--text-body); line-height: var(--leading-body); }
-.ltbg__quote-name { margin: var(--space-1) 0 0; font-size: var(--text-body-sm); color: var(--ltbg-text-ter); }
+.ltbg__quote-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3);
+  margin: var(--space-2) 0 0; font-size: var(--text-body-sm); line-height: var(--leading-tight);
+}
+.ltbg__quote-name { font-weight: var(--weight-semibold); color: var(--ltbg-text); }
+.ltbg__verified {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: var(--text-micro); font-weight: var(--weight-medium); color: var(--color-teal-text); white-space: nowrap;
+}
+.ltbg__verified svg { flex: none; }
+.ltbg__quote-date { font-size: var(--text-micro); color: var(--ltbg-text-ter); font-variant-numeric: tabular-nums; }
+/* Weg zu allen Bewertungen: gleiche Zeile wie die Laden in Karte 1 und 2, nur als Link
+   auf #reviews (lt-pdp-reviews-all direkt unter dieser Section). */
+.ltbg__more { margin: 0; border-top: 1px solid var(--ltbg-rule); }
+.ltbg__more a {
+  display: flex; justify-content: space-between; align-items: center; gap: var(--space-2);
+  padding: var(--space-3) 0 0; text-decoration: none;
+  font-size: var(--text-body-sm); font-weight: var(--weight-semibold); color: var(--color-dark);
+  transition: color var(--ease-default);
+}
+.ltbg__more a:hover { color: var(--color-teal-text); }
+.ltbg__more a:focus-visible { outline: 2px solid var(--color-teal-dark); outline-offset: 2px; }
 
 /* Ab 840 px: jede Karte eine Zeile. Kennzahl links in fester Spalte, Herleitung
    rechts hinter einer Haarlinie. Drei Kennzahlen untereinander lesen sich wie
@@ -448,6 +555,7 @@
     { "type": "checkbox", "id": "show_rohstoff", "label": "Karte anzeigen", "default": true },
     { "type": "text", "id": "rohstoff_title", "label": "Oberzeile", "default": "Der Rohstoff" },
     { "type": "text", "id": "rohstoff_name", "label": "Name groß", "default": "Uthever®" },
+    { "type": "text", "id": "rohstoff_name_label", "label": "Zeile unter dem Namen (optional)", "info": "Zum Beispiel „Gespräch, inklusive“ unter „15 Minuten“. Leer = keine Zeile." },
     { "type": "text", "id": "rohstoff_meta", "label": "Herkunftszeile", "default": "Patentiert, Herkunft dokumentiert, nach GMP hergestellt" },
     { "type": "textarea", "id": "rohstoff_text", "label": "Satz", "default": "Der erste NMN-Rohstoff mit positivem EU-Gutachten. Die Mitgliedstaaten haben der Zulassung am 25. September 2026 zugestimmt." },
     { "type": "image_picker", "id": "person_image", "label": "Person: Bild" },
@@ -460,7 +568,9 @@
     { "type": "header", "content": "Karte 3: Was Kunden sagen" },
     { "type": "checkbox", "id": "show_stimmen", "label": "Karte anzeigen", "default": true },
     { "type": "text", "id": "stimmen_title", "label": "Oberzeile", "default": "Was Kunden sagen" },
-    { "type": "url", "id": "stimmen_link_url", "label": "Link auf alle Bewertungen (optional)", "info": "Schnitt und Anzahl kommen aus den Loox-Metafeldern" }
+    { "type": "text", "id": "verified_label", "label": "Kennzeichen-Text", "default": "Verifiziert", "info": "Steht an Stimmen mit gesetztem Häkchen. Loox zeigt das Zeichen an jeder Bewertung, auch an importierten; es belegt keinen Kauf." },
+    { "type": "text", "id": "stimmen_link_label", "label": "Link zu allen Bewertungen", "default": "Alle [anzahl] Bewertungen lesen", "info": "[anzahl] wird durch loox.num_reviews ersetzt. Schnitt und Anzahl im Kopf kommen aus den Loox-Metafeldern." },
+    { "type": "url", "id": "stimmen_link_url", "label": "Ziel des Links", "info": "#reviews, wenn die Section „Alle Bewertungen (Loox)“ direkt darunter steht" }
   ],
   "blocks": [
     {
@@ -473,15 +583,27 @@
       ]
     },
     {
+      "type": "bereich",
+      "name": "Bereich (Karte 1, Tests)",
+      "settings": [
+        { "type": "text", "id": "bereich", "label": "Bereich", "default": "MethylPace" },
+        { "type": "text", "id": "werte", "label": "Werte", "default": "biologisches Alter, Tempo" },
+        { "type": "checkbox", "id": "aendert_sich", "label": "Ändert sich mit dem Alltag", "default": true }
+      ]
+    },
+    {
       "type": "stimme",
       "name": "Kundenstimme (Karte 3)",
       "settings": [
         { "type": "textarea", "id": "text", "label": "Zitat", "default": "Klar deklariert, Laborwerte einsehbar. Genau das will ich." },
-        { "type": "text", "id": "name", "label": "Name", "default": "Hans-Werner G." }
+        { "type": "text", "id": "name", "label": "Name", "default": "Hans-Werner G." },
+        { "type": "range", "id": "rating", "label": "Sterne", "min": 1, "max": 5, "step": 1, "default": 5, "info": "Wie im Loox-Widget bei dieser Bewertung" },
+        { "type": "text", "id": "date", "label": "Monat", "info": "z. B. April 2026, aus dem Loox-Widget" },
+        { "type": "checkbox", "id": "verified", "label": "Loox-Kennzeichen zeigen", "default": false }
       ]
     }
   ],
-  "max_blocks": 12,
+  "max_blocks": 16,
   "presets": [
     {
       "name": "PDP Belege-Karten",
