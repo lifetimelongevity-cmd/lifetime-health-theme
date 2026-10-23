@@ -7,8 +7,10 @@
   sobald die Trust-Liste unten im Bild stand, und nach dem Einfahren der
   Sticky-Leiste auf deren Kaufbutton.
 
-  1. Laeuft die Trust-Liste durch das untere Band, in dem die Blase sitzt,
-     tritt die Blase kurz zurueck.
+  1. Laeuft die Trust-Liste oder der Kauf-Knopf (#lt-hero-atc) durch das
+     untere Band, in dem die Blase sitzt, tritt die Blase kurz zurueck.
+     Den Knopf beobachten wir seit 23.10.2026: Mit der kompakten Kaufzone
+     steht er mobil schon im ersten Bildschirm (y ~ 680) und lag unter der Blase.
   2. Ist die Sticky-Leiste eingefahren, rueckt die Blase ueber sie.
 
   Angesprochen wird nur ::part(activator), der Knopf der Blase. Das Chatfenster
@@ -29,12 +31,13 @@
 <script>
   (function () {
     var trust = document.querySelector('.lt-pdp-hero__trust');
+    var atc = document.getElementById('lt-hero-atc');
     var bar = document.getElementById('lt-sticky-atc');
-    if (!trust && !bar) return;
+    if (!trust && !atc && !bar) return;
 
     var mq = window.matchMedia('(max-width: 749px)');
     var root = document.documentElement;
-    var trustInBand = false;
+    var inBand = new Map();
     var BAND = 140;
 
     function update() {
@@ -43,7 +46,9 @@
         root.style.removeProperty('--lt-chat-lift');
         return;
       }
-      root.classList.toggle('lt-chat-quiet', trustInBand);
+      var quiet = false;
+      inBand.forEach(function (v) { if (v) quiet = true; });
+      root.classList.toggle('lt-chat-quiet', quiet);
       var lift = 0;
       if (bar && bar.classList.contains('visible')) {
         lift = Math.max(0, bar.offsetHeight - 8);
@@ -53,13 +58,14 @@
 
     var io = null;
     function observeTrust() {
-      if (!trust || !('IntersectionObserver' in window)) return;
+      if (!('IntersectionObserver' in window)) return;
       if (io) io.disconnect();
       io = new IntersectionObserver(function (entries) {
-        trustInBand = entries[entries.length - 1].isIntersecting;
+        entries.forEach(function (e) { inBand.set(e.target, e.isIntersecting); });
         update();
       }, { rootMargin: '-' + Math.max(0, window.innerHeight - BAND) + 'px 0px 0px 0px' });
-      io.observe(trust);
+      if (trust) io.observe(trust);
+      if (atc) io.observe(atc);
     }
 
     observeTrust();
