@@ -25,7 +25,7 @@ Ausgangslage: Live-Templates `index.json`, `product.age-dna-test.json`, `product
 | Startseite → NMN → Kasse (Abo) | 3 (Knopf „Größe wählen“ in Bereiche, Kaufknopf, Kasse) | 3, Knopf heißt jetzt „NMN bestellen“ |
 
 Die Klickzahl war schon am Minimum für den Test. Gewonnen hat der Entwurf bei den Abzweigungen:
-**Ausgänge mitten im Kaufweg 6 → 2** (die zwei verbleibenden sind Richtext der Text-Diät, siehe unten),
+**Ausgänge mitten im Kaufweg 6 → 0** (die zwei Blog-Links im Belege-Richtext hat die Text-Diät auf ihrem Branch entfernt, d2cb995),
 **Kauf-Labels 7 Varianten → 2 Muster** („Test bestellen“, „NMN bestellen“, auf den PDPs mit Preis-Zusatz).
 
 ## Fixes
@@ -74,9 +74,9 @@ Außerhalb des Themes oder außerhalb meiner Dateien:
    Hero-Aufbau, an „Erster Bildschirm“.
 4. **Hero-Startseite:** Quiz-Link „Passt der Test zu mir?“ direkt unter dem Kaufknopf ist ein zweiter
    Weg im ersten Bildschirm. Gelassen (Quiz-Funnel mit eigener Messung), Entscheidung Hero-Unterchat.
-5. **Zwei Blog-Links in NMN-Belege** (`labor_compare` → nmn-gehalt-marktanalysen,
-   `rohstoff_details_body` → uthever-nmn) und einer in der NMN-FAQ (Rechtsstand, am Seitenende).
-   Richtext gehört der Text-Diät, Bitte ist dort hinterlegt.
+5. **Blog-Links NMN:** Die zwei Links in NMN-Belege (`labor_compare`, `rohstoff_details_body`) sind auf
+   `claude/text-diaet-f9a604` raus (Commit d2cb995), erst nach dem Zusammenführen sichtbar. Der Link in der
+   NMN-FAQ (Rechtsstand, am Seitenende) bleibt bewusst.
 6. **Test-Kauflabel mit festem Preis** („Test bestellen, 349 €“ in `cta_label`): ändert sich der Preis,
    muss das Label von Hand mit. Hero hängt im Standalone-Pfad keinen Preis an.
 7. **Appstle-Hinweis im Drawer** bei Abo: „Ein oder mehrere Artikel in deinem Warenkorb ist/sind ein…“
