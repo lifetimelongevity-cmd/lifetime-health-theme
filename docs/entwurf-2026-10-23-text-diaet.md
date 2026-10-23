@@ -83,5 +83,5 @@ Ausgeblendet: „Gibt es eine Verzehrempfehlung?“ (`faq_3`, in Frage 4 aufgega
 ## Offen für BJ
 
 - `normbereich` wieder rein? Siehe Tabelle oben.
-- NMN-Versand-FAQ: „alle Größen gratis“ ist aus dem Live-Hero übernommen. Die DE-Versandregel ist sonst „gratis ab 49 €“; stimmt das für die 30-g-Größe nicht, die Antwort anpassen.
+- NMN-Versand-FAQ: beim Zusammenführen korrigiert (Leitsession 23.10.). „Nichts“ stimmte nur fürs Abo; Einmalkauf in DE unter 49 € kostet 4,90 € (`lt-shipping-rule`).
 - Merge: Die Hero-Felder in allen drei Templates sind unberührt. In `index.json` hat das Neuschreiben die Einrückung von drei Zeilen in `video_vsl` korrigiert (vorher 2 statt 8 Leerzeichen), sonst sind alle Diffs auf die Sections unter dem Hero begrenzt.
