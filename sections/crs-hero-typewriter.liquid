@@ -35,6 +35,10 @@
     padding-top:    {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
   }
+  {%- comment -%} Mobil höchstens 64 px oben (Header liegt transparent darüber, 47 px): Knopf und Bild sollen in den ersten Bildschirm (23.10.2026) {%- endcomment -%}
+  @media (max-width: 640px) {
+    #section-{{ section.id }} { padding-top: {{ section.settings.padding_top | at_most: 64 }}px; }
+  }
 {% endstyle %}
 
 <section
@@ -927,7 +931,17 @@
     row-gap: 36px;
   }
 
-  .ltw-quiz { margin-top: calc(var(--space-5) - 36px); }
+  .ltw-quiz { margin-top: calc(var(--space-5) - 24px); }
+
+  /* Erster Bildschirm (23.10.2026): Satz, Sterne und Knopf oben, das Bild direkt
+     darunter, damit Gesicht und Ergebniskarten noch ohne Scrollen anlaufen. */
+  .ltw-container { gap: 24px; row-gap: 24px; }
+  .ltw-heading-group { margin-bottom: var(--space-4); }
+  .ltw-sterne { margin-top: 0; }
+  .ltw-sterne + .ltw-cta { margin-top: var(--space-4); }
+  /* Ganzes Bild inklusive Ergebniskarten im ersten Bildschirm: Höhe statt Breite begrenzen */
+  .ltw-visual { justify-content: flex-start; }
+  .ltw-visual__img { max-height: 360px; }
 
   .ltw-heading-group {
     margin-bottom: 24px;
