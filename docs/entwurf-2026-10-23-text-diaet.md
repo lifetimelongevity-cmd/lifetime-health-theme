@@ -67,8 +67,9 @@ Ausgeblendet: „Ist das eine medizinische Diagnose?“ (`faq_4`).
 ## NMN-PDP (`templates/product.nmn-pulver.json`)
 
 `lt-pdp-belege`:
-- Karte 1: Lade-Text auf die Chargennummer reduziert (Labor und Datum stehen schon in der Tabellen-Überschrift), Labor-Zeile kürzer, NUS-Vergleich in einem Satz mit Link.
-- Karte 2: Meta „Patentiert, nach GMP hergestellt“, Text „Der erste NMN-Rohstoff mit positivem EU-Gutachten.“, Votum vom 25.09.2026 und Amtsblatt-Stand in die Lade. Firmenzeile (Diga Health GmbH, HRB) aus der Lade entfernt, Firmenname steht weiter im Footer und JSON-LD. Rolle Limmroth „Chefarzt Neurologie, prüft unsere NMN-Inhalte“.
+- Karte 1: Lade-Text auf die Chargennummer reduziert (Labor und Datum stehen schon in der Tabellen-Überschrift), Labor-Zeile kürzer, NUS-Vergleich in einem Satz.
+- Karte 2: Meta „Patentiert, nach GMP hergestellt“, Text „Der erste NMN-Rohstoff mit positivem EU-Gutachten.“, Votum vom 25.09.2026 und Amtsblatt-Stand in die Lade.
+- Blog-Links aus beiden Laden entfernt (auf Bitte der Klickweg-Session: Ausgänge mitten im Kaufweg): „Die Untersuchung“ → `/blogs/longevity-blog/nmn-gehalt-marktanalysen` und „Mehr zu Uthever“ → `/blogs/longevity-blog/uthever-nmn`. Der Link „Der ganze Rechtsstand“ in der FAQ bleibt. Wer die internen Links für SEO zurück will, setzt die zwei `<a>` wieder ein. Firmenzeile (Diga Health GmbH, HRB) aus der Lade entfernt, Firmenname steht weiter im Footer und JSON-LD. Rolle Limmroth „Chefarzt Neurologie, prüft unsere NMN-Inhalte“.
 - Karte 3: 2 statt 3 Stimmen (Hannelore M., Christa V.); Hans-Werner G. ausgeblendet (gleiche Aussage wie Hannelore).
 
 `crs-faq-accordion`, 4 Fragen, Kaufbedenken zuerst:
