@@ -1510,8 +1510,14 @@
                 <span class="lt-price-direct__compare" data-lt-direct-compare {% unless lt_compare_price > lt_pill_1_once %}hidden{% endunless %}>{% if lt_compare_price > lt_pill_1_once %}{{ lt_compare_price | money_without_trailing_zeros }}{% endif %}</span>
               </div>
               <span class="lt-price-direct__savings" data-lt-direct-savings {% unless lt_compare_price > lt_pill_1_once %}hidden{% endunless %}>{% if lt_compare_price > lt_pill_1_once %}Du sparst {{ lt_compare_price | minus: lt_pill_1_once | money_without_trailing_zeros }}{% endif %}</span>
+              {%- comment -%} Kompakte Kaufzone: die Notiz steht unter dem Knopf (post-cta), damit
+                  Preis und Knopf mobil in den ersten Bildschirm passen (23.10.2026). {%- endcomment -%}
               {%- if section.settings.bb_once_subline != blank -%}
-                <span class="lt-price-direct__note">{{ section.settings.bb_once_subline | escape }}</span>
+                {%- if section.settings.bb_compact -%}
+                  {%- assign lt_note_below_cta = true -%}
+                {%- else -%}
+                  <span class="lt-price-direct__note">{{ section.settings.bb_once_subline | escape }}</span>
+                {%- endif -%}
               {%- endif -%}
               {%- comment -%} Zahlungs-Entlastung an den Preisanker statt ans Spaltenende:
                   bei High-Ticket gehoert der Klarna-Hinweis in den Moment der Preisentscheidung. {%- endcomment -%}
@@ -1727,6 +1733,9 @@
                 {%- endif -%}
               {%- endif -%}
             </p>
+            {%- if lt_note_below_cta -%}
+              <p class="lt-pdp-hero__post-note">{{ section.settings.bb_once_subline | escape }}</p>
+            {%- endif -%}
           </div>
         {%- elsif lt_show_cancel_after_cta or section.settings.show_guarantee_badge or lt_payment_note_post_cta -%}
           <div class="lt-pdp-hero__post-cta">
@@ -3172,6 +3181,49 @@
 .lt-pdp-hero-section--compact .lt-pdp-hero__trust { border-top: 0 !important; border-bottom: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; margin-top: var(--space-3) !important; }
 .lt-pdp-hero-section--compact .lt-pdp-hero__trust-item--note { margin-top: 0; }
 #lt-sticky-atc[data-lt-sticky-gate].lt-sticky-atc--held { visibility: hidden !important; pointer-events: none !important; }
+
+/* Erster Bildschirm mobil (23.10.2026): Bild, Name, Nutzen, Sterne, Preis und Knopf
+   stehen auf 375x812 ohne Scrollen. Bild 86 % hoch statt quadratisch (cover, leicht
+   nach oben verschoben, damit Titel im Bild und Beutelkopf bleiben), engere Abstände,
+   Bullets in Body-sm, Modus-Kacheln einzeilig. Nur mit bb_compact (NMN, AGE&DNA). */
+.lt-pdp-hero-section--compact .lt-pdp-hero__post-note { margin: 0; font-size: 13px; line-height: 1.4; color: var(--lt-muted, #525252); text-align: center; }
+@media (max-width: 767px) {
+  .lt-pdp-hero-section--compact .lt-pdp-hero__container { padding-top: var(--space-2); }
+  .lt-pdp-hero-section--compact .lt-pdp-hero { row-gap: var(--space-3); }
+  .lt-pdp-hero-section--compact .product-gallery-item { padding-top: 86% !important; }
+  .lt-pdp-hero-section--compact .product-gallery-item img { object-fit: cover !important; object-position: 50% 35%; }
+  .lt-pdp-hero-section--compact .css-slider-navigation-container { margin-top: 6px !important; }
+  .lt-pdp-hero-section--compact .lt-pdp-hero__rating { margin-bottom: 6px; }
+  .lt-pdp-hero-section--compact .lt-pdp-hero__heading { margin-bottom: var(--space-3); }
+  .lt-pdp-hero-section--compact .lt-pdp-hero__heading .crs-heading-stack__title,
+  .lt-pdp-hero-section--compact .lt-pdp-hero__heading .crs-heading-stack__subtitle { font-size: 30px; }
+  .lt-pdp-hero-section--compact .lt-pdp-hero__bullets { margin-bottom: var(--space-2); gap: 6px; }
+  .lt-pdp-hero-section--compact .lt-pdp-hero__bullet { font-size: var(--text-body-sm, 14px); line-height: 1.35; }
+  .lt-pdp-hero-section--compact .lt-pdp-hero__bullet svg { margin-top: 2px; }
+  .lt-pdp-hero-section--compact .lt-pdp-hero__coa { margin-top: var(--space-2); }
+  .lt-pdp-hero-section--compact .lt-purchase-block { margin-top: var(--space-2) !important; margin-bottom: var(--space-2) !important; }
+  .lt-pdp-hero-section--compact .lt-price-direct { margin-top: 0; }
+  .lt-pdp-hero-section--compact .lt-size { margin-top: var(--space-3); margin-bottom: var(--space-2); }
+  .lt-pdp-hero-section--compact .lt-size__pill { min-height: 44px; padding: 6px 4px; }
+  .lt-pdp-hero-section--compact .lt-bb-card__body { padding: var(--space-2) var(--space-3) !important; }
+  .lt-pdp-hero-section--compact .lt-bb-card__title,
+  .lt-pdp-hero-section--compact .lt-bb-card:not(.is-selected) .lt-bb-card__title,
+  .lt-pdp-hero-section--compact .lt-bb-card .lt-bb-card__current,
+  .lt-pdp-hero-section--compact .lt-bb-card.is-selected .lt-bb-card__current,
+  .lt-pdp-hero-section--compact .lt-bb-card:not(.is-selected) .lt-bb-card__current { font-size: 15px !important; }
+  .lt-pdp-hero-section--compact .lt-bb-card__sub { font-size: 13px; }
+  .lt-pdp-hero-section--compact .lt-bb-card__head { padding-top: 0 !important; }
+  /* Hinweis und Grundpreis teilen sich eine Zeile */
+  .lt-pdp-hero-section--compact .lt-bb__hint,
+  .lt-pdp-hero-section--compact .lt-bb__unitline { display: inline; margin: 0; font-size: 13px; }
+  .lt-pdp-hero-section--compact .lt-bb__unitline { margin-left: 4px; }
+  .lt-pdp-hero-section--compact .lt-bb__unitline:empty,
+  .lt-pdp-hero-section--compact .lt-bb__hint[hidden] { display: none; }
+  .lt-pdp-hero-section--compact .lt-bb { margin-bottom: 6px; }
+  .lt-pdp-hero-section--compact .lt-pdp-hero__atc { margin-top: var(--space-2) !important; }
+}
+/* Sticky-Knopf schreibt wie der Hero-Knopf („Test bestellen, 349 €“), nicht in Versalien */
+#lt-sticky-atc[data-lt-sticky-gate] .lt-sticky-btn { text-transform: none; letter-spacing: normal; }
 
 /* Compliance-Fussnote: abgesetzt von den drei Vorteils-Zeilen darueber, damit
    sie nicht als vierter Vorteil gelesen wird. Trennung ueber Weissraum und
