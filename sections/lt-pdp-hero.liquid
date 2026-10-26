@@ -1721,7 +1721,7 @@
               (dynamisch, Kompakt-JS) und eine Zeile Versand plus Garantie. Die Garantie öffnet
               weiter das Popup, Kündbarkeit steht in der Abo-Kachel, Zahlarten entfallen hier. {%- endcomment -%}
           <div class="lt-pdp-hero__post-cta lt-pdp-hero__post-cta--compact">
-            <span class="lt-save-chip" data-lt-save-chip hidden></span>
+            <button type="button" class="lt-save-chip" data-lt-save-chip hidden disabled><span class="lt-save-chip__lead" data-lt-save-lead>Du sparst</span> <span class="lt-save-chip__amt" data-lt-save-amt></span><span class="lt-save-chip__go" aria-hidden="true"> →</span></button>
             <p class="lt-pdp-hero__post-line">
               {%- if section.settings.compact_ship_text != blank -%}<span>{{ section.settings.compact_ship_text | escape }}</span>{%- endif -%}
               {%- if section.settings.show_guarantee_badge -%}
@@ -2230,6 +2230,55 @@
       var hint = section.querySelector('[data-lt-bb-hint]');
       var unitLine = section.querySelector('[data-lt-bb-unitline]');
       var chip = section.querySelector('[data-lt-save-chip]');
+      var chipLead = chip ? chip.querySelector('[data-lt-save-lead]') : null;
+      var chipAmt = chip ? chip.querySelector('[data-lt-save-amt]') : null;
+      var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var chipRaf = 0;
+      function parseCents(txt) {
+        var n = parseFloat(String(txt).replace(/[^\d,]/g, '').replace(',', '.'));
+        return isNaN(n) ? NaN : Math.round(n * 100);
+      }
+      // Ersparnis-Chip (26.10.2026, /impeccable delight): die Zahl ist ein Messwert und
+      // zählt beim Wechsel von Größe oder Kaufart vom alten zum neuen Betrag (450 ms,
+      // Kurve aus DESIGN.md). Steigt sie, hebt sich der Chip kurz an. Ohne Bewegung bei
+      // prefers-reduced-motion. Ganze Euro ohne „,00“ wie im Hero-Preis.
+      function fmtSave(c) {
+        return c % 100 === 0 ? (c / 100) + ' €' : formatPrice(c);
+      }
+      function setChip(lead, cents, actionable) {
+        if (!chip || isNaN(cents) || cents <= 0) { if (chip) chip.hidden = true; return; }
+        chipLead.textContent = lead;
+        chip.disabled = !actionable;
+        chip.classList.toggle('is-actionable', actionable);
+        chip.setAttribute('aria-label', lead + ' ' + fmtSave(cents) + (actionable ? ', Abo wählen' : ''));
+        var from = parseInt(chip.dataset.cents, 10);
+        var wasHidden = chip.hidden;
+        chip.hidden = false;
+        // refresh() läuft pro Wechsel zweimal (change + CTA-Observer): gleicher Zielwert
+        // lässt eine laufende Zählung weiterlaufen.
+        if (from === cents && !wasHidden) return;
+        chip.dataset.cents = cents;
+        if (chipRaf) cancelAnimationFrame(chipRaf);
+        if (calm || wasHidden || isNaN(from)) { chipAmt.textContent = fmtSave(cents); return; }
+        if (cents > from) {
+          chip.classList.remove('is-up'); void chip.offsetWidth; chip.classList.add('is-up');
+        }
+        var t0 = performance.now();
+        (function step(now) {
+          // rAF-Zeitstempel liegt beim ersten Frame vor t0: ohne Klemme zählt es kurz rückwärts
+          var k = Math.max(0, Math.min(1, (now - t0) / 450));
+          var e = 1 - Math.pow(1 - k, 4);
+          var v = Math.round(from + (cents - from) * e);
+          chipAmt.textContent = k < 1 ? formatPrice(v) : fmtSave(cents);
+          if (k < 1) chipRaf = requestAnimationFrame(step);
+        })(t0);
+      }
+      if (chip) {
+        chip.addEventListener('click', function () {
+          var sub = section.querySelector('[data-bb-kind="sub"] .lt-bb-card__input');
+          if (sub && !sub.checked) sub.click();
+        });
+      }
       function refresh() {
         var activeCard = section.querySelector('.lt-bb-card__input:checked');
         var cardEl = activeCard ? activeCard.closest('[data-lt-bb-card]') : null;
@@ -2268,16 +2317,25 @@
           // unter den Knopf, wie bei NMN, die Preiszeile zeigt sie dann nicht mehr doppelt.
           var direct = section.querySelector('[data-lt-direct-savings]');
           var directTxt = direct ? direct.textContent.trim() : '';
-          if (directTxt) { chip.textContent = directTxt; chip.hidden = false; direct.hidden = true; }
+          if (directTxt) { setChip('Du sparst', parseCents(directTxt.replace(/^Du sparst\s*/, '')), false); direct.hidden = true; }
           else { chip.hidden = true; }
         } else if (chip) {
           var base = sizes[0];
           var baseC = base ? parseInt(base.dataset.oncePrice, 10) : NaN;
           var baseG = base ? parseInt(base.dataset.grams, 10) : NaN;
           var g2 = active ? parseInt(active.dataset.grams, 10) : NaN;
-          var saved = (!isNaN(baseC) && baseG > 0 && g2 > 0 && !isNaN(current)) ? Math.round(baseC * g2 / baseG) - current : 0;
-          if (saved > 0) { chip.textContent = 'Du sparst ' + formatPrice(saved); chip.hidden = false; }
-          else { chip.hidden = true; }
+          var baseline = (!isNaN(baseC) && baseG > 0 && g2 > 0) ? Math.round(baseC * g2 / baseG) : NaN;
+          // Bei „Einmalig“ zeigt der Chip, was das Abo spart, und schaltet per Tipp aufs Abo.
+          // Gleiche Bezugsgröße in beiden Zuständen (Einzelkauf in 30-g-Beuteln), damit die
+          // Zahl beim Wechsel stehen bleibt und nur der Satz sich dreht.
+          var subCard = section.querySelector('[data-bb-kind="sub"] .lt-bb-card__input');
+          if (!isSub && subCard && !isNaN(subC) && baseline - subC > 0) {
+            setChip('Im Abo sparst du', baseline - subC, true);
+          } else {
+            var saved = (!isNaN(baseline) && !isNaN(current)) ? baseline - current : 0;
+            if (saved > 0) setChip('Du sparst', saved, false);
+            else chip.hidden = true;
+          }
         }
         var stickyText = document.querySelector('#lt-sticky-atc .lt-sticky-btn .button__text');
         if (stickyText && ctaText) stickyText.textContent = ctaText.textContent.trim();
@@ -3258,7 +3316,28 @@
 .lt-pdp-hero-section--compact .lt-pdp-hero__post-line,
 .lt-pdp-hero-section--compact .lt-pdp-hero__post-note,
 .lt-pdp-hero-section--compact .lt-pdp-hero__trust-link { font-size: 13px; }
-.lt-pdp-hero-section--compact .lt-save-chip { font-size: 13px; font-weight: 500; }
+.lt-pdp-hero-section--compact .lt-save-chip { font-size: 13px; font-weight: 400; }
+/* Ersparnis-Chip (26.10.2026): Mint nur als Fläche, kein Rand. Satz grau, Betrag in Ink
+   mit Ziffern fester Breite, damit das Hochzählen nicht zittert. Bei „Einmalig“ ist der
+   Chip ein Knopf zum Abo (Pfeil sichtbar), sonst eine ruhige Anzeige. */
+.lt-pdp-hero-section--compact .lt-save-chip {
+  appearance: none; -webkit-appearance: none; font-family: inherit;
+  border: 0; padding: 4px 12px; cursor: default;
+  color: var(--lt-muted, #525252);
+  transition: background-color 0.2s ease;
+}
+.lt-pdp-hero-section--compact .lt-save-chip:disabled { opacity: 1; color: var(--lt-muted, #525252); }
+.lt-pdp-hero-section--compact .lt-save-chip__amt { font-weight: 500; color: var(--lt-text, #26251e); font-variant-numeric: tabular-nums; }
+.lt-pdp-hero-section--compact .lt-save-chip__go { display: none; color: var(--lt-text, #26251e); }
+.lt-pdp-hero-section--compact .lt-save-chip.is-actionable { cursor: pointer; }
+.lt-pdp-hero-section--compact .lt-save-chip.is-actionable .lt-save-chip__go { display: inline; }
+.no-touchevents .lt-pdp-hero-section--compact .lt-save-chip.is-actionable:hover { background: color-mix(in srgb, var(--color-benefit-bg, #e6f4f1) 70%, #65c0b6); }
+.lt-pdp-hero-section--compact .lt-save-chip:focus-visible { outline: 2px solid var(--lt-text, #26251e); outline-offset: 2px; }
+.lt-pdp-hero-section--compact .lt-save-chip.is-up { animation: lt-save-up 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes lt-save-up { 0% { transform: translateY(0); } 35% { transform: translateY(-3px); } 100% { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .lt-pdp-hero-section--compact .lt-save-chip.is-up { animation: none; }
+}
 /* Hinweis ist seit „jederzeit kündbar“ zu lang für eine Zeile: Grundpreis eigene Zeile, ohne Einzug */
 .lt-pdp-hero-section--compact .lt-bb__hint,
 .lt-pdp-hero-section--compact .lt-bb__unitline { display: block; margin: 0; }
