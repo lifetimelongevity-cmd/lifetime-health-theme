@@ -82,7 +82,7 @@
 
         {%- when 'produkt' -%}
           <article class="lthv__folie lthv__folie--kit" aria-label="Folie {{ forloop.index }} von {{ folien }}" {{ block.shopify_attributes }}>
-            <div class="lthv__bild lthv__bild--kit">
+            <div class="lthv__bild lthv__bild--kit" style="--lthv-dreh: {{ block.settings.rotate | default: 0 }}deg; --lthv-kit-breite: {{ block.settings.width_desktop | default: 52 }}%; --lthv-kit-hoehe: {{ block.settings.height_mobile | default: 60 }}%; --lthv-kit-maxb: {{ block.settings.max_width_mobile | default: 78 }}%;">
               {%- if block.settings.image != blank -%}
                 {{
                   block.settings.image
@@ -191,20 +191,20 @@
 /* Mobil: Kit oben rechts, Text unten wie auf Folie 1 (BJ 26.10.: „mobile erst das Bild“) */
 .lthv__bild--kit {
   inset: 0 0 auto 0;
-  height: 60%;
+  height: var(--lthv-kit-hoehe, 60%);
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
   pointer-events: none;
 }
 .lthv__bild--kit img {
-  width: auto;
+  width: 100%;
   height: 100%;
-  max-width: 78%;
+  max-width: var(--lthv-kit-maxb, 78%);
   object-fit: contain;
   object-position: right top;
   filter: drop-shadow(0 30px 40px rgba(0, 0, 0, 0.35));
-  transform: translate(8%, 4%) rotate(-6deg);
+  transform: translate(4%, 4%) rotate(var(--lthv-dreh, -6deg));
 }
 .lthv__text {
   position: relative;
@@ -319,8 +319,8 @@
   .lthv__folie--kit::after { display: none; }
   .lthv__text { padding-bottom: 0; }
   .lthv__folie--kit .lthv__text { align-self: center; }
-  .lthv__bild--kit { inset: 0 0 0 auto; width: 52%; height: 100%; align-items: center; }
-  .lthv__bild--kit img { height: 80%; max-width: 100%; object-position: center; transform: translate(4%, 6%) rotate(-6deg); }
+  .lthv__bild--kit { inset: 0 0 0 auto; width: var(--lthv-kit-breite, 52%); height: 100%; align-items: center; }
+  .lthv__bild--kit img { height: 80%; max-width: 100%; object-position: center; transform: translate(2%, 4%) rotate(var(--lthv-dreh, -6deg)); }
   .lthv__titel { margin-bottom: var(--space-4); max-width: 9.5em; font-size: 64px; line-height: 1.02; }
   .lthv__sub { max-width: 26em; font-size: var(--text-section); }
   .lthv__knoepfe { width: auto; }
@@ -412,7 +412,11 @@
       "type": "produkt",
       "name": "Folie Produkt",
       "settings": [
-        { "type": "image_picker", "id": "image", "label": "Kit freigestellt" },
+        { "type": "image_picker", "id": "image", "label": "Produktbild freigestellt (transparent)" },
+        { "type": "range", "id": "rotate", "label": "Drehung", "min": -10, "max": 10, "step": 1, "default": -6, "unit": "°", "info": "Bei Bildern mit Hand oder mehreren Produkten 0." },
+        { "type": "range", "id": "width_desktop", "label": "Breite des Bildes Desktop", "min": 40, "max": 70, "step": 2, "default": 52, "unit": "%" },
+        { "type": "range", "id": "height_mobile", "label": "Höhe des Bildes Handy", "min": 40, "max": 70, "step": 2, "default": 60, "unit": "%" },
+        { "type": "range", "id": "max_width_mobile", "label": "Breite des Bildes Handy", "min": 60, "max": 100, "step": 2, "default": 78, "unit": "%" },
         { "type": "text", "id": "heading", "label": "Headline", "default": "Der AGE & DNA-Test." },
         { "type": "textarea", "id": "subheading", "label": "Unterzeile", "default": "Biologisches Alter und Gene aus einer Speichelprobe. Ergebnis in der App, mit AI Health Coach." },
         { "type": "text", "id": "cta_label", "label": "Knopf (weiß)", "default": "Test bestellen" },
