@@ -2244,7 +2244,9 @@
             var plan = section.querySelector('[data-lt-sub-subline]');
             var planName = plan ? plan.textContent.trim() : '';
             if (planName) planName = planName.charAt(0).toLowerCase() + planName.slice(1);
-            hint.textContent = planName ? 'Lieferung ' + planName + ', versandfrei.' : 'Versandfrei.';
+            // „Jederzeit kündbar“ stand bis 26.10. als Unterzeile in der Abo-Karte; die Karten
+            // tragen jetzt nur Name und Preis wie die Größen-Pills, der Satz wandert hierher.
+            hint.textContent = planName ? 'Lieferung ' + planName + ', versandfrei, jederzeit kündbar.' : 'Versandfrei, jederzeit kündbar.';
           } else {
             var once = section.querySelector('[data-lt-once-subline]');
             var free = once ? parseInt(once.dataset.shipFree, 10) : NaN;
@@ -3190,8 +3192,10 @@
 @media (max-width: 767px) {
   .lt-pdp-hero-section--compact .lt-pdp-hero__container { padding-top: var(--space-2); }
   .lt-pdp-hero-section--compact .lt-pdp-hero { row-gap: var(--space-3); }
-  .lt-pdp-hero-section--compact .product-gallery-item { padding-top: 86% !important; }
-  .lt-pdp-hero-section--compact .product-gallery-item img { object-fit: cover !important; object-position: 50% 35%; }
+  /* 92 % statt 86 % (26.10.): bei 86 % kappte der Zuschnitt den NMN-Beutel unten (Beutel
+     reicht im quadratischen Bild von 6 bis 94 %); sichtbar bleiben jetzt 3 bis 95 %. */
+  .lt-pdp-hero-section--compact .product-gallery-item { padding-top: 92% !important; }
+  .lt-pdp-hero-section--compact .product-gallery-item img { object-fit: cover !important; object-position: 50% 40%; }
   .lt-pdp-hero-section--compact .css-slider-navigation-container { margin-top: 6px !important; }
   .lt-pdp-hero-section--compact .lt-pdp-hero__rating { margin-bottom: 6px; }
   .lt-pdp-hero-section--compact .lt-pdp-hero__heading { margin-bottom: var(--space-3); }
@@ -3222,6 +3226,40 @@
   .lt-pdp-hero-section--compact .lt-bb { margin-bottom: 6px; }
   .lt-pdp-hero-section--compact .lt-pdp-hero__atc { margin-top: var(--space-2) !important; }
 }
+/* Kompakte Kaufzone, Stand 26.10.2026 (BJ): unter der H1 gibt es nur zwei Textstufen.
+   14 px = Inhalt (Bullets, Optionsnamen 500, Optionspreise grau, Prüfbericht-Link);
+   13 px = Kleingedrucktes (Hinweise, Grundpreis, Versand/Rückgabe, Spar-Chip, Trust-Zeile).
+   Eigene Rollen behalten nur Preis und Kauf-Knopf. 15 px ginge für die Bullets nicht:
+   der dritte AGE&DNA-Bullet bräuchte 322 px bei 311 px Platz.
+   Die Abo-/Einmalig-Karten folgen dem Format der Größen-Pills: gleiche Höhe, zentriert,
+   Name oben, Preis grau darunter; „Jederzeit kündbar“ steht im Hinweis (siehe Skript). */
+.lt-pdp-hero-section--compact .lt-pdp-hero__bullet { font-size: 14px; }
+.lt-pdp-hero-section--compact .lt-size__pill { min-height: 44px !important; padding: 6px 4px !important; }
+.lt-pdp-hero-section--compact .lt-size__name { font-size: 14px; font-weight: 500; }
+.lt-pdp-hero-section--compact .lt-size__price { font-size: 14px; }
+/* Karte als Flex-Spalte: als Block hing unter dem Body eine leere Zeile (12 px) */
+.lt-pdp-hero-section--compact .lt-bb-card { display: flex !important; flex-direction: column; }
+.lt-pdp-hero-section--compact .lt-bb-card__body { flex: 1; display: flex !important; align-items: center; justify-content: center; min-height: 44px; padding: 6px 4px !important; }
+.lt-pdp-hero-section--compact .lt-bb-card__head { width: 100%; padding: 0 !important; }
+.lt-pdp-hero-section--compact .lt-bb-card__row { flex-direction: column; align-items: center !important; gap: 2px !important; }
+.lt-pdp-hero-section--compact .lt-bb-card__sub { display: none !important; }
+.lt-pdp-hero-section--compact .lt-bb-card__prices { text-align: center !important; }
+.lt-pdp-hero-section--compact .lt-bb-card__title,
+.lt-pdp-hero-section--compact .lt-bb-card:not(.is-selected) .lt-bb-card__title { font-size: 14px !important; font-weight: 500 !important; line-height: 1.1; }
+.lt-pdp-hero-section--compact .lt-bb-card .lt-bb-card__current,
+.lt-pdp-hero-section--compact .lt-bb-card.is-selected .lt-bb-card__current,
+.lt-pdp-hero-section--compact .lt-bb-card:not(.is-selected) .lt-bb-card__current { font-size: 14px !important; font-weight: 400 !important; line-height: 1.1; color: var(--lt-muted, #525252) !important; }
+.lt-pdp-hero-section--compact .lt-pdp-hero__coa-link { font-size: 14px; }
+.lt-pdp-hero-section--compact .lt-bb__hint,
+.lt-pdp-hero-section--compact .lt-bb__unitline,
+.lt-pdp-hero-section--compact .lt-pdp-hero__post-line,
+.lt-pdp-hero-section--compact .lt-pdp-hero__post-note,
+.lt-pdp-hero-section--compact .lt-pdp-hero__trust-link { font-size: 13px; }
+.lt-pdp-hero-section--compact .lt-save-chip { font-size: 13px; font-weight: 500; }
+/* Hinweis ist seit „jederzeit kündbar“ zu lang für eine Zeile: Grundpreis eigene Zeile, ohne Einzug */
+.lt-pdp-hero-section--compact .lt-bb__hint,
+.lt-pdp-hero-section--compact .lt-bb__unitline { display: block; margin: 0; }
+
 /* Sticky-Knopf schreibt wie der Hero-Knopf („Test bestellen, 349 €“), nicht in Versalien */
 #lt-sticky-atc[data-lt-sticky-gate] .lt-sticky-btn { text-transform: none; letter-spacing: normal; }
 
