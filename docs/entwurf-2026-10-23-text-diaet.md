@@ -105,3 +105,4 @@ Nachtrag 26.10., vierte Runde (BJ: Sinn, Kernaussage, Story, Textmenge; Zeilenab
 
 **Live seit 26.10. (BJ „bitte genau das deployen“):** nur Karte 2 der AGE&DNA-Belege (sieben `rohstoff_*`-Felder, auf die Live-Fassung des Templates gepatcht) und die 4-px-Zeile in `lt-pdp-belege.liquid`. Der restliche Entwurf (Text-Diät, `bb_once_subline`, Startseite, NMN) ist damit NICHT live.
 **Live seit 26.10., zweiter Schritt:** `bb_once_subline` = „Einmalig, kein Abo.“ (200-bis-300-€-Satz raus), ebenfalls nur diese eine Zeile auf die Live-Fassung gepatcht.
+**Live seit 26.10., dritter Schritt:** Hero-Bullets 2 und 3 (Körperalter statt 15-Minuten-Gespräch, Gene auf Platz 3), nur diese zwei Felder auf die Live-Fassung gepatcht.
