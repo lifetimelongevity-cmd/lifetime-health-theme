@@ -1,0 +1,244 @@
+{% comment %}
+  lt-hp-bereiche-karten — „Was ist der Test?“ als sechs Foto-Karten (Startseite, 26.10.2026).
+  AG1s Nutzen-Karten übersetzt: je Karte ein Bereich aus dem Test, ein Satz, der sagt,
+  was gemessen wird, keine Wirkaussage. Kicker „Wie du alterst“ (Epigenetik) oder
+  „Was angelegt ist“ (DNA) wie die Spaltenköpfe im alten Test-Block.
+  Mobil horizontal scrollbar (78 % breit, Scroll-Snap), ab 769 px drei Spalten, ab 1180 px sechs.
+  Anker #test (Ziel des Ghost-Knopfs im Hero) liegt auf dem inneren Wrapper, nicht auf der
+  Section, damit die Paddings bleiben (Memory: anchor_id killt Padding).
+  Vorlage: docs/entwurf-startseite-ag1-2026-10-26.html#test
+{% endcomment %}
+
+{% style %}
+  #shopify-section-{{ section.id }} {
+    --ltbk-pt: {{ section.settings.padding_top }}px;
+    --ltbk-pb: {{ section.settings.padding_bottom }}px;
+  }
+{% endstyle %}
+
+<div class="ltbk"{% if section.settings.anchor != blank %} id="{{ section.settings.anchor | escape }}"{% endif %}>
+  <div class="ltbk__wrap">
+    <div class="ltbk__kopf">
+      {% render 'section-heading-crs',
+        heading: section.settings.heading,
+        subheading: section.settings.subheading,
+        headline_md: true,
+        modifier: 'homepage-truth'
+      %}
+      {%- if section.settings.lead != blank -%}
+        <p class="ltbk__lead">{{ section.settings.lead | escape }}</p>
+      {%- endif -%}
+    </div>
+
+    <ul class="ltbk__karten" role="list">
+      {%- for block in section.blocks -%}
+        <li class="ltbk__karte" {{ block.shopify_attributes }}>
+          {%- if block.settings.image != blank -%}
+            {{
+              block.settings.image
+              | image_url: width: 800
+              | image_tag:
+                loading: 'lazy',
+                widths: '320, 480, 640, 800',
+                sizes: '(min-width: 1180px) 16vw, (min-width: 769px) 32vw, 78vw',
+                class: 'ltbk__foto',
+                alt: ''
+            }}
+          {%- endif -%}
+          <div class="ltbk__text">
+            {%- if block.settings.kicker != blank -%}
+              <p class="ltbk__kicker">{{ block.settings.kicker | escape }}</p>
+            {%- endif -%}
+            <h3 class="ltbk__titel">{{ block.settings.title | escape }}</h3>
+            {%- if block.settings.text != blank -%}
+              <p class="ltbk__satz">{{ block.settings.text | escape }}</p>
+            {%- endif -%}
+          </div>
+        </li>
+      {%- endfor -%}
+    </ul>
+
+    {%- if section.settings.footer_text != blank or section.settings.link_label != blank -%}
+      <div class="ltbk__fuss">
+        {%- if section.settings.footer_text != blank -%}
+          <p class="ltbk__fusstext">{{ section.settings.footer_text | escape }}</p>
+        {%- endif -%}
+        {%- if section.settings.link_label != blank -%}
+          <a class="ltbk__link" href="{{ section.settings.link_url | default: '/pages/quiz-age' }}">{{ section.settings.link_label | escape }}</a>
+        {%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+</div>
+
+{% stylesheet %}
+.ltbk {
+  /* Kapitel-Stufe der AG1-Seite: 36 px Desktop, 28 px Handy (Entwurf 26.10.) */
+  --text-h2: 36px;
+  --ltbk-rand: 40px;
+  background: var(--color-paper);
+  padding: var(--ltbk-pt, 96px) 0 var(--ltbk-pb, 96px);
+  scroll-margin-top: var(--space-8);
+}
+.ltbk__wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--ltbk-rand); }
+.ltbk__kopf {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-7);
+  align-items: end;
+}
+.ltbk__lead {
+  margin: 0;
+  max-width: 34em;
+  font-family: var(--font-body);
+  font-size: var(--text-article);
+  line-height: var(--leading-relaxed);
+  color: var(--color-ink);
+}
+.ltbk__karten {
+  list-style: none;
+  margin: var(--space-7) 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+}
+.ltbk__karte {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  background: var(--color-dark);
+  color: var(--color-paper);
+}
+.ltbk__foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.ltbk__karte::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(38, 37, 30, 0.85) 0%, rgba(38, 37, 30, 0.35) 40%, rgba(38, 37, 30, 0) 65%);
+}
+.ltbk__text { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; padding: var(--space-4); }
+.ltbk__kicker {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-bold);
+  line-height: 1.4;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(247, 247, 244, 0.7);
+}
+.ltbk__titel {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-regular);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--color-paper);
+}
+.ltbk__satz {
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(247, 247, 244, 0.85);
+}
+.ltbk__fuss {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+.ltbk__fusstext {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: 1.5;
+  color: var(--color-ink-muted);
+}
+.ltbk__link {
+  flex: 0 0 auto;
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.ltbk__link:hover { opacity: 0.8; }
+.ltbk__link:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 4px; }
+@media (min-width: 1180px) {
+  .ltbk__karten { grid-template-columns: repeat(6, 1fr); }
+  .ltbk__karte { aspect-ratio: 3 / 4.4; }
+}
+@media (max-width: 1024px) { .ltbk { --ltbk-rand: 24px; } }
+@media (max-width: 768px) {
+  .ltbk { --text-h2: 28px; padding: var(--space-8) 0; }
+  .ltbk__kopf { grid-template-columns: 1fr; gap: var(--space-4); max-width: 36em; }
+  .ltbk__karten {
+    display: flex;
+    margin: var(--space-6) calc(var(--ltbk-rand) * -1) 0;
+    padding: 0 var(--ltbk-rand);
+    gap: var(--space-3);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 var(--ltbk-rand);
+    scrollbar-width: none;
+  }
+  .ltbk__karten::-webkit-scrollbar { display: none; }
+  .ltbk__karte { flex: 0 0 78%; max-width: 320px; scroll-snap-align: start; }
+  .ltbk__titel { font-size: 22px; }
+  .ltbk__satz { font-size: var(--text-body-sm); }
+  .ltbk__fuss { flex-direction: column; align-items: flex-start; gap: var(--space-3); margin-top: var(--space-5); }
+}
+@media (max-width: 640px) { .ltbk { --ltbk-rand: 20px; } }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "HP Bereiche Karten",
+  "tag": "section",
+  "class": "section lt-hp-bereiche-karten",
+  "max_blocks": 8,
+  "settings": [
+    { "type": "text", "id": "anchor", "label": "Anker (ohne #)", "default": "test", "info": "Ziel des Ghost-Knopfs im Hero." },
+    { "type": "text", "id": "heading", "label": "Überschrift", "default": "Eine Speichelprobe." },
+    { "type": "text", "id": "subheading", "label": "Unterzeile (gleich groß, nur heller)", "default": "Sechs Antworten über deinen Körper." },
+    { "type": "textarea", "id": "lead", "label": "Einleitungssatz", "default": "Die Epigenetik zeigt, wie du heute alterst. Die DNA zeigt, was angelegt ist. Beides liest der Test aus derselben Probe, du bekommst alles in der App." },
+    { "type": "header", "content": "Fußzeile" },
+    { "type": "text", "id": "footer_text", "label": "Text", "default": "Sechs Bereiche aus der Epigenetik, 23 Kategorien aus der DNA. Dazu in der App: AI Health Coach und Face-Scan." },
+    { "type": "text", "id": "link_label", "label": "Link", "default": "Passt der Test zu mir? In zwei Minuten geklärt" },
+    { "type": "url", "id": "link_url", "label": "Ziel des Links" },
+    { "type": "header", "content": "Abstände Desktop" },
+    { "type": "range", "id": "padding_top", "label": "Oben", "min": 0, "max": 160, "step": 8, "default": 96, "unit": "px" },
+    { "type": "range", "id": "padding_bottom", "label": "Unten", "min": 0, "max": 160, "step": 8, "default": 96, "unit": "px" }
+  ],
+  "blocks": [
+    {
+      "type": "karte",
+      "name": "Karte",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Foto (Hochformat)" },
+        { "type": "select", "id": "kicker", "label": "Kicker", "default": "Wie du alterst", "options": [
+          { "value": "Wie du alterst", "label": "Wie du alterst (Epigenetik)" },
+          { "value": "Was angelegt ist", "label": "Was angelegt ist (DNA)" }
+        ] },
+        { "type": "text", "id": "title", "label": "Titel", "default": "Bereich" },
+        { "type": "textarea", "id": "text", "label": "Ein Satz: was gemessen wird, keine Wirkaussage", "default": "Was der Test in diesem Bereich ausliest." }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "HP Bereiche Karten",
+      "blocks": [
+        { "type": "karte" }, { "type": "karte" }, { "type": "karte" },
+        { "type": "karte" }, { "type": "karte" }, { "type": "karte" }
+      ]
+    }
+  ]
+}
+{% endschema %}

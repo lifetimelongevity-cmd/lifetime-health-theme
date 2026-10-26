@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-10-22
+last_review: 2026-10-26
 canonical_for: startseite-umbau-2026-10
 supersedes: [../../../lifetime-produktdetails/hormozi/2026-09-22_page-homepage.md]
 review_cadence_days: 14
@@ -11,6 +11,35 @@ review_cadence_days: 14
 Section für Section mit BJ durchgegangen (07./08.10.2026), Vorbild wonderful.ai. Grundsatz: Die Startseite ist der Eingang zur Marke, der Test ist das Hero-Produkt, aber nicht das einzige.
 
 **Vorschau:** `startseite.html` (über http://localhost:8789/startseite-v2/startseite.html). Sie ist die Live-Seite mit den neuen Sections an ihrer Stelle, Scripts entfernt. Die Sections dort (HTML + CSS + JS je Block) sind die Bauvorlage für die echten Liquid-Sections. Das Bauskript lag im Scratchpad und ist weg. **Seit dem Livegang am 09.10. ist das Theme die Quelle** (`templates/index.json` und die Sections), die Vorschau zeigt den Stand vom 08.10.
+
+## AG1-Umbau 26.10.
+
+Nach der AG1-Hero-Analyse (`docs/ag1-hero-analyse-2026-10-26.md`) und BJs Freigabe des Entwurfs `docs/entwurf-startseite-ag1-2026-10-26.html` („genau so“, Schriften wie live) ist die Startseite auf dem **Entwicklungs-Theme 193836777847** komplett neu gesetzt (Vorschau `https://lifetime-health-de.myshopify.com/?preview_theme_id=193836777847`). **Nicht live**, live geht nur über den Theme Manager. Grundsatz: ein Bild, ein Satz, ein Knopf im Hero; Beweis, Bereiche, Forschung, Stimmen, Angebot, Fragen darunter.
+
+| # | Section-Datei | Key in `index.json` | Was sie zeigt |
+|---|---|---|---|
+| 1 | `lt-hp-hero-vollbild` (neu) | `hero_vollbild` | Vollbild-Karussell, zwei Folien als Blocks: Paar beim Laufen (`lt-hp-hero-laufen-paar.webp`, Mint-Knopf + Ghost-Knopf nach `#test`) und Kit auf Teal-Verlauf (weißer Knopf). Kein Autoplay, Punkte immer, Pfeile ab 769 px. Oben ein Papier-Streifen in Kopfzeilenhöhe, weil die Kopfzeile auf der Startseite absolut liegt (`header_absolute_homepage`); JS misst `.site-header` nach. |
+| 2 | `lt-hp-bekannt` | `bekannt` | unverändert |
+| 3 | `lt-hp-bereiche-karten` (neu, Anker `#test`) | `bereiche_karten` | „Eine Speichelprobe. / Sechs Antworten über deinen Körper.“, sechs Foto-Karten als Blocks (Kicker „Wie du alterst“ / „Was angelegt ist“), mobil Scroll-Snap 78 %, ab 769 px drei, ab 1180 px sechs Spalten, Fußzeile mit Quiz-Link |
+| 4 | `lt-hp-video-vsl` | `video_vsl` | neu: Blocks „methode“ (drei nummerierte Zeilen), Zitat 24/28 px, Video-Karte 4:5 rechts, Play-Knopf mittig; `forschung_text` leer (Text steht in Methode 03), Link „Wie wir forschen →“ bleibt eigenständig |
+| 5 | `lt-hp-stimmen` | `stimmen` | neues Setting `layout: raster`: drei Foto-Karten (Markus 46 → 38, Anja 36 → 31, Julia + 6 Jahre, `lt-hp-stimme-*.webp`), Sterne-Zeile aus Loox rechts neben der Überschrift (Link zu den Bewertungen), Zahl 40 px, Zitat in Lato mit Anführungszeichen. `karussell` ist der Stand vom 09.10. und bleibt wählbar |
+| 6 | `lt-hp-angebot` (neu, Anker `#bestellen`) | `angebot` | Kit links auf Papier, rechts „Starte mit dem AGE & DNA-Test.“, fünf Inhaltszeilen, Preis aus `lifetime-age-dna` (Fallback 349 €), Teal-Knopf, drei Vertrauenszeilen, darunter vier Schritte. Block-Typen `inhalt`, `vertrauen`, `schritt`. Keine Streichpreise, keine Knappheit |
+| 7 | `lt-hp-fragen` | `fragen` | vier Fragen (Kosten, Rückgabe, Genauigkeit, Datensicherheit), links „Oder 15 Minuten Video-Call, kostenlos. Termin wählen →“ (neues Setting `link_intro`) |
+| 8 | `lt-leiste` | `schluss` | unverändert |
+
+Deaktiviert im Template, als Rückweg mit allen Settings: `hero` (`crs-hero-typewriter`, Stand 22.10.), `test`, `normbereich`, `ablauf`, `bereiche`. 13 Sections im Template, unter der 25er-Grenze.
+
+**Typografie:** Kapitel-Überschriften seitenweit 36 px Desktop / 28 px Handy (Entwurf), gesetzt als `--text-h2` auf der Section-Wurzel in allen sieben Sections mit Heading-Paar (vorher 28 / 24). Hero-Headline 64 / 36 px, Helvetica Neue 400, −0,02 em. Der Hero-Primärknopf ist der einzige Mint-Knopf der Seite (`--color-teal` ist das Mint `#65c0b6`, Schrift Tinte); alle anderen Knöpfe Teal `--color-dark`.
+
+**Abweichungen vom Entwurf, bewusst:** Bekannt-aus und Schluss-Leiste bleiben wie live (Kacheln statt loser Logos; Leiste 520 px mit Verlauf, Knopf 16 px Tinte statt 18 px Teal). Häkchen vor den Vertrauenszeilen sind Phosphor-Icons in `--color-dark`, Sterne in `--color-dark` wie im Hero vom 22.10. Der Hero hat keine Kopfzeile im Bild (Entwurf und AG1 zeigen beide eine weiße Kopfzeile darüber). Preis und Produkt-Link kommen aus dem Produkt, nicht hart aus dem Entwurf. Fragen-Zeilen behalten die Live-Größen 18 / 16 px (Entwurf 17 / 15).
+
+**Geprüft am 26.10.:** `shopify theme check` ohne Fehler; Puppeteer-Abgleich Entwurf gegen Dev-Theme bei 1440 und 390 px (Hero beide Folien, alle Sections, Schriftgrößen gleich), Karussell per Punkt, Pfeil und Wischen, Karten scrollen mobil, Fragen klappen, keine Konsolenfehler außer Shopify-Monorail. Skript lag im Scratchpad (Muster `vergleich.mjs`, Paare `.hero/.lthv`, `.test/.ltbk`, `.forschung/.ltvsl`, `.stimmen/.ltk`, `.angebot/.ltag`, `.fragen/.ltf`).
+
+**Stolperstein beim Push:** Die Section mit dem neuen Setting muss *vor* dem Template auf dem Theme sein. Beim ersten Push war das Schema von `lt-hp-stimmen` ungültig (Option-Label über 50 Zeichen), Shopify hat `layout: raster` aus dem Template still verworfen; nach dem Fix Template nochmal pushen (vorher `touch`, sonst überspringt die CLI es als „nicht neuer“). Das Dev-Theme hatte vor dem Umbau einen älteren `index.json` als `main` (Stand vor 26.10.), deshalb nach `theme pull` immer gegen Git diffen und von der Git-Fassung ausgehen.
+
+**Bilder neu in den Shopify-Dateien (26.10.):** `lt-hp-hero-laufen-paar.webp` (aus `lifetime-mockups/lifestyle/sport-laufen-paar.jpg`, 1122 × 1402, Quelle hier als `bilder/hero-laufen-paar.webp`), `lt-hp-stimme-anja.webp`, `lt-hp-stimme-julia.webp`. Weg wie am 08.10.: `stagedUploadsCreate` über den Shopify-MCP, POST per curl, `fileCreate`.
+
+**Offen bei BJ:** `DESIGN.md` verbietet Foto-Hintergründe im Hero, der Umbau bricht das absichtlich; `DESIGN.md` nachziehen oder Umbau verwerfen. Ob Kopfzeile auf dem Foto liegen soll (wie bei Vollbild-Heros üblich) statt darüber. Ob ein 10-Sekunden-Mitzieher das Foto ersetzt. NMN ist weiter nicht auf der Startseite.
 
 ## Hero 22.10.
 
