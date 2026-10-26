@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entwurf Startseite nach AG1-Hero, 26.10.2026</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap">
+<style>
+  @font-face {
+    font-family: 'LT Instrument Serif';
+    src: url('entwurf-ag1-instrument-serif.woff2') format('woff2');
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+  :root {
+    --tinte: #26251e;
+    --grund: #f7f7f4;
+    --karte: #f2f1ed;
+    --teal: #364f56;
+    --mint: #65c0b6;
+    --grau: #6b6b63;
+    --rand: rgba(38,37,30,.12);
+    --hell: rgba(247,247,244,.72);
+    --serif: 'LT Instrument Serif', Georgia, serif;
+    --kopf: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --text: Lato, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --s4: 4px; --s8: 8px; --s12: 12px; --s16: 16px; --s24: 24px; --s32: 32px; --s48: 48px; --s64: 64px; --s96: 96px;
+    --rand-x: 20px;
+  }
+  @media (min-width: 769px) { :root { --rand-x: 40px; } }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body { margin: 0; background: var(--grund); color: var(--tinte); font-family: var(--text); font-size: 16px; line-height: 1.6; }
+  a { color: inherit; text-decoration: none; }
+  img { display: block; max-width: 100%; height: auto; }
+  h1, h2, h3, .kopf { font-family: var(--kopf); font-weight: 400; margin: 0; letter-spacing: -0.01em; }
+  h2 { font-size: 28px; line-height: 1.15; }
+  h2 span { display: block; opacity: .72; }
+  @media (min-width: 769px) { h2 { font-size: 36px; } }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 var(--rand-x); }
+  .klein { font-size: 14px; color: var(--grau); }
+  .label { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--grau); }
+  .textlink { display: inline-block; font-size: 15px; text-decoration: underline; text-underline-offset: 4px; }
+  .knopf { display: inline-flex; align-items: center; justify-content: center; gap: var(--s8); background: var(--teal); color: var(--grund); border-radius: 999px; padding: 15px 26px; font-size: 16px; font-weight: 700; line-height: 1.3; white-space: nowrap; }
+  .knopf:hover { background: #2b3f45; }
+  .knopf--mint { background: var(--mint); color: var(--tinte); padding: 16px 28px; font-size: 18px; }
+  .knopf--mint:hover { background: #56b0a6; }
+  .knopf--weiss { background: var(--grund); color: var(--teal); padding: 16px 28px; font-size: 18px; }
+  .knopf--weiss:hover { background: #fff; }
+  .knopf--ghost { background: transparent; color: var(--grund); border: 1px solid rgba(247,247,244,.85); padding: 15px 28px; font-size: 18px; font-weight: 400; }
+  .knopf--ghost:hover { background: rgba(247,247,244,.14); }
+
+  /* Leiste + Kopfzeile, wie live angedeutet */
+  .bar { background: var(--teal); color: var(--grund); text-align: center; font-size: 13px; padding: 7px 12px; }
+  .header { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .logo { font-family: var(--kopf); font-size: 26px; letter-spacing: .06em; }
+  .logo b { font-weight: 600; }
+  .logo span { font-weight: 300; }
+  .nav { display: none; gap: var(--s24); font-size: 15px; }
+  .icons { display: flex; gap: var(--s16); font-size: 14px; color: var(--grau); }
+  @media (min-width: 769px) { .nav { display: flex; } }
+
+  /* Hero: Vollbild, zwei Folien, ein Satz, ein Knopf */
+  .hero { position: relative; background: var(--teal); color: var(--grund); }
+  .hero__spur { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+  .hero__spur::-webkit-scrollbar { display: none; }
+  .folie { position: relative; flex: 0 0 100%; min-width: 100%; scroll-snap-align: start; height: 560px; overflow: hidden; display: flex; align-items: flex-end; }
+  .folie__bild { position: absolute; inset: 0; }
+  .folie__bild img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 18%; }
+  .folie--person .folie__bild::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(38,37,30,.78) 0%, rgba(38,37,30,.35) 45%, rgba(38,37,30,0) 70%); }
+  .folie--kit { background: radial-gradient(120% 90% at 85% 20%, #4b6a72 0%, var(--teal) 55%, #2b3f45 100%); }
+  .folie--kit .folie__bild { inset: auto 0 0 0; height: 62%; display: flex; justify-content: flex-end; align-items: flex-end; pointer-events: none; }
+  .folie--kit .folie__bild img { width: auto; height: 100%; max-width: 78%; object-fit: contain; object-position: right bottom; filter: drop-shadow(0 30px 40px rgba(0,0,0,.35)); transform: translate(8%, 10%) rotate(-6deg); }
+  .folie__text { position: relative; z-index: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: 0 var(--rand-x) var(--s48); }
+  .folie--kit .folie__text { padding-bottom: 0; align-self: flex-start; padding-top: var(--s48); }
+  .folie h1, .folie .h1 { font-family: var(--kopf); font-weight: 400; font-size: 36px; line-height: 1.08; letter-spacing: -0.02em; margin: 0 0 var(--s12); max-width: 12em; }
+  .folie__sub { margin: 0 0 var(--s24); font-size: 16px; line-height: 1.5; max-width: 30em; }
+  .folie__knoepfe { display: flex; gap: var(--s12); width: 100%; }
+  .folie__knoepfe .knopf { flex: 1 1 0; min-width: 0; font-size: 16px; padding-left: 12px; padding-right: 12px; }
+  .hero__punkte { position: absolute; left: 0; right: 0; bottom: var(--s16); display: flex; justify-content: center; gap: 6px; z-index: 2; }
+  .hero__punkte button { width: 8px; height: 8px; border-radius: 999px; border: 0; padding: 0; background: rgba(247,247,244,.5); cursor: pointer; }
+  .hero__punkte button[aria-current="true"] { width: 28px; background: var(--grund); }
+  .hero__pfeil { display: none; position: absolute; top: 50%; transform: translateY(-50%); z-index: 2; width: 44px; height: 44px; border-radius: 999px; border: 0; background: rgba(247,247,244,.92); color: var(--tinte); cursor: pointer; align-items: center; justify-content: center; }
+  .hero__pfeil svg { width: 18px; height: 18px; }
+  .hero__pfeil--l { left: var(--s16); } .hero__pfeil--r { right: var(--s16); }
+  @media (min-width: 769px) {
+    .folie { height: min(80vh, 805px); min-height: 620px; align-items: center; }
+    .folie__bild img { object-position: 50% 22%; }
+    .folie--person .folie__bild::after { background: linear-gradient(to right, rgba(38,37,30,.62) 0%, rgba(38,37,30,.28) 45%, rgba(38,37,30,0) 72%); }
+    .folie__text { padding-bottom: 0; }
+    .folie--kit .folie__text { padding-top: 0; align-self: center; }
+    .folie--kit .folie__bild { inset: 0 0 0 auto; width: 52%; height: 100%; align-items: center; }
+    .folie--kit .folie__bild img { height: 80%; max-width: 100%; transform: translate(4%, 6%) rotate(-6deg); }
+    .folie h1, .folie .h1 { font-size: 64px; line-height: 1.02; margin-bottom: var(--s16); max-width: 9.5em; }
+    .folie__sub { font-size: 20px; line-height: 1.5; max-width: 26em; }
+    .folie__knoepfe { width: auto; }
+    .folie__knoepfe .knopf { flex: 0 0 auto; font-size: 18px; padding-left: 28px; padding-right: 28px; }
+    .hero__punkte { bottom: var(--s24); }
+    .hero__pfeil { display: inline-flex; }
+  }
+
+  /* Bekannt aus */
+  .bekannt { padding: var(--s32) 0; border-bottom: 1px solid var(--rand); }
+  .bekannt .label { display: block; text-align: center; margin-bottom: var(--s16); }
+  .logos { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s16) var(--s32); align-items: center; }
+  .logos img { height: 22px; width: auto; opacity: .7; filter: grayscale(1); }
+  @media (min-width: 769px) { .logos img { height: 28px; } .logos { gap: var(--s24) var(--s48); } }
+
+  /* Was ist der Test: sechs Foto-Karten */
+  .test { padding: var(--s64) 0; }
+  .test__kopf { max-width: 36em; }
+  .test__kopf p { margin: var(--s16) 0 0; font-size: 17px; max-width: 34em; }
+  .karten { display: flex; gap: var(--s12); overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin: var(--s32) calc(var(--rand-x) * -1) 0; padding: 0 var(--rand-x); }
+  .karten::-webkit-scrollbar { display: none; }
+  .karte { position: relative; flex: 0 0 78%; max-width: 320px; aspect-ratio: 4 / 5; border-radius: 16px; overflow: hidden; scroll-snap-align: start; color: var(--grund); background: var(--teal); }
+  .karte img { width: 100%; height: 100%; object-fit: cover; }
+  .karte::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(38,37,30,.85) 0%, rgba(38,37,30,.35) 40%, rgba(38,37,30,0) 65%); }
+  .karte__text { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--s16); z-index: 1; }
+  .karte__text h3 { font-size: 22px; line-height: 1.15; }
+  .karte__text p { margin: var(--s4) 0 0; font-size: 14px; line-height: 1.45; color: rgba(247,247,244,.85); }
+  .karte__text .label { color: rgba(247,247,244,.7); display: block; margin-bottom: var(--s4); }
+  .test__fuss { display: flex; flex-direction: column; gap: var(--s12); margin-top: var(--s24); }
+  @media (min-width: 769px) {
+    .test { padding: var(--s96) 0; }
+    .test__kopf { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s48); align-items: end; max-width: none; }
+    .test__kopf p { margin: 0; }
+    .karten { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s16); margin: var(--s48) 0 0; padding: 0; overflow: visible; }
+    .karte { flex: none; max-width: none; aspect-ratio: 4 / 5; }
+    .karte__text h3 { font-size: 20px; }
+    .karte__text p { font-size: 13px; }
+    .test__fuss { flex-direction: row; justify-content: space-between; align-items: center; margin-top: var(--s32); }
+  }
+  @media (min-width: 1180px) {
+    .karten { grid-template-columns: repeat(6, 1fr); }
+    .karte { aspect-ratio: 3 / 4.4; }
+  }
+
+  /* Forschung: Teal-Band wie live, drei Methodenzeilen neu */
+  .forschung { background: var(--teal); color: var(--grund); padding: var(--s64) 0; }
+  .forschung h2 span { opacity: .72; }
+  .forschung__grid { display: grid; gap: var(--s32); }
+  .forschung blockquote { margin: var(--s24) 0 0; font-family: var(--kopf); font-size: 24px; line-height: 1.25; letter-spacing: -0.01em; }
+  .forschung .wer { margin: var(--s12) 0 0; font-size: 14px; }
+  .forschung .wer small { display: block; color: var(--hell); }
+  .video { position: relative; border-radius: 16px; overflow: hidden; aspect-ratio: 4 / 5; max-width: 420px; background: #2b3f45; }
+  .video img { width: 100%; height: 100%; object-fit: cover; }
+  .play { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 64px; height: 64px; border-radius: 50%; background: var(--grund); color: var(--teal); display: grid; place-items: center; }
+  .video__hinweis { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--s12) var(--s16); font-size: 12px; color: var(--hell); background: linear-gradient(to top, rgba(38,37,30,.7), transparent); }
+  .methoden { list-style: none; margin: var(--s32) 0 0; padding: 0; border-top: 1px solid rgba(247,247,244,.2); }
+  .methoden li { display: grid; grid-template-columns: 40px 1fr; gap: var(--s12); padding: var(--s16) 0; border-bottom: 1px solid rgba(247,247,244,.2); }
+  .methoden .nr { font-family: var(--kopf); font-size: 24px; line-height: 1; color: var(--hell); font-variant-numeric: tabular-nums; }
+  .methoden b { display: block; font-weight: 700; font-size: 16px; }
+  .methoden p { margin: var(--s4) 0 0; font-size: 14px; color: var(--hell); line-height: 1.5; }
+  .forschung .textlink { color: var(--grund); margin-top: var(--s16); }
+  @media (min-width: 769px) {
+    .forschung { padding: var(--s96) 0; }
+    .forschung__grid { grid-template-columns: 1.15fr .85fr; gap: var(--s96); align-items: center; }
+    .forschung blockquote { font-size: 28px; }
+    .video { justify-self: end; width: 100%; }
+  }
+
+  /* Stimmen: drei Karten, Sterne */
+  .stimmen { padding: var(--s64) 0; }
+  .stimmen__kopf { display: flex; flex-direction: column; gap: var(--s8); }
+  .sterne { display: inline-flex; align-items: center; gap: var(--s8); font-size: 14px; color: var(--grau); }
+  .sterne__reihe { display: inline-flex; gap: 2px; color: var(--teal); }
+  .sterne__reihe svg { width: 16px; height: 16px; fill: currentColor; }
+  .stimmen__grid { display: grid; gap: var(--s12); margin-top: var(--s24); }
+  .stimme { position: relative; border-radius: 16px; overflow: hidden; background: var(--teal); color: var(--grund); min-height: 360px; display: flex; flex-direction: column; justify-content: flex-end; padding: var(--s24); }
+  .stimme img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .stimme::after { content: ""; position: absolute; inset: 0; background: linear-gradient(to top, rgba(38,37,30,.9) 0%, rgba(38,37,30,.45) 50%, rgba(38,37,30,.1) 100%); }
+  .stimme > * { position: relative; z-index: 1; }
+  .stimme .zahl { font-family: var(--kopf); font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .stimme .zahl small { display: block; font-family: var(--text); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--hell); margin-top: var(--s4); }
+  .stimme p { margin: var(--s16) 0 0; font-size: 16px; line-height: 1.5; }
+  .stimme .wer { margin-top: var(--s12); font-size: 13px; color: var(--hell); }
+  @media (min-width: 769px) {
+    .stimmen { padding: var(--s96) 0; }
+    .stimmen__kopf { flex-direction: row; justify-content: space-between; align-items: end; }
+    .stimmen__grid { grid-template-columns: repeat(3, 1fr); gap: var(--s16); margin-top: var(--s32); }
+    .stimme { min-height: 440px; padding: var(--s32); }
+  }
+
+  /* Angebot: Kit, Inhalt, Preis, Ablauf */
+  .angebot { background: var(--karte); padding: var(--s64) 0; border-top: 1px solid var(--rand); }
+  .angebot__grid { display: grid; gap: var(--s32); }
+  .angebot__bild { background: var(--grund); border-radius: 16px; padding: var(--s24); display: grid; place-items: center; }
+  .angebot__bild img { max-width: 360px; width: 100%; }
+  .inhalt { list-style: none; margin: var(--s24) 0 0; padding: 0; border-top: 1px solid var(--rand); }
+  .inhalt li { display: flex; justify-content: space-between; gap: var(--s16); padding: var(--s12) 0; border-bottom: 1px solid var(--rand); font-size: 15px; }
+  .inhalt li span:last-child { color: var(--grau); white-space: nowrap; }
+  .inhalt li b { font-weight: 700; }
+  .preis { display: flex; align-items: baseline; gap: var(--s12); margin-top: var(--s24); }
+  .preis .zahl { font-family: var(--kopf); font-size: 40px; line-height: 1; }
+  .preis .klein { font-size: 15px; }
+  .angebot .knopf { margin-top: var(--s16); width: 100%; }
+  .vertrauen { display: flex; flex-wrap: wrap; gap: var(--s8) var(--s24); margin: var(--s16) 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--grau); }
+  .vertrauen li::before { content: "✓ "; color: var(--teal); }
+  .ablauf { display: grid; gap: var(--s16); margin-top: var(--s48); padding-top: var(--s32); border-top: 1px solid var(--rand); }
+  .schritt .nr { font-family: var(--kopf); font-size: 28px; line-height: 1; color: var(--grau); font-variant-numeric: tabular-nums; }
+  .schritt b { display: block; margin-top: var(--s8); font-weight: 700; }
+  .schritt p { margin: var(--s4) 0 0; font-size: 14px; color: var(--grau); line-height: 1.5; }
+  @media (min-width: 769px) {
+    .angebot { padding: var(--s96) 0; }
+    .angebot__grid { grid-template-columns: 1fr 1fr; gap: var(--s96); align-items: center; }
+    .angebot .knopf { width: auto; }
+    .ablauf { grid-template-columns: repeat(4, 1fr); gap: var(--s32); margin-top: var(--s64); }
+  }
+
+  /* Fragen */
+  .fragen { padding: var(--s64) 0; }
+  .fragen__grid { display: grid; gap: var(--s24); }
+  .fragen details { border-top: 1px solid var(--rand); }
+  .fragen details:last-of-type { border-bottom: 1px solid var(--rand); }
+  .fragen summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: var(--s16); padding: var(--s16) 0; font-size: 17px; }
+  .fragen summary::-webkit-details-marker { display: none; }
+  .fragen summary::after { content: "+"; font-size: 22px; color: var(--grau); }
+  .fragen details[open] summary::after { content: "−"; }
+  .fragen details p { margin: 0 0 var(--s16); font-size: 15px; color: var(--grau); max-width: 40em; }
+  @media (min-width: 769px) {
+    .fragen { padding: var(--s96) 0; }
+    .fragen__grid { grid-template-columns: 1fr 1.4fr; gap: var(--s96); align-items: start; }
+  }
+
+  /* Schluss-Leiste, wie live */
+  .leiste { position: relative; background: var(--teal); color: var(--grund); padding: var(--s64) 0; overflow: hidden; }
+  .leiste img { position: absolute; inset: -20px; width: calc(100% + 40px); height: calc(100% + 40px); object-fit: cover; filter: blur(18px); opacity: .45; }
+  .leiste .wrap { position: relative; z-index: 1; display: flex; flex-direction: column; gap: var(--s16); align-items: flex-start; }
+  .leiste .kopf { font-family: var(--serif); font-size: 36px; line-height: 1; }
+  .leiste .kopf span { display: block; opacity: .72; }
+  .leiste .klein { color: var(--hell); }
+  @media (min-width: 769px) {
+    .leiste { padding: var(--s96) 0; }
+    .leiste .wrap { flex-direction: row; justify-content: space-between; align-items: center; }
+    .leiste .kopf { font-size: 56px; }
+  }
+
+  /* Footer, verkürzt */
+  .footer { background: var(--teal); color: var(--grund); padding: var(--s48) 0 var(--s32); font-size: 14px; border-top: 1px solid rgba(247,247,244,.15); }
+  .footer .kopf { font-size: 20px; margin-bottom: var(--s24); }
+  .footer ul { list-style: none; padding: 0; margin: 0; display: grid; gap: var(--s8); opacity: .85; }
+  .footer__grid { display: grid; gap: var(--s32); }
+  .footer .hinweis { margin-top: var(--s32); opacity: .6; font-size: 12px; }
+  @media (min-width: 769px) { .footer__grid { grid-template-columns: 1fr 1fr 1fr; } }
+
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } .hero__spur { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<div class="bar">★ 4,8/5 · 431 Bewertungen für LIFETIME</div>
+
+<div class="wrap">
+  <header class="header">
+    <a class="logo" href="/"><span>LIFE</span><b>TIME</b></a>
+    <nav class="nav">
+      <a href="/collections/all">Produkte</a>
+      <a href="/pages/science">Wissenschaft</a>
+      <a href="/pages/quiz-age">AGE Quiz</a>
+      <a href="/blogs/longevity-blog">Blog</a>
+    </nav>
+    <div class="icons"><span>Suche</span><span>Konto</span><span>Warenkorb</span></div>
+  </header>
+</div>
+
+<section class="hero" aria-roledescription="Karussell" aria-label="Startseite">
+  <div class="hero__spur" id="spur">
+
+    <article class="folie folie--person" aria-label="Folie 1 von 2">
+      <div class="folie__bild">
+        <img src="entwurf-ag1-hero-paar.jpg" alt="Paar um 55 läuft in der Abendsonne einen Hügelpfad entlang, Bewegungsunschärfe" width="1122" height="1402" fetchpriority="high">
+      </div>
+      <div class="folie__text">
+        <h1>Finde heraus, was wirkt.</h1>
+        <p class="folie__sub">Dein biologisches Alter zeigt, ob Training, Ernährung und Supplements bei deinem Körper ankommen. Über 150 DNA-Ergebnisse sagen dir, wo du ansetzt. Aus einer Speichelprobe, zu Hause.</p>
+        <div class="folie__knoepfe">
+          <a class="knopf knopf--mint" href="/products/lifetime-age-dna">Test bestellen <span aria-hidden="true">→</span></a>
+          <a class="knopf knopf--ghost" href="#test">Was ist der Test?</a>
+        </div>
+      </div>
+    </article>
+
+    <article class="folie folie--kit" aria-label="Folie 2 von 2">
+      <div class="folie__bild">
+        <img src="startseite-v2/bilder/kit-offen-frei.webp" alt="Geöffnetes AGE & DNA-Testkit von LIFETIME mit Speichelröhrchen" width="1400" height="1390" loading="lazy">
+      </div>
+      <div class="folie__text">
+        <p class="h1">Der AGE &amp; DNA-Test.</p>
+        <p class="folie__sub">Biologisches Alter und Gene aus einer Speichelprobe. Ergebnis in der App, mit AI Health Coach.</p>
+        <div class="folie__knoepfe">
+          <a class="knopf knopf--weiss" href="/products/lifetime-age-dna">Test bestellen <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+    </article>
+
+  </div>
+  <button class="hero__pfeil hero__pfeil--l" type="button" data-richtung="-1" aria-label="Vorige Folie"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button class="hero__pfeil hero__pfeil--r" type="button" data-richtung="1" aria-label="Nächste Folie"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+  <div class="hero__punkte" id="punkte">
+    <button type="button" data-ziel="0" aria-label="Folie 1" aria-current="true"></button>
+    <button type="button" data-ziel="1" aria-label="Folie 2"></button>
+  </div>
+</section>
+
+<section class="bekannt">
+  <div class="wrap">
+    <span class="label">Bekannt aus</span>
+    <div class="logos">
+      <img src="//www.lifetime-health.de/cdn/shop/files/lt-hp-logo-rtl.png" alt="RTL Punkt 12">
+      <img src="//www.lifetime-health.de/cdn/shop/files/lt-hp-logo-ksta.png" alt="Kölner Stadt-Anzeiger">
+      <img src="//www.lifetime-health.de/cdn/shop/files/lt-hp-logo-swr1.png" alt="SWR1">
+      <img src="//www.lifetime-health.de/cdn/shop/files/lt-hp-logo-sat1.png" alt="SAT.1">
+      <img src="//www.lifetime-health.de/cdn/shop/files/lt-hp-logo-maxima.png" alt="maxima">
+    </div>
+  </div>
+</section>
+
+<section class="test" id="test">
+  <div class="wrap">
+    <div class="test__kopf">
+      <h2>Eine Speichelprobe.<span>Sechs Antworten über deinen Körper.</span></h2>
+      <p>Die Epigenetik zeigt, wie du heute alterst. Die DNA zeigt, was angelegt ist. Beides liest der Test aus derselben Probe, du bekommst alles in der App.</p>
+    </div>
+    <div class="karten">
+      <article class="karte">
+        <img src="startseite-v2/bilder/bereich-ki-bewegung-c.webp" alt="" loading="lazy">
+        <div class="karte__text"><span class="label">Wie du alterst</span><h3>Biologisches Alter</h3><p>Dein Alterstempo aus der DNA-Methylierung. Dazu Hör-, Augen- und Gedächtnisalter.</p></div>
+      </article>
+      <article class="karte">
+        <img src="startseite-v2/bilder/problem-pizza-freunde.webp" alt="" loading="lazy">
+        <div class="karte__text"><span class="label">Wie du alterst</span><h3>Entzündung</h3><p>Wo dein Entzündungsprofil im Vergleich zur Referenzgruppe liegt.</p></div>
+      </article>
+      <article class="karte">
+        <img src="startseite-v2/bilder/bereich-sport-tennis.webp" alt="" loading="lazy">
+        <div class="karte__text"><span class="label">Wie du alterst</span><h3>Immunscore</h3><p>Wie dein Immunsystem epigenetisch aufgestellt ist.</p></div>
+      </article>
+      <article class="karte">
+        <img src="startseite-v2/bilder/bereich-schlafen.webp" alt="" loading="lazy">
+        <div class="karte__text"><span class="label">Was angelegt ist</span><h3>Schlaf</h3><p>Was deine Gene über Schlafdauer und Tagesrhythmus sagen.</p></div>
+      </article>
+      <article class="karte">
+        <img src="startseite-v2/bilder/bereich-markt-gemuese.webp" alt="" loading="lazy">
+        <div class="karte__text"><span class="label">Was angelegt ist</span><h3>Vitamine</h3><p>Welche Nährstoffe dein Körper laut DNA schlechter aufnimmt oder verwertet.</p></div>
+      </article>
+      <article class="karte">
+        <img src="startseite-v2/bilder/bereich-ki-kueche-handy-b.webp" alt="" loading="lazy">
+        <div class="karte__text"><span class="label">Was angelegt ist</span><h3>Herz</h3><p>Genetische Marker rund um Herz, Kreislauf und Blutfette.</p></div>
+      </article>
+    </div>
+    <div class="test__fuss">
+      <p class="klein" style="margin:0">Sechs Bereiche aus der Epigenetik, 23 Kategorien aus der DNA. Dazu in der App: AI Health Coach und Face-Scan.</p>
+      <a class="textlink" href="/pages/quiz-age">Passt der Test zu mir? In zwei Minuten geklärt</a>
+    </div>
+  </div>
+</section>
+
+<section class="forschung" id="forschung">
+  <div class="wrap forschung__grid">
+    <div>
+      <h2>Dein biologisches Alter ist messbar.<span>Und beeinflussbar.</span></h2>
+      <blockquote>„Longevity beginnt mit Daten, nicht mit Annahmen.“</blockquote>
+      <p class="wer">Prof. Dr. med. Volker Limmroth<small>Chefarzt der Neurologie, Köln-Merheim · Chief Scientific Officer LIFETIME</small></p>
+      <ol class="methoden">
+        <li><span class="nr">01</span><div><b>Methylierung statt Fragebogen</b><p>Das biologische Alter kommt aus Markern auf der DNA, nicht aus Wearable-Daten oder Selbstauskunft.</p></div></li>
+        <li><span class="nr">02</span><div><b>Akkreditiertes Labor</b><p>Analyse bei Eurofins Genomics nach ISO 17025. Deine Probe läuft pseudonymisiert unter einer eigenen ID.</p></div></li>
+        <li><span class="nr">03</span><div><b>Eigene Forschung</b><p>Ein biologisches Alter bekommst du an vielen Stellen. Wir erforschen, ab wann eine Veränderung echt ist und kein Zufall. Was wir finden, veröffentlichen wir.</p></div></li>
+      </ol>
+      <a class="textlink" href="/pages/unsere-forschung">Wie wir forschen →</a>
+    </div>
+    <a class="video" href="https://www.youtube-nocookie.com/embed/Tm8yZ40wmTY" aria-label="Video mit Prof. Dr. Limmroth abspielen, 1:12 Minuten">
+      <img src="startseite-v2/bilder/volker-podcast.webp" alt="Prof. Dr. med. Volker Limmroth im Podcast" loading="lazy">
+      <span class="play" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 20 20" fill="currentColor"><path d="M6 3.5v13l10-6.5z"/></svg></span>
+      <span class="video__hinweis">1:12 Min. · Mit dem Klick lädst du das Video von YouTube.</span>
+    </a>
+  </div>
+</section>
+
+<section class="stimmen" id="stimmen">
+  <div class="wrap">
+    <div class="stimmen__kopf">
+      <h2>Was ihr Test gezeigt hat</h2>
+      <a class="sterne" href="/products/lifetime-age-dna#reviews" aria-label="4,7 von 5 Sternen, 122 Bewertungen zum Test">
+        <span class="sterne__reihe" aria-hidden="true">
+          <svg viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L10 14.9l-5.3 2.8 1.1-5.9L1.5 7.7l5.9-.8z"/></svg><svg viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L10 14.9l-5.3 2.8 1.1-5.9L1.5 7.7l5.9-.8z"/></svg><svg viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L10 14.9l-5.3 2.8 1.1-5.9L1.5 7.7l5.9-.8z"/></svg><svg viewBox="0 0 20 20"><path d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L10 14.9l-5.3 2.8 1.1-5.9L1.5 7.7l5.9-.8z"/></svg><svg viewBox="0 0 20 20"><defs><linearGradient id="halb"><stop offset="70%" stop-color="currentColor"/><stop offset="70%" stop-color="currentColor" stop-opacity=".25"/></linearGradient></defs><path fill="url(#halb)" d="M10 1.5l2.6 5.4 5.9.8-4.3 4.1 1.1 5.9L10 14.9l-5.3 2.8 1.1-5.9L1.5 7.7l5.9-.8z"/></svg>
+        </span>
+        <span>4,7 von 5 · 122 Bewertungen zum Test</span>
+      </a>
+    </div>
+    <div class="stimmen__grid">
+      <article class="stimme">
+        <img src="startseite-v2/bilder/stimme-markus.webp" alt="" loading="lazy">
+        <div class="zahl">46 → 38<small>chronologisch → biologisch</small></div>
+        <p>„Als das biologische Alter in der App erschien, habe ich lange auf den Bildschirm geschaut.“</p>
+        <div class="wer">Markus T. · Bewertung auf Loox</div>
+      </article>
+      <article class="stimme">
+        <img src="startseite-v2/bilder/stimme-anja.webp" alt="" loading="lazy">
+        <div class="zahl">36 → 31<small>chronologisch → biologisch</small></div>
+        <p>„Bin 36 und biologisch 31 laut Test – absolut empfehlenswert!“</p>
+        <div class="wer">Anja F. · Bewertung auf Loox</div>
+      </article>
+      <article class="stimme">
+        <img src="startseite-v2/bilder/stimme-julia.webp" alt="" loading="lazy">
+        <div class="zahl">+ 6 Jahre<small>biologisch über chronologisch</small></div>
+        <p>„Mein biologisches Alter liegt 6 Jahre über meinem chronologischen. Das hat mir nicht gefallen. Aber genau das ist der Punkt.“</p>
+        <div class="wer">Julia W. · Bewertung auf Loox</div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="angebot" id="bestellen">
+  <div class="wrap">
+    <div class="angebot__grid">
+      <div class="angebot__bild">
+        <img src="startseite-v2/bilder/kit-offen-frei.webp" alt="Geöffnetes AGE & DNA-Testkit" width="1400" height="1390" loading="lazy">
+      </div>
+      <div>
+        <h2>Starte mit dem AGE &amp; DNA-Test.</h2>
+        <ul class="inhalt">
+          <li><b>Speichel-Kit</b><span>mit frankiertem Rückumschlag</span></li>
+          <li><b>Epigenetische Analyse</b><span>6 Bereiche, 12 Werte</span></li>
+          <li><b>DNA-Analyse</b><span>23 Kategorien, über 150 Ergebnisse</span></li>
+          <li><b>LIFETIME-App</b><span>AI Health Coach, Face-Scan</span></li>
+          <li><b>Laboranalyse und Versand</b><span>inklusive</span></li>
+        </ul>
+        <div class="preis"><span class="zahl">349 €</span><span class="klein">einmalig, kein Abo</span></div>
+        <a class="knopf" href="/products/lifetime-age-dna">Test bestellen <span aria-hidden="true">→</span></a>
+        <ul class="vertrauen">
+          <li>Versandkostenfrei</li>
+          <li>30 Tage Rückgabe, solange versiegelt</li>
+          <li>Neues Kit gratis, falls die Probe nicht auswertbar ist</li>
+        </ul>
+      </div>
+    </div>
+    <div class="ablauf">
+      <div class="schritt"><span class="nr">01</span><b>Kit kommt nach Hause</b><p>Bestellen, in 1 bis 3 Tagen ist es da.</p></div>
+      <div class="schritt"><span class="nr">02</span><b>Speichel ins Röhrchen</b><p>Unter 5 Minuten. Kein Blut, kein Arzttermin.</p></div>
+      <div class="schritt"><span class="nr">03</span><b>Rückumschlag ins Labor</b><p>Frankiert, Analyse inklusive.</p></div>
+      <div class="schritt"><span class="nr">04</span><b>Ergebnis in der App</b><p>6 Wochen nach Eingang. Nach 6 Monaten nochmal messen, dann siehst du, was gewirkt hat.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="fragen" id="fragen">
+  <div class="wrap fragen__grid">
+    <div>
+      <h2>Bevor du bestellst</h2>
+      <p class="klein" style="margin-top:12px">Oder 15 Minuten Video-Call, kostenlos. <a class="textlink" href="/pages/longevity-coach">Termin wählen →</a></p>
+    </div>
+    <div>
+      <details open><summary>Kommen noch Kosten dazu?</summary><p>Nein. 349 € einmalig, Versand, Rückumschlag und Laboranalyse inklusive, kein Abo.</p></details>
+      <details><summary>Kann ich das Kit zurückgeben?</summary><p>Ja, 30 Tage ab Erhalt, solange das Kit versiegelt ist. Ist deine Probe nicht auswertbar, bekommst du ein neues Kit gratis.</p></details>
+      <details><summary>Wie genau sind die Ergebnisse?</summary><p>Analysiert bei Eurofins Genomics nach ISO 17025. Aussagekräftig ist die Entwicklung, deshalb misst du nach 6 Monaten nach.</p></details>
+      <details><summary>Sind meine genetischen Daten sicher?</summary><p>Pseudonymisiert unter einer eigenen ID, DSGVO-konform auf EU-Servern. Zugriff haben nur die Stellen, die für Labor und Bereitstellung nötig sind. Du kannst deine Daten löschen lassen.</p></details>
+    </div>
+  </div>
+</section>
+
+<section class="leiste">
+  <img src="startseite-v2/bilder/leiste-schluss.webp" alt="" loading="lazy">
+  <div class="wrap">
+    <div>
+      <p class="kopf">Miss, wo du heute stehst.<span>Danach weißt du, wo du ansetzt.</span></p>
+      <p class="klein" style="margin:12px 0 0">349 € einmalig · versandkostenfrei · kein Abo</p>
+    </div>
+    <a class="knopf knopf--weiss" href="/products/lifetime-age-dna">Test bestellen <span aria-hidden="true">→</span></a>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__grid">
+      <div><p class="kopf">Kein Wellness. Biologie.</p></div>
+      <ul>
+        <li>NMN in Deutschland</li><li>Datenschutzerklärung</li><li>Widerrufsbelehrung</li><li>AGB</li><li>Versand und Lieferung</li><li>Impressum</li><li>Kontakt</li>
+      </ul>
+      <ul>
+        <li>Diga Health GmbH</li><li>Oststraße 11-13</li><li>50996 Köln</li>
+      </ul>
+    </div>
+    <p class="hinweis">Die Produkte von LIFETIME sind nicht zur Diagnose, Behandlung oder Heilung von Krankheiten bestimmt. © 2026 LIFETIME Longevity &amp; Health</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var spur = document.getElementById('spur');
+  var punkte = document.querySelectorAll('#punkte button');
+  var folien = spur.querySelectorAll('.folie');
+  var ruhig = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function zu(i) {
+    i = (i + folien.length) % folien.length;
+    spur.scrollTo({ left: folien[i].offsetLeft, behavior: ruhig ? 'auto' : 'smooth' });
+  }
+  function aktuell() { return Math.round(spur.scrollLeft / spur.clientWidth); }
+  function markiere() {
+    var i = aktuell();
+    punkte.forEach(function (p, k) { p.setAttribute('aria-current', k === i ? 'true' : 'false'); });
+  }
+  punkte.forEach(function (p) { p.addEventListener('click', function () { zu(+p.dataset.ziel); }); });
+  document.querySelectorAll('.hero__pfeil').forEach(function (b) { b.addEventListener('click', function () { zu(aktuell() + (+b.dataset.richtung)); }); });
+  spur.addEventListener('scroll', function () { window.requestAnimationFrame(markiere); }, { passive: true });
+})();
+</script>
+
+</body>
+</html>
