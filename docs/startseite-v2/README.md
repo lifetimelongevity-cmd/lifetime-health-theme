@@ -14,7 +14,7 @@ Section für Section mit BJ durchgegangen (07./08.10.2026), Vorbild wonderful.ai
 
 ## AG1-Umbau 26.10.
 
-Nach der AG1-Hero-Analyse (`docs/ag1-hero-analyse-2026-10-26.md`) und BJs Freigabe des Entwurfs `docs/entwurf-startseite-ag1-2026-10-26.html` („genau so“, Schriften wie live) ist die Startseite auf dem **Entwicklungs-Theme 193836777847** komplett neu gesetzt (Vorschau `https://lifetime-health-de.myshopify.com/?preview_theme_id=193836777847`). **Nicht live**, live geht nur über den Theme Manager. Grundsatz: ein Bild, ein Satz, ein Knopf im Hero; Beweis, Bereiche, Forschung, Stimmen, Angebot, Fragen darunter.
+Nach der AG1-Hero-Analyse (`docs/ag1-hero-analyse-2026-10-26.md`) und BJs Freigabe des Entwurfs `docs/entwurf-startseite-ag1-2026-10-26.html` („genau so“, Schriften wie live) ist die Startseite auf dem **Entwicklungs-Theme 193836777847** komplett neu gesetzt (Vorschau `https://lifetime-health-de.myshopify.com/?preview_theme_id=193836777847`). **Live seit 26.10.2026** (BJ-Ansage „deploy“, Push per CLI nach dem Ablauf des Theme Managers, Stand Commit `24d2587`; vorher Live-Template gegen lokal gediffed, keine Editor-Änderungen). Live-Theme 192529400183. Grundsatz: ein Bild, ein Satz, ein Knopf im Hero; Beweis, Bereiche, Forschung, Stimmen, Angebot, Fragen darunter.
 
 | # | Section-Datei | Key in `index.json` | Was sie zeigt |
 |---|---|---|---|
