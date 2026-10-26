@@ -85,3 +85,7 @@ Ausgeblendet: „Gibt es eine Verzehrempfehlung?“ (`faq_3`, in Frage 4 aufgega
 - `normbereich` wieder rein? Siehe Tabelle oben.
 - NMN-Versand-FAQ: beim Zusammenführen korrigiert (Leitsession 23.10.). „Nichts“ stimmte nur fürs Abo; Einmalkauf in DE unter 49 € kostet 4,90 € (`lt-shipping-rule`).
 - Merge: Die Hero-Felder in allen drei Templates sind unberührt. In `index.json` hat das Neuschreiben die Einrückung von drei Zeilen in `video_vsl` korrigiert (vorher 2 statt 8 Leerzeichen), sonst sind alle Diffs auf die Sections unter dem Hero begrenzt.
+
+## Nachtrag 26.10. (BJ)
+
+`video_vsl` (Limmroth-Video plus Forschungs-Absatz) ist wieder eingeschaltet, an alter Stelle nach `bekannt`, mit Link „Wie wir forschen →“ auf `/pages/unsere-forschung`. Startseite damit 7 sichtbare Sections, Flächen wechseln hell/Teal: hero, bekannt, video_vsl, stimmen, test, fragen, schluss.
