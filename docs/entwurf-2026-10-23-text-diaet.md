@@ -89,3 +89,10 @@ Ausgeblendet: „Gibt es eine Verzehrempfehlung?“ (`faq_3`, in Frage 4 aufgega
 ## Nachtrag 26.10. (BJ)
 
 `video_vsl` (Limmroth-Video plus Forschungs-Absatz) ist wieder eingeschaltet, an alter Stelle nach `bekannt`, mit Link „Wie wir forschen →“ auf `/pages/unsere-forschung`. Startseite damit 7 sichtbare Sections, Flächen wechseln hell/Teal: hero, bekannt, video_vsl, stimmen, test, fragen, schluss.
+
+## Nachtrag 26.10. (BJ)
+
+AGE&DNA-PDP:
+- Kaufzone `bb_once_subline`: „Der Alterswert allein kostet anderswo 200 bis 300 €, hier kommen deine Gene dazu.“ gestrichen, bleibt „Einmalig, kein Abo.“
+- Belege-Karte 2 („Und dann? 15 Minuten Gespräch“) ist jetzt die Wissenschafts-Karte: „Wissenschaftlich entwickelt“, groß **MethylPace**, „unsere epigenetische Uhr, validiert an über 2.600 Menschen“, Kernsatz „Biologisches Alter ist nicht gleich biologisches Alter. Wir messen, wie schnell du alterst, und sind der einzige Test, der das mit deinen Genen verbindet.“ Lade „Wie die Uhr arbeitet“: Horvath-Bezug ohne Messstellenzahl (freigegeben 06.08.), Alterstempo und Körperalter. Limmroth bleibt als Person darunter. Das 15-Minuten-Gespräch steht nicht mehr in dieser Karte.
+- Offen: Beleg für „einziger Test, der das mit deinen Genen verbindet“ (Marktvergleich). Validierungsstudie ist ein Preprint des Uhr-Anbieters, deshalb nicht als „peer-reviewt“ oder „unabhängig“ formuliert; Anbieter wird nicht genannt (White-Label).
