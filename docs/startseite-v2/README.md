@@ -18,7 +18,7 @@ Nach der AG1-Hero-Analyse (`docs/ag1-hero-analyse-2026-10-26.md`) und BJs Freiga
 
 | # | Section-Datei | Key in `index.json` | Was sie zeigt |
 |---|---|---|---|
-| 1 | `lt-hp-hero-vollbild` (neu) | `hero_vollbild` | Vollbild-Karussell, zwei Folien als Blocks: Paar beim Laufen (`lt-hp-hero-laufen-paar.webp`, Teal-Knopf + Ghost-Knopf nach `#test`) und Kit auf Teal-Verlauf (weißer Knopf). Kein Autoplay, Punkte immer, Pfeile ab 769 px. Oben ein Papier-Streifen in Kopfzeilenhöhe, weil die Kopfzeile auf der Startseite absolut liegt (`header_absolute_homepage`); JS misst `.site-header` nach. |
+| 1 | `lt-hp-hero-vollbild` (neu) | `hero_vollbild` | Vollbild-Karussell, zwei Folien als Blocks: Paar beim Laufen (`lt-hp-hero-laufen-paar.webp`, Teal-Knopf + Ghost-Knopf nach `#test`) und Kit auf Teal-Verlauf (weißer Knopf; mobil Kit oben, Text unten wie auf Folie 1, BJ 26.10.). Kein Autoplay, Punkte immer, Pfeile ab 769 px. Oben ein Papier-Streifen in Kopfzeilenhöhe, weil die Kopfzeile auf der Startseite absolut liegt (`header_absolute_homepage`); JS misst `.site-header` nach. |
 | 2 | `lt-hp-bekannt` | `bekannt` | neu seit 26.10. (Presse-Zeile, siehe „Bekannt aus 26.10.“) |
 | 3 | `lt-hp-bereiche-karten` (neu, Anker `#test`) | `bereiche_karten` | „Eine Speichelprobe. / Sechs Antworten über deinen Körper.“, sechs Foto-Karten als Blocks (Kicker „Wie du alterst“ / „Was angelegt ist“), mobil Scroll-Snap 78 %, ab 769 px drei, ab 1180 px sechs Spalten, Fußzeile mit Quiz-Link |
 | 4 | `lt-hp-video-vsl` | `video_vsl` | neu: Blocks „methode“ (drei nummerierte Zeilen), Zitat 24/28 px, Video-Karte 4:5 rechts, Play-Knopf mittig; `forschung_text` leer (Text steht in Methode 03), Link „Wie wir forschen →“ bleibt eigenständig |
