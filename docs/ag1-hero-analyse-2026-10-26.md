@@ -87,3 +87,20 @@ Die Seite hat damit genau eine Verkaufslogik: Hero zieht, Erklärung zeigt die B
 Stand und Abweichungen des Baus: `docs/startseite-v2/README.md` § AG1-Umbau 26.10. Alte Keys `hero`, `test`, `normbereich`, `ablauf`, `bereiche` bleiben deaktiviert im Template.
 
 Bilder im Entwurf: `entwurf-ag1-hero-paar.jpg` (aus `lifetime-mockups/lifestyle/sport-laufen-paar`), `entwurf-ag1-hero-laeuferin.jpg` (`ki-bewegung-b2`, Live-Motiv ohne Karten) als Alternative, alles Weitere aus `docs/startseite-v2/bilder/`. Für den Bau im Theme: Hero als neue Section (`lt-hp-hero-vollbild`), nicht als Umbau von `crs-hero-typewriter`, damit der Rückweg bleibt. Schriften wie live: Headlines Helvetica Neue 400, Fließtext und Knöpfe Lato, Instrument Serif nur in der Schluss-Leiste. **BJ-Freigabe 26.10.2026: „genau so“, mit der Schriftkorrektur.**
+
+## 5. Abgleich nach dem Bau (26.10., nachmittags)
+
+AG1 (drinkag1.com/de-eu) und das Dev-Theme 193836777847 nebeneinander in Headless Chrome, 1440 und 390 px, Ganzseiten und Messwerte. Was AG1 besser macht, nach Gewicht sortiert:
+
+| # | AG1 | Wir (Dev-Theme) | Hebel |
+|---|---|---|---|
+| 1 | **Karten groß und mit Produkt in Benutzung.** Drei Karten je Reihe (rund 430 × 560 px), Titel rund 40 px, jede zeigt einen Menschen mit dem Shake, Reihe scrollt mit Pfeilen. | Sechs Karten je Reihe (187 px breit), Titel 20 px, kein Produkt im Bild. Auf 1440 wirken sie wie Thumbnails. | `lt-hp-bereiche-karten` ab 1180 px auf drei sichtbare Karten mit Scroll umstellen, Titel 28 bis 32 px. |
+| 2 | **Typo-Skala mit Luft.** H2 56 px Desktop / 32 px Handy, Sections 900 bis 1500 px hoch, Seite 12 300 px lang. | H2 36 / 28 px, Sections dichter, Seite 5 800 px. Neben der 64-px-H1 wirken die 36er klein. | H2 auf 48 px (`--text-display`) Desktop, Section-Abstände 96 → 120 bis 140 px. |
+| 3 | **Beweise als Liste mit Fußnoten.** „Unabhängig geprüft“ mit fünf Häkchen-Zeilen, vier Studien-Reiter je mit einer Aussage und Fußnotenbuchstaben, fünf benannte Expert:innen mit Titel. | Ein Zitat, drei Methoden-Zeilen, Eurofins/ISO einmal im Fließtext. | Eigene Section „Unabhängig geprüft“: Eurofins Genomics ISO 17025, Pseudonymisierung, EU-Server, Löschrecht, Chargenprüfung. Inhalt ist vorhanden, nur nicht gebündelt. |
+| 4 | **Hero-Bild trägt Person, Produkt und Blickkontakt.** Hugh Jackman schaut in die Kamera, Shaker und Beutel stehen vorn, warmes Innenlicht, Material dunkel genug ohne Verlauf. | Laufpaar in Bewegungsunschärfe, Gesichter nicht lesbar, kein Produkt, heller Himmel, deshalb kräftiger Verlauf nötig. | Foto mit Blickkontakt und Kit beiläufig im Bild (Küche, Tisch), oder der 10-Sekunden-Mitzieher. Bildwelt-Briefing `lifetime-mockups/BILDWELT-briefing.md`. |
+| 5 | **Garantie und Angebotslogik.** „30 Tage Geld-zurück-Garantie“, Preis je Portion, Erstkauf-Stack. | „30 Tage Rückgabe, solange versiegelt“, 349 € einmalig. Der Stack ist bewusst weg (compare_at-Regel). | Geschäftsentscheidung BJ: Geld-zurück auch nach Öffnen? Preis je Ergebnis („rund 2 € je Einblick“) als Zeile? |
+| 6 | **Cookie-Banner stört den Hero nicht.** Kleiner Balken unten. | Consentmo-Box liegt beim ersten Besuch auf 390 px über Headline und Knöpfen, auf 1440 über dem Ghost-Knopf. | Consentmo-Layout: kompakter Balken unten, nicht Karte links. Außerhalb des Themes. |
+| 7 | Pfeile als Halbkreise an der Bildkante, Knöpfe 62 px / 20 px. | Pfeile als schwebende Kreise, Knöpfe 50 px / 16 px (BJ-Entscheid: wie die übrige Seite). | Kosmetik, kein Handlungsbedarf. |
+
+Was wir gleichwertig oder besser haben: Bekannt-aus direkt unter dem Hero (AG1 hat keine Logo-Wand), echte Kundenzahlen mit Loox-Sternen, Angebotsblock ohne Scheinrabatte, kürzere Seite ohne Nährwert-Anhang, Instrument-Serif-Schluss.
+

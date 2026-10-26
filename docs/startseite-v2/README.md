@@ -29,7 +29,7 @@ Nach der AG1-Hero-Analyse (`docs/ag1-hero-analyse-2026-10-26.md`) und BJs Freiga
 
 Deaktiviert im Template, als Rückweg mit allen Settings: `hero` (`crs-hero-typewriter`, Stand 22.10.), `test`, `normbereich`, `ablauf`, `bereiche`. 13 Sections im Template, unter der 25er-Grenze.
 
-**Typografie:** Kapitel-Überschriften seitenweit 36 px Desktop / 28 px Handy (Entwurf), gesetzt als `--text-h2` auf der Section-Wurzel in allen sieben Sections mit Heading-Paar (vorher 28 / 24). Hero-Headline 64 / 36 px, Helvetica Neue 400, −0,02 em. Alle Knöpfe Teal `--color-dark` mit heller Schrift; der Mint-Knopf des Entwurfs ist verworfen (BJ 26.10.: „nicht dieses Grün“).
+**Typografie:** Kapitel-Überschriften seitenweit 36 px Desktop / 28 px Handy (Entwurf), gesetzt als `--text-h2` auf der Section-Wurzel in allen sieben Sections mit Heading-Paar (vorher 28 / 24). Hero-Headline „Finde heraus, was wirkt“ ohne Punkt (BJ 26.10.), 64 / 36 px, Helvetica Neue 400, −0,02 em. Alle Knöpfe Teal `--color-dark` mit heller Schrift; der Mint-Knopf des Entwurfs ist verworfen (BJ 26.10.: „nicht dieses Grün“).
 
 **Knöpfe (BJ 26.10., „wie sonst auf der Seite, nicht dieses Grün“):** nicht die 18-px-fetten Mint-Pillen des Entwurfs, sondern der Stil von `lt-hp-test`, `lt-leiste` und dem PDP-Kaufknopf: Teal `--color-dark` mit heller Schrift, Lato 16 px, Gewicht 500, 15 × 26 px Innenabstand, rund 50 px hoch, Pille, Hover heller wie auf der PDP. Mobil im Hero beide Knöpfe nebeneinander mit 12 px seitlich. Abweichend nur der Ghost-Knopf (transparent, heller Rand) und der Papier-Knopf auf der Kit-Folie. Mint kommt nirgends mehr als Knopf vor; Regel 6 der Analyse ist entsprechend geändert.
 
