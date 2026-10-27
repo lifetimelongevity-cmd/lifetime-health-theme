@@ -6,7 +6,7 @@ canonical_for: garantie-frist-90-tage-umstellung
 
 # 90-Tage-Garantie: Umstellung im Theme (27.10.2026)
 
-BJ-Entscheid 27.10.2026: Die Garantie gilt **90 Tage** statt 30, Bedingung **„solange versiegelt“**. Die Google-Brand-Anzeigen werben schon so („90 Tage Geld-zurück“, Sitelink „90 Tage risikofrei“). Dieser Commit zieht Theme und Startseite nach. Die Shopify-Rückgaberichtlinie (`/policies/refund-policy`, liegt im Admin, nicht im Theme) wird separat im Shopify-Admin geändert (siehe unten, der MCP darf Richtlinien nicht schreiben).
+BJ-Entscheid 27.10.2026: Die Garantie gilt **90 Tage** statt 30, Bedingung **„solange versiegelt“**. Die Google-Brand-Anzeigen werben schon so („90 Tage Geld-zurück“, Sitelink „90 Tage risikofrei“). Dieser Commit zieht Theme und Startseite nach. Die Shopify-Rückgaberichtlinie (`/policies/refund-policy`, liegt im Admin, nicht im Theme) wurde am 27.10.2026 im Shopify-Admin geändert (siehe unten, der MCP darf Richtlinien nicht schreiben).
 
 ## Was die Richtlinie heute sagt (live gelesen 27.10.2026)
 
@@ -15,9 +15,9 @@ BJ-Entscheid 27.10.2026: Die Garantie gilt **90 Tage** statt 30, Bedingung **„
 
 Die Supplement-PDPs haben die 90 Tage also bisher unterverkauft (sie sagten 30). Der Test hatte nur die 30 Tage Widerruf.
 
-## Richtlinienänderung: freigegeben, aber nicht per MCP schreibbar
+## Richtlinienänderung: erledigt am 27.10.2026 (per Claude-in-Chrome im Admin)
 
-BJ hat die Änderung am 27.10.2026 freigegeben. Die Mutation `shopPolicyUpdate` scheitert aber am Zugriffsrecht: Der Shopify-MCP hat den Scope `write_legal_policies` nicht („Access denied for shopPolicyUpdate field“). Die drei Stellen unten müssen im Shopify-Admin eingetragen werden (Einstellungen → Richtlinien → Rückgabe und Erstattung), per Hand oder per Claude-in-Chrome.
+BJ hat die Änderung am 27.10.2026 freigegeben. Die Mutation `shopPolicyUpdate` scheitert aber am Zugriffsrecht: Der Shopify-MCP hat den Scope `write_legal_policies` nicht („Access denied for shopPolicyUpdate field“). Die drei Stellen unten wurden deshalb per Claude-in-Chrome im Shopify-Admin eingetragen (Einstellungen → Richtlinien → Widerrufsrecht) und gespeichert; Gegenprobe per MCP-Lesezugriff. **Offen:** Die Shopify-„Rückgabe- und Stornierungsregeln“ (Self-Service-Rückgaben) stehen weiter auf „Rückgabe innerhalb von 30 Tagen“, das ist eine eigene Einstellung oberhalb der Richtlinien.
 
 Kleinster Eingriff, der BJs Satz „90 Tage Rückgabe solange versiegelt“ für alle Produkte wahr macht: **die vertragliche Widerrufsfrist von 30 auf 90 Tage verlängern.** Drei Stellen im Text, alles andere bleibt:
 
