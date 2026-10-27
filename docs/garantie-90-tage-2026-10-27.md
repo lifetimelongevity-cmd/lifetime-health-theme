@@ -6,7 +6,7 @@ canonical_for: garantie-frist-90-tage-umstellung
 
 # 90-Tage-Garantie: Umstellung im Theme (27.10.2026)
 
-BJ-Entscheid 27.10.2026: Die Garantie gilt **90 Tage** statt 30, Bedingung **„solange versiegelt“**. Die Google-Brand-Anzeigen werben schon so („90 Tage Geld-zurück“, Sitelink „90 Tage risikofrei“). Dieser Commit zieht Theme und Startseite nach. Die Shopify-Rückgaberichtlinie (`/policies/refund-policy`, liegt im Admin, nicht im Theme) wird separat per Shopify-MCP geändert, erst nach BJs Ja.
+BJ-Entscheid 27.10.2026: Die Garantie gilt **90 Tage** statt 30, Bedingung **„solange versiegelt“**. Die Google-Brand-Anzeigen werben schon so („90 Tage Geld-zurück“, Sitelink „90 Tage risikofrei“). Dieser Commit zieht Theme und Startseite nach. Die Shopify-Rückgaberichtlinie (`/policies/refund-policy`, liegt im Admin, nicht im Theme) wird separat im Shopify-Admin geändert (siehe unten, der MCP darf Richtlinien nicht schreiben).
 
 ## Was die Richtlinie heute sagt (live gelesen 27.10.2026)
 
@@ -15,7 +15,9 @@ BJ-Entscheid 27.10.2026: Die Garantie gilt **90 Tage** statt 30, Bedingung **„
 
 Die Supplement-PDPs haben die 90 Tage also bisher unterverkauft (sie sagten 30). Der Test hatte nur die 30 Tage Widerruf.
 
-## Entwurf Richtlinienänderung (noch nicht geschrieben)
+## Richtlinienänderung: freigegeben, aber nicht per MCP schreibbar
+
+BJ hat die Änderung am 27.10.2026 freigegeben. Die Mutation `shopPolicyUpdate` scheitert aber am Zugriffsrecht: Der Shopify-MCP hat den Scope `write_legal_policies` nicht („Access denied for shopPolicyUpdate field“). Die drei Stellen unten müssen im Shopify-Admin eingetragen werden (Einstellungen → Richtlinien → Rückgabe und Erstattung), per Hand oder per Claude-in-Chrome.
 
 Kleinster Eingriff, der BJs Satz „90 Tage Rückgabe solange versiegelt“ für alle Produkte wahr macht: **die vertragliche Widerrufsfrist von 30 auf 90 Tage verlängern.** Drei Stellen im Text, alles andere bleibt:
 
@@ -55,4 +57,4 @@ Die NMN-PDP und die übrigen Supplement-PDPs behalten die Zufriedenheits-Logik (
 
 ## Push
 
-Alles im Theme-Ordner per Theme Manager pushen, Live-Check danach: NMN-PDP, AGE&DNA-PDP, Startseite, Quiz-Ergebnis (`/pages/quiz-age`), Longevity-Plan. Die Richtlinie wird nicht gepusht, sondern per Shopify-MCP (`shopPolicyUpdate`) geschrieben.
+Alles im Theme-Ordner per Theme Manager pushen, Live-Check danach: NMN-PDP, AGE&DNA-PDP, Startseite, Quiz-Ergebnis (`/pages/quiz-age`), Longevity-Plan. Die Richtlinie wird nicht gepusht, sondern im Shopify-Admin geändert.
