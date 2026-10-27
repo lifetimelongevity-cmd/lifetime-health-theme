@@ -1,0 +1,86 @@
+{% comment %}
+  lt-pdp-ereignisse — Seitenereignisse der Verkaufsseite als dataLayer-Pushes.
+  Gebaut 27.10.2026 nach lifetime-ads/briefings/gruene-wiese/02-funnel-landingpage-email.md § 5.
+
+  Namen und Parameter sind neutral: kein Produktname, kein Gesundheitsbegriff, kein
+  Variantentitel. Meta stuft Gesundheitsanbieter ein und blockt Ereignisse mit
+  Gesundheitsbezug, deshalb sagen die Namen nur, was passiert, nicht womit.
+
+  Das Snippet schreibt nur in window.dataLayer. Es sendet nichts an Meta oder GA4.
+  Ob und wohin ein Ereignis weitergeht, entscheidet GTM (Consent Mode, Consentmo);
+  der alte Meta-Tag in GTM bleibt pausiert. lt_step und lt_done entstehen im Checkout
+  und gehören in ein Shopify Custom Pixel, nicht ins Theme. lt_note kommt mit dem
+  Capture-Block.
+
+  lt_seen    Seite geladen                     value, currency, hl (Überschrift-Variante)
+  lt_choice  Karte gewählt                      opt: a | b | c
+  lt_intent  Kaufknopf gedrückt                 value, currency, pos: top | sticky | mid | bottom
+  lt_read    Element mit data-lt-read sichtbar  keine
+
+  Kaufknöpfe außerhalb des Hero melden sich über data-lt-intent="<pos>" oder als
+  Link auf einen Warenkorb-Permalink (/cart/<id>:<menge>), dann pos bottom.
+{% endcomment %}
+<script>
+  (function () {
+    if (window.__ltPdpEvents) return;
+    window.__ltPdpEvents = true;
+    var dl = (window.dataLayer = window.dataLayer || []);
+    var baseCents = {{ product.selected_or_first_available_variant.price | default: 0 }};
+    var firstCents = {{ product.variants.first.price | default: 0 }};
+
+    function selectedCents() {
+      var sel = document.querySelector('#shopify-section-{{ section_id }} .lt-pkg__input:checked');
+      if (!sel) return baseCents;
+      var qty = Math.max(1, parseInt(sel.dataset.quantity, 10) || 1);
+      return (parseInt(sel.dataset.oncePrice, 10) || baseCents) * qty;
+    }
+    function euro(cents) { return Math.round(cents) / 100; }
+
+    dl.push({ event: 'lt_seen', value: euro(baseCents), currency: 'EUR', hl: {{ headline_variant | default: 'a' | json }} });
+
+    document.addEventListener('change', function (e) {
+      var inp = e.target.closest && e.target.closest('.lt-pkg__input');
+      if (inp && inp.checked) dl.push({ event: 'lt_choice', opt: inp.dataset.opt || 'a' });
+    });
+
+    var lastIntent = 0;
+    // Capture-Phase: der Hero-Knopf springt per Direkt-Checkout weg, bevor ein
+    // Bubble-Listener sicher laufen würde.
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest) return;
+      var pos = '';
+      var el;
+      var cents = NaN;
+      if (e.target.closest('#lt-hero-atc')) pos = 'top';
+      else if (e.target.closest('#lt-sticky-atc button, #lt-sticky-atc a')) pos = 'sticky';
+      else if ((el = e.target.closest('[data-lt-intent]'))) {
+        pos = el.getAttribute('data-lt-intent') || 'bottom';
+        cents = parseInt(el.getAttribute('data-lt-value'), 10);
+      } else if ((el = e.target.closest('a[href*="/cart/"]')) && /\/cart\/\d+:\d+/.test(el.getAttribute('href') || '')) {
+        pos = 'bottom';
+      }
+      if (!pos) return;
+      // Der Sticky-Knopf klickt den Hero-Knopf programmatisch nach
+      // (component-product-form.js), das waere sonst ein zweites lt_intent mit pos top.
+      if (Date.now() - lastIntent < 800) return;
+      lastIntent = Date.now();
+      // Hero und Sticky kaufen die gewählte Karte, die Knöpfe weiter unten die erste Variante
+      if (isNaN(cents)) cents = (pos === 'top' || pos === 'sticky') ? selectedCents() : firstCents;
+      dl.push({ event: 'lt_intent', value: euro(cents), currency: 'EUR', pos: pos });
+    }, true);
+
+    function watchRead() {
+      var target = document.querySelector('[data-lt-read]');
+      if (!target || !('IntersectionObserver' in window)) return;
+      var io = new IntersectionObserver(function (entries) {
+        if (entries.some(function (en) { return en.isIntersecting; })) {
+          dl.push({ event: 'lt_read' });
+          io.disconnect();
+        }
+      }, { threshold: 0.25 });
+      io.observe(target);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watchRead);
+    else watchRead();
+  })();
+</script>

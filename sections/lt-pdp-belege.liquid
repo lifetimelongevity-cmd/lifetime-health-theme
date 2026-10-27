@@ -98,6 +98,11 @@
 
 <div class="ltbg" id="section-{{ section.id }}">
   <div class="ltbg__container">
+    {%- comment -%} Beweiszeile (AGE&DNA 27.10.2026, Grüne Wiese 02 § 2.3): eine Zeile Labor und
+        Leitung direkt unter der Kaufzone, ohne Bild. Leer = nichts. {%- endcomment -%}
+    {%- if section.settings.beweis_zeile != blank -%}
+      <p class="ltbg__beweis">{{ section.settings.beweis_zeile | escape }}</p>
+    {%- endif -%}
     {% render 'section-heading-crs',
       heading: bg_heading,
       subheading: bg_sub,
@@ -129,8 +134,15 @@
           {%- endif -%}
         </div>
         <div class="ltbg__main">
+          {%- comment -%} Mehrere Absätze möglich (eine Zeile je Absatz), seit 27.10.2026. {%- endcomment -%}
           {%- if section.settings.labor_text != blank -%}
-            <p class="ltbg__text">{{ section.settings.labor_text | escape }}</p>
+            {%- assign bg_labor_paras = section.settings.labor_text | newline_to_br | split: '<br />' -%}
+            {%- for bg_para in bg_labor_paras -%}
+              {%- assign bg_para_s = bg_para | strip -%}
+              {%- if bg_para_s != blank -%}
+                <p class="ltbg__text">{{ bg_para_s | escape }}</p>
+              {%- endif -%}
+            {%- endfor -%}
           {%- endif -%}
 
           {%- if bg_jsonld_rows > 0 or section.settings.labor_provenance != blank or section.settings.labor_compare != blank -%}
@@ -365,7 +377,15 @@
   margin: 0 auto;
   padding: 0 var(--lt-page-gutter, 16px);
 }
-.ltbg__header { margin-bottom: var(--space-6); }
+.ltbg__header { margin-bottom: var(--space-6); max-width: 960px; margin-left: auto; margin-right: auto; }
+.ltbg__beweis {
+  max-width: 960px;
+  margin: 0 auto var(--space-5);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--ltbg-text-sec);
+}
+.ltbg__text + .ltbg__text { margin-top: var(--space-2); }
 /* Karten immer untereinander, auch auf dem Desktop (BJ 22.10.): nebeneinander
    enden drei verschieden hohe Karten auf drei Höhen und lassen unten weiße Ecken.
    Auf dem Desktop wird jede Karte eine Zeile (Kennzahl links, Herleitung rechts),
@@ -541,13 +561,15 @@
     { "type": "textarea", "id": "heading", "label": "Überschrift", "default": "__none__", "info": "__none__ = ausblenden" },
     { "type": "textarea", "id": "subheading", "label": "Unterüberschrift", "default": "__none__", "info": "__none__ = ausblenden" },
 
+    { "type": "text", "id": "beweis_zeile", "label": "Beweiszeile über den Karten", "info": "Eine Zeile, z. B. Labor und wissenschaftliche Leitung. Leer = keine." },
+
     { "type": "header", "content": "Karte 1: Was drin ist" },
     { "type": "checkbox", "id": "show_labor", "label": "Karte anzeigen", "default": true },
     { "type": "text", "id": "labor_title", "label": "Oberzeile", "default": "Was drin ist" },
     { "type": "text", "id": "labor_value", "label": "Große Zahl", "default": "100,1 %" },
     { "type": "text", "id": "labor_value_label", "label": "Bezeichnung der Zahl", "default": "NMN-Gehalt" },
     { "type": "text", "id": "labor_meta", "label": "Herkunftszeile", "default": "Charge 20250917 · Limbach Analytics, Mainz · 1H-NMR" },
-    { "type": "text", "id": "labor_text", "label": "Satz", "default": "Schwermetalle: 4 von 4 unter der Bestimmungsgrenze." },
+    { "type": "textarea", "id": "labor_text", "label": "Satz", "default": "Schwermetalle: 4 von 4 unter der Bestimmungsgrenze.", "info": "Eine Zeile je Absatz." },
     { "type": "text", "id": "labor_details_label", "label": "Lade-Beschriftung", "default": "Einzelwerte und Prüfdetails" },
     { "type": "text", "id": "labor_batch", "label": "Charge", "default": "20250917", "info": "Für Tabellen-Caption und JSON-LD" },
     { "type": "text", "id": "labor_lab", "label": "Labor", "default": "Limbach Analytics, Arotop Laboratorien Mainz, DAkkS-akkreditiert nach DIN EN ISO/IEC 17025" },
@@ -605,7 +627,7 @@
       "settings": [
         { "type": "textarea", "id": "text", "label": "Zitat", "default": "Klar deklariert, Laborwerte einsehbar. Genau das will ich." },
         { "type": "text", "id": "name", "label": "Name", "default": "Hans-Werner G." },
-        { "type": "range", "id": "rating", "label": "Sterne", "min": 1, "max": 5, "step": 1, "default": 5, "info": "Wie im Loox-Widget bei dieser Bewertung" },
+        { "type": "range", "id": "rating", "label": "Sterne", "min": 0, "max": 5, "step": 1, "default": 5, "info": "Wie im Loox-Widget bei dieser Bewertung. 0 = keine Sterne, solange die Wertung nicht geprüft ist." },
         { "type": "text", "id": "date", "label": "Monat", "info": "z. B. April 2026, aus dem Loox-Widget" },
         { "type": "checkbox", "id": "verified", "label": "Loox-Kennzeichen zeigen", "default": false }
       ]

@@ -20,6 +20,11 @@
     assign media_type = 'image'
     assign media = settings.product_card_fallback_image
   endunless
+  # image_override: ein Bild aus den Dateien statt eines Produktmediums (lt-pdp-hero, Ergebnisbild 27.10.2026)
+  if image_override != blank
+    assign media_type = 'image'
+    assign media = image_override
+  endif
 -%}
 
 <div 
@@ -42,7 +47,7 @@
     Alle Aufrufer uebergeben forloop.index0, deshalb plus: 1 fuer die
     menschliche Zaehlung. Der Alt-Text gewinnt, wenn er gepflegt ist.
   {%- endcomment -%}
-  aria-label="{% if media.alt != blank %}{{ media.alt | strip_html | escape }}{% else %}Produktbild {{ index | plus: 1 }}{% endif %}"
+  aria-label="{% if alt_override != blank %}{{ alt_override | escape }}{% elsif media.alt != blank %}{{ media.alt | strip_html | escape }}{% else %}Produktbild {{ index | plus: 1 }}{% endif %}"
   data-index="{{ index }}"
   {%- if media_type == 'external_video' -%} 
     data-video-id="{{ media.external_id }}" 
@@ -87,7 +92,7 @@
         assign image_class = 'apply-gallery-animation'
       endif
       
-      render 'lazy-image', image: media, id: image_id, fit: fit, ratio: aspect_ratio, sizes: sizes, preload: preload, type: 'background', class: image_class
+      render 'lazy-image', image: media, id: image_id, fit: fit, ratio: aspect_ratio, sizes: sizes, preload: preload, type: 'background', class: image_class, alt: alt_override
 
     -%}
 

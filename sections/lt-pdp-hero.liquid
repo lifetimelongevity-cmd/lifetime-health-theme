@@ -149,7 +149,15 @@
           damit Preload und img-Element denselben Kandidaten waehlen (kein Doppel-Download).
           Ohne das haengt fetchpriority=high nur am Shopify-Chat-Drittscript.
         {%- endcomment -%}
+        {%- comment -%} Ergebnisbild vor den Produktmedien (AGE&DNA 27.10.2026): Die Produktmedien
+            speisen auch Merchant Center und Meta-Katalog und bleiben deshalb Produktfotos. Das
+            Ergebnisbild kommt nur auf der Seite davor. Ohne Setting bleibt alles wie bisher. {%- endcomment -%}
+        {%- assign lt_hero_img = section.settings.hero_image -%}
+        {%- assign lt_hero_off = 0 -%}
+        {%- if lt_hero_img != blank -%}{%- assign lt_hero_off = 1 -%}{%- endif -%}
+        {%- assign lt_slide_count = product.media.size | plus: lt_hero_off -%}
         {%- assign lt_lcp = product.media.first.preview_image -%}
+        {%- if lt_hero_img != blank -%}{%- assign lt_lcp = lt_hero_img -%}{%- endif -%}
         {%- if lt_lcp != blank -%}
           <link
             rel="preload"
@@ -169,14 +177,14 @@
               {%- if section.settings.show_badge -%}
                 <span class="lt-pdp-hero__badge lt-badge">{{ section.settings.badge_text | default: 'Bestseller' | escape }}</span>
               {%- endif -%}
-            {%- if product.media.size > 1 -%}
+            {%- if lt_slide_count > 1 -%}
               <css-slider
                 data-options='
                   {
                     "selector": ".product-gallery-item",
                     "autoHeight": false,
                     "navigationDOM": "<span class=\"css-slider-button css-slider-prev\" style=\"display:none\"><svg fill=\"none\" height=\"11\" viewBox=\"0 0 6 11\" width=\"6\" xmlns=\"http://www.w3.org/2000/svg\"><path clip-rule=\"evenodd\" d=\"m4.32845 10.0708-4.18198-4.18194c-.195261-.19526-.195261-.51185 0-.70711l4.18198-4.181979c.19527-.195262.51185-.195262.70711 0 .19526.195259.19526.511849 0 .707109l-3.32843 3.32842s-.70713.4647-.00002 1l3.32845 3.32843c.19526.19526.19526.51185 0 .70707-.19526.1953-.51185.1953-.70711 0z\" fill=\"#000\" fill-rule=\"evenodd\"/></svg></span><span class=\"css-slider-button css-slider-next\" style=\"display:none\"><svg fill=\"none\" height=\"11\" viewBox=\"0 0 6 11\" width=\"6\" xmlns=\"http://www.w3.org/2000/svg\"><path clip-rule=\"evenodd\" d=\"m.853555.999962 4.181985 4.181978c.19526.19526.19526.51185 0 .70711l-4.181983 4.18195c-.195263.1953-.511845.1953-.707108 0-.1952631-.19523-.1952632-.51181 0-.70708l3.328431-3.32842s.70713-.4647.00002-1l-3.328453-3.32843c-.1952626-.19526-.1952627-.51185 0-.707108.195263-.195262.511845-.195262.707108 0z\" fill=\"#000\" fill-rule=\"evenodd\"/></svg></span>",
-                    "thumbnailsDOM": "<div class=\"css-slider-dot-navigation\" style=\"display:none;--size:{{ product.media.size }}\"></div>",
+                    "thumbnailsDOM": "<div class=\"css-slider-dot-navigation\" style=\"display:none;--size:{{ lt_slide_count }}\"></div>",
                     "listenScroll": false
                   }
                 '
@@ -186,7 +194,7 @@
             {%- endif -%}
 
             <div class="grid grid--slider grid-1 lap--grid--slider grid--gap-small" style="--mobile-media-width: {{ gallery_mobile_width }}%">
-              {%- if product.media.size == 0 -%}
+              {%- if lt_slide_count == 0 -%}
                 {%- unless settings.product_card_fallback_image == blank -%}
                   {%- render 'product-media',
                     fallback: true,
@@ -204,12 +212,30 @@
                   </div>
                 {%- endunless -%}
               {%- else -%}
+                {%- if lt_hero_img != blank -%}
+                  {%- render 'product-media',
+                    media: lt_hero_img,
+                    image_override: lt_hero_img,
+                    alt_override: section.settings.hero_image_alt,
+                    enable_zoom: false,
+                    loop: false,
+                    index: 0,
+                    aspect_ratio: gallery_ratio,
+                    fit: true,
+                    layout: gallery_layout,
+                    desktop_width: 'one-half',
+                    mobile_width: gallery_mobile_width,
+                    autoplay: false,
+                    video_fit: true
+                  -%}
+                {%- endif -%}
                 {%- for media in product.media -%}
+                  {%- assign lt_media_index = forloop.index0 | plus: lt_hero_off -%}
                   {%- render 'product-media',
                     media: media,
                     enable_zoom: false,
                     loop: false,
-                    index: forloop.index0,
+                    index: lt_media_index,
                     aspect_ratio: gallery_ratio,
                     fit: true,
                     layout: gallery_layout,
@@ -225,10 +251,10 @@
               {%- endif -%}
             </div>
 
-            {%- if product.media.size > 1 -%}</css-slider>{%- endif -%}
+            {%- if lt_slide_count > 1 -%}</css-slider>{%- endif -%}
             </div>{%- comment -%} /.lt-pdp-hero__gallery-media {%- endcomment -%}
 
-            {%- if product.media.size > 1 -%}
+            {%- if lt_slide_count > 1 -%}
               {%- comment -%}
                 aria-hidden + tabindex="-1": Die Thumbnails sind reine Maus-Navigation.
                 Tastatur/Screenreader nutzen die benannten Slider-Dots ("Zeige Folie n");
@@ -236,8 +262,18 @@
               {%- endcomment -%}
               <div class="product-gallery__thumbnails" aria-hidden="true">
                 <div class="product-gallery__thumbnails-holder">
+                  {%- if lt_hero_img != blank -%}
+                    <button class="thumbnail element--border-radius" data-index="0" tabindex="-1">
+                      {%- render 'lazy-image-small',
+                        image: lt_hero_img,
+                        aspect_ratio: settings.cart_image_ratio,
+                        fit: settings.cart_image_fit,
+                        class: 'thumbnail__image'
+                      -%}
+                    </button>
+                  {%- endif -%}
                   {%- for media in product.media -%}
-                    <button class="thumbnail element--border-radius" data-index="{{ forloop.index0 }}" tabindex="-1">
+                    <button class="thumbnail element--border-radius" data-index="{{ forloop.index0 | plus: lt_hero_off }}" tabindex="-1">
                       {%- render 'lazy-image-small',
                         image: media.preview_image,
                         aspect_ratio: settings.cart_image_ratio,
@@ -642,6 +678,19 @@
         {%- endif -%}
 
         {%- assign lt_hero_heading_text = section.settings.hero_headline | default: product.title -%}
+        {%- comment -%} Ueberschrift-Varianten (Gruene Wiese 02 § 2.1, 27.10.2026): A ist hero_headline
+            plus Tagline, B und C tragen eigene Paare. Getestet wird nacheinander, je zwei Wochen,
+            gemessen an lt_intent (Parameter hl im Ereignis lt_seen). {%- endcomment -%}
+        {%- assign lt_hl_variant = section.settings.headline_variant | default: 'a' -%}
+        {%- if lt_hl_variant == 'b' and section.settings.hero_headline_b != blank -%}
+          {%- assign lt_hero_heading_text = section.settings.hero_headline_b -%}
+          {%- assign lt_tagline_text = section.settings.tagline_b -%}
+        {%- elsif lt_hl_variant == 'c' and section.settings.hero_headline_c != blank -%}
+          {%- assign lt_hero_heading_text = section.settings.hero_headline_c -%}
+          {%- assign lt_tagline_text = section.settings.tagline_c -%}
+        {%- else -%}
+          {%- assign lt_hl_variant = 'a' -%}
+        {%- endif -%}
         {%- render 'section-heading-crs',
           heading: lt_hero_heading_text,
           subheading: lt_tagline_text,
@@ -650,6 +699,11 @@
           headline_lg: true,
           extra_class: 'lt-pdp-hero__heading'
         -%}
+        {%- if section.settings.hero_quote != blank -%}
+          <p class="lt-pdp-hero__quote">„{{ section.settings.hero_quote | escape }}“
+            {%- if section.settings.hero_quote_name != blank %} <span class="lt-pdp-hero__quote-name">{{ section.settings.hero_quote_name | escape }}</span>{% endif -%}
+          </p>
+        {%- endif -%}
 
         {%- if lt_show_hero_bullets -%}
           <div class="lt-pdp-hero__bullets lt-hero-bullets">
@@ -1356,6 +1410,10 @@
             {%- if lt_show_packages -%}
               <div class="lt-pkg" data-lt-pkg-group role="radiogroup" aria-label="Paket wählen">
                 {%- for variant in product.variants -%}
+                  {%- comment -%} Ab der dritten Variante nur mit pkg_tier3_enable (Stufe 3 „Vorher und
+                      Nachher“, vorbereitet 27.10.2026, Variante existiert noch nicht). {%- endcomment -%}
+                  {%- if forloop.index > 3 -%}{%- break -%}{%- endif -%}
+                  {%- if forloop.index == 3 and section.settings.pkg_tier3_enable != true -%}{%- continue -%}{%- endif -%}
                   {%- liquid
                     assign pkg_note = ''
                     assign pkg_label = variant.title
@@ -1369,6 +1427,21 @@
                       if section.settings.pkg_label_2 != blank
                         assign pkg_label = section.settings.pkg_label_2
                       endif
+                    elsif forloop.index == 3
+                      assign pkg_note = section.settings.pkg_note_3
+                      if section.settings.pkg_label_3 != blank
+                        assign pkg_label = section.settings.pkg_label_3
+                      endif
+                    endif
+                    assign pkg_opt = 'a'
+                    if forloop.index == 2
+                      assign pkg_opt = 'b'
+                    elsif forloop.index == 3
+                      assign pkg_opt = 'c'
+                    endif
+                    assign pkg_save_cents = 0
+                    if forloop.index == 3 and section.settings.pkg_tier3_anchor_cents > variant.price
+                      assign pkg_save_cents = section.settings.pkg_tier3_anchor_cents | minus: variant.price
                     endif
                   -%}
                   <label class="lt-pkg__card{% if variant.id == lt_variant_1.id %} is-selected{% endif %}" data-lt-pkg>
@@ -1383,6 +1456,8 @@
                       data-compare-price="{{ variant.compare_at_price | default: 0 }}"
                       data-size-short="{{ variant.title | escape }}"
                       data-stack-bundle="{% if forloop.first %}0{% else %}1{% endif %}"
+                      data-opt="{{ pkg_opt }}"
+                      {% if pkg_save_cents > 0 %}data-save-cents="{{ pkg_save_cents }}"{% endif %}
                       {% unless variant.available %}disabled{% endunless %}
                     >
                     <span class="lt-pkg__head">
@@ -1396,7 +1471,7 @@
                           Preiszeile darunter (lt-price-direct) wiederholte 349/399/Ersparnis
                           wortgleich und ist im Paket-Pfad entfallen. {%- endcomment -%}
                       <span class="lt-pkg__price">
-                        {%- if variant.compare_at_price > variant.price -%}
+                        {%- if variant.compare_at_price > variant.price and section.settings.pkg_hide_compare != true -%}
                           <del class="lt-pkg__compare">{{ variant.compare_at_price | money_without_trailing_zeros }}</del>
                         {%- endif %}
                         {{- variant.price | money_without_trailing_zeros -}}
@@ -1415,7 +1490,7 @@
                       {%- endunless -%}
                     {%- endif -%}
                     {%- if pkg_note != blank -%}
-                      <span class="lt-pkg__note">{{ pkg_note | escape }}</span>
+                      <span class="lt-pkg__note{% if section.settings.pkg_note_selected_only %} lt-pkg__note--selected-only{% endif %}">{{ pkg_note | escape }}</span>
                     {%- endif -%}
                   </label>
                 {%- endfor -%}
@@ -1722,17 +1797,50 @@
               weiter das Popup, Kündbarkeit steht in der Abo-Kachel, Zahlarten entfallen hier. {%- endcomment -%}
           <div class="lt-pdp-hero__post-cta lt-pdp-hero__post-cta--compact">
             <button type="button" class="lt-save-chip" data-lt-save-chip hidden disabled><span class="lt-save-chip__lead" data-lt-save-lead>Du sparst</span> <span class="lt-save-chip__amt" data-lt-save-amt></span><span class="lt-save-chip__go" aria-hidden="true"> →</span></button>
+            {%- capture lt_guarantee_inline -%}
+              {%- if lt_guarantee_popup_plain != '' -%}
+                <button type="button" class="lt-pdp-hero__post-line-btn" data-crs-dialog-open aria-haspopup="dialog" aria-controls="crs-lt-hero-guarantee-{{ section.id }}">{{ lt_guarantee_line | escape }}</button>
+              {%- else -%}
+                <span>{{ lt_guarantee_line | escape }}</span>
+              {%- endif -%}
+            {%- endcapture -%}
+            {%- comment -%} Garantie als eigene Zeile direkt am Knopf (Gruene Wiese 01 § 3, 27.10.2026):
+                sie ist das „or what“ des Angebots und soll nicht hinter der Versandzeile verschwinden. {%- endcomment -%}
+            {%- assign lt_guarantee_first = false -%}
+            {%- if section.settings.show_guarantee_badge and section.settings.compact_guarantee_first -%}
+              {%- assign lt_guarantee_first = true -%}
+              <p class="lt-pdp-hero__post-line lt-pdp-hero__post-line--guarantee">{{ lt_guarantee_inline }}</p>
+            {%- endif -%}
             <p class="lt-pdp-hero__post-line">
               {%- if section.settings.compact_ship_text != blank -%}<span>{{ section.settings.compact_ship_text | escape }}</span>{%- endif -%}
-              {%- if section.settings.show_guarantee_badge -%}
+              {%- if section.settings.show_guarantee_badge and lt_guarantee_first == false -%}
                 {%- if section.settings.compact_ship_text != blank %}<span aria-hidden="true"> · </span>{% endif -%}
-                {%- if lt_guarantee_popup_plain != '' -%}
-                  <button type="button" class="lt-pdp-hero__post-line-btn" data-crs-dialog-open aria-haspopup="dialog" aria-controls="crs-lt-hero-guarantee-{{ section.id }}">{{ lt_guarantee_line | escape }}</button>
-                {%- else -%}
-                  <span>{{ lt_guarantee_line | escape }}</span>
-                {%- endif -%}
+                {{ lt_guarantee_inline }}
+              {%- endif -%}
+              {%- if section.settings.result_line_enable -%}
+                <span data-lt-result-line hidden>
+                  {%- if section.settings.compact_ship_text != blank or lt_guarantee_first == false %}<span aria-hidden="true"> · </span>{% endif -%}
+                  {{ section.settings.result_line_prefix | escape }} <span data-lt-result-date></span>
+                </span>
               {%- endif -%}
             </p>
+            {%- if section.settings.result_line_enable -%}
+              {%- comment -%} Ergebnistermin statt Countdown (Gruene Wiese 02 § 2.2): heute plus
+                  result_line_days, im Browser gerechnet, weil die Seite gecacht ausgeliefert wird und ein
+                  serverseitiges Datum veralten wuerde. setDate rechnet Monats- und Jahresgrenzen selbst
+                  (31.01. plus 42 = 14.03., 25.12. plus 42 = 05.02.). Ohne JavaScript bleibt die Zeile weg. {%- endcomment -%}
+              <script>
+                (function () {
+                  var line = document.currentScript.previousElementSibling;
+                  var el = line && line.querySelector('[data-lt-result-line]');
+                  if (!el) return;
+                  var d = new Date();
+                  d.setDate(d.getDate() + {{ section.settings.result_line_days | default: 42 }});
+                  el.querySelector('[data-lt-result-date]').textContent = d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' });
+                  el.hidden = false;
+                })();
+              </script>
+            {%- endif -%}
             {%- if lt_note_below_cta -%}
               <p class="lt-pdp-hero__post-note">{{ section.settings.bb_once_subline | escape }}</p>
             {%- endif -%}
@@ -1991,6 +2099,10 @@
     {%- endif -%}
   </div>
 </section>
+
+{%- if section.settings.events_enable -%}
+  {%- render 'lt-pdp-ereignisse', product: product, section_id: section.id, headline_variant: lt_hl_variant -%}
+{%- endif -%}
 
 {%- if section.settings.show_sticky_atc and product.available -%}
   {%- comment -%}
@@ -2311,7 +2423,12 @@
           var g = active ? parseInt(active.dataset.grams, 10) : NaN;
           unitLine.textContent = (!isNaN(current) && g > 0) ? formatPrice(Math.round(current / g * 100)) + '/100 g' : '';
         }
-        if (chip && !sizes.length) {
+        var pkgSel = section.querySelector('.lt-pkg__input:checked');
+        var pkgSave = pkgSel ? parseInt(pkgSel.dataset.saveCents, 10) : NaN;
+        if (chip && !sizes.length && pkgSave > 0) {
+          // Stufe 3 (27.10.2026): Ersparnis gegen die Einzelpreise, nicht gegen einen Streichpreis
+          setChip('Du sparst', pkgSave, false);
+        } else if (chip && !sizes.length) {
           // Standalone-Pfad ohne Größen (AGE&DNA-Test, 22.10.2026): die Ersparnis steht
           // serverseitig in der Preiszeile (data-lt-direct-savings). Sie wandert als Chip
           // unter den Knopf, wie bei NMN, die Preiszeile zeigt sie dann nicht mehr doppelt.
@@ -3167,6 +3284,15 @@
   white-space: nowrap;
 }
 .lt-promo-card__timer[hidden] { display: none; }
+.lt-pkg__card:not(.is-selected) .lt-pkg__note--selected-only { display: none; }
+.lt-pdp-hero__quote {
+  margin: 8px 0 0;
+  font-size: 15px;
+  line-height: 1.4;
+  color: var(--lt-muted, #525252);
+}
+.lt-pdp-hero__quote-name { white-space: nowrap; }
+.lt-pdp-hero-section--compact .lt-pdp-hero__post-line--guarantee { margin-bottom: 4px; color: var(--lt-text, #26251e); }
 .lt-pkg__note {
   font-size: 13px;
   line-height: 1.4;
@@ -4081,6 +4207,17 @@
       "content": "Galerie"
     },
     {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Erstes Galeriebild (Ergebnisbild)",
+      "info": "Steht vor den Produktmedien, nur auf dieser Seite. Die Produktmedien bleiben für Merchant Center und Meta-Katalog unverändert."
+    },
+    {
+      "type": "text",
+      "id": "hero_image_alt",
+      "label": "Alt-Text des Ergebnisbilds"
+    },
+    {
       "type": "select",
       "id": "gallery_ratio",
       "label": "Bildformat",
@@ -4234,6 +4371,50 @@
       "type": "textarea",
       "id": "hero_headline",
       "label": "Zwischenüberschrift (unter Tagline)"
+    },
+    {
+      "type": "select",
+      "id": "headline_variant",
+      "label": "Überschrift-Variante",
+      "options": [
+        { "value": "a", "label": "A (Überschrift + Tagline oben)" },
+        { "value": "b", "label": "B" },
+        { "value": "c", "label": "C" }
+      ],
+      "default": "a",
+      "info": "B und C greifen nur, wenn ihre Überschrift gefüllt ist. Die Variante geht als Parameter hl ins Ereignis lt_seen."
+    },
+    {
+      "type": "textarea",
+      "id": "hero_headline_b",
+      "label": "Variante B: Überschrift"
+    },
+    {
+      "type": "text",
+      "id": "tagline_b",
+      "label": "Variante B: Unterzeile"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_headline_c",
+      "label": "Variante C: Überschrift"
+    },
+    {
+      "type": "text",
+      "id": "tagline_c",
+      "label": "Variante C: Unterzeile"
+    },
+    {
+      "type": "text",
+      "id": "hero_quote",
+      "label": "Kundenstimme unter der Überschrift",
+      "info": "Wortlaut aus Loox, ohne Anführungszeichen."
+    },
+    {
+      "type": "text",
+      "id": "hero_quote_name",
+      "label": "Name zur Kundenstimme",
+      "info": "Name wie in Loox."
     },
     {
       "type": "header",
@@ -4594,6 +4775,38 @@
     },
     {
       "type": "checkbox",
+      "id": "compact_guarantee_first",
+      "label": "Kompakt: Garantie als eigene Zeile direkt am Knopf",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "result_line_enable",
+      "label": "Kompakt: Ergebnistermin in der Versandzeile",
+      "info": "Heute plus die Tage unten, im Browser gerechnet.",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "result_line_prefix",
+      "label": "Ergebnistermin: Text vor dem Datum",
+      "default": "Dein Ergebnis etwa am"
+    },
+    {
+      "type": "number",
+      "id": "result_line_days",
+      "label": "Ergebnistermin: Tage ab heute",
+      "default": 42
+    },
+    {
+      "type": "checkbox",
+      "id": "events_enable",
+      "label": "Seitenereignisse (lt_seen, lt_choice, lt_intent, lt_read) in den dataLayer",
+      "info": "Neutral benannt, ohne Produktnamen. Nur dataLayer, keine Weitergabe an Meta aus dem Theme.",
+      "default": false
+    },
+    {
+      "type": "checkbox",
       "id": "show_size_selector",
       "label": "Größen-Auswahl anzeigen (Varianten)",
       "info": "Zeigt über den Kaufoptionen eine Kachel pro Produktvariante (z. B. 30/60/90 g). Einmal-/Abo-Preis und Warenkorb-Variante wechseln pro Größe. Nur aktivieren, wenn das Produkt mehrere Varianten hat.",
@@ -4650,6 +4863,47 @@
       "id": "pkg_note_2",
       "label": "Paket 2 — Notiz",
       "info": "Eine Zeile unter dem Namen der zweiten Variante. Leer lassen = keine Notiz."
+    },
+    {
+      "type": "checkbox",
+      "id": "pkg_note_selected_only",
+      "label": "Notiz nur an der gewählten Karte",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "pkg_hide_compare",
+      "label": "Streichpreis in den Karten ausblenden",
+      "info": "Karten zeigen nur Name und Preis. Der Chip „Du sparst“ unter dem Knopf erscheint dann nur noch bei Stufe 3.",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Stufe 3 (dritte Variante)"
+    },
+    {
+      "type": "checkbox",
+      "id": "pkg_tier3_enable",
+      "label": "Dritte Variante als Karte zeigen",
+      "info": "Erst einschalten, wenn die Variante im Produkt existiert. Ohne Haken bleibt eine dritte Variante unsichtbar.",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "pkg_label_3",
+      "label": "Paket 3 — Anzeigename"
+    },
+    {
+      "type": "text",
+      "id": "pkg_note_3",
+      "label": "Paket 3 — Notiz"
+    },
+    {
+      "type": "number",
+      "id": "pkg_tier3_anchor_cents",
+      "label": "Paket 3 — Einzelpreise zusammen (Cent)",
+      "info": "Summe der echten Einzelpreise, z. B. 449 € + 299 € = 74800. Der Chip unter dem Knopf zeigt die Differenz zum Paketpreis.",
+      "default": 74800
     },
     {
       "type": "header",

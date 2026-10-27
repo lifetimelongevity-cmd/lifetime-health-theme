@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-09-29
+last_review: 2026-10-27
 canonical_for: pdp-section-system und live-reihenfolge
 ---
 
@@ -46,27 +46,31 @@ strukturelle Unterschied zur AGE&DNA-PDP, der nicht aus dem Produkt folgt.
 ## PDP AGE&DNA-Test (`/products/lifetime-age-dna`)
 
 Template: `templates/product.age-dna-test.json`. 14 Einträge in `order`, davon 1 deaktiviert.
+**Stand 27.10.2026 lokal committet, nicht gepusht:** Verkaufsseite für kalten Meta-Traffic nach
+`lifetime-ads/briefings/gruene-wiese/02-funnel-landingpage-email.md` § 2 und § 3 (Reihenfolge),
+Angebot aus `01-angebot.md` § 2 bis § 4. Umsetzung, offene Punkte und Prüfliste:
+`docs/agedna-pdp-verkaufsseite-2026-10-27.md`. Live läuft bis zum Push die Fassung vom 22.10.
+(Hero, Belege, Loox-Lade, FAQ).
 
 | # | Section-Key | Typ (`sections/*.liquid`) | Stufe | Rolle |
 |---|---|---|---|---|
-| 1 | `main` | `lt-pdp-hero` | Aufmerksamkeit + Handlung | Hero, Einmalkauf-Buybox (kein Abo-Toggle), Trust-Zeilen, Sticky-ATC. Unter der Buy-Box seit 29.09.2026 der Beratungslink (precheck, 15 Minuten kostenfrei) und die Strecke „Management Summary auf Anfrage“ mit drei Muster-Seiten (`report_strip_enable`, `snippets/lt-pdp-report-strip.liquid`); die echte Summary wird auf Anfrage individuell erstellt, liegt also nicht jedem Test bei |
-| 2 | `logo_garden` | `crs-logo-garden` | Vertrauen | Medienlogos, kompakter gesetzt als auf der NMN-PDP |
-| 3 | `process_steps` | `lt-pdp-process-steps` | Verständnis | Ablauf in 4 Schritten, Kit bis Ergebnis |
-| 4 | `metrics_row` | `crs-metrics-row` | Verständnis | Umfang in Zahlen (187 DNA-Reports, 10 CpG-Gene, 5 Epigenetik-Reports) |
-| 5 | `feature_grid` | `crs-feature-grid` | Verständnis | 6 Leistungskarten inklusive App und AI Health Coach |
-| 6 | `report_preview` | `lt-pdp-report-preview` | Persönliche Relevanz | App-Visual mit 4 Callouts, Retest-Hinweis |
-| 7 | `expert_quotes` | `crs-expert-quotes` | Vertrauen | Limmroth, Horvath, Sinclair mit Quellenangabe |
-| 8 | `comparison_table` | `lt-comparison-table` | Vertrauen | Abgrenzung gegen Standard-Blutbild und Consumer-Tests |
-| 9 | `customer_reviews_test` | `crs-customer-reviews` | Vertrauen | 8 Reviews plus 5 Themen-Pills, sichtbar 4 |
-| 10 | `ideal_candidate` | `lt-pdp-ideal-candidate` | Persönliche Relevanz | 5 Passungs-Profile plus 2 Ausschlüsse |
-| 11 | `faq_accordion` | `crs-faq-accordion` | Risikoreduktion | 11 Fragen (Probe, Datenschutz, Diagnose-Abgrenzung, Retest) |
-| 12 | `risk_free_close` | `crs-risk-free-close` | Handlung | Close mit sechs Trust-Zeilen |
-| 13 | `loox_reviews` | `apps` | Vertrauen | Loox-Widget, bewusst hinter dem Close |
+| 1 | `main` | `lt-pdp-hero` | Aufmerksamkeit + Handlung | Ergebnisbild als erste Folie (`hero_image`, Produktmedien unverändert), Überschrift A/B/C (`headline_variant`), Stimme Markus T., zwei Karten 395/449 ohne Streichpreis, Garantie-Zeile und Ergebnistermin (heute + 42 Tage) unter dem Knopf, Stufe 3 vorbereitet (`pkg_tier3_enable` aus), Seitenereignisse (`events_enable`, Snippet `lt-pdp-ereignisse`) |
+| 2 | `belege` | `lt-pdp-belege` | Vertrauen + Verständnis | Beweiszeile (Eurofins, Limmroth), dann Karte „Was du bekommst“ mit Bereichen und JSON-LD |
+| 3 | `warum_jetzt` | `lt-pdp-zusage` | Persönliche Relevanz | Ausgangswert-Argument, Kaufknopf (`pos: mid`) |
+| 4 | `belege_stimmen` | `lt-pdp-belege` | Vertrauen | Drei Loox-Stimmen (Thomas R., Petra N., Sophie K.), Schnitt und Zahl live aus Loox |
+| 5 | `loox_reviews` | `lt-pdp-reviews-all` | Vertrauen | Lade mit allen Bewertungen |
+| 6 | `einwaende` | `lt-dna-lp-objections` | Risikoreduktion | Vier Einwände, sichtbar statt Akkordeon, löst `lt_read` aus |
+| 7 | `abgrenzung` | `lt-dna-lp-objections` | Verständnis | Fünf Wege und was ihnen fehlt, als Liste statt Tabelle |
+| 8 | `leitung` | `lt-pdp-belege` | Vertrauen | Limmroth mit Porträt, Eurofins, Methode in der Lade |
+| 9 | `ablauf` | `lt-dna-lp-steps` | Verständnis | Fünf Schritte von heute bis Folgetest |
+| 10 | `bonus_stack` | `lt-pdp-zusage` | Handlung | „Das bekommst du für 395 €“, Nachmess-Gutschein als deaktivierter Block |
+| 11 | `garantie` | `lt-pdp-zusage` | Risikoreduktion + Handlung | Benannte Garantie in getönter Karte, Stufe 2b als deaktivierter Block, Kaufknopf |
+| 12 | `faq_accordion` | `crs-faq-accordion` | Risikoreduktion | Sechs Fragen |
+| 13 | `schluss` | `lt-leiste` | Handlung | Schluss-Leiste mit Knopf auf den Warenkorb-Permalink der ersten Variante |
 | 14 | `main_product_hidden` | `main-product` | keine | `"disabled": true`, rendert nicht |
 
-Unterschied in der Schlusslogik: NMN schließt mit `risk_free_close` vor der FAQ, AGE&DNA stellt
-die FAQ davor und hängt das Loox-Widget hinter den Close. Wer eine der beiden PDPs angleicht,
-sollte das bewusst tun, nicht nebenbei.
+Schlusslogik seit 27.10.: Stack und Garantie bilden den Close vor der FAQ (wie NMN), die Leiste
+wiederholt den Kauf am Seitenende. Kaufknöpfe: Hero, Warum jetzt, Garantie, Leiste, plus Sticky.
 
 ## PDP Spermidin (`/products/spermidin-kapseln`)
 
