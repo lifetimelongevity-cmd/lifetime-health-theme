@@ -1811,13 +1811,25 @@
               {%- assign lt_guarantee_first = true -%}
               <p class="lt-pdp-hero__post-line lt-pdp-hero__post-line--guarantee">{{ lt_guarantee_inline }}</p>
             {%- endif -%}
+            {%- comment -%} Ergebnistermin als Kalenderblatt (Impeccable 27.10.2026, delight): der eine
+                gestaltete Moment der Seite. Aus „etwa sechs Wochen“ wird ein Tag im Kalender. Eigene
+                Zeile unter der Garantie, Monat klein über dem Tag; Text bleibt result_line_prefix.
+                Ohne JavaScript bleibt das Blatt weg, wie die Zeile. {%- endcomment -%}
+            {%- assign lt_result_blatt = false -%}
+            {%- if section.settings.result_line_enable and section.settings.result_line_style == 'blatt' -%}
+              {%- assign lt_result_blatt = true -%}
+              <div class="lt-result-blatt" data-lt-result-line hidden>
+                <span class="lt-result-blatt__sheet" aria-hidden="true"><span class="lt-result-blatt__m" data-lt-result-month></span><span class="lt-result-blatt__d" data-lt-result-day></span></span>
+                <span class="lt-result-blatt__text">{{ section.settings.result_line_prefix | escape }} <strong data-lt-result-date></strong></span>
+              </div>
+            {%- endif -%}
             <p class="lt-pdp-hero__post-line">
               {%- if section.settings.compact_ship_text != blank -%}<span>{{ section.settings.compact_ship_text | escape }}</span>{%- endif -%}
               {%- if section.settings.show_guarantee_badge and lt_guarantee_first == false -%}
                 {%- if section.settings.compact_ship_text != blank %}<span aria-hidden="true"> · </span>{% endif -%}
                 {{ lt_guarantee_inline }}
               {%- endif -%}
-              {%- if section.settings.result_line_enable -%}
+              {%- if section.settings.result_line_enable and lt_result_blatt == false -%}
                 <span data-lt-result-line hidden>
                   {%- if section.settings.compact_ship_text != blank or lt_guarantee_first == false %}<span aria-hidden="true"> · </span>{% endif -%}
                   {{ section.settings.result_line_prefix | escape }} <span data-lt-result-date></span>
@@ -1831,13 +1843,19 @@
                   (31.01. plus 42 = 14.03., 25.12. plus 42 = 05.02.). Ohne JavaScript bleibt die Zeile weg. {%- endcomment -%}
               <script>
                 (function () {
-                  var line = document.currentScript.previousElementSibling;
-                  var el = line && line.querySelector('[data-lt-result-line]');
+                  var box = document.currentScript.parentNode;
+                  var el = box && box.querySelector('[data-lt-result-line]');
                   if (!el) return;
                   var d = new Date();
                   d.setDate(d.getDate() + {{ section.settings.result_line_days | default: 42 }});
                   el.querySelector('[data-lt-result-date]').textContent = d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' });
+                  var m = el.querySelector('[data-lt-result-month]');
+                  if (m) {
+                    m.textContent = d.toLocaleDateString('de-DE', { month: 'short' }).replace('.', '');
+                    el.querySelector('[data-lt-result-day]').textContent = d.getDate();
+                  }
                   el.hidden = false;
+                  requestAnimationFrame(function () { el.classList.add('is-in'); });
                 })();
               </script>
             {%- endif -%}
@@ -3363,6 +3381,18 @@
 .lt-pdp-hero-section--compact .lt-save-chip { display: inline-block; padding: 4px 12px; border: 1px solid rgba(101, 192, 182, 0.45); border-radius: 4px; background: var(--color-benefit-bg, #e6f4f1); font-size: 15px; font-weight: 700; line-height: 1.4; color: var(--lt-text, #26251e); }
 .lt-pdp-hero-section--compact .lt-save-chip[hidden] { display: none; }
 .lt-pdp-hero-section--compact .lt-pdp-hero__post-line { margin: 0; font-size: 15px; line-height: 1.4; color: var(--lt-muted, #525252); text-align: center; }
+/* Ergebnistermin als Kalenderblatt (result_line_style: blatt, 27.10.2026). Blatt in Weiß mit
+   Vollrahmen, Monat in Mikro-Versalien, Tag in Überschrift-Schrift mit Tabellenziffern. Blendet
+   einmal ein, wenn das Datum steht; bei reduzierter Bewegung sofort. */
+.lt-pdp-hero-section--compact .lt-result-blatt { display: flex; align-items: center; justify-content: center; gap: var(--space-3); margin: var(--space-1) 0; opacity: 0; transform: translateY(4px); transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+.lt-pdp-hero-section--compact .lt-result-blatt[hidden] { display: none; }
+.lt-pdp-hero-section--compact .lt-result-blatt.is-in { opacity: 1; transform: none; }
+.lt-result-blatt__sheet { flex: none; width: 44px; border: 1px solid var(--color-border-strong); border-radius: 4px; background: var(--color-white); text-align: center; overflow: hidden; }
+.lt-result-blatt__m { display: block; padding-top: 3px; font-size: var(--text-micro); line-height: 1.2; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-ink-muted); }
+.lt-result-blatt__d { display: block; padding: 2px 0 6px; font-family: var(--font-heading); font-size: var(--text-section); font-weight: var(--weight-bold); line-height: 1; font-variant-numeric: tabular-nums; color: var(--lt-text, #26251e); }
+.lt-result-blatt__text { font-size: 13px; line-height: 1.35; color: var(--lt-muted, #525252); text-align: left; }
+.lt-result-blatt__text strong { display: block; font-size: var(--text-body-sm); font-weight: var(--weight-bold); color: var(--lt-text, #26251e); }
+@media (prefers-reduced-motion: reduce) { .lt-pdp-hero-section--compact .lt-result-blatt { transition: none; } }
 .lt-pdp-hero-section--compact .lt-pdp-hero__post-line-btn { appearance: none; -webkit-appearance: none; background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 0.125em; }
 .lt-pdp-hero-section--compact .lt-pdp-hero__trust { border-top: 0 !important; border-bottom: 0 !important; padding-top: 0 !important; padding-bottom: 0 !important; margin-top: var(--space-3) !important; }
 .lt-pdp-hero-section--compact .lt-pdp-hero__trust-item--note { margin-top: 0; }
@@ -4785,6 +4815,16 @@
       "label": "Kompakt: Ergebnistermin in der Versandzeile",
       "info": "Heute plus die Tage unten, im Browser gerechnet.",
       "default": false
+    },
+    {
+      "type": "select",
+      "id": "result_line_style",
+      "label": "Ergebnistermin: Darstellung",
+      "options": [
+        { "value": "zeile", "label": "In der Versandzeile" },
+        { "value": "blatt", "label": "Eigene Zeile mit Kalenderblatt" }
+      ],
+      "default": "zeile"
     },
     {
       "type": "text",

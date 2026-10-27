@@ -15,6 +15,14 @@
   Der Knopf legt die erste Variante per Warenkorb-Permalink direkt in die Kasse, wie der
   Direkt-Checkout im Hero, und meldet sich bei lt-pdp-ereignisse mit data-lt-intent.
   Der Preis im Knopf kommt aus der Variante, nie aus dem Text.
+
+  Impeccable 27.10.2026 (critique, bolder, overdrive), alle Schalter per Default aus:
+  - stat_value: eine Zahl über der Überschrift (Garantie „90 Tage“), Zahl vor Text
+  - lead_own_line: in der Liste mit Haken steht der fette Anfang als eigene Zeile, Text und Wert
+    darunter. Vorher drückte die Wertspalte rechts den Text in eine schmale Spalte.
+  - verlauf_*: Verlaufsgrafik für „Warum jetzt“. Heute ein Punkt, in sechs Monaten zwei mögliche
+    Enden (älter, jünger). Keine Messwerte, nur das Prinzip Ausgangswert und Richtung. Zeichnet
+    sich einmal beim Hereinscrollen von links nach rechts, bei reduzierter Bewegung steht sie still.
 {% endcomment %}
 
 {%- liquid
@@ -56,6 +64,9 @@
       {%- if zs_kicker != blank -%}
         <p class="ltzs__name">{{ zs_kicker | escape }}</p>
       {%- endif -%}
+      {%- if section.settings.stat_value != blank -%}
+        <p class="ltzs__stat">{{ section.settings.stat_value | escape }}</p>
+      {%- endif -%}
       {% render 'section-heading-crs',
         heading: zs_heading,
         subheading: zs_sub,
@@ -64,18 +75,65 @@
         extra_class: 'ltzs__header'
       %}
 
+      {%- if section.settings.verlauf_enable -%}
+        {%- capture zs_verlauf_aria -%}{{ section.settings.verlauf_heute }}: {{ section.settings.verlauf_heute_note }}. {{ section.settings.verlauf_spaeter }}: {{ section.settings.verlauf_spaeter_note }}, {{ section.settings.verlauf_unten }} oder {{ section.settings.verlauf_oben }}.{%- endcapture -%}
+        <figure class="ltzs__verlauf" role="img" aria-label="{{ zs_verlauf_aria | strip | escape }}" data-ltzs-verlauf>
+          <svg viewBox="0 0 340 132" aria-hidden="true" focusable="false">
+            <line class="ltzs__v-ax" x1="0" y1="96" x2="340" y2="96"/>
+            <g class="ltzs__v-fork">
+              <path class="ltzs__v-ln" d="M40 60 L262 26"/>
+              <path class="ltzs__v-ln" d="M40 60 L262 86"/>
+            </g>
+            <circle class="ltzs__v-p0" cx="40" cy="60" r="6"/>
+            <g class="ltzs__v-late">
+              <circle class="ltzs__v-p1" cx="262" cy="26" r="6"/>
+              <circle class="ltzs__v-p1" cx="262" cy="86" r="6"/>
+              <text x="276" y="30">{{ section.settings.verlauf_oben | escape }}</text>
+              <text x="276" y="90">{{ section.settings.verlauf_unten | escape }}</text>
+            </g>
+            <text class="ltzs__v-k" x="40" y="116" text-anchor="middle">{{ section.settings.verlauf_heute | escape }}</text>
+            <text x="40" y="131" text-anchor="middle">{{ section.settings.verlauf_heute_note | escape }}</text>
+            <text class="ltzs__v-k" x="262" y="116" text-anchor="middle">{{ section.settings.verlauf_spaeter | escape }}</text>
+            <text x="262" y="131" text-anchor="middle">{{ section.settings.verlauf_spaeter_note | escape }}</text>
+          </svg>
+        </figure>
+        <script>
+          (function () {
+            var f = document.querySelector('#section-{{ section.id }} [data-ltzs-verlauf]');
+            if (!f) return;
+            var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            if (still || !('IntersectionObserver' in window)) return;
+            f.classList.add('is-pre');
+            var io = new IntersectionObserver(function (en) {
+              if (!en[0].isIntersecting) return;
+              io.disconnect();
+              f.classList.remove('is-pre');
+            }, { threshold: 0.5 });
+            io.observe(f);
+          })();
+        </script>
+      {%- endif -%}
+
       {%- if section.blocks.size > 0 -%}
         {%- if zs_list == 'haken' -%}
-          <ul class="ltzs__rows" role="list">
+          <ul class="ltzs__rows{% if section.settings.lead_own_line %} ltzs__rows--lead{% endif %}" role="list">
             {%- for block in section.blocks -%}
               <li class="ltzs__row" {{ block.shopify_attributes }}>
                 <span class="ltzs__check" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="m5 12.5 4.5 4.5L19 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-                <span class="ltzs__row-text">
-                  {%- if block.settings.lead != blank -%}<strong>{{ block.settings.lead | escape }}</strong> {% endif -%}
-                  {{- block.settings.text | escape -}}
-                </span>
-                {%- if block.settings.value != blank -%}
-                  <span class="ltzs__value">{{ block.settings.value | escape }}</span>
+                {%- if section.settings.lead_own_line -%}
+                  <span class="ltzs__row-text">
+                    {%- if block.settings.lead != blank -%}<strong>{{ block.settings.lead | escape }}</strong>{% endif -%}
+                    {%- if block.settings.text != blank -%}<span class="ltzs__row-sub">{{ block.settings.text | escape }}</span>{% endif -%}
+                    {%- if block.settings.value != blank -%}<span class="ltzs__row-value">{{ block.settings.value | escape }}</span>{% endif -%}
+                  </span>
+                {%- else -%}
+                  <span class="ltzs__row-text">
+                    {%- if block.settings.lead != blank -%}<strong>{{ block.settings.lead | escape }}</strong> {% endif -%}
+                    {{- block.settings.text | escape -}}
+                  </span>
+                  {%- if block.settings.value != blank -%}
+                    <span class="ltzs__value">{{ block.settings.value | escape }}</span>
+                  {%- endif -%}
                 {%- endif -%}
               </li>
             {%- endfor -%}
@@ -127,6 +185,32 @@
   line-height: var(--leading-body);
 }
 .ltzs__header { margin-bottom: var(--space-5); }
+.ltzs__stat {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-heading);
+  font-size: var(--text-display);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-stat);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.ltzs__rows--lead .ltzs__row { grid-template-columns: 20px minmax(0, 1fr); }
+.ltzs__rows--lead .ltzs__row-text strong { display: block; }
+.ltzs__row-sub { display: block; font-size: var(--text-body-sm); color: var(--color-ink-muted); }
+.ltzs__row-value { display: block; margin-top: 2px; font-size: var(--text-body-sm); font-weight: var(--weight-bold); }
+.ltzs__verlauf { margin: 0 0 var(--space-5); max-width: 26rem; }
+.ltzs__verlauf svg { display: block; width: 100%; height: auto; overflow: visible; }
+.ltzs__v-ax { stroke: var(--color-border-strong); stroke-width: 1; }
+.ltzs__v-ln { fill: none; stroke: var(--color-teal-dark); stroke-width: 1.5; stroke-dasharray: 4 5; }
+.ltzs__v-p0 { fill: var(--color-teal-dark); }
+.ltzs__v-p1 { fill: var(--color-paper); stroke: var(--color-teal-dark); stroke-width: 1.5; }
+.ltzs__verlauf text { font-family: var(--font-body); font-size: 13px; fill: var(--color-ink-muted); }
+.ltzs__verlauf .ltzs__v-k { fill: var(--color-ink); font-weight: var(--weight-bold); }
+.ltzs__v-fork { clip-path: inset(0 0 0 0); transition: clip-path 1.1s cubic-bezier(0.16, 1, 0.3, 1); }
+.ltzs__v-late { transition: opacity 0.5s ease 0.8s; }
+.ltzs__verlauf.is-pre .ltzs__v-fork { clip-path: inset(0 100% 0 0); }
+.ltzs__verlauf.is-pre .ltzs__v-late { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .ltzs__v-fork, .ltzs__v-late { transition: none; } }
 .ltzs__paras { display: grid; gap: var(--space-3); }
 .ltzs__para {
   margin: 0;
@@ -204,8 +288,18 @@
       "default": "absatz"
     },
     { "type": "text", "id": "kicker", "label": "Name über der Überschrift (fett)", "info": "__none__ blendet ihn aus.", "default": "__none__" },
+    { "type": "text", "id": "stat_value", "label": "Große Zahl über der Überschrift", "info": "Z. B. 90 Tage. Leer = keine." },
     { "type": "text", "id": "heading", "label": "Überschrift", "default": "Du gehst kein Risiko ein." },
     { "type": "text", "id": "subheading", "label": "Unterzeile", "info": "__none__ blendet sie aus.", "default": "__none__" },
+    { "type": "checkbox", "id": "lead_own_line", "label": "Liste: fetter Anfang als eigene Zeile, Text und Wert darunter", "default": false },
+    { "type": "header", "content": "Verlauf" },
+    { "type": "checkbox", "id": "verlauf_enable", "label": "Verlaufsgrafik unter der Überschrift", "info": "Ein Punkt heute, zwei mögliche Enden in sechs Monaten. Keine Messwerte.", "default": false },
+    { "type": "text", "id": "verlauf_heute", "label": "Links: Zeit", "default": "Heute" },
+    { "type": "text", "id": "verlauf_heute_note", "label": "Links: Zusatz", "default": "Ausgangswert" },
+    { "type": "text", "id": "verlauf_spaeter", "label": "Rechts: Zeit", "default": "In 6 Monaten" },
+    { "type": "text", "id": "verlauf_spaeter_note", "label": "Rechts: Zusatz", "default": "die Richtung" },
+    { "type": "text", "id": "verlauf_oben", "label": "Oberes Ende", "default": "älter" },
+    { "type": "text", "id": "verlauf_unten", "label": "Unteres Ende", "default": "jünger" },
     { "type": "header", "content": "Kaufknopf" },
     { "type": "text", "id": "cta_label", "label": "Knopf", "info": "Leer = kein Knopf." },
     { "type": "checkbox", "id": "cta_show_price", "label": "Preis der Variante an den Knopf hängen", "default": true },

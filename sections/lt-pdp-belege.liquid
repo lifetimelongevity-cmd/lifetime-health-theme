@@ -122,8 +122,19 @@
             <h2 class="ltbg__label">{{ section.settings.labor_title | escape }}</h2>
           {%- endif -%}
           {%- if section.settings.labor_value != blank -%}
+            {%- comment -%} Zahl zählt ein (Impeccable 27.10.2026, overdrive): mit labor_value_from
+                läuft die führende Zahl einmal vom Startwert auf den Wert, z. B. 49 auf 42, damit der
+                Abstand zum Pass sichtbar wird. Im HTML steht immer der Endwert (ohne JS, bei reduzierter
+                Bewegung und für Suchmaschinen). {%- endcomment -%}
+            {%- assign bg_from = section.settings.labor_value_from | strip -%}
+            {%- assign bg_val_num = section.settings.labor_value | split: ' ' | first -%}
+            {%- assign bg_val_rest = section.settings.labor_value | remove_first: bg_val_num -%}
             <p class="ltbg__big ltbg__big--num">
-              {{ section.settings.labor_value | escape }}
+              {%- if bg_from != blank -%}
+                <span data-ltbg-count="{{ bg_from | escape }}">{{ bg_val_num | escape }}</span>{{ bg_val_rest | escape }}
+              {%- else -%}
+                {{ section.settings.labor_value | escape }}
+              {%- endif -%}
               {%- if section.settings.labor_value_label != blank -%}
                 <span class="ltbg__big-label">{{ section.settings.labor_value_label | escape }}</span>
               {%- endif -%}
@@ -137,12 +148,33 @@
           {%- comment -%} Mehrere Absätze möglich (eine Zeile je Absatz), seit 27.10.2026. {%- endcomment -%}
           {%- if section.settings.labor_text != blank -%}
             {%- assign bg_labor_paras = section.settings.labor_text | newline_to_br | split: '<br />' -%}
-            {%- for bg_para in bg_labor_paras -%}
-              {%- assign bg_para_s = bg_para | strip -%}
-              {%- if bg_para_s != blank -%}
-                <p class="ltbg__text">{{ bg_para_s | escape }}</p>
-              {%- endif -%}
-            {%- endfor -%}
+            {%- if section.settings.labor_text_style == 'zeilen' -%}
+              {%- comment -%} Zahl vor Text (27.10.2026): je Zeile „Kopf | Text“, Kopf groß in
+                  Überschrift-Schrift, Text darunter gedämpft. Ohne | wird die Zeile nur Text. {%- endcomment -%}
+              <ul class="ltbg__zeilen" role="list">
+                {%- for bg_para in bg_labor_paras -%}
+                  {%- assign bg_para_s = bg_para | strip -%}
+                  {%- if bg_para_s != blank -%}
+                    {%- assign bg_teile = bg_para_s | split: '|' -%}
+                    <li class="ltbg__zeile">
+                      {%- if bg_teile.size > 1 -%}
+                        <span class="ltbg__zeile-kopf">{{ bg_teile[0] | strip | escape }}</span>
+                        <span class="ltbg__zeile-text">{{ bg_teile[1] | strip | escape }}</span>
+                      {%- else -%}
+                        <span class="ltbg__zeile-text">{{ bg_para_s | escape }}</span>
+                      {%- endif -%}
+                    </li>
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            {%- else -%}
+              {%- for bg_para in bg_labor_paras -%}
+                {%- assign bg_para_s = bg_para | strip -%}
+                {%- if bg_para_s != blank -%}
+                  <p class="ltbg__text">{{ bg_para_s | escape }}</p>
+                {%- endif -%}
+              {%- endfor -%}
+            {%- endif -%}
           {%- endif -%}
 
           {%- if bg_jsonld_rows > 0 or section.settings.labor_provenance != blank or section.settings.labor_compare != blank -%}
@@ -236,14 +268,14 @@
             <p class="ltbg__meta">{{ section.settings.rohstoff_meta | escape }}</p>
           {%- endif -%}
         </div>
-        <div class="ltbg__main">
+        <div class="ltbg__main{% if section.settings.person_first %} ltbg__main--person-first{% endif %}">
           {%- if section.settings.rohstoff_text != blank -%}
             <p class="ltbg__text">{{ section.settings.rohstoff_text | escape }}</p>
           {%- endif -%}
           {%- if section.settings.person_name != blank -%}
-            <div class="ltbg__person">
+            <div class="ltbg__person{% if section.settings.person_first %} ltbg__person--first{% endif %}">
               {%- if section.settings.person_image != blank -%}
-                {{ section.settings.person_image | image_url: width: 96 | image_tag: loading: 'lazy', class: 'ltbg__person-img', alt: '' }}
+                {{ section.settings.person_image | image_url: width: 160 | image_tag: loading: 'lazy', class: 'ltbg__person-img', alt: '' }}
               {%- elsif section.settings.person_image_url != blank -%}
                 <img src="{{ section.settings.person_image_url | escape }}" alt="" loading="lazy" class="ltbg__person-img" width="48" height="48">
               {%- endif -%}
@@ -278,7 +310,13 @@
           {%- if bg_count > 0 -%}
             <p class="ltbg__big ltbg__big--num">
               {{ bg_rating | round: 1 | replace: '.', ',' }}
-              <span class="ltbg__big-label">von 5 · {{ bg_count }} Bewertungen</span>
+              <span class="ltbg__big-label">
+                {%- if section.settings.stimmen_stars_big -%}
+                  <span class="ltbg__stars ltbg__stars--big" aria-hidden="true">
+                    {%- for i in (1..5) -%}<svg class="ltbg__star" width="14" height="14" viewBox="0 0 14 13" fill="none"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg>{%- endfor -%}
+                  </span>
+                {%- endif -%}
+                von 5 · {{ bg_count }} Bewertungen</span>
             </p>
           {%- endif -%}
         </div>
@@ -336,6 +374,30 @@
     {%- endif -%}
   </div>
 </div>
+
+{%- if section.settings.show_labor and section.settings.labor_value_from != blank -%}
+<script>
+  (function () {
+    var el = document.querySelector('#section-{{ section.id }} [data-ltbg-count]');
+    if (!el || !('IntersectionObserver' in window)) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var to = parseFloat(el.textContent.replace(',', '.')), from = parseFloat(el.getAttribute('data-ltbg-count').replace(',', '.'));
+    if (isNaN(to) || isNaN(from) || to === from || to % 1 || from % 1) return;
+    el.textContent = from;
+    var io = new IntersectionObserver(function (en) {
+      if (!en[0].isIntersecting) return;
+      io.disconnect();
+      var t0 = performance.now(), dur = 1100;
+      (function step(t) {
+        var k = Math.min(1, (t - t0) / dur), e = k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+        el.textContent = Math.round(from + (to - from) * e);
+        if (k < 1) requestAnimationFrame(step);
+      })(t0);
+    }, { threshold: 0.6 });
+    io.observe(el);
+  })();
+</script>
+{%- endif -%}
 
 {%- if section.settings.jsonld_enable and section.settings.show_labor and bg_jsonld_rows > 0 -%}
 <script type="application/ld+json">
@@ -399,6 +461,19 @@
   min-width: 0;
 }
 .ltbg__head, .ltbg__main { min-width: 0; }
+/* Ohne Oberzeile steht die Zahl oben an der Karte */
+.ltbg__head > .ltbg__big:first-child { margin-top: 0; }
+/* Zeilen „Kopf | Text“ (labor_text_style: zeilen, 27.10.2026): Zahl vor Text, Haarlinie dazwischen */
+.ltbg__zeilen { list-style: none; margin: var(--space-4) 0 0; padding: 0; }
+.ltbg__zeile { display: grid; gap: 2px; padding: var(--space-3) 0; border-top: 1px solid var(--ltbg-rule); }
+.ltbg__zeile-kopf { font-family: var(--font-heading); font-size: var(--text-section); font-weight: var(--weight-bold); line-height: var(--leading-tight); font-variant-numeric: tabular-nums; }
+.ltbg__zeile-text { font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--ltbg-text-sec); }
+/* Person zuerst (person_first): Gesicht vor dem Text, größer */
+.ltbg__main--person-first { display: flex; flex-direction: column; }
+.ltbg__main--person-first .ltbg__person { order: -1; margin-top: 0; gap: var(--space-4); }
+.ltbg__person--first .ltbg__person-img { width: 80px; height: 80px; }
+.ltbg__person--first .ltbg__person-name { font-family: var(--font-heading); font-size: var(--text-section); }
+.ltbg__stars--big { margin: 0 var(--space-2) 0 0; vertical-align: -2px; }
 /* Karten-Oberzeile: klein, Versalien, gedämpft. Bewusst kein Heading-Stack,
    die Karten sind Karten, keine Sections. !important gegen globale h2-Regeln. */
 .ltbg__label {
@@ -569,7 +644,16 @@
     { "type": "text", "id": "labor_value", "label": "Große Zahl", "default": "100,1 %" },
     { "type": "text", "id": "labor_value_label", "label": "Bezeichnung der Zahl", "default": "NMN-Gehalt" },
     { "type": "text", "id": "labor_meta", "label": "Herkunftszeile", "default": "Charge 20250917 · Limbach Analytics, Mainz · 1H-NMR" },
-    { "type": "textarea", "id": "labor_text", "label": "Satz", "default": "Schwermetalle: 4 von 4 unter der Bestimmungsgrenze.", "info": "Eine Zeile je Absatz." },
+    { "type": "text", "id": "labor_value_from", "label": "Große Zahl zählt ein ab", "info": "Ganze Zahl, z. B. 49: die führende Zahl läuft beim Hereinscrollen einmal auf den Wert. Leer = steht still." },
+    { "type": "textarea", "id": "labor_text", "label": "Satz", "default": "Schwermetalle: 4 von 4 unter der Bestimmungsgrenze.", "info": "Eine Zeile je Absatz. Bei „Zeilen“: Kopf | Text." },
+    {
+      "type": "select", "id": "labor_text_style", "label": "Satz als",
+      "options": [
+        { "value": "absatz", "label": "Absätze" },
+        { "value": "zeilen", "label": "Zeilen mit großem Kopf (Kopf | Text)" }
+      ],
+      "default": "absatz"
+    },
     { "type": "text", "id": "labor_details_label", "label": "Lade-Beschriftung", "default": "Einzelwerte und Prüfdetails" },
     { "type": "text", "id": "labor_batch", "label": "Charge", "default": "20250917", "info": "Für Tabellen-Caption und JSON-LD" },
     { "type": "text", "id": "labor_lab", "label": "Labor", "default": "Limbach Analytics, Arotop Laboratorien Mainz, DAkkS-akkreditiert nach DIN EN ISO/IEC 17025" },
@@ -592,12 +676,14 @@
     { "type": "url", "id": "person_image_url", "label": "Person: Bild-URL (Fallback)" },
     { "type": "text", "id": "person_name", "label": "Person: Name", "default": "Prof. Dr. med. Volker Limmroth" },
     { "type": "text", "id": "person_role", "label": "Person: Rolle", "default": "Chefarzt Neurologie, prüft, was wir zu NMN veröffentlichen" },
+    { "type": "checkbox", "id": "person_first", "label": "Person zuerst, Bild größer", "default": false },
     { "type": "text", "id": "rohstoff_details_label", "label": "Lade-Beschriftung", "default": "Zulassungsstand und Firma" },
     { "type": "richtext", "id": "rohstoff_details_body", "label": "Lade-Inhalt" },
 
     { "type": "header", "content": "Karte 3: Was Kunden sagen" },
     { "type": "checkbox", "id": "show_stimmen", "label": "Karte anzeigen", "default": true },
     { "type": "text", "id": "stimmen_title", "label": "Oberzeile", "default": "Was Kunden sagen" },
+    { "type": "checkbox", "id": "stimmen_stars_big", "label": "Sterne neben dem Schnitt", "default": false },
     { "type": "text", "id": "verified_label", "label": "Kennzeichen-Text", "default": "Verifiziert", "info": "Steht an Stimmen mit gesetztem Häkchen. Loox zeigt das Zeichen an jeder Bewertung, auch an importierten; es belegt keinen Kauf." },
     { "type": "text", "id": "stimmen_link_label", "label": "Link zu allen Bewertungen", "default": "Alle [anzahl] Bewertungen lesen", "info": "[anzahl] wird durch loox.num_reviews ersetzt. Schnitt und Anzahl im Kopf kommen aus den Loox-Metafeldern." },
     { "type": "url", "id": "stimmen_link_url", "label": "Ziel des Links", "info": "#reviews, wenn die Section „Alle Bewertungen (Loox)“ direkt darunter steht" }
