@@ -47,17 +47,16 @@
     assign ltl2_text_key = 'fakt_' | append: i | append: '_text'
     assign ltl2_zahl = section.settings[ltl2_zahl_key] | strip
     assign ltl2_text = section.settings[ltl2_text_key] | strip
-    if ltl2_zahl == blank and ltl2_text == blank
-      continue
-    endif
-    assign ltl2_paar = ltl2_zahl | append: '|' | append: ltl2_text
-    if ltl2_paar contains '{datum'
-      assign ltl2_datum_aktiv = true
-    endif
-    assign ltl2_zahl = ltl2_zahl | escape | replace: '{datum_kurz}', ltl2_datum_kurz_html | replace: '{datum}', ltl2_datum_html | replace: '{bewertungen}', ltl2_bewertungen | replace: '{note}', ltl2_note
-    assign ltl2_text = ltl2_text | escape | replace: '{datum_kurz}', ltl2_datum_kurz_html | replace: '{datum}', ltl2_datum_html | replace: '{bewertungen}', ltl2_bewertungen | replace: '{note}', ltl2_note
-    assign ltl2_fakt = '<li class="ltl2__fakt"><strong class="ltl2__zahl">' | append: ltl2_zahl | append: '</strong><span class="ltl2__fakt-text">' | append: ltl2_text | append: '</span></li>'
-    assign ltl2_fakten = ltl2_fakten | append: ltl2_fakt
+    unless ltl2_zahl == blank and ltl2_text == blank
+      assign ltl2_paar = ltl2_zahl | append: '|' | append: ltl2_text
+      if ltl2_paar contains '{datum'
+        assign ltl2_datum_aktiv = true
+      endif
+      assign ltl2_zahl = ltl2_zahl | escape | replace: '{datum_kurz}', ltl2_datum_kurz_html | replace: '{datum}', ltl2_datum_html | replace: '{bewertungen}', ltl2_bewertungen | replace: '{note}', ltl2_note
+      assign ltl2_text = ltl2_text | escape | replace: '{datum_kurz}', ltl2_datum_kurz_html | replace: '{datum}', ltl2_datum_html | replace: '{bewertungen}', ltl2_bewertungen | replace: '{note}', ltl2_note
+      assign ltl2_fakt = '<li class="ltl2__fakt"><strong class="ltl2__zahl">' | append: ltl2_zahl | append: '</strong><span class="ltl2__fakt-text">' | append: ltl2_text | append: '</span></li>'
+      assign ltl2_fakten = ltl2_fakten | append: ltl2_fakt
+    endunless
   endfor
 -%}
 

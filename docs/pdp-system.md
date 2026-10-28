@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-10-27
+last_review: 2026-10-28
 canonical_for: pdp-section-system und live-reihenfolge
 ---
 
@@ -46,15 +46,18 @@ strukturelle Unterschied zur AGE&DNA-PDP, der nicht aus dem Produkt folgt.
 ## PDP AGE&DNA-Test (`/products/lifetime-age-dna`)
 
 Template: `templates/product.age-dna-test.json`. 14 Einträge in `order`, davon 1 deaktiviert.
-**Stand 27.10.2026 lokal committet, nicht gepusht:** Verkaufsseite für kalten Meta-Traffic nach
+**Stand 28.10.2026 lokal committet, wartet auf BJs Push:** Verkaufsseite für kalten Meta-Traffic nach
 `lifetime-ads/briefings/gruene-wiese/02-funnel-landingpage-email.md` § 2 und § 3 (Reihenfolge),
-Angebot aus `01-angebot.md` § 2 bis § 4. Umsetzung, offene Punkte und Prüfliste:
-`docs/agedna-pdp-verkaufsseite-2026-10-27.md`. Live läuft bis zum Push die Fassung vom 22.10.
-(Hero, Belege, Loox-Lade, FAQ).
+Angebot aus `01-angebot.md` § 2 bis § 4, danach zwei Impeccable-Durchgänge
+(`docs/agedna-pdp-impeccable-2026-10-27.md`, `docs/agedna-pdp-impeccable-2/`). Abgenommen im
+Vorschau-Theme `194066317687` („Claude AGE&DNA Verkaufsseite 28.10.“): Knopf im ersten Bildschirm
+(375 px), Karten 395/495 € ohne Streichpreis, Variantenwechsel und Warenkorb, `lt_seen`/`lt_choice`,
+keine Konsolenfehler. NMN-PDP, Startseite, Folgetest und `page.dna-lp*` rendern dort unverändert.
+Live läuft bis zum Push die Fassung vom 22.10. (Hero, Belege, Loox-Lade, FAQ).
 
 | # | Section-Key | Typ (`sections/*.liquid`) | Stufe | Rolle |
 |---|---|---|---|---|
-| 1 | `main` | `lt-pdp-hero` | Aufmerksamkeit + Handlung | Ergebnisbild als erste Folie (`hero_image`, Produktmedien unverändert), Überschrift A/B/C (`headline_variant`), Stimme Markus T., zwei Karten 395/449 ohne Streichpreis, Garantie-Zeile und Ergebnistermin (heute + 42 Tage) unter dem Knopf, Stufe 3 vorbereitet (`pkg_tier3_enable` aus), Seitenereignisse (`events_enable`, Snippet `lt-pdp-ereignisse`) |
+| 1 | `main` | `lt-pdp-hero` | Aufmerksamkeit + Handlung | Ergebnisbild als erste Folie (`hero_image`, Produktmedien unverändert), Überschrift A/B/C (`headline_variant`), zwei Karten 395/495 € ohne Streichpreis und ohne Chip, Garantie-Zeile und Ergebnistermin als Kalenderblatt (heute + 42 Tage) unter dem Knopf, Stufe 3 vorbereitet (`pkg_tier3_enable` aus), Seitenereignisse (`events_enable`, Snippet `lt-pdp-ereignisse`) |
 | 2 | `belege` | `lt-pdp-belege` | Vertrauen + Verständnis | Beweiszeile (Eurofins, Limmroth), dann Karte „Was du bekommst“ mit Bereichen und JSON-LD |
 | 3 | `warum_jetzt` | `lt-pdp-zusage` | Persönliche Relevanz | Ausgangswert-Argument, Kaufknopf (`pos: mid`) |
 | 4 | `belege_stimmen` | `lt-pdp-belege` | Vertrauen | Drei Loox-Stimmen (Thomas R., Petra N., Sophie K.), Schnitt und Zahl live aus Loox |

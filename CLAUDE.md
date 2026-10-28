@@ -24,7 +24,9 @@ Live-Shopify-Theme von LIFETIME („Combine“ v3.1.1 von KrownThemes, stark umg
 
 - Schema-`name` und `presets[].name`: höchstens **25 Zeichen**.
 - Schema-`default`: nie `""`. Weglassen und in Liquid `| default:` nutzen.
-- `type: "header"` → `content` höchstens **50 Zeichen**. Das fällt nur beim Push auf, nicht bei `theme check`, und dann wird die ganze Section abgewiesen.
+- Schon bei einem einzigen Verstoß gegen die folgenden drei Grenzen weist Shopify die ganze Section ab, und jedes Template, das sie nutzt, scheitert mit. `theme check` meldet keine davon, `scripts/lt-check.mjs` schon:
+  - `label` höchstens **70 Zeichen**, `options[].label` höchstens **50**, `header`-`content` höchstens **50**
+  - `range`: höchstens **100 Stufen** (`(max − min) / step`)
 - Produkt-Template: höchstens **25 Sections** im `order`. App-Blöcke zählen mit.
 - `rich-text`-Section: höchstens 9 Blöcke. `richtext`-Felder erlauben keine Tabellen.
 - Der Theme Manager kann während einer Sitzung den Arbeitsstand committen und pushen. Git-Status oder Commit belegen also nicht, was live ist.

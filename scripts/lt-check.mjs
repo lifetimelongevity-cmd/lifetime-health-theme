@@ -119,7 +119,8 @@ function checkLiquid(rel, text, added) {
     const at = text.slice(0, m.index).split('\n').length;
     let schema;
     try {
-      schema = JSON.parse(m[1]);
+      // Shopify akzeptiert Kommas vor ] und } (z. B. ss-hero-pro), JSON.parse nicht.
+      schema = JSON.parse(m[1].replace(/,(\s*[\]}])/g, '$1'));
     } catch (e) {
       out.push([at, `Schema ist kein gültiges JSON: ${e.message}`]);
     }
@@ -135,6 +136,15 @@ function checkLiquid(rel, text, added) {
         if (node.default === '') out.push([at, `Leeres default bei Setting "${node.id || trail}". Weglassen und in Liquid | default: nutzen.`]);
         if (node.type === 'header' && typeof node.content === 'string' && node.content.length > 50)
           out.push([at, `header-content "${node.content.slice(0, 40)}…" hat ${node.content.length} Zeichen, erlaubt sind 50 (scheitert erst beim Push).`]);
+        // Übersetzungsschlüssel (t:…) zählen nicht, nur wörtliche Labels.
+        if (typeof node.label === 'string' && !node.label.startsWith('t:') && node.label.length > 70)
+          out.push([at, `label "${node.label.slice(0, 40)}…" (${node.id || node.value || trail}) hat ${node.label.length} Zeichen, erlaubt sind 70 (scheitert erst beim Push).`]);
+        if (Array.isArray(node.options))
+          for (const o of node.options)
+            if (typeof o?.label === 'string' && !o.label.startsWith('t:') && o.label.length > 50)
+              out.push([at, `option label "${o.label.slice(0, 40)}…" (${node.id}) hat ${o.label.length} Zeichen, erlaubt sind 50 (scheitert erst beim Push).`]);
+        if (node.type === 'range' && node.step > 0 && (node.max - node.min) / node.step > 100)
+          out.push([at, `range "${node.id}" hat ${(node.max - node.min) / node.step} Stufen, erlaubt sind 100 (scheitert erst beim Push).`]);
         for (const [k, v] of Object.entries(node)) if (typeof v === 'object') walk(v, node.id || k);
       };
       walk(schema.settings, 'settings');
