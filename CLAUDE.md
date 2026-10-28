@@ -1,156 +1,82 @@
 ---
 status: living
-last_review: 2026-07-28
-canonical_for: shopify-theme-orientation
+last_review: 2026-10-28
+canonical_for: shopify-theme-regeln
+supersedes: [AGENTS.md, shopify/AGENTS.md, .cursor/rules/*.mdc]
 ---
 
-# CLAUDE.md
+# LIFETIME-Theme: das einzige Regelwerk
 
-Guidance for Claude Code (claude.ai/code) when working in this repository: the live Shopify theme for Lifetime Health.
+Live-Shopify-Theme von LIFETIME („Combine“ v3.1.1 von KrownThemes, stark umgebaut). Eigene Sections tragen `lt-` (LIFETIME) oder `crs-` (geteilte Conversion-Bausteine). Alles hier gilt. Andere Docs beschreiben Seiten und Stände, sie stellen keine weiteren Regeln auf. Wenn etwas fehlt, kommt es hierher und nicht in ein neues Doc.
 
-## Project Overview
+## Ablauf
 
-This is a **Shopify Liquid theme** ("Combine" by KrownThemes v3.1.1) customized for **Lifetime Health**, a German longevity and wellness e-commerce brand selling DNA tests and supplements.
+**Bei jeder Arbeit an `sections/`, `snippets/`, `blocks/` oder `templates/` zuerst den Skill `/lt-section` laden.** Er enthält den Ablauf Schritt für Schritt. Kurzfassung:
 
-## Kanonisches Fundament (Live = Source of Truth)
+1. **Live ist die Wahrheit.** Kanonisch sind die fünf Seiten Startseite, `/products/lifetime-age-dna`, `/pages/science`, `/pages/quiz-age` und `/products/lifetime-nmn`. Welches Template und welche Section hinter einer URL stecken, steht in `docs/live-pages-map.md`.
+2. **Bei Produktseiten das Template am Produkt bestätigen** (`product.templateSuffix` per Shopify-MCP), nie aus dem Dateinamen raten. Beispiel: Die NMN-PDP rendert aus `product.nmn-pulver.json`.
+3. **Erweitern statt neu bauen.** Erst nach einer vorhandenen Section, einem Snippet oder einer Klasse suchen. Vorbilder: `_examples/` (geprüfte Muster) und `DESIGN.md` (visuelle Sprache, daraus lesen auch die Impeccable-Skills).
+4. **Geteilte Sections:** Neue Settings stehen per Default auf aus, damit andere Seiten unverändert bleiben. Vor dem Commit jedes Template prüfen, das die Section nutzt: `grep -l '"type": "<section>"' templates/*.json`.
+5. **Prüfung:** Ein Hook prüft nach jedem Edit an `.liquid` oder `templates/*.json` die geänderte Datei (`scripts/lt-check.mjs` plus `shopify theme check`). Meldungen werden behoben, nicht umgangen.
+6. **Nur BJ pusht live, und zwar über den Theme Manager.** Claude committet lokal und pusht auf Dev-Themes. `shopify theme push --allow-live` gibt es nur auf ausdrückliche Ansage von BJ.
 
-Diese 5 Live-Seiten sind das Fundament für Struktur, Copy und visuelle Qualität. Bevor du an einer Section oder Copy arbeitest: sieh dir die thematisch nächste Seite live an (Chrome-MCP; für Mobile echte Handy-Screenshots, siehe Memory). Live schlägt jede MD-Spec.
+## Plattform-Grenzen (scheitern sonst beim Push)
 
-1. Startseite        `https://www.lifetime-health.de/`
-2. PDP AGE&DNA-Test  `https://www.lifetime-health.de/products/lifetime-age-dna`
-3. Science           `https://www.lifetime-health.de/pages/science`
-4. Quiz              `https://www.lifetime-health.de/pages/quiz-age`
-5. PDP NMN           `https://www.lifetime-health.de/products/lifetime-nmn`
+- Schema-`name` und `presets[].name`: höchstens **25 Zeichen**.
+- Schema-`default`: nie `""`. Weglassen und in Liquid `| default:` nutzen.
+- `type: "header"` → `content` höchstens **50 Zeichen**. Das fällt nur beim Push auf, nicht bei `theme check`, und dann wird die ganze Section abgewiesen.
+- Produkt-Template: höchstens **25 Sections** im `order`. App-Blöcke zählen mit.
+- `rich-text`-Section: höchstens 9 Blöcke. `richtext`-Felder erlauben keine Tabellen.
+- Der Theme Manager kann während einer Sitzung den Arbeitsstand committen und pushen. Git-Status oder Commit belegen also nicht, was live ist.
+- JSON-valide heißt nicht Shopify-valide. Der Theme Manager verschluckt Push-Fehler stillschweigend. Nach dem Push muss die Live-URL per `curl` belegen, dass die Änderung angekommen ist. Der Storefront-Cache liefert bis zu 20 Minuten gemischte Stände.
 
-### Vorrang bei Konflikt (oben gewinnt)
+## Liquid
 
-1. **Live-Seite** (die 5 oben), tatsächlich publiziert = SoT für Inhalt und Section-Reihenfolge
-2. **`docs/live-pages-map.md`** = wo der Code liegt (Slug zu Template zu Section)
-3. **`_examples/`** = approved Bau-Muster (für PDP zuerst `_examples/pdp-reference.html` öffnen)
-4. **`.cursor/rules/`** = Tokens, Plattform-Limits, Component-Specs
+- Texte aus Settings immer mit `| escape` ausgeben. Ausnahme sind `richtext`-Felder.
+- `{%- -%}` (Whitespace entfernen), `{{ block.shopify_attributes }}` an jedem Block-Wrapper.
+- **`inline_asset_content` nie nutzen**, es rendert im Store ohne Fehlermeldung leer. SVG gehört in ein Snippet mit `case`-Mapping.
+- `continue` innerhalb von `{% liquid %}` überspringt die Iteration nicht zuverlässig. Stattdessen mit `unless … endunless` einschließen.
+- Vanilla JS mit Web Components, kein Framework. Neu initialisieren über `shopify:section:load`.
+- Apps nicht per CSS verstecken (`display:none !important`), sondern den Block aus `block_order` nehmen.
 
-MD-Specs sind Beschreibung, nicht Vertrag. Bei Drift: Live prüfen, dann MD nachziehen oder als `superseded` markieren.
+## CSS und Farben
 
-## Development Commands
+- CSS lebt in der Section (`{% stylesheet %}` oder `<style>` wie die Nachbar-Sections) und ist auf die Section-Klasse gescoped. Keine `[class*=…]`-Wildcards im globalen CSS.
+- **Neuer Code nutzt nur die Variablen aus `assets/theme.css :root`:** `--color-ink` (#26251e), `--color-paper` (#f7f7f4), `--color-light-warm`, `--color-dark` (#364F56), `--color-teal` (Mint #65C0B6), `--color-ink-muted`, `--color-gray-200/400/600`, `--space-1…10`, `--text-*`, `--leading-*`, `--weight-*`, `--radius-*`, `--font-heading` und `--font-body`.
+- Hex-Werte sind nur an drei Stellen erlaubt: als `default` eines Schema-Settings vom `type: "color"`, als Fallback in einer Variable (`var(--lt-text, #26251e)`, so arbeiten die `lt-*`-Sections) und im Bestand. **Rund 60 ältere `lt-*`-Sections haben feste Hex-Werte.** Die bleiben, solange niemand die Section aus anderem Grund umbaut. Nebenbei wird nichts migriert.
+- `color_accent_main` (#f25a38) ist tot, nicht verwenden.
 
-No build system exists, this is a pure Shopify theme. Development uses the Shopify CLI:
+## Gestaltung
 
-```bash
-shopify auth login --store <store-name>.myshopify.com
-shopify theme dev       # Start with hot-reload
-shopify theme push      # Push to store
-shopify theme pull      # Pull latest from store
-shopify theme list      # List available themes
-```
+- **Überschriften immer über `snippets/section-heading-crs.liquid`** (`crs-heading-stack`). Titel und Untertitel sind ein Block in derselben Größe und Schrift, nur die Deckkraft unterscheidet sie. Kein eigenes Heading-CSS. Details: `docs/section-heading-stack.md`.
+- **Kein farbiges `border-left`** als Akzent. Stattdessen eine getönte Karte mit vollem Rahmen.
+- Kein `#000` als Hintergrund, keine neue Schriftfamilie. Überschriften in `--font-heading`, Text in `--font-body`.
+- Mobil zuerst (375 px), ohne horizontales Scrollen. Jede Section hat genau ein dominantes Element. Höchstens drei Schriftgrößen je Section.
+- Weniger ist mehr: Was nur da ist, weil es leicht zu bauen war, fliegt raus.
 
-## Architecture
+## Copy
 
-### Template System
+- Du-Form, kurze Sätze, „19 %“ statt „Prozent“.
+- **Keine Em-Dashes**, keine Stakkato-Dreiklänge („Schneller. Klarer. Besser.“).
+- Es gilt die Copy-Linie aus der Workspace-CLAUDE.md: aggressiv als Default, Grenzen nur bei der Schwarzen Liste (UWG-Anhang, z. B. Fake-Countdown) und beim VSW-Vergleich (NMN als NEM). Wo `docs/conversion-messaging.md` vorsichtiger klingt, gilt die Workspace-Linie.
+- NMN nicht als Beispiel-Wirkstoff in Copy für andere Produkte, dafür Kreatin nehmen.
+- Bei jeder neuen Section-Copy vermerken, wo ein Bild Sinn ergibt.
 
-1. **Layouts** (`/layout/`): HTML wrapper (`theme.liquid` is entry point)
-2. **Templates** (`/templates/`): JSON files declaring sections per page type
-3. **Sections** (`/sections/`): Reusable components (~200 files, zählen mit `ls sections/ | wc -l`); Liquid + `{% schema %}`
-4. **Snippets** (`/snippets/`): Stateless partials via `{% render 'snippet-name' %}`
-5. **Blocks** (`/blocks/`): Nested components within sections
+## Vorschau und Test
 
-**Critical limits:**
-- Product JSON templates: **max 25 sections** in `order` array
-- Section schema `name`: **max 25 characters** (error: *name ist zu lang*)
-- Schema `default`: **never empty string** (error: *default darf nicht leer sein*)
+- HTML-Vorschauen aus `docs/` unter **http://localhost:8789/** öffnen (LaunchAgent, läuft immer). Keinen zweiten Server auf 8789 starten und nichts per `file://` öffnen.
+- `shopify theme dev`: Nach einem neuen Schema-Setting den Server neu starten, sonst ist der Wert `nil`. Sections vom `type: "apps"` rendern dort nicht.
+- Nach Änderungen am Produkt-Template: Warenkorb und Variantenwahl testen, Konsole ohne Fehler, Desktop bei 1280 px und Mobil bei 375 px.
 
-Full details: `.cursor/rules/shopify-rules.mdc`
+## Wo was steht
 
-### JavaScript Pattern
+| Frage | Datei |
+|---|---|
+| Welche URL rendert welches Template und welche Section? | `docs/live-pages-map.md` |
+| Aufbau und Section-Reihenfolge der PDPs | `docs/pdp-system.md` |
+| Felder beim Anlegen eines neuen Produkts | `docs/lt-pdp-template-notes.md` |
+| Messaging im Detail | `docs/conversion-messaging.md` |
+| Was ist live, was wartet auf Push? | `docs/theme-status.md` |
+| Geprüfte Bau-Muster | `_examples/README.md` |
 
-Vanilla ES6+, no framework. Web Components pattern:
-- `ModalBox`, `MainHeader`, `CSSSlider`, `ProductVariants` are custom elements
-- Re-init via `shopify:section:load` events
-
-### Styling
-
-Modular CSS in `/assets/`. No preprocessor.
-- `theme.css`: Base styles, CSS custom properties
-- `section-*.css`: Section-scoped styles
-- All values via CSS tokens defined in `.cursor/rules/design-tokens.mdc`
-
----
-
-## Design & Visual System
-
-### Approved Section Examples
-
-Read `_examples/README.md` before building any section. Approved reference implementations with full decision documentation:
-
-| File | Pattern | Use for |
-|---|---|---|
-| `_examples/sections/benefits.liquid` | card-info × 3 | benefit/feature grids |
-| `_examples/sections/stat-callout.liquid` | stat-callout | numbers/proof sections |
-| `_examples/sections/reviews.liquid` | card-review × 3 | testimonial sections |
-| `_examples/sections/quote.liquid` | quote-block | expert/testimonial emphasis |
-| `_examples/sections/expert-profile.liquid` | expert-profile | person/authority pages |
-| `_examples/sections/team-grid.liquid` | team-grid | team/people grids |
-
-For PDP work the visual north star is `_examples/pdp-reference.html` (approved mobile PDP): match its visual quality, spacing rhythm, component structure, and token usage.
-
-### Design Governance
-
-All visual decisions follow `.cursor/rules/design-components.mdc` and the token system in `.cursor/rules/design-tokens.mdc`.
-
-**Never:**
-- Hardcode hex colors or px values
-- Use `#000000` as background
-- Introduce new font families
-- Use decorative colored left-/accent-borders (`border-left` with a color); separate via whitespace, hierarchy, tokens
-- Create layout patterns not in the approved system
-
-**Always:**
-- Reference tokens for every value
-- Read the closest approved example before building
-- Apply the §12 build process (spec, build, QA)
-- Run the visual craft QA before outputting code
-
-### Messaging Governance
-
-All copy follows `docs/conversion-messaging.md`:
-- German, Du-form
-- No medical claims, no cure language
-- One claim = one message, no claim stacking
-- Tone: intelligent but simple, calm, trustworthy
-
-### Keine KI-Tells (generierte Copy + Section-CSS)
-
-- Keine Em-Dashes in Copy. Stattdessen Komma, Punkt oder Klammer.
-- Keine rhythmischen Dreiklang-/Stakkato-Slogans ("Schneller. Klarer. Besser.").
-- Keine farbigen Left-/Accent-Borders als Deko (siehe Never-Liste oben).
-
-Detail Copy: `docs/conversion-messaging.md` §9. Detail Visual: `.cursor/rules/design-components.mdc`.
-
----
-
-## Working Rules
-
-- After generating a section, run the visual craft QA in `.cursor/rules/design-components.mdc`: list failures, then output only the corrected code.
-- Do not propose full rewrites or new design systems; prefer minimal, incremental changes.
-- Do not invent layout patterns not in `_examples/`.
-- Reuse existing sections, snippets, CSS classes, and patterns.
-- Inspect the current implementation and check app interactions / regression points before changing it.
-
----
-
-## Rules Index
-
-| File | Active for | Purpose |
-|---|---|---|
-| `/AGENTS.md` | all agents | Project orientation + source of truth hierarchy |
-| `/docs/live-pages-map.md` | any task referring to a live page | Slug to Template to Section mapping. **Read first** when the user names a live page by URL or label. |
-| `/shopify/AGENTS.md` | Shopify implementation | Theme rules, naming, CSS scoping, QA |
-| `/docs/pdp-system.md` | PDP work | Live section order, proof structure, messaging |
-| `.cursor/rules/design-tokens.mdc` | all files | CSS token definitions |
-| `.cursor/rules/design-components.mdc` | sections, snippets, CSS | Component specs + visual QA |
-| `.cursor/rules/section-heading-stack.mdc` | sections | Shared heading stack rules for LT/CRS sections |
-| `.cursor/rules/shopify-rules.mdc` | liquid, json, templates | Platform limits + operating rules |
-| `.cursor/rules/pdp-architecture.mdc` | PDP sections | Psychological journey model (section map, see pdp-system.md) |
-| `docs/design-governance.md` | visual decisions | Full visual system reference |
-| `docs/conversion-messaging.md` | copy | Messaging governance, subscription framing, KI-Tells (§9) |
-| `docs/lt-pdp-template-notes.md` | new products | Per-product field checklist for PDP duplication |
-| `docs/nmn-angebotsarchitektur.md` | NMN pricing, shipping, subscription, guarantee | Zielzustand für Preisraster, Größenwahl, Versandmodell, Garantie-Copy. Live weicht ab, Abweichungen sind dort markiert. |
+Alles andere in `docs/` sind Arbeitsstände (Entwürfe, Analysen, Vorschauen) zu einem Datum. Die frühere Regelsammlung (`AGENTS.md`-Langfassung, `shopify/AGENTS.md`, `.cursor/rules/`) liegt seit 28.10.2026 in `docs/archive/2026-10-28_regeln-zusammengefuehrt/`.

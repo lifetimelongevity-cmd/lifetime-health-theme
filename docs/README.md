@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-07-10
+last_review: 2026-10-28
 canonical_for: documentation-index-and-hierarchy
 ---
 
@@ -8,28 +8,22 @@ canonical_for: documentation-index-and-hierarchy
 
 Dieses Verzeichnis trennt aktive Projekt-Guidance von historischen Briefings.
 
-## Source of Truth Hierarchy
+## Regeln
 
-1. **Live Theme Code** — `sections/`, `templates/`, `snippets/`
-2. **Live page mapping** — `docs/live-pages-map.md`
-3. **PDP system logic** — `docs/pdp-system.md`
-4. **AI execution rules** — `.cursor/rules/*.mdc`
-5. **Human-readable governance** — die aktiven Dokumente in `docs/`
-6. **Archive** — `docs/archive/` und `_archive/`
+**Alle Regeln stehen in `/CLAUDE.md`** (seit 28.10.2026 das einzige Regelwerk, auch für andere Agenten). Die Docs hier beschreiben Seiten, Stände und Hintergründe; sie stellen keine eigenen Regeln auf. Reihenfolge bei Widerspruch: Live-Seite, dann Theme-Code, dann `/CLAUDE.md`, dann alles in `docs/`.
 
-## Active Core Guidance
+## Nachschlagen
 
-| Topic | Canonical file |
+| Frage | Datei |
 |---|---|
-| Repo orientation | `/AGENTS.md`, `/CLAUDE.md` |
-| Shopify implementation | `/shopify/AGENTS.md`, `/.cursor/rules/shopify-rules.mdc` |
-| Live slug/template mapping | `/docs/live-pages-map.md` |
-| PDP structure and roles | `/docs/pdp-system.md` |
-| Messaging and claims | `/docs/conversion-messaging.md` |
-| Visual system and tokens | `/docs/design-governance.md`, `/.cursor/rules/design-tokens.mdc` |
-| Component QA and section build rules | `/docs/design-components.md`, `/.cursor/rules/design-components.mdc` |
-| Section heading system | `/docs/section-heading-stack.md`, `/.cursor/rules/section-heading-stack.mdc` |
-| Product onboarding | `/docs/lt-pdp-template-notes.md` |
+| URL → Template → Section | `/docs/live-pages-map.md` |
+| Aufbau der PDPs | `/docs/pdp-system.md` |
+| Messaging im Detail | `/docs/conversion-messaging.md` |
+| Heading-System, ausführlich | `/docs/section-heading-stack.md` |
+| Neues Produkt anlegen | `/docs/lt-pdp-template-notes.md` |
+| Live-Stand, wartende Pushes | `/docs/theme-status.md` |
+| Visuelle Sprache (Impeccable) | `/DESIGN.md` |
+| Langfassungen zu Design (Hintergrund, keine Pflichtlektüre) | `/docs/design-governance.md`, `/docs/design-components.md` |
 
 ## Active Supporting Docs
 
@@ -37,9 +31,10 @@ Dieses Verzeichnis trennt aktive Projekt-Guidance von historischen Briefings.
 |---|---|
 | Science / homepage implementation specs | `homepage-*`, `science-*`, `ueber-lifetime-rebuild-prompt.md` |
 | Quiz docs | `lifetime-quiz-spec.md`, `lifetime-doctor-quiz-spec.md`, `lifetime-quiz-shopify-setup.md`, `mobile-lp-audit-2026-06-04.md` |
-| GEO / content strategy | `geo-strategy.md`, `age-dna-geo/`, `nmn-blog-geo/`, `blog-design-best-practices.md` |
+| GEO / content strategy | `geo-dashboard.html`, `geo-strategy.md`, `geo-action-plan.md`, `geo-prompt-panel.md`, `geo-prompt-baseline-2026-07-29.md`, `geo-claim-ledger.md`, `age-dna-product-fact-sheet.md`, `age-dna-evidence-request-pack-2026-07-29.md`, `geo-p0-technical-audit-2026-07-29.md`, `geo-p0-url-decision-list-2026-07-29.md`, `age-dna-geo/`, `nmn-blog-geo/`, `blog-design-best-practices.md` |
+| AGE&DNA-PDP upgrade package | `PDP-DNA-UPGRADE/` (`README.md`, `01-rmbc-kontext.md` copy/offer layer, `02-massnahmen.md`, `03-cro-befunde.md` measured CRO layer) |
 | Research / evidence | `nmn-pdp-evidence-base.md` |
-| Status / operations | `theme-status.md` |
+| Status / operations | `theme-status.md`, `geo-dashboard.html` |
 | Claude design bundle | `design-system/README.md` |
 
 ## Archive Rules
@@ -48,8 +43,6 @@ Dieses Verzeichnis trennt aktive Projekt-Guidance von historischen Briefings.
 - `_archive/` = archived theme code, templates, snippets, and assets
 - If a doc is no longer active but still informative, move it to `docs/archive/` instead of deleting it
 
-## Known Overlaps
+## Frühere Regelsammlung
 
-- `.cursor/rules/*.mdc` are the compact execution layer for AI agents.
-- The matching `docs/*.md` files exist for fuller human-readable context when needed.
-- When these disagree, prefer the live code, then the root/source-of-truth files above.
+`AGENTS.md`-Langfassung, `shopify/AGENTS.md` und `.cursor/rules/*.mdc` liegen seit 28.10.2026 in `docs/archive/2026-10-28_regeln-zusammengefuehrt/`.

@@ -14,7 +14,7 @@ die Reihenfolge, dann das Template, niemals eine ältere Beschreibung.
 
 ## Journey-Modell
 
-Das Modell aus `.cursor/rules/pdp-architecture.mdc` gilt unverändert: Aufmerksamkeit,
+Das Journey-Modell (früher `.cursor/rules/pdp-architecture.mdc`, archiviert 28.10.2026) gilt unverändert: Aufmerksamkeit,
 Verständnis, persönliche Relevanz, Vertrauen, Risikoreduktion, Handlung. Eine Section bedient
 genau eine Stufe. Die Reihenfolge der Stufen ist nicht die Reihenfolge der Sections: beide PDPs
 starten mit Aufmerksamkeit und Handlung gleichzeitig (Hero plus Buybox plus Sticky-ATC) und

@@ -223,4 +223,4 @@ German storefront copy must not read as machine-generated. Avoid the patterns th
 - **No claim stacking** (see §4): one badge, one statement.
 - **No empty superlatives or vague hype** (see §5).
 
-This section governs copy. The matching visual tell (decorative colored left-/accent-borders) is enforced in `.cursor/rules/design-components.mdc`.
+This section governs copy. The matching visual tell (decorative colored left-/accent-borders) is enforced in `/CLAUDE.md` (Gestaltung) and by `scripts/lt-check.mjs`.

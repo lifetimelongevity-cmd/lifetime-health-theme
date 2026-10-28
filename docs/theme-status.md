@@ -114,9 +114,9 @@ Die redaktionelle v3 ist inzwischen fertig. Die vollständige Arbeitsfassung lie
 | Shopify Shop | `lifetime-health-de.myshopify.com` |
 | Domain | `lifetime-health.de` (.com leitet weiter) |
 | Push-Tooling | Theme Manager.app (täglich genutzt) |
-| Eintrittstür | `lifetime-health-theme/CLAUDE.md` → `AGENTS.md` |
+| Eintrittstür | `lifetime-health-theme/CLAUDE.md` (einziges Regelwerk seit 28.10.2026) |
 | Heading-System | `assets/crs-section-headings.css` + `snippets/section-heading-crs.liquid` |
-| Design-Rules | `docs/design-governance.md`, `docs/design-components.md`, `docs/section-heading-stack.md`, `.cursor/rules/shopify-rules.mdc`, `docs/pdp-system.md` |
+| Design-Rules | `docs/design-governance.md`, `docs/design-components.md`, `docs/section-heading-stack.md`, `docs/pdp-system.md`; Regeln selbst nur in `CLAUDE.md` |
 | Visual Reference | `_examples/pdp-reference.html`, `_examples/sections/*.liquid` |
 
 ---
