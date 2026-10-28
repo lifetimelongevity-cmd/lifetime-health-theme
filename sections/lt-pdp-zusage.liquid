@@ -4,9 +4,9 @@
   § 2.11, 01 § 3 und § 4). Eine Section für drei Aufgaben, damit nicht drei fast gleiche
   entstehen:
 
-  - Warum jetzt messen: ohne Karte, Absätze, Knopf
-  - Bonus-Stack „Das bekommst du“: weiße Karte, Zeilen mit Haken und echtem Wert rechts
-  - Garantie: getönte Karte mit Vollrahmen (Mint, keine farbige Kante), Name fett, Absätze, Knopf
+  - Warum jetzt messen: ohne Karte, Verlaufsgrafik, ein Absatz, Knopf
+  - Bonus-Stack „Das bekommst du“: Posten-Liste, Wert rechts, Summenzeile mit Variantenpreis
+  - Garantie: getönte Karte mit Vollrahmen (Mint, keine farbige Kante), Stufen-Kacheln, Knopf
 
   Texte stehen in Blöcken, nicht im Liquid. Ein Block lässt sich einzeln deaktivieren:
   so liegen Zusagen, die BJ noch nicht freigegeben hat (Garantie Stufe 2b, Nachmess-Gutschein),
@@ -14,15 +14,41 @@
 
   Der Knopf legt die erste Variante per Warenkorb-Permalink direkt in die Kasse, wie der
   Direkt-Checkout im Hero, und meldet sich bei lt-pdp-ereignisse mit data-lt-intent.
-  Der Preis im Knopf kommt aus der Variante, nie aus dem Text.
+  Der Preis im Knopf und in der Summenzeile kommt aus der Variante, nie aus dem Text.
 
   Impeccable 27.10.2026 (critique, bolder, overdrive), alle Schalter per Default aus:
-  - stat_value: eine Zahl über der Überschrift (Garantie „90 Tage“), Zahl vor Text
-  - lead_own_line: in der Liste mit Haken steht der fette Anfang als eigene Zeile, Text und Wert
-    darunter. Vorher drückte die Wertspalte rechts den Text in eine schmale Spalte.
+  - stat_value: eine Zahl über der Überschrift, Zahl vor Text
+  - lead_own_line: in der Liste mit Haken steht der fette Anfang als eigene Zeile
   - verlauf_*: Verlaufsgrafik für „Warum jetzt“. Heute ein Punkt, in sechs Monaten zwei mögliche
-    Enden (älter, jünger). Keine Messwerte, nur das Prinzip Ausgangswert und Richtung. Zeichnet
-    sich einmal beim Hereinscrollen von links nach rechts, bei reduzierter Bewegung steht sie still.
+    Enden (älter, jünger). Keine Messwerte, nur das Prinzip. Zeichnet sich einmal beim
+    Hereinscrollen, bei reduzierter Bewegung und ohne JavaScript steht sie still und fertig.
+
+  Impeccable 28.10.2026, zweiter Durchgang (critique, bolder, delight), Default aus:
+  - list_style „posten“: Posten-Liste wie ein Kassenzettel. Text links, Wert rechts (nur kurze
+    echte Werte: „299 €“, „inkl.“), Summenzeile (sum_enable) mit dem Preis der Variante und einer
+    Zeile darunter (sum_note). Die Haken-Variante mit Wert rechts drückte den Text in eine
+    schmale Spalte; kurze Werte tun das nicht. Delight: die Posten ohne Preis stapeln sich beim
+    Hereinscrollen kurz nacheinander auf den ersten, die Summe schließt (stagger_enable).
+  - list_style „stufen“: je Block eine Kachel, der fette Anfang als große Zahl (36 px), Text
+    darunter. Für die Garantie: „90 Tage“ gilt nur für die versiegelte Rücksendung, „0 €“ für
+    das neue Kit. Vorher stand eine Zahl über beiden Stufen. Delight: unter einer Kachel das
+    Datum, bis zu dem die Frist für eine Bestellung von heute läuft (date_days je Block), wie
+    der Ergebnistermin im Hero. Ohne JavaScript bleibt die Zeile weg.
+  - verlauf_axis: Beschriftung der senkrechten Achse („Biologisches Alter“), damit „älter“
+    oben nicht als Fortschritt gelesen wird.
+
+  Impeccable 28.10.2026, dritter Durchgang (bolder), Default aus:
+  - zahl_xl: die große Zahl (Summe der Posten-Liste, Zahl der Stufen-Kacheln) in Display-Größe
+    (48 px statt 36). Die Zahl schlägt dann die Überschrift (28 px regular) deutlich, Zahl vor Text.
+  - card_style „foto“: dunkle Karte mit verwischtem Foto (card_image, Muster lt-leiste: Blur 26 px,
+    Teal-Überlagerung 0,8 bis 1, unten voll Teal, Ausschnitt oben rechts, wo das Licht sitzt). Das Foto gibt nur Stimmung, Text in Paper hält
+    auch auf dem hellsten Bildpunkt über 4,5:1 (geprüft gegen das Schlussleisten-Foto). Ohne Bild
+    bleibt die Karte einfarbig Teal.
+  - card_style „mesh“: dunkle Karte, zwei weiche Radialverläufe aus Mint und Paper auf Teal,
+    nichts bewegt sich. Keine Farbwerte außerhalb der Palette.
+    Beide dunklen Karten: Überschrift per on_dark, Haarlinien in Paper 0,2, Knopf als Paper-Pille
+    mit Tintentext (wie der Knopf der Schlussleiste), Nebentext in Paper 0,88 (auf den aufgehellten
+    Stellen reicht 0,72 nicht für 14 px).
 {% endcomment %}
 
 {%- liquid
@@ -47,7 +73,22 @@
     assign zs_kicker = ''
   endif
   assign zs_card = section.settings.card_style | default: 'none'
+  assign zs_dark = false
+  if zs_card == 'foto' or zs_card == 'mesh'
+    assign zs_dark = true
+  endif
   assign zs_list = section.settings.list_style | default: 'absatz'
+  assign zs_needs_js = false
+  if section.settings.verlauf_enable or section.settings.stagger_enable
+    assign zs_needs_js = true
+  endif
+  if zs_list == 'stufen'
+    for block in section.blocks
+      if block.settings.date_days > 0
+        assign zs_needs_js = true
+      endif
+    endfor
+  endif
 -%}
 
 {% style %}
@@ -58,9 +99,16 @@
   }
 {% endstyle %}
 
-<section class="ltzs ltzs--card-{{ zs_card }}" id="section-{{ section.id }}"{% if section.settings.read_marker %} data-lt-read{% endif %}>
+<section class="ltzs ltzs--card-{{ zs_card }}{% if zs_dark %} ltzs--dark{% endif %}{% if section.settings.zahl_xl %} ltzs--xl{% endif %}" id="section-{{ section.id }}"{% if section.settings.read_marker %} data-lt-read{% endif %}>
   <div class="ltzs__wrap">
     <div class="ltzs__box">
+      {%- if zs_card == 'foto' and section.settings.card_image != blank -%}
+        {{
+          section.settings.card_image
+          | image_url: width: 1120
+          | image_tag: loading: 'lazy', widths: '560, 1120', sizes: '(min-width: 750px) 704px, 100vw', class: 'ltzs__foto', alt: ''
+        }}
+      {%- endif -%}
       {%- if zs_kicker != blank -%}
         <p class="ltzs__name">{{ zs_kicker | escape }}</p>
       {%- endif -%}
@@ -72,46 +120,53 @@
         subheading: zs_sub,
         align: 'left',
         headline_md: true,
+        on_dark: zs_dark,
         extra_class: 'ltzs__header'
       %}
 
       {%- if section.settings.verlauf_enable -%}
         {%- capture zs_verlauf_aria -%}{{ section.settings.verlauf_heute }}: {{ section.settings.verlauf_heute_note }}. {{ section.settings.verlauf_spaeter }}: {{ section.settings.verlauf_spaeter_note }}, {{ section.settings.verlauf_unten }} oder {{ section.settings.verlauf_oben }}.{%- endcapture -%}
-        <figure class="ltzs__verlauf" role="img" aria-label="{{ zs_verlauf_aria | strip | escape }}" data-ltzs-verlauf>
-          <svg viewBox="0 0 340 132" aria-hidden="true" focusable="false">
-            <line class="ltzs__v-ax" x1="0" y1="96" x2="340" y2="96"/>
+        <figure class="ltzs__verlauf" role="img" aria-label="{{ zs_verlauf_aria | strip | escape }}" data-ltzs-reveal>
+          {%- comment -%}
+            Diagramm 28.10.2026 (diagram-design): Zeitachse unten, Wertachse links mit Pfeil und
+            waagerechter Beschriftung. Gefüllter Punkt = gemessen (heute), Ringe = noch nicht gemessen.
+            Gepunktete Waagerechte auf Höhe des Ausgangswerts, der Korridor zwischen den Ästen zeigt
+            den Raum der möglichen Ergebnisse. Keine Messwerte. Koordinaten auf 4er-Raster.
+          {%- endcomment -%}
+          <svg viewBox="0 0 364 156" aria-hidden="true" focusable="false">
+            <defs>
+              <linearGradient id="ltzs-korridor-{{ section.id }}" gradientUnits="userSpaceOnUse" x1="56" y1="0" x2="284" y2="0">
+                <stop offset="0" class="ltzs__v-stop0"/>
+                <stop offset="1" class="ltzs__v-stop1"/>
+              </linearGradient>
+            </defs>
+            {%- if section.settings.verlauf_axis != blank -%}
+              <path class="ltzs__v-ax" d="M4 112 V20"/>
+              <path class="ltzs__v-ax ltzs__v-arrow" d="M0.5 24 L4 19.5 L7.5 24"/>
+              <text class="ltzs__v-cap" x="14" y="24">{{ section.settings.verlauf_axis | escape }}</text>
+            {%- endif -%}
+            <path class="ltzs__v-ax" d="M4 112 H364"/>
+            <path class="ltzs__v-tick" d="M56 112 V117 M284 112 V117"/>
+            <path class="ltzs__v-ref" d="M56 64 H284"/>
             <g class="ltzs__v-fork">
-              <path class="ltzs__v-ln" d="M40 60 L262 26"/>
-              <path class="ltzs__v-ln" d="M40 60 L262 86"/>
+              <path class="ltzs__v-band" d="M56 64 L284 28 L284 100 Z" fill="url(#ltzs-korridor-{{ section.id }})"/>
+              <path class="ltzs__v-ln" d="M56 64 L284 28"/>
+              <path class="ltzs__v-ln" d="M56 64 L284 100"/>
             </g>
-            <circle class="ltzs__v-p0" cx="40" cy="60" r="6"/>
+            <circle class="ltzs__v-halo" cx="56" cy="64" r="12"/>
+            <circle class="ltzs__v-p0" cx="56" cy="64" r="5"/>
             <g class="ltzs__v-late">
-              <circle class="ltzs__v-p1" cx="262" cy="26" r="6"/>
-              <circle class="ltzs__v-p1" cx="262" cy="86" r="6"/>
-              <text x="276" y="30">{{ section.settings.verlauf_oben | escape }}</text>
-              <text x="276" y="90">{{ section.settings.verlauf_unten | escape }}</text>
+              <circle class="ltzs__v-p1" cx="284" cy="28" r="5"/>
+              <circle class="ltzs__v-p1" cx="284" cy="100" r="5"/>
+              <text class="ltzs__v-end" x="298" y="33">{{ section.settings.verlauf_oben | escape }}</text>
+              <text class="ltzs__v-end" x="298" y="105">{{ section.settings.verlauf_unten | escape }}</text>
             </g>
-            <text class="ltzs__v-k" x="40" y="116" text-anchor="middle">{{ section.settings.verlauf_heute | escape }}</text>
-            <text x="40" y="131" text-anchor="middle">{{ section.settings.verlauf_heute_note | escape }}</text>
-            <text class="ltzs__v-k" x="262" y="116" text-anchor="middle">{{ section.settings.verlauf_spaeter | escape }}</text>
-            <text x="262" y="131" text-anchor="middle">{{ section.settings.verlauf_spaeter_note | escape }}</text>
+            <text class="ltzs__v-time" x="56" y="136" text-anchor="middle">{{ section.settings.verlauf_heute | escape }}</text>
+            <text class="ltzs__v-note" x="56" y="153" text-anchor="middle">{{ section.settings.verlauf_heute_note | escape }}</text>
+            <text class="ltzs__v-time" x="284" y="136" text-anchor="middle">{{ section.settings.verlauf_spaeter | escape }}</text>
+            <text class="ltzs__v-note" x="284" y="153" text-anchor="middle">{{ section.settings.verlauf_spaeter_note | escape }}</text>
           </svg>
         </figure>
-        <script>
-          (function () {
-            var f = document.querySelector('#section-{{ section.id }} [data-ltzs-verlauf]');
-            if (!f) return;
-            var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-            if (still || !('IntersectionObserver' in window)) return;
-            f.classList.add('is-pre');
-            var io = new IntersectionObserver(function (en) {
-              if (!en[0].isIntersecting) return;
-              io.disconnect();
-              f.classList.remove('is-pre');
-            }, { threshold: 0.5 });
-            io.observe(f);
-          })();
-        </script>
       {%- endif -%}
 
       {%- if section.blocks.size > 0 -%}
@@ -138,6 +193,50 @@
               </li>
             {%- endfor -%}
           </ul>
+
+        {%- elsif zs_list == 'posten' -%}
+          <ul class="ltzs__posten" role="list"{% if section.settings.stagger_enable %} data-ltzs-reveal{% endif %}>
+            {%- for block in section.blocks -%}
+              {%- liquid
+                assign zs_priced = false
+                if block.settings.value contains '€'
+                  assign zs_priced = true
+                endif
+              -%}
+              <li class="ltzs__posten-row{% unless zs_priced %} ltzs__posten-row--inkl{% endunless %}" {{ block.shopify_attributes }}>
+                <span class="ltzs__posten-text">
+                  {%- if block.settings.lead != blank -%}<strong>{{ block.settings.lead | escape }}</strong>{% endif -%}
+                  {%- if block.settings.text != blank -%}<span class="ltzs__posten-sub">{{ block.settings.text | escape }}</span>{% endif -%}
+                </span>
+                {%- if block.settings.value != blank -%}
+                  <span class="ltzs__posten-value">{{ block.settings.value | escape }}</span>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+            {%- if section.settings.sum_enable and zs_variant != blank -%}
+              <li class="ltzs__posten-sum">
+                <span class="ltzs__posten-sum-label">{{ section.settings.sum_label | escape }}</span>
+                <span class="ltzs__posten-sum-value">{{ zs_variant.price | money_without_trailing_zeros }}</span>
+                {%- if section.settings.sum_note != blank -%}
+                  <span class="ltzs__posten-sum-note">{{ section.settings.sum_note | escape }}</span>
+                {%- endif -%}
+              </li>
+            {%- endif -%}
+          </ul>
+
+        {%- elsif zs_list == 'stufen' -%}
+          <ol class="ltzs__stufen" role="list">
+            {%- for block in section.blocks -%}
+              <li class="ltzs__stufe" {{ block.shopify_attributes }}>
+                {%- if block.settings.lead != blank -%}<span class="ltzs__stufe-stat">{{ block.settings.lead | escape }}</span>{% endif -%}
+                {%- if block.settings.text != blank -%}<span class="ltzs__stufe-text">{{ block.settings.text | escape }}</span>{% endif -%}
+                {%- if block.settings.date_days > 0 -%}
+                  <span class="ltzs__stufe-date" data-ltzs-date="{{ block.settings.date_days }}" data-ltzs-date-prefix="{{ block.settings.date_prefix | escape }}" hidden></span>
+                {%- endif -%}
+              </li>
+            {%- endfor -%}
+          </ol>
+
         {%- else -%}
           <div class="ltzs__paras">
             {%- for block in section.blocks -%}
@@ -165,6 +264,45 @@
     </div>
   </div>
 </section>
+
+{%- if zs_needs_js -%}
+  <script>
+    (function () {
+      var root = document.getElementById('section-{{ section.id }}');
+      if (!root) return;
+      var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      // Einmaliges Enthüllen beim Hereinscrollen (Verlauf, Posten). Ohne JS steht der Endzustand.
+      var reveals = root.querySelectorAll('[data-ltzs-reveal]');
+      if (reveals.length && !still && 'IntersectionObserver' in window) {
+        reveals.forEach(function (el) { el.classList.add('is-pre'); });
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (!en.isIntersecting) return;
+            io.unobserve(en.target);
+            en.target.classList.remove('is-pre');
+          });
+        }, { threshold: 0.4 });
+        reveals.forEach(function (el) { io.observe(el); });
+      }
+
+      // Frist als Datum: heute plus date_days, deutsche Monatsnamen, ohne Jahr.
+      var dates = root.querySelectorAll('[data-ltzs-date]');
+      if (dates.length) {
+        var months = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+        dates.forEach(function (el) {
+          var days = parseInt(el.getAttribute('data-ltzs-date'), 10);
+          if (!days) return;
+          var d = new Date();
+          d.setDate(d.getDate() + days);
+          var prefix = el.getAttribute('data-ltzs-date-prefix') || '';
+          el.textContent = (prefix ? prefix + ' ' : '') + d.getDate() + '. ' + months[d.getMonth()];
+          el.hidden = false;
+        });
+      }
+    })();
+  </script>
+{%- endif -%}
 
 {% stylesheet %}
 .ltzs__wrap { max-width: 72rem; margin: 0 auto; padding-left: var(--gutter-container, 20px); padding-right: var(--gutter-container, 20px); }
@@ -194,23 +332,40 @@
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
 }
+
+/* Haken-Liste (lead_own_line) */
 .ltzs__rows--lead .ltzs__row { grid-template-columns: 20px minmax(0, 1fr); }
 .ltzs__rows--lead .ltzs__row-text strong { display: block; }
 .ltzs__row-sub { display: block; font-size: var(--text-body-sm); color: var(--color-ink-muted); }
 .ltzs__row-value { display: block; margin-top: 2px; font-size: var(--text-body-sm); font-weight: var(--weight-bold); }
-.ltzs__verlauf { margin: 0 0 var(--space-5); max-width: 26rem; }
+
+/* Verlauf: Gabel. Feine Linien in Teal (gemessen = gefüllt, offen = Ring), Korridor als Raum der
+   möglichen Ergebnisse, Achsen als Haarlinien. Zeichnet sich einmal (is-pre per JS gesetzt, entfernt). */
+.ltzs__verlauf { margin: 0 0 var(--space-5); max-width: 28rem; }
 .ltzs__verlauf svg { display: block; width: 100%; height: auto; overflow: visible; }
-.ltzs__v-ax { stroke: var(--color-border-strong); stroke-width: 1; }
-.ltzs__v-ln { fill: none; stroke: var(--color-teal-dark); stroke-width: 1.5; stroke-dasharray: 4 5; }
-.ltzs__v-p0 { fill: var(--color-teal-dark); }
-.ltzs__v-p1 { fill: var(--color-paper); stroke: var(--color-teal-dark); stroke-width: 1.5; }
-.ltzs__verlauf text { font-family: var(--font-body); font-size: 13px; fill: var(--color-ink-muted); }
-.ltzs__verlauf .ltzs__v-k { fill: var(--color-ink); font-weight: var(--weight-bold); }
+.ltzs__v-ax { fill: none; stroke: var(--color-border-strong); stroke-width: 1; stroke-linecap: round; stroke-linejoin: round; }
+.ltzs__v-arrow { stroke: var(--color-ink-muted); }
+.ltzs__v-tick { stroke: var(--color-ink-muted); stroke-width: 1; }
+.ltzs__v-ref { fill: none; stroke: var(--color-ink-muted); stroke-width: 1; stroke-dasharray: 1 4; stroke-linecap: round; opacity: 0.55; }
+.ltzs__v-band { stroke: none; }
+.ltzs__v-stop0 { stop-color: var(--color-dark); stop-opacity: 0.14; }
+.ltzs__v-stop1 { stop-color: var(--color-dark); stop-opacity: 0.03; }
+.ltzs__v-ln { fill: none; stroke: var(--color-dark); stroke-width: 1.25; stroke-linecap: round; }
+.ltzs__v-halo { fill: var(--color-dark); opacity: 0.1; }
+.ltzs__v-p0 { fill: var(--color-dark); }
+.ltzs__v-p1 { fill: var(--color-paper); stroke: var(--color-dark); stroke-width: 1.25; }
+.ltzs__verlauf text { font-family: var(--font-body); fill: var(--color-ink-muted); }
+.ltzs__verlauf .ltzs__v-cap,
+.ltzs__verlauf .ltzs__v-time { font-size: var(--text-micro); font-weight: var(--weight-bold); letter-spacing: 0.1em; text-transform: uppercase; }
+.ltzs__verlauf .ltzs__v-time { fill: var(--color-ink); }
+.ltzs__verlauf .ltzs__v-note { font-size: var(--text-body-sm); }
+.ltzs__verlauf .ltzs__v-end { font-family: var(--font-heading); font-size: var(--text-body); fill: var(--color-ink); letter-spacing: -0.01em; }
 .ltzs__v-fork { clip-path: inset(0 0 0 0); transition: clip-path 1.1s cubic-bezier(0.16, 1, 0.3, 1); }
 .ltzs__v-late { transition: opacity 0.5s ease 0.8s; }
 .ltzs__verlauf.is-pre .ltzs__v-fork { clip-path: inset(0 100% 0 0); }
 .ltzs__verlauf.is-pre .ltzs__v-late { opacity: 0; }
-@media (prefers-reduced-motion: reduce) { .ltzs__v-fork, .ltzs__v-late { transition: none; } }
+
+/* Absätze */
 .ltzs__paras { display: grid; gap: var(--space-3); }
 .ltzs__para {
   margin: 0;
@@ -219,6 +374,8 @@
   line-height: var(--leading-body);
 }
 .ltzs__para--strong { font-weight: var(--weight-bold); }
+
+/* Haken-Liste */
 .ltzs__rows { margin: 0; padding: 0; list-style: none; }
 .ltzs__row {
   display: grid;
@@ -233,6 +390,81 @@
 .ltzs__check svg { width: 20px; height: 20px; }
 .ltzs__row-text { font-family: var(--font-body); font-size: var(--text-body); line-height: var(--leading-body); }
 .ltzs__value { font-family: var(--font-body); font-size: var(--text-body-sm); color: var(--color-ink-muted); white-space: nowrap; }
+
+/* Posten-Liste: Text links, kurzer Wert rechts, Summe wie auf dem Kassenzettel */
+.ltzs__posten { margin: 0; padding: 0; list-style: none; font-family: var(--font-body); }
+.ltzs__posten-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  align-items: start;
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--color-border-strong);
+}
+.ltzs__posten-row:first-child { border-top: 0; padding-top: 0; }
+.ltzs__posten-text { font-size: var(--text-body); line-height: var(--leading-body); }
+.ltzs__posten-text strong { display: block; }
+.ltzs__posten-sub { display: block; font-size: var(--text-body-sm); color: var(--color-ink-muted); }
+.ltzs__posten-value {
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-body);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ltzs__posten-row--inkl .ltzs__posten-value { font-weight: var(--weight-regular); color: var(--color-ink-muted); }
+.ltzs__posten-sum {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0 var(--space-4);
+  align-items: baseline;
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 2px solid var(--color-ink);
+}
+.ltzs__posten-sum-label { font-size: var(--text-body-lg); font-weight: var(--weight-bold); line-height: var(--leading-body); }
+.ltzs__posten-sum-value {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-stat);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ltzs__posten-sum-note { grid-column: 1 / -1; margin-top: var(--space-2); font-size: var(--text-body-sm); color: var(--color-ink-muted); line-height: var(--leading-body); }
+/* Delight: die Posten ohne Preis stapeln sich nacheinander auf den ersten, dann schließt die Summe */
+.ltzs__posten-row--inkl, .ltzs__posten-sum { transition: opacity 0.45s cubic-bezier(0.16, 1, 0.3, 1), transform 0.45s cubic-bezier(0.16, 1, 0.3, 1); }
+.ltzs__posten-row--inkl:nth-of-type(2) { transition-delay: 0.1s; }
+.ltzs__posten-row--inkl:nth-of-type(3) { transition-delay: 0.22s; }
+.ltzs__posten-row--inkl:nth-of-type(4) { transition-delay: 0.34s; }
+.ltzs__posten-row--inkl:nth-of-type(5) { transition-delay: 0.46s; }
+.ltzs__posten-sum { transition-delay: 0.6s; }
+.ltzs__posten.is-pre .ltzs__posten-row--inkl, .ltzs__posten.is-pre .ltzs__posten-sum { opacity: 0; transform: translateY(8px); }
+
+/* Stufen: je Zusage eine Kachel, Zahl vor Text */
+.ltzs__stufen {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-5) var(--space-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: var(--font-body);
+}
+.ltzs__stufe { display: grid; gap: var(--space-2); align-content: start; padding-top: var(--space-4); border-top: 1px solid var(--color-border-strong); }
+.ltzs__stufe-stat {
+  font-family: var(--font-heading);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-stat);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ltzs__stufe-text { font-size: var(--text-body); line-height: var(--leading-body); }
+.ltzs__stufe-date { font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--color-ink-muted); }
+
 .ltzs__buy { margin-top: var(--space-6); }
 .ltzs__btn {
   display: flex; align-items: center; justify-content: center;
@@ -252,11 +484,73 @@
   color: var(--color-ink-muted);
   text-align: center;
 }
+/* Große Zahl in Display-Größe (zahl_xl): Summe und Stufen-Zahl auf 48 px */
+.ltzs--xl .ltzs__posten-sum-value,
+.ltzs--xl .ltzs__stufe-stat { font-size: var(--text-display); }
+
+/* Dunkle Karten (foto, mesh): Teal-Grund, Text in Paper, Haarlinien in Paper, Knopf als Paper-Pille.
+   Nebentext in Paper 0,88 statt 0,72, weil Foto und Mesh den Grund stellenweise aufhellen
+   (Rechnung: hellster Bildpunkt unter 0,8 Teal ergibt 4,4:1, gemessen am verwischten Foto über 6:1; Mint-Fleck 0,26 ergibt 4,61:1). */
+.ltzs--dark .ltzs__box {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  padding: var(--space-6) var(--space-5);
+  border-radius: var(--radius-lg);
+  background: var(--color-dark);
+  color: var(--color-paper);
+}
+.ltzs--dark .ltzs__row,
+.ltzs--dark .ltzs__posten-row,
+.ltzs--dark .ltzs__stufe { border-top-color: rgba(247, 247, 244, 0.2); }
+.ltzs--dark .ltzs__posten-sum { border-top-color: var(--color-paper); }
+.ltzs--dark .ltzs__check { color: var(--color-paper); }
+.ltzs--dark .ltzs__row-sub,
+.ltzs--dark .ltzs__row-value,
+.ltzs--dark .ltzs__value,
+.ltzs--dark .ltzs__posten-sub,
+.ltzs--dark .ltzs__posten-row--inkl .ltzs__posten-value,
+.ltzs--dark .ltzs__posten-sum-note,
+.ltzs--dark .ltzs__stufe-date,
+.ltzs--dark .ltzs__note { color: rgba(247, 247, 244, 0.88); }
+.ltzs--dark .ltzs__btn { background: var(--color-paper); color: var(--color-ink); }
+.ltzs--dark .ltzs__btn:focus-visible { outline-color: var(--color-paper); }
+/* Foto: verwischt, etwas größer als die Karte (sonst franst der Blur am Rand aus), Teal darüber.
+   Oben bleibt das Foto sichtbar, nach unten läuft die Überlagerung in volles Teal. */
+.ltzs__foto {
+  position: absolute;
+  z-index: -2;
+  top: -12%; left: -12%;
+  width: 124%; height: 124%;
+  object-fit: cover;
+  object-position: 100% 0;
+  filter: blur(26px) brightness(0.95) saturate(1.1);
+}
+.ltzs--card-foto .ltzs__box::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(54, 79, 86, 0.8) 0%, rgba(54, 79, 86, 0.9) 55%, var(--color-dark) 100%);
+}
+/* Mesh: zwei ruhige Radialverläufe (Mint oben rechts, Paper unten links) auf Teal */
+.ltzs--card-mesh .ltzs__box {
+  background:
+    radial-gradient(70% 55% at 90% 6%, rgba(101, 192, 182, 0.26), rgba(101, 192, 182, 0) 70%),
+    radial-gradient(60% 48% at 4% 98%, rgba(247, 247, 244, 0.12), rgba(247, 247, 244, 0) 70%),
+    var(--color-dark);
+}
+@media (prefers-reduced-motion: reduce) {
+  .ltzs__v-fork, .ltzs__v-late, .ltzs__posten-row--inkl, .ltzs__posten-sum { transition: none; }
+}
 @media screen and (min-width: 750px) {
   .ltzs--card-weiss .ltzs__box,
-  .ltzs--card-getoent .ltzs__box { padding: var(--space-7); }
+  .ltzs--card-getoent .ltzs__box,
+  .ltzs--dark .ltzs__box { padding: var(--space-7); }
   .ltzs__btn { width: auto; min-width: 18rem; display: inline-flex; }
   .ltzs__note { text-align: left; }
+  .ltzs__stufen { gap: var(--space-6); }
 }
 {% endstylesheet %}
 
@@ -275,25 +569,37 @@
       "options": [
         { "value": "none", "label": "Keine Karte" },
         { "value": "weiss", "label": "Weiße Karte" },
-        { "value": "getoent", "label": "Getönte Karte (Mint, Vollrahmen)" }
+        { "value": "getoent", "label": "Getönte Karte (Mint, Vollrahmen)" },
+        { "value": "foto", "label": "Dunkle Karte mit verwischtem Foto" },
+        { "value": "mesh", "label": "Dunkle Karte mit weichen Verläufen" }
       ],
       "default": "none"
     },
+    { "type": "image_picker", "id": "card_image", "label": "Foto der dunklen Karte (wird verwischt)", "info": "Nur bei „Dunkle Karte mit verwischtem Foto“. Ohne Bild bleibt die Karte einfarbig." },
+    { "type": "checkbox", "id": "zahl_xl", "label": "Große Zahl in Display-Größe (48 px)", "info": "Summe der Posten-Liste und Zahl der Stufen-Kacheln.", "default": false },
     {
       "type": "select", "id": "list_style", "label": "Zeilen",
       "options": [
         { "value": "absatz", "label": "Absätze" },
-        { "value": "haken", "label": "Liste mit Haken und Wert rechts" }
+        { "value": "haken", "label": "Liste mit Haken und Wert rechts" },
+        { "value": "posten", "label": "Posten-Liste (Wert rechts, Summenzeile)" },
+        { "value": "stufen", "label": "Stufen-Kacheln (Zahl groß, Text darunter)" }
       ],
       "default": "absatz"
     },
     { "type": "text", "id": "kicker", "label": "Name über der Überschrift (fett)", "info": "__none__ blendet ihn aus.", "default": "__none__" },
     { "type": "text", "id": "stat_value", "label": "Große Zahl über der Überschrift", "info": "Z. B. 90 Tage. Leer = keine." },
-    { "type": "text", "id": "heading", "label": "Überschrift", "default": "Du gehst kein Risiko ein." },
+    { "type": "text", "id": "heading", "label": "Überschrift", "info": "Zeilenumbruch bleibt erhalten.", "default": "Das Risiko tragen wir." },
     { "type": "text", "id": "subheading", "label": "Unterzeile", "info": "__none__ blendet sie aus.", "default": "__none__" },
-    { "type": "checkbox", "id": "lead_own_line", "label": "Liste: fetter Anfang als eigene Zeile, Text und Wert darunter", "default": false },
+    { "type": "checkbox", "id": "lead_own_line", "label": "Liste mit Haken: fetter Anfang als eigene Zeile, Text und Wert darunter", "default": false },
+    { "type": "header", "content": "Posten-Liste" },
+    { "type": "checkbox", "id": "sum_enable", "label": "Summenzeile mit dem Preis der Variante", "default": false },
+    { "type": "text", "id": "sum_label", "label": "Summenzeile: Wort links", "default": "Zusammen" },
+    { "type": "text", "id": "sum_note", "label": "Zeile unter der Summe", "info": "Nur belegte Zahlen." },
+    { "type": "checkbox", "id": "stagger_enable", "label": "Posten ohne Preis stapeln sich beim Hereinscrollen", "default": false },
     { "type": "header", "content": "Verlauf" },
     { "type": "checkbox", "id": "verlauf_enable", "label": "Verlaufsgrafik unter der Überschrift", "info": "Ein Punkt heute, zwei mögliche Enden in sechs Monaten. Keine Messwerte.", "default": false },
+    { "type": "text", "id": "verlauf_axis", "label": "Senkrechte Achse", "info": "Z. B. Biologisches Alter. Leer = keine." },
     { "type": "text", "id": "verlauf_heute", "label": "Links: Zeit", "default": "Heute" },
     { "type": "text", "id": "verlauf_heute_note", "label": "Links: Zusatz", "default": "Ausgangswert" },
     { "type": "text", "id": "verlauf_spaeter", "label": "Rechts: Zeit", "default": "In 6 Monaten" },
@@ -320,10 +626,12 @@
       "type": "zeile",
       "name": "Zeile",
       "settings": [
-        { "type": "text", "id": "lead", "label": "Fetter Anfang" },
+        { "type": "text", "id": "lead", "label": "Fetter Anfang", "info": "Bei Stufen-Kacheln: die große Zahl." },
         { "type": "textarea", "id": "text", "label": "Text", "default": "Text der Zeile." },
-        { "type": "text", "id": "value", "label": "Wert rechts (nur echte Preise)", "info": "Nur in der Liste mit Haken." },
-        { "type": "checkbox", "id": "emphasis", "label": "Ganze Zeile fett", "default": false }
+        { "type": "text", "id": "value", "label": "Wert rechts (nur echte Preise)", "info": "Liste mit Haken und Posten-Liste. Bei Posten kurz halten: 299 €, inkl." },
+        { "type": "checkbox", "id": "emphasis", "label": "Ganze Zeile fett", "default": false },
+        { "type": "range", "id": "date_days", "label": "Stufen-Kacheln: Frist als Datum, Tage ab heute", "min": 0, "max": 180, "step": 1, "default": 0, "info": "0 = kein Datum. Braucht JavaScript." },
+        { "type": "text", "id": "date_prefix", "label": "Stufen-Kacheln: Text vor dem Datum", "default": "Heute bestellt: bis etwa" }
       ]
     }
   ],

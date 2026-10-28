@@ -6,7 +6,60 @@
   Abstand und Linie, damit die Leiste ohne Kante in ihn übergeht.
   Ersetzt auf der Startseite lt-hp-cta-close (bleibt auf anderen Seiten im Einsatz).
   Vorlage: docs/startseite-v2/startseite.html#schluss
+
+  Fakten unter dem Knopf (Impeccable 2, 28.10.2026, AGE&DNA-PDP): bis zu drei Paare „Zahl / Text“,
+  per Default leer, dann rendert nichts und die Startseite bleibt wie sie ist. Platzhalter:
+  {datum} = heute plus datum_tage als „8. Dezember“, {datum_kurz} = „8. Dez.“,
+  {bewertungen} = Loox-Zahl, {note} = Loox-Schnitt mit Komma (beide nur auf Produktseiten).
+  Das Datum rechnet Liquid (Monatsnamen aus der Liste, Shopifys date lokalisiert %B nicht,
+  siehe crs-novel-food) und ein kleines Skript zieht es im Browser auf den heutigen Tag nach,
+  weil die Seite gecacht ausgeliefert wird. Ohne JavaScript steht das Serverdatum.
 {% endcomment %}
+
+{%- liquid
+  assign ltl2_tage = section.settings.datum_tage | default: 42
+  assign ltl2_sek = ltl2_tage | times: 86400
+  assign ltl2_ts = 'now' | date: '%s' | plus: ltl2_sek
+  assign ltl2_monate = 'Januar,Februar,März,April,Mai,Juni,Juli,August,September,Oktober,November,Dezember' | split: ','
+  assign ltl2_monate_kurz = 'Jan.,Feb.,März,Apr.,Mai,Juni,Juli,Aug.,Sep.,Okt.,Nov.,Dez.' | split: ','
+  assign ltl2_m = ltl2_ts | date: '%m' | plus: 0 | minus: 1
+  assign ltl2_d = ltl2_ts | date: '%-d'
+  assign ltl2_datum = ltl2_d | append: '. ' | append: ltl2_monate[ltl2_m]
+  assign ltl2_datum_kurz = ltl2_d | append: '. ' | append: ltl2_monate_kurz[ltl2_m]
+  assign ltl2_datum_html = '<span data-ltl2-datum>' | append: ltl2_datum | append: '</span>'
+  assign ltl2_datum_kurz_html = '<span data-ltl2-datum-kurz>' | append: ltl2_datum_kurz | append: '</span>'
+  assign ltl2_bewertungen = ''
+  assign ltl2_note = ''
+  if product
+    assign ltl2_bewertungen = product.metafields.loox.num_reviews.value | default: 0 | plus: 0 | append: ''
+    assign ltl2_note_raw = product.metafields.loox.avg_rating.value | default: 0 | plus: 0
+    if ltl2_note_raw > 0
+      assign ltl2_note = ltl2_note_raw | round: 1 | append: '' | replace: '.', ','
+    endif
+    if ltl2_bewertungen == '0'
+      assign ltl2_bewertungen = ''
+    endif
+  endif
+  assign ltl2_fakten = ''
+  assign ltl2_datum_aktiv = false
+  for i in (1..3)
+    assign ltl2_zahl_key = 'fakt_' | append: i | append: '_zahl'
+    assign ltl2_text_key = 'fakt_' | append: i | append: '_text'
+    assign ltl2_zahl = section.settings[ltl2_zahl_key] | strip
+    assign ltl2_text = section.settings[ltl2_text_key] | strip
+    if ltl2_zahl == blank and ltl2_text == blank
+      continue
+    endif
+    assign ltl2_paar = ltl2_zahl | append: '|' | append: ltl2_text
+    if ltl2_paar contains '{datum'
+      assign ltl2_datum_aktiv = true
+    endif
+    assign ltl2_zahl = ltl2_zahl | escape | replace: '{datum_kurz}', ltl2_datum_kurz_html | replace: '{datum}', ltl2_datum_html | replace: '{bewertungen}', ltl2_bewertungen | replace: '{note}', ltl2_note
+    assign ltl2_text = ltl2_text | escape | replace: '{datum_kurz}', ltl2_datum_kurz_html | replace: '{datum}', ltl2_datum_html | replace: '{bewertungen}', ltl2_bewertungen | replace: '{note}', ltl2_note
+    assign ltl2_fakt = '<li class="ltl2__fakt"><strong class="ltl2__zahl">' | append: ltl2_zahl | append: '</strong><span class="ltl2__fakt-text">' | append: ltl2_text | append: '</span></li>'
+    assign ltl2_fakten = ltl2_fakten | append: ltl2_fakt
+  endfor
+-%}
 
 {% style %}
   @font-face {
@@ -21,7 +74,7 @@
   {%- endif %}
 {% endstyle %}
 
-<div class="ltl2">
+<div class="ltl2{% if section.settings.kompakt_mobil %} ltl2--kompakt{% endif %}">
   {%- if section.settings.image != blank -%}
     {{
       section.settings.image
@@ -41,6 +94,22 @@
     {%- endif -%}
     {%- if section.settings.small != blank -%}
       <span class="ltl2__klein">{{ section.settings.small | escape }}</span>
+    {%- endif -%}
+    {%- if ltl2_fakten != blank -%}
+      <ul class="ltl2__fakten" role="list">{{ ltl2_fakten }}</ul>
+      {%- if ltl2_datum_aktiv -%}
+        <script>
+          (function () {
+            var box = document.currentScript.parentNode;
+            var d = new Date();
+            d.setDate(d.getDate() + {{ ltl2_tage }});
+            var lang = d.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' });
+            var kurz = d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' });
+            box.querySelectorAll('[data-ltl2-datum]').forEach(function (el) { el.textContent = lang; });
+            box.querySelectorAll('[data-ltl2-datum-kurz]').forEach(function (el) { el.textContent = kurz; });
+          })();
+        </script>
+      {%- endif -%}
     {%- endif -%}
   </div>
 </div>
@@ -117,6 +186,37 @@
   line-height: 1.45;
   color: rgba(247, 247, 244, 0.72);
 }
+/* Fakten unter dem Knopf: Zahl in der Serife der Ueberschrift, Text darunter, drei nebeneinander. */
+.ltl2__fakten {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4) var(--space-6);
+  margin: var(--space-6) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.ltl2__fakt {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.ltl2__zahl {
+  font-family: 'LT Instrument Serif', Georgia, serif;
+  font-size: var(--text-h2);
+  font-weight: var(--weight-regular);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  color: var(--color-paper);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ltl2__fakt-text {
+  margin-top: var(--space-1);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: 1.45;
+  color: rgba(247, 247, 244, 0.72);
+}
 @media (max-width: 1024px) { .ltl2__text { padding-left: 24px; padding-right: 24px; } }
 @media (max-width: 900px) {
   .ltl2 { display: block; min-height: 0; }
@@ -124,8 +224,16 @@
   .ltl2::after { background: linear-gradient(180deg, rgba(54, 79, 86, 0) 18%, rgba(54, 79, 86, 0.6) 34%, var(--color-dark) 52%); }
   .ltl2__text { padding-top: 300px; padding-bottom: 56px; }
   .ltl2__titel { font-size: var(--text-h1); }
+  /* Kompakt (kompakt_mobil): halb so viel Foto-Vorlauf, der Knopf kommt frueher in den Bildschirm. */
+  .ltl2--kompakt .ltl2__foto { height: 46%; }
+  .ltl2--kompakt::after { background: linear-gradient(180deg, rgba(54, 79, 86, 0) 10%, rgba(54, 79, 86, 0.6) 24%, var(--color-dark) 40%); }
+  .ltl2--kompakt .ltl2__text { padding-top: 168px; }
 }
-@media (max-width: 640px) { .ltl2__text { padding-left: 20px; padding-right: 20px; } }
+@media (max-width: 640px) {
+  .ltl2__text { padding-left: 20px; padding-right: 20px; }
+  .ltl2__fakten { gap: var(--space-3) var(--space-5); margin-top: var(--space-5); }
+  .ltl2__zahl { font-size: var(--text-h3); }
+}
 {% endstylesheet %}
 
 {% schema %}
@@ -140,7 +248,16 @@
     { "type": "url", "id": "button_url", "label": "Ziel des Knopfs" },
     { "type": "text", "id": "small", "label": "Kleine Zeile", "default": "395 € einmalig · versandkostenfrei · kein Abo" },
     { "type": "image_picker", "id": "image", "label": "Foto (wird verwischt)" },
-    { "type": "checkbox", "id": "footer_nahtlos", "label": "Nahtlos in den Footer (nur Startseite)", "default": true, "info": "Footer ohne Abstand und ohne Linie, wenn die Leiste als letzte Section auf der Startseite steht." }
+    { "type": "checkbox", "id": "footer_nahtlos", "label": "Nahtlos in den Footer (nur Startseite)", "default": true, "info": "Footer ohne Abstand und ohne Linie, wenn die Leiste als letzte Section auf der Startseite steht." },
+    { "type": "checkbox", "id": "kompakt_mobil", "label": "Kompakt auf dem Handy", "default": false, "info": "Weniger Foto über dem Text (168 statt 300 px), für Seiten, auf denen die Leiste die letzte Kaufchance ist." },
+    { "type": "header", "content": "Fakten unter dem Knopf", "info": "Bis zu drei Paare Zahl und Text. Leer = nichts. Platzhalter: {datum} (heute plus Tage, „8. Dezember“), {datum_kurz} („8. Dez.“), {bewertungen} und {note} (Loox, nur auf Produktseiten)." },
+    { "type": "text", "id": "fakt_1_zahl", "label": "Fakt 1: Zahl" },
+    { "type": "text", "id": "fakt_1_text", "label": "Fakt 1: Text" },
+    { "type": "text", "id": "fakt_2_zahl", "label": "Fakt 2: Zahl" },
+    { "type": "text", "id": "fakt_2_text", "label": "Fakt 2: Text" },
+    { "type": "text", "id": "fakt_3_zahl", "label": "Fakt 3: Zahl" },
+    { "type": "text", "id": "fakt_3_text", "label": "Fakt 3: Text" },
+    { "type": "range", "id": "datum_tage", "label": "Tage bis {datum}", "min": 7, "max": 90, "step": 1, "unit": "d", "default": 42 }
   ],
   "presets": [{ "name": "LT Leiste" }]
 }

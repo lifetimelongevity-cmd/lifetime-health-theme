@@ -9,11 +9,21 @@
   - layout „raster“: Vergleich statt Fragen. Je Zeile Name und ein Satz, rechts zwei Spalten
     mit Haken oder Strich (Spaltennamen in den Section-Einstellungen). Eine Zeile mit
     „Hervorheben“ wird getönte Karte mit Vollrahmen (die eigene Lösung), keine farbige Kante.
+
+  Impeccable 2 am 28.10.2026 (bolder, delight), alles per Default aus:
+  - „Kurzantwort groß“ (antwort_gross): die Kurzantwort wird die große Zeile (--text-h2, fett),
+    die Frage steht klein und gedämpft darüber, der Text klein darunter. Ab 750 px drei Spalten.
+  - Balken je Einwand (balken_teil / balken_gesamt): ein Anteil als dünner Balken mit zwei
+    Beschriftungen, z. B. 299 von 395 €. Füllt sich beim Hereinscrollen per CSS-Scroll-Timeline,
+    ohne JavaScript; ohne Unterstützung und bei reduzierter Bewegung steht der Endzustand.
+  - layout „leiter“: ein Bild statt Textzeilen. Je Weg eine Stufe an einer senkrechten Linie,
+    von oben (Schätzung) nach unten (die eigene Lösung, mit „Hervorheben“: gefüllter Punkt,
+    größerer Name). Die Linie zeichnet sich beim Scrollen bis zur eigenen Stufe, gleiche Technik.
 {% endcomment %}
 
 {%- assign obj_layout = section.settings.layout | default: 'liste' -%}
 
-<section class="lt-dna-obj"{% if section.settings.color_bg != blank %} style="background: {{ section.settings.color_bg }}"{% endif %}{% if section.settings.read_marker %} data-lt-read{% endif %}>
+<section class="lt-dna-obj{% if section.settings.antwort_gross %} lt-dna-obj--gross{% endif %}"{% if section.settings.color_bg != blank %} style="background: {{ section.settings.color_bg }}; --lt-obj-bg: {{ section.settings.color_bg }}"{% endif %}{% if section.settings.read_marker %} data-lt-read{% endif %}>
   <div class="lt-dna-obj__inner lt-dna-wrap">
     {% render 'section-heading-crs', heading: section.settings.heading, subheading: section.settings.subheading, align: 'left', headline_md: true, extra_class: 'lt-dna-obj__header' %}
     {%- if obj_layout == 'raster' -%}
@@ -36,6 +46,35 @@
           </div>
         {%- endfor -%}
       </div>
+    {%- elsif obj_layout == 'leiter' -%}
+      <ol class="lt-dna-obj__leiter" aria-label="{{ section.settings.heading | escape }}">
+        {%- for block in section.blocks -%}
+          <li class="lt-dna-obj__stufe{% if block.settings.hervorheben %} lt-dna-obj__stufe--wir{% endif %}" {{ block.shopify_attributes }}>
+            <span class="lt-dna-obj__punkt" aria-hidden="true"></span>
+            <p class="lt-dna-obj__g-name">{{ block.settings.objection | escape }}</p>
+            {%- if block.settings.answer != blank -%}<p class="lt-dna-obj__g-why">{{ block.settings.answer | escape }}</p>{%- endif -%}
+          </li>
+        {%- endfor -%}
+      </ol>
+    {%- elsif section.settings.antwort_gross -%}
+    <dl class="lt-dna-obj__list">
+      {%- for block in section.blocks -%}
+        <div class="lt-dna-obj__row" {{ block.shopify_attributes }}>
+          <dt class="lt-dna-obj__q">{{ block.settings.objection | escape }}</dt>
+          <dd class="lt-dna-obj__a">
+            {%- if block.settings.kurz != blank -%}<strong class="lt-dna-obj__kurz">{{ block.settings.kurz | escape }}</strong>{%- endif -%}
+            {%- if block.settings.balken_teil > 0 and block.settings.balken_gesamt > 0 -%}
+              {%- assign obj_pct = block.settings.balken_teil | times: 100.0 | divided_by: block.settings.balken_gesamt | round: 1 -%}
+              <span class="lt-dna-obj__bar" style="--lt-obj-pct: {{ obj_pct }}%" role="img" aria-label="{{ block.settings.balken_label_teil | escape }}, {{ block.settings.balken_label_rest | escape }}">
+                <span class="lt-dna-obj__bar-track"><span class="lt-dna-obj__bar-fill"></span></span>
+                <span class="lt-dna-obj__bar-labels"><span>{{ block.settings.balken_label_teil | escape }}</span><span>{{ block.settings.balken_label_rest | escape }}</span></span>
+              </span>
+            {%- endif -%}
+            {%- if block.settings.answer != blank -%}<span class="lt-dna-obj__txt">{{ block.settings.answer | escape }}</span>{%- endif -%}
+          </dd>
+        </div>
+      {%- endfor -%}
+    </dl>
     {%- else -%}
     <dl class="lt-dna-obj__list">
       {%- for block in section.blocks -%}
@@ -80,6 +119,33 @@
   color: var(--color-ink-muted);
 }
 .lt-dna-obj__kurz { font-weight: var(--weight-bold); color: var(--color-ink); }
+
+/* Kurzantwort groß: Frage klein darüber, Antwort als große Zeile, Text klein darunter */
+.lt-dna-obj--gross .lt-dna-obj__row { gap: var(--space-1); align-content: start; padding: var(--space-4) 0; }
+.lt-dna-obj--gross .lt-dna-obj__q {
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  color: var(--color-ink-muted);
+}
+.lt-dna-obj--gross .lt-dna-obj__kurz {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  letter-spacing: -0.01em;
+  color: var(--color-ink);
+  text-wrap: balance;
+}
+.lt-dna-obj--gross .lt-dna-obj__txt { display: block; margin-top: var(--space-2); font-size: var(--text-body-sm); max-width: var(--lt-measure, 32rem); }
+.lt-dna-obj__bar { display: block; margin-top: var(--space-2); max-width: 24rem; }
+.lt-dna-obj__bar-track { display: block; height: 8px; border-radius: var(--radius-full); background: var(--color-surface-benefit); overflow: hidden; }
+.lt-dna-obj__bar-fill { display: block; height: 100%; width: var(--lt-obj-pct, 50%); border-radius: var(--radius-full); background: var(--color-teal-dark); }
+.lt-dna-obj__bar-labels { display: flex; justify-content: space-between; gap: var(--space-3); margin-top: var(--space-1); font-size: var(--text-micro); line-height: var(--leading-body); color: var(--color-ink); font-variant-numeric: tabular-nums; }
+.lt-dna-obj__bar-labels span:last-child { text-align: right; color: var(--color-ink-muted); }
+
 .lt-dna-obj__grid { max-width: 44rem; }
 .lt-dna-obj__g-row {
   display: grid;
@@ -104,9 +170,65 @@
   background: var(--color-surface-benefit);
 }
 .lt-dna-obj__g-row--wir .lt-dna-obj__g-why { color: var(--color-ink); }
+
+/* Leiter: Stufen an einer Linie, oben Schätzung, unten die eigene Lösung */
+.lt-dna-obj__leiter { position: relative; list-style: none; margin: 0; padding: 0 0 0 calc(var(--space-6) + var(--space-1)); max-width: 40rem; }
+.lt-dna-obj__leiter::before {
+  content: "";
+  position: absolute;
+  left: 7px;
+  top: 10px;
+  bottom: 12px;
+  width: 2px;
+  background: var(--color-border-strong);
+  transform-origin: top;
+}
+.lt-dna-obj__stufe { position: relative; padding: var(--space-3) 0; }
+.lt-dna-obj__stufe + .lt-dna-obj__stufe { border-top: 1px solid var(--color-border-strong); }
+.lt-dna-obj__punkt {
+  position: absolute;
+  left: calc(-1 * (var(--space-6) + var(--space-1)));
+  top: calc(var(--space-3) + 5px);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--color-ink-muted);
+  background: var(--lt-obj-bg, var(--color-surface-secondary));
+}
+.lt-dna-obj__stufe--wir { padding-top: var(--space-4); padding-bottom: var(--space-4); }
+.lt-dna-obj__stufe--wir .lt-dna-obj__g-name { font-family: var(--font-heading); font-size: var(--text-section); }
+.lt-dna-obj__stufe--wir .lt-dna-obj__g-why { color: var(--color-ink); }
+.lt-dna-obj__stufe--wir .lt-dna-obj__punkt {
+  top: calc(var(--space-4) + 3px);
+  width: 20px;
+  height: 20px;
+  left: calc(-1 * (var(--space-6) + var(--space-1)) - 2px);
+  border-color: var(--color-teal-dark);
+  background: var(--color-teal-dark);
+  box-shadow: 0 0 0 4px var(--color-surface-benefit);
+}
+
+/* Delight ohne JavaScript: Linie und Balken zeichnen sich beim Scrollen, Endzustand steht ohne Unterstützung */
+@supports (animation-timeline: view()) {
+  .lt-dna-obj__leiter::before { animation: lt-dna-obj-draw linear both; animation-timeline: view(); animation-range: entry 0% cover 45%; }
+  .lt-dna-obj__stufe--wir .lt-dna-obj__punkt { animation: lt-dna-obj-fill linear both; animation-timeline: view(); animation-range: entry 0% entry 100%; }
+  .lt-dna-obj__bar-fill { animation: lt-dna-obj-bar linear both; animation-timeline: view(); animation-range: entry 0% cover 30%; }
+}
+@keyframes lt-dna-obj-draw { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+@keyframes lt-dna-obj-fill { from { background: var(--lt-obj-bg, var(--color-surface-secondary)); box-shadow: 0 0 0 0 var(--color-surface-benefit); } to { background: var(--color-teal-dark); box-shadow: 0 0 0 4px var(--color-surface-benefit); } }
+@keyframes lt-dna-obj-bar { from { width: 0; } to { width: var(--lt-obj-pct, 50%); } }
+@media (prefers-reduced-motion: reduce) {
+  .lt-dna-obj__leiter::before, .lt-dna-obj__stufe--wir .lt-dna-obj__punkt, .lt-dna-obj__bar-fill { animation: none; }
+}
+
 @media screen and (min-width: 750px) {
   .lt-dna-obj__g-row { grid-template-columns: minmax(0, 1fr) 72px 72px; }
   .lt-dna-obj__row { grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: var(--space-6); }
+  .lt-dna-obj--gross .lt-dna-obj__list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); align-items: start; border-top: 1px solid var(--color-border-strong); }
+  .lt-dna-obj--gross .lt-dna-obj__row { grid-template-columns: minmax(0, 1fr); gap: var(--space-1); border-top: 0; padding-top: var(--space-5); }
+  .lt-dna-obj--gross .lt-dna-obj__row:last-child { border-bottom: 0; }
+  .lt-dna-obj__stufe { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: var(--space-4); align-items: baseline; }
+  .lt-dna-obj__stufe .lt-dna-obj__g-why { margin-top: 0; }
 }
 {% endstylesheet %}
 
@@ -122,10 +244,12 @@
       "type": "select", "id": "layout", "label": "Darstellung",
       "options": [
         { "value": "liste", "label": "Fragen und Antworten" },
-        { "value": "raster", "label": "Vergleich mit zwei Spalten" }
+        { "value": "raster", "label": "Vergleich mit zwei Spalten" },
+        { "value": "leiter", "label": "Leiter: ein Weg je Stufe" }
       ],
       "default": "liste"
     },
+    { "type": "checkbox", "id": "antwort_gross", "label": "Kurzantwort groß", "info": "Nur bei „Fragen und Antworten“: Frage klein, Kurzantwort als große Zeile, Antwort klein darunter.", "default": false },
     { "type": "text", "id": "col_1_label", "label": "Vergleich: Spalte 1", "default": "Alter" },
     { "type": "text", "id": "col_2_label", "label": "Vergleich: Spalte 2", "default": "Gene" },
     { "type": "checkbox", "id": "read_marker", "label": "Ereignis lt_read, wenn diese Section sichtbar wird", "info": "Nur an einer Section je Seite setzen (AGE&DNA-PDP: Einwände).", "default": false }
@@ -134,10 +258,16 @@
     { "type": "objection", "name": "Einwand", "limit": 8, "settings": [
       { "type": "text", "id": "objection", "label": "Einwand in Kundenworten", "default": "Reicht Speichel?" },
       { "type": "text", "id": "kurz", "label": "Kurzantwort (fett davor)", "info": "Die Antwort in drei, vier Wörtern. Leer = keine." },
-      { "type": "textarea", "id": "answer", "label": "Antwort, zwei Sätze", "info": "Beim Vergleich: ein Satz unter dem Namen." },
+      { "type": "textarea", "id": "answer", "label": "Antwort, zwei Sätze", "info": "Beim Vergleich und bei der Leiter: ein Satz unter dem Namen." },
+      { "type": "header", "content": "Balken (nur bei „Kurzantwort groß“)" },
+      { "type": "number", "id": "balken_teil", "label": "Anteil", "info": "Zum Beispiel 299. Leer oder 0 = kein Balken." },
+      { "type": "number", "id": "balken_gesamt", "label": "Gesamt", "info": "Zum Beispiel 395." },
+      { "type": "text", "id": "balken_label_teil", "label": "Beschriftung links" },
+      { "type": "text", "id": "balken_label_rest", "label": "Beschriftung rechts" },
+      { "type": "header", "content": "Vergleich und Leiter" },
       { "type": "checkbox", "id": "col_1", "label": "Vergleich: Spalte 1 erfüllt", "default": false },
       { "type": "checkbox", "id": "col_2", "label": "Vergleich: Spalte 2 erfüllt", "default": false },
-      { "type": "checkbox", "id": "hervorheben", "label": "Vergleich: als eigene Lösung hervorheben", "default": false }
+      { "type": "checkbox", "id": "hervorheben", "label": "Als eigene Lösung hervorheben", "info": "Vergleich: getönte Zeile. Leiter: gefüllter Punkt, größerer Name.", "default": false }
     ] }
   ],
   "presets": [{ "name": "LT DNA-LP Objections" }]

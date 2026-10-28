@@ -60,20 +60,30 @@
       </div>
 
       {%- comment -%} Right: accordion items {%- endcomment -%}
+      {%- comment -%} Impeccable 2 (28.10.2026, AGE&DNA-PDP): `kurz` je Block ist die halbe Antwort in
+          der geschlossenen Zeile (fett hinter der Frage, Muster lt-dna-lp-objections). `first_open`
+          rendert die erste Antwort serverseitig offen, damit sie auch ohne JavaScript steht; die
+          Einblendung beim Laden ist der eine Delight-Moment der Section (nur CSS). Beide per
+          Default aus, NMN-PDP, Science und dna-lp rendern wie bisher. {%- endcomment -%}
       <div class="faq-right">
         {%- for block in section.blocks -%}
+          {%- assign faq_kurz = block.settings.kurz | strip -%}
+          {%- assign faq_open = false -%}
+          {%- if section.settings.first_open and forloop.first -%}
+            {%- assign faq_open = true -%}
+          {%- endif -%}
           <div class="faq-item" {{ block.shopify_attributes }}>
             <button
               class="faq-question"
               id="faq-trigger-{{ section.id }}-{{ forloop.index }}"
-              aria-expanded="false"
+              aria-expanded="{% if faq_open %}true{% else %}false{% endif %}"
               aria-controls="faq-panel-{{ section.id }}-{{ forloop.index }}"
             >
-              <span class="faq-question-text">{{ block.settings.question | escape }}</span>
+              <span class="faq-question-text">{{ block.settings.question | escape }}{% if faq_kurz != blank %} <strong class="faq-question-kurz">{{ faq_kurz | escape }}</strong>{% endif %}</span>
               <span class="faq-toggle" aria-hidden="true">{% render 'crs-chevron', class: 'faq-toggle-icon' %}</span>
             </button>
             <div
-              class="faq-panel"
+              class="faq-panel{% if faq_open %} is-open faq-panel--initial{% endif %}"
               id="faq-panel-{{ section.id }}-{{ forloop.index }}"
               role="region"
               aria-labelledby="faq-trigger-{{ section.id }}-{{ forloop.index }}"
@@ -95,6 +105,10 @@
   {%- for block in section.blocks -%}
     {%- assign faq_question = block.settings.question | strip -%}
     {%- assign faq_answer = block.settings.answer | strip -%}
+    {%- assign faq_kurz_ld = block.settings.kurz | strip -%}
+    {%- if faq_kurz_ld != blank -%}
+      {%- assign faq_answer = faq_kurz_ld | append: ' ' | append: faq_answer -%}
+    {%- endif -%}
     {%- if faq_question != blank and faq_answer != blank -%}
       {%- if faq_schema_started -%},{%- endif -%}
       {%- assign faq_schema_started = true -%}
@@ -234,15 +248,43 @@
 .faq-answer {
   overflow: hidden;
 }
+/* Zugeklappt auch fuer Tastatur und Screenreader weg (Gutachten B, 28.10.2026): die 0fr-Zeile
+   versteckt nur optisch, ein Link in der Antwort blieb sonst unsichtbar fokussierbar. visibility
+   wartet beim Schliessen die Panel-Transition ab und schaltet beim Oeffnen sofort. */
+.faq-panel:not(.is-open) .faq-answer {
+  visibility: hidden;
+  transition: visibility 0s 0.28s;
+}
 
 .faq-answer > :last-child {
   margin-bottom: 16px;
+}
+
+/* Halbe Antwort in der geschlossenen Zeile (kurz), fett hinter der Frage. */
+.faq-question-kurz {
+  font-weight: var(--weight-bold, 700);
+  color: var(--crs-text, #26251e);
+}
+
+/* Erste Antwort offen geladen (first_open): entfaltet sich einmal beim Laden, danach
+   normaler Zustand. Ohne JavaScript steht sie offen, bei reduzierter Bewegung sofort. */
+@keyframes faq-unfold {
+  from { grid-template-rows: 0fr; }
+  to   { grid-template-rows: 1fr; }
+}
+.faq-panel--initial {
+  /* backwards, nicht forwards: der Endzustand kommt aus .is-open, sonst bliebe 1fr stehen,
+     wenn das JS die Zeile spaeter schliesst. */
+  animation: faq-unfold 0.55s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .faq-panel,
   .faq-toggle-icon {
     transition: none;
+  }
+  .faq-panel--initial {
+    animation: none;
   }
 }
 
@@ -399,6 +441,13 @@
       "info": "Zeilenumbruch: Enter in Überschrift/Unterüberschrift."
     },
     {
+      "type": "checkbox",
+      "id": "first_open",
+      "label": "Erste Frage offen laden",
+      "default": false,
+      "info": "Die erste Antwort steht beim Laden offen (auch ohne JavaScript) und entfaltet sich einmal."
+    },
+    {
       "type": "text",
       "id": "kicker",
       "label": "Kicker (optional)",
@@ -429,6 +478,12 @@
           "id": "question",
           "label": "Frage",
           "default": "Wie lange dauert die Lieferung?"
+        },
+        {
+          "type": "text",
+          "id": "kurz",
+          "label": "Kurzantwort (fett hinter der Frage)",
+          "info": "Die halbe Antwort in zwei, drei Wörtern, sichtbar ohne Aufklappen. Leer = keine."
         },
         {
           "type": "textarea",

@@ -38,6 +38,19 @@
   Blocktyp "bereich" (Bereich · Werte · Ändert sich), der in Karte 1 als zweite Tabelle
   rendert und ebenfalls ins JSON-LD geht. Karte 2 bekommt eine optionale Zeile unter
   der großen Zahl (rohstoff_name_label, bei NMN leer). Default leer, NMN bleibt gleich.
+
+  Impeccable-Durchgang 2 (28.10.2026, bolder + delight, AGE&DNA-PDP), alle Schalter per Default aus:
+  · labor_value_style "paar": Startwert bleibt links stehen (49), rechts zählt die Zahl auf den
+    Wert (42), Pfeil dazwischen, je Zahl eine Zeile darunter (labor_pair_*_label). Der Abstand
+    zum Pass bleibt nach dem Zählen sichtbar; das ist der eine Zähl-Moment der Seite.
+  · labor_text_style "spalten": Kopf links in fester Spalte, Text rechts, wie die Spec-Rows
+    aus DESIGN.md. Halb so hoch wie "zeilen".
+  · labor_source: Quellenzeile unten in Karte 1 (Labor, Norm), ersetzt die Beweiszeile oben.
+  · person_quote + person_proof: Karte 2 trägt einen Satz der Person (Zitat-Stimme, Lato
+    kursiv, hängende Anführung) und eine Belegzeile unter der Rolle.
+  · stimmen_quelle: Wort hinter der Anzahl ("auf Loox"). Die großen Sterne neben dem Schnitt
+    füllen sich seit diesem Durchgang nach dem Schnitt: bei 4,7 sind vier Sterne voll und der
+    fünfte zu 70 %, statt fünf voller Sterne neben einer 4,7.
 {% endcomment %}
 
 {%- liquid
@@ -63,6 +76,10 @@
   assign bg_rating = product.metafields.loox.avg_rating | default: 0 | plus: 0
   assign bg_count = product.metafields.loox.num_reviews | default: 0 | plus: 0
   assign bg_count_s = bg_count | append: ''
+  assign bg_rating10 = bg_rating | times: 10 | round
+  assign bg_stars_full = bg_rating10 | divided_by: 10
+  assign bg_stars_part = bg_rating10 | modulo: 10 | times: 10
+  assign bg_stars_next = bg_stars_full | plus: 1
   assign bg_more_label = section.settings.stimmen_link_label | strip
   if bg_count > 0
     assign bg_more_label = bg_more_label | replace: '[anzahl]', bg_count_s
@@ -129,6 +146,29 @@
             {%- assign bg_from = section.settings.labor_value_from | strip -%}
             {%- assign bg_val_num = section.settings.labor_value | split: ' ' | first -%}
             {%- assign bg_val_rest = section.settings.labor_value | remove_first: bg_val_num -%}
+            {%- if section.settings.labor_value_style == 'paar' and bg_from != blank -%}
+              {%- comment -%} Zahlenpaar (Impeccable 2, 28.10.2026): der Startwert bleibt links stehen, rechts
+                  zählt die Zahl einmal vom Startwert auf den Wert. Nach dem Zählen steht der Abstand da.
+                  Ohne JS und bei reduzierter Bewegung steht das Paar von Anfang an. {%- endcomment -%}
+              <div class="ltbg__paar">
+                <span class="ltbg__paar-cell">
+                  <span class="ltbg__paar-num ltbg__paar-num--from">{{ bg_from | escape }}</span>
+                  {%- if section.settings.labor_pair_from_label != blank -%}
+                    <span class="ltbg__paar-cap">{{ section.settings.labor_pair_from_label | escape }}</span>
+                  {%- endif -%}
+                </span>
+                <svg class="ltbg__paar-arrow" width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="wird zu" focusable="false"><path d="M4 14h19M16 7l7 7-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="ltbg__paar-cell">
+                  <span class="ltbg__paar-num"><span data-ltbg-count="{{ bg_from | escape }}">{{ bg_val_num | escape }}</span>{{ bg_val_rest | escape }}</span>
+                  {%- if section.settings.labor_pair_to_label != blank -%}
+                    <span class="ltbg__paar-cap">{{ section.settings.labor_pair_to_label | escape }}</span>
+                  {%- endif -%}
+                </span>
+              </div>
+              {%- if section.settings.labor_value_label != blank -%}
+                <p class="ltbg__big-label ltbg__big-label--paar">{{ section.settings.labor_value_label | escape }}</p>
+              {%- endif -%}
+            {%- else -%}
             <p class="ltbg__big ltbg__big--num">
               {%- if bg_from != blank -%}
                 <span data-ltbg-count="{{ bg_from | escape }}">{{ bg_val_num | escape }}</span>{{ bg_val_rest | escape }}
@@ -139,6 +179,7 @@
                 <span class="ltbg__big-label">{{ section.settings.labor_value_label | escape }}</span>
               {%- endif -%}
             </p>
+            {%- endif -%}
           {%- endif -%}
           {%- if section.settings.labor_meta != blank -%}
             <p class="ltbg__meta">{{ section.settings.labor_meta | escape }}</p>
@@ -148,10 +189,11 @@
           {%- comment -%} Mehrere Absätze möglich (eine Zeile je Absatz), seit 27.10.2026. {%- endcomment -%}
           {%- if section.settings.labor_text != blank -%}
             {%- assign bg_labor_paras = section.settings.labor_text | newline_to_br | split: '<br />' -%}
-            {%- if section.settings.labor_text_style == 'zeilen' -%}
+            {%- if section.settings.labor_text_style == 'zeilen' or section.settings.labor_text_style == 'spalten' -%}
               {%- comment -%} Zahl vor Text (27.10.2026): je Zeile „Kopf | Text“, Kopf groß in
-                  Überschrift-Schrift, Text darunter gedämpft. Ohne | wird die Zeile nur Text. {%- endcomment -%}
-              <ul class="ltbg__zeilen" role="list">
+                  Überschrift-Schrift, Text darunter gedämpft. Ohne | wird die Zeile nur Text.
+                  „spalten“ (28.10.2026): Kopf links in fester Spalte, Text rechts daneben. {%- endcomment -%}
+              <ul class="ltbg__zeilen{% if section.settings.labor_text_style == 'spalten' %} ltbg__zeilen--spalten{% endif %}" role="list">
                 {%- for bg_para in bg_labor_paras -%}
                   {%- assign bg_para_s = bg_para | strip -%}
                   {%- if bg_para_s != blank -%}
@@ -243,6 +285,9 @@
             </div>
           </details>
           {%- endif -%}
+          {%- if section.settings.labor_source != blank -%}
+            <p class="ltbg__source">{{ section.settings.labor_source | escape }}</p>
+          {%- endif -%}
         </div>
       </article>
       {%- endif -%}
@@ -267,13 +312,21 @@
           {%- if section.settings.rohstoff_meta != blank -%}
             <p class="ltbg__meta">{{ section.settings.rohstoff_meta | escape }}</p>
           {%- endif -%}
+          {%- if section.settings.person_quote != blank -%}
+            {%- comment -%} Ein Satz der Person (28.10.2026): Zitat-Stimme aus DESIGN.md, Anführungszeichen
+                aus dem CSS, die öffnende hängt in den Rand. Auf dem Desktop links neben der Person. {%- endcomment -%}
+            <p class="ltbg__zitat">{{ section.settings.person_quote | escape }}</p>
+          {%- endif -%}
         </div>
         <div class="ltbg__main{% if section.settings.person_first %} ltbg__main--person-first{% endif %}">
           {%- if section.settings.rohstoff_text != blank -%}
             <p class="ltbg__text">{{ section.settings.rohstoff_text | escape }}</p>
           {%- endif -%}
           {%- if section.settings.person_name != blank -%}
-            <div class="ltbg__person{% if section.settings.person_first %} ltbg__person--first{% endif %}">
+            {%- comment -%} Mit Zitat wird die Person zur Unterschrift (28.10.2026): Bild 48 px, Name in
+                Body-sm halbfett wie der Name an den Stimmen, Rolle und Beleg darunter. Fett gehört den
+                Messwerten, nicht dem Namen (DESIGN.md). person_first bleibt dann ohne Wirkung auf die Größe. {%- endcomment -%}
+            <div class="ltbg__person{% if section.settings.person_first %} ltbg__person--first{% endif %}{% if section.settings.person_quote != blank %} ltbg__person--byline{% endif %}">
               {%- if section.settings.person_image != blank -%}
                 {{ section.settings.person_image | image_url: width: 160 | image_tag: loading: 'lazy', class: 'ltbg__person-img', alt: '' }}
               {%- elsif section.settings.person_image_url != blank -%}
@@ -283,6 +336,9 @@
                 <p class="ltbg__person-name">{{ section.settings.person_name | escape }}</p>
                 {%- if section.settings.person_role != blank -%}
                   <p class="ltbg__person-role">{{ section.settings.person_role | escape }}</p>
+                {%- endif -%}
+                {%- if section.settings.person_proof != blank -%}
+                  <p class="ltbg__person-proof">{{ section.settings.person_proof | escape }}</p>
                 {%- endif -%}
               </div>
             </div>
@@ -312,11 +368,22 @@
               {{ bg_rating | round: 1 | replace: '.', ',' }}
               <span class="ltbg__big-label">
                 {%- if section.settings.stimmen_stars_big -%}
+                  {%- comment -%} Sterne nach dem Schnitt (28.10.2026, delight): volle Sterne bis zur Ganzzahl,
+                      der nächste zu dem Anteil gefüllt, den der Schnitt vorgibt (4,7 → vier voll, einer zu 70 %),
+                      der Rest leer. Reines CSS (clip-path), kein JS, kein Bewegungsmoment. {%- endcomment -%}
                   <span class="ltbg__stars ltbg__stars--big" aria-hidden="true">
-                    {%- for i in (1..5) -%}<svg class="ltbg__star" width="14" height="14" viewBox="0 0 14 13" fill="none"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg>{%- endfor -%}
+                    {%- for i in (1..5) -%}
+                      {%- if i <= bg_stars_full -%}
+                        <svg class="ltbg__star" width="14" height="14" viewBox="0 0 14 13" fill="none"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg>
+                      {%- elsif bg_stars_part > 0 and i == bg_stars_next -%}
+                        <span class="ltbg__star ltbg__star--part" style="--ltbg-star-fill: {{ bg_stars_part }}%"><svg class="ltbg__star-base" width="14" height="14" viewBox="0 0 14 13" fill="none"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" stroke="currentColor" stroke-width="0.9" fill="none"/></svg><svg class="ltbg__star-fill" width="14" height="14" viewBox="0 0 14 13" fill="none"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg></span>
+                      {%- else -%}
+                        <svg class="ltbg__star ltbg__star--empty" width="14" height="14" viewBox="0 0 14 13" fill="none"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" stroke="currentColor" stroke-width="0.9" fill="none"/></svg>
+                      {%- endif -%}
+                    {%- endfor -%}
                   </span>
                 {%- endif -%}
-                von 5 · {{ bg_count }} Bewertungen</span>
+                von 5 · {{ bg_count }} Bewertungen{% if section.settings.stimmen_quelle != blank %} {{ section.settings.stimmen_quelle | escape }}{% endif %}</span>
             </p>
           {%- endif -%}
         </div>
@@ -468,11 +535,70 @@
 .ltbg__zeile { display: grid; gap: 2px; padding: var(--space-3) 0; border-top: 1px solid var(--ltbg-rule); }
 .ltbg__zeile-kopf { font-family: var(--font-heading); font-size: var(--text-section); font-weight: var(--weight-bold); line-height: var(--leading-tight); font-variant-numeric: tabular-nums; }
 .ltbg__zeile-text { font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--ltbg-text-sec); }
+/* Spalten (labor_text_style: spalten, 28.10.2026): unter 840 px läuft der Kopf fett in die
+   Zeile hinein (zwei Zeilen je Eintrag statt drei), ab 840 px steht er links in fester Spalte.
+   Kopf in Body-Größe fett, damit allein das Zahlenpaar Stat-Größe hat. */
+.ltbg__zeilen--spalten .ltbg__zeile { display: block; font-size: var(--text-body); line-height: var(--leading-body); }
+.ltbg__zeilen--spalten .ltbg__zeile-kopf { font-family: var(--font-body); font-size: var(--text-body); font-weight: var(--weight-bold); line-height: inherit; margin-right: var(--space-2); }
+.ltbg__zeilen--spalten .ltbg__zeile-text { font-size: var(--text-body); }
+/* Mit Spalten hat die ganze Karte unter dem Zahlenpaar eine Schriftgröße (BJ 28.10.): Zeilen, Lade,
+   Tabelle und Quellenzeile in Body-Größe. Nur über das Geschwister-Selektor-Paar, damit NMN (Absätze) bleibt. */
+.ltbg__zeilen--spalten ~ .ltbg__details .ltbg__summary,
+.ltbg__zeilen--spalten ~ .ltbg__details .ltbg__body,
+.ltbg__zeilen--spalten ~ .ltbg__details .ltbg__table,
+.ltbg__zeilen--spalten ~ .ltbg__source { font-size: var(--text-body); }
+/* Zahlenpaar (labor_value_style: paar, 28.10.2026): beide Zahlen in Stat-Größe, der Startwert
+   gedämpft und regular, der Wert fett in Tinte (Texte nur Schwarz/Grau/Weiß, BJ 26.10.).
+   Unter jeder Zahl ihre Zeile, der Pfeil sitzt auf der Grundlinie der Zahlen. */
+.ltbg__paar { display: flex; align-items: flex-start; gap: var(--space-3); margin: 0; font-variant-numeric: tabular-nums; }
+.ltbg__paar-cell { display: grid; gap: var(--space-1); min-width: 0; }
+.ltbg__paar-num {
+  font-family: var(--font-heading);
+  font-size: var(--text-display);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  line-height: var(--leading-stat);
+  color: var(--ltbg-text);
+}
+.ltbg__paar-num--from { font-weight: var(--weight-regular); color: var(--ltbg-text-ter); }
+.ltbg__paar-cap { font-size: var(--text-body-sm); line-height: var(--leading-tight); color: var(--ltbg-text-sec); }
+.ltbg__paar-arrow { flex: none; width: 28px; height: 28px; margin-top: calc((var(--text-display) - 28px) / 2); color: var(--ltbg-text-ter); }
+.ltbg__big-label--paar { display: block; font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--ltbg-text-sec); margin: var(--space-3) 0 0; }
+/* Quellenzeile unten in Karte 1 (labor_source): Micro-Stufe, tertiär, über einer Haarlinie */
+.ltbg__source { margin: var(--space-3) 0 0; padding-top: var(--space-3); border-top: 1px solid var(--ltbg-rule); font-size: var(--text-micro); line-height: var(--leading-body); color: var(--ltbg-text-ter); }
+/* Ein Satz der Person (person_quote): Zitat-Stimme aus DESIGN.md (Lato kursiv, 22 px mobil,
+   28 px ab 840 px), Anführungszeichen aus dem CSS, das öffnende hängt in den Rand. */
+.ltbg__zitat {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: var(--text-h3);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  letter-spacing: 0;
+  color: var(--ltbg-text);
+  margin: 0;
+  max-width: 22em;
+  text-indent: -0.42em;
+}
+.ltbg__zitat::before { content: "\201E"; }
+.ltbg__zitat::after { content: "\201C"; }
+.ltbg__head > .ltbg__zitat:first-child { margin-top: 0; }
+.ltbg__head > * + .ltbg__zitat { margin-top: var(--space-3); }
+.ltbg__person-proof { margin: 2px 0 0; font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--ltbg-text-sec); }
+/* Teilstern neben dem Schnitt: Kontur in Tertiär, darüber die Füllung, per clip-path auf den Anteil beschnitten */
+.ltbg__star--part { position: relative; display: block; width: 14px; height: 14px; }
+.ltbg__star--part .ltbg__star-base { position: absolute; inset: 0; color: var(--ltbg-text-ter); }
+.ltbg__star--part .ltbg__star-fill { position: absolute; inset: 0; clip-path: inset(0 calc(100% - var(--ltbg-star-fill, 0%)) 0 0); }
 /* Person zuerst (person_first): Gesicht vor dem Text, größer */
 .ltbg__main--person-first { display: flex; flex-direction: column; }
 .ltbg__main--person-first .ltbg__person { order: -1; margin-top: 0; gap: var(--space-4); }
 .ltbg__person--first .ltbg__person-img { width: 80px; height: 80px; }
 .ltbg__person--first .ltbg__person-name { font-family: var(--font-heading); font-size: var(--text-section); }
+/* Unterschrift unter dem Zitat (person_quote gesetzt): schlägt person_first: gleiche Spezifität, steht dahinter */
+.ltbg__person--byline { gap: var(--space-3); align-items: center; margin-top: var(--space-4); }
+.ltbg__person--byline .ltbg__person-img { width: 48px; height: 48px; }
+.ltbg__person--byline .ltbg__person-name { font-family: var(--font-body); font-size: var(--text-body-sm); font-weight: var(--weight-semibold); line-height: var(--leading-body); }
+.ltbg__person--byline .ltbg__person-role { margin: 0; }
 .ltbg__stars--big { margin: 0 var(--space-2) 0 0; vertical-align: -2px; }
 /* Karten-Oberzeile: klein, Versalien, gedämpft. Bewusst kein Heading-Stack,
    die Karten sind Karten, keine Sections. !important gegen globale h2-Regeln. */
@@ -606,6 +732,11 @@
     align-items: start;
   }
   .ltbg__big { font-size: var(--text-stat); }
+  .ltbg__paar-num { font-size: var(--text-stat); }
+  .ltbg__zeilen--spalten .ltbg__zeile { display: grid; grid-template-columns: minmax(0, 9rem) minmax(0, 1fr); gap: var(--space-4); align-items: baseline; }
+  .ltbg__zeilen--spalten .ltbg__zeile-kopf { margin-right: 0; }
+  .ltbg__paar-arrow { margin-top: calc((var(--text-stat) - 28px) / 2); }
+  .ltbg__zitat { font-size: var(--text-quote); }
   .ltbg__main {
     border-left: 1px solid var(--ltbg-rule);
     padding-left: var(--space-6);
@@ -645,15 +776,28 @@
     { "type": "text", "id": "labor_value_label", "label": "Bezeichnung der Zahl", "default": "NMN-Gehalt" },
     { "type": "text", "id": "labor_meta", "label": "Herkunftszeile", "default": "Charge 20250917 · Limbach Analytics, Mainz · 1H-NMR" },
     { "type": "text", "id": "labor_value_from", "label": "Große Zahl zählt ein ab", "info": "Ganze Zahl, z. B. 49: die führende Zahl läuft beim Hereinscrollen einmal auf den Wert. Leer = steht still." },
+    {
+      "type": "select", "id": "labor_value_style", "label": "Große Zahl als",
+      "options": [
+        { "value": "zahl", "label": "Eine Zahl" },
+        { "value": "paar", "label": "Zahlenpaar (Startwert bleibt links stehen)" }
+      ],
+      "default": "zahl",
+      "info": "Zahlenpaar braucht „zählt ein ab“. Die Bezeichnung der Zahl steht dann als Zeile unter dem Paar."
+    },
+    { "type": "text", "id": "labor_pair_from_label", "label": "Zeile unter dem Startwert", "info": "Nur beim Zahlenpaar, z. B. „Jahre laut Pass“" },
+    { "type": "text", "id": "labor_pair_to_label", "label": "Zeile unter dem Wert", "info": "Nur beim Zahlenpaar, z. B. „Jahre biologisch“" },
     { "type": "textarea", "id": "labor_text", "label": "Satz", "default": "Schwermetalle: 4 von 4 unter der Bestimmungsgrenze.", "info": "Eine Zeile je Absatz. Bei „Zeilen“: Kopf | Text." },
     {
       "type": "select", "id": "labor_text_style", "label": "Satz als",
       "options": [
         { "value": "absatz", "label": "Absätze" },
-        { "value": "zeilen", "label": "Zeilen mit großem Kopf (Kopf | Text)" }
+        { "value": "zeilen", "label": "Zeilen mit großem Kopf (Kopf | Text)" },
+        { "value": "spalten", "label": "Spalten: Kopf links, Text rechts (Kopf | Text)" }
       ],
       "default": "absatz"
     },
+    { "type": "text", "id": "labor_source", "label": "Quellenzeile unten", "info": "Unter der Lade, z. B. „Labor: Eurofins Genomics, ISO 17025“. Leer = keine." },
     { "type": "text", "id": "labor_details_label", "label": "Lade-Beschriftung", "default": "Einzelwerte und Prüfdetails" },
     { "type": "text", "id": "labor_batch", "label": "Charge", "default": "20250917", "info": "Für Tabellen-Caption und JSON-LD" },
     { "type": "text", "id": "labor_lab", "label": "Labor", "default": "Limbach Analytics, Arotop Laboratorien Mainz, DAkkS-akkreditiert nach DIN EN ISO/IEC 17025" },
@@ -677,13 +821,16 @@
     { "type": "text", "id": "person_name", "label": "Person: Name", "default": "Prof. Dr. med. Volker Limmroth" },
     { "type": "text", "id": "person_role", "label": "Person: Rolle", "default": "Chefarzt Neurologie, prüft, was wir zu NMN veröffentlichen" },
     { "type": "checkbox", "id": "person_first", "label": "Person zuerst, Bild größer", "default": false },
+    { "type": "textarea", "id": "person_quote", "label": "Person: ein Satz (Zitat)", "info": "Ohne Anführungszeichen, die setzt die Section. Leer = kein Zitat." },
+    { "type": "text", "id": "person_proof", "label": "Person: Belegzeile", "info": "Eine Zeile unter der Rolle, z. B. der Buchtitel. Leer = keine." },
     { "type": "text", "id": "rohstoff_details_label", "label": "Lade-Beschriftung", "default": "Zulassungsstand und Firma" },
     { "type": "richtext", "id": "rohstoff_details_body", "label": "Lade-Inhalt" },
 
     { "type": "header", "content": "Karte 3: Was Kunden sagen" },
     { "type": "checkbox", "id": "show_stimmen", "label": "Karte anzeigen", "default": true },
     { "type": "text", "id": "stimmen_title", "label": "Oberzeile", "default": "Was Kunden sagen" },
-    { "type": "checkbox", "id": "stimmen_stars_big", "label": "Sterne neben dem Schnitt", "default": false },
+    { "type": "checkbox", "id": "stimmen_stars_big", "label": "Sterne neben dem Schnitt", "default": false, "info": "Füllen sich nach dem Schnitt: bei 4,7 vier volle Sterne und einer zu 70 %." },
+    { "type": "text", "id": "stimmen_quelle", "label": "Wort hinter der Anzahl", "info": "z. B. „auf Loox“ → „122 Bewertungen auf Loox“. Leer = nichts." },
     { "type": "text", "id": "verified_label", "label": "Kennzeichen-Text", "default": "Verifiziert", "info": "Steht an Stimmen mit gesetztem Häkchen. Loox zeigt das Zeichen an jeder Bewertung, auch an importierten; es belegt keinen Kauf." },
     { "type": "text", "id": "stimmen_link_label", "label": "Link zu allen Bewertungen", "default": "Alle [anzahl] Bewertungen lesen", "info": "[anzahl] wird durch loox.num_reviews ersetzt. Schnitt und Anzahl im Kopf kommen aus den Loox-Metafeldern." },
     { "type": "url", "id": "stimmen_link_url", "label": "Ziel des Links", "info": "#reviews, wenn die Section „Alle Bewertungen (Loox)“ direkt darunter steht" }

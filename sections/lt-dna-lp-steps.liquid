@@ -1,18 +1,38 @@
 {% comment %}
-  lt-dna-lp-steps — „So läuft es": vier Schritte, je Titel und Zeitangabe, nichts sonst.
+  lt-dna-lp-steps — „So läuft es": Schritte, je Titel und Zeitangabe, nichts sonst.
   Beantwortet „Was muss ich tun?" und „Wie lange dauert es?" in einem Blick.
   Surface: --color-paper. Dominantes Element: die Schrittfolge.
-  Zeitleiste (timeline, 27.10.2026, per Default aus): Haarlinie verbindet die Kreise, Schritt 1
-  ist gefüllt (du bist hier), Ziffern in Überschrift-Schrift mit Tabellenziffern.
+
+  Darstellung (layout, 28.10.2026, Default liste):
+  - liste: Ziffer im Kreis, Titel, Zeit darunter. So rendern die Landingpages page.dna-lp*.json.
+    Zeitleiste (timeline, 27.10.2026, per Default aus): Haarlinie verbindet die Kreise, Schritt 1
+    ist gefüllt (du bist hier), Ziffern in Überschrift-Schrift mit Tabellenziffern.
+  - zahlen: die Zeit (oder das eine Stichwort) steht groß und fett voran, darunter eine Zeile.
+    Keine Ziffern, nur Punkte auf einer Linie. Der eine Moment der Section: die Linie zieht sich
+    beim Scrollen von Schritt zu Schritt, jeder Punkt füllt sich, wenn sie ihn erreicht. Nur per
+    CSS (animation-timeline: view()), kein JavaScript. Ohne Unterstützung oder bei
+    prefers-reduced-motion steht der Endzustand: Linie gezogen, Punkte gefüllt.
+    Desktop waagerecht, Spaltenzahl folgt der Schrittzahl.
 {% endcomment %}
 
-<section class="lt-dna-steps{% if section.settings.timeline %} lt-dna-steps--timeline{% endif %}"{% if section.settings.color_bg != blank %} style="background: {{ section.settings.color_bg }}"{% endif %}>
+{%- liquid
+  assign steps_layout = section.settings.layout | default: 'liste'
+  if steps_layout != 'zahlen'
+    assign steps_layout = 'liste'
+  endif
+-%}
+
+<section class="lt-dna-steps lt-dna-steps--{{ steps_layout }}{% if section.settings.timeline and steps_layout == 'liste' %} lt-dna-steps--timeline{% endif %}"{% if section.settings.color_bg != blank %} style="background: {{ section.settings.color_bg }}"{% endif %}>
   <div class="lt-dna-steps__inner lt-dna-wrap">
     {% render 'section-heading-crs', heading: section.settings.heading, subheading: section.settings.subheading, align: 'left', headline_md: true, extra_class: 'lt-dna-steps__header' %}
-    <ol class="lt-dna-steps__list">
+    <ol class="lt-dna-steps__list" data-count="{{ section.blocks.size }}">
       {%- for block in section.blocks -%}
         <li class="lt-dna-steps__item" {{ block.shopify_attributes }}>
-          <span class="lt-dna-steps__num" aria-hidden="true">{{ forloop.index }}</span>
+          {%- if steps_layout == 'zahlen' -%}
+            <span class="lt-dna-steps__dot" aria-hidden="true"></span>
+          {%- else -%}
+            <span class="lt-dna-steps__num" aria-hidden="true">{{ forloop.index }}</span>
+          {%- endif -%}
           <div class="lt-dna-steps__text">
             <p class="lt-dna-steps__title">{{ block.settings.title | escape }}</p>
             {%- if block.settings.time != blank -%}
@@ -61,10 +81,121 @@
   .lt-dna-steps--timeline .lt-dna-steps__item:not(:last-child)::before { left: 36px; right: calc(-1 * var(--space-6)); top: 17.5px; bottom: auto; width: auto; height: 1px; }
 }
 @media screen and (min-width: 990px) {
-  /* Spaltenzahl folgt der Schrittzahl (4 auf der LP, 5 auf der AGE&DNA-PDP seit 27.10.2026) */
+  /* Spaltenzahl folgt der Schrittzahl (4 auf der LP, 4 auf der AGE&DNA-PDP seit 28.10.2026) */
   .lt-dna-steps__list { grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: var(--space-6); }
   .lt-dna-steps__item { flex-direction: column; }
   .lt-dna-steps__title { margin-top: var(--space-3); }
+}
+
+/* ---------- Darstellung „zahlen": Zeit groß voran, Punkte auf einer Linie ---------- */
+.lt-dna-steps--zahlen {
+  --lt-steps-dot: var(--space-3);
+  --lt-steps-gap: var(--space-5);
+  --lt-steps-pad: var(--space-2);
+  /* Punkt sitzt auf der Mitte der ersten Zeile der großen Zahl */
+  --lt-steps-dot-top: calc((var(--text-h2) * var(--leading-heading) - var(--lt-steps-dot)) / 2);
+  --lt-steps-on: var(--color-teal-dark);
+}
+.lt-dna-steps--zahlen .lt-dna-steps__inner { padding-top: var(--space-7); padding-bottom: var(--space-7); }
+.lt-dna-steps--zahlen .lt-dna-steps__header { margin-bottom: var(--space-5); }
+.lt-dna-steps--zahlen .lt-dna-steps__list {
+  gap: var(--lt-steps-gap);
+  view-timeline-name: --lt-dna-steps;
+  view-timeline-axis: block;
+}
+.lt-dna-steps--zahlen .lt-dna-steps__item {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--lt-steps-dot) minmax(0, 1fr);
+  column-gap: var(--space-4);
+  align-items: start;
+}
+.lt-dna-steps--zahlen .lt-dna-steps__dot {
+  position: relative; z-index: 1;
+  width: var(--lt-steps-dot); height: var(--lt-steps-dot);
+  margin-top: var(--lt-steps-dot-top);
+  border-radius: var(--radius-full);
+  box-shadow: inset 0 0 0 1px var(--lt-steps-on);
+  background: var(--lt-steps-on);
+}
+/* Wegstück zum nächsten Punkt: ::before ist die Haarlinie, ::after die gezogene Linie darüber. */
+.lt-dna-steps--zahlen .lt-dna-steps__item:not(:last-child)::before,
+.lt-dna-steps--zahlen .lt-dna-steps__item:not(:last-child)::after {
+  content: ""; position: absolute;
+  left: calc(var(--lt-steps-dot) / 2);
+  top: calc(var(--lt-steps-dot-top) + var(--lt-steps-dot) + var(--lt-steps-pad));
+  width: 1px;
+  height: calc(100% + var(--lt-steps-gap) - var(--lt-steps-dot) - 2 * var(--lt-steps-pad));
+  transform: translateX(-50%);
+}
+.lt-dna-steps--zahlen .lt-dna-steps__item:not(:last-child)::before { background: var(--color-border-strong); }
+.lt-dna-steps--zahlen .lt-dna-steps__item:not(:last-child)::after { background: var(--lt-steps-on); transform-origin: center top; }
+.lt-dna-steps--zahlen .lt-dna-steps__title {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-heading);
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+}
+.lt-dna-steps--zahlen .lt-dna-steps__time { margin: var(--space-1) 0 0; line-height: var(--leading-body); }
+.lt-dna-steps--zahlen .lt-dna-steps__note { margin-top: var(--space-5); }
+@media screen and (min-width: 990px) {
+  .lt-dna-steps--zahlen { --lt-steps-gap: var(--space-6); }
+  .lt-dna-steps--zahlen .lt-dna-steps__item { display: flex; flex-direction: column; align-items: flex-start; gap: 0; }
+  .lt-dna-steps--zahlen .lt-dna-steps__dot { margin-top: 0; }
+  .lt-dna-steps--zahlen .lt-dna-steps__item:not(:last-child)::before,
+  .lt-dna-steps--zahlen .lt-dna-steps__item:not(:last-child)::after {
+    top: calc(var(--lt-steps-dot) / 2);
+    left: calc(var(--lt-steps-dot) + var(--lt-steps-pad));
+    width: calc(100% + var(--lt-steps-gap) - var(--lt-steps-dot) - 2 * var(--lt-steps-pad));
+    height: 1px;
+    transform: translateY(-50%);
+  }
+  .lt-dna-steps--zahlen .lt-dna-steps__item:not(:last-child)::after { transform-origin: left center; }
+  .lt-dna-steps--zahlen .lt-dna-steps__title { margin-top: var(--space-4); }
+}
+/* Der eine Moment: Linie zieht sich beim Scrollen, Punkte füllen sich der Reihe nach.
+   Endzustand ist der Grundzustand oben, deshalb nur mit Unterstützung und ohne Reduced-Motion.
+   Bereiche hängen an „cover": 0 % heißt, die Liste berührt die Unterkante, 100 % heißt, sie
+   hat die Oberkante verlassen. Sobald die Liste ganz im Bild steht, ist der Weg gezogen. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .lt-dna-steps--zahlen .lt-dna-steps__item:not(:last-child)::after,
+    .lt-dna-steps--zahlen .lt-dna-steps__dot {
+      animation-timeline: --lt-dna-steps;
+      animation-fill-mode: both;
+      animation-timing-function: linear;
+      animation-duration: auto;
+    }
+    .lt-dna-steps--zahlen .lt-dna-steps__item:not(:last-child)::after { animation-name: lt-dna-steps-draw-y; transform: translateX(-50%) scaleY(1); }
+    .lt-dna-steps--zahlen .lt-dna-steps__dot { animation-name: lt-dna-steps-dot-on; }
+    .lt-dna-steps--zahlen .lt-dna-steps__item:nth-child(1) .lt-dna-steps__dot { animation-range: cover 8% cover 11%; }
+    .lt-dna-steps--zahlen .lt-dna-steps__item:nth-child(1)::after              { animation-range: cover 11% cover 19%; }
+    .lt-dna-steps--zahlen .lt-dna-steps__item:nth-child(2) .lt-dna-steps__dot { animation-range: cover 19% cover 22%; }
+    .lt-dna-steps--zahlen .lt-dna-steps__item:nth-child(2)::after              { animation-range: cover 22% cover 30%; }
+    .lt-dna-steps--zahlen .lt-dna-steps__item:nth-child(3) .lt-dna-steps__dot { animation-range: cover 30% cover 33%; }
+    .lt-dna-steps--zahlen .lt-dna-steps__item:nth-child(3)::after              { animation-range: cover 33% cover 41%; }
+    .lt-dna-steps--zahlen .lt-dna-steps__item:nth-child(4) .lt-dna-steps__dot { animation-range: cover 41% cover 44%; }
+    .lt-dna-steps--zahlen .lt-dna-steps__item:nth-child(4)::after              { animation-range: cover 44% cover 50%; }
+    .lt-dna-steps--zahlen .lt-dna-steps__item:nth-child(5) .lt-dna-steps__dot { animation-range: cover 50% cover 53%; }
+    @media screen and (min-width: 990px) {
+      .lt-dna-steps--zahlen .lt-dna-steps__item:not(:last-child)::after { animation-name: lt-dna-steps-draw-x; transform: translateY(-50%) scaleX(1); }
+    }
+  }
+}
+@keyframes lt-dna-steps-draw-y {
+  from { transform: translateX(-50%) scaleY(0); }
+  to   { transform: translateX(-50%) scaleY(1); }
+}
+@keyframes lt-dna-steps-draw-x {
+  from { transform: translateY(-50%) scaleX(0); }
+  to   { transform: translateY(-50%) scaleX(1); }
+}
+@keyframes lt-dna-steps-dot-on {
+  from { background: transparent; }
+  to   { background: var(--lt-steps-on); }
 }
 {% endstylesheet %}
 
@@ -77,12 +208,23 @@
     { "type": "text", "id": "heading", "label": "Headline", "default": "So läuft es." },
     { "type": "text", "id": "subheading", "label": "Subline", "default": "Ohne Arzttermin." },
     { "type": "textarea", "id": "note", "label": "Fußnote" },
+    {
+      "type": "select",
+      "id": "layout",
+      "label": "Darstellung",
+      "default": "liste",
+      "options": [
+        { "value": "liste", "label": "Liste: Ziffer, Titel, Zeit" },
+        { "value": "zahlen", "label": "Zahlen: Zeit groß, eine Zeile, Linie zieht sich" }
+      ],
+      "info": "Bei „Zahlen“ ist der Titel die große Angabe (Heute, 3 Minuten, 6 Wochen) und „Zeit oder Zusatz“ die eine Zeile darunter. Die Zeitleiste unten gilt nur für „Liste“."
+    },
     { "type": "checkbox", "id": "timeline", "label": "Zeitleiste: Linie zwischen den Schritten, Schritt 1 gefüllt", "default": false }
   ],
   "blocks": [
     { "type": "step", "name": "Schritt", "limit": 5, "settings": [
-      { "type": "text", "id": "title", "label": "Titel", "default": "Kit kommt" },
-      { "type": "text", "id": "time", "label": "Zeit oder Zusatz", "default": "2 bis 3 Werktage" }
+      { "type": "text", "id": "title", "label": "Titel", "default": "Kit kommt", "info": "Bei Darstellung „Zahlen“: die Zahl oder das eine Stichwort, groß." },
+      { "type": "text", "id": "time", "label": "Zeit oder Zusatz", "default": "2 bis 3 Werktage", "info": "Bei Darstellung „Zahlen“: eine Zeile, was in dem Schritt passiert." }
     ] }
   ],
   "presets": [{ "name": "LT DNA-LP Steps" }]

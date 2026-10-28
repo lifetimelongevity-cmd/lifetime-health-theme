@@ -55,6 +55,19 @@
   if ra_label == blank
     assign ra_label = 'Alle Bewertungen lesen'
   endif
+  comment
+    Link-Stil (Impeccable 2, 28.10.2026, bolder): kein eigener Abschnitt mit Linien, sondern ein
+    zentrierter Link, die Zahl fett. Die Beschriftung wird escaped und erst danach die Zahl
+    als <strong> eingesetzt, deshalb unten ohne zweites escape. label_open ist der eine
+    Delight-Moment: aufgeklappt sagt die Zeile, dass sie wieder zuklappt (nur CSS, ohne JS).
+  endcomment
+  assign ra_style = section.settings.style | default: 'zeile'
+  assign ra_label_html = ra_label | escape
+  if ra_count > 0
+    assign ra_count_html = '<strong class="ltra__count">' | append: ra_count_s | append: '</strong>'
+    assign ra_label_html = ra_label_html | replace: ra_count_s, ra_count_html
+  endif
+  assign ra_label_open = section.settings.label_open | strip
 -%}
 
 {% style %}
@@ -71,11 +84,14 @@
   }
 {% endstyle %}
 
-<div class="ltra" id="section-{{ section.id }}">
+<div class="ltra ltra--{{ ra_style }}" id="section-{{ section.id }}">
   <div class="ltra__container">
     <details class="ltra__details" id="reviews" data-ltra{% if request.design_mode %} open{% endif %}>
       <summary class="ltra__summary">
-        <span class="ltra__summary-text">{{ ra_label | escape }}</span>
+        <span class="ltra__summary-text{% if ra_label_open != blank %} ltra__summary-text--closed{% endif %}">{{ ra_label_html }}</span>
+        {%- if ra_label_open != blank -%}
+          <span class="ltra__summary-text ltra__summary-text--open">{{ ra_label_open | escape }}</span>
+        {%- endif -%}
         <span class="ltra__summary-icon" aria-hidden="true">{% render 'crs-chevron' %}</span>
       </summary>
       <div class="ltra__panel">
@@ -154,6 +170,47 @@
     transition: none;
   }
 }
+
+/* Beschriftung je Zustand (label_open gesetzt): zu „Alle 122 Bewertungen lesen“,
+   offen „Bewertungen einklappen“. Reines CSS ueber details[open]. */
+.ltra__summary-text--open {
+  display: none;
+}
+.ltra__details[open] .ltra__summary-text--closed {
+  display: none;
+}
+.ltra__details[open] .ltra__summary-text--open {
+  display: inline;
+}
+
+/* Link-Stil (style: link): keine Linien, zentriert, Zahl fett, Unterstreichung wie ein Link.
+   Das Tap-Ziel bleibt die ganze Zeile (summary), min. 44 px hoch. */
+.ltra--link .ltra__details {
+  border-top: 0;
+  border-bottom: 0;
+}
+.ltra--link .ltra__summary {
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-2) 0;
+  font-weight: var(--weight-regular);
+}
+.ltra--link .ltra__summary-text {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--ltra-icon, rgba(38, 37, 30, 0.66));
+}
+.ltra--link .ltra__count {
+  font-weight: var(--weight-bold);
+}
+.ltra--link .ltra__summary:hover .ltra__summary-text {
+  text-decoration-color: currentColor;
+}
+.ltra--link .ltra__panel {
+  padding-top: var(--space-4);
+}
 {% endstylesheet %}
 
 {% javascript %}
@@ -216,6 +273,23 @@
       "label": "Beschriftung",
       "default": "Alle [count] Bewertungen lesen",
       "info": "[count] wird durch die Zahl aus Loox ersetzt (loox.num_reviews). Fehlt die Zahl, fällt der Platzhalter weg."
+    },
+    {
+      "type": "select",
+      "id": "style",
+      "label": "Darstellung",
+      "options": [
+        { "value": "zeile", "label": "Zeile mit Linien" },
+        { "value": "link", "label": "Link, zentriert, Zahl fett" }
+      ],
+      "default": "zeile",
+      "info": "Link: kein eigener Abschnitt, nur eine Zeile unter den Stimmen (AGE&DNA-PDP seit 28.10.2026)."
+    },
+    {
+      "type": "text",
+      "id": "label_open",
+      "label": "Beschriftung, wenn aufgeklappt",
+      "info": "Leer = Beschriftung bleibt. Zum Beispiel „Bewertungen einklappen“."
     },
     {
       "type": "range",

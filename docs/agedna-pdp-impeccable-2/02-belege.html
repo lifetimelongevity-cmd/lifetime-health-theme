@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AGE&amp;DNA-PDP · Belege, Stimmen, Leitung (Impeccable 2)</title>
+<meta name="description" content="Vorschau der drei Sections aus lt-pdp-belege.liquid nach dem zweiten Impeccable-Durchgang (critique, bolder, delight) vom 28.10.2026: Belege (Zahlenpaar 49 → 42), Kundenstimmen (Loox), Wissenschaftliche Leitung. Texte 1:1 aus templates/product.age-dna-test.json, CSS 1:1 aus der Section.">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  /* Basis aus docs/entwurf-agedna-verkaufsseite-impeccable-2026-10-27.html, dazu die Theme-Tokens
+     aus assets/theme.css, die die Section-CSS braucht. Section-CSS darunter 1:1 aus
+     sections/lt-pdp-belege.liquid ({% stylesheet %}), Heading-Stack aus assets/crs-section-headings.css. */
+  :root{
+    --ink:#26251e; --ink-2:#5e5c54; --bg:#f7f7f4; --bg-2:#f2f1ed; --card:#ffffff; --line:#e3e1da;
+    --color-teal:#65C0B6; --color-teal-dark:#4A8C85; --color-teal-text:#3A736D; --color-star:#F4B740; --color-white:#fff;
+    --font-heading:'Helvetica Neue',Helvetica,Arial,sans-serif; --font-body:'Lato',-apple-system,BlinkMacSystemFont,sans-serif;
+    --text-stat:56px; --text-display:48px; --text-h1:36px; --text-h2:28px; --text-h3:24px; --text-quote:28px; --text-section:20px;
+    --text-body-lg:18px; --text-body:16px; --text-body-sm:14px; --text-micro:12px;
+    --leading-stat:1; --leading-display:1.1; --leading-heading:1.15; --leading-tight:1.25; --leading-body:1.4; --leading-relaxed:1.6;
+    --weight-regular:400; --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+    --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px; --space-8:64px; --space-9:80px;
+    --lt-page-gutter:var(--space-4); --lt-page-max:1280px; --ease-default:0.2s ease;
+  }
+  @media (min-width:768px){ :root{ --lt-page-gutter:var(--space-5); } }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:var(--font-body);font-size:var(--text-body);line-height:1.5;color:var(--ink);background:var(--bg)}
+  a{color:inherit}
+  h1,h2,h3,p{margin:0}
+  .hd{height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:var(--bg);max-width:1040px;margin:0 auto;padding:0 var(--space-4)}
+  .logo{font-size:1.4rem;letter-spacing:.22em} .logo b{font-weight:700} .logo span{font-weight:400}
+  .hd__r{display:flex;gap:var(--space-4);color:var(--ink-2);font-size:.9375rem}
+  .ph{max-width:1040px;margin:0 auto;padding:var(--space-5) var(--space-4) 0;font-size:13px;color:var(--ink-2)}
+  .ph + .ph{padding-top:var(--space-2)}
+  /* Section-Abstände wie das Template (padding_top/bottom je Section) */
+  #section-belege{padding-top:min(40px,10vw);padding-bottom:min(48px,10vw);--ltbg-bg:#f2f1ed;--ltbg-card-bg:#fff;--ltbg-text:#26251e;--ltbg-text-sec:rgba(38,37,30,.72);--ltbg-text-ter:rgba(38,37,30,.66);--ltbg-border:rgba(38,37,30,.05);--ltbg-rule:rgba(38,37,30,.08)}
+  #section-stimmen{padding-top:min(48px,10vw);padding-bottom:min(16px,10vw);--ltbg-bg:#f2f1ed;--ltbg-card-bg:#fff;--ltbg-text:#26251e;--ltbg-text-sec:rgba(38,37,30,.72);--ltbg-text-ter:rgba(38,37,30,.66);--ltbg-border:rgba(38,37,30,.05);--ltbg-rule:rgba(38,37,30,.08)}
+  #section-leitung{padding-top:min(64px,10vw);padding-bottom:min(64px,10vw);--ltbg-bg:#f7f7f4;--ltbg-card-bg:#fff;--ltbg-text:#26251e;--ltbg-text-sec:rgba(38,37,30,.72);--ltbg-text-ter:rgba(38,37,30,.66);--ltbg-border:rgba(38,37,30,.05);--ltbg-rule:rgba(38,37,30,.08)}
+  /* Loox-Lade (lt-pdp-reviews-all, fremde Section) nur als Platzhalterzeile, damit der Übergang stimmt */
+  .lade{display:block;text-align:center;padding:var(--space-4) 0 var(--space-6);background:var(--bg-2);color:var(--ink-2);font-size:.9375rem}
+  /* Vorschau-Raster: wie die Gesamtvorschau Sections nebeneinander mit Nachbarn trennen */
+  .nachbar{background:var(--bg);padding:var(--space-6) var(--space-4);text-align:center;color:var(--ink-2);font-size:13px;border-top:1px dashed var(--line);border-bottom:1px dashed var(--line)}
+
+  /* ===== assets/crs-section-headings.css ===== */
+/**
+ * Shared heading stack: optional kicker + title + subtitle (CRS / LT sections).
+ * Uses theme design tokens; sections set --crs-* on #section-{{ id }} where applicable.
+ *
+ * Contract:
+ * - title + subtitle must read as one visual block
+ * - keep font-size, font-weight, and line-height in lockstep
+ * - local section CSS must not split them into separate hierarchy levels
+ * - allowed difference inside the shared system: color strength (opacity) only;
+ *   title and subtitle share the same font-family (heading)
+ */
+
+.crs-heading-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.crs-heading-stack--align-left {
+  text-align: left;
+  align-items: flex-start;
+}
+
+.crs-heading-stack--align-center {
+  text-align: center;
+  align-items: center;
+}
+
+.crs-heading-stack--align-right {
+  text-align: right;
+  align-items: flex-end;
+}
+
+.crs-heading-stack .crs-heading-stack__kicker {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-medium);
+  line-height: var(--leading-tight);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--crs-text-ter, rgba(38, 37, 30, 0.66));
+  margin: 0 0 var(--space-3);
+  max-width: 100%;
+}
+
+.crs-heading-stack .crs-heading-stack__pair {
+  display: flex;
+  flex-direction: column;
+  align-items: inherit;
+  gap: 0;
+  width: 100%;
+}
+
+/* Title + subtitle are one block. Keep size/weight/line-height aligned. */
+/* (0,2,0) — beats theme .h2 media-query rules (0,1,0) */
+.crs-heading-stack .crs-heading-stack__title {
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  color: var(--crs-text, #26251e);
+  margin: 0;
+  max-width: 100%;
+}
+
+/* (0,2,0) — beats theme .h2 media-query rules (0,1,0) */
+.crs-heading-stack .crs-heading-stack__subtitle {
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-tight);
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.72));
+  margin: 0;
+  max-width: 100%;
+}
+
+/* headline-lg modifier: (0,3,0) beats base (0,2,0) */
+.crs-heading-stack.crs-heading-stack--headline-lg .crs-heading-stack__title {
+  font-size: var(--text-h1);
+  line-height: var(--leading-heading);
+  letter-spacing: -0.02em;
+}
+
+.crs-heading-stack.crs-heading-stack--headline-lg .crs-heading-stack__subtitle {
+  font-size: var(--text-h1);
+  line-height: var(--leading-heading);
+  letter-spacing: -0.02em;
+}
+
+/* headline-xl modifier: --text-display (48px). Dem Seiten-H1 einer Dossier-Seite
+   vorbehalten (DESIGN.md „Display“: 48px → 36px mobil, 1.1, -0.02em); die
+   Mobilstufe liefert die Seite selbst, indem sie --text-display in ihrem eigenen
+   Scope herunterstuft. Title + Subtitle bleiben deckungsgleich (Kernregel).
+   (0,3,0) beats base (0,2,0). */
+.crs-heading-stack.crs-heading-stack--headline-xl .crs-heading-stack__title,
+.crs-heading-stack.crs-heading-stack--headline-xl .crs-heading-stack__subtitle {
+  font-size: var(--text-display);
+  line-height: var(--leading-display);
+  letter-spacing: -0.02em;
+}
+
+/* headline-md modifier: Mittelstufe zwischen --text-section (20px) und --text-h1
+   (36px). Gedacht für Content-Sections, damit --text-h1 dem echten H1 der Seite
+   vorbehalten bleibt. Title + Subtitle bleiben deckungsgleich (Kernregel).
+   (0,3,0) beats base (0,2,0). */
+.crs-heading-stack.crs-heading-stack--headline-md .crs-heading-stack__title {
+  font-size: var(--text-h2);
+  line-height: var(--leading-heading);
+  letter-spacing: -0.01em;
+}
+
+.crs-heading-stack.crs-heading-stack--headline-md .crs-heading-stack__subtitle {
+  font-size: var(--text-h2);
+  line-height: var(--leading-heading);
+  letter-spacing: -0.01em;
+}
+
+.crs-heading-stack.crs-heading-stack--homepage-truth .crs-heading-stack__kicker {
+  margin-bottom: var(--space-2);
+  letter-spacing: 0.12em;
+}
+
+.crs-heading-stack.crs-heading-stack--homepage-truth .crs-heading-stack__title {
+  font-weight: var(--weight-regular);
+}
+
+.crs-heading-stack.crs-heading-stack--homepage-truth .crs-heading-stack__subtitle {
+  margin-top: 0;
+  color: var(--crs-text-sec, rgba(38, 37, 30, 0.72));
+}
+
+/* Dark sections: (0,3,0) beats base (0,2,0) — always wins for color */
+.crs-heading-stack.crs-heading-stack--on-dark .crs-heading-stack__kicker {
+  color: var(--color-text-on-dark-muted);
+}
+
+.crs-heading-stack.crs-heading-stack--on-dark .crs-heading-stack__title {
+  color: var(--color-text-on-dark);
+}
+
+.crs-heading-stack.crs-heading-stack--on-dark .crs-heading-stack__subtitle {
+  color: var(--color-text-on-dark-muted);
+}
+
+  /* ===== sections/lt-pdp-belege.liquid {% stylesheet %} ===== */
+
+.ltbg { background: var(--ltbg-bg, #f2f1ed); color: var(--ltbg-text, #26251e); }
+.ltbg__container {
+  max-width: var(--lt-page-max, 1280px);
+  margin: 0 auto;
+  padding: 0 var(--lt-page-gutter, 16px);
+}
+.ltbg__header { margin-bottom: var(--space-6); max-width: 960px; margin-left: auto; margin-right: auto; }
+.ltbg__beweis {
+  max-width: 960px;
+  margin: 0 auto var(--space-5);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--ltbg-text-sec);
+}
+.ltbg__text + .ltbg__text { margin-top: var(--space-2); }
+/* Karten immer untereinander, auch auf dem Desktop (BJ 22.10.): nebeneinander
+   enden drei verschieden hohe Karten auf drei Höhen und lassen unten weiße Ecken.
+   Auf dem Desktop wird jede Karte eine Zeile (Kennzahl links, Herleitung rechts),
+   deshalb breiter als die FAQ-Lesebreite, aber nicht die volle Seite. */
+.ltbg__grid { display: grid; gap: var(--space-3); max-width: 960px; margin: 0 auto; }
+.ltbg__card {
+  background: var(--ltbg-card-bg, #fff);
+  border: 1px solid var(--ltbg-border, rgba(38, 37, 30, 0.05));
+  border-radius: 4px; /* bewusst wie die Hero-Karten dieser PDP (lt-pdp-hero setzt 4px), nicht --radius-sm */
+  padding: var(--space-5);
+  min-width: 0;
+}
+.ltbg__head, .ltbg__main { min-width: 0; }
+/* Ohne Oberzeile steht die Zahl oben an der Karte */
+.ltbg__head > .ltbg__big:first-child { margin-top: 0; }
+/* Zeilen „Kopf | Text“ (labor_text_style: zeilen, 27.10.2026): Zahl vor Text, Haarlinie dazwischen */
+.ltbg__zeilen { list-style: none; margin: var(--space-4) 0 0; padding: 0; }
+.ltbg__zeile { display: grid; gap: 2px; padding: var(--space-3) 0; border-top: 1px solid var(--ltbg-rule); }
+.ltbg__zeile-kopf { font-family: var(--font-heading); font-size: var(--text-section); font-weight: var(--weight-bold); line-height: var(--leading-tight); font-variant-numeric: tabular-nums; }
+.ltbg__zeile-text { font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--ltbg-text-sec); }
+/* Spalten (labor_text_style: spalten, 28.10.2026): unter 840 px läuft der Kopf fett in die
+   Zeile hinein (zwei Zeilen je Eintrag statt drei), ab 840 px steht er links in fester Spalte.
+   Kopf in Body-Größe fett, damit allein das Zahlenpaar Stat-Größe hat. */
+.ltbg__zeilen--spalten .ltbg__zeile { display: block; font-size: var(--text-body); line-height: var(--leading-body); }
+.ltbg__zeilen--spalten .ltbg__zeile-kopf { font-family: var(--font-body); font-size: var(--text-body); font-weight: var(--weight-bold); line-height: inherit; margin-right: var(--space-2); }
+.ltbg__zeilen--spalten .ltbg__zeile-text { font-size: var(--text-body); }
+/* Mit Spalten hat die ganze Karte unter dem Zahlenpaar eine Schriftgröße (BJ 28.10.): Zeilen, Lade,
+   Tabelle und Quellenzeile in Body-Größe. Nur über das Geschwister-Selektor-Paar, damit NMN (Absätze) bleibt. */
+.ltbg__zeilen--spalten ~ .ltbg__details .ltbg__summary,
+.ltbg__zeilen--spalten ~ .ltbg__details .ltbg__body,
+.ltbg__zeilen--spalten ~ .ltbg__details .ltbg__table,
+.ltbg__zeilen--spalten ~ .ltbg__source { font-size: var(--text-body); }
+/* Zahlenpaar (labor_value_style: paar, 28.10.2026): beide Zahlen in Stat-Größe, der Startwert
+   gedämpft und regular, der Wert fett in Tinte (Texte nur Schwarz/Grau/Weiß, BJ 26.10.).
+   Unter jeder Zahl ihre Zeile, der Pfeil sitzt auf der Grundlinie der Zahlen. */
+.ltbg__paar { display: flex; align-items: flex-start; gap: var(--space-3); margin: 0; font-variant-numeric: tabular-nums; }
+.ltbg__paar-cell { display: grid; gap: var(--space-1); min-width: 0; }
+.ltbg__paar-num {
+  font-family: var(--font-heading);
+  font-size: var(--text-display);
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.02em;
+  line-height: var(--leading-stat);
+  color: var(--ltbg-text);
+}
+.ltbg__paar-num--from { font-weight: var(--weight-regular); color: var(--ltbg-text-ter); }
+.ltbg__paar-cap { font-size: var(--text-body-sm); line-height: var(--leading-tight); color: var(--ltbg-text-sec); }
+.ltbg__paar-arrow { flex: none; width: 28px; height: 28px; margin-top: calc((var(--text-display) - 28px) / 2); color: var(--ltbg-text-ter); }
+.ltbg__big-label--paar { display: block; font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--ltbg-text-sec); margin: var(--space-3) 0 0; }
+/* Quellenzeile unten in Karte 1 (labor_source): Micro-Stufe, tertiär, über einer Haarlinie */
+.ltbg__source { margin: var(--space-3) 0 0; padding-top: var(--space-3); border-top: 1px solid var(--ltbg-rule); font-size: var(--text-micro); line-height: var(--leading-body); color: var(--ltbg-text-ter); }
+/* Ein Satz der Person (person_quote): Zitat-Stimme aus DESIGN.md (Lato kursiv, 22 px mobil,
+   28 px ab 840 px), Anführungszeichen aus dem CSS, das öffnende hängt in den Rand. */
+.ltbg__zitat {
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: var(--text-h3);
+  font-weight: var(--weight-regular);
+  line-height: var(--leading-body);
+  letter-spacing: 0;
+  color: var(--ltbg-text);
+  margin: 0;
+  max-width: 22em;
+  text-indent: -0.42em;
+}
+.ltbg__zitat::before { content: "\201E"; }
+.ltbg__zitat::after { content: "\201C"; }
+.ltbg__head > .ltbg__zitat:first-child { margin-top: 0; }
+.ltbg__head > * + .ltbg__zitat { margin-top: var(--space-3); }
+.ltbg__person-proof { margin: 2px 0 0; font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--ltbg-text-sec); }
+/* Teilstern neben dem Schnitt: Kontur in Tertiär, darüber die Füllung, per clip-path auf den Anteil beschnitten */
+.ltbg__star--part { position: relative; display: block; width: 14px; height: 14px; }
+.ltbg__star--part .ltbg__star-base { position: absolute; inset: 0; color: var(--ltbg-text-ter); }
+.ltbg__star--part .ltbg__star-fill { position: absolute; inset: 0; clip-path: inset(0 calc(100% - var(--ltbg-star-fill, 0%)) 0 0); }
+/* Person zuerst (person_first): Gesicht vor dem Text, größer */
+.ltbg__main--person-first { display: flex; flex-direction: column; }
+.ltbg__main--person-first .ltbg__person { order: -1; margin-top: 0; gap: var(--space-4); }
+.ltbg__person--first .ltbg__person-img { width: 80px; height: 80px; }
+.ltbg__person--first .ltbg__person-name { font-family: var(--font-heading); font-size: var(--text-section); }
+/* Unterschrift unter dem Zitat (person_quote gesetzt): schlägt person_first: gleiche Spezifität, steht dahinter */
+.ltbg__person--byline { gap: var(--space-3); align-items: center; margin-top: var(--space-4); }
+.ltbg__person--byline .ltbg__person-img { width: 48px; height: 48px; }
+.ltbg__person--byline .ltbg__person-name { font-family: var(--font-body); font-size: var(--text-body-sm); font-weight: var(--weight-semibold); line-height: var(--leading-body); }
+.ltbg__person--byline .ltbg__person-role { margin: 0; }
+.ltbg__stars--big { margin: 0 var(--space-2) 0 0; vertical-align: -2px; }
+/* Karten-Oberzeile: klein, Versalien, gedämpft. Bewusst kein Heading-Stack,
+   die Karten sind Karten, keine Sections. !important gegen globale h2-Regeln. */
+.ltbg__label {
+  font-family: var(--font-body) !important;
+  font-size: var(--text-micro) !important;
+  font-weight: var(--weight-regular) !important;
+  letter-spacing: 0.06em !important;
+  line-height: var(--leading-tight) !important;
+  text-transform: uppercase;
+  color: var(--ltbg-text-sec);
+  margin: 0 !important;
+}
+/* Die Kennzahl: Stat-Stufe (48 px mobil, 56 px ab 840 px). Messwerte fett, in
+   Messwert-Teal und mit Tabellenziffern; der Rohstoffname regular und in Tinte,
+   weil er kein Messwert ist (Messwert-Teal-Regel). */
+.ltbg__big {
+  font-family: var(--font-heading);
+  font-size: var(--text-display);
+  font-weight: var(--weight-regular);
+  letter-spacing: -0.02em;
+  line-height: var(--leading-stat);
+  margin: var(--space-3) 0 0;
+}
+.ltbg__big--num {
+  font-weight: var(--weight-bold);
+  color: var(--ltbg-text); /* Texte nur Schwarz/Grau/Weiß, kein Teal (BJ 26.10.) */
+  font-variant-numeric: tabular-nums;
+}
+/* Das ® im Rohstoffnamen läuft sonst in voller Stat-Größe mit */
+.ltbg__reg { font-size: 0.4em; font-weight: var(--weight-regular); vertical-align: baseline; position: relative; top: -1.1em; margin-left: 0.08em; letter-spacing: 0; }
+.ltbg__big-label {
+  display: block;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-regular);
+  font-variant-numeric: normal;
+  letter-spacing: 0;
+  line-height: var(--leading-body);
+  color: var(--ltbg-text-sec);
+  margin: var(--space-2) 0 0;
+}
+.ltbg__meta {
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  color: var(--ltbg-text-sec);
+  /* 4 statt 8 px: Label und Meta sind zwei Zeilen einer Angabe (BJ 26.10.) */
+  margin: var(--space-1) 0 0;
+}
+.ltbg__meta a { color: var(--ltbg-text); }
+.ltbg__text {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  margin: var(--space-3) 0 0;
+}
+.ltbg__person { display: flex; gap: var(--space-3); align-items: center; margin-top: var(--space-3); }
+.ltbg__person-img { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; flex: none; }
+.ltbg__person-name { margin: 0; font-weight: var(--weight-bold); font-size: var(--text-body); line-height: var(--leading-tight); }
+.ltbg__person-role { margin: 2px 0 0; font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--ltbg-text-sec); }
+.ltbg__details { margin-top: var(--space-3); border-top: 1px solid var(--ltbg-rule); }
+.ltbg__summary {
+  display: flex; justify-content: space-between; align-items: center; gap: var(--space-2);
+  padding: var(--space-3) 0 0; cursor: pointer; list-style: none;
+  font-size: var(--text-body-sm); font-weight: var(--weight-semibold); color: var(--ltbg-text);
+  transition: color var(--ease-default);
+}
+.ltbg__summary:hover { color: var(--ltbg-text-sec); }
+.ltbg__summary::-webkit-details-marker { display: none; }
+.ltbg__summary:focus-visible { outline: 2px solid var(--color-teal-dark); outline-offset: 2px; }
+.ltbg__chevron { display: inline-flex; width: 16px; height: 16px; transition: transform 0.2s ease; }
+.ltbg__chevron svg { width: 100%; height: 100%; }
+.ltbg__details[open] .ltbg__chevron { transform: rotate(180deg); }
+.ltbg__body { padding-top: var(--space-3); font-size: var(--text-body-sm); line-height: var(--leading-body); color: var(--ltbg-text-sec); }
+.ltbg__body p { margin: 0 0 var(--space-2); }
+.ltbg__body a { color: var(--ltbg-text); }
+.ltbg__table { width: 100%; border-collapse: collapse; font-size: var(--text-body-sm); line-height: var(--leading-tight); text-align: left; margin-bottom: var(--space-3); font-variant-numeric: tabular-nums; }
+.ltbg__caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+.ltbg__table th, .ltbg__table td { padding: var(--space-2) 0; border-bottom: 1px solid var(--ltbg-rule); font-weight: var(--weight-regular); vertical-align: baseline; color: var(--ltbg-text); }
+.ltbg__table thead th { color: var(--ltbg-text-ter); font-size: var(--text-micro); }
+.ltbg__table .ltbg__td-muted { color: var(--ltbg-text-ter); }
+.ltbg__td-right { text-align: right; white-space: nowrap; }
+.ltbg__table + .ltbg__table { margin-top: var(--space-3); }
+/* Bereiche-Tabelle (Tests): drei Textspalten brauchen Luft zwischen den Spalten,
+   sonst läuft „Muskelschwund“ bei 390 px in „ein Wert“. */
+.ltbg__table--bereiche th, .ltbg__table--bereiche td { padding-right: var(--space-3); }
+.ltbg__table--bereiche .ltbg__td-right { padding-right: 0; }
+.ltbg__body ol { margin: 0 0 var(--space-2); padding-left: 1.25em; }
+.ltbg__body li { margin: 0 0 var(--space-1); }
+/* Stimmen: Sterne oben, Zitat, darunter Name · Kennzeichen · Monat. Sterne wie in
+   crs-customer-reviews (12 statt 14 px, die Karte ist kleiner), Kennzeichen in
+   Text-Teal (AA bei 12 px), Monat tertiär. */
+.ltbg__quotes { list-style: none; margin: var(--space-3) 0 0; padding: 0; }
+.ltbg__quote { padding: var(--space-4) 0; border-top: 1px solid var(--ltbg-rule); }
+.ltbg__quote:first-child { border-top: 0; padding-top: 0; }
+.ltbg__stars { display: inline-flex; gap: 2px; color: var(--color-star); margin-bottom: var(--space-2); }
+.ltbg__star { display: block; }
+.ltbg__star--empty { color: var(--ltbg-text-ter); }
+.ltbg__quote-text { margin: 0; font-size: var(--text-body); line-height: var(--leading-body); }
+.ltbg__quote-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3);
+  margin: var(--space-2) 0 0; font-size: var(--text-body-sm); line-height: var(--leading-tight);
+}
+.ltbg__quote-name { font-weight: var(--weight-semibold); color: var(--ltbg-text); }
+.ltbg__verified {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: var(--text-micro); font-weight: var(--weight-medium); color: var(--ltbg-text-sec); white-space: nowrap;
+}
+.ltbg__verified svg { flex: none; }
+.ltbg__quote-date { font-size: var(--text-micro); color: var(--ltbg-text-ter); font-variant-numeric: tabular-nums; }
+/* Weg zu allen Bewertungen: gleiche Zeile wie die Laden in Karte 1 und 2, nur als Link
+   auf #reviews (lt-pdp-reviews-all direkt unter dieser Section). */
+.ltbg__more { margin: 0; border-top: 1px solid var(--ltbg-rule); }
+.ltbg__more a {
+  display: flex; justify-content: space-between; align-items: center; gap: var(--space-2);
+  padding: var(--space-3) 0 0; text-decoration: none;
+  font-size: var(--text-body-sm); font-weight: var(--weight-semibold); color: var(--ltbg-text);
+  transition: color var(--ease-default);
+}
+.ltbg__more a:hover { color: var(--ltbg-text-sec); }
+.ltbg__more a:focus-visible { outline: 2px solid var(--color-teal-dark); outline-offset: 2px; }
+
+/* Ab 840 px: jede Karte eine Zeile. Kennzahl links in fester Spalte, Herleitung
+   rechts hinter einer Haarlinie. Drei Kennzahlen untereinander lesen sich wie
+   eine Tabelle in Section-Größe. */
+@media (min-width: 840px) {
+  .ltbg__card {
+    display: grid;
+    grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+    gap: var(--space-6);
+    padding: var(--space-6);
+    align-items: start;
+  }
+  .ltbg__big { font-size: var(--text-stat); }
+  .ltbg__paar-num { font-size: var(--text-stat); }
+  .ltbg__zeilen--spalten .ltbg__zeile { display: grid; grid-template-columns: minmax(0, 9rem) minmax(0, 1fr); gap: var(--space-4); align-items: baseline; }
+  .ltbg__zeilen--spalten .ltbg__zeile-kopf { margin-right: 0; }
+  .ltbg__paar-arrow { margin-top: calc((var(--text-stat) - 28px) / 2); }
+  .ltbg__zitat { font-size: var(--text-quote); }
+  .ltbg__main {
+    border-left: 1px solid var(--ltbg-rule);
+    padding-left: var(--space-6);
+    /* Erste Zeile rechts auf Höhe der Kennzahl, nicht der Oberzeile */
+    padding-top: calc(var(--text-micro) * var(--leading-tight) + var(--space-3));
+  }
+  .ltbg__main > :first-child { margin-top: 0; }
+  .ltbg__text { font-size: var(--text-body-lg); }
+}
+
+</style>
+</head>
+<body>
+
+<header class="hd">
+  <div class="logo"><span>LIFE</span><b>TIME</b></div>
+  <div class="hd__r"><span>Suche</span><span>Warenkorb</span><span>Menü</span></div>
+</header>
+<p class="ph">Vorschau Impeccable 2 (28.10.2026): nur die drei Sections aus <code>lt-pdp-belege.liquid</code>, in Template-Reihenfolge. Dazwischen stehen auf der Seite andere Sections (hier als gestrichelte Zeile).</p>
+
+<main>
+<div class="nachbar">… Hero und Kaufzone (main) …</div>
+
+<!-- 2 Belege (belege): Zahlenpaar 49 → 42, Kopf-in-Zeile, Quellenzeile. Keine Überschrift, keine Beweiszeile mehr. -->
+<div class="ltbg" id="section-belege">
+  <div class="ltbg__container">
+    <div class="ltbg__grid">
+      <article class="ltbg__card">
+        <div class="ltbg__head">
+          <div class="ltbg__paar">
+            <span class="ltbg__paar-cell"><span class="ltbg__paar-num ltbg__paar-num--from">49</span><span class="ltbg__paar-cap">Jahre laut Pass</span></span>
+            <svg class="ltbg__paar-arrow" width="28" height="28" viewBox="0 0 28 28" fill="none" role="img" aria-label="wird zu" focusable="false"><path d="M4 14h19M16 7l7 7-7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="ltbg__paar-cell"><span class="ltbg__paar-num"><span data-ltbg-count="49">42</span></span><span class="ltbg__paar-cap">Jahre biologisch</span></span>
+          </div>
+        </div>
+        <div class="ltbg__main">
+          <ul class="ltbg__zeilen ltbg__zeilen--spalten" role="list">
+            <li class="ltbg__zeile"><span class="ltbg__zeile-kopf">6 Bereiche</span><span class="ltbg__zeile-text">Epigenetik: wie du alterst. Nach 6 Monaten neu messbar.</span></li>
+            <li class="ltbg__zeile"><span class="ltbg__zeile-kopf">23 Kategorien</span><span class="ltbg__zeile-text">Gene: was angelegt ist. Über 150 Ergebnisse, einmal im Leben.</span></li>
+            <li class="ltbg__zeile"><span class="ltbg__zeile-kopf">KI-Coach</span><span class="ltbg__zeile-text">Erklärt jeden Wert. PDF für deine Ärztin.</span></li>
+          </ul>
+          <details class="ltbg__details">
+            <summary class="ltbg__summary"><span>Alle Bereiche und Kategorien</span><span class="ltbg__chevron" aria-hidden="true"><svg class="" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg></span></summary>
+            <div class="ltbg__body">
+              <table class="ltbg__table ltbg__table--bereiche">
+                <caption class="ltbg__caption">Bereiche und Werte AGE &amp; DNA-Test</caption>
+                <thead><tr><th scope="col">Bereich</th><th scope="col">Werte</th><th scope="col" class="ltbg__td-right">Ändert sich</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Körperalter</th><td>Hör-, Augen-, Gedächtnisalter</td><td class="ltbg__td-right">ja</td></tr>
+                  <tr><th scope="row">MethylPace</th><td>biologisches Alter, Tempo</td><td class="ltbg__td-right">ja</td></tr>
+                  <tr><th scope="row">Entzündung</th><td>drei Werte</td><td class="ltbg__td-right">ja</td></tr>
+                  <tr><th scope="row">EpiVitality</th><td>ein Wert</td><td class="ltbg__td-right">ja</td></tr>
+                  <tr><th scope="row">Immunscore</th><td>ein Wert</td><td class="ltbg__td-right">ja</td></tr>
+                  <tr><th scope="row">Muskelschwund</th><td>ein Wert</td><td class="ltbg__td-right">ja</td></tr>
+                  <tr><th scope="row">Gene</th><td>23 Kategorien, über 150 Ergebnisse</td><td class="ltbg__td-right">nein</td></tr>
+                </tbody>
+              </table>
+              <p>Gene misst du einmal, die epigenetischen Werte nach sechs Monaten erneut (Folgetest 299 €).</p>
+              <div class="rte"><p>Deine DNA bleibt ein Leben lang gleich. Was sich verändert, ist ihre Methylierung: chemische Markierungen, die mit den Jahren an festen Stellen deiner DNA dazukommen oder verschwinden. Genau dieses Muster liest eine epigenetische Uhr. In der Altersforschung gilt sie als Goldstandard für das biologische Alter, weil sie nicht schätzt, sondern misst: kein Fragebogen und kein Wearable, sondern eine Messung an deiner DNA.</p><p>Unsere Uhr folgt dem Prinzip, das Steve Horvath 2013 begründet hat, und ist auf die Stellen kalibriert, die das Alter am verlässlichsten anzeigen. Aus derselben Probe liest sie dein Alterstempo, also wie schnell du gerade alterst, und das Alter von Gehör, Augen und Gedächtnis.</p></div>
+            </div>
+          </details>
+          <p class="ltbg__source">Labor: Eurofins Genomics, ISO 17025</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</div>
+
+<div class="nachbar">… Warum jetzt (warum_jetzt) …</div>
+
+<!-- 4 Kundenstimmen (belege_stimmen): 4,7 mit Teilstern, drei Loox-Stimmen Sophie, Thomas, Markus -->
+<div class="ltbg" id="section-stimmen">
+  <div class="ltbg__container">
+    <div class="ltbg__grid">
+      <article class="ltbg__card">
+        <div class="ltbg__head">
+          <p class="ltbg__big ltbg__big--num">4,7 <span class="ltbg__big-label"><span class="ltbg__stars ltbg__stars--big" aria-hidden="true"><svg class="ltbg__star" width="14" height="14" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="14" height="14" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="14" height="14" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="14" height="14" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><span class="ltbg__star ltbg__star--part" style="--ltbg-star-fill: 70%"><svg class="ltbg__star-base" width="14" height="14" viewBox="0 0 14 13" fill="none"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" stroke="currentColor" stroke-width="0.9" fill="none"/></svg><svg class="ltbg__star-fill" width="14" height="14" viewBox="0 0 14 13" fill="none"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg></span></span>von 5 · 122 Bewertungen auf Loox</span></p>
+        </div>
+        <div class="ltbg__main">
+          <ul class="ltbg__quotes">
+            <li class="ltbg__quote"><span class="ltbg__stars" role="img" aria-label="5 von 5 Sternen"><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg></span><p class="ltbg__quote-text">Ich habe keine Biologie studiert. Aber ich verstehe jetzt, was meine Werte bedeuten.</p><p class="ltbg__quote-meta"><span class="ltbg__quote-name">Sophie K.</span><span class="ltbg__verified"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><circle cx="5.5" cy="5.5" r="5.5" fill="currentColor"/><path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Verifiziert</span><span class="ltbg__quote-date">Juni 2026</span></p></li>
+            <li class="ltbg__quote"><span class="ltbg__stars" role="img" aria-label="5 von 5 Sternen"><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg></span><p class="ltbg__quote-text">Mein biologisches Alter lag drei Jahre über meinem chronologischen. (…) Nach 14 Monaten bin ich jetzt genau auf meinem Alter.</p><p class="ltbg__quote-meta"><span class="ltbg__quote-name">Thomas R.</span><span class="ltbg__verified"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><circle cx="5.5" cy="5.5" r="5.5" fill="currentColor"/><path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Verifiziert</span><span class="ltbg__quote-date">Juli 2026</span></p></li>
+            <li class="ltbg__quote"><span class="ltbg__stars" role="img" aria-label="5 von 5 Sternen"><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg class="ltbg__star" width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg></span><p class="ltbg__quote-text">Ich bin 46, mein biologisches Alter: 38. Das hat mich motiviert weiterzumachen.</p><p class="ltbg__quote-meta"><span class="ltbg__quote-name">Markus T.</span><span class="ltbg__verified"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><circle cx="5.5" cy="5.5" r="5.5" fill="currentColor"/><path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Verifiziert</span><span class="ltbg__quote-date">März 2026</span></p></li>
+          </ul>
+        </div>
+      </article>
+    </div>
+  </div>
+</div>
+<a class="lade" href="#">Alle 122 Bewertungen lesen</a>
+
+<div class="nachbar">… Einwände, Abgrenzung …</div>
+
+<!-- 8 Wissenschaftliche Leitung (leitung): ein Satz, ein Name, ein Beleg. Keine Lade mehr. -->
+<div class="ltbg" id="section-leitung">
+  <div class="ltbg__container">
+    <div class="ltbg__header crs-heading-stack crs-heading-stack--align-left crs-heading-stack--headline-md">
+      <div class="crs-heading-stack__pair">
+        <h2 class="crs-heading-stack__title">Geleitet von einem Chefarzt.</h2>
+        <p class="crs-heading-stack__subtitle">Nicht von einem Influencer.</p>
+      </div>
+    </div>
+    <div class="ltbg__grid">
+      <article class="ltbg__card">
+        <div class="ltbg__head">
+          <p class="ltbg__zitat">Longevity beginnt mit Daten, nicht mit Annahmen.</p>
+        </div>
+        <div class="ltbg__main ltbg__main--person-first">
+          <div class="ltbg__person ltbg__person--first ltbg__person--byline">
+            <img src="../startseite-v2/bilder/volker-podcast.webp" alt="" loading="lazy" class="ltbg__person-img" width="48" height="48">
+            <div>
+              <p class="ltbg__person-name">Prof. Dr. med. Volker Limmroth</p>
+              <p class="ltbg__person-role">Chefarzt Neurologie, Köln-Merheim</p>
+              <p class="ltbg__person-proof">Co-Autor des SPIEGEL-Bestsellers „Der Longevity-Kompass“</p>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</div>
+
+<div class="nachbar">… Ablauf, Bonus-Stack, Garantie, FAQ, Schluss …</div>
+</main>
+
+<script>
+  (function () {
+    var el = document.querySelector('#section-belege [data-ltbg-count]');
+    if (!el || !('IntersectionObserver' in window)) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var to = parseFloat(el.textContent.replace(',', '.')), from = parseFloat(el.getAttribute('data-ltbg-count').replace(',', '.'));
+    if (isNaN(to) || isNaN(from) || to === from || to % 1 || from % 1) return;
+    el.textContent = from;
+    var io = new IntersectionObserver(function (en) {
+      if (!en[0].isIntersecting) return;
+      io.disconnect();
+      var t0 = performance.now(), dur = 1100;
+      (function step(t) {
+        var k = Math.min(1, (t - t0) / dur), e = k === 1 ? 1 : 1 - Math.pow(2, -10 * k);
+        el.textContent = Math.round(from + (to - from) * e);
+        if (k < 1) requestAnimationFrame(step);
+      })(t0);
+    }, { threshold: 0.6 });
+    io.observe(el);
+  })();
+</script>
+</body>
+</html>
