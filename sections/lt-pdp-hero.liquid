@@ -693,14 +693,25 @@
         {%- else -%}
           {%- assign lt_hl_variant = 'a' -%}
         {%- endif -%}
-        {%- render 'section-heading-crs',
-          heading: lt_hero_heading_text,
-          subheading: lt_tagline_text,
-          align: 'left',
-          heading_tag: 'h1',
-          headline_lg: true,
-          extra_class: 'lt-pdp-hero__heading'
-        -%}
+        {%- comment -%} hero_headline_drop_mobile (BJ 28.10.2026): ein Wort der Überschrift fällt mobil weg,
+            damit sie einzeilig bleibt („Wie alt ist dein Körper wirklich?“ → mobil ohne „wirklich“).
+            Das Snippet escaped die Überschrift, deshalb wird das Wort danach in einen Span gelegt. {%- endcomment -%}
+        {%- capture lt_hero_heading_html -%}
+          {%- render 'section-heading-crs',
+            heading: lt_hero_heading_text,
+            subheading: lt_tagline_text,
+            align: 'left',
+            heading_tag: 'h1',
+            headline_lg: true,
+            extra_class: 'lt-pdp-hero__heading'
+          -%}
+        {%- endcapture -%}
+        {%- if section.settings.hero_headline_drop_mobile != blank -%}
+          {%- assign lt_drop_word = section.settings.hero_headline_drop_mobile | strip | escape | prepend: ' ' -%}
+          {%- assign lt_drop_span = lt_drop_word | prepend: '<span class="lt-pdp-hero__drop-m">' | append: '</span>' -%}
+          {%- assign lt_hero_heading_html = lt_hero_heading_html | replace_first: lt_drop_word, lt_drop_span -%}
+        {%- endif -%}
+        {{- lt_hero_heading_html -}}
         {%- if section.settings.hero_quote != blank -%}
           <p class="lt-pdp-hero__quote">„{{ section.settings.hero_quote | escape }}“
             {%- if section.settings.hero_quote_name != blank %} <span class="lt-pdp-hero__quote-name">{{ section.settings.hero_quote_name | escape }}</span>{% endif -%}
@@ -3471,6 +3482,7 @@
    Bullets in Body-sm, Modus-Kacheln einzeilig. Nur mit bb_compact (NMN, AGE&DNA). */
 .lt-pdp-hero-section--compact .lt-pdp-hero__post-note { margin: 0; font-size: 13px; line-height: 1.4; color: var(--lt-muted, #525252); text-align: center; }
 @media (max-width: 767px) {
+  .lt-pdp-hero__drop-m { display: none; }
   .lt-pdp-hero-section--compact .lt-pdp-hero__container { padding-top: var(--space-2); }
   .lt-pdp-hero-section--compact .lt-pdp-hero { row-gap: var(--space-3); }
   /* 92 % statt 86 % (26.10.): bei 86 % kappte der Zuschnitt den NMN-Beutel unten (Beutel
@@ -4490,6 +4502,12 @@
       "type": "textarea",
       "id": "hero_headline",
       "label": "Zwischenüberschrift (unter Tagline)"
+    },
+    {
+      "type": "text",
+      "id": "hero_headline_drop_mobile",
+      "label": "Überschrift: Wort, das mobil wegfällt",
+      "info": "Optional, z. B. wirklich. Das erste Vorkommen wird unter 768 px ausgeblendet, damit die Überschrift einzeilig bleibt."
     },
     {
       "type": "select",
