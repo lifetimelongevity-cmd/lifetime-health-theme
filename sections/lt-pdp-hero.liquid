@@ -1440,7 +1440,9 @@
               braucht den Wert vor diesem Zweig).
             {%- endcomment -%}
             {%- if lt_show_packages -%}
-              <div class="lt-pkg{% if section.settings.pkg_cards_row %} lt-pkg--row{% endif %}" data-lt-pkg-group role="radiogroup" aria-label="Paket wählen">
+              {%- comment -%} pkg_tableau (Preis-Tableau 395 · 595 · 895, BJ 28.10.2026): mobil untereinander,
+                  ab 768 px dreispaltig, die Ersparnis steht auf der Karte statt als Chip unter dem Knopf. {%- endcomment -%}
+              <div class="lt-pkg{% if section.settings.pkg_tableau %} lt-pkg--tableau{% elsif section.settings.pkg_cards_row %} lt-pkg--row{% endif %}" data-lt-pkg-group role="radiogroup" aria-label="Paket wählen">
                 {%- for variant in product.variants -%}
                   {%- comment -%} Ab der dritten Variante nur mit pkg_tier3_enable (Stufe 3 „Vorher und
                       Nachher“, vorbereitet 27.10.2026, Variante existiert noch nicht). {%- endcomment -%}
@@ -1472,6 +1474,9 @@
                       assign pkg_opt = 'c'
                     endif
                     assign pkg_save_cents = 0
+                    if forloop.index == 2 and section.settings.pkg_anchor_cents_2 > variant.price
+                      assign pkg_save_cents = section.settings.pkg_anchor_cents_2 | minus: variant.price
+                    endif
                     if forloop.index == 3 and section.settings.pkg_tier3_anchor_cents > variant.price
                       assign pkg_save_cents = section.settings.pkg_tier3_anchor_cents | minus: variant.price
                     endif
@@ -1523,6 +1528,9 @@
                     {%- endif -%}
                     {%- if pkg_note != blank -%}
                       <span class="lt-pkg__note{% if section.settings.pkg_note_selected_only %} lt-pkg__note--selected-only{% endif %}">{{ pkg_note | escape }}</span>
+                    {%- endif -%}
+                    {%- if section.settings.pkg_tableau and pkg_save_cents > 0 -%}
+                      <span class="lt-pkg__save">Du sparst {{ pkg_save_cents | money_without_trailing_zeros }}</span>
                     {%- endif -%}
                   </label>
                 {%- endfor -%}
@@ -1926,6 +1934,36 @@
             {%- endif -%}
             {%- if lt_note_below_cta -%}
               <p class="lt-pdp-hero__post-note">{{ section.settings.bb_once_subline | escape }}</p>
+            {%- endif -%}
+            {%- comment -%} Paketvergleich (BJ 28.10.2026): unter der Versandzeile, zugeklappt, damit zwischen
+                Karten und Knopf nichts bremst. Zeilen aus pkg_table, Spalten mit | getrennt, erste Zeile
+                ist der Kopf, „ja“ wird zum Haken, die letzte Zeile steht fett (Paketpreis). {%- endcomment -%}
+            {%- if section.settings.pkg_table != blank -%}
+              {%- assign lt_pt_rows = section.settings.pkg_table | strip | newline_to_br | split: '<br />' -%}
+              {%- assign lt_pt_head = lt_pt_rows.first | strip | split: '|' -%}
+              {%- assign lt_pt_cols = lt_pt_head.size | minus: 1 -%}
+              <details class="lt-pkg-table">
+                <summary><span>{{ section.settings.pkg_table_summary | default: 'Was ist in den Paketen?' | escape }}</span></summary>
+                <table>
+                  {%- for row in lt_pt_rows -%}
+                    {%- assign lt_pt_cells = row | strip | split: '|' -%}
+                    <tr{% if forloop.last and forloop.length > 2 %} class="lt-pkg-table__sum"{% endif %}>
+                      {%- for i in (0..lt_pt_cols) -%}
+                        {%- assign lt_pt_c = lt_pt_cells[i] | strip -%}
+                        {%- if forloop.parentloop.first -%}
+                          <th scope="col">{{ lt_pt_c | escape }}</th>
+                        {%- elsif forloop.first -%}
+                          <th scope="row">{{ lt_pt_c | escape }}</th>
+                        {%- elsif lt_pt_c == 'ja' -%}
+                          <td class="lt-pkg-table__ja"><span aria-hidden="true">✓</span><span class="visually-hidden">ja</span></td>
+                        {%- else -%}
+                          <td>{{ lt_pt_c | escape }}</td>
+                        {%- endif -%}
+                      {%- endfor -%}
+                    </tr>
+                  {%- endfor -%}
+                </table>
+              </details>
             {%- endif -%}
           </div>
         {%- elsif lt_show_cancel_after_cta or section.settings.show_guarantee_badge or lt_payment_note_post_cta -%}
@@ -2515,6 +2553,9 @@
           // gewählten Karte gegen ihren eigenen Streichpreis. Ohne Zählen, das eine bewegte Element
           // der Section ist das Kalenderblatt.
           setChip('Du sparst', pkgCmp - pkgOnce, false, true);
+        } else if (chip && !sizes.length && pkgSave > 0 && pkgSel.closest('.lt-pkg--tableau')) {
+          // Tableau (28.10.2026): die Ersparnis steht schon auf der Karte, kein zweiter Hinweis am Knopf
+          chip.hidden = true;
         } else if (chip && !sizes.length && pkgSave > 0) {
           // Stufe 3 (27.10.2026): Ersparnis gegen die Einzelpreise, nicht gegen einen Streichpreis
           setChip('Du sparst', pkgSave, false);
@@ -3579,6 +3620,37 @@
 .lt-pdp-hero-section--compact .lt-pkg--row .lt-pkg__card.is-selected .lt-pkg__price { font-weight: var(--weight-bold); color: var(--lt-text, #26251e); }
 .lt-pdp-hero-section--compact .lt-pkg--row .lt-pkg__note,
 .lt-pdp-hero-section--compact .lt-pkg--row .lt-pkg__anchor { padding-left: 0; margin-top: var(--space-1); }
+/* Preis-Tableau (pkg_tableau, 28.10.2026): mobil eine Zeile je Paket, Name links, Preis rechts,
+   Ersparnis darunter; ab 768 px drei Spalten mit großem Preis. */
+.lt-pdp-hero-section--compact .lt-pkg--tableau { margin-top: var(--space-3); }
+.lt-pdp-hero-section--compact .lt-pkg--tableau .lt-pkg__card { gap: 0; padding: var(--space-3) var(--space-4); background: var(--lt-surface-raised, #fff); }
+.lt-pdp-hero-section--compact .lt-pkg--tableau .lt-pkg__radio { display: none; }
+.lt-pdp-hero-section--compact .lt-pkg--tableau .lt-pkg__head { align-items: baseline; gap: var(--space-3); }
+.lt-pdp-hero-section--compact .lt-pkg--tableau .lt-pkg__name { font-size: var(--text-body-sm); font-weight: var(--weight-regular); opacity: 1; }
+.lt-pdp-hero-section--compact .lt-pkg--tableau .lt-pkg__price { font-weight: var(--weight-bold); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lt-pdp-hero-section--compact .lt-pkg--tableau .lt-pkg__note { padding-left: 0; margin-top: var(--space-1); }
+.lt-pkg__save { display: block; margin-top: 2px; font-size: 12px; font-weight: var(--weight-bold); letter-spacing: 0.02em; color: var(--color-dark); }
+@media (min-width: 768px) {
+  .lt-pdp-hero-section--compact .lt-pkg--tableau { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lt-pdp-hero-section--compact .lt-pkg--tableau .lt-pkg__card { padding: var(--space-4); }
+  .lt-pdp-hero-section--compact .lt-pkg--tableau .lt-pkg__head { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .lt-pdp-hero-section--compact .lt-pkg--tableau .lt-pkg__name { min-height: 2.4em; line-height: 1.2; }
+  .lt-pdp-hero-section--compact .lt-pkg--tableau .lt-pkg__price { font-family: var(--font-heading); font-size: var(--text-section); font-weight: var(--weight-regular); }
+  .lt-pdp-hero-section--compact .lt-pkg--tableau .lt-pkg__card.is-selected .lt-pkg__price { font-weight: var(--weight-bold); }
+}
+/* Paketvergleich unter der Versandzeile, zugeklappt */
+.lt-pkg-table { margin-top: var(--space-3); }
+.lt-pkg-table summary { list-style: none; cursor: pointer; padding: var(--space-1) 0; font-size: 13px; color: var(--lt-muted, #525252); text-align: center; }
+.lt-pkg-table summary::-webkit-details-marker { display: none; }
+.lt-pkg-table summary span { text-decoration: underline dotted; text-underline-offset: 3px; }
+.lt-pkg-table table { width: 100%; margin-top: var(--space-2); border-collapse: collapse; font-size: 13px; line-height: 1.3; }
+.lt-pkg-table th,
+.lt-pkg-table td { padding: 6px var(--space-1); border-top: 1px solid rgba(54, 79, 86, 0.14); text-align: center; vertical-align: top; font-weight: var(--weight-regular); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.lt-pkg-table tr:first-child th { border-top: 0; padding-bottom: var(--space-1); font-size: 12px; color: var(--lt-muted, #525252); white-space: normal; }
+.lt-pkg-table th[scope="row"] { width: 38%; padding-left: 0; text-align: left; white-space: normal; color: var(--lt-muted, #525252); }
+.lt-pkg-table__ja { font-weight: var(--weight-bold) !important; color: var(--color-dark); }
+.lt-pkg-table__sum td,
+.lt-pkg-table__sum th[scope="row"] { font-weight: var(--weight-bold); color: var(--lt-text, #26251e); }
 /* Ersparnis-Chip (26.10.2026): Mint nur als Fläche, kein Rand. Satz grau, Betrag in Ink
    mit Ziffern fester Breite, damit das Hochzählen nicht zittert. Bei „Einmalig“ ist der
    Chip ein Knopf zum Abo (Pfeil sichtbar), sonst eine ruhige Anzeige. */
@@ -5090,6 +5162,32 @@
       "label": "Paket 3 — Einzelpreise zusammen (Cent)",
       "info": "Summe der echten Einzelpreise, z. B. 449 € + 299 € = 74800. Der Chip unter dem Knopf zeigt die Differenz zum Paketpreis.",
       "default": 74800
+    },
+    {
+      "type": "number",
+      "id": "pkg_anchor_cents_2",
+      "label": "Paket 2: Einzelpreise zusammen (Cent)",
+      "info": "0 = kein Ersparnis-Hinweis. Beispiel Test 395 € + Folgetest 299 € = 69400.",
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "pkg_tableau",
+      "label": "Kompakt: Paketkarten als Tableau",
+      "info": "Mobil untereinander (Name links, Preis rechts), ab 768 px dreispaltig. Die Ersparnis steht auf der Karte statt als Chip unter dem Knopf. Schlägt „nebeneinander“.",
+      "default": false
+    },
+    {
+      "type": "textarea",
+      "id": "pkg_table",
+      "label": "Paketvergleich unter der Versandzeile",
+      "info": "Eine Zeile je Tabellenzeile, Spalten mit | trennen. Erste Zeile ist der Kopf, „ja“ wird ein Haken, die letzte Zeile steht fett. Preise hier von Hand pflegen. Leer = kein Vergleich."
+    },
+    {
+      "type": "text",
+      "id": "pkg_table_summary",
+      "label": "Paketvergleich: Text zum Aufklappen",
+      "default": "Was ist in den Paketen?"
     },
     {
       "type": "header",

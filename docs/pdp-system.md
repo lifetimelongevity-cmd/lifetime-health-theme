@@ -50,9 +50,13 @@ Template: `templates/product.age-dna-test.json`. 14 Einträge in `order`, davon 
 `lifetime-ads/briefings/gruene-wiese/02-funnel-landingpage-email.md` § 2 und § 3 (Reihenfolge),
 Angebot aus `01-angebot.md` § 2 bis § 4, danach zwei Impeccable-Durchgänge
 (`docs/agedna-pdp-impeccable-2026-10-27.md`, `docs/agedna-pdp-impeccable-2/`). Abgenommen im
-Vorschau-Theme `194066317687` („Claude AGE&DNA Verkaufsseite 28.10.“): Knopf im ersten Bildschirm
-(375 px), Karten 395/495 € ohne Streichpreis, Variantenwechsel und Warenkorb, `lt_seen`/`lt_choice`,
-keine Konsolenfehler. NMN-PDP, Startseite, Folgetest und `page.dna-lp*` rendern dort unverändert.
+Vorschau-Theme `194066317687` („Claude AGE&DNA Verkaufsseite 28.10.“): Preis-Tableau aus
+`lifetime-ads/briefings/gruene-wiese/07-preis-tableau.md` mit drei Karten Test 395 € · Vorher und
+Nachher 595 € · Begleitet 895 € (`pkg_tableau`, „Du sparst 99 €“ auf Karte 2 und 3, Paketvergleich
+zugeklappt unter der Versandzeile), H1 mobil ohne „wirklich“, Variantenwechsel und Warenkorb,
+`lt_seen`/`lt_choice` a/b/c, keine Konsolenfehler. **Die Varianten 595 € und 895 € sind seit 28.10.
+im Shop** (vorher „Test + Ergebnisgespräch“ 495 €, umbenannt), live aber erst mit dem Push als Karten
+sichtbar. NMN-PDP, Startseite, Folgetest und `page.dna-lp*` rendern dort unverändert.
 Live läuft bis zum Push die Fassung vom 22.10. (Hero, Belege, Loox-Lade, FAQ).
 
 | # | Section-Key | Typ (`sections/*.liquid`) | Stufe | Rolle |
