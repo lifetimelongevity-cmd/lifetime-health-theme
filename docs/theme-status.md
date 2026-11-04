@@ -138,6 +138,14 @@ rich-text, text-columns-images, text-columns-icons, content-toggles, slideshow, 
 
 ## Änderungs-Log
 
+### 2026-11-04 · /pages/unsere-forschung: erster Befund, Zahl-Schema, Selbstprüfung, Ausblick
+
+- `templates/page.wissenschaft.json`: drei neue Abschnitte aus vorhandenen Section-Typen, kein neuer Liquid-Code. `zahl` (lt-wiss-kurz, nach `grenze`), `befund` (lt-wiss-forschung, Rubrik 04, nach `forschung`), `pruefung` (lt-wiss-kurz, nach `befund`).
+- `ausblick` neu: Speichel-Validierung bis Ende 2027 (Inhalt SALIVAGE-TH), drei Blöcke, Stand November 2026. Rubriken danach: Team 05, Ausblick 06.
+- Quellen um Meyer & Schumacher 2024, Teschendorff 2020, Liu 2020 ergänzt (Titel gegen Crossref geprüft).
+- Zahlen aus Manuskript off-clock v2b, Belege und Formulierungsgrenzen in `docs/copy-unsere-forschung_2026-11-04.md`.
+- Geprüft: lt-check + theme check ohne Befund, `shopify theme dev` bei 375 und 1280 px ohne horizontales Scrollen. **Nicht live**, Push durch BJ über den Theme Manager.
+
 ### 2026-08-19 — /collections/all umgebaut, gemeinsame Produktkarte für Katalog und Register
 
 **Neu:** `snippets/lt-product-card.liquid` + `assets/lt-product-card.css` (ein Feldsatz,
