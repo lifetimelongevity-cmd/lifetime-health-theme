@@ -138,6 +138,16 @@ rich-text, text-columns-images, text-columns-icons, content-toggles, slideshow, 
 
 ## Änderungs-Log
 
+### 2026-11-04 · NAD⁺-PDP auf die Spermidin-Kette (Phase 4 des Supplement-Rollouts)
+
+- `templates/product.12_nad-liposomal-2.json` neu aus `product.02_spermidin.json` gebaut: Hero, Logos, Merkmale, Wirkprinzip (ohne Bild), Produktfakten, Vergleich, Loox-Stimmen, Abo-Close, FAQ. Raus: `ss-social-proof`, `text-columns-icons`, `info-tabs`, vier `rich-text`, `ss-comparison-table-22` (Platzhalter „Third column“, „Other 3“, verrutschte Kopfkarten), Produktempfehlungen.
+- Laborclaims entfernt, weil kein Prüfbericht existiert (BJ 04.11.): „>99,9 % Reinheit, laborgeprüft“ in Headline, Bullet, Icon-Leiste und Vergleich sowie das ✗ „Laborgeprüft“ bei anderen Anbietern. Badge „Bestseller“ aus.
+- Gehalt, Zutaten und Verzehrempfehlung wörtlich vom Etikett (Produktbild `product-1159623.png`): 500 mg NAD⁺ je 2 Kapseln, Phospholipide aus Sonnenblumenlecithin an erster Stelle. Die alte Seite sagte „morgens“, das Etikett nicht.
+- Loox-Stimmen per `loox_pick`, sechs Texte ohne Wirk- und Verzehraussage („Bin mit der Wirkung sehr zufrieden“ bleibt draußen).
+- Nebenbei `product.02_spermidin.json`: Vergleichszeile Garantie 30 → 90 Tage, beim Umstellen am 27.10. übersehen.
+- Geprüft im Vorschau-Theme `194173796727` („Claude Neben-PDPs NAD (04.11.)“): lt-check ohne Befund, 1280 und 375 px ohne horizontales Scrollen, Abo (35,91 €) und Einmalkauf (39,90 €) landen korrekt im Warenkorb, keine Skriptfehler. **Nicht live**, Push durch BJ über den Theme Manager.
+- Offen: Bild für das Wirkprinzip (Liposom-Grafik), auf dem Desktop bleibt die rechte Hälfte der dunklen Fläche leer.
+
 ### 2026-11-04 · /pages/unsere-forschung: erster Befund, Zahl-Schema, Selbstprüfung, Ausblick
 
 - `templates/page.wissenschaft.json`: drei neue Abschnitte aus vorhandenen Section-Typen, kein neuer Liquid-Code. `zahl` (lt-wiss-kurz, nach `grenze`), `befund` (lt-wiss-forschung, Rubrik 04, nach `forschung`), `pruefung` (lt-wiss-kurz, nach `befund`).

@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-10-28
+last_review: 2026-11-04
 canonical_for: pdp-section-system und live-reihenfolge
 ---
 
@@ -108,6 +108,18 @@ genug substanzielle Loox-Bewertungen existieren. Die Begründung je Produkt steh
 Die Loox-Section hat keine Farb-Settings und erbt den Body-Hintergrund `#f7f7f4`. Sie steht
 deshalb an Position 7, wo die Flächen-Alternation ohnehin `#f7f7f4` verlangt. Verschiebt man
 sie, kippt der Rhythmus.
+
+## PDP NAD⁺ (`/products/nad-booster`)
+
+Template: `templates/product.12_nad-liposomal-2.json` (Suffix `12_nad-liposomal-2`). Seit 04.11.2026
+lokal auf der Spermidin-Kette, wartet auf BJs Push. 9 Einträge in `order`, keiner deaktiviert, kein
+`main_product_hidden` (hatte die alte Fassung auch nicht).
+
+Reihenfolge wie Spermidin ohne Loox-App-Parkplatz: `main` (lt-pdp-hero), `logo_garden`,
+`feature_grid`, `wirkprinzip` (ohne Bild), `produktfakten`, `comparison_table`,
+`customer_reviews` (`review_source: loox`, sechs Texte per `loox_pick`), `risk_free_close`,
+`faq_accordion` (10 Fragen). Gehalt, Zutaten und Verzehrempfehlung sind vom Etikett übernommen.
+Keine Labor- oder Reinheitsclaims: Für NAD⁺ existiert kein Prüfbericht.
 
 ## Konvention `main_product_hidden`
 

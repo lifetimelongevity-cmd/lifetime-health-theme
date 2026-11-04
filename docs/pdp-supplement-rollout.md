@@ -1,10 +1,15 @@
 ---
 status: living
-last_review: 2026-07-29
+last_review: 2026-11-04
 canonical_for: pdp-rollout-hero-matrix-und-gates
 ---
 
 # PDP-Rollout Supplements: Hero-Matrix und Gate-Liste
+
+> **Stand 04.11.2026:** Umgestellt sind Spermidin (Pilot, 29.07.) und NAD⁺ (04.11., lokal
+> committet, Push durch BJ). NAD⁺ läuft auf derselben Kette wie Spermidin, mit `loox_pick` statt
+> Mindestlänge und ohne Loox-App-Parkplatz. Für NAD⁺ gibt es keinen Prüfbericht (BJ 04.11.),
+> G3b hält also auch dort nicht. Offen sind die neun Wellen-Produkte unten und die drei Bundles.
 
 Zwei Artefakte aus §9 Phase 3 von `briefing-pdp-refit.md`, erarbeitet am Piloten
 `product.02_spermidin.json` (live seit 2026-07-29).
