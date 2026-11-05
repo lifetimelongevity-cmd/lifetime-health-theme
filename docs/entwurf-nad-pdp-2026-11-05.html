@@ -4,191 +4,237 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Entwurf NAD⁺-PDP</title>
-<meta name="description" content="Entwurf der NAD⁺-Produktseite nach Jobs to be Done, Progressive Disclosure und Kenya Hara. Nur Vorschau, kein Produktivcode.">
+<meta name="description" content="Entwurf der NAD⁺-Produktseite nach Jobs to be Done, Progressive Disclosure und Kenya Hara, in der Form der Live-NMN-PDP. Nur Vorschau, kein Produktivcode.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  /* Werte gemessen an der Live-NMN-PDP (05.11.2026, 1280 und 375 px), Namen wie assets/theme.css :root */
   :root{
-    --ink:#26251e; --ink-2:#5e5c54; --ink-3:#8a887f;
-    --bg:#f7f7f4; --bg-2:#f2f1ed; --card:#ffffff; --line:#e3e1da;
-    --teal:#364f56; --teal-ink:#ffffff; --mint:#65c0b6; --mint-bg:#e9f5f3; --mint-line:#c9e4e0;
+    /* Farben */
+    --color-ink:#26251e; --color-paper:#f7f7f4; --color-warm:#f2f1ed; --color-white:#fff;
+    --color-dark:#364f56; --color-teal:#65c0b6; --color-star:#f4b740; --color-gray-600:#525252; --color-ink-muted:#6b6b63;
+    --ink-sec:rgba(38,37,30,.72); --ink-ter:rgba(38,37,30,.66); --ink-icon:rgba(38,37,30,.38);
+    --rule-faint:rgba(38,37,30,.05); --rule:rgba(38,37,30,.08); --rule-strong:rgba(38,37,30,.1);
+    --chip-bg:#e6f4f1;
+    /* Schrift */
+    --font-heading:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --font-body:Lato,-apple-system,BlinkMacSystemFont,sans-serif;
+    --text-stat:56px; --text-display:48px; --text-h1:min(36px,8vw); --text-h2:28px;
+    --text-body-lg:18px; --text-body:16px; --text-buy:15px; --text-body-sm:14px; --text-fine:13px; --text-micro:12px;
+    --leading-stat:1; --leading-heading:1.15; --leading-tight:1.25; --leading-body:1.4; --leading-copy:1.5; --leading-relaxed:1.6; --leading-answer:1.65;
+    --weight-regular:400; --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+    /* Abstände, Radien, Breiten */
+    --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px; --space-8:64px; --space-9:80px;
+    --radius-card:4px; --radius-lg:16px; --radius-full:999px;
+    --page-max:1280px; --page-gutter:var(--space-4); --belege-max:960px; --measure:32rem;
+    /* Kaufzone */
+    --pick-h:49px; --cta-h:48px; --icon:16px; --icon-gap:9px; --thumb:64px;
+    --section-y:min(80px,15vw);
+    /* Notizen für BJ, nicht Teil der Seite */
     --note-bg:#fbf5e4; --note-line:#e6d6a6; --note-ink:#6b5a24;
-    --r:4px; --head:"Helvetica Neue",Helvetica,Arial,sans-serif;
-    --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:24px; --s6:32px; --s7:48px; --s8:64px; --s9:96px;
-    --t-title:2rem; --t-text:1rem; --t-small:.9375rem;
   }
+  @media (min-width:768px){ :root{--page-gutter:var(--space-5)} }
+  @media (max-width:860px){ :root{--text-h2:24px} }
+
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
-  body{margin:0;font-family:Lato,system-ui,sans-serif;font-size:var(--t-text);line-height:1.5;color:var(--ink);background:var(--bg);overflow-x:hidden}
+  body{margin:0;font-family:var(--font-body);font-size:var(--text-body);line-height:var(--leading-body);color:var(--color-ink);background:var(--color-paper);overflow-x:hidden}
   a{color:inherit}
   h1,h2,h3,p,ul{margin:0}
   ul{padding:0;list-style:none}
   button{font:inherit;color:inherit}
-  img{max-width:100%}
-  .wrap{max-width:1040px;margin:0 auto;padding:0 var(--s4)}
-
-  /* Rahmen */
-  .hd{height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line)}
-  .logo{font-size:1.4rem;letter-spacing:.22em}
-  .logo b{font-weight:700}.logo span{font-weight:200}
-  .hd__r{display:flex;gap:var(--s4);color:var(--ink-2);font-size:var(--t-small)}
-
-  /* Ueberschriften-Stack wie crs-heading-stack: ein Block, nur Deckkraft */
-  .hs{font-family:var(--head);font-size:1.75rem;line-height:1.2;font-weight:400;letter-spacing:-.01em}
-  .hs span{display:block;opacity:.6}
-
-  /* Hero */
-  .hero{padding:var(--s4) 0 var(--s8)}
-  .gal__main{background:var(--bg-2);border-radius:var(--r);aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden}
-  .gal__main img{width:100%;height:100%;object-fit:cover;display:block}
-  .gal__main .ph{width:100%;height:100%;border:0;border-radius:0}
-  .thumbs{display:flex;gap:var(--s2);margin-top:var(--s2)}
-  .thumb{width:56px;height:56px;border-radius:var(--r);border:1px solid var(--line);padding:0;background:var(--bg-2);overflow:hidden;cursor:pointer;flex:none}
-  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
-  .thumb.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
-  .thumb--ph{display:flex;align-items:center;justify-content:center;font-size:.6875rem;color:var(--ink-3);border-style:dashed}
-
-  .rating{display:flex;align-items:center;gap:var(--s2);margin-top:var(--s5);font-size:var(--t-small);color:var(--ink-2)}
-  .rating .stars{color:#e8b43a;letter-spacing:.05em}
-  .rating b{color:var(--ink)}
-  h1{font-family:var(--head);font-size:var(--t-title);line-height:1.15;font-weight:400;letter-spacing:-.02em;margin-top:var(--s2)}
-  h1 span{display:block;opacity:.6}
-  .pts{margin-top:var(--s4);display:grid;gap:var(--s1);color:var(--ink-2)}
-  .pts li{display:flex;gap:var(--s2);align-items:baseline}
-  .pts li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--mint);flex:none;transform:translateY(-2px)}
-
-  .box{margin-top:var(--s6)}
-  .lbl{font-size:var(--t-small);color:var(--ink-2);margin-bottom:var(--s2)}
-  .modes{display:grid;grid-template-columns:1fr 1fr;gap:var(--s2)}
-  .mode{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:var(--s3);cursor:pointer;text-align:left}
-  .mode span{display:block;font-size:var(--t-small);color:var(--ink-2)}
-  .mode b{display:block;font-size:1.125rem}
-  .mode.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
-  .hint{margin-top:var(--s2);font-size:var(--t-small);color:var(--ink-2)}
-  .cta{display:block;width:100%;margin-top:var(--s5);height:52px;padding:0 var(--s4);border:0;border-radius:999px;background:var(--teal);color:var(--teal-ink);font-weight:700;font-size:1rem;cursor:pointer}
-  .save{margin-top:var(--s3);text-align:center}
-  .save span{display:inline-block;background:var(--mint-bg);border:1px solid var(--mint-line);border-radius:var(--r);padding:var(--s1) var(--s3);font-weight:700;font-size:var(--t-small)}
-  .under{margin-top:var(--s2);font-size:var(--t-small);color:var(--ink-2);text-align:center}
-  .guar{margin-top:var(--s5);background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:var(--s4);display:flex;gap:var(--s3);align-items:flex-start}
-  .guar svg{flex:none;width:28px;height:28px;color:var(--teal)}
-  .guar b{display:block}
-  .guar p{font-size:var(--t-small);color:var(--ink-2);margin-top:2px}
-
-  /* Laden */
-  details{border-top:1px solid var(--line)}
-  summary{list-style:none;cursor:pointer;padding:var(--s3) 0;display:flex;justify-content:space-between;gap:var(--s3)}
+  img{max-width:100%;display:block}
+  summary{list-style:none;cursor:pointer}
   summary::-webkit-details-marker{display:none}
-  summary::after{content:"+";color:var(--ink-3);flex:none}
-  details[open] summary::after{content:"–"}
-  .d-body{padding:0 0 var(--s4);color:var(--ink-2);font-size:var(--t-small)}
-  .d-body p+p{margin-top:var(--s2)}
+  .wrap{max-width:var(--page-max);margin:0 auto;padding:0 var(--page-gutter)}
+  .chev{flex:none;width:var(--icon);height:var(--icon);color:var(--ink-ter);transition:transform .2s ease}
+  details[open]>summary .chev{transform:rotate(180deg)}
 
-  /* Wirkprinzip */
-  .wp{padding:var(--s8) 0;background:var(--bg-2)}
-  .wp__grid{display:grid;gap:var(--s6);margin-top:var(--s6)}
-  .stat__n{font-family:var(--head);font-size:4.5rem;line-height:1;font-weight:400;letter-spacing:-.03em}
-  .stat__t{margin-top:var(--s2);font-size:1.125rem;max-width:30ch}
-  .bars{margin-top:var(--s5);display:grid;gap:var(--s3)}
-  .bar{display:grid;grid-template-columns:96px 1fr;gap:var(--s3);align-items:center;font-size:var(--t-small);color:var(--ink-2)}
-  .bar__track{height:14px;background:transparent}
-  .bar__fill{height:100%;border-radius:2px;background:var(--teal)}
-  .bar--b .bar__fill{background:var(--mint)}
-  .src{margin-top:var(--s4);font-size:.8125rem;color:var(--ink-3)}
-  .src a{color:var(--ink-3);text-underline-offset:3px}
-  .roles{display:grid;gap:var(--s5)}
-  .roles h3{font-size:var(--t-text);font-weight:700}
-  .roles p{margin-top:var(--s1);color:var(--ink-2);font-size:var(--t-small)}
+  /* Kopf (Platzhalter für den Theme-Header) */
+  .hd{height:57px;display:flex;align-items:center;justify-content:space-between}
+  .hd img{height:24px;width:auto}
+  .hd__r{display:flex;gap:var(--space-4);color:var(--ink-sec);font-size:var(--text-body-sm)}
 
-  /* Belege */
-  .proof{padding:var(--s7) 0 var(--s4)}
-  .cards{display:grid;gap:var(--s3)}
-  .card{background:var(--card);border:1px solid rgba(38,37,30,.05);border-radius:var(--r);padding:var(--s5)}
-  .card h2{font-size:.8125rem;color:var(--ink-2);font-weight:400;text-transform:uppercase;letter-spacing:.06em}
-  .big{font-family:var(--head);font-size:2rem;font-weight:400;letter-spacing:-.02em;line-height:1.1;margin-top:var(--s2)}
-  .big small{font-size:var(--t-small);color:var(--ink-2)}
-  .card p{margin-top:var(--s2)}
-  .card p.m{color:var(--ink-2);font-size:var(--t-small)}
-  .card details{margin-top:var(--s3);border-top:1px solid var(--line)}
-  .card summary{padding:var(--s2) 0;font-size:var(--t-small);color:var(--teal)}
-  .lipo{display:flex;gap:var(--s3);align-items:center;margin-top:var(--s3)}
-  .lipo svg{width:64px;height:64px;flex:none}
-  .lipo p{margin:0;font-size:var(--t-small);color:var(--ink-2)}
-  .q{border-top:1px solid var(--line);padding:var(--s3) 0}
-  .q:first-of-type{border-top:0}
-  .q small{display:block;color:var(--ink-3);margin-top:var(--s1);font-size:.8125rem}
-  .q--hero{display:flex;gap:var(--s3);align-items:flex-start}
-  .q--hero img{width:56px;height:74px;object-fit:cover;border-radius:var(--r);flex:none}
-  .q--hero p{font-size:1.0625rem;margin:0}
-  .person{display:flex;gap:var(--s3);align-items:center;margin-top:var(--s4)}
-  .person img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none}
-  .person b{display:block;font-size:var(--t-small)}
-  .person span{font-size:.8125rem;color:var(--ink-2)}
-  .loox{padding:0 0 var(--s7)}
-  .loox details{border-bottom:1px solid var(--line)}
-  .loox summary{justify-content:center;color:var(--teal);font-size:var(--t-small)}
-  .loox summary::after{content:""}
+  /* Überschriften: crs-heading-stack, headline-md (Titel + Untertitel ein Block, nur die Farbe gedämpft) */
+  .hs{font-family:var(--font-heading);font-size:var(--text-h2);line-height:var(--leading-heading);font-weight:var(--weight-regular);letter-spacing:-.01em;margin-bottom:var(--space-6)}
+  .hs span{display:block;color:var(--ink-sec)}
 
-  /* Produktfakten */
-  .pf{padding:var(--s8) 0;background:var(--bg-2)}
-  .pf__grid{display:grid;gap:var(--s5);margin-top:var(--s6)}
-  .facts{background:var(--card);border-radius:var(--r);padding:var(--s5)}
-  .fact{display:flex;justify-content:space-between;gap:var(--s4);padding:var(--s3) 0;border-top:1px solid var(--line)}
+  /* 1 · Hero (lt-pdp-hero) */
+  .hero{background:var(--color-paper)}
+  .hero .wrap{padding-top:var(--space-2);padding-bottom:var(--space-7)}
+  .hero__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-3) var(--space-5)}
+  .gal__main{background:var(--color-warm);border-radius:var(--radius-card);aspect-ratio:343/316;overflow:hidden}
+  .gal__main img{width:100%;height:100%;object-fit:cover}
+  .thumbs{display:flex;justify-content:center;gap:var(--space-2);margin-top:var(--space-2)}
+  .thumb{width:24px;height:6px;padding:0;border:0;border-radius:var(--radius-full);background:var(--color-ink);opacity:.5;cursor:pointer;overflow:hidden}
+  .thumb img{display:none}
+  .thumb.on{opacity:1}
+
+  .rating{display:inline-flex;align-items:center;gap:6px;margin:-4px 0 6px;padding:4px 0}
+  .rating__stars{font-size:var(--text-fine);line-height:1;letter-spacing:.04em;color:var(--color-star)}
+  .rating b{font-size:var(--text-fine);font-weight:var(--weight-medium)}
+  .rating__count{font-size:var(--text-micro);color:var(--ink-sec)}
+  h1{font-family:var(--font-heading);font-size:var(--text-h1);line-height:var(--leading-heading);font-weight:var(--weight-regular);letter-spacing:-.02em;margin:var(--space-1) 0 var(--space-5)}
+  h1 span{display:block;color:var(--ink-sec)}
+  .pts{display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-5)}
+  .pts li{display:flex;align-items:flex-start;gap:var(--icon-gap);font-size:var(--text-body-sm);line-height:var(--leading-copy);color:var(--ink-sec)}
+  .pts svg{flex:none;margin-top:var(--space-1);color:var(--color-ink)}
+
+  .lbl{font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec);margin-bottom:var(--space-2)}
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)}
+  .mode{height:var(--pick-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--color-white);border:1px solid var(--rule-strong);border-radius:var(--radius-card);padding:6px var(--space-1);cursor:pointer;line-height:1.1}
+  .mode span{font-size:var(--text-body-sm);font-weight:var(--weight-medium)}
+  .mode b{font-size:var(--text-body-sm);font-weight:var(--weight-regular);color:var(--ink-sec)}
+  .mode.on{border-color:var(--color-ink);box-shadow:inset 0 0 0 .5px var(--color-ink)}
+  .hint{margin-top:6px;font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec)}
+  .cta{display:block;width:100%;height:var(--cta-h);margin-top:var(--space-4);padding:0 15px;border:0;border-radius:var(--radius-full);background:var(--color-dark);color:var(--color-white);font-size:var(--text-buy);font-weight:var(--weight-medium);cursor:pointer}
+  .save{margin-top:var(--space-3);text-align:center}
+  .save span{display:inline-block;background:var(--chip-bg);border-radius:var(--radius-card);padding:var(--space-1) var(--space-3);font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec)}
+  .save b{font-weight:var(--weight-medium);color:var(--color-ink)}
+  .under{margin-top:var(--space-2);font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec);text-align:center}
+  .guar{margin-top:var(--space-3);background:var(--color-white);border:1px solid var(--rule-strong);border-radius:var(--radius-card);padding:var(--space-3) var(--space-4);display:flex;gap:var(--icon-gap);align-items:flex-start}
+  .guar svg{flex:none;margin-top:1px}
+  .guar b{display:block;font-size:var(--text-body-sm);font-weight:var(--weight-medium)}
+  .guar p{margin-top:2px;font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec)}
+
+  @media (min-width:768px){
+    .hero .wrap{padding-top:var(--space-9);padding-bottom:var(--space-8)}
+    .hero__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--space-6);align-items:start}
+    .gal{position:sticky;top:var(--space-5)}
+    .gal__main{aspect-ratio:1/1}
+    .thumbs{margin-top:var(--space-4);gap:23px}
+    .thumb{width:var(--thumb);height:var(--thumb);border:1px solid var(--rule-strong);border-radius:var(--radius-card);background:var(--color-paper);opacity:.62}
+    .thumb img{display:block;width:100%;height:100%;object-fit:cover}
+    .lbl{margin-top:0}
+  }
+
+  /* 2 · Wirkprinzip (lt-pdp-wirkprinzip, Fläche und Abstände aus product.12_nad-liposomal-2.json) */
+  .wp{background:var(--color-warm);padding:var(--section-y) 0}
+  .wp__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-6)}
+  .stat__n{font-family:var(--font-heading);font-size:var(--text-display);line-height:var(--leading-stat);font-weight:var(--weight-bold);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .stat__t{margin-top:var(--space-2);max-width:30ch;line-height:var(--leading-relaxed)}
+  .bars{margin-top:var(--space-5);display:grid;gap:var(--space-3)}
+  .bar{display:grid;grid-template-columns:96px 1fr;gap:var(--space-3);align-items:center;font-size:var(--text-body-sm);color:var(--ink-sec)}
+  .bar__fill{height:14px;border-radius:2px;background:var(--color-dark)}
+  .bar--b .bar__fill{background:var(--color-teal)}
+  .src{margin-top:var(--space-6);font-size:var(--text-body-sm);line-height:var(--leading-relaxed);color:var(--ink-sec)}
+  .src a{color:var(--color-teal);text-underline-offset:2px}
+  .roles>div+div{margin-top:var(--space-5);padding-top:var(--space-5);border-top:1px solid var(--rule-strong)}
+  .roles h3{font-size:var(--text-body-sm);font-weight:var(--weight-semibold);line-height:var(--leading-body);margin-bottom:var(--space-2)}
+  .roles p{line-height:var(--leading-relaxed);max-width:52ch}
+  @media (min-width:840px){ .stat__n{font-size:var(--text-stat)} }
+  @media (min-width:900px){ .wp__grid{grid-template-columns:minmax(0,1fr) minmax(0,.85fr);gap:var(--space-8)} }
+
+  /* 3 · Belege-Karten (lt-pdp-belege, CSS aus dem Theme) */
+  .ltbg{background:var(--color-warm);padding:var(--space-6) 0 var(--space-4)}
+  .ltbg__grid{display:grid;gap:var(--space-3);max-width:var(--belege-max);margin:0 auto}
+  .ltbg__card{background:var(--color-white);border:1px solid var(--rule-faint);border-radius:var(--radius-card);padding:var(--space-5);min-width:0}
+  .ltbg__label{font-size:var(--text-micro);line-height:var(--leading-tight);letter-spacing:.06em;text-transform:uppercase;font-weight:var(--weight-regular);color:var(--ink-sec)}
+  .ltbg__big{font-family:var(--font-heading);font-size:var(--text-display);font-weight:var(--weight-regular);letter-spacing:-.02em;line-height:var(--leading-stat);margin-top:var(--space-3)}
+  .ltbg__big--num{font-weight:var(--weight-bold);font-variant-numeric:tabular-nums}
+  .ltbg__big-label{display:block;font-family:var(--font-body);font-size:var(--text-body-sm);font-weight:var(--weight-regular);letter-spacing:0;line-height:var(--leading-body);color:var(--ink-sec);margin-top:var(--space-2)}
+  .ltbg__meta{font-size:var(--text-body-sm);line-height:var(--leading-body);color:var(--ink-sec);margin-top:var(--space-1)}
+  .ltbg__text{line-height:var(--leading-body);margin-top:var(--space-3)}
+  .ltbg__lipo{display:flex;gap:var(--space-3);align-items:center}
+  .ltbg__lipo svg{flex:none;width:var(--thumb);height:var(--thumb)}
+  .lipo-ring{fill:none;stroke:var(--color-dark);stroke-width:2}
+  .lipo-core{fill:var(--chip-bg);stroke:var(--color-dark);stroke-width:2}
+  .lipo-dot{fill:var(--color-teal)}
+  .ltbg__person{display:flex;gap:var(--space-3);align-items:center;margin-top:var(--space-3)}
+  .ltbg__person img{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:none}
+  .ltbg__person-name{font-weight:var(--weight-bold);line-height:var(--leading-tight)}
+  .ltbg__person-role{margin-top:2px;font-size:var(--text-body-sm);line-height:var(--leading-body);color:var(--ink-sec)}
+  .ltbg__details{margin-top:var(--space-3);border-top:1px solid var(--rule)}
+  .ltbg__summary{display:flex;justify-content:space-between;align-items:center;gap:var(--space-2);padding-top:var(--space-3);font-size:var(--text-body-sm);font-weight:var(--weight-semibold)}
+  .ltbg__summary .chev{color:inherit}
+  .ltbg__body{padding-top:var(--space-3);font-size:var(--text-body-sm);line-height:var(--leading-body);color:var(--ink-sec)}
+  .ltbg__body p{margin-bottom:var(--space-2)}
+  .ltbg__quotes{margin-top:var(--space-3)}
+  .ltbg__quote{padding:var(--space-4) 0;border-top:1px solid var(--rule)}
+  .ltbg__quote:first-child{border-top:0;padding-top:0}
+  .ltbg__quote--photo{display:flex;gap:var(--space-3);align-items:flex-start}
+  .ltbg__quote--photo img{width:56px;height:74px;object-fit:cover;border-radius:var(--radius-card);flex:none}
+  .ltbg__stars{display:flex;gap:2px;color:var(--color-star);margin-bottom:var(--space-2)}
+  .ltbg__quote-text{line-height:var(--leading-body)}
+  .ltbg__quote-meta{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-1) var(--space-3);margin-top:var(--space-2);font-size:var(--text-body-sm);line-height:var(--leading-tight)}
+  .ltbg__quote-name{font-weight:var(--weight-semibold)}
+  .ltbg__verified{display:inline-flex;align-items:center;gap:4px;font-size:var(--text-micro);font-weight:var(--weight-medium);color:var(--ink-sec);white-space:nowrap}
+  .ltbg__quote-date{font-size:var(--text-micro);color:var(--ink-ter);font-variant-numeric:tabular-nums}
+  @media (min-width:840px){
+    .ltbg__card{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:var(--space-6);padding:var(--space-6);align-items:start}
+    .ltbg__big{font-size:var(--text-stat)}
+    .ltbg__main{border-left:1px solid var(--rule);padding-left:var(--space-6);padding-top:calc(var(--text-micro) * var(--leading-tight) + var(--space-3))}
+    .ltbg__main>:first-child{margin-top:0}
+    .ltbg__text{font-size:var(--text-body-lg)}
+  }
+
+  /* 4 · Loox-Lade (lt-pdp-reviews-all) */
+  .ltra{background:var(--color-warm);padding-bottom:var(--space-7)}
+  .ltra .wrap{max-width:var(--belege-max)}
+  .ltra__details{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+  .ltra__summary{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:var(--space-4) 0;font-weight:var(--weight-semibold);line-height:var(--leading-body);color:var(--color-gray-600)}
+  .ltra__panel{padding-bottom:var(--space-5);font-size:var(--text-body-sm);color:var(--ink-sec)}
+
+  /* 5 · Produktfakten (lt-pdp-produktfakten, Fläche und Karte aus product.12_nad-liposomal-2.json) */
+  .pf{background:var(--color-warm);padding:var(--section-y) 0}
+  .pf__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-6)}
+  .facts{background:var(--color-white);border-radius:var(--radius-lg);padding:var(--space-6)}
+  .fact{display:flex;justify-content:space-between;gap:var(--space-4);padding:var(--space-3) 0;border-top:1px solid var(--rule-strong);line-height:var(--leading-relaxed)}
   .fact:first-child{border-top:0;padding-top:0}
-  .fact span{color:var(--ink-2);font-size:var(--t-small)}
-  .fact b{text-align:right;font-weight:700}
-  .facts details{margin-top:var(--s3)}
-  .facts summary{font-size:var(--t-small);color:var(--teal)}
+  .fact span{color:var(--ink-sec)}
+  .fact b{text-align:right;font-weight:var(--weight-semibold)}
+  .facts .ltbg__details{margin-top:var(--space-4)}
+  .facts .ltbg__body{line-height:var(--leading-relaxed)}
+  @media (min-width:900px){
+    .pf__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-7)}
+    .facts{padding:var(--space-7)}
+  }
 
-  /* FAQ */
-  .faq{padding:var(--s8) 0 var(--s9)}
-  .faq details:last-of-type{border-bottom:1px solid var(--line)}
-  .faq summary{font-weight:700}
-  .faq .hs{margin-bottom:var(--s4)}
+  /* 6 · FAQ (crs-faq-accordion) */
+  .faq{background:var(--color-paper);padding:var(--section-y) 0}
+  .faq__layout{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-6)}
+  .faq__left{padding-top:var(--space-1)}
+  .faq__left .hs{margin-bottom:0}
+  .faq__item{border-top:1px solid var(--rule-faint)}
+  .faq__item:last-of-type{border-bottom:1px solid var(--rule-faint)}
+  .faq__q{display:flex;justify-content:space-between;align-items:center;gap:var(--space-4);padding:15.68px 0 16.8px}
+  .faq__q span{line-height:var(--leading-copy);max-width:var(--measure)}
+  .faq__a{margin-bottom:var(--space-4);line-height:var(--leading-answer);color:var(--ink-sec);max-width:var(--measure)}
+  @media (min-width:1025px){
+    .faq__layout{grid-template-columns:1fr 1fr;gap:0}
+    .faq__left{padding-right:var(--space-7)}
+    .faq__left .hs{position:sticky;top:var(--space-9)}
+  }
 
   /* Bildstelle */
-  .ph{background:repeating-linear-gradient(135deg,#efede7 0 10px,#f5f4f0 10px 20px);border:1px dashed #c9c6bb;border-radius:var(--r);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:var(--s5);color:var(--ink-2);font-size:var(--t-small);min-height:220px}
-  .ph b{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:var(--s2)}
+  .ph{background:repeating-linear-gradient(135deg,#efede7 0 10px,#f5f4f0 10px 20px);border:1px dashed #c9c6bb;border-radius:var(--radius-lg);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:var(--space-5);color:var(--ink-sec);font-size:var(--text-body-sm);min-height:220px}
+  .ph b{font-size:var(--text-micro);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-ter);margin-bottom:var(--space-2)}
   .ph p{max-width:34ch}
 
-  /* Sticky */
-  .sticky{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);padding:var(--s3) var(--s4);display:flex;align-items:center;gap:var(--s3);transform:translateY(110%);transition:transform .2s;z-index:5}
+  /* Sticky-Kaufleiste (lt-sticky-atc) */
+  .sticky{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--color-paper);border-top:1px solid #e5e5e5;box-shadow:0 -6px 8px rgba(0,0,0,.08);padding:var(--space-2) var(--space-4);display:flex;align-items:center;gap:var(--space-4);transform:translateY(110%);transition:transform .2s}
   .sticky.show{transform:none}
-  .sticky .meta{flex:1;font-size:var(--t-small);color:var(--ink-2);line-height:1.3;min-width:0}
-  .sticky .meta b{display:block;color:var(--ink)}
-  .sticky .cta{width:auto;margin:0;height:44px;padding:0 var(--s5);flex:none}
+  .sticky .meta{flex:1;min-width:0;line-height:var(--leading-body)}
+  .sticky .meta b{display:block;font-size:var(--text-fine);font-weight:var(--weight-medium)}
+  .sticky .meta span{font-size:var(--text-micro);color:var(--color-ink-muted)}
+  .sticky .cta{width:auto;height:44px;margin:0;padding:0 var(--space-4);font-size:var(--text-body-sm);flex:none}
 
-  .ft{padding:var(--s6) var(--s4);border-top:1px solid var(--line);font-size:var(--t-small);color:var(--ink-3)}
+  .ft{padding:var(--space-6) var(--page-gutter);border-top:1px solid var(--rule);font-size:var(--text-body-sm);color:var(--ink-ter)}
 
-  /* Notizen fuer BJ (nicht Teil der Seite) */
-  .note{background:var(--note-bg);border:1px solid var(--note-line);border-radius:var(--r);padding:var(--s3) var(--s4);color:var(--note-ink);font-size:.875rem;line-height:1.45;margin-top:var(--s4)}
-  .note b{color:#4d4119}
-  .note .tag{display:inline-block;font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--note-line);border-radius:999px;padding:0 var(--s2);margin-right:var(--s1);background:#fff}
-  .note .tag--q{background:#fff2c7}
+  /* Notizen für BJ (nicht Teil der Seite) */
+  .note{background:var(--note-bg);border:1px solid var(--note-line);border-radius:var(--radius-card);padding:var(--space-3) var(--space-4);color:var(--note-ink);font-size:var(--text-body-sm);line-height:var(--leading-copy);margin-top:var(--space-4)}
+  .ltbg .note{max-width:var(--belege-max);margin:var(--space-4) auto 0}
+  .tag{display:inline-block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--note-line);border-radius:var(--radius-full);padding:0 var(--space-2);margin-right:var(--space-1);background:var(--color-white)}
+  .tag--q{background:#fff2c7}
   body.clean .note,body.clean .bj{display:none}
-  .toggle{position:absolute;top:64px;right:var(--s3);z-index:10;background:var(--ink);color:#fff;border:0;border-radius:999px;padding:var(--s2) var(--s4);font-size:.8125rem;cursor:pointer}
-  .bj{background:var(--note-bg);border-top:1px solid var(--note-line);padding:var(--s7) 0 var(--s9);color:var(--ink)}
-  .bj h2{font-family:var(--head);font-weight:400;font-size:1.5rem}
-  .bj h3{margin-top:var(--s5);font-size:var(--t-text)}
-  .bj ul{margin-top:var(--s2);display:grid;gap:var(--s2)}
-  .bj li{font-size:var(--t-small);padding-left:var(--s4);position:relative}
-  .bj li::before{content:"·";position:absolute;left:var(--s1);font-weight:700}
-  .bj p.lead{margin-top:var(--s2);color:var(--ink-2);font-size:var(--t-small);max-width:68ch}
-
-  @media (min-width:840px){
-    :root{--t-title:2.5rem}
-    .hero{padding:var(--s7) 0 var(--s9)}
-    .hero__grid{display:grid;grid-template-columns:1.1fr 1fr;gap:var(--s8);align-items:start}
-    .gal{position:sticky;top:var(--s5)}
-    .rating{margin-top:0}
-    .hs{font-size:2rem}
-    .wp,.pf{padding:var(--s9) 0}
-    .wp__grid{grid-template-columns:1.3fr 1fr;gap:var(--s8);align-items:start}
-    .roles{padding-top:var(--s2)}
-    .cards{grid-template-columns:repeat(3,1fr);align-items:start}
-    .pf__grid{grid-template-columns:1fr 1fr;gap:var(--s7);align-items:start}
-    .faq .wrap{max-width:680px}
-    .loox .wrap{max-width:680px}
-  }
+  .toggle{position:absolute;top:64px;right:var(--space-3);z-index:10;background:var(--color-ink);color:var(--color-white);border:0;border-radius:var(--radius-full);padding:var(--space-2) var(--space-4);font-size:var(--text-micro);cursor:pointer}
+  .bj{background:var(--note-bg);border-top:1px solid var(--note-line);padding:var(--space-7) 0 var(--space-9)}
+  .bj h2{font-family:var(--font-heading);font-weight:var(--weight-regular);font-size:var(--text-h2)}
+  .bj h3{margin-top:var(--space-5)}
+  .bj ul{margin-top:var(--space-2);display:grid;gap:var(--space-2)}
+  .bj li{font-size:var(--text-body-sm);padding-left:var(--space-4);position:relative}
+  .bj li::before{content:"·";position:absolute;left:var(--space-1);font-weight:var(--weight-bold)}
+  .bj p{margin-top:var(--space-2);color:var(--ink-sec);font-size:var(--text-body-sm);max-width:68ch}
 </style>
 </head>
 <body>
@@ -196,7 +242,7 @@
 <button class="toggle" id="toggle" type="button">Notizen ausblenden</button>
 
 <header class="hd wrap">
-  <div class="logo"><span>LIFE</span><b>TIME</b></div>
+  <img src="https://www.lifetime-health.de/cdn/shop/files/logo-lifetime-black.svg?v=1705418762" alt="LIFETIME" width="156" height="24">
   <div class="hd__r"><span>Suche</span><span>Warenkorb</span></div>
 </header>
 
@@ -210,40 +256,38 @@
         <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-6946911.png?v=1771403239&width=900" alt="LIFETIME NAD⁺-Kapseln, Dose mit 60 Kapseln">
       </div>
       <div class="thumbs" id="thumbs">
-        <button class="thumb on" type="button" data-src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-6946911.png?v=1771403239&width=900" data-alt="LIFETIME NAD⁺-Kapseln, Dose mit 60 Kapseln"><img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-6946911.png?v=1771403239&width=120" alt=""></button>
-        <button class="thumb" type="button" data-src="entwurf-nad-pdp-visual-2026-11-05/galerie-ritual-montage.jpg" data-alt="Frau um 55 am Küchentisch, daneben die Dose NAD⁺-Kapseln"><img src="entwurf-nad-pdp-visual-2026-11-05/galerie-ritual-montage.jpg" alt=""></button>
-        <button class="thumb" type="button" data-src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-1159623.png?v=1771403240&width=900" data-alt="Etikett der NAD⁺-Kapseln, ausgerollt"><img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-1159623.png?v=1771403240&width=120" alt=""></button>
+        <button class="thumb on" type="button" aria-label="Bild 1" data-src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-6946911.png?v=1771403239&width=900" data-alt="LIFETIME NAD⁺-Kapseln, Dose mit 60 Kapseln"><img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-6946911.png?v=1771403239&width=120" alt=""></button>
+        <button class="thumb" type="button" aria-label="Bild 2" data-src="entwurf-nad-pdp-visual-2026-11-05/galerie-ritual-montage.jpg" data-alt="Frau um 55 am Küchentisch, daneben die Dose NAD⁺-Kapseln"><img src="entwurf-nad-pdp-visual-2026-11-05/galerie-ritual-montage.jpg" alt=""></button>
+        <button class="thumb" type="button" aria-label="Bild 3" data-src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-1159623.png?v=1771403240&width=900" data-alt="Etikett der NAD⁺-Kapseln, ausgerollt"><img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-1159623.png?v=1771403240&width=120" alt=""></button>
       </div>
       <div class="note"><span class="tag">Geändert</span> Galerie von 6 auf 3 Bilder. Raus: die vier Kacheln mit eingebranntem Text. Zwei davon werben mit „laborgeprüft“ und zeigen Eurofins-, Illumina- und Limbach-Logos, die zum AGE&amp;DNA-Test gehören. Das widerspricht Commit <code>e571a32</code> (Laborclaims ohne Prüfbericht raus). Neu: ein Alltagsbild in der Zielgruppe, vorläufig der Kandidat <code>galerie-ritual-montage.jpg</code> aus der Sitzung <code>nad-pdp-visual</code>; deren finale Wahl gilt.</div>
     </div>
 
     <div>
-      <div class="rating"><span class="stars">★★★★★</span> <b>4,8</b> · 18 Bewertungen</div>
+      <div class="rating"><span class="rating__stars" aria-hidden="true">★★★★★</span><b>4,8</b><span class="rating__count">· 18 Bewertungen</span></div>
       <h1>NAD⁺-Kapseln <span>Für Energie, die mit den Jahren nachlässt.</span></h1>
       <ul class="pts">
-        <li>NAD⁺ selbst, keine Vorstufe.</li>
-        <li>Liposomal, damit es in der Zelle ankommt.</li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>NAD⁺ selbst, keine Vorstufe.</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Liposomal, damit es in der Zelle ankommt.</span></li>
       </ul>
       <div class="note"><span class="tag">Geändert</span> Der Job steht jetzt in der Titelzeile statt „Liposomal, 500 mg am Tag“. Die Menge wandert in die Produktfakten.<br><span class="tag tag--q">Offen</span> Quelle für „Energie“ (Titelzeile) und „kommt in der Zelle an“ (Punkt 2)? Ohne Beleg wäre Punkt 2 „Liposomal, in einer Hülle wie deine Zellmembran.“</div>
 
-      <div class="box">
-        <div class="lbl">1 Dose · 60 Kapseln</div>
-        <div class="modes" id="modes">
-          <button class="mode on" type="button" data-mode="sub"><span>Im Abo</span><b>35,91 €</b></button>
-          <button class="mode" type="button" data-mode="once"><span>Einmalig</span><b>39,90 €</b></button>
-        </div>
-        <p class="hint" id="hint">Lieferung alle 30 Tage, versandfrei, jederzeit kündbar.</p>
+      <p class="lbl">1 Dose · 60 Kapseln</p>
+      <div class="modes" id="modes">
+        <button class="mode on" type="button" data-mode="sub"><span>Im Abo</span><b>35,91 €</b></button>
+        <button class="mode" type="button" data-mode="once"><span>Einmalig</span><b>39,90 €</b></button>
+      </div>
+      <p class="hint" id="hint">Lieferung alle 30 Tage, versandfrei, jederzeit kündbar.</p>
 
-        <button class="cta" id="cta" type="button">Abo starten, 35,91 €</button>
-        <p class="save" id="save"><span>Du sparst 3,99 €</span></p>
-        <p class="under">Versand in 1–2 Werktagen</p>
+      <button class="cta" id="cta" type="button">Abo starten, 35,91 €</button>
+      <p class="save" id="save"><span>Du sparst <b>3,99 €</b></span></p>
+      <p class="under">Versand in 1–2 Werktagen</p>
 
-        <div class="guar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z"/><path d="M8.8 12.2l2.2 2.2 4.2-4.4"/></svg>
-          <div>
-            <b>90 Tage Geld zurück</b>
-            <p>Merkst du nichts, bekommst du den vollen Betrag zurück. Auch bei angebrochener Dose, eine E-Mail genügt.</p>
-          </div>
+      <div class="guar">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M9 2 3.5 4.25v4.1c0 3.4 2.3 6.4 5.5 7.4 3.2-1 5.5-4 5.5-7.4v-4.1L9 2Z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.6 8.8 8.3 10.5l3.1-3.2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div>
+          <b>90 Tage Geld zurück</b>
+          <p>Merkst du nichts, bekommst du den vollen Betrag zurück. Auch bei angebrochener Dose, eine E-Mail genügt.</p>
         </div>
       </div>
       <div class="note"><span class="tag">Neu</span> Garantie als eigener Block statt Kleinschrift hinter dem Punkt. Sie baut die größte Hürde ab („merke ich überhaupt etwas?“). Bewusst mit Abstand unter Chip und Versandzeile, damit die Regel „unter dem Knopf höchstens Chip plus eine Zeile“ hält. Deckt sich mit der 90-Tage-Zufriedenheitsgarantie der Rückgaberichtlinie (Erstkauf, Foto der Restmenge).</div>
@@ -258,11 +302,11 @@
 
     <div class="wp__grid">
       <div>
-        <div class="stat__n">61 %</div>
+        <p class="stat__n">61 %</p>
         <p class="stat__t">weniger NAD⁺ im Gewebe zwischen 51 und 70 Jahren als zwischen 30 und 50.</p>
         <div class="bars" role="img" aria-label="NAD⁺ im Gewebe: 30 bis 50 Jahre 2,74, 51 bis 70 Jahre 1,08 Nanogramm je Milligramm Protein">
-          <div class="bar"><span>30–50 Jahre</span><div class="bar__track"><div class="bar__fill" style="width:100%"></div></div></div>
-          <div class="bar bar--b"><span>51–70 Jahre</span><div class="bar__track"><div class="bar__fill" style="width:39.4%"></div></div></div>
+          <div class="bar"><span>30–50 Jahre</span><div class="bar__fill" style="width:100%"></div></div>
+          <div class="bar bar--b"><span>51–70 Jahre</span><div class="bar__fill" style="width:39.4%"></div></div>
         </div>
         <p class="src">Gemessen an Hautproben von 49 Menschen. <a href="https://pubmed.ncbi.nlm.nih.gov/22848760/" target="_blank" rel="noopener">Massudi et al., PLoS One 2012</a></p>
       </div>
@@ -282,65 +326,91 @@
   </div>
 </section>
 
-<!-- 3 · Belege-Karten: Struktur wie NMN -->
-<section class="proof">
-  <div class="wrap cards">
-
-    <div class="card">
-      <h2>Was drin ist</h2>
-      <div class="big">NAD⁺ selbst</div>
-      <p>Keine Vorstufe, aus der dein Körper es erst bilden muss.</p>
-    </div>
-
-    <div class="card">
-      <h2>Die Form</h2>
-      <div class="big">Liposomal</div>
-      <p class="m">Phospholipide aus Sonnenblumenlecithin, HACCP-Produktion</p>
-      <div class="lipo">
-        <svg viewBox="0 0 64 64" aria-hidden="true">
-          <circle cx="32" cy="32" r="27" fill="none" stroke="#364f56" stroke-width="2"/>
-          <circle cx="32" cy="32" r="22" fill="#e9f5f3" stroke="#364f56" stroke-width="2"/>
-          <circle cx="26" cy="27" r="3" fill="#65c0b6"/><circle cx="37" cy="25" r="3" fill="#65c0b6"/>
-          <circle cx="31" cy="36" r="3" fill="#65c0b6"/><circle cx="40" cy="37" r="3" fill="#65c0b6"/><circle cx="24" cy="38" r="3" fill="#65c0b6"/>
-        </svg>
-        <p>Das NAD⁺ steckt in einer Hülle aus Phospholipiden, dem Grundstoff jeder Zellmembran.</p>
-      </div>
-      <div class="person">
-        <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/volker-podcast.png?v=1766075350" alt="">
-        <div><b>Prof. Dr. med. Volker Limmroth</b><span>Chefarzt Neurologie, prüft, was wir veröffentlichen</span></div>
-      </div>
-      <details>
-        <summary>Herstellung und Firma</summary>
-        <div class="d-body">
-          <p>Hergestellt nach HACCP. Jede Charge wird auf Schwermetalle und Verunreinigungen untersucht. Die Kapselhülle ist pflanzlich (Hydroxypropylmethylcellulose), das Produkt ist vegan.</p>
-          <p>LIFETIME ist die Diga Health GmbH, eingetragen beim Amtsgericht Köln unter HRB 64399.</p>
-        </div>
-      </details>
-    </div>
-
-    <div class="card">
-      <h2>Was Kunden sagen</h2>
-      <div class="big">4,8 <small>von 5 · 18 Bewertungen</small></div>
-      <div class="q q--hero" style="margin-top:var(--s3)">
-        <img src="https://images.loox.io/uploads/2026/5/14/XGEB8iYSV.jpg" alt="Kundenfoto: NAD⁺-Dose auf einem Holztisch">
-        <div><p>Bin mit der Wirkung sehr zufrieden!!</p><small>Katharina B. · Verifiziert · Mai 2026</small></div>
-      </div>
-      <div class="q"><p>Gut verträglich.</p><small>Gabriele K. · Verifiziert · Dezember 2025</small></div>
-      <div class="q"><p>Gut in die Routine integrierbar.</p><small>Silke D. · Verifiziert · Januar 2026</small></div>
-    </div>
-  </div>
-
+<!-- 3 · Belege-Karten: Struktur wie NMN (lt-pdp-belege) -->
+<section class="ltbg">
   <div class="wrap">
+    <div class="ltbg__grid">
+
+      <article class="ltbg__card">
+        <div class="ltbg__head">
+          <h2 class="ltbg__label">Was drin ist</h2>
+          <p class="ltbg__big">NAD⁺ selbst</p>
+        </div>
+        <div class="ltbg__main">
+          <p class="ltbg__text">Keine Vorstufe, aus der dein Körper es erst bilden muss.</p>
+        </div>
+      </article>
+
+      <article class="ltbg__card">
+        <div class="ltbg__head">
+          <h2 class="ltbg__label">Die Form</h2>
+          <p class="ltbg__big">Liposomal</p>
+          <p class="ltbg__meta">Phospholipide aus Sonnenblumenlecithin, HACCP-Produktion</p>
+        </div>
+        <div class="ltbg__main">
+          <div class="ltbg__text ltbg__lipo">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <circle class="lipo-ring" cx="32" cy="32" r="27"/>
+              <circle class="lipo-core" cx="32" cy="32" r="22"/>
+              <circle class="lipo-dot" cx="26" cy="27" r="3"/><circle class="lipo-dot" cx="37" cy="25" r="3"/>
+              <circle class="lipo-dot" cx="31" cy="36" r="3"/><circle class="lipo-dot" cx="40" cy="37" r="3"/><circle class="lipo-dot" cx="24" cy="38" r="3"/>
+            </svg>
+            <p>Das NAD⁺ steckt in einer Hülle aus Phospholipiden, dem Grundstoff jeder Zellmembran.</p>
+          </div>
+          <div class="ltbg__person">
+            <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/volker-podcast.png?v=1766075350" alt="">
+            <div><p class="ltbg__person-name">Prof. Dr. med. Volker Limmroth</p><p class="ltbg__person-role">Chefarzt Neurologie, prüft, was wir veröffentlichen</p></div>
+          </div>
+          <details class="ltbg__details">
+            <summary class="ltbg__summary"><span>Herstellung und Firma</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+            <div class="ltbg__body">
+              <p>Hergestellt nach HACCP. Jede Charge wird auf Schwermetalle und Verunreinigungen untersucht. Die Kapselhülle ist pflanzlich (Hydroxypropylmethylcellulose), das Produkt ist vegan.</p>
+              <p>LIFETIME ist die Diga Health GmbH, eingetragen beim Amtsgericht Köln unter HRB 64399.</p>
+            </div>
+          </details>
+        </div>
+      </article>
+
+      <article class="ltbg__card">
+        <div class="ltbg__head">
+          <h2 class="ltbg__label">Was Kunden sagen</h2>
+          <p class="ltbg__big ltbg__big--num">4,8<span class="ltbg__big-label">von 5 · 18 Bewertungen</span></p>
+        </div>
+        <div class="ltbg__main">
+          <ul class="ltbg__quotes">
+            <li class="ltbg__quote ltbg__quote--photo">
+              <img src="https://images.loox.io/uploads/2026/5/14/XGEB8iYSV.jpg" alt="Kundenfoto: NAD⁺-Dose auf einem Holztisch">
+              <div>
+                <span class="ltbg__stars" role="img" aria-label="5 von 5 Sternen"><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg></span>
+                <p class="ltbg__quote-text">Bin mit der Wirkung sehr zufrieden!!</p>
+                <p class="ltbg__quote-meta"><span class="ltbg__quote-name">Katharina B.</span><span class="ltbg__verified"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><circle cx="5.5" cy="5.5" r="5.5" fill="currentColor"/><path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Verifiziert</span><span class="ltbg__quote-date">Mai 2026</span></p>
+              </div>
+            </li>
+            <li class="ltbg__quote">
+              <span class="ltbg__stars" role="img" aria-label="5 von 5 Sternen"><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg></span>
+              <p class="ltbg__quote-text">Gut verträglich.</p>
+              <p class="ltbg__quote-meta"><span class="ltbg__quote-name">Gabriele K.</span><span class="ltbg__verified"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><circle cx="5.5" cy="5.5" r="5.5" fill="currentColor"/><path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Verifiziert</span><span class="ltbg__quote-date">Dezember 2025</span></p>
+            </li>
+            <li class="ltbg__quote">
+              <span class="ltbg__stars" role="img" aria-label="5 von 5 Sternen"><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg><svg width="12" height="12" viewBox="0 0 14 13" fill="none" aria-hidden="true"><path d="M7 0l1.572 4.837h5.085l-4.114 2.99 1.572 4.836L7 9.673l-4.114 2.99 1.571-4.837-4.114-2.99h5.085L7 0z" fill="currentColor"/></svg></span>
+              <p class="ltbg__quote-text">Gut in die Routine integrierbar.</p>
+              <p class="ltbg__quote-meta"><span class="ltbg__quote-name">Silke D.</span><span class="ltbg__verified"><svg width="11" height="11" viewBox="0 0 11 11" fill="none" aria-hidden="true"><circle cx="5.5" cy="5.5" r="5.5" fill="currentColor"/><path d="M3 5.5l1.6 1.6 3.4-3.4" stroke="white" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Verifiziert</span><span class="ltbg__quote-date">Januar 2026</span></p>
+            </li>
+          </ul>
+        </div>
+      </article>
+    </div>
+
     <div class="note"><span class="tag">Geändert</span> „Was drin ist“ zeigt nur noch „NAD⁺ selbst“, die Mengen stehen einmal in den Produktfakten. „Die Form“ bekommt eine kleine Skizze (Platzhalter, bis <code>nad-pdp-visual</code> die Grafik liefert). Bewertungen: Katharina B. mit Foto spricht über die Wirkung, Gabriele K. über Verträglichkeit, Silke D. über die Routine. Alle drei echt aus Loox. Raus: „Sehr hochwertiger Eindruck“ und „Alles wie beschrieben“, die belegen nur die Verpackung.</div>
   </div>
 </section>
 
-<!-- 4 · Loox-Lade -->
-<section class="loox">
+<!-- 4 · Loox-Lade (lt-pdp-reviews-all) -->
+<section class="ltra">
   <div class="wrap">
-    <details>
-      <summary>Alle 18 Bewertungen lesen</summary>
-      <div class="d-body"><p>Hier öffnet sich im Theme das Loox-Widget mit allen Bewertungen, Schnitt 4,8.</p></div>
+    <details class="ltra__details">
+      <summary class="ltra__summary"><span>Alle <strong>18</strong> Bewertungen lesen</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="ltra__panel"><p>Hier öffnet sich im Theme das Loox-Widget mit allen Bewertungen, Schnitt 4,8.</p></div>
     </details>
   </div>
 </section>
@@ -355,9 +425,9 @@
         <div class="fact"><span>NAD⁺ je Tagesportion</span><b>500 mg</b></div>
         <div class="fact"><span>Einnahme</span><b>2 Kapseln täglich zu einer Mahlzeit</b></div>
         <div class="fact"><span>Eine Dose</span><b>60 Kapseln, reicht 30 Tage</b></div>
-        <details>
-          <summary>Zutaten und Pflichthinweise</summary>
-          <div class="d-body">
+        <details class="ltbg__details">
+          <summary class="ltbg__summary"><span>Zutaten und Pflichthinweise</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="ltbg__body">
             <p><b>Zutaten:</b> Phospholipide (aus Sonnenblumenlecithin), Nicotinamidadenindinukleotid (NAD⁺), Maltodextrin, Siliciumdioxid, Hydroxypropylmethylcellulose (Kapselhülle).</p>
             <p>Die angegebene empfohlene tägliche Verzehrmenge darf nicht überschritten werden. Nahrungsergänzungsmittel sind kein Ersatz für eine ausgewogene und abwechslungsreiche Ernährung und eine gesunde Lebensweise. Außerhalb der Reichweite von kleinen Kindern aufbewahren. Kühl und trocken lagern sowie vor Licht schützen.</p>
           </div>
@@ -368,26 +438,28 @@
   </div>
 </section>
 
-<!-- 6 · FAQ: 6 statt 9 -->
+<!-- 6 · FAQ: 6 statt 9 (crs-faq-accordion) -->
 <section class="faq">
-  <div class="wrap">
-    <h2 class="hs">Häufige Fragen</h2>
-    <details><summary>Was kostet der Versand?</summary><div class="d-body"><p>Im Abo nichts. Beim Einmalkauf in Deutschland ab 49 € versandfrei, darunter 4,90 €. Wir verschicken in 1–2 Werktagen.</p></div></details>
-    <details><summary>Kann ich das Abo jederzeit kündigen?</summary><div class="d-body"><p>Ja, im Kundenkonto, ohne Frist und ohne Anruf.</p></div></details>
-    <details><summary>Wie funktioniert die Geld-zurück-Garantie?</summary><div class="d-body"><p>Bist du mit deiner ersten Lieferung nicht zufrieden, auch weil du nichts merkst, bekommst du innerhalb von 90 Tagen den vollen Betrag zurück. Eine E-Mail mit Foto der Restmenge genügt. Dein Widerrufsrecht bleibt unberührt.</p></div></details>
-    <details><summary>Ist das NAD⁺ oder eine Vorstufe?</summary><div class="d-body"><p>NAD⁺ selbst. Viele Produkte mit „NAD“ im Namen enthalten nur eine Vorstufe, aus der der Körper NAD⁺ erst bilden muss.</p></div></details>
-    <details><summary>Was heißt liposomal?</summary><div class="d-body"><p>Das NAD⁺ ist in Phospholipide aus Sonnenblumenlecithin eingebettet. Diese Hülle nennt man Liposom. Phospholipide sind auch der Grundstoff jeder Zellmembran.</p></div></details>
-    <details><summary>Sind die Kapseln vegan?</summary><div class="d-body"><p>Ja. Die Kapselhülle ist pflanzlich, die Phospholipide stammen aus Sonnenblumen.</p></div></details>
-    <div class="note"><span class="tag">Raus</span> „Wofür nehme ich NAD⁺?“ (steht im Hero und im Wirkprinzip), „Wie nehme ich die Kapseln ein?“ und „Wie lagere ich?“ (stehen in den Produktfakten). „Vorstufe“ ohne Milligramm, die Menge steht einmal in den Produktfakten. Garantie-Antwort an die neue Zeile an der Kaufzone angeglichen.</div>
+  <div class="wrap faq__layout">
+    <div class="faq__left"><h2 class="hs">Häufige Fragen</h2></div>
+    <div>
+      <details class="faq__item"><summary class="faq__q"><span>Was kostet der Versand?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Im Abo nichts. Beim Einmalkauf in Deutschland ab 49 € versandfrei, darunter 4,90 €. Wir verschicken in 1–2 Werktagen.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Kann ich das Abo jederzeit kündigen?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Ja, im Kundenkonto, ohne Frist und ohne Anruf.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Wie funktioniert die Geld-zurück-Garantie?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Bist du mit deiner ersten Lieferung nicht zufrieden, auch weil du nichts merkst, bekommst du innerhalb von 90 Tagen den vollen Betrag zurück. Eine E-Mail mit Foto der Restmenge genügt. Dein Widerrufsrecht bleibt unberührt.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Ist das NAD⁺ oder eine Vorstufe?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">NAD⁺ selbst. Viele Produkte mit „NAD“ im Namen enthalten nur eine Vorstufe, aus der der Körper NAD⁺ erst bilden muss.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Was heißt liposomal?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Das NAD⁺ ist in Phospholipide aus Sonnenblumenlecithin eingebettet. Diese Hülle nennt man Liposom. Phospholipide sind auch der Grundstoff jeder Zellmembran.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Sind die Kapseln vegan?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Ja. Die Kapselhülle ist pflanzlich, die Phospholipide stammen aus Sonnenblumen.</p></details>
+      <div class="note"><span class="tag">Raus</span> „Wofür nehme ich NAD⁺?“ (steht im Hero und im Wirkprinzip), „Wie nehme ich die Kapseln ein?“ und „Wie lagere ich?“ (stehen in den Produktfakten). „Vorstufe“ ohne Milligramm, die Menge steht einmal in den Produktfakten. Garantie-Antwort an die neue Zeile an der Kaufzone angeglichen.</div>
+    </div>
   </div>
 </section>
 </main>
 
-<!-- Fuer BJ: Aenderungsliste -->
+<!-- Für BJ: Änderungsliste -->
 <section class="bj">
   <div class="wrap">
     <h2>Für BJ: was sich ändert</h2>
-    <p class="lead">Job der Seite: Eine Frau um 55 merkt, dass ihre Energie nachlässt, will etwas tun, das in den Zellen ansetzt, und braucht vor dem Kauf nur die Sicherheit, dass es echtes NAD⁺ ist, dass es Sinn ergibt und dass sie kein Geld verliert, wenn sie nichts merkt. Größte Hürde: „Merke ich überhaupt etwas?“ Die Seite baut sie mit Wirkprinzip, Ergebnis-Bewertung und Garantie ab.</p>
+    <p>Job der Seite: Eine Frau um 55 merkt, dass ihre Energie nachlässt, will etwas tun, das in den Zellen ansetzt, und braucht vor dem Kauf nur die Sicherheit, dass es echtes NAD⁺ ist, dass es Sinn ergibt und dass sie kein Geld verliert, wenn sie nichts merkt. Größte Hürde: „Merke ich überhaupt etwas?“ Die Seite baut sie mit Wirkprinzip, Ergebnis-Bewertung und Garantie ab.</p>
 
     <h3>Fliegt raus</h3>
     <ul>
@@ -415,7 +487,7 @@
       <li>Wirkprinzip hell, Rückgang groß, Energie und Reparatur klein daneben.</li>
       <li>Produktfakten: Gehalt, Einnahme, Reichweite offen; Zutaten und Pflichttext hinter der Lade.</li>
       <li>Kaufzone: Karten nur Abo/Einmalig mit Preis, Chip „Du sparst 3,99 €“ unter dem Knopf, mehr Luft drumherum.</li>
-      <li>Hero, Belege-Karten, Loox-Lade und FAQ behalten die NMN-Struktur, nur ihr Inhalt ändert sich.</li>
+      <li>Hero, Belege-Karten, Loox-Lade und FAQ sind in Maßen, Icons und Abständen wie auf der Live-NMN-PDP gebaut (gemessen am 05.11.2026), nur ihr Inhalt ändert sich.</li>
     </ul>
 
     <h3>Offen</h3>
@@ -441,7 +513,7 @@
   var P={sub:35.91,once:39.90};
   function eur(n){return n.toFixed(2).replace('.',',')+' €';}
   function render(){
-    var p=P[mode], label=(mode==='sub'?'Abo starten, ':'Einmalig kaufen, ')+eur(p);
+    var label=(mode==='sub'?'Abo starten, ':'Einmalig kaufen, ')+eur(P[mode]);
     document.getElementById('cta').textContent=label;
     document.getElementById('st-cta').textContent=label;
     document.getElementById('save').hidden=mode!=='sub';
@@ -457,8 +529,7 @@
   var main=document.getElementById('galMain'), thumbs=document.querySelectorAll('#thumbs .thumb');
   thumbs.forEach(function(t){t.addEventListener('click',function(){
     thumbs.forEach(function(x){x.classList.remove('on')}); t.classList.add('on');
-    if(t.dataset.ph){ main.innerHTML='<div class="ph"><b>Bildstelle</b><p>'+t.dataset.ph+'</p></div>'; }
-    else { main.innerHTML='<img src="'+t.dataset.src+'" alt="'+t.dataset.alt+'">'; }
+    main.innerHTML='<img src="'+t.dataset.src+'" alt="'+t.dataset.alt+'">';
   })});
 
   var tg=document.getElementById('toggle');
