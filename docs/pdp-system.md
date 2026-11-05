@@ -111,15 +111,19 @@ sie, kippt der Rhythmus.
 
 ## PDP NAD⁺ (`/products/nad-booster`)
 
-Template: `templates/product.12_nad-liposomal-2.json` (Suffix `12_nad-liposomal-2`). Seit 04.11.2026
-lokal auf der Spermidin-Kette, wartet auf BJs Push. 9 Einträge in `order`, keiner deaktiviert, kein
-`main_product_hidden` (hatte die alte Fassung auch nicht).
+Template: `templates/product.12_nad-liposomal-2.json` (Suffix `12_nad-liposomal-2`). Seit 05.11.2026
+lokal auf dem **Aufbau der NMN-PDP** (BJ: NAD⁺ soll konsistent zur NMN-PDP sein), wartet auf BJs Push.
+4 Einträge in `order`, kein `main_product_hidden`.
 
-Reihenfolge wie Spermidin ohne Loox-App-Parkplatz: `main` (lt-pdp-hero), `logo_garden`,
-`feature_grid`, `wirkprinzip` (ohne Bild), `produktfakten`, `comparison_table`,
-`customer_reviews` (`review_source: loox`, sechs Texte per `loox_pick`), `risk_free_close`,
-`faq_accordion` (10 Fragen). Gehalt, Zutaten und Verzehrempfehlung sind vom Etikett übernommen.
-Keine Labor- oder Reinheitsclaims: Für NAD⁺ existiert kein Prüfbericht.
+| # | Section-Key | Typ | Rolle |
+|---|---|---|---|
+| 1 | `main` | `lt-pdp-hero` | Kompakte Kaufzone wie NMN (`bb_compact`), Abo/Einmalig, Garantie unter dem Knopf |
+| 2 | `belege` | `lt-pdp-belege` | Was drin ist (500 mg, Zutaten und Verzehrempfehlung in der Lade) · Die Form (liposomal, Limmroth) · Was Kunden sagen (drei Loox-Stimmen) |
+| 3 | `loox_reviews` | `lt-pdp-reviews-all` | Lade mit allen Loox-Bewertungen |
+| 4 | `faq_accordion` | `crs-faq-accordion` | 8 Fragen, Versand/Abo/Garantie wie NMN vorn |
+
+Keine Messwert-Blöcke in Karte 1: Die Tabelle trägt die Caption „Prüfbericht“, und für NAD⁺ existiert
+keiner. Aus demselben Grund keine Labor- oder Reinheitsclaims.
 
 ## Konvention `main_product_hidden`
 

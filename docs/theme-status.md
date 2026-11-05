@@ -138,6 +138,14 @@ rich-text, text-columns-images, text-columns-icons, content-toggles, slideshow, 
 
 ## Änderungs-Log
 
+### 2026-11-05 · NAD⁺-PDP auf den NMN-Aufbau statt Spermidin-Kette (BJ: „sollte konsistent zur NMN-PDP sein“)
+
+- `templates/product.12_nad-liposomal-2.json` noch einmal umgebaut, diesmal aus `product.nmn-pulver.json`: kompakter Hero (`bb_compact`, Abo/Einmalig nebeneinander, Garantie unter dem Knopf), `lt-pdp-belege` mit drei Karten, `lt-pdp-reviews-all` als Loox-Lade, `crs-faq-accordion`. Vier Sections statt neun.
+- Karte 1 „Was drin ist“: 500 mg NAD⁺ je Tagesportion, Zutaten und Verzehrempfehlung vom Etikett in der Lade. Keine Messwert-Blöcke, weil die Tabelle mit „Prüfbericht“ überschrieben ist und es für NAD⁺ keinen gibt; JSON-LD der Messwerte aus.
+- Karte 2 „Die Form“: Liposomal, Limmroth, Herstellung und Firma in der Lade. Karte 3: drei Loox-Stimmen ohne Wirkaussage, Sterne und Monat aus dem Loox-Widget (Alexander M., Patrick L., Silke D.).
+- Unterschied zu NMN, bewusst nicht angefasst: Der Ersparnis-Chip unter dem Knopf erscheint nur bei Größen oder Streichpreis. NAD⁺ hat eine Variante ohne Streichpreis, die Abo-Ersparnis steht nur in den Kacheln.
+- Geprüft im Vorschau-Theme `194173796727`: lt-check ohne Befund, 1280 und 375 px ohne horizontales Scrollen, Abo (35,91 €) und Einmalkauf (39,90 €) im Warenkorb korrekt, keine Skriptfehler. **Nicht live**, Push durch BJ über den Theme Manager.
+
 ### 2026-11-04 · NAD⁺-PDP auf die Spermidin-Kette (Phase 4 des Supplement-Rollouts)
 
 - `templates/product.12_nad-liposomal-2.json` neu aus `product.02_spermidin.json` gebaut: Hero, Logos, Merkmale, Wirkprinzip (ohne Bild), Produktfakten, Vergleich, Loox-Stimmen, Abo-Close, FAQ. Raus: `ss-social-proof`, `text-columns-icons`, `info-tabs`, vier `rich-text`, `ss-comparison-table-22` (Platzhalter „Third column“, „Other 3“, verrutschte Kopfkarten), Produktempfehlungen.
