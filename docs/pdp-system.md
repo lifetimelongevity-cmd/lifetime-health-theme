@@ -112,15 +112,18 @@ sie, kippt der Rhythmus.
 ## PDP NAD⁺ (`/products/nad-booster`)
 
 Template: `templates/product.12_nad-liposomal-2.json` (Suffix `12_nad-liposomal-2`). Seit 05.11.2026
-lokal auf dem **Aufbau der NMN-PDP** (BJ: NAD⁺ soll konsistent zur NMN-PDP sein), wartet auf BJs Push.
-4 Einträge in `order`, kein `main_product_hidden`.
+lokal, wartet auf BJs Push. **Regel (BJ 05.11.):** Sections, die NAD⁺ und NMN gemeinsam haben, sind
+gleich gebaut und gleich eingestellt. NAD⁺ darf als Nahrungsergänzungsmittel mehr sagen als NMN, das
+steht in eigenen Abschnitten dazwischen. 6 Einträge in `order`, kein `main_product_hidden`.
 
-| # | Section-Key | Typ | Rolle |
-|---|---|---|---|
-| 1 | `main` | `lt-pdp-hero` | Kompakte Kaufzone wie NMN (`bb_compact`), Abo/Einmalig, Garantie unter dem Knopf |
-| 2 | `belege` | `lt-pdp-belege` | Was drin ist (500 mg, Zutaten und Verzehrempfehlung in der Lade) · Die Form (liposomal, Limmroth) · Was Kunden sagen (drei Loox-Stimmen) |
-| 3 | `loox_reviews` | `lt-pdp-reviews-all` | Lade mit allen Loox-Bewertungen |
-| 4 | `faq_accordion` | `crs-faq-accordion` | 8 Fragen, Versand/Abo/Garantie wie NMN vorn |
+| # | Section-Key | Typ | gleich wie NMN? | Rolle |
+|---|---|---|---|---|
+| 1 | `main` | `lt-pdp-hero` | ja | Kompakte Kaufzone (`bb_compact`), Abo/Einmalig, Garantie unter dem Knopf |
+| 2 | `belege` | `lt-pdp-belege` | ja | Was drin ist (500 mg) · Die Form (liposomal, Limmroth) · Was Kunden sagen (drei Loox-Stimmen) |
+| 3 | `loox_reviews` | `lt-pdp-reviews-all` | ja | Lade mit allen Loox-Bewertungen |
+| 4 | `wirkprinzip` | `lt-pdp-wirkprinzip` | nur NEM | Dunkle Zäsur: Energie, Reparatur, Alter, Quelle Massudi 2012 |
+| 5 | `produktfakten` | `lt-pdp-produktfakten` | nur NEM | Gehalt, Zutaten, Verzehrempfehlung vom Etikett |
+| 6 | `faq_accordion` | `crs-faq-accordion` | ja | 9 Fragen, Versand/Abo/Garantie wie NMN vorn |
 
 Keine Messwert-Blöcke in Karte 1: Die Tabelle trägt die Caption „Prüfbericht“, und für NAD⁺ existiert
 keiner. Aus demselben Grund keine Labor- oder Reinheitsclaims.

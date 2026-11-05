@@ -138,6 +138,13 @@ rich-text, text-columns-images, text-columns-icons, content-toggles, slideshow, 
 
 ## Änderungs-Log
 
+### 2026-11-05 · NAD⁺-PDP: NMN-Teile gleich, zwei NEM-Abschnitte dazu (BJ: „NAD⁺ muss schon anders sein, die gleichen Sections sollen gleich sein“)
+
+- Gleich wie NMN bleiben Hero (kompakt), `lt-pdp-belege`, `lt-pdp-reviews-all` und FAQ. Dazu kommen zwei Abschnitte, die NMN als Nicht-NEM nicht haben darf: `wirkprinzip` (dunkel, „Was NAD⁺ in deinen Zellen macht“: Energie, Reparatur, Alter, Quelle Massudi et al., PLoS One 2012, PMID 22848760) und `produktfakten` (Gehalt, Zutaten, Verzehrempfehlung sichtbar statt in der Lade).
+- Hero-Zeile 2 jetzt „Für den Energiestoffwechsel deiner Zellen.“, FAQ um „Wofür nehme ich NAD⁺?“ ergänzt. Karte 1 ohne Lade, die Pflichtangaben stehen in den Produktfakten.
+- Bild im Wirkprinzip ist vorerst das Produktbild `product-2683366.png` (Liposomen, mit eingebranntem Text). Ein eigenes Motiv ohne Text wäre besser.
+- Geprüft im Vorschau-Theme `194173796727`: lt-check ohne Befund, 1280 und 375 px ohne horizontales Scrollen, Abo und Einmalkauf im Warenkorb korrekt. **Nicht live.**
+
 ### 2026-11-05 · NAD⁺-PDP auf den NMN-Aufbau statt Spermidin-Kette (BJ: „sollte konsistent zur NMN-PDP sein“)
 
 - `templates/product.12_nad-liposomal-2.json` noch einmal umgebaut, diesmal aus `product.nmn-pulver.json`: kompakter Hero (`bb_compact`, Abo/Einmalig nebeneinander, Garantie unter dem Knopf), `lt-pdp-belege` mit drei Karten, `lt-pdp-reviews-all` als Loox-Lade, `crs-faq-accordion`. Vier Sections statt neun.
