@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NAD⁺-PDP Bildkonzept</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<!--
+  status: snapshot
+  last_review: 2026-11-05
+  canonical_for: Bildentscheidungen NAD⁺-PDP (Muster für weitere Supplement-PDPs)
+  Inhalts-Entwurf parallel: docs/entwurf-nad-pdp-2026-11-05.html (Sitzung nad-pdp-vorschau)
+-->
+<style>
+:root{
+  --ink:#26251e; --ink-72:rgba(38,37,30,.72); --ink-55:rgba(38,37,30,.58);
+  --paper:#f7f7f4; --warm:#f2f1ed; --white:#fff;
+  --dark:#364f56; --dark-tile:#2d4249; --mint:#65c0b6;
+  --on-dark:#f7f7f4; --on-dark-72:rgba(247,247,244,.74);
+  --hair:rgba(38,37,30,.12); --hair-dark:rgba(247,247,244,.2);
+  --gold:#f4b740;
+  --head:"Helvetica Neue",Helvetica,Arial,sans-serif;
+  --body:Lato,-apple-system,BlinkMacSystemFont,sans-serif;
+  --r-sm:8px; --r-md:12px;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:#e9e8e3;color:var(--ink);font:16px/1.45 var(--body)}
+::selection{background:rgba(101,192,182,.35)}
+a{color:inherit;text-underline-offset:3px}
+img{display:block;max-width:100%}
+:focus-visible{outline:2px solid var(--mint);outline-offset:2px}
+
+/* ---------- Rahmen des Dokuments ---------- */
+.doc{max-width:1360px;margin:0 auto;padding:32px 16px 96px}
+.doc-head{display:grid;gap:24px;margin-bottom:40px}
+.doc-head h1{font:400 34px/1.15 var(--head);letter-spacing:-.01em;margin:0}
+.doc-head h1 span{color:var(--ink-72)}
+.doc-head p{margin:0;max-width:72ch;color:var(--ink-72)}
+.switch{display:inline-flex;border:1px solid var(--hair);border-radius:999px;background:var(--white);padding:3px;gap:2px;width:max-content}
+.switch button{font:700 14px var(--body);border:0;background:none;padding:8px 16px;border-radius:999px;cursor:pointer;color:var(--ink-72)}
+.switch button[aria-pressed="true"]{background:var(--dark);color:var(--on-dark)}
+
+table.sum{width:100%;border-collapse:collapse;background:var(--white);border-radius:var(--r-md);overflow:hidden;font-size:15px}
+table.sum th,table.sum td{text-align:left;vertical-align:top;padding:12px 14px;border-bottom:1px solid var(--hair)}
+table.sum th{font-weight:700;background:var(--warm)}
+table.sum tr:last-child td{border-bottom:0}
+.sum-wrap{overflow-x:auto;border-radius:var(--r-md)}
+.offen{background:var(--white);border:1px solid var(--hair);border-radius:var(--r-md);padding:20px 22px}
+.offen h2,.funde h2{font:700 17px/1.3 var(--body);margin:0 0 10px}
+.offen ol,.funde ul{margin:0;padding-left:20px}
+.offen li,.funde li{margin:6px 0}
+.funde{background:rgba(244,183,64,.12);border:1px solid rgba(244,183,64,.55);border-radius:var(--r-md);padding:20px 22px}
+
+.row{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:28px;align-items:start;margin-top:56px}
+.row-label{grid-column:1/-1;display:flex;align-items:baseline;gap:12px;margin-bottom:-12px}
+.row-label h2{font:400 26px/1.2 var(--head);margin:0}
+.row-label span{color:var(--ink-55);font-size:14px}
+.frame{background:var(--white);border-radius:var(--r-md);box-shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.06);overflow:hidden;container-type:inline-size;margin-inline:auto;width:100%;transition:max-width .35s cubic-bezier(.16,1,.3,1)}
+body.m .frame{max-width:375px}
+.note{position:sticky;top:20px;background:var(--white);border:1px solid var(--hair);border-radius:var(--r-md);padding:20px 22px;font-size:15px}
+.note dl{margin:0;display:grid;gap:12px}
+.note dt{font-weight:700;font-size:13px;color:var(--ink-55)}
+.note dd{margin:2px 0 0}
+.tag{display:inline-block;font:700 11px/1 var(--body);letter-spacing:.04em;padding:5px 8px;border-radius:999px;vertical-align:middle}
+.tag.da{background:rgba(101,192,182,.18);color:#2f6f68}
+.tag.neu{background:rgba(244,183,64,.22);color:#7a5300}
+.tag.weg{background:var(--warm);color:var(--ink-72)}
+.ph{position:absolute;left:10px;top:10px;z-index:3}
+.ph.da{background:#e3f3f1}.ph.neu{background:#fbecc8}
+@media (max-width:980px){.row{grid-template-columns:1fr}.note{position:static}}
+
+/* ---------- PDP-Bausteine (reagieren auf die Rahmenbreite) ---------- */
+.pdp{font-family:var(--body);color:var(--ink)}
+.sec{padding:40px 20px}
+@container (min-width:700px){.sec{padding:64px 48px}}
+.h-stack{font:400 28px/1.15 var(--head);letter-spacing:-.01em;margin:0 0 28px}
+.h-stack span{display:block;color:var(--ink-72)}
+.on-dark .h-stack span{color:var(--on-dark-72)}
+
+/* Hero */
+.hero{background:var(--paper);display:grid;gap:20px;padding:0 0 32px}
+@container (min-width:700px){.hero{grid-template-columns:1.1fr 1fr;gap:40px;padding:32px 40px 48px}}
+.hero>div{min-width:0}
+.gal-main{position:relative;aspect-ratio:1;background:var(--warm);overflow:hidden}
+@container (min-width:700px){.gal-main{border-radius:var(--r-sm)}}
+.gal-main img{width:100%;height:100%;object-fit:cover}
+.gal-main img.contain{object-fit:contain;background:#fff}
+.thumbs{display:flex;gap:8px;margin-top:10px;padding:0 16px;overflow-x:auto}
+@container (min-width:700px){.thumbs{padding:0}}
+.thumbs button{position:relative;flex:0 0 64px;aspect-ratio:1;border:1px solid var(--hair);border-radius:6px;padding:0;overflow:hidden;background:var(--warm);cursor:pointer}
+.thumbs button[aria-current="true"]{outline:2px solid var(--dark);outline-offset:1px}
+.thumbs img{width:100%;height:100%;object-fit:cover}
+.thumbs b{position:absolute;right:3px;bottom:3px;font:700 10px/1 var(--body);background:rgba(255,255,255,.9);border-radius:4px;padding:2px 4px}
+.gal-cap{font-size:13px;color:var(--ink-55);padding:8px 16px 0}
+@container (min-width:700px){.gal-cap{padding:8px 0 0}}
+.buy{padding:0 16px}
+@container (min-width:700px){.buy{padding:0}}
+.stars{color:var(--gold);letter-spacing:1px;font-size:14px}
+.rating{font-size:14px;color:var(--ink-72);display:flex;gap:6px;align-items:center}
+.buy h3{font:400 34px/1.12 var(--head);letter-spacing:-.01em;margin:8px 0 18px}
+.buy h3 span{display:block;color:var(--ink-72)}
+.checks{list-style:none;margin:0 0 18px;padding:0;display:grid;gap:6px;font-size:15px}
+.checks li{display:flex;gap:8px;align-items:flex-start}
+.checks svg{flex:none;margin-top:2px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opt{border:1px solid var(--hair);border-radius:var(--r-sm);padding:10px;text-align:center;background:#fff;font-size:15px}
+.opt b{display:block}
+.opt.on{border:2px solid var(--ink)}
+.opt small{color:var(--ink-72);font-size:14px}
+.cta{display:block;width:100%;margin-top:14px;border:0;border-radius:999px;background:var(--dark);color:var(--on-dark);font:700 16px var(--body);padding:15px;cursor:pointer}
+.cta:hover{background:var(--dark-tile)}
+.assure{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.assure div{display:flex;gap:8px;align-items:center;font-size:14px;background:var(--warm);border:1px solid var(--hair);border-radius:var(--r-sm);padding:10px}
+.assure div.strong{background:rgba(101,192,182,.14);border-color:rgba(101,192,182,.5);font-weight:700}
+.assure svg{flex:none}
+
+/* Wirkprinzip */
+.wirk{background:var(--dark);color:var(--on-dark)}
+.wirk-grid{display:grid;gap:28px}
+.wirk-grid .h-stack{margin:0}
+@container (min-width:700px){.wirk-grid .h-stack{margin-bottom:28px}}
+@container (min-width:700px){.wirk-grid{grid-template-columns:1fr 1fr;grid-template-areas:"h fig" "st fig";column-gap:48px;row-gap:0;align-items:start}.wirk-grid .h-stack{grid-area:h;align-self:end}.wirk-grid .stages{grid-area:st}.wirk-grid .einbl{grid-area:fig;align-self:center}}
+.stages{list-style:none;margin:0;padding:0;display:grid;gap:0}
+.stages li{display:grid;grid-template-columns:40px 1fr;gap:12px;padding:16px 0;border-top:1px solid var(--hair-dark)}
+.stages li:first-child{border-top:0;padding-top:0}
+.stages svg{color:var(--mint)}
+.stages b{display:block;margin-bottom:4px}
+.stages p{margin:0;color:var(--on-dark-72);font-size:15px}
+.einbl{position:relative;border-radius:var(--r-md);overflow:hidden;aspect-ratio:4/5}
+.einbl>img{width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+.glass{position:absolute;left:5%;right:5%;bottom:5%;background:rgba(255,255,255,.84);backdrop-filter:blur(14px) saturate(1.1);-webkit-backdrop-filter:blur(14px) saturate(1.1);border:1px solid rgba(255,255,255,.7);border-radius:14px;padding:16px 18px;color:var(--ink);box-shadow:0 8px 28px rgba(38,37,30,.18)}
+.glass .big{font:700 52px/1 var(--head);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.glass .lbl{font-size:14px;margin:6px 0 12px;color:var(--ink-72)}
+.bar{display:grid;grid-template-columns:86px 1fr;gap:10px;align-items:center;font-size:13px;margin-top:6px}
+.bar i{display:block;height:10px;border-radius:999px;background:var(--mint)}
+.bar i.low{background:var(--dark)}
+.glass .src{font-size:11px;color:var(--ink-55);margin-top:10px}
+.wirk .src-line{font-size:13px;color:var(--on-dark-72);margin-top:16px}
+
+/* Belege */
+.belege{background:var(--warm)}
+.cards{display:grid;gap:12px}
+.card{background:#fff;border-radius:var(--r-md);padding:22px;display:grid;gap:16px}
+@container (min-width:700px){.card{grid-template-columns:38% 1fr;gap:32px;padding:28px 32px}}
+.card .k{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-55);margin-bottom:6px}
+.card .v{font:700 48px/1 var(--head);letter-spacing:-.02em}
+.card .v.word{font-weight:400;font-size:40px}
+.card .meta{font-size:13px;color:var(--ink-55);margin-top:6px}
+.card p{margin:0}
+.media-row{display:flex;gap:14px;align-items:center;background:var(--paper);border-radius:var(--r-sm);padding:12px 14px;position:relative}
+.media-row img{width:96px;height:auto}
+.media-row span{font-size:15px}
+.media-wide{position:relative;border-radius:var(--r-sm);overflow:hidden;aspect-ratio:2.1/1;background:#cfe0ea}
+.media-wide img{width:100%;height:100%;object-fit:cover;object-position:60% 50%;filter:saturate(.7) sepia(.12)}
+.person{display:flex;gap:10px;align-items:center;font-size:14px}
+.person img{width:44px;height:44px;border-radius:50%;object-fit:cover}
+.person small{display:block;color:var(--ink-55)}
+.review{border-top:1px solid var(--hair);padding:10px 0}
+.review:first-child{border-top:0;padding-top:0}
+.review small{color:var(--ink-55)}
+
+/* Loox */
+.loox{background:var(--warm);padding:0 20px 32px;text-align:center;font-size:15px}
+.loox a{font-weight:700}
+
+/* Produktfakten */
+.fakten{background:var(--warm)}
+.fakten .card{grid-template-columns:1fr}
+@container (min-width:700px){.fakten .card{grid-template-columns:44% 1fr}}
+.etikett{position:relative;border-radius:var(--r-sm);overflow:hidden;background:#fff;border:1px solid var(--hair);aspect-ratio:16/10;cursor:zoom-in}
+.etikett img{width:100%;height:100%;object-fit:cover;object-position:0% 50%;transform:scale(1.9);transform-origin:4% 46%}
+.etikett figcaption{position:absolute;right:8px;bottom:8px;font-size:12px;background:rgba(255,255,255,.92);border-radius:999px;padding:4px 10px}
+.nut{width:100%;border-collapse:collapse;font-size:15px}
+.nut td{padding:8px 0;border-bottom:1px solid var(--hair);vertical-align:top}
+.nut td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap;padding-left:12px}
+.fakt h4{font:700 15px var(--body);margin:18px 0 6px}
+.fakt h4:first-child{margin-top:0}
+.fakt p{margin:0;font-size:15px}
+.fakt .legal{font-size:13px;color:var(--ink-55);margin-top:8px}
+.einnahme{display:flex;gap:12px;align-items:center;background:var(--paper);border-radius:var(--r-sm);padding:12px 14px;margin-top:6px}
+.einnahme svg{flex:none}
+
+/* FAQ */
+.faq{background:var(--paper)}
+.faq details{border-top:1px solid var(--hair);padding:14px 0}
+.faq details:last-child{border-bottom:1px solid var(--hair)}
+.faq summary{cursor:pointer;font-size:16px;list-style:none;display:flex;justify-content:space-between;gap:12px}
+.faq summary::after{content:"+";color:var(--ink-55)}
+.faq details[open] summary::after{content:"–"}
+.faq p{margin:8px 0 0;color:var(--ink-72);font-size:15px}
+
+/* Leiste */
+.leiste{position:relative;background:var(--dark-tile);color:var(--on-dark);overflow:hidden;display:grid;min-height:300px}
+.leiste .bg{position:absolute;inset:0 0 0 auto;width:100%;overflow:hidden}
+@container (min-width:700px){.leiste .bg{width:60%}}
+.leiste .bg img{width:100%;height:100%;object-fit:cover;filter:blur(18px) saturate(.9);transform:scale(1.15);opacity:.8}
+.leiste .bg::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--dark-tile) 0%,rgba(45,66,73,.55) 45%,rgba(45,66,73,.1) 100%)}
+@container (max-width:699px){.leiste{min-height:0;aspect-ratio:4/5}.leiste .bg::after{background:linear-gradient(0deg,var(--dark-tile) 22%,rgba(45,66,73,.4) 55%,rgba(45,66,73,0) 100%)}.leiste .bg img{opacity:1;filter:blur(14px) saturate(.95)}}
+.leiste .txt{position:relative;padding:40px 20px;align-self:end}
+@container (min-width:700px){.leiste .txt{padding:56px 48px;align-self:center;max-width:56%}}
+.leiste h3{font:400 32px/1.12 var(--head);letter-spacing:-.01em;margin:0 0 8px}
+.leiste p{margin:0 0 20px;color:var(--on-dark-72)}
+.leiste .btn{display:inline-block;background:var(--paper);color:var(--ink);font-weight:700;border-radius:999px;padding:12px 22px;text-decoration:none}
+</style>
+</head>
+<body>
+<main class="doc">
+
+<header class="doc-head">
+  <h1>NAD⁺-PDP, Abschnitt für Abschnitt <span>Welches Bild lässt die Käuferin am schnellsten einordnen, worum es geht und was es ihr bringt?</span></h1>
+  <p>Links die Seite mit echten Bildern (Shopify-Dateien, <code>lifetime-mockups/lifestyle</code>) oder klar markierten Platzhaltern, rechts die Begründung. Reihenfolge nach der Denkschule-Runde: Wirkprinzip direkt hinter den Hero. Texte sind die aus der Vorschau, die Copy macht die Sitzung nad-pdp-vorschau. Stand 05.11.2026, nichts davon ist im Theme.</p>
+  <div class="switch" role="group" aria-label="Ansicht">
+    <button type="button" aria-pressed="true" data-v="d">Desktop</button>
+    <button type="button" aria-pressed="false" data-v="m">375 px</button>
+  </div>
+
+  <div class="sum-wrap">
+  <table class="sum">
+    <thead><tr><th>Abschnitt</th><th>Bild heute</th><th>Bild neu</th><th>Grund</th></tr></thead>
+    <tbody>
+      <tr><td>Hero: Galerie</td><td>6 Bilder, 4 davon mit eingebranntem Text, junger Läufer, Eurofins- und Illumina-Logos</td><td>5 Bilder ohne Text: Dose · Ritual am Küchentisch · zwei Kapseln in der Hand · Frau um 50 in Bewegung · Etikett</td><td>Jedes Bild ein Gedanke, mobil lesbar, die Käuferin sieht sich selbst statt eines 30-jährigen Läufers</td></tr>
+      <tr><td>Hero: Kaufzone</td><td>„90 Tage Geld zurück“ als kleiner Link unter dem Knopf</td><td>Zwei Zusagen als Kacheln mit Symbol direkt unter dem Knopf, Garantie betont</td><td>Das Risiko fällt genau dort weg, wo sie zögert</td></tr>
+      <tr><td>Wirkprinzip</td><td>Liposomen-Grafik mit eingebranntem Werbetext</td><td>Einblendung: Frau um 50 zu Hause, darüber Glaskarte „−60 %“ mit zwei Balken (Massudi 2012)</td><td>Eine Zahl, die zu ihrem Alter passt, ersetzt drei Absätze Biochemie</td></tr>
+      <tr><td>Belege: Was drin ist</td><td>nur Zahl „500 mg“</td><td>Zahl plus freigestellte Kapseln, „2 Kapseln am Tag“</td><td>Die Menge wird greifbar: so sieht die Tagesportion aus</td></tr>
+      <tr><td>Belege: Die Form</td><td>nur Wort „Liposomal“ plus Limmroth</td><td>textfreier Ausschnitt der Liposomen-Kugeln, später warmes Makrofoto</td><td>„Liposomal“ ist ein Fremdwort, das Bild erklärt die Hülle ohne Satz</td></tr>
+      <tr><td>Belege: Kunden</td><td>Sterne, 4,8</td><td>bleibt</td><td>Die Zahl ist das Bild, Gesichter wären erfunden</td></tr>
+      <tr><td>Loox-Lade</td><td>Link</td><td>kein Bild</td><td>Reiner Ausgang, ein Bild würde nur verzögern</td></tr>
+      <tr><td>Produktfakten</td><td>nur Text</td><td>Etikett als Foto zum Vergrößern, Einnahme als kleines Piktogramm</td><td>Belegt „das steht wirklich auf der Dose“, die Einnahme liest man in einer Sekunde</td></tr>
+      <tr><td>FAQ</td><td>kein Bild</td><td>kein Bild</td><td>Wer hier ist, sucht eine Antwort, kein Gefühl</td></tr>
+      <tr><td>Abschluss-Leiste (neu, optional)</td><td>fehlt</td><td>Leiste nach Wispr Flow: dunkles Teal, verwischte Frau in Bewegung, Knopf</td><td>Mobil ist der Kaufknopf nach dem FAQ zehn Bildschirme weit weg</td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <div class="offen">
+    <h2>Offene Bildwünsche, müssten neu erzeugt werden (erst nach deinem Ja)</h2>
+    <ol>
+      <li><b>Ritual am Küchentisch</b> (Galerie 2, ersetzt die grobe Montage): Frau Anfang 50 morgens am Holztisch, Halbprofil, Kaffee und Frühstück, die NAD⁺-Dose steht scharf im Vordergrund, eine Hand nimmt zwei Kapseln heraus. Stil wie <code>ki-kueche-handy-b</code>, Dose als Vorlage <code>dose-frei.png</code> mitgeben, kein Text, keine fremden Marken. 1:1 und 4:5.</li>
+      <li><b>Zwei Kapseln in der Hand</b> (Galerie 3): Nur Hand und Unterarm, Handfläche offen, zwei weiße Kapseln, warmer Hellgrau-Grund <code>#f2f1ed</code>, Tageslicht seitlich. Am besten echtes Foto mit dem Handy (5 Minuten), KI nur als Notlösung. 1:1.</li>
+      <li><b>Liposom warm</b> (Belege: Die Form, ersetzt den kalten blauen Ausschnitt): Makro einer geöffneten Kapsel mit Pulver auf beigem Grund oder ein einzelnes Glas-Kügelchen in Mint, ein Objekt, viel Luft, nach AG1-Typ „Forschung im Makro“. Kein Text. 2:1.</li>
+    </ol>
+  </div>
+
+  <div class="funde">
+    <h2>Beim Sichten aufgefallen</h2>
+    <ul>
+      <li><b>Galerie Bild 5</b> („Qualitätsversprechen“) zeigt die Logos von Eurofins und Illumina. Beide gehören zum AGE&amp;DNA-Test, nicht zu NAD⁺. Auf einer Supplement-PDP liest sich das als Laborprüfung des Pulvers. Raus.</li>
+      <li><b>Galerie Bild 3</b> sagt „Laborgeprüft“, Bild 2 „deutlich höhere zelluläre Aufnahme“. Beide Aussagen hat der Refit gerade aus der Copy genommen, weil kein Prüfbericht vorliegt. Raus.</li>
+      <li><b>Etikett</b> (Galerie 6) trägt die Anschrift Pappelallee 78, Berlin. Hausregel ist „aus Köln“. Das ist das echte Etikett, also bleibt das Bild, aber in der Vergrößerung sieht man die Adresse. Neues Etikett oder bewusst stehen lassen: deine Entscheidung.</li>
+      <li><b>Massudi 2012</b>: r = −0,71 gilt nur für Männer (n = 19), bei Frauen ist es −0,54. Für eine Käuferin ist ein Korrelationswert keine Zahl. Tabelle 1 der Studie gibt die Gruppenmittel: 2,74 ng NAD⁺/mg Protein bei 30–50 Jahren (Mittel 41), 1,08 bei 51–70 (Mittel 63), also <b>rund 60 % weniger</b>. Hautgewebe, n = 12 und 23. Ob der Unterschied zwischen genau diesen zwei Gruppen signifikant ist, lässt sich aus dem Volltext-Export nicht lesen (Sternchen fehlen), im PDF prüfen. <a href="https://doi.org/10.1371/journal.pone.0042357">DOI</a></li>
+      <li><b>PRODUCT.md</b> sagt „kein weiteres Bildmaterial mit Menschen/Wirkversprechen“. Das stammt aus der Startseiten-Arbeit. Die Menschen hier zeigen Alltag, kein Vorher-Nachher und keinen Effekt des Produkts.</li>
+    </ul>
+  </div>
+</header>
+
+<!-- ===================== 1 HERO ===================== -->
+<section class="row" aria-labelledby="r1">
+  <div class="row-label"><h2 id="r1">1 · Hero mit Galerie und Kaufzone</h2><span>lt-pdp-hero, wie NMN</span></div>
+  <div class="frame"><div class="pdp">
+    <div class="hero">
+      <div>
+        <div class="gal-main">
+          <span class="tag da ph" id="galtag">vorhanden</span>
+          <img id="galimg" class="contain" src="entwurf-nad-pdp-visual-2026-11-05/galerie-dose.jpg" alt="NAD⁺-Dose frontal">
+        </div>
+        <div class="thumbs" role="list">
+          <button type="button" aria-current="true" data-src="entwurf-nad-pdp-visual-2026-11-05/galerie-dose.jpg" data-fit="contain" data-tag="vorhanden" data-cap="1 Dose frontal. Bleibt als Startbild: sie erkennt das Produkt, das sie aus der Anzeige kennt."><img src="entwurf-nad-pdp-visual-2026-11-05/galerie-dose.jpg" alt=""><b>1</b></button>
+          <button type="button" data-src="entwurf-nad-pdp-visual-2026-11-05/galerie-ritual-montage.jpg" data-fit="cover" data-tag="Montage, neu erzeugen" data-cap="2 Ritual: Frau um 50 am Frühstückstisch, die Dose vorne. Grobe Montage aus vorhandenem Foto und freigestellter Dose, Endbild per Briefing 1."><img src="entwurf-nad-pdp-visual-2026-11-05/galerie-ritual-montage.jpg" alt=""><b>2</b></button>
+          <button type="button" data-src="entwurf-nad-pdp-visual-2026-11-05/kapseln.png" data-fit="contain" data-tag="Platzhalter, neu" data-cap="3 Zwei Kapseln in der offenen Hand. Platzhalter: Kapseln aus dem vorhandenen Galeriebild, Endbild per Briefing 2."><img src="entwurf-nad-pdp-visual-2026-11-05/kapseln.png" alt="" style="object-fit:contain;background:#fff"><b>3</b></button>
+          <button type="button" data-src="entwurf-nad-pdp-visual-2026-11-05/ki-bewegung-a.jpg" data-fit="cover" data-tag="vorhanden" data-cap="4 Frau Anfang 50 zügig am Wasser, Abendsonne, Bewegungsunschärfe. Ersetzt den jungen Läufer: Energie im Alltag, nicht Sport."><img src="entwurf-nad-pdp-visual-2026-11-05/ki-bewegung-a.jpg" alt=""><b>4</b></button>
+          <button type="button" data-src="entwurf-nad-pdp-visual-2026-11-05/galerie-etikett.jpg" data-fit="contain" data-tag="vorhanden" data-cap="5 Etikett abgerollt. Für die, die erst die Zutaten sehen will. Achtung: Berliner Anschrift auf dem Etikett."><img src="entwurf-nad-pdp-visual-2026-11-05/galerie-etikett.jpg" alt=""><b>5</b></button>
+        </div>
+        <p class="gal-cap" id="galcap">1 Dose frontal. Bleibt als Startbild: sie erkennt das Produkt, das sie aus der Anzeige kennt.</p>
+      </div>
+      <div class="buy">
+        <div class="rating"><span class="stars" aria-label="4,8 von 5 Sternen">★★★★★</span> 4,8 · 18 Produktbewertungen</div>
+        <h3>NAD⁺-Kapseln <span>Liposomal, 500 mg am Tag</span></h3>
+        <ul class="checks">
+          <li><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-opacity=".5"/><path d="M5.5 9.2l2.3 2.3 4.7-4.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>NAD⁺ selbst, keine Vorstufe.</li>
+          <li><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-opacity=".5"/><path d="M5.5 9.2l2.3 2.3 4.7-4.8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Für den Energiestoffwechsel deiner Zellen.</li>
+        </ul>
+        <div class="opts">
+          <div class="opt on"><b>Im Abo</b><small>35,91 €</small></div>
+          <div class="opt"><b>Einmalig</b><small>39,90 €</small></div>
+        </div>
+        <button class="cta" type="button">Abo starten, 35,91 €</button>
+        <div class="assure">
+          <div class="strong"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3l7 3v5.5c0 4.3-3 7.9-7 9.5-4-1.6-7-5.2-7-9.5V6l7-3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M8.8 12.2l2.2 2.2 4.3-4.4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>90 Tage Geld zurück</div>
+          <div><svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="7" cy="17.5" r="1.6" stroke="currentColor" stroke-width="1.5"/><circle cx="17.5" cy="17.5" r="1.6" stroke="currentColor" stroke-width="1.5"/></svg>Versand in 1–2 Werktagen</div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <aside class="note"><dl>
+    <dt>Zweck</dt><dd>In zwei Sekunden: Was ist das, ist das für mich, was riskiere ich?</dd>
+    <dt>Bildtyp</dt><dd>Produktbild, Alltagsfoto, Hände mit Produkt, Etikett. Keine Textbilder.</dd>
+    <dt>Motive</dt><dd>1 Dose frontal <span class="tag da">vorhanden</span> · 2 Frau Anfang 50 am Frühstückstisch, Morgenlicht, Dose scharf vorne <span class="tag neu">neu</span> · 3 offene Hand mit zwei Kapseln auf Hellgrau <span class="tag neu">neu</span> · 4 Frau Anfang 50 zügig am Wasser, Abendsonne <span class="tag da">vorhanden</span> · 5 Etikett abgerollt <span class="tag da">vorhanden</span>. Raus: Liposomen mit Werbetext, Dose mit „Laborgeprüft“-Pillen, junger Läufer mit Text, Qualitätsversprechen mit Labor-Logos.</dd>
+    <dt>Platz</dt><dd>Desktop: Galerie links, Kaufzone rechts, Daumen zum Klicken (hier ausprobieren). Mobil: Galerie oben als Wischstrecke, Dose zuerst, Kaufzone darunter. Garantie-Kachel neben dem Versand direkt unter dem Knopf, nicht als Link.</dd>
+    <dt>Warum leichter</dt><dd>Jedes Bild trägt genau einen Gedanken: das Produkt, das Ritual, die Menge, das Gefühl, die Zutaten. Eingebrannter Text ist mobil 9 px groß und wird übersprungen; ohne ihn liest sie das Bild statt es zu entziffern. Das Ritualbild beantwortet „wie passt das in meinen Morgen“, bevor sie danach fragt.</dd>
+  </dl></aside>
+</section>
+
+<!-- ===================== 2 WIRKPRINZIP ===================== -->
+<section class="row" aria-labelledby="r2">
+  <div class="row-label"><h2 id="r2">2 · Wirkprinzip</h2><span>lt-pdp-wirkprinzip, NEM-Teil, direkt hinter den Hero</span></div>
+  <div class="frame"><div class="pdp">
+    <div class="sec wirk on-dark">
+      <div class="wirk-grid">
+          <h3 class="h-stack">Was NAD⁺ in deinen Zellen macht <span>Und warum der Spiegel mit dem Alter zählt.</span></h3>
+
+        <figure class="einbl" style="margin:0">
+          <span class="tag da ph" style="left:auto;right:10px">Foto vorhanden · Karte in HTML</span>
+          <img src="entwurf-nad-pdp-visual-2026-11-05/ki-frau-handy-zuhause.jpg" alt="Frau Anfang 50 auf dem Sofa, hält ihr Handy">
+          <figcaption class="glass">
+            <div class="big">−60 %</div>
+            <div class="lbl">NAD⁺ in der Haut mit 51–70 Jahren gegenüber 30–50 Jahren</div>
+            <div class="bar"><span>30–50 Jahre</span><i style="width:100%"></i></div>
+            <div class="bar"><span>51–70 Jahre</span><i class="low" style="width:39%"></i></div>
+            <div class="src">Massudi et al., PLoS One 2012, Gruppenmittel Tabelle 1</div>
+          </figcaption>
+        </figure>
+          <ul class="stages">
+            <li><svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M15.5 3L7 16h6l-1 9 9-13.5h-6.2L15.5 3z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg><div><b>Energie</b><p>NAD⁺ wandelt Nährstoffe aus deiner Nahrung in Zellenergie um. Ohne NAD⁺ entsteht kein ATP, der Treibstoff jeder Zelle.</p></div></li>
+            <li><svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M9 3c0 6 10 6 10 11S9 19 9 25M19 3c0 6-10 6-10 11s10 5 10 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M10.5 8.5h7M10.5 19.5h7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><div><b>Reparatur</b><p>Sirtuine und PARP-Enzyme, die an der Reparatur deiner DNA arbeiten, verbrauchen NAD⁺ als Rohstoff.</p></div></li>
+          </ul>
+      </div>
+    </div>
+  </div></div>
+  <aside class="note"><dl>
+    <dt>Zweck</dt><dd>Sie versteht, warum NAD⁺ gerade in ihrem Alter Thema ist.</dd>
+    <dt>Bildtyp</dt><dd>Einblendung: echtes Lifestyle-Foto, darüber eine helle Glaskarte mit einer Zahl als Grafik. Muster Aniva, BJ-Geschmack „Einblendung“.</dd>
+    <dt>Motiv</dt><dd>Frau Anfang 50 zu Hause auf dem hellen Sofa, schaut aufs Handy, Tageslicht, untere Bildhälfte ruhig (<code>ki-frau-handy-zuhause</code>, für genau diese Karte erzeugt) <span class="tag da">vorhanden</span>. Karte: „−60 %“ groß, zwei Balken 30–50 und 51–70 Jahre, Quelle klein. Text und Balken in HTML, nie ins Bild gerendert.</dd>
+    <dt>Platz</dt><dd>Desktop: Text links, Einblendung rechts 4:5 (wie die heutige Bildspalte). Mobil: Überschrift, dann die Einblendung volle Breite, dann Energie und Reparatur. Die dritte Stufe „Alter“ geht in der Karte auf.</dd>
+    <dt>Warum leichter</dt><dd>„Sirtuine“ und „PARP“ versteht sie nicht, „−60 %“ in einer Sekunde. Die Frau im Bild ist sie selbst, die Zahl betrifft ihre Altersgruppe. Das alte Liposomen-Bild erklärte die Form, nicht die Wirkung, und gehört nach unten zu „Die Form“. Die zwei kleinen Strichsymbole nur, wenn die Sitzung die Stufen behält; sonst weglassen.</dd>
+  </dl></aside>
+</section>
+
+<!-- ===================== 3 BELEGE ===================== -->
+<section class="row" aria-labelledby="r3">
+  <div class="row-label"><h2 id="r3">3 · Belege-Karten</h2><span>lt-pdp-belege, wie NMN</span></div>
+  <div class="frame"><div class="pdp">
+    <div class="sec belege">
+      <div class="cards">
+        <div class="card">
+          <div><div class="k">Was drin ist</div><div class="v">500 mg</div><div class="meta">NAD⁺ je Tagesportion</div></div>
+          <div style="display:grid;gap:12px">
+            <div class="media-row"><img src="entwurf-nad-pdp-visual-2026-11-05/kapseln.png" alt="Zwei weiße Kapseln"><span><b>2 Kapseln am Tag</b><br>60 Kapseln reichen 30 Tage.<br><span class="tag da" style="margin-top:6px">Ausschnitt vorhanden</span></span></div>
+            <p>NAD⁺ selbst, keine Vorstufe, aus der dein Körper es erst bilden muss.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div><div class="k">Die Form</div><div class="v word">Liposomal</div><div class="meta">Phospholipide aus Sonnenblumenlecithin</div></div>
+          <div style="display:grid;gap:12px">
+            <div class="media-wide"><span class="tag neu ph">vorhanden, ohne Text · später warm</span><img src="entwurf-nad-pdp-visual-2026-11-05/liposomen-ausschnitt.jpg" alt="Liposomen als gläserne Kugeln mit Hülle"></div>
+            <p>Das NAD⁺ steckt in einer Hülle aus Phospholipiden, dem Grundstoff jeder Zellmembran.</p>
+            <div class="person"><img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/volker-podcast.png?v=1766075350&amp;width=120" alt=""><div>Prof. Dr. med. Volker Limmroth<small>Chefarzt Neurologie, prüft, was wir veröffentlichen</small></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div><div class="k">Was Kunden sagen</div><div class="v">4,8</div><div class="meta"><span class="stars">★★★★★</span> von 5 · 18 Bewertungen</div></div>
+          <div>
+            <div class="review"><span class="stars">★★★★★</span><br>Sehr hochwertiger Eindruck.<br><small>Alexander M. · Verifiziert · November 2025</small></div>
+            <div class="review"><span class="stars">★★★★★</span><br>Gut in die Routine integrierbar.<br><small>Silke D. · Verifiziert · Januar 2026</small></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <aside class="note"><dl>
+    <dt>Zweck</dt><dd>Drei Belege nebeneinander: Menge, Form, andere Käufer.</dd>
+    <dt>Bildtyp</dt><dd>Karte 1: freigestelltes Produktdetail (Kapseln). Karte 2: Makro/Illustration der Form. Karte 3: keine, die 4,8 mit Sternen ist das Bild.</dd>
+    <dt>Motive</dt><dd>Kapseln aus Galeriebild 3 freigestellt <span class="tag da">vorhanden</span>. Liposomen-Kugeln aus Galeriebild 2, unterhalb des eingebrannten Texts beschnitten <span class="tag da">vorhanden</span>, entsättigt; Ersatz durch warmes Makro <span class="tag neu">Briefing 3</span>, weil kaltes Laborblau aus der Bildwelt fällt. Limmroth-Porträt bleibt klein rund.</dd>
+    <dt>Platz</dt><dd>Desktop: Zahl links, Bild oben in der rechten Spalte über dem Satz. Mobil: Zahl, Bild, Satz untereinander; Kapselzeile kompakt mit 96 px Bild, Liposomen als Streifen 2:1.</dd>
+    <dt>Warum leichter</dt><dd>„500 mg“ ist abstrakt, zwei Kapseln sieht man. „Liposomal“ ist ein Fremdwort, die Kugel mit Hülle erklärt es ohne Satz. Mengen nur einmal: „2 Kapseln, 30 Tage“ steht hier, die Produktfakten wiederholen es nicht als Fließtext. Kundenfotos gibt es bei 18 Bewertungen nicht; Porträts wären erfunden, also kein Bild.</dd>
+  </dl></aside>
+</section>
+
+<!-- ===================== 4 LOOX ===================== -->
+<section class="row" aria-labelledby="r4">
+  <div class="row-label"><h2 id="r4">4 · Loox-Lade</h2><span>lt-pdp-reviews-all, wie NMN</span></div>
+  <div class="frame"><div class="pdp"><div class="loox"><a href="#">Alle 18 Bewertungen lesen</a></div></div></div>
+  <aside class="note"><dl>
+    <dt>Entscheidung</dt><dd><span class="tag weg">kein Bild</span> Ein Ausgang zu allen Bewertungen. Wer klickt, will Texte lesen. Ein Bild würde die Zeile nur höher machen und den Link nach unten drücken.</dd>
+  </dl></aside>
+</section>
+
+<!-- ===================== 5 PRODUKTFAKTEN ===================== -->
+<section class="row" aria-labelledby="r5">
+  <div class="row-label"><h2 id="r5">5 · Produktfakten</h2><span>lt-pdp-produktfakten, NEM-Teil</span></div>
+  <div class="frame"><div class="pdp">
+    <div class="sec fakten">
+      <h3 class="h-stack">Zusammensetzung und Einnahme <span>Zutaten, Gehalt und Verzehrempfehlung.</span></h3>
+      <div class="card">
+        <figure class="etikett" style="margin:0" title="Zum Vergrößern antippen">
+          <span class="tag da ph">vorhanden</span>
+          <img src="entwurf-nad-pdp-visual-2026-11-05/galerie-etikett.jpg" alt="Etikett der Dose, abgerollt">
+          <figcaption>Etikett vergrößern</figcaption>
+        </figure>
+        <div class="fakt">
+          <h4>Gehalt pro Tagesportion</h4>
+          <table class="nut"><tr><td>Nicotinamid­adenin­dinukleotid (NAD⁺)</td><td>500 mg</td></tr></table>
+          <h4>Einnahme</h4>
+          <div class="einnahme">
+            <svg width="56" height="28" viewBox="0 0 56 28" fill="none" aria-hidden="true"><rect x="2" y="7" width="22" height="12" rx="6" stroke="currentColor" stroke-width="1.5"/><path d="M13 7v12" stroke="currentColor" stroke-width="1.5"/><rect x="30" y="7" width="22" height="12" rx="6" stroke="currentColor" stroke-width="1.5"/><path d="M41 7v12" stroke="currentColor" stroke-width="1.5"/></svg>
+            <span>Täglich 2 Kapseln zu einer Mahlzeit.</span>
+          </div>
+          <h4>Zutaten</h4>
+          <p>Phospholipide (aus Sonnenblumenlecithin), Nicotinamidadenindinukleotid (NAD⁺), Maltodextrin, Siliciumdioxid, Hydroxypropylmethylcellulose (Kapselhülle).</p>
+          <p class="legal">Die angegebene empfohlene tägliche Verzehrmenge darf nicht überschritten werden. Nahrungsergänzungsmittel sind kein Ersatz für eine ausgewogene und abwechslungsreiche Ernährung und eine gesunde Lebensweise. Außerhalb der Reichweite von kleinen Kindern aufbewahren. Kühl und trocken lagern sowie vor Licht schützen.</p>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  <aside class="note"><dl>
+    <dt>Zweck</dt><dd>Alles Pflichtige, und der Beweis, dass es so auf der Dose steht.</dd>
+    <dt>Bildtyp</dt><dd>Produktbild (Etikett abgerollt) plus ein kleines gezeichnetes Piktogramm für die Einnahme.</dd>
+    <dt>Motiv</dt><dd>Galeriebild 6, auf die Nährwerttabelle des Etiketts beschnitten, Antippen öffnet das ganze Etikett <span class="tag da">vorhanden</span>. Piktogramm: zwei Kapseln als Strichzeichnung in der Textfarbe.</dd>
+    <dt>Platz</dt><dd>Desktop: Etikett links (44 %), Tabelle rechts. Mobil: Etikett als Streifen 16:10 über der Tabelle, dann Einnahme, Zutaten, Pflichttext.</dd>
+    <dt>Warum leichter</dt><dd>Die Skeptikerin will sehen, nicht glauben: das echte Etikett ist der stärkste Beleg auf diesem Abschnitt. Das Piktogramm macht „2 Kapseln täglich“ in einer Sekunde lesbar, ohne den Satz. Achtung Berliner Adresse auf dem Etikett, siehe oben.</dd>
+  </dl></aside>
+</section>
+
+<!-- ===================== 6 FAQ ===================== -->
+<section class="row" aria-labelledby="r6">
+  <div class="row-label"><h2 id="r6">6 · FAQ</h2><span>crs-faq-accordion, wie NMN</span></div>
+  <div class="frame"><div class="pdp">
+    <div class="sec faq">
+      <h3 class="h-stack">Häufige Fragen</h3>
+      <details><summary>Wie funktioniert die Geld-zurück-Garantie?</summary><p>Hält die erste Lieferung nicht, was wir beschreiben, gibt es 90 Tage lang den vollen Betrag zurück per E-Mail. Dein Widerrufsrecht bleibt unberührt.</p></details>
+      <details><summary>Ist das NAD⁺ oder eine Vorstufe?</summary><p>NAD⁺ selbst. Viele Produkte mit „NAD“ im Namen enthalten nur eine Vorstufe, aus der der Körper NAD⁺ erst bilden muss.</p></details>
+      <details><summary>Kann ich das Abo jederzeit kündigen?</summary><p>Ja, im Kundenkonto, ohne Frist und ohne Anruf.</p></details>
+      <details><summary>Sind die Kapseln vegan?</summary><p>Ja. Die Kapselhülle ist pflanzlich, die Phospholipide stammen aus Sonnenblumen.</p></details>
+    </div>
+  </div></div>
+  <aside class="note"><dl>
+    <dt>Entscheidung</dt><dd><span class="tag weg">kein Bild</span> Hier sucht sie eine bestimmte Antwort. Ein Bild neben dem Akkordeon schiebt mobil die erste Frage unter den Rand. Kein Wiederholen der Liposomen oder des Etiketts.</dd>
+  </dl></aside>
+</section>
+
+<!-- ===================== 7 LEISTE ===================== -->
+<section class="row" aria-labelledby="r7">
+  <div class="row-label"><h2 id="r7">7 · Abschluss-Leiste</h2><span>neu, optional, NMN hat sie nicht</span></div>
+  <div class="frame"><div class="pdp">
+    <div class="leiste">
+      <div class="bg"><img src="entwurf-nad-pdp-visual-2026-11-05/freundinnen-spaziergang.jpg" alt=""></div>
+      <div class="txt">
+        <h3>NAD⁺ selbst, jeden Tag.</h3>
+        <p>500 mg liposomal. 90 Tage Geld zurück.</p>
+        <a class="btn" href="#">Abo starten, 35,91 €</a>
+      </div>
+    </div>
+  </div></div>
+  <aside class="note"><dl>
+    <dt>Zweck</dt><dd>Wer bis unten gelesen hat, ist überzeugt und braucht nur noch den Knopf.</dd>
+    <dt>Bildtyp</dt><dd>Leiste nach Wispr Flow: dunkle Fläche (dunkles Teal statt Schwarz, Hausregel), stark verwischtes Stimmungsfoto, das weich in die Fläche ausläuft. BJ-Geschmack „Leiste“.</dd>
+    <dt>Motiv</dt><dd>Zwei Freundinnen um 50 beim Spaziergang am Wasser, Abendlicht (<code>freundinnen-spaziergang</code>) <span class="tag da">vorhanden</span>. Für das Theme vorab mit der Vorlage <code>leiste</code> ohne Titel verwischt exportieren, Text und Knopf bleiben in der Section.</dd>
+    <dt>Platz</dt><dd>Desktop: Leiste 4:1, Text links, Foto rechts 60 %. Mobil: 4:5, Foto oben, Text und Knopf unten auf der Fläche.</dd>
+    <dt>Warum leichter</dt><dd>Auf 375 px liegt der Kaufknopf nach dem FAQ rund zehn Bildschirme zurück. Die Leiste ist ein Abschluss mit Gefühl statt eines nackten zweiten Knopfs. Überschrift in Helvetica, weil das Theme keine Serifenschrift hat.</dd>
+  </dl></aside>
+</section>
+
+</main>
+<script>
+(function(){
+  var btns=document.querySelectorAll('.switch button');
+  btns.forEach(function(b){b.addEventListener('click',function(){
+    btns.forEach(function(x){x.setAttribute('aria-pressed',x===b?'true':'false')});
+    document.body.classList.toggle('m',b.dataset.v==='m');
+    try{localStorage.setItem('nadv',b.dataset.v)}catch(e){}
+  })});
+  try{if(localStorage.getItem('nadv')==='m'){btns[1].click()}}catch(e){}
+  var img=document.getElementById('galimg'),cap=document.getElementById('galcap'),tag=document.getElementById('galtag');
+  document.querySelectorAll('.thumbs button').forEach(function(t){t.addEventListener('click',function(){
+    document.querySelectorAll('.thumbs button').forEach(function(x){x.setAttribute('aria-current',x===t?'true':'false')});
+    img.src=t.dataset.src; img.className=t.dataset.fit==='contain'?'contain':''; cap.textContent=t.dataset.cap;
+    tag.textContent=t.dataset.tag; tag.className='tag ph '+(t.dataset.tag==='vorhanden'?'da':'neu');
+  })});
+  document.querySelector('.etikett').addEventListener('click',function(){window.open(this.querySelector('img').src,'_blank')});
+})();
+</script>
+</body>
+</html>
