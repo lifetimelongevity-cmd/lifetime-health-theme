@@ -199,7 +199,46 @@
       headline_md: pf_headline_md,
       extra_class: 'ltpf__header'
     -%}
-
+    {%- if section.settings.layout_style == 'fakten' -%}
+    {%- comment -%} Fakten (NAD⁺ 06.11.2026): links das Etikett (antippbar, öffnet es ganz), rechts eine Karte
+        mit wenigen Zeilen „Kopf | Wert“, Zutaten und Pflichttext hinter einer Lade. {%- endcomment -%}
+    <div class="ltpf__fakten">
+      {%- if section.settings.label_image != blank -%}
+        <a class="ltpf__etikett" href="{{ section.settings.label_image | image_url: width: 2000 }}" target="_blank" rel="noopener" style="--ltpf-zoom:{{ section.settings.label_scale | default: 1 }};--ltpf-origin:{{ section.settings.label_origin | default: '50% 50%' | escape }}">
+          {{ section.settings.label_image | image_url: width: 1400 | image_tag: loading: 'lazy', widths: '600, 900, 1200, 1400', sizes: '(min-width: 900px) 50vw, 100vw', alt: section.settings.label_image_alt }}
+          {%- if section.settings.label_zoom_text != blank -%}<span>{{ section.settings.label_zoom_text | escape }}</span>{%- endif -%}
+        </a>
+      {%- endif -%}
+      <div class="ltpf__facts">
+        {%- assign pf_rows = section.settings.fact_rows | newline_to_br | split: '<br />' -%}
+        {%- assign pf_icon_row = section.settings.fact_icon_row | default: 0 | plus: 0 -%}
+        {%- assign pf_row_i = 0 -%}
+        {%- for pf_row in pf_rows -%}
+          {%- assign pf_row_s = pf_row | strip -%}
+          {%- if pf_row_s != blank -%}
+            {%- assign pf_row_i = pf_row_i | plus: 1 -%}
+            {%- assign pf_teile = pf_row_s | split: '|' -%}
+            <div class="ltpf__fact">
+              <span>{{ pf_teile[0] | strip | escape }}</span>
+              <b{% if pf_row_i == pf_icon_row %} class="ltpf__fact-icon"{% endif %}>
+                {%- if pf_row_i == pf_icon_row -%}<svg width="44" height="22" viewBox="0 0 56 28" fill="none" aria-hidden="true"><rect x="2" y="7" width="22" height="12" rx="6" stroke="currentColor" stroke-width="1.6"/><path d="M13 7v12" stroke="currentColor" stroke-width="1.6"/><rect x="30" y="7" width="22" height="12" rx="6" stroke="currentColor" stroke-width="1.6"/><path d="M41 7v12" stroke="currentColor" stroke-width="1.6"/></svg>{%- endif -%}
+                {{- pf_teile[1] | strip | escape -}}
+              </b>
+            </div>
+          {%- endif -%}
+        {%- endfor -%}
+        {%- if pf_ingredients != blank or pf_legal != blank -%}
+          <details class="ltpf__lade">
+            <summary class="ltpf__lade-summary"><span>{{ section.settings.lade_label | default: 'Zutaten und Pflichthinweise' | escape }}</span><span class="ltpf__lade-chev" aria-hidden="true">{% render 'crs-chevron' %}</span></summary>
+            <div class="ltpf__lade-body">
+              {%- if pf_ingredients != blank -%}<p><b>{{ pf_label_ingredients | default: 'Zutaten' | escape }}:</b> {{ pf_ingredients | escape }}</p>{%- endif -%}
+              {%- if pf_legal != blank -%}<p>{{ pf_legal | escape }}</p>{%- endif -%}
+            </div>
+          </details>
+        {%- endif -%}
+      </div>
+    </div>
+    {%- else -%}
     <div class="ltpf__panel">
       <div class="ltpf__grid" data-ltpf-cols="{{ pf_cols }}">
 
@@ -304,12 +343,36 @@
 
       </div>
     </div>
+    {%- endif -%}
 
   </div>
 </div>
 {%- endif -%}
 
 {% stylesheet %}
+/* Fakten (layout_style: fakten, NAD⁺ 06.11.2026) */
+.ltpf__fakten { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+.ltpf__etikett { position: relative; display: block; border-radius: var(--radius-lg); overflow: hidden; background: var(--color-white, #fff); border: 1px solid rgba(38, 37, 30, 0.08); aspect-ratio: 16 / 10; cursor: zoom-in; }
+.ltpf__etikett img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 0% 50%; transform: scale(var(--ltpf-zoom, 1)); transform-origin: var(--ltpf-origin, 50% 50%); }
+.ltpf__etikett span { position: absolute; right: var(--space-2); bottom: var(--space-2); font-size: var(--text-micro); background: rgba(255, 255, 255, 0.92); border-radius: var(--radius-full, 999px); padding: var(--space-1) var(--space-3); color: var(--ltpf-text, #26251e); }
+.ltpf__facts { background: var(--ltpf-card-bg, #fff); border-radius: var(--radius-lg); padding: var(--space-6); }
+.ltpf__fact { display: flex; justify-content: space-between; gap: var(--space-4); padding: var(--space-3) 0; border-top: 1px solid rgba(38, 37, 30, 0.1); line-height: var(--leading-relaxed); }
+.ltpf__fact:first-child { border-top: 0; padding-top: 0; }
+.ltpf__fact span { color: var(--ltpf-text-muted, rgba(38, 37, 30, 0.72)); }
+.ltpf__fact b { text-align: right; font-weight: var(--weight-semibold); }
+.ltpf__fact-icon { display: flex; flex-direction: column; align-items: flex-end; gap: var(--space-1); }
+.ltpf__fact-icon svg { color: var(--color-dark); }
+.ltpf__lade { margin-top: var(--space-4); border-top: 1px solid rgba(38, 37, 30, 0.08); }
+.ltpf__lade-summary { display: flex; justify-content: space-between; align-items: center; gap: var(--space-2); padding-top: var(--space-3); font-size: var(--text-body-sm); font-weight: var(--weight-semibold); cursor: pointer; list-style: none; }
+.ltpf__lade-summary::-webkit-details-marker { display: none; }
+.ltpf__lade-chev { display: inline-flex; transition: transform 0.2s ease; }
+.ltpf__lade[open] .ltpf__lade-chev { transform: rotate(180deg); }
+.ltpf__lade-body { padding-top: var(--space-3); font-size: var(--text-body-sm); line-height: var(--leading-relaxed); color: var(--ltpf-text-muted, rgba(38, 37, 30, 0.72)); }
+.ltpf__lade-body p { margin: 0 0 var(--space-2); }
+@media (min-width: 900px) {
+  .ltpf__fakten { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-7); }
+  .ltpf__facts { padding: var(--space-7); }
+}
 /* ===================================================
    LIFETIME PDP — Produktfakten · lt-pdp-produktfakten.liquid
    LMIV-/NemV-Pflichtangaben, dreispaltig auf einer Flaeche
@@ -594,6 +657,29 @@
       "type": "header",
       "content": "Nährwerte"
     },
+    {
+      "type": "header",
+      "content": "Darstellung"
+    },
+    {
+      "type": "select",
+      "id": "layout_style",
+      "label": "Darstellung",
+      "info": "Fakten: Etikett links, Karte mit Zeilen rechts, Zutaten und Pflichttext hinter einer Lade.",
+      "options": [
+        { "value": "tabelle", "label": "Drei Spalten mit Tabelle" },
+        { "value": "fakten", "label": "Etikett und Faktenkarte" }
+      ],
+      "default": "tabelle"
+    },
+    { "type": "image_picker", "id": "label_image", "label": "Fakten: Etikett-Bild" },
+    { "type": "text", "id": "label_image_alt", "label": "Fakten: Alt-Text des Etiketts" },
+    { "type": "number", "id": "label_scale", "label": "Fakten: Ausschnitt-Zoom (1 = ganzes Bild)" },
+    { "type": "text", "id": "label_origin", "label": "Fakten: Ausschnitt-Mitte (z. B. 4% 46%)" },
+    { "type": "text", "id": "label_zoom_text", "label": "Fakten: Hinweis am Bild", "info": "Zum Beispiel „Etikett vergrößern“. Leer = kein Hinweis." },
+    { "type": "textarea", "id": "fact_rows", "label": "Fakten: Zeilen (je Zeile „Kopf | Wert“)" },
+    { "type": "number", "id": "fact_icon_row", "label": "Fakten: Zeile mit Kapsel-Symbol (0 = keine)" },
+    { "type": "text", "id": "lade_label", "label": "Fakten: Beschriftung der Lade", "info": "In der Lade stehen Zutaten und Pflichthinweis aus den Feldern unten." },
     {
       "type": "text",
       "id": "nutrients_label",

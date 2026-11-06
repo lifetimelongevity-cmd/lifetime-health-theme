@@ -157,7 +157,17 @@
         {%- assign lt_hero_img = section.settings.hero_image -%}
         {%- assign lt_hero_off = 0 -%}
         {%- if lt_hero_img != blank -%}{%- assign lt_hero_off = 1 -%}{%- endif -%}
-        {%- assign lt_slide_count = product.media.size | plus: lt_hero_off -%}
+        {%- comment -%} Eigene Galerie (NAD⁺ 06.11.2026): gallery_first_only zeigt nur das erste Produktbild,
+            gallery_extra_1–4 hängen eigene Bilder dahinter, nur auf dieser Seite. Produktmedien bleiben für
+            Merchant Center und Meta-Katalog unverändert. Ohne Settings alles wie bisher. {%- endcomment -%}
+        {%- assign lt_media_limit = product.media.size -%}
+        {%- if section.settings.gallery_first_only and lt_media_limit > 1 -%}{%- assign lt_media_limit = 1 -%}{%- endif -%}
+        {%- assign lt_extra_count = 0 -%}
+        {%- for i in (1..4) -%}
+          {%- assign lt_extra_key = 'gallery_extra_' | append: i -%}
+          {%- if section.settings[lt_extra_key] != blank -%}{%- assign lt_extra_count = lt_extra_count | plus: 1 -%}{%- endif -%}
+        {%- endfor -%}
+        {%- assign lt_slide_count = lt_media_limit | plus: lt_hero_off | plus: lt_extra_count -%}
         {%- assign lt_lcp = product.media.first.preview_image -%}
         {%- if lt_hero_img != blank -%}{%- assign lt_lcp = lt_hero_img -%}{%- endif -%}
         {%- if lt_lcp != blank -%}
@@ -231,7 +241,7 @@
                     video_fit: true
                   -%}
                 {%- endif -%}
-                {%- for media in product.media -%}
+                {%- for media in product.media limit: lt_media_limit -%}
                   {%- assign lt_media_index = forloop.index0 | plus: lt_hero_off -%}
                   {%- render 'product-media',
                     media: media,
@@ -248,6 +258,29 @@
                   -%}
                   {%- if media.media_type == 'external_video' or media.media_type == 'video' -%}
                     {%- assign video_script = true -%}
+                  {%- endif -%}
+                {%- endfor -%}
+                {%- assign lt_extra_index = lt_media_limit | plus: lt_hero_off -%}
+                {%- for i in (1..4) -%}
+                  {%- assign lt_extra_key = 'gallery_extra_' | append: i -%}
+                  {%- assign lt_extra_img = section.settings[lt_extra_key] -%}
+                  {%- if lt_extra_img != blank -%}
+                    {%- render 'product-media',
+                      media: lt_extra_img,
+                      image_override: lt_extra_img,
+                      alt_override: lt_extra_img.alt,
+                      enable_zoom: false,
+                      loop: false,
+                      index: lt_extra_index,
+                      aspect_ratio: gallery_ratio,
+                      fit: true,
+                      layout: gallery_layout,
+                      desktop_width: 'one-half',
+                      mobile_width: gallery_mobile_width,
+                      autoplay: false,
+                      video_fit: true
+                    -%}
+                    {%- assign lt_extra_index = lt_extra_index | plus: 1 -%}
                   {%- endif -%}
                 {%- endfor -%}
               {%- endif -%}
@@ -274,7 +307,7 @@
                       -%}
                     </button>
                   {%- endif -%}
-                  {%- for media in product.media -%}
+                  {%- for media in product.media limit: lt_media_limit -%}
                     <button class="thumbnail element--border-radius" data-index="{{ forloop.index0 | plus: lt_hero_off }}" tabindex="-1">
                       {%- render 'lazy-image-small',
                         image: media.preview_image,
@@ -288,6 +321,22 @@
                         <span class="thumbnail__badge">{%- render 'theme-symbols', icon: 'badge-model-thumbnail' -%}</span>
                       {%- endif -%}
                     </button>
+                  {%- endfor -%}
+                  {%- assign lt_extra_index = lt_media_limit | plus: lt_hero_off -%}
+                  {%- for i in (1..4) -%}
+                    {%- assign lt_extra_key = 'gallery_extra_' | append: i -%}
+                    {%- assign lt_extra_img = section.settings[lt_extra_key] -%}
+                    {%- if lt_extra_img != blank -%}
+                      <button class="thumbnail element--border-radius" data-index="{{ lt_extra_index }}" tabindex="-1">
+                        {%- render 'lazy-image-small',
+                          image: lt_extra_img,
+                          aspect_ratio: settings.cart_image_ratio,
+                          fit: settings.cart_image_fit,
+                          class: 'thumbnail__image'
+                        -%}
+                      </button>
+                      {%- assign lt_extra_index = lt_extra_index | plus: 1 -%}
+                    {%- endif -%}
                   {%- endfor -%}
                 </div>
               </div>
@@ -4420,6 +4469,17 @@
       "id": "hero_image_alt",
       "label": "Alt-Text des Ergebnisbilds"
     },
+    {
+      "type": "checkbox",
+      "id": "gallery_first_only",
+      "label": "Nur das erste Produktbild zeigen",
+      "info": "Die übrigen Produktmedien bleiben im Katalog, erscheinen hier aber nicht. Dahinter stehen die eigenen Bilder unten.",
+      "default": false
+    },
+    { "type": "image_picker", "id": "gallery_extra_1", "label": "Eigenes Galeriebild 1", "info": "Nur auf dieser Seite, hinter den Produktmedien. Alt-Text kommt aus der Datei." },
+    { "type": "image_picker", "id": "gallery_extra_2", "label": "Eigenes Galeriebild 2" },
+    { "type": "image_picker", "id": "gallery_extra_3", "label": "Eigenes Galeriebild 3" },
+    { "type": "image_picker", "id": "gallery_extra_4", "label": "Eigenes Galeriebild 4" },
     {
       "type": "select",
       "id": "gallery_ratio",

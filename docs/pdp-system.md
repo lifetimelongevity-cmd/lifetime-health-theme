@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-11-04
+last_review: 2026-11-06
 canonical_for: pdp-section-system und live-reihenfolge
 ---
 
@@ -111,22 +111,29 @@ sie, kippt der Rhythmus.
 
 ## PDP NAD⁺ (`/products/nad-booster`)
 
-Template: `templates/product.12_nad-liposomal-2.json` (Suffix `12_nad-liposomal-2`). Seit 05.11.2026
-lokal, wartet auf BJs Push. **Regel (BJ 05.11.):** Sections, die NAD⁺ und NMN gemeinsam haben, sind
-gleich gebaut und gleich eingestellt. NAD⁺ darf als Nahrungsergänzungsmittel mehr sagen als NMN, das
-steht in eigenen Abschnitten dazwischen. 6 Einträge in `order`, kein `main_product_hidden`.
+Template: `templates/product.12_nad-liposomal-2.json` (Suffix `12_nad-liposomal-2`). Seit 06.11.2026
+auf dem Stand des Entwurfs `docs/entwurf-nad-pdp-2026-11-05.html` (Commit `84fcf6c`, BJ-Freigabe
+„Passt, Template bauen“), lokal, wartet auf BJs Push. **Regel (BJ 05.11.):** Sections, die NAD⁺ und
+NMN gemeinsam haben, sind gleich gebaut und gleich eingestellt. NAD⁺ darf als Nahrungsergänzungsmittel
+mehr sagen als NMN, das steht in eigenen Abschnitten dazwischen. 6 Einträge in `order`, kein
+`main_product_hidden`.
 
 | # | Section-Key | Typ | gleich wie NMN? | Rolle |
 |---|---|---|---|---|
-| 1 | `main` | `lt-pdp-hero` | ja | Kompakte Kaufzone (`bb_compact`), Abo/Einmalig, Garantie unter dem Knopf |
-| 2 | `belege` | `lt-pdp-belege` | ja | Was drin ist (500 mg) · Die Form (liposomal, Limmroth) · Was Kunden sagen (drei Loox-Stimmen) |
-| 3 | `loox_reviews` | `lt-pdp-reviews-all` | ja | Lade mit allen Loox-Bewertungen |
-| 4 | `wirkprinzip` | `lt-pdp-wirkprinzip` | nur NEM | Dunkle Zäsur: Energie, Reparatur, Alter, Quelle Massudi 2012 |
-| 5 | `produktfakten` | `lt-pdp-produktfakten` | nur NEM | Gehalt, Zutaten, Verzehrempfehlung vom Etikett |
-| 6 | `faq_accordion` | `crs-faq-accordion` | ja | 9 Fragen, Versand/Abo/Garantie wie NMN vorn |
+| 1 | `main` | `lt-pdp-hero` | ja, plus eigene Galerie | Titelzeile „Für Energie wie früher.“, drei Punkte, kompakte Kaufzone. Galerie: erstes Produktbild, dann vier eigene Bilder (`gallery_first_only`, `gallery_extra_1–4`) |
+| 2 | `wirkprinzip` | `lt-pdp-wirkprinzip` | nur NEM | Hell, Darstellung „Einblendung“: Foto mit Glaskarte 61 % (Massudi 2012, Tabelle 1), Energie und Reparatur daneben |
+| 3 | `belege` | `lt-pdp-belege` | ja, Karte 2 als Bildkarte | Karte 1 aus. „Was drin ist“ als Bildkarte (Liposom mit zwei Marken, Limmroth, Lade). Was Kunden sagen: Katharina B., Gabriele K., Silke D. |
+| 4 | `loox_reviews` | `lt-pdp-reviews-all` | ja | Lade mit allen Loox-Bewertungen |
+| 5 | `produktfakten` | `lt-pdp-produktfakten` | nur NEM | Darstellung „Fakten“: Etikett links, drei Zeilen rechts, Zutaten und Pflichttext hinter der Lade |
+| 6 | `faq_accordion` | `crs-faq-accordion` | ja | 6 Fragen, Versand/Abo/Garantie wie NMN vorn |
+
+Alle neuen Settings der vier Sections stehen per Default auf aus oder leer, NMN, AGE&DNA und
+Spermidin rendern unverändert. Die Bilder liegen in den Shopify-Dateien als `nad-galerie-*.jpg`,
+`nad-wirkprinzip-frau-tee.jpg` und `nad-liposom.jpg` (2400 × 1200).
 
 Keine Messwert-Blöcke in Karte 1: Die Tabelle trägt die Caption „Prüfbericht“, und für NAD⁺ existiert
-keiner. Aus demselben Grund keine Labor- oder Reinheitsclaims.
+keiner. Der Hero-Punkt „Jede Charge im Labor geprüft.“ stützt sich auf die Herstellerangabe in der
+Lade (Schwermetalle, Verunreinigungen); ein verlinkbarer Prüfbericht je Charge ist offen.
 
 ## Konvention `main_product_hidden`
 

@@ -196,6 +196,90 @@
 
 <div class="ltwp" id="section-{{ section.id }}">
   <div class="ltwp__container">
+    {%- if section.settings.layout_style == 'einblendung' -%}
+    {%- comment -%} Einblendung (NAD⁺ 06.11.2026): Überschrift, Foto mit Glaskarte (große Zahl, zwei Balken,
+        Quelle), Stufen ohne Nummer mit kleinem Symbol. Mobil gestapelt (Foto 4:5), ab 900 px Überschrift
+        und Stufen links, Foto rechts in 4:3. {%- endcomment -%}
+    <div class="ltwp__grid">
+      {%- render 'section-heading-crs',
+        heading: wp_head,
+        subheading: wp_sub,
+        kicker: wp_kicker,
+        align: wp_align,
+        headline_lg: wp_headline_lg,
+        headline_md: wp_headline_md,
+        extra_class: 'ltwp__header ltwp__h'
+      -%}
+      {%- if section.settings.image != blank -%}
+        <figure class="ltwp__einbl">
+          {{ section.settings.image
+             | image_url: width: 1400
+             | image_tag:
+               loading: 'lazy',
+               sizes: '(min-width: 900px) 50vw, 100vw',
+               widths: '480, 720, 960, 1200, 1400',
+               alt: wp_img_alt,
+               class: 'ltwp__einbl-img' }}
+          {%- if section.settings.stat_value != blank -%}
+            <figcaption class="ltwp__glass">
+              <p class="ltwp__stat">{{ section.settings.stat_value | escape }}</p>
+              {%- if section.settings.stat_text != blank -%}
+                <p class="ltwp__stat-text">{{ section.settings.stat_text | escape }}</p>
+              {%- endif -%}
+              {%- if section.settings.bar_1_label != blank and section.settings.bar_2_label != blank -%}
+                <div class="ltwp__bars" role="img" aria-label="{{ section.settings.bars_aria | escape }}">
+                  <div class="ltwp__bar"><span>{{ section.settings.bar_1_label | escape }}</span><div class="ltwp__bar-fill" style="width:{{ section.settings.bar_1_value | default: 100 }}%"></div></div>
+                  <div class="ltwp__bar ltwp__bar--b"><span>{{ section.settings.bar_2_label | escape }}</span><div class="ltwp__bar-fill" style="width:{{ section.settings.bar_2_value | default: 50 }}%"></div></div>
+                </div>
+              {%- endif -%}
+              {%- if wp_src_label != blank or section.settings.source_prefix != blank -%}
+                <p class="ltwp__glass-src">
+                  {%- if section.settings.source_prefix != blank -%}{{ section.settings.source_prefix | escape }} {% endif -%}
+                  {%- if wp_src_label != blank -%}
+                    {%- if wp_src_url != blank -%}
+                      <a href="{{ wp_src_url }}" target="_blank" rel="noopener noreferrer">{{ wp_src_label | escape }}</a>
+                    {%- else -%}
+                      {{ wp_src_label | escape }}
+                    {%- endif -%}
+                  {%- endif -%}
+                </p>
+              {%- endif -%}
+            </figcaption>
+          {%- endif -%}
+        </figure>
+      {%- endif -%}
+      <ul class="ltwp__roles" role="list">
+        {%- for block in section.blocks -%}
+          {%- liquid
+            assign s_label = block.settings.stage_label | strip
+            assign s_body  = block.settings.stage_body | strip
+            if s_label == '__none__'
+              assign s_label = ''
+            endif
+            if s_body == '__none__'
+              assign s_body = ''
+            endif
+          -%}
+          {%- if s_label != blank or s_body != blank -%}
+            <li class="ltwp__role" {{ block.shopify_attributes }}>
+              {%- if s_label != blank -%}
+                <h3 class="ltwp__role-label">
+                  {%- case block.settings.stage_icon -%}
+                    {%- when 'energie' -%}<svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M15.5 3L7 16h6l-1 9 9-13.5h-6.2L15.5 3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+                    {%- when 'dna' -%}<svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M9 3c0 6 10 6 10 11S9 19 9 25M19 3c0 6-10 6-10 11s10 5 10 11" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10.5 8.5h7M10.5 19.5h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  {%- endcase -%}
+                  {{- s_label | escape -}}
+                </h3>
+              {%- endif -%}
+              {%- if s_body != blank -%}
+                <p class="ltwp__role-body">{{ s_body | escape }}</p>
+              {%- endif -%}
+            </li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    </div>
+    {%- else -%}
     <div class="ltwp__layout{% if wp_has_media %} ltwp__layout--with-media ltwp__layout--media-{{ wp_media_pos }}{% endif %}">
 
       <div class="ltwp__main">
@@ -261,12 +345,13 @@
               Rohe CDN-URL, typischerweise ein SVG. Kein srcset moeglich, weil
               Shopify GenericFiles nicht ueber image_url transformiert.
             {%- endcomment -%}
-            <img class="ltwp__media-img" src="{{ wp_img_url }}" alt="{{ wp_img_alt | escape }}" loading="lazy" decoding="async">
+            <img class="ltwp__media-img" src="{{ wp_img_url }}" alt="{{ wp_img_alt | escape }}" width="900" height="600" loading="lazy" decoding="async">
           {%- endif -%}
         </div>
       {%- endif -%}
 
     </div>
+    {%- endif -%}
   </div>
 </div>
 {%- endif -%}
@@ -417,6 +502,44 @@
   height: auto;
   max-width: 100%;
 }
+/* Einblendung (layout_style: einblendung, NAD⁺ 06.11.2026) */
+.ltwp__grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-6); }
+.ltwp__grid .ltwp__h { margin-bottom: 0; }
+.ltwp__einbl { position: relative; margin: 0; border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4 / 5; background: var(--ltwp-media-bg, #f2f1ed); }
+.ltwp__einbl-img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 50% 20%; }
+.ltwp__glass {
+  position: absolute; left: 5%; right: 5%; bottom: 5%;
+  background: rgba(255, 255, 255, 0.86);
+  -webkit-backdrop-filter: blur(14px) saturate(1.1); backdrop-filter: blur(14px) saturate(1.1);
+  border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 14px;
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  box-shadow: 0 8px 28px rgba(38, 37, 30, 0.18);
+  color: var(--color-ink, #26251e);
+}
+.ltwp__stat { margin: 0; font-family: var(--font-heading); font-size: var(--text-stat); line-height: var(--leading-stat); font-weight: var(--weight-semibold); letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.ltwp__stat-text { margin: var(--space-1) 0 0; font-size: var(--text-body-sm); line-height: var(--leading-body); color: rgba(38, 37, 30, 0.72); }
+.ltwp__bars { margin-top: var(--space-3); display: grid; gap: var(--space-2); }
+.ltwp__bar { display: grid; grid-template-columns: 84px 1fr; gap: var(--space-3); align-items: center; font-size: var(--text-micro); color: rgba(38, 37, 30, 0.72); }
+.ltwp__bar-fill { height: 10px; border-radius: var(--radius-full, 999px); background: var(--color-teal); }
+.ltwp__bar--b .ltwp__bar-fill { background: var(--color-dark); }
+.ltwp__glass-src { margin: var(--space-3) 0 0; font-size: var(--text-micro); line-height: var(--leading-body); color: rgba(38, 37, 30, 0.66); }
+.ltwp__glass-src a { color: inherit; text-underline-offset: 2px; }
+.ltwp__roles { list-style: none; margin: 0; padding: 0; }
+.ltwp__role + .ltwp__role { margin-top: var(--space-5); padding-top: var(--space-5); border-top: 1px solid var(--ltwp-rule, rgba(38, 37, 30, 0.1)); }
+.ltwp__role-label { display: flex; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-1); font-family: var(--font-body); font-size: var(--text-body); font-weight: var(--weight-semibold); line-height: var(--leading-body); color: var(--ltwp-text, #26251e); }
+.ltwp__role-label svg { flex: none; color: var(--color-dark); }
+.ltwp__role-body { margin: 0; font-size: var(--text-body); line-height: var(--leading-relaxed); color: var(--ltwp-text, #26251e); max-width: 52ch; }
+@media (min-width: 900px) {
+  .ltwp__grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "h fig" "roles fig";
+    column-gap: var(--space-8); row-gap: var(--space-6); align-items: start;
+  }
+  .ltwp__grid .ltwp__h { grid-area: h; align-self: end; }
+  .ltwp__einbl { grid-area: fig; align-self: center; aspect-ratio: 4 / 3; }
+  .ltwp__einbl-img { object-position: 50% 8%; }
+  .ltwp__roles { grid-area: roles; }
+}
 {% endstylesheet %}
 
 {% schema %}
@@ -540,6 +663,29 @@
     },
     {
       "type": "header",
+      "content": "Darstellung"
+    },
+    {
+      "type": "select",
+      "id": "layout_style",
+      "label": "Darstellung",
+      "info": "Einblendung: Foto mit Glaskarte (Zahl, zwei Balken, Quelle), Stufen ohne Nummer daneben. Braucht ein Bild im Bildwähler.",
+      "options": [
+        { "value": "stufen", "label": "Nummerierte Stufen" },
+        { "value": "einblendung", "label": "Einblendung" }
+      ],
+      "default": "stufen"
+    },
+    { "type": "text", "id": "stat_value", "label": "Einblendung: große Zahl", "info": "Zum Beispiel „61 %“. Leer = keine Glaskarte." },
+    { "type": "text", "id": "stat_text", "label": "Einblendung: Zeile unter der Zahl" },
+    { "type": "text", "id": "bar_1_label", "label": "Balken 1: Beschriftung" },
+    { "type": "number", "id": "bar_1_value", "label": "Balken 1: Länge in %" },
+    { "type": "text", "id": "bar_2_label", "label": "Balken 2: Beschriftung" },
+    { "type": "number", "id": "bar_2_value", "label": "Balken 2: Länge in %" },
+    { "type": "text", "id": "bars_aria", "label": "Balken: Beschreibung für Screenreader" },
+    { "type": "text", "id": "source_prefix", "label": "Einblendung: Satz vor der Quelle", "info": "Zum Beispiel „Hautproben von 49 Menschen.“" },
+    {
+      "type": "header",
       "content": "Bild"
     },
     {
@@ -612,6 +758,17 @@
           "label": "Ein Satz",
           "info": "Genau ein Satz, Zielkorridor 80 bis 120 Zeichen. Keine gesundheitsbezogene Angabe ohne zugelassenen Claim-Wortlaut, siehe VO (EG) 1924/2006 Art. 10(1).",
           "default": "__none__"
+        },
+        {
+          "type": "select",
+          "id": "stage_icon",
+          "label": "Symbol (nur Einblendung)",
+          "options": [
+            { "value": "none", "label": "Keins" },
+            { "value": "energie", "label": "Blitz" },
+            { "value": "dna", "label": "DNA" }
+          ],
+          "default": "none"
         }
       ]
     }

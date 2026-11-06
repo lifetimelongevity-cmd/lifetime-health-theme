@@ -293,7 +293,10 @@
       {%- endif -%}
 
       {%- if section.settings.show_rohstoff -%}
-      <article class="ltbg__card">
+      {%- comment -%} Bildkarte (NAD⁺ 06.11.2026): Mit Bild wird Karte 2 zur Bildkarte. Ab 1008 px Text links,
+          Bild randlos rechts, Lade als Fußzeile; darunter gestapelt. Ohne Bild bleibt alles wie bisher. {%- endcomment -%}
+      {%- assign bg_bild = section.settings.rohstoff_image -%}
+      <article class="ltbg__card{% if bg_bild != blank %} ltbg__card--bild{% endif %}">
         <div class="ltbg__head">
           {%- if section.settings.rohstoff_title != blank -%}
             <h2 class="ltbg__label">{{ section.settings.rohstoff_title | escape }}</h2>
@@ -307,6 +310,9 @@
               {%- if section.settings.rohstoff_name_label != blank -%}
                 <span class="ltbg__big-label">{{ section.settings.rohstoff_name_label | escape }}</span>
               {%- endif -%}
+              {%- if section.settings.rohstoff_name_sub != blank -%}
+                <span class="ltbg__big-sub">{{ section.settings.rohstoff_name_sub | escape }}</span>
+              {%- endif -%}
             </p>
           {%- endif -%}
           {%- if section.settings.rohstoff_meta != blank -%}
@@ -318,9 +324,52 @@
             <p class="ltbg__zitat">{{ section.settings.person_quote | escape }}</p>
           {%- endif -%}
         </div>
+        {%- if bg_bild != blank -%}
+          {%- comment -%} Marken: HTML über dem Bild, Position in Prozent des Bildes (x = Spitze der Linie). {%- endcomment -%}
+          <figure class="ltbg__fig">
+            <div class="ltbg__stage">
+              {{ bg_bild | image_url: width: 1600 | image_tag: loading: 'lazy', widths: '480, 720, 960, 1200, 1600', sizes: '(min-width: 1008px) 432px, 100vw', alt: section.settings.rohstoff_image_alt }}
+              {%- if section.settings.mark_1_text != blank or section.settings.mark_2_text != blank -%}
+                <ul class="ltbg__marks" aria-hidden="true">
+                  {%- for i in (1..2) -%}
+                    {%- assign bg_mk = 'mark_' | append: i -%}
+                    {%- assign bg_k_text = bg_mk | append: '_text' -%}
+                    {%- assign bg_k_x = bg_mk | append: '_x' -%}
+                    {%- assign bg_k_y = bg_mk | append: '_y' -%}
+                    {%- assign bg_k_reach = bg_mk | append: '_reach' -%}
+                    {%- assign bg_mk_text = section.settings[bg_k_text] -%}
+                    {%- if bg_mk_text != blank -%}
+                      <li class="ltbg__mark" style="--mark-x:{{ section.settings[bg_k_x] | default: 50 }}%;--mark-y:{{ section.settings[bg_k_y] | default: 50 }}%;--mark-reach:{{ section.settings[bg_k_reach] | default: 80 }}px">{{ bg_mk_text | escape }}<span class="ltbg__mark-line"></span></li>
+                    {%- endif -%}
+                  {%- endfor -%}
+                </ul>
+              {%- endif -%}
+            </div>
+          </figure>
+        {%- endif -%}
         <div class="ltbg__main{% if section.settings.person_first %} ltbg__main--person-first{% endif %}">
           {%- if section.settings.rohstoff_text != blank -%}
-            <p class="ltbg__text">{{ section.settings.rohstoff_text | escape }}</p>
+            {%- if section.settings.rohstoff_text_zeilen -%}
+              {%- comment -%} Satz als Zeilen (06.11.2026): je Zeile „Kopf | Text“, Kopf fett in Textgröße. {%- endcomment -%}
+              {%- assign bg_r_paras = section.settings.rohstoff_text | newline_to_br | split: '<br />' -%}
+              <ul class="ltbg__zeilen ltbg__zeilen--fliess" role="list">
+                {%- for bg_para in bg_r_paras -%}
+                  {%- assign bg_para_s = bg_para | strip -%}
+                  {%- if bg_para_s != blank -%}
+                    {%- assign bg_teile = bg_para_s | split: '|' -%}
+                    <li class="ltbg__zeile">
+                      {%- if bg_teile.size > 1 -%}
+                        <span class="ltbg__zeile-kopf">{{ bg_teile[0] | strip | escape }}</span> <span class="ltbg__zeile-text">{{ bg_teile[1] | strip | escape }}</span>
+                      {%- else -%}
+                        <span class="ltbg__zeile-text">{{ bg_para_s | escape }}</span>
+                      {%- endif -%}
+                    </li>
+                  {%- endif -%}
+                {%- endfor -%}
+              </ul>
+            {%- else -%}
+              <p class="ltbg__text">{{ section.settings.rohstoff_text | escape }}</p>
+            {%- endif -%}
           {%- endif -%}
           {%- if section.settings.person_name != blank -%}
             {%- comment -%} Mit Zitat wird die Person zur Unterschrift (28.10.2026): Bild 48 px, Name in
@@ -344,6 +393,7 @@
             </div>
           {%- endif -%}
           {%- assign bg_rohstoff_plain = section.settings.rohstoff_details_body | strip_html | strip -%}
+          {%- capture bg_rohstoff_lade -%}
           {%- if bg_rohstoff_plain != blank -%}
           <details class="ltbg__details">
             <summary class="ltbg__summary">
@@ -353,7 +403,10 @@
             <div class="ltbg__body rte">{{ section.settings.rohstoff_details_body }}</div>
           </details>
           {%- endif -%}
+          {%- endcapture -%}
+          {%- if bg_bild == blank -%}{{ bg_rohstoff_lade }}{%- endif -%}
         </div>
+        {%- if bg_bild != blank -%}{{ bg_rohstoff_lade }}{%- endif -%}
       </article>
       {%- endif -%}
 
@@ -392,7 +445,11 @@
             <ul class="ltbg__quotes">
               {%- for block in bg_stimmen -%}
                 {%- assign bg_stars = block.settings.rating | default: 5 | plus: 0 -%}
-                <li class="ltbg__quote" {{ block.shopify_attributes }}>
+                <li class="ltbg__quote{% if block.settings.photo != blank %} ltbg__quote--photo{% endif %}" {{ block.shopify_attributes }}>
+                  {%- if block.settings.photo != blank -%}
+                    {{ block.settings.photo | image_url: width: 224 | image_tag: loading: 'lazy', class: 'ltbg__quote-photo', alt: block.settings.photo_alt }}
+                    <div class="ltbg__quote-body">
+                  {%- endif -%}
                   {%- if bg_stars > 0 -%}
                     <span class="ltbg__stars" role="img" aria-label="{{ bg_stars }} von 5 Sternen">
                       {%- for i in (1..5) -%}
@@ -421,6 +478,7 @@
                       {%- endif -%}
                     </p>
                   {%- endif -%}
+                  {%- if block.settings.photo != blank -%}</div>{%- endif -%}
                 </li>
               {%- endfor -%}
             </ul>
@@ -746,6 +804,54 @@
   .ltbg__main > :first-child { margin-top: 0; }
   .ltbg__text { font-size: var(--text-body-lg); }
 }
+/* Bildkarte (rohstoff_image, NAD⁺ 06.11.2026). Bis 1007 px gestapelt wie Karte 2, Bild 5:2 unter dem Kopf.
+   Ab 1008 px ist die Karte 960 px breit: Text links, Bild randlos rechts (Bühne 2:1, rechts angeschlagen,
+   damit die Marken in Prozent am Motiv sitzen), Lade als Fußzeile über die ganze Breite. */
+.ltbg__big-sub { display: block; color: var(--ltbg-text-sec); }
+.ltbg__fig { position: relative; margin: var(--space-3) 0 0; aspect-ratio: 5 / 2; border-radius: 4px; overflow: hidden; background: var(--ltbg-bg, #f2f1ed); }
+.ltbg__stage { position: absolute; inset: 0; }
+.ltbg__stage img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: 70% 50%; }
+.ltbg__marks { display: none; }
+.ltbg__zeilen--fliess .ltbg__zeile { display: block; font-size: var(--text-body); line-height: var(--leading-body); }
+.ltbg__zeilen--fliess .ltbg__zeile:first-child { border-top: 0; padding-top: 0; }
+.ltbg__zeilen--fliess .ltbg__zeile-kopf { font-family: var(--font-body); font-size: var(--text-body); font-weight: var(--weight-bold); line-height: inherit; margin-right: var(--space-1); }
+.ltbg__zeilen--fliess .ltbg__zeile-text { font-size: var(--text-body); color: var(--ltbg-text); }
+/* Stimme mit Kundenfoto (Block-Setting photo) */
+.ltbg__quote--photo { display: flex; gap: var(--space-3); align-items: flex-start; }
+.ltbg__quote-photo { width: 56px; height: 74px; object-fit: cover; border-radius: 4px; flex: none; }
+.ltbg__quote-body { min-width: 0; }
+@media (min-width: 840px) {
+  .ltbg__card--bild { display: block; }
+  .ltbg__card--bild .ltbg__main { border-left: 0; padding: 0; }
+}
+@media (min-width: 1008px) {
+  .ltbg__card--bild {
+    display: grid;
+    grid-template-columns: minmax(0, 11fr) minmax(0, 9fr);
+    grid-template-rows: auto 1fr auto;
+    grid-template-areas: "head fig" "main fig" "lade lade";
+    gap: 0; padding: 0; overflow: hidden;
+  }
+  .ltbg__card--bild .ltbg__head { grid-area: head; padding: var(--space-6) var(--space-6) 0; }
+  .ltbg__card--bild .ltbg__main { grid-area: main; padding: var(--space-5) var(--space-6) var(--space-6); }
+  .ltbg__card--bild .ltbg__zeilen { margin-top: 0; }
+  .ltbg__card--bild .ltbg__zeile { text-wrap: balance; }
+  .ltbg__card--bild .ltbg__fig { grid-area: fig; align-self: stretch; margin: 0; aspect-ratio: auto; border-radius: 0; }
+  .ltbg__card--bild .ltbg__stage { inset: 0 0 0 auto; aspect-ratio: 2 / 1; }
+  .ltbg__card--bild .ltbg__marks { display: block; list-style: none; margin: 0; padding: 0; }
+  .ltbg__mark {
+    position: absolute; left: var(--mark-x); top: var(--mark-y); transform: translate(-100%, -50%);
+    display: flex; align-items: center; gap: var(--space-2);
+    font-size: var(--text-micro); line-height: 1; letter-spacing: 0.06em; text-transform: uppercase; white-space: nowrap;
+  }
+  .ltbg__mark-line { position: relative; width: var(--mark-reach); height: 1px; background: var(--ltbg-text-ter); }
+  .ltbg__mark-line::after { content: ""; position: absolute; right: -2.5px; top: -2px; width: 5px; height: 5px; border-radius: 50%; background: var(--ltbg-text); }
+  .ltbg__card--bild > .ltbg__details { grid-area: lade; margin-top: 0; }
+  .ltbg__card--bild > .ltbg__details .ltbg__summary { padding: var(--space-4) var(--space-6); }
+  .ltbg__card--bild > .ltbg__details .ltbg__body { display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); padding: 0 0 var(--space-5); }
+  .ltbg__card--bild > .ltbg__details .ltbg__body p { margin: 0; padding: 0 var(--space-6); }
+  .ltbg__card--bild > .ltbg__details .ltbg__body p + p { padding-left: 0; }
+}
 {% endstylesheet %}
 
 {% schema %}
@@ -815,7 +921,19 @@
     { "type": "text", "id": "rohstoff_name", "label": "Name groß", "default": "Uthever®" },
     { "type": "text", "id": "rohstoff_name_label", "label": "Zeile unter dem Namen (optional)", "info": "Zum Beispiel „Gespräch, inklusive“ unter „15 Minuten“. Leer = keine Zeile." },
     { "type": "text", "id": "rohstoff_meta", "label": "Herkunftszeile", "default": "Patentiert, Herkunft dokumentiert, nach GMP hergestellt" },
+    { "type": "text", "id": "rohstoff_name_sub", "label": "Zweite Zeile unter dem Namen (gedämpft)", "info": "Gleiche Größe wie der Name, nur gedämpft. Leer = keine." },
     { "type": "textarea", "id": "rohstoff_text", "label": "Satz", "default": "Der erste NMN-Rohstoff mit positivem EU-Gutachten. Die Mitgliedstaaten haben der Zulassung am 25. September 2026 zugestimmt." },
+    { "type": "checkbox", "id": "rohstoff_text_zeilen", "label": "Satz als Zeilen (je Zeile „Kopf | Text“)", "default": false },
+    { "type": "image_picker", "id": "rohstoff_image", "label": "Bild (macht daraus die Bildkarte)", "info": "Ab 1008 px Text links, Bild randlos rechts. Leer = Karte wie bisher." },
+    { "type": "text", "id": "rohstoff_image_alt", "label": "Bild: Alt-Text" },
+    { "type": "text", "id": "mark_1_text", "label": "Marke 1: Text", "info": "Nur ab 1008 px sichtbar. Leer = keine Marke." },
+    { "type": "number", "id": "mark_1_x", "label": "Marke 1: Spitze, x in % des Bildes" },
+    { "type": "number", "id": "mark_1_y", "label": "Marke 1: Spitze, y in % des Bildes" },
+    { "type": "number", "id": "mark_1_reach", "label": "Marke 1: Linienlänge in px" },
+    { "type": "text", "id": "mark_2_text", "label": "Marke 2: Text" },
+    { "type": "number", "id": "mark_2_x", "label": "Marke 2: Spitze, x in % des Bildes" },
+    { "type": "number", "id": "mark_2_y", "label": "Marke 2: Spitze, y in % des Bildes" },
+    { "type": "number", "id": "mark_2_reach", "label": "Marke 2: Linienlänge in px" },
     { "type": "image_picker", "id": "person_image", "label": "Person: Bild" },
     { "type": "url", "id": "person_image_url", "label": "Person: Bild-URL (Fallback)" },
     { "type": "text", "id": "person_name", "label": "Person: Name", "default": "Prof. Dr. med. Volker Limmroth" },
@@ -862,7 +980,9 @@
         { "type": "text", "id": "name", "label": "Name", "default": "Hans-Werner G." },
         { "type": "range", "id": "rating", "label": "Sterne", "min": 0, "max": 5, "step": 1, "default": 5, "info": "Wie im Loox-Widget bei dieser Bewertung. 0 = keine Sterne, solange die Wertung nicht geprüft ist." },
         { "type": "text", "id": "date", "label": "Monat", "info": "z. B. April 2026, aus dem Loox-Widget" },
-        { "type": "checkbox", "id": "verified", "label": "Loox-Kennzeichen zeigen", "default": false }
+        { "type": "checkbox", "id": "verified", "label": "Loox-Kennzeichen zeigen", "default": false },
+        { "type": "image_picker", "id": "photo", "label": "Kundenfoto (optional)", "info": "Nur mit Einverständnis der Kundin. Leer = ohne Foto." },
+        { "type": "text", "id": "photo_alt", "label": "Kundenfoto: Alt-Text" }
       ]
     }
   ],
