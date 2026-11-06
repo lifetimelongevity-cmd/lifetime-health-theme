@@ -160,11 +160,16 @@
   .ltbg__big{font-family:var(--font-heading);font-size:var(--text-stat);font-weight:var(--weight-regular);letter-spacing:-.02em;line-height:var(--leading-stat);margin-top:var(--space-3)}
   .ltbg__big--num{font-weight:var(--weight-bold);font-variant-numeric:tabular-nums}
   .ltbg__big-label{display:block;font-family:var(--font-body);font-size:var(--text-body-sm);font-weight:var(--weight-regular);letter-spacing:0;line-height:var(--leading-body);color:var(--ink-sec);margin-top:var(--space-2)}
-  .ltbg__meta{font-size:var(--text-body-sm);line-height:var(--leading-body);color:var(--ink-sec);margin-top:var(--space-1)}
-  .ltbg__text{line-height:var(--leading-body);margin-top:var(--space-3)}
-  .ltbg__media{display:flex;gap:var(--space-4);align-items:center}
-  .ltbg__media img{flex:none;width:96px;height:64px;object-fit:contain;border-radius:var(--radius-card)}
-  .ltbg__wide{width:100%;aspect-ratio:5/2;object-fit:cover;object-position:70% 50%;border-radius:var(--radius-card);margin-top:var(--space-3)}
+  /* Bildkarte (neu, nur NAD⁺): „Was drin ist“ und „Die Form“ als eine Karte. Gestapelt wie die alte Karte 2 */
+  .ltbg__big-sub{display:block;color:var(--ink-sec)}
+  .ltbg__fig{position:relative;margin:var(--space-3) 0 0;aspect-ratio:5/2;border-radius:var(--radius-card);overflow:hidden;background:var(--color-warm)}
+  .ltbg__stage{position:absolute;inset:0}
+  .ltbg__stage img{width:100%;height:100%;object-fit:cover;object-position:70% 50%}
+  .ltbg__marks{display:none}
+  .ltbg__zeilen{margin-top:var(--space-4)}
+  .ltbg__zeile{padding:var(--space-3) 0;border-top:1px solid var(--rule);line-height:var(--leading-body)}
+  .ltbg__zeile:first-child{border-top:0;padding-top:0}
+  .ltbg__zeile-kopf{font-weight:var(--weight-bold);margin-right:var(--space-1)}
   .ltbg__person{display:flex;gap:var(--space-3);align-items:center;margin-top:var(--space-3)}
   .ltbg__person img{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:none}
   .ltbg__person-name{font-weight:var(--weight-bold);line-height:var(--leading-tight)}
@@ -189,7 +194,33 @@
     .ltbg__card{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:var(--space-6);padding:var(--space-6);align-items:start}
     .ltbg__main{border-left:1px solid var(--rule);padding-left:var(--space-6);padding-top:calc(var(--text-micro) * var(--leading-tight) + var(--space-3))}
     .ltbg__main>:first-child{margin-top:0}
-    .ltbg__text{font-size:var(--text-body-lg)}
+    /* Bildkarte bleibt bis 1007 px gestapelt */
+    .ltbg__card--bild{display:block}
+    .ltbg__card--bild .ltbg__main{border-left:0;padding:0}
+    .ltbg__card--bild .ltbg__zeilen{margin-top:var(--space-4)}
+  }
+  /* Ab 1008 px ist die Karte immer 960 px breit: Text links (528), Bild randlos rechts (432), Lade als Fußzeile.
+     Die Bühne ist das ganze Bild in 2:1 auf Kartenhöhe, rechts angeschlagen. Die Marken sitzen in Prozent
+     des Bildes, also am Motiv, egal wie hoch die Karte wird. */
+  @media (min-width:1008px){
+    .ltbg__card--bild{display:grid;grid-template-columns:minmax(0,11fr) minmax(0,9fr);grid-template-rows:auto 1fr auto;grid-template-areas:"head fig" "main fig" "lade lade";gap:0;padding:0;overflow:hidden}
+    .ltbg__card--bild .ltbg__head{grid-area:head;padding:var(--space-6) var(--space-6) 0}
+    .ltbg__card--bild .ltbg__main{grid-area:main;padding:var(--space-5) var(--space-6) var(--space-6)}
+    .ltbg__card--bild .ltbg__zeilen{margin-top:0}
+    .ltbg__zeile{text-wrap:balance}
+    .ltbg__fig{grid-area:fig;align-self:stretch;margin:0;aspect-ratio:auto;border-radius:0}
+    .ltbg__stage{inset:0 0 0 auto;aspect-ratio:2/1}
+    .ltbg__marks{display:block}
+    .ltbg__mark{position:absolute;left:var(--mark-x);top:var(--mark-y);transform:translate(-100%,-50%);display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-micro);line-height:var(--leading-stat);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+    .ltbg__mark-line{position:relative;width:var(--mark-reach);height:1px;background:var(--ink-icon)}
+    .ltbg__mark-line::after{content:"";position:absolute;right:-2.5px;top:-2px;width:5px;height:5px;border-radius:50%;background:var(--color-ink)}
+    .ltbg__mark--kern{--mark-x:67.7%;--mark-y:42%;--mark-reach:128px}
+    .ltbg__mark--huelle{--mark-x:62.1%;--mark-y:66.7%;--mark-reach:79px}
+    .ltbg__card--bild .ltbg__details{grid-area:lade;margin-top:0}
+    .ltbg__card--bild .ltbg__summary{padding:var(--space-4) var(--space-6)}
+    .ltbg__card--bild .ltbg__body{display:grid;grid-template-columns:minmax(0,11fr) minmax(0,9fr);padding:0 0 var(--space-5)}
+    .ltbg__card--bild .ltbg__body p{margin:0;padding:0 var(--space-6)}
+    .ltbg__card--bild .ltbg__body p+p{padding-left:0}
   }
 
   /* 4 · Loox-Lade (lt-pdp-reviews-all) */
@@ -371,40 +402,37 @@
   <div class="wrap">
     <div class="ltbg__grid">
 
-      <article class="ltbg__card">
+      <article class="ltbg__card ltbg__card--bild">
         <div class="ltbg__head">
           <h2 class="ltbg__label">Was drin ist</h2>
-          <p class="ltbg__big">NAD⁺ selbst</p>
+          <p class="ltbg__big">NAD⁺ selbst,<span class="ltbg__big-sub">liposomal verpackt</span></p>
         </div>
-        <div class="ltbg__main">
-          <div class="ltbg__text ltbg__media">
-            <img src="entwurf-nad-pdp-visual-2026-11-05/kapseln-offen.png" alt="Geöffnete Kapsel mit weißem Pulver, daneben eine ganze Kapsel">
-            <p>Keine Vorstufe, aus der dein Körper es erst bilden muss.</p>
+        <figure class="ltbg__fig">
+          <div class="ltbg__stage">
+            <img src="entwurf-nad-pdp-visual-2026-11-05/liposom-warm.jpg" alt="Modell eines Liposoms: ein türkiser Kern in einer klaren Hülle" width="1200" height="600">
+            <ul class="ltbg__marks" aria-hidden="true">
+              <li class="ltbg__mark ltbg__mark--kern">NAD⁺<span class="ltbg__mark-line"></span></li>
+              <li class="ltbg__mark ltbg__mark--huelle">Hülle<span class="ltbg__mark-line"></span></li>
+            </ul>
           </div>
-        </div>
-      </article>
-
-      <article class="ltbg__card">
-        <div class="ltbg__head">
-          <h2 class="ltbg__label">Die Form</h2>
-          <p class="ltbg__big">Liposomal</p>
-          <p class="ltbg__meta">Phospholipide aus Sonnenblumenlecithin, HACCP-Produktion</p>
-        </div>
+        </figure>
         <div class="ltbg__main">
-          <img class="ltbg__wide" src="entwurf-nad-pdp-visual-2026-11-05/liposom-warm.jpg" alt="Ein Liposom als Kugel mit Hülle">
-          <p class="ltbg__text">Das NAD⁺ steckt in einer Hülle aus Phospholipiden, dem Grundstoff jeder Zellmembran.</p>
+          <ul class="ltbg__zeilen">
+            <li class="ltbg__zeile"><span class="ltbg__zeile-kopf">NAD⁺</span> <span class="ltbg__zeile-text">Keine Vorstufe, aus der dein Körper es erst bilden muss.</span></li>
+            <li class="ltbg__zeile"><span class="ltbg__zeile-kopf">Hülle</span> <span class="ltbg__zeile-text">Aus Phospholipiden, dem Grundstoff jeder Zellmembran.</span></li>
+          </ul>
           <div class="ltbg__person">
             <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/volker-podcast.png?v=1766075350" alt="">
             <div><p class="ltbg__person-name">Prof. Dr. med. Volker Limmroth</p><p class="ltbg__person-role">Chefarzt Neurologie, prüft, was wir veröffentlichen</p></div>
           </div>
-          <details class="ltbg__details">
-            <summary class="ltbg__summary"><span>Herstellung und Firma</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
-            <div class="ltbg__body">
-              <p>Hergestellt nach HACCP. Jede Charge wird auf Schwermetalle und Verunreinigungen untersucht. Die Kapselhülle ist pflanzlich (Hydroxypropylmethylcellulose), das Produkt ist vegan.</p>
-              <p>LIFETIME ist die Diga Health GmbH, eingetragen beim Amtsgericht Köln unter HRB 64399.</p>
-            </div>
-          </details>
         </div>
+        <details class="ltbg__details">
+          <summary class="ltbg__summary"><span>Herstellung und Firma</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="ltbg__body">
+            <p>Hergestellt nach HACCP. Jede Charge wird auf Schwermetalle und Verunreinigungen untersucht. Die Kapselhülle ist pflanzlich (Hydroxypropylmethylcellulose), das Produkt ist vegan.</p>
+            <p>LIFETIME ist die Diga Health GmbH, eingetragen beim Amtsgericht Köln unter HRB 64399.</p>
+          </div>
+        </details>
       </article>
 
       <article class="ltbg__card">
@@ -437,7 +465,7 @@
       </article>
     </div>
 
-    <div class="note"><span class="tag">Geändert</span> „Was drin ist“ zeigt nur „NAD⁺ selbst“ plus die zwei Kapseln als Bild. Die Visual-Sitzung wollte hier auch „2 Kapseln am Tag, 60 reichen 30 Tage“; der Denkschule-Auftrag setzt die Mengen einmal in die Produktfakten, und die Leitschule gewinnt. „Die Form“ bekommt ein warmes Liposom-Makro ohne Text (neu erzeugt). Bewertungen: Katharina B. mit Foto spricht über die Wirkung, Gabriele K. über Verträglichkeit, Silke D. über die Routine. Alle drei echt aus Loox. Raus: „Sehr hochwertiger Eindruck“ und „Alles wie beschrieben“, die belegen nur die Verpackung.<br><span class="tag tag--q">Braucht Erweiterung</span> Drei Bildarten kann <code>lt-pdp-belege</code> heute nicht: Bild neben dem Text (<code>ltbg__media</code>, Kapseln), Bild über die volle Breite (<code>ltbg__wide</code>, Liposom) und Kundenfoto an einer Stimme (<code>ltbg__quote--photo</code>). Sie kommen als neue Block-Settings in die geteilte Section, Default aus, damit NMN unverändert bleibt und sie später auch dort nutzen kann.</div>
+    <div class="note"><span class="tag">Geändert</span> „Was drin ist“ und „Die Form“ sind jetzt eine Karte. Ab 1008 px steht links die Aussage in Zahlengröße, rechts randlos das Liposom-Bild (432 von 960 px), die Lade „Herstellung und Firma“ läuft als Fußzeile über die ganze Breite. Das Bild zeigt selbst, was drin ist: zwei Marken weisen auf den Kern („NAD⁺“) und die „Hülle“, mit denselben zwei Wörtern beginnen links die zwei Zeilen. Die Marken sind HTML, nichts ist ins Bild eingebrannt. Die Sätze sind die bisherigen, nur gekürzt. Raus: das kleine Kapselbild und die Zeile „Phospholipide aus Sonnenblumenlecithin, HACCP-Produktion“ (Sonnenblumenlecithin steht in den Zutaten, HACCP in der Lade). Unter 1008 px bleibt die Karte gestapelt wie die alte Karte 2, ohne Marken. Keine neue Schriftgröße, kein neues Gewicht.<br><span class="tag">Unverändert</span> Bewertungen: Katharina B. mit Foto spricht über die Wirkung, Gabriele K. über Verträglichkeit, Silke D. über die Routine. Alle drei echt aus Loox. Raus: „Sehr hochwertiger Eindruck“ und „Alles wie beschrieben“, die belegen nur die Verpackung.<br><span class="tag tag--q">Braucht Erweiterung</span> Geht in <code>lt-pdp-belege</code>, eine eigene NAD-Section braucht es nicht. Karte 1 wird per <code>show_labor</code> ausgeschaltet, Karte 2 trägt schon Name groß, Person und Lade. Neu an Karte 2, alle mit Default leer oder aus, damit NMN und AGE&amp;DNA unverändert bleiben: Bild (schaltet die Klasse <code>ltbg__card--bild</code> und damit das ganze Layout ein), zweite Zeile unter dem Namen in gedämpfter Farbe, „Satz als Zeilen“ (die Darstellung „Kopf | Text“ gibt es in Karte 1 schon als <code>labor_text_style</code>), zwei Marken mit Text und Position in Prozent des Bildes. Das Kundenfoto an einer Stimme (<code>ltbg__quote--photo</code>) bleibt ein eigenes Block-Setting.<br><span class="tag tag--q">Offen</span> Das Liposom-Bild hat 1200 × 600 px und steht am Desktop auf 738 px Breite. Für Retina-Schärfe bräuchte es dasselbe Motiv ab 1600 px Breite. Die Karten bleiben 960 px breit, weil die Bewertungskarte wie auf NMN aussehen soll. Breiter hieße beide Karten ändern, also auch NMN.</div>
   </div>
 </section>
 
