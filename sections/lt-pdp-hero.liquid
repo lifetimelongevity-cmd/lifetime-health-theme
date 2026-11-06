@@ -2614,7 +2614,12 @@
           // unter den Knopf, wie bei NMN, die Preiszeile zeigt sie dann nicht mehr doppelt.
           var direct = section.querySelector('[data-lt-direct-savings]');
           var directTxt = direct ? direct.textContent.trim() : '';
+          // Abo ohne Größenwahl (NAD⁺, 06.11.2026): kein Streichpreis, aber zwei Kaufarten. Der Chip
+          // zeigt wie bei NMN die Abo-Ersparnis und schaltet bei „Einmalig“ per Tipp aufs Abo.
+          var aboIn = section.querySelector('[data-bb-kind="sub"] .lt-bb-card__input');
+          var aboSave = aboIn ? parseInt(aboIn.dataset.oncePrice, 10) - parseInt(aboIn.dataset.subPrice, 10) : NaN;
           if (directTxt) { setChip('Du sparst', parseCents(directTxt.replace(/^Du sparst\s*/, '')), false); direct.hidden = true; }
+          else if (aboSave > 0) { setChip(isSub ? 'Du sparst' : 'Im Abo sparst du', aboSave, !isSub); }
           else { chip.hidden = true; }
         } else if (chip) {
           var base = sizes[0];
