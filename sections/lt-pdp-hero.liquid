@@ -1425,7 +1425,7 @@
               {%- comment -%} Kompakt: eine Zeile Takt und Versand des gewählten Modus, darunter der
                   Grundpreis genau einmal (PAngV), beides aus dem Kompakt-JS. {%- endcomment -%}
               <p class="lt-bb__hint" data-lt-bb-hint aria-live="polite"></p>
-              <p class="lt-bb__unitline" data-lt-bb-unitline></p>
+              <p class="lt-bb__unitline" data-lt-bb-unitline{% if section.settings.compact_amount_text != blank %} data-amount-text="{{ section.settings.compact_amount_text | escape }}" data-days="{{ bb_supply_days | plus: 0 }}"{% endif %}></p>
             {%- endif -%}
             {%- comment -%}
               Zusatzartikel-Häkchen unter der Kaufart (Conversion-Plan 3.3, 29.09.2026):
@@ -2591,7 +2591,17 @@
         }
         if (unitLine) {
           var g = active ? parseInt(active.dataset.grams, 10) : NaN;
-          unitLine.textContent = (!isNaN(current) && g > 0) ? formatPrice(Math.round(current / g * 100)) + '/100 g' : '';
+          var amountText = unitLine.getAttribute('data-amount-text');
+          if (amountText) {
+            // Mengenzeile (NAD⁺, 06.11.2026): Produkte ohne Größenwahl sagen hier, was in der Packung
+            // ist, plus den Preis am Tag der gewählten Kaufart. Preis aus der aktiven Kachel.
+            var days = parseInt(unitLine.getAttribute('data-days'), 10);
+            var cardC = activeCard ? parseInt(isSub ? activeCard.dataset.subPrice : activeCard.dataset.oncePrice, 10) : NaN;
+            var dayC = !isNaN(current) ? current : cardC;
+            unitLine.textContent = amountText + ((days > 0 && !isNaN(dayC)) ? ' · ' + formatPrice(Math.round(dayC / days)) + ' am Tag' : '');
+          } else {
+            unitLine.textContent = (!isNaN(current) && g > 0) ? formatPrice(Math.round(current / g * 100)) + '/100 g' : '';
+          }
         }
         var pkgSel = section.querySelector('.lt-pkg__input:checked');
         var pkgSave = pkgSel ? parseInt(pkgSel.dataset.saveCents, 10) : NaN;
@@ -5053,6 +5063,12 @@
       "id": "compact_ship_text",
       "label": "Kompakt: Versandzeile unter dem Knopf",
       "default": "Versand in 1–2 Werktagen"
+    },
+    {
+      "type": "text",
+      "id": "compact_amount_text",
+      "label": "Kompakt: Mengenzeile unter den Karten",
+      "info": "Zum Beispiel „60 Kapseln für 30 Tage“. Der Preis am Tag wird angehängt. Leer = Grundpreis je 100 g wie bisher."
     },
     {
       "type": "range",
