@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entwurf Kreatin-PDP</title>
+<meta name="description" content="Entwurf der Kreatin-Produktseite nach Jobs to be Done, Progressive Disclosure und Steve Krug, gebaut wie die Live-NMN- und NAD⁺-PDP. Nur Vorschau, kein Produktivcode.">
+<style>
+  /* Lato wie im Live-Shop: dieselben Dateien und Schnitte (400, 500, 600; 700 fällt wie live auf 600) */
+  @font-face{font-family:Lato;font-weight:400;font-style:normal;font-display:swap;src:url("https://www.lifetime-health.de/cdn/fonts/lato/lato_n4.c3b93d431f0091c8be23185e15c9d1fee1e971c5.woff2") format("woff2")}
+  @font-face{font-family:Lato;font-weight:500;font-style:normal;font-display:swap;src:url("https://www.lifetime-health.de/cdn/fonts/lato/lato_n5.b2fec044fbe05725e71d90882e5f3b21dae2efbd.woff2") format("woff2")}
+  @font-face{font-family:Lato;font-weight:600;font-style:normal;font-display:swap;src:url("https://www.lifetime-health.de/cdn/fonts/lato/lato_n6.38d0e3b23b74a60f769c51d1df73fac96c580d59.woff2") format("woff2")}
+  /* Werte gemessen an der Live-NMN-PDP (05.11.2026, 1280 und 375 px), Namen wie assets/theme.css :root */
+  :root{
+    /* Farben */
+    --color-ink:#26251e; --color-paper:#f7f7f4; --color-warm:#f2f1ed; --color-white:#fff;
+    --color-dark:#364f56; --color-teal:#65c0b6; --color-star:#f4b740; --color-gray-600:#525252; --color-ink-muted:#6b6b63;
+    --ink-sec:rgba(38,37,30,.72); --ink-ter:rgba(38,37,30,.66); --ink-icon:rgba(38,37,30,.38);
+    --rule-faint:rgba(38,37,30,.05); --rule:rgba(38,37,30,.08); --rule-strong:rgba(38,37,30,.1);
+    --chip-bg:#e6f4f1;
+    /* Schrift: sechs Größen, zwei Gewichte, fünf Zeilenhöhen. Alles Stufen der Live-NMN-PDP (05.11.2026).
+       Größen je Viewport 375 / 1280: Zahl 48/56 · Titel 30/36 · Abschnitt 24/28 · Text 16 · Klein 14 · Mikro 12 */
+    --font-heading:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --font-body:Lato,-apple-system,BlinkMacSystemFont,sans-serif;
+    --text-stat:48px; --text-h1:min(36px,8vw); --text-h2:28px;
+    --text-body:16px; --text-body-sm:14px; --text-micro:12px;
+    /* Nur in den geteilten Bausteinen (Hero, Belege, FAQ, Sticky), dort wie live NMN */
+    --text-body-lg:18px; --text-buy:15px; --text-fine:13px;
+    --leading-copy:1.5; --leading-answer:1.65; --weight-medium:500; --weight-bold:700;
+    --leading-stat:1; --leading-heading:1.15; --leading-tight:1.25; --leading-body:1.4; --leading-relaxed:1.6;
+    --weight-regular:400; --weight-semibold:600;
+    /* Abstände, Radien, Breiten */
+    --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px; --space-8:64px; --space-9:80px;
+    --radius-card:4px; --radius-lg:16px; --radius-full:999px;
+    --page-max:1280px; --page-gutter:var(--space-4); --belege-max:960px; --measure:32rem;
+    /* Kaufzone */
+    --pick-h:49px; --cta-h:48px; --icon:16px; --icon-gap:9px; --thumb:64px;
+    --section-y:min(80px,15vw);
+    /* Notizen für BJ, nicht Teil der Seite */
+    --note-bg:#fbf5e4; --note-line:#e6d6a6; --note-ink:#6b5a24;
+  }
+  @media (min-width:768px){ :root{--page-gutter:var(--space-5)} }
+  @media (min-width:840px){ :root{--text-stat:56px} }
+  @media (max-width:860px){ :root{--text-h2:24px} }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:var(--font-body);font-size:var(--text-body);line-height:var(--leading-body);color:var(--color-ink);background:var(--color-paper);overflow-x:hidden}
+  a{color:inherit}
+  h1,h2,h3,p,ul{margin:0}
+  h3{font-size:var(--text-body)}
+  b,strong,h3{font-weight:var(--weight-semibold)}
+  ul{padding:0;list-style:none}
+  button{font:inherit;color:inherit}
+  img{max-width:100%;display:block}
+  summary{list-style:none;cursor:pointer}
+  summary::-webkit-details-marker{display:none}
+  .wrap{max-width:var(--page-max);margin:0 auto;padding:0 var(--page-gutter)}
+  .chev{flex:none;width:var(--icon);height:var(--icon);color:var(--ink-ter);transition:transform .2s ease}
+  details[open]>summary .chev{transform:rotate(180deg)}
+
+  /* Kopf (Platzhalter für den Theme-Header) */
+  .hd{height:57px;display:flex;align-items:center;justify-content:space-between}
+  .hd img{height:24px;width:auto}
+  .hd__r{display:flex;gap:var(--space-4);color:var(--ink-sec);font-size:var(--text-body-sm)}
+
+  /* Überschriften: crs-heading-stack, headline-md (Titel + Untertitel ein Block, nur die Farbe gedämpft) */
+  .hs{font-family:var(--font-heading);font-size:var(--text-h2);line-height:var(--leading-heading);font-weight:var(--weight-regular);letter-spacing:-.01em;margin-bottom:var(--space-6)}
+  .hs span{display:block;color:var(--ink-sec)}
+
+  /* 1 · Hero (lt-pdp-hero) */
+  .hero{background:var(--color-paper)}
+  .hero .wrap{padding-top:var(--space-2);padding-bottom:var(--space-7)}
+  .hero__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-3) var(--space-5)}
+  .gal__main{background:var(--color-warm);border-radius:var(--radius-card);aspect-ratio:343/316;overflow:hidden}
+  .gal__main img{width:100%;height:100%;object-fit:contain}
+  .thumbs{display:flex;justify-content:center;gap:var(--space-2);margin-top:var(--space-2)}
+  .thumb{width:24px;height:6px;padding:0;border:0;border-radius:var(--radius-full);background:var(--color-ink);opacity:.5;cursor:pointer;overflow:hidden}
+  .thumb img{display:none}
+  .thumb.on{opacity:1}
+
+  .rating{display:inline-flex;align-items:center;gap:6px;margin:-4px 0 6px;padding:4px 0}
+  .rating__stars{font-size:var(--text-fine);line-height:var(--leading-stat);letter-spacing:.04em;color:var(--color-star)}
+  .rating b{font-size:var(--text-fine);font-weight:var(--weight-medium)}
+  .rating__count{font-size:var(--text-micro);color:var(--ink-sec)}
+  h1{font-family:var(--font-heading);font-size:var(--text-h1);line-height:var(--leading-heading);font-weight:var(--weight-regular);letter-spacing:-.02em;margin:var(--space-1) 0 var(--space-5)}
+  h1 span{display:block;color:var(--ink-sec)}
+  .pts{display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-5)}
+  .pts li{display:flex;align-items:flex-start;gap:var(--icon-gap);font-size:var(--text-body-sm);line-height:var(--leading-copy);color:var(--ink-sec)}
+  .pts svg{flex:none;margin-top:var(--space-1);color:var(--color-ink)}
+
+  .lbl{font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec);margin-bottom:var(--space-2)}
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)}
+  .mode{height:var(--pick-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--color-white);border:1px solid var(--rule-strong);border-radius:var(--radius-card);padding:6px var(--space-1);cursor:pointer;line-height:1.1}
+  .mode span{font-size:var(--text-body-sm);font-weight:var(--weight-medium)}
+  .mode b{font-size:var(--text-body-sm);font-weight:var(--weight-regular);color:var(--ink-sec)}
+  .mode.on{border-color:var(--color-ink);box-shadow:inset 0 0 0 .5px var(--color-ink)}
+  .hint{margin-top:6px;font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec)}
+  .cta{display:block;width:100%;height:var(--cta-h);margin-top:var(--space-4);padding:0 15px;border:0;border-radius:var(--radius-full);background:var(--color-dark);color:var(--color-white);font-size:var(--text-buy);font-weight:var(--weight-medium);cursor:pointer}
+  /* Unter dem Knopf wie live NMN (lt-pdp-hero__post-cta--compact): Chip, dann eine Zeile Versand · Garantie */
+  .post{display:flex;flex-direction:column;align-items:center;gap:var(--space-2);margin-top:var(--space-3)}
+  .chip{display:inline-block;background:var(--chip-bg);border-radius:var(--radius-card);padding:var(--space-1) var(--space-3);font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec)}
+  .chip[hidden]{display:none}
+  .chip b{font-weight:var(--weight-medium);color:var(--color-ink)}
+  .post-line{font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec);text-align:center}
+  .post-line button{appearance:none;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline dotted;text-underline-offset:.125em}
+  /* Garantie-Dialog (crs-micro-dialog, assets/lt-pdp.css) */
+  .dlg{max-width:min(92vw,28rem);width:100%;margin:auto;padding:0;border:1px solid #e5e5e5;border-radius:12px;background:var(--color-white);box-shadow:0 4px 12px rgba(0,0,0,.08);color:var(--color-ink)}
+  .dlg::backdrop{background:color-mix(in srgb,var(--color-dark) 35%,transparent)}
+  .dlg__inner{position:relative;padding:var(--space-6) var(--space-5) var(--space-5)}
+  .dlg__close{position:absolute;top:var(--space-3);right:var(--space-3);width:var(--space-6);height:var(--space-6);display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:2px;background:transparent;color:var(--color-gray-600);font-size:24px;line-height:1;cursor:pointer}
+  .dlg__close:hover{background:var(--color-warm);color:var(--color-ink)}
+  .dlg__title{font-family:var(--font-heading);font-size:20px;font-weight:var(--weight-semibold);line-height:var(--leading-tight);margin:0 var(--space-7) var(--space-3) 0;padding-right:var(--space-2)}
+  .dlg__body{line-height:var(--leading-relaxed);color:var(--color-gray-600)}
+  .dlg__body p+p{margin-top:var(--space-3)}
+
+  @media (min-width:768px){
+    .hero .wrap{padding-top:var(--space-9);padding-bottom:var(--space-8)}
+    .hero__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--space-6);align-items:start}
+    .gal{position:sticky;top:var(--space-5)}
+    .gal__main{aspect-ratio:1/1}
+    .thumbs{margin-top:var(--space-4);gap:23px}
+    .thumb{width:var(--thumb);height:var(--thumb);border:1px solid var(--rule-strong);border-radius:var(--radius-card);background:var(--color-paper);opacity:.62}
+    .thumb img{display:block;width:100%;height:100%;object-fit:cover}
+    .lbl{margin-top:0}
+  }
+
+  /* 2 · Wirkprinzip (lt-pdp-wirkprinzip, Fläche und Abstände aus product.12_nad-liposomal-2.json) */
+  .wp{background:var(--color-warm);padding:var(--section-y) 0}
+  .wp__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-6)}
+  .wp__h{margin-bottom:0}
+  .einbl{position:relative;margin:0;border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:4/5}
+  .einbl>img{width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+  .glass{position:absolute;left:5%;right:5%;bottom:5%;background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(14px) saturate(1.1);backdrop-filter:blur(14px) saturate(1.1);border:1px solid rgba(255,255,255,.7);border-radius:14px;padding:var(--space-4) var(--space-4) var(--space-3);box-shadow:0 8px 28px rgba(38,37,30,.18)}
+  .stat__n{font-family:var(--font-heading);font-size:var(--text-stat);line-height:var(--leading-stat);font-weight:var(--weight-semibold);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .stat__t{margin-top:var(--space-1);font-size:var(--text-body-sm);line-height:var(--leading-body);color:var(--ink-sec)}
+  .bars{margin-top:var(--space-3);display:grid;gap:var(--space-2)}
+  .bar{display:grid;grid-template-columns:84px 1fr;gap:var(--space-3);align-items:center;font-size:var(--text-micro);color:var(--ink-sec)}
+  .bar__fill{height:10px;border-radius:var(--radius-full);background:var(--color-teal)}
+  .bar--b .bar__fill{background:var(--color-dark)}
+  .src{margin-top:var(--space-3);font-size:var(--text-micro);line-height:var(--leading-body);color:var(--ink-ter)}
+  .src a{color:inherit;text-underline-offset:2px}
+  .roles>div+div{margin-top:var(--space-5);padding-top:var(--space-5);border-top:1px solid var(--rule-strong)}
+  .roles h3{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-body);font-weight:var(--weight-semibold);line-height:var(--leading-body);margin-bottom:var(--space-1)}
+  .roles h3 svg{flex:none;color:var(--color-dark)}
+  .roles p{line-height:var(--leading-relaxed);max-width:52ch}
+  @media (min-width:900px){
+    .wp__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"h fig" "roles fig";column-gap:var(--space-8);row-gap:var(--space-6);align-items:start}
+    .wp__h{grid-area:h;align-self:end}
+    .einbl{grid-area:fig;align-self:center;aspect-ratio:4/3}
+    .einbl>img{object-position:50% 8%}
+    .roles{grid-area:roles}
+  }
+
+  /* 3 · Belege-Karten (lt-pdp-belege, CSS aus dem Theme) */
+  .ltbg{background:var(--color-warm);padding:var(--space-6) 0 var(--space-4)}
+  .ltbg__grid{display:grid;gap:var(--space-3);max-width:var(--belege-max);margin:0 auto}
+  .ltbg__card{background:var(--color-white);border:1px solid var(--rule-faint);border-radius:var(--radius-card);padding:var(--space-5);min-width:0}
+  .ltbg__label{font-size:var(--text-micro);line-height:var(--leading-tight);letter-spacing:.06em;text-transform:uppercase;font-weight:var(--weight-regular);color:var(--ink-sec)}
+  .ltbg__big{font-family:var(--font-heading);font-size:var(--text-stat);font-weight:var(--weight-regular);letter-spacing:-.02em;line-height:var(--leading-stat);margin-top:var(--space-3)}
+  .ltbg__big--num{font-weight:var(--weight-bold);font-variant-numeric:tabular-nums}
+  .ltbg__big-label{display:block;font-family:var(--font-body);font-size:var(--text-body-sm);font-weight:var(--weight-regular);letter-spacing:0;line-height:var(--leading-body);color:var(--ink-sec);margin-top:var(--space-2)}
+  /* Bildkarte (neu, nur NAD⁺): „Was drin ist“ und „Die Form“ als eine Karte. Gestapelt wie die alte Karte 2 */
+  .ltbg__big-sub{display:block;color:var(--ink-sec)}
+  .ltbg__fig{position:relative;margin:var(--space-3) 0 0;aspect-ratio:5/2;border-radius:var(--radius-card);overflow:hidden;background:var(--color-warm)}
+  .ltbg__stage{position:absolute;inset:0}
+  .ltbg__stage img{width:100%;height:100%;object-fit:cover;object-position:70% 50%}
+  .ltbg__marks{display:none}
+  .ltbg__zeilen{margin-top:var(--space-4)}
+  .ltbg__zeile{padding:var(--space-3) 0;border-top:1px solid var(--rule);line-height:var(--leading-body)}
+  .ltbg__zeile:first-child{border-top:0;padding-top:0}
+  .ltbg__zeile-kopf{font-weight:var(--weight-bold);margin-right:var(--space-1)}
+  .ltbg__person{display:flex;gap:var(--space-3);align-items:center;margin-top:var(--space-3)}
+  .ltbg__person img{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:none}
+  .ltbg__person-name{font-weight:var(--weight-bold);line-height:var(--leading-tight)}
+  .ltbg__person-role{margin-top:2px;font-size:var(--text-body-sm);line-height:var(--leading-body);color:var(--ink-sec)}
+  .ltbg__details{margin-top:var(--space-3);border-top:1px solid var(--rule)}
+  .ltbg__summary{display:flex;justify-content:space-between;align-items:center;gap:var(--space-2);padding-top:var(--space-3);font-size:var(--text-body-sm);font-weight:var(--weight-semibold)}
+  .ltbg__summary .chev{color:inherit}
+  .ltbg__body{padding-top:var(--space-3);font-size:var(--text-body-sm);line-height:var(--leading-body);color:var(--ink-sec)}
+  .ltbg__body p{margin-bottom:var(--space-2)}
+  .ltbg__quotes{margin-top:var(--space-3)}
+  .ltbg__quote{padding:var(--space-4) 0;border-top:1px solid var(--rule)}
+  .ltbg__quote:first-child{border-top:0;padding-top:0}
+  .ltbg__quote--photo{display:flex;gap:var(--space-3);align-items:flex-start}
+  .ltbg__quote--photo img{width:56px;height:74px;object-fit:cover;border-radius:var(--radius-card);flex:none}
+  .ltbg__stars{display:flex;gap:2px;color:var(--color-star);margin-bottom:var(--space-2)}
+  .ltbg__quote-text{line-height:var(--leading-body)}
+  .ltbg__quote-meta{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-1) var(--space-3);margin-top:var(--space-2);font-size:var(--text-body-sm);line-height:var(--leading-tight)}
+  .ltbg__quote-name{font-weight:var(--weight-semibold)}
+  .ltbg__verified{display:inline-flex;align-items:center;gap:4px;font-size:var(--text-micro);font-weight:var(--weight-medium);color:var(--ink-sec);white-space:nowrap}
+  .ltbg__quote-date{font-size:var(--text-micro);color:var(--ink-ter);font-variant-numeric:tabular-nums}
+  @media (min-width:840px){
+    .ltbg__card{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:var(--space-6);padding:var(--space-6);align-items:start}
+    .ltbg__main{border-left:1px solid var(--rule);padding-left:var(--space-6);padding-top:calc(var(--text-micro) * var(--leading-tight) + var(--space-3))}
+    .ltbg__main>:first-child{margin-top:0}
+    /* Bildkarte bleibt bis 1007 px gestapelt */
+    .ltbg__card--bild{display:block}
+    .ltbg__card--bild .ltbg__main{border-left:0;padding:0}
+    .ltbg__card--bild .ltbg__zeilen{margin-top:var(--space-4)}
+  }
+  /* Ab 1008 px ist die Karte immer 960 px breit: Text links (528), Bild randlos rechts (432), Lade als Fußzeile.
+     Die Bühne ist das ganze Bild in 2:1 auf Kartenhöhe, rechts angeschlagen. Die Marken sitzen in Prozent
+     des Bildes, also am Motiv, egal wie hoch die Karte wird. */
+  @media (min-width:1008px){
+    .ltbg__card--bild{display:grid;grid-template-columns:minmax(0,11fr) minmax(0,9fr);grid-template-rows:auto 1fr auto;grid-template-areas:"head fig" "main fig" "lade lade";gap:0;padding:0;overflow:hidden}
+    .ltbg__card--bild .ltbg__head{grid-area:head;padding:var(--space-6) var(--space-6) 0}
+    .ltbg__card--bild .ltbg__main{grid-area:main;padding:var(--space-5) var(--space-6) var(--space-6)}
+    .ltbg__card--bild .ltbg__zeilen{margin-top:0}
+    .ltbg__zeile{text-wrap:balance}
+    .ltbg__fig{grid-area:fig;align-self:stretch;margin:0;aspect-ratio:auto;border-radius:0}
+    .ltbg__stage{inset:0 0 0 auto;aspect-ratio:2/1}
+    .ltbg__marks{display:block}
+    .ltbg__mark{position:absolute;left:var(--mark-x);top:var(--mark-y);transform:translate(-100%,-50%);display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-micro);line-height:var(--leading-stat);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+    .ltbg__mark-line{position:relative;width:var(--mark-reach);height:1px;background:var(--ink-icon)}
+    .ltbg__mark-line::after{content:"";position:absolute;right:-2.5px;top:-2px;width:5px;height:5px;border-radius:50%;background:var(--color-ink)}
+    .ltbg__mark--kern{--mark-x:67.7%;--mark-y:42%;--mark-reach:128px}
+    .ltbg__mark--huelle{--mark-x:62.1%;--mark-y:66.7%;--mark-reach:79px}
+    .ltbg__card--bild .ltbg__details{grid-area:lade;margin-top:0}
+    .ltbg__card--bild .ltbg__summary{padding:var(--space-4) var(--space-6)}
+    .ltbg__card--bild .ltbg__body{display:grid;grid-template-columns:minmax(0,11fr) minmax(0,9fr);padding:0 0 var(--space-5)}
+    .ltbg__card--bild .ltbg__body p{margin:0;padding:0 var(--space-6)}
+    .ltbg__card--bild .ltbg__body p+p{padding-left:0}
+  }
+
+  /* 4 · Loox-Lade (lt-pdp-reviews-all) */
+  .ltra{background:var(--color-warm);padding-bottom:var(--space-7)}
+  .ltra .wrap{max-width:var(--belege-max)}
+  .ltra__details{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+  .ltra__summary{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:var(--space-4) 0;font-weight:var(--weight-semibold);line-height:var(--leading-body);color:var(--color-gray-600)}
+  .ltra__panel{padding-bottom:var(--space-5);font-size:var(--text-body-sm);color:var(--ink-sec)}
+
+  /* 5 · Produktfakten (lt-pdp-produktfakten, Fläche und Karte aus product.12_nad-liposomal-2.json) */
+  .pf{background:var(--color-warm);padding:var(--section-y) 0}
+  .pf__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-6)}
+  .facts{background:var(--color-white);border-radius:var(--radius-lg);padding:var(--space-6)}
+  .fact{display:flex;justify-content:space-between;gap:var(--space-4);padding:var(--space-3) 0;border-top:1px solid var(--rule-strong);line-height:var(--leading-relaxed)}
+  .fact:first-child{border-top:0;padding-top:0}
+  .fact span{color:var(--ink-sec)}
+  .fact b{text-align:right;font-weight:var(--weight-semibold)}
+  .intake{display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-1)}
+  .intake svg{color:var(--color-dark)}
+  .etikett{position:relative;display:block;border-radius:var(--radius-lg);overflow:hidden;background:var(--color-white);border:1px solid var(--rule);aspect-ratio:16/10;cursor:zoom-in}
+  .etikett img{width:100%;height:100%;object-fit:cover;object-position:0% 50%;transform:scale(1.9);transform-origin:4% 46%}
+  .etikett span{position:absolute;right:var(--space-2);bottom:var(--space-2);font-size:var(--text-micro);background:rgba(255,255,255,.92);border-radius:var(--radius-full);padding:var(--space-1) var(--space-3)}
+  .facts .ltbg__details{margin-top:var(--space-4)}
+  .facts .ltbg__body{line-height:var(--leading-relaxed)}
+  @media (min-width:900px){
+    .pf__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-7)}
+    .facts{padding:var(--space-7)}
+  }
+
+  /* 6 · FAQ (crs-faq-accordion) */
+  .faq{background:var(--color-paper);padding:var(--section-y) 0}
+  .faq__layout{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-6)}
+  .faq__left{padding-top:var(--space-1)}
+  .faq__left .hs{margin-bottom:0}
+  .faq__item{border-top:1px solid var(--rule-faint)}
+  .faq__item:last-of-type{border-bottom:1px solid var(--rule-faint)}
+  .faq__q{display:flex;justify-content:space-between;align-items:center;gap:var(--space-4);padding:15.68px 0 16.8px}
+  .faq__q span{line-height:var(--leading-copy);max-width:var(--measure)}
+  .faq__a{margin-bottom:var(--space-4);line-height:var(--leading-answer);color:var(--ink-sec);max-width:var(--measure)}
+  @media (min-width:1025px){
+    .faq__layout{grid-template-columns:1fr 1fr;gap:0}
+    .faq__left{padding-right:var(--space-7)}
+    .faq__left .hs{position:sticky;top:var(--space-9)}
+  }
+
+  /* Bildstelle */
+  .ph{background:repeating-linear-gradient(135deg,#efede7 0 10px,#f5f4f0 10px 20px);border:1px dashed #c9c6bb;border-radius:var(--radius-lg);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:var(--space-5);color:var(--ink-sec);font-size:var(--text-body-sm);min-height:220px}
+  .ph b{font-size:var(--text-micro);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-ter);margin-bottom:var(--space-2)}
+  .ph p{max-width:34ch}
+
+  /* Sticky-Kaufleiste (lt-sticky-atc) */
+  .sticky{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--color-paper);border-top:1px solid #e5e5e5;box-shadow:0 -6px 8px rgba(0,0,0,.08);padding:var(--space-2) var(--space-4);display:flex;align-items:center;gap:var(--space-4);transform:translateY(110%);transition:transform .2s}
+  .sticky.show{transform:none}
+  .sticky .meta{flex:1;min-width:0;line-height:var(--leading-body)}
+  .sticky .meta b{display:block;font-size:var(--text-fine);font-weight:var(--weight-medium)}
+  .sticky .meta span{font-size:var(--text-micro);color:var(--color-ink-muted)}
+  .sticky .cta{width:auto;height:44px;margin:0;padding:0 var(--space-4);font-size:var(--text-body-sm);flex:none}
+
+  .ft{padding:var(--space-6) var(--page-gutter);border-top:1px solid var(--rule);font-size:var(--text-body-sm);color:var(--ink-ter)}
+
+  /* Notizen für BJ (nicht Teil der Seite) */
+  .note{background:var(--note-bg);border:1px solid var(--note-line);border-radius:var(--radius-card);padding:var(--space-3) var(--space-4);color:var(--note-ink);font-size:var(--text-body-sm);line-height:var(--leading-body);margin-top:var(--space-4)}
+  .ltbg .note{max-width:var(--belege-max);margin:var(--space-4) auto 0}
+  .tag{display:inline-block;font-size:var(--text-micro);letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--note-line);border-radius:var(--radius-full);padding:0 var(--space-2);margin-right:var(--space-1);background:var(--color-white)}
+  .tag--q{background:#fff2c7}
+  body.clean .note,body.clean .bj{display:none}
+  .toggle{position:absolute;top:64px;right:var(--space-3);z-index:10;background:var(--color-ink);color:var(--color-white);border:0;border-radius:var(--radius-full);padding:var(--space-2) var(--space-4);font-size:var(--text-micro);cursor:pointer}
+  .bj{background:var(--note-bg);border-top:1px solid var(--note-line);padding:var(--space-7) 0 var(--space-9)}
+  .bj h2{font-family:var(--font-heading);font-weight:var(--weight-regular);font-size:var(--text-h2)}
+  .bj h3{margin-top:var(--space-5)}
+  .bj ul{margin-top:var(--space-2);display:grid;gap:var(--space-2)}
+  .bj li{font-size:var(--text-body-sm);padding-left:var(--space-4);position:relative}
+  .bj li::before{content:"·";position:absolute;left:var(--space-1);font-weight:var(--weight-semibold)}
+  .bj p{margin-top:var(--space-2);color:var(--ink-sec);font-size:var(--text-body-sm);max-width:68ch}
+
+  /* Ergänzungen Kreatin (nur was der NAD⁺-Entwurf nicht hatte, Werte wie live NAD⁺/NMN gemessen 06.11.2026) */
+  /* Prüf-/Etikett-Zeile unter den Punkten (lt-pdp-hero__coa) */
+  .coa{display:flex;align-items:center;gap:var(--icon-gap);flex-wrap:wrap;margin:calc(var(--space-1) * -1) 0 var(--space-4);font-size:var(--text-body-sm);line-height:var(--leading-copy)}
+  .coa svg{flex:none;color:var(--color-ink)}
+  .coa a{text-decoration:underline dotted;text-underline-offset:.2em}
+  /* Zweite Hinweiszeile unter den Karten: Menge · Grundpreis (einmal, klein, grau) */
+  .hint+.hint{margin-top:0}
+  /* Galerie-Platzhalter */
+  .gal__main .ph{height:100%;min-height:0;border-radius:0;border:0}
+  .thumb--ph{background:repeating-linear-gradient(135deg,#efede7 0 6px,#f5f4f0 6px 12px);font-size:0;color:transparent}
+  @media (min-width:768px){ .thumb--ph{display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink-ter);line-height:1.1;text-align:center;padding:2px} }
+  .einbl>.ph{position:absolute;inset:0;border-radius:0;border:0;justify-content:flex-start;padding-top:var(--space-6)}
+  .ltbg__fig .ph{position:absolute;inset:0;min-height:0;border-radius:0;border:0;padding:var(--space-3)}
+  @media (min-width:1008px){ .ltbg__stage:has(.ph){inset:0;aspect-ratio:auto} }
+</style>
+
+</head>
+<body>
+
+<button class="toggle" id="toggle" type="button">Notizen ausblenden</button>
+
+<header class="hd wrap">
+  <img src="https://www.lifetime-health.de/cdn/shop/files/logo-lifetime-black.svg?v=1705418762" alt="LIFETIME" width="156" height="24">
+  <div class="hd__r"><span>Suche</span><span>Warenkorb</span></div>
+</header>
+
+<main>
+
+<!-- 1 · Hero mit Kaufzone (lt-pdp-hero, kompakt wie NMN und NAD⁺) -->
+<section class="hero">
+  <div class="wrap hero__grid">
+    <div class="gal">
+      <div class="gal__main" id="galMain">
+        <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-4961031.jpg?v=1768563315&width=2048" alt="LIFETIME Kreatin-Pulver, Dose mit 300 g">
+      </div>
+      <div class="thumbs" id="thumbs">
+        <button class="thumb on" type="button" aria-label="Bild 1" data-src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-4961031.jpg?v=1768563315&width=2048" data-alt="LIFETIME Kreatin-Pulver, Dose mit 300 g"><img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-4961031.jpg?v=1768563315&width=160" alt=""></button>
+        <button class="thumb thumb--ph" type="button" aria-label="Bild 2" data-ph="Produktshot: Dose frontal auf Travertin vor warmer Wand, Blattschatten, viel Luft (wie NAD⁺ Bild 2)">Bild 2</button>
+        <button class="thumb thumb--ph" type="button" aria-label="Bild 3" data-ph="Echte Hände, kein Gesicht: ein Messlöffel weißes Pulver über einem Glas Wasser, Tageslicht">Bild 3</button>
+        <button class="thumb thumb--ph" type="button" aria-label="Bild 4" data-ph="Echtes Foto (Pexels): Frau um 58 beim Krafttraining mit Kurzhanteln, warmes Licht, ohne Produkt">Bild 4</button>
+        <button class="thumb" type="button" aria-label="Bild 5" data-src="entwurf-kreatin-pdp-2026-11-06/etikett.jpg" data-alt="Etikett der Kreatin-Dose, abgerollt"><img src="entwurf-kreatin-pdp-2026-11-06/etikett.jpg" alt=""></button>
+      </div>
+      <div class="note"><span class="tag">Geändert</span> Galerie mit 5 Bildern ohne Text, Aufbau wie NAD⁺: Dose · Dose auf Travertin · Hände mit Messlöffel · Frau beim Krafttraining · Etikett. Heute gibt es nur das eine Dosenbild. Bild 1 vorhanden (2048 px), Bild 5 aus deiner Druckdatei <code>Kreatin_300[77].png</code>. Bilder 2 bis 4 kommen in der Bildrunde: 2 und 3 per ChatGPT, 4 als echtes Foto. Es gilt die Regel aus der NAD⁺-Runde: Ist ein Gesicht zu sehen, nehmen wir ein echtes Foto ohne Produkt. Ist das Produkt im Bild, zeigen wir nur Hände.</div>
+    </div>
+
+    <div>
+      <div class="rating"><span class="rating__stars" aria-hidden="true">★★★★★</span><b>4,8</b><span class="rating__count">· 5 Produktbewertungen</span></div>
+      <h1>Kreatin-Pulver <span>Für Kraft, die bleibt.</span></h1>
+      <ul class="pts">
+        <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Mehr Kraft aus deinem Training ab 55.</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Reines Kreatin-Monohydrat, sonst nichts.</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Jede Charge im Labor geprüft.</span></li>
+      </ul>
+      <p class="coa"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 1.75h5.5L12.25 4.5v9.75H4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M9.25 1.75V4.75h3" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M6 9.25l1.5 1.5 2.75-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Über 99,5 % Reinheit</span><a href="entwurf-kreatin-pdp-2026-11-06/etikett.jpg" target="_blank" rel="noopener">Etikett ansehen</a></p>
+      <div class="note"><span class="tag">Geändert</span> Der Titel nennt jetzt den Job, im Alter Kraft zu behalten. Vorher stand dort „Der meistuntersuchte Muskel- und Gehirn-Treibstoff“, und das spricht Sportler an. Punkt 1 ist der zugelassene Claim für über 55 (VO (EU) 2017/672), der alte Punkt „Steigert Kraft und Leistungsfähigkeit“ fliegt raus. Raus sind auch das Badge „Kraft &amp; Kognition“, die drei Benefit-Icons, die doppelte Unterzeile und das Limmroth-Badge, das jetzt in der Belege-Karte steht.<br><span class="tag tag--q">Offen</span> Titelzeile: „Für Kraft, die bleibt.“ oder „Damit dein Training mehr Kraft bringt.“? Die zweite Variante ist näher am Claim, die erste näher am Job.</div>
+
+      <div class="modes" id="modes">
+        <button class="mode on" type="button" data-mode="sub"><span>Im Abo</span><b>22,41 €</b></button>
+        <button class="mode" type="button" data-mode="once"><span>Einmalig</span><b>24,90 €</b></button>
+      </div>
+      <p class="hint" id="hint">Lieferung alle 2 Monate, versandfrei, jederzeit kündbar.</p>
+      <p class="hint" id="unit">300 g für 60 Tage · 7,47 €/100 g</p>
+
+      <button class="cta" id="cta" type="button">Abo starten, 22,41 €</button>
+      <div class="post">
+        <p class="chip" id="save">Du sparst <b>2,49 €</b></p>
+        <p class="post-line"><span>Versand in 1–2 Werktagen</span><span aria-hidden="true"> · </span><button type="button" id="guar-open" aria-haspopup="dialog" aria-controls="guar-dlg">90 Tage Geld zurück</button></p>
+      </div>
+      <dialog class="dlg" id="guar-dlg" aria-labelledby="guar-title">
+        <div class="dlg__inner">
+          <button type="button" class="dlg__close" data-close aria-label="Schließen"><span aria-hidden="true">×</span></button>
+          <h2 class="dlg__title" id="guar-title">90-Tage Geld-zurück-Garantie</h2>
+          <div class="dlg__body">
+            <p>Auch wenn du nichts merkst: Du bekommst den vollen Kaufbetrag zurück. Eine E-Mail innerhalb von 90 Tagen nach Erhalt genügt.</p>
+            <p>Die Garantie gilt für deine erste Bestellung, einmalig oder im Abo. Dein gesetzliches Widerrufsrecht bleibt davon unberührt.</p>
+          </div>
+        </div>
+      </dialog>
+      <div class="note"><span class="tag">Wie NMN</span> Die Karten zeigen nur „Im Abo“ oder „Einmalig“ mit Preis. Darunter stehen der Abo-Hinweis wie auf NMN und eine Zeile mit Menge und Grundpreis, der einmal, klein und grau erscheint. Unter dem Knopf folgen der Chip und die Zeile „Versand in 1–2 Werktagen · 90 Tage Geld zurück“. Der Knopf heißt wie auf NMN und NAD⁺ „Abo starten, 22,41 €“. Der Preis im Knopf ist also kein Regelverstoß. Verstöße waren der Chip „SPARE 2,49 €“ und „0,37 €/Tag“ in der Karte, der Streichpreis, „ODER“, die drei Abo-Vorteile mit dem PDF-Bonus und vier Versandzeilen.<br><span class="tag tag--q">Offen</span> Eine Dose kostet 24,90 € und kommt allein nie an die Versandgrenze von 49 €. Zwei Dosen für 49,80 € lägen darüber und reichen 4 Monate. Dafür bräuchte es eine zweite Variante im Shop. Soll ich die als Größenwahl wie bei NMN vorbereiten? Angelegt habe ich nichts.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · Wirkprinzip (lt-pdp-wirkprinzip, Darstellung „Einblendung“) -->
+<section class="wp">
+  <div class="wrap">
+    <div class="wp__grid">
+      <h2 class="hs wp__h">Kein Pulver nur für Bodybuilder <span>Ab 55 holt es mehr Kraft aus deinem Training.</span></h2>
+
+      <figure class="einbl">
+        <div class="ph"><b>Bildstelle</b><p>Echtes Foto (Pexels): Frau um 58 beim Krafttraining, Kurzhanteln oder Beinpresse, warmes Tageslicht, ohne Produkt. Hochformat 4:5, Motiv oben, damit die Glaskarte unten Platz hat.</p></div>
+        <figcaption class="glass">
+          <p class="stat__n">+1,4 kg</p>
+          <p class="stat__t">mehr fettfreie Masse als mit Training allein. Die Teilnehmenden waren im Schnitt 57 bis 70 Jahre alt.</p>
+          <p class="src">22 Studien, 721 Menschen. <a href="https://doi.org/10.2147/OAJSM.S123529" target="_blank" rel="noopener">Chilibeck et al., Open Access J Sports Med 2017</a></p>
+        </figcaption>
+      </figure>
+
+      <div class="roles">
+        <div>
+          <h3><svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M15.5 3L7 16h6l-1 9 9-13.5h-6.2L15.5 3z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>Kraft für den Moment</h3>
+          <p>Kreatin füllt den schnellen Energiespeicher deiner Muskeln. Aus ihm kommt die Kraft für kurze, harte Momente: die schwere Tasche, die Treppe, das Aufstehen aus der Hocke.</p>
+        </div>
+        <div>
+          <h3><svg width="20" height="20" viewBox="0 0 28 28" fill="none" aria-hidden="true"><path d="M3 14h22M7 9v10M21 9v10M4 11v6M24 11v6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Mehr aus jedem Training</h3>
+          <p>Ab 55 kann Kreatin die Wirkung deines Krafttrainings auf die Muskelkraft verstärken. Dafür reichen 3 g am Tag und Training an mindestens drei Tagen pro Woche.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="note"><span class="tag">Geändert</span> Die drei Text-Sections „Cell Power“, „Ist das nicht nur etwas für Bodybuilder?“ und „Höchste Qualität“ hatten zusammen über 2.000 px. Jetzt ist es eine Section auf Platz 2. Der Kaufgrund aus der Bodybuilder-Section ist die Überschrift. Die große Zahl ist +1,4 kg aus einer Meta-Analyse mit Menschen in deinem Käuferalter, als Glaskarte über einem Foto wie bei NAD⁺. Raus: die Tag-Pillen, „ATP“, „Skelettmuskulatur“, „Cell Power“ und das Wort Gehirn.<br><span class="tag">Geprüft</span> Claim 2: Den englischen Wortlaut und die Bedingungen aus dem Anhang der VO (EU) 2017/672 habe ich auf legislation.gov.uk geprüft. Den deutschen Amtsblatt-Text habe ich nicht abgerufen. Laut Zulassung muss die Kundin erfahren, dass die Wirkung mit 3 g am Tag und Krafttraining an mindestens drei Tagen pro Woche über mehrere Wochen eintritt, mit mindestens 65 bis 75 % der Maximallast. Das steht hier kurz und in der FAQ vollständig. Rolle 1 erklärt den Mechanismus in Alltagssprache. Zugelassen ist dazu der Schnellkraft-Claim aus VO 432/2012, und der steht schon in der Shop-Beschreibung.<br><span class="tag">Geprüft</span> Zahl laut Abstract (PubMed, <a href="https://doi.org/10.2147/OAJSM.S123529">DOI</a>): 1,37 kg mehr fettfreie Masse (95 % KI 0,97 bis 1,76), 22 randomisierte Studien, 721 Teilnehmende, Krafttraining 2 bis 3 Tage pro Woche. Fettfreie Masse ist nicht gleich Muskeln, deshalb steht hier nicht „Muskelmasse“. Balken lasse ich weg, weil die Studie nur die Differenz nennt.<br><span class="tag tag--q">Braucht Erweiterung</span> Rolle 2 braucht ein neues Symbol „Hantel“ in <code>stage_icon</code>. Heute gibt es nur Blitz und DNA. Die Einstellung ist per Default aus.</div>
+  </div>
+</section>
+
+<!-- 3 · Belege-Karte als Bildkarte (lt-pdp-belege, Karte 1 aus, Kundenstimmen aus) -->
+<section class="ltbg">
+  <div class="wrap">
+    <div class="ltbg__grid">
+
+      <article class="ltbg__card ltbg__card--bild">
+        <div class="ltbg__head">
+          <h2 class="ltbg__label">Was drin ist</h2>
+          <p class="ltbg__big">Nur Kreatin,<span class="ltbg__big-sub">als Monohydrat</span></p>
+        </div>
+        <figure class="ltbg__fig">
+          <div class="ltbg__stage">
+            <div class="ph"><b>Bildstelle 2:1</b><p>Ein Messlöffel weißes Pulver neben der offenen Dose auf Travertin, warme Wand. Marken ab 1008 px: „Monohydrat“ am Pulver, „99,5 %“ an der Dose.</p></div>
+          </div>
+        </figure>
+        <div class="ltbg__main">
+          <ul class="ltbg__zeilen">
+            <li class="ltbg__zeile"><span class="ltbg__zeile-kopf">Monohydrat</span> <span class="ltbg__zeile-text">Die Form, mit der fast alle Kreatin-Studien arbeiten.</span></li>
+            <li class="ltbg__zeile"><span class="ltbg__zeile-kopf">99,5 %</span> <span class="ltbg__zeile-text">So rein ist das Pulver. Ohne Zusätze, vegan und glutenfrei.</span></li>
+          </ul>
+          <div class="ltbg__person">
+            <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/volker-podcast.png?v=1766075350" alt="">
+            <div><p class="ltbg__person-name">Prof. Dr. med. Volker Limmroth</p><p class="ltbg__person-role">Chefarzt Neurologie, prüft, was wir veröffentlichen</p></div>
+          </div>
+        </div>
+        <details class="ltbg__details">
+          <summary class="ltbg__summary"><span>Herstellung und Firma</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="ltbg__body">
+            <p>Hergestellt nach HACCP. Jede Charge wird auf Schwermetalle und Verunreinigungen untersucht. Ultrafeines Pulver, löst sich in Wasser.</p>
+            <p>LIFETIME ist die Diga Health GmbH, eingetragen beim Amtsgericht Köln unter HRB 64399.</p>
+          </div>
+        </details>
+      </article>
+
+    </div>
+    <div class="note"><span class="tag">Wie NAD⁺</span> Wir haben keinen eigenen Messwert, deshalb kommt die Bildkarte und nicht der Rahmen mit der großen Zahl. Die beiden Marken im Bild beginnen mit denselben Wörtern wie die zwei Zeilen links. Die Feature-Leiste mit vier Icons (Laborgeprüft, Reinheit, Vegan, GMP &amp; HACCP) und der Text „Höchste Qualität“ stecken jetzt in dieser Karte und ihrer Lade.<br><span class="tag">Raus</span> Die Karte „Was Kunden sagen“: Drei der vier Loox-Texte lauten „Kein Kommentar“, einer „Gut“. Die Hürde „Wirkt das bei Leuten wie mir?“ baut jetzt die Studienzahl mit 57- bis 70-Jährigen ab. Die 4,8 Sterne bleiben oben im Hero und in der Lade.<br><span class="tag tag--q">Offen</span> „Fast alle Kreatin-Studien“ nutzen Monohydrat. Das ist Konsens, aber gibt es eine Quelle, die du verlinken willst? „GMP“ stand live, auf dem Etikett steht nur HACCP, deshalb hier nur HACCP. Gibt es einen Prüfbericht je Charge? Dann würde der Rahmen mit Zahl wie auf NMN tragen, und „Über 99,5 %“ oben könnte auf ihn verlinken statt aufs Etikett.</div>
+  </div>
+</section>
+
+<!-- 4 · Loox-Lade (lt-pdp-reviews-all) -->
+<section class="ltra">
+  <div class="wrap">
+    <details class="ltra__details">
+      <summary class="ltra__summary"><span>Alle <strong>5</strong> Bewertungen lesen</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="ltra__panel"><p>Hier öffnet sich im Theme das Loox-Widget mit allen Bewertungen, Schnitt 4,8.</p></div>
+    </details>
+  </div>
+</section>
+
+<!-- 5 · Produktfakten (lt-pdp-produktfakten, Darstellung „Fakten“) -->
+<section class="pf">
+  <div class="wrap">
+    <h2 class="hs">Zusammensetzung und Einnahme <span>Gehalt und Verzehrempfehlung.</span></h2>
+    <div class="pf__grid">
+      <a class="etikett" href="entwurf-kreatin-pdp-2026-11-06/etikett.jpg" target="_blank" rel="noopener">
+        <img src="entwurf-kreatin-pdp-2026-11-06/etikett.jpg" alt="Etikett der Dose, Ausschnitt mit Nährwerttabelle und Verzehrempfehlung" style="transform:scale(1.8);transform-origin:0% 12%">
+        <span>Etikett vergrößern</span>
+      </a>
+      <div class="facts">
+        <div class="fact"><span>Kreatin je Tagesportion</span><b>5 g</b></div>
+        <div class="fact"><span>Einnahme</span><b class="intake"><svg width="44" height="22" viewBox="0 0 56 28" fill="none" aria-hidden="true"><path d="M6 10h18a9 9 0 0 1-18 0z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M24 12h26" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>1 Messlöffel täglich in 250 ml Wasser</b></div>
+        <div class="fact"><span>Eine Dose</span><b>300 g, reicht 60 Tage</b></div>
+        <details class="ltbg__details">
+          <summary class="ltbg__summary"><span>Zutaten und Pflichthinweise</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="ltbg__body">
+            <p><b>Zutaten:</b> Kreatin-Monohydrat.</p>
+            <p>Die angegebene empfohlene tägliche Verzehrmenge darf nicht überschritten werden. Nahrungsergänzungsmittel sind kein Ersatz für eine ausgewogene und abwechslungsreiche Ernährung und eine gesunde Lebensweise. Außerhalb der Reichweite von kleinen Kindern aufbewahren. Kühl und trocken lagern sowie vor Licht schützen.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="note"><span class="tag">Geändert</span> Ersetzt <code>main_product_hidden</code>, das live sichtbar war (540 px) und Punkte, Versandzeile und drei Laden doppelte. Gehalt, Einnahme und Reichweite stehen auf Ebene 1, Zutaten und Pflichttext hinter der Lade. Es gilt eine Mengenangabe, die vom Etikett: 1 Messlöffel (5 g) in 250 ml, 300 g reichen 60 Tage. Live standen daneben „3-5 g täglich“, „60-100 Tage Vorrat“ und „150-200 ml“.<br><span class="tag tag--q">Braucht Erweiterung</span> Das Einnahme-Piktogramm ist heute fest eine Kapsel (<code>fact_icon_row</code>). Für Kreatin braucht es eine Auswahl „Messlöffel“, per Default Kapsel.<br><span class="tag tag--q">Offen</span> Wie bei NAD⁺ steht auf dem Etikett die Berliner Anschrift Pappelallee 78. Außerdem fehlt dem Etikett-Hinweis das Wort „abwechslungsreiche“. Die Lade hier hat den vollen Wortlaut.</div>
+  </div>
+</section>
+
+<!-- 6 · FAQ (crs-faq-accordion), Versand, Abo und Garantie vorn wie NMN -->
+<section class="faq">
+  <div class="wrap faq__layout">
+    <div class="faq__left"><h2 class="hs">Häufige Fragen</h2></div>
+    <div>
+      <details class="faq__item"><summary class="faq__q"><span>Was kostet der Versand?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Im Abo nichts. Beim Einmalkauf in Deutschland ab 49 € versandfrei, darunter 4,90 €. Wir verschicken in 1–2 Werktagen.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Kann ich das Abo jederzeit kündigen?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Ja, im Kundenkonto, ohne Frist und ohne Anruf.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Wie funktioniert die Geld-zurück-Garantie?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Bist du mit deiner ersten Lieferung nicht zufrieden, auch weil du nichts merkst, bekommst du innerhalb von 90 Tagen den vollen Betrag zurück. Eine E-Mail mit Foto der Restmenge genügt. Dein Widerrufsrecht bleibt unberührt.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Muss ich dafür Krafttraining machen?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Für mehr Kraft ja. Belegt ist die Wirkung bei Erwachsenen über 55, die 3 g Kreatin am Tag nehmen und mindestens dreimal pro Woche über mehrere Wochen Krafttraining machen. Das Gewicht liegt dabei bei mindestens 65 bis 75 % dessen, was du einmal gerade noch schaffst, und steigt mit der Zeit.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Werde ich davon schwerer?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Die Waage kann in den ersten Wochen etwas mehr zeigen. Das ist Wasser, das deine Muskeln zusammen mit dem Kreatin speichern, kein Fett.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Wann nehme ich es, und wie schmeckt es?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Wann du willst, wichtig ist nur jeden Tag. Das Pulver schmeckt nach nichts und löst sich in Wasser oder jedem anderen Getränk.</p></details>
+      <div class="note"><span class="tag">Neu</span> Bisher hatte die Seite keine FAQ. Die ersten drei Fragen sind wortgleich mit NMN und NAD⁺. Danach kommen die drei Hürden der Zielgruppe: Training nötig (dort stehen die Bedingungen der Zulassung vollständig), Gewicht und Aufwand.<br><span class="tag tag--q">Offen</span> „Schmeckt nach nichts“ und „löst sich in jedem Getränk“: Stimmt das für unser Pulver? Hier fragt die Kundin.</div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- Für BJ: Änderungsliste -->
+<section class="bj">
+  <div class="wrap">
+    <h2>Für BJ: was sich ändert</h2>
+    <p>Job der Seite: Eine Frau um 58 merkt, dass Treppe, Einkaufstaschen und Aufstehen schwerer werden. Sie bewegt sich oder fängt mit Krafttraining an und will, dass das im Alter mehr Kraft bringt. Vor dem Kauf braucht sie nur drei Antworten: Ist das etwas für Leute wie mich und nicht für Bodybuilder? Was genau ist drin? Was kostet mich ein Fehlkauf? Die größte Hürde ist die Gewohnheit, Kreatin für Sportlerpulver zu halten. Die Seite baut sie mit der Überschrift im Wirkprinzip und der Studienzahl mit 57- bis 70-Jährigen ab. Die Angst vor dem Fehlkauf baut die Garantie ab.</p>
+
+    <h3>Fliegt raus</h3>
+    <ul>
+      <li>Badge „Kraft &amp; Kognition“, H1 „meistuntersuchter Muskel- und Gehirn-Treibstoff“: Sie sprechen Sportler an, nicht den Job.</li>
+      <li>Drei Benefit-Icons und die doppelte Unterzeile im Hero: Sie wiederholen die Punkte.</li>
+      <li>Kaufkarte mit „SPARE 2,49 €“, Streichpreis, „0,37 €/Tag“, „ODER“ und drei Abo-Vorteilen samt PDF-Bonus: Das verstößt gegen deine Buybox-Regeln.</li>
+      <li>Vier Versandaussagen („Meist am Montag“, „2–3 Werktage“, „1–3 Werktage“, „1–2 Werktage“): Übrig bleibt eine Zeile.</li>
+      <li>Feature-Leiste mit vier Icons: Ihr Inhalt steht in der Belege-Karte.</li>
+      <li>Drei Text-Sections mit über 2.000 px: Sie werden zu einem Wirkprinzip.</li>
+      <li>„Wird oft zusammen gekauft“ und ein leerer App-Slot: Beide rendern 0 px.</li>
+      <li>Sichtbares <code>main_product_hidden</code> (540 px) mit Punkten, Lottie-Versandzeile, Tag-Pillen und drei Laden: Es wird durch die Produktfakten ersetzt.</li>
+      <li>Das Gehirn als Versprechen: Es ist nicht der Job, und es gibt keinen zugelassenen Claim dafür.</li>
+    </ul>
+
+    <h3>Kommt neu rein</h3>
+    <ul>
+      <li>Titelzeile „Für Kraft, die bleibt.“ und Punkt 1 als zugelassener Claim für über 55.</li>
+      <li>Wirkprinzip mit +1,4 kg (Meta-Analyse, Alter 57 bis 70) als Glaskarte über einem echten Foto.</li>
+      <li>Belege-Karte als Bildkarte mit Limmroth und einer Lade zur Herstellung.</li>
+      <li>Produktfakten mit dem echten Etikett, das ich aus deiner Druckdatei geschnitten habe.</li>
+      <li>FAQ mit 6 Fragen, die ersten drei wortgleich mit NMN.</li>
+      <li>Galerie mit 5 Bildern statt einem.</li>
+    </ul>
+
+    <h3>Ändert sich</h3>
+    <ul>
+      <li>Reihenfolge: Hero, Wirkprinzip, Belege, Loox, Produktfakten, FAQ. Das ist genau die Kette von NAD⁺, 6 statt 9 Sections.</li>
+      <li>Eine Mengenangabe auf der ganzen Seite: 5 g täglich, 300 g für 60 Tage.</li>
+      <li>Loox-Widget wird zur Lade „Alle 5 Bewertungen lesen“ wie auf NMN.</li>
+      <li>Kaufzone, Garantie-Dialog, Belege-Karte, Loox-Lade und FAQ sind so gebaut wie live NMN und NAD⁺.</li>
+    </ul>
+
+    <h3>Braucht Erweiterung (Default aus, NMN und NAD⁺ bleiben gleich)</h3>
+    <ul>
+      <li><code>lt-pdp-wirkprinzip</code>: Symbol „Hantel“ für die Rolle 2.</li>
+      <li><code>lt-pdp-produktfakten</code>: Piktogramm „Messlöffel“ statt Kapsel.</li>
+    </ul>
+
+    <h3>Offen</h3>
+    <ul>
+      <li>Titelzeile: „Für Kraft, die bleibt.“ oder „Damit dein Training mehr Kraft bringt.“?</li>
+      <li>Zwei-Dosen-Angebot für 49,80 € (über der Versandgrenze, 4 Monate): Soll die Variante kommen? Dann baue ich die Größenwahl wie bei NMN.</li>
+      <li>Prüfbericht je Charge für Kreatin? Damit würde „Über 99,5 %“ belegt und verlinkbar.</li>
+      <li>Geschmack und Löslichkeit (FAQ 6): Stimmt „schmeckt nach nichts, löst sich in jedem Getränk“?</li>
+      <li>Etikett: Berliner Anschrift, und im Pflichthinweis fehlt „abwechslungsreiche“. Neu drucken oder stehen lassen?</li>
+      <li>„Für Kraft, die bleibt.“ spricht Erhalt an. Der Claim sagt „verstärkt die Wirkung von Krafttraining“. Reicht dir das als Brücke?</li>
+    </ul>
+  </div>
+</section>
+
+<footer class="ft">Entwurf 06.11.2026. Footer wie im Theme. Nur Vorschau, kein Produktivcode.</footer>
+
+<div class="sticky" id="sticky">
+  <div class="meta"><b>Kreatin-Pulver</b><span id="st-sub">Im Abo, alle 2 Monate</span></div>
+  <button class="cta" id="st-cta" type="button">Abo starten, 22,41 €</button>
+</div>
+
+<script>
+(function(){
+  var modes=document.querySelectorAll('#modes .mode'), mode='sub';
+  var P={sub:22.41,once:24.90};
+  function eur(n){return n.toFixed(2).replace('.',',')+' €';}
+  function render(){
+    var label=(mode==='sub'?'Abo starten, ':'Einmalig kaufen, ')+eur(P[mode]);
+    document.getElementById('cta').textContent=label;
+    document.getElementById('st-cta').textContent=label;
+    document.getElementById('save').hidden=mode!=='sub';
+    document.getElementById('st-sub').textContent=mode==='sub'?'Im Abo, alle 2 Monate':'Einmalig';
+    document.getElementById('hint').textContent=mode==='sub'
+      ?'Lieferung alle 2 Monate, versandfrei, jederzeit kündbar.'
+      :'Zzgl. 4,90 € Versand, versandfrei ab 49 €.';
+    document.getElementById('unit').textContent='300 g für 60 Tage · '+eur(P[mode]/3)+'/100 g';
+  }
+  modes.forEach(function(b){b.addEventListener('click',function(){
+    modes.forEach(function(x){x.classList.remove('on')}); b.classList.add('on'); mode=b.dataset.mode; render();
+  })});
+
+  var main=document.getElementById('galMain'), thumbs=document.querySelectorAll('#thumbs .thumb');
+  thumbs.forEach(function(t){t.addEventListener('click',function(){
+    thumbs.forEach(function(x){x.classList.remove('on')}); t.classList.add('on');
+    if(t.dataset.ph){ main.innerHTML='<div class="ph"><b>Bildstelle</b><p>'+t.dataset.ph+'</p></div>'; }
+    else { main.innerHTML='<img src="'+t.dataset.src+'" alt="'+t.dataset.alt+'">'; }
+  })});
+
+  var dlg=document.getElementById('guar-dlg');
+  document.getElementById('guar-open').addEventListener('click',function(){dlg.showModal()});
+  dlg.addEventListener('click',function(e){if(e.target===dlg||e.target.closest('[data-close]'))dlg.close()});
+
+  var tg=document.getElementById('toggle');
+  tg.addEventListener('click',function(){
+    var c=document.body.classList.toggle('clean');
+    tg.textContent=c?'Notizen einblenden':'Notizen ausblenden';
+  });
+
+  var st=document.getElementById('sticky'), cta=document.getElementById('cta');
+  new IntersectionObserver(function(e){ st.classList.toggle('show', !e[0].isIntersecting && e[0].boundingClientRect.top<0); },{threshold:0}).observe(cta);
+  render();
+})();
+</script>
+</body>
+</html>
