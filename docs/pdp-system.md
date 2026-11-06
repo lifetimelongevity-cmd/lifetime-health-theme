@@ -113,7 +113,7 @@ sie, kippt der Rhythmus.
 
 Template: `templates/product.12_nad-liposomal-2.json` (Suffix `12_nad-liposomal-2`). Seit 06.11.2026
 auf dem Stand des Entwurfs `docs/entwurf-nad-pdp-2026-11-05.html` (Commit `84fcf6c`, BJ-Freigabe
-„Passt, Template bauen“), lokal, wartet auf BJs Push. **Regel (BJ 05.11.):** Sections, die NAD⁺ und
+„Passt, Template bauen“), live seit 06.11.2026 (BJ-Push per Theme Manager, per Pull aus dem Live-Theme und im Browser bestätigt). **Regel (BJ 05.11.):** Sections, die NAD⁺ und
 NMN gemeinsam haben, sind gleich gebaut und gleich eingestellt. NAD⁺ darf als Nahrungsergänzungsmittel
 mehr sagen als NMN, das steht in eigenen Abschnitten dazwischen. 6 Einträge in `order`, kein
 `main_product_hidden`.
