@@ -204,8 +204,15 @@
         mit wenigen Zeilen „Kopf | Wert“, Zutaten und Pflichttext hinter einer Lade. {%- endcomment -%}
     <div class="ltpf__fakten">
       {%- if section.settings.label_image != blank -%}
-        <a class="ltpf__etikett" href="{{ section.settings.label_image | image_url: width: 2000 }}" target="_blank" rel="noopener" style="--ltpf-zoom:{{ section.settings.label_scale | default: 1 }};--ltpf-origin:{{ section.settings.label_origin | default: '50% 50%' | escape }}">
-          {{ section.settings.label_image | image_url: width: 1400 | image_tag: loading: 'lazy', widths: '600, 900, 1200, 1400', sizes: '(min-width: 900px) 50vw, 100vw', alt: section.settings.label_image_alt }}
+        {%- comment -%} Der Zoom vergrößert das Bild über die Kachel hinaus, also muss sizes ihn mitrechnen, sonst lädt der Browser zu klein. {%- endcomment -%}
+        {%- liquid
+          assign ltpf_zoom = section.settings.label_scale | default: 1
+          assign ltpf_vw_desktop = 50 | times: ltpf_zoom | round
+          assign ltpf_vw_mobil = 100 | times: ltpf_zoom | round
+          assign ltpf_sizes = '(min-width: 900px) ' | append: ltpf_vw_desktop | append: 'vw, ' | append: ltpf_vw_mobil | append: 'vw'
+        -%}
+        <a class="ltpf__etikett" href="{{ section.settings.label_image | image_url: width: 2000 }}" target="_blank" rel="noopener" style="--ltpf-zoom:{{ ltpf_zoom }};--ltpf-origin:{{ section.settings.label_origin | default: '50% 50%' | escape }}">
+          {{ section.settings.label_image | image_url: width: 2000 | image_tag: loading: 'lazy', widths: '600, 900, 1200, 1600, 2000', sizes: ltpf_sizes, alt: section.settings.label_image_alt }}
           {%- if section.settings.label_zoom_text != blank -%}<span>{{ section.settings.label_zoom_text | escape }}</span>{%- endif -%}
         </a>
       {%- endif -%}
