@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-11-06
+last_review: 2026-11-07
 canonical_for: pdp-section-system und live-reihenfolge
 ---
 
@@ -134,6 +134,29 @@ Spermidin rendern unverändert. Die Bilder liegen in den Shopify-Dateien als `na
 Keine Messwert-Blöcke in Karte 1: Die Tabelle trägt die Caption „Prüfbericht“, und für NAD⁺ existiert
 keiner. Der Hero-Punkt „Jede Charge im Labor geprüft.“ stützt sich auf die Herstellerangabe in der
 Lade (Schwermetalle, Verunreinigungen); ein verlinkbarer Prüfbericht je Charge ist offen.
+
+## PDP Kreatin (`/products/kreatin-monohydrat-pulver`)
+
+Template: `templates/product.05_kreatin.json` (Suffix `05_kreatin`, am Produkt bestätigt 07.11.2026).
+Seit 07.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-kreatin-pdp-2026-11-06.html` (BJ-Freigabe
+07.11.), gleiche Kette wie NAD⁺. **Wartet auf BJs Push**, zusammen mit den NAD⁺-Commits `822c556` und
+`cfb2c2d`, auf denen die Kaufzone aufsetzt. Abgenommen im Vorschau-Theme `194212397431`
+(„Claude Kreatin-PDP (07.11.)“). 6 Einträge in `order`, kein `main_product_hidden`.
+
+| # | Section-Key | Typ | Rolle |
+|---|---|---|---|
+| 1 | `main` | `lt-pdp-hero` | Titelzeile „Für Kraft, die bleibt.“, drei Punkte, Zeile „Über 99,5 % Reinheit · Etikett ansehen“, kompakte Kaufzone mit festem Abo-Hinweis (`compact_sub_hint`), Grundpreis statt Tagespreis (`compact_amount_grams: 300`) und Versandkosten bei „Einmalig“ (`compact_once_ship`). Galerie: Dose, dann `gallery_extra_1–3` |
+| 2 | `wirkprinzip` | `lt-pdp-wirkprinzip` | Einblendung mit +1,4 kg (Chilibeck 2017), Rollen mit Blitz und Hantel (`stage_icon: hantel`) |
+| 3 | `belege` | `lt-pdp-belege` | Bildkarte „Nur Kreatin, als Monohydrat“ (Stillleben, Marken Monohydrat und 99,5 %), ohne Kundenstimmen |
+| 4 | `loox_reviews` | `lt-pdp-reviews-all` | Lade mit allen Loox-Bewertungen |
+| 5 | `produktfakten` | `lt-pdp-produktfakten` | Fakten mit Etikett, Messlöffel-Symbol (`fact_icon: messloeffel`) |
+| 6 | `faq_accordion` | `crs-faq-accordion` | 6 Fragen, Versand/Abo/Garantie vorn, dann Training, Gewicht, Einnahme |
+
+Bilder in den Shopify-Dateien: `kreatin-galerie-travertin.png`, `kreatin-galerie-kettlebell.jpg`,
+`kreatin-etikett.png` (Original 2148 × 979, Zoom 2,12 bei 8,9 % 8,6 % ergibt den Entwurfsausschnitt),
+`kreatin-stillleben.png` und `kreatin-wirkprinzip-kabelzug_1b0c58ad-….jpg` (auf 25 MP verkleinert,
+Shopify-Grenze). Offen: Fokuspunkt des Kabelzug-Fotos (50 % 68 % trägt mobil und Desktop),
+Prüfbericht je Charge.
 
 ## Konvention `main_product_hidden`
 

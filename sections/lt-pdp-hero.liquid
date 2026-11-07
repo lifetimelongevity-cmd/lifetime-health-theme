@@ -1409,6 +1409,14 @@
                           {%- endif -%}
                         {%- else -%}
                           <span class="lt-bb-card__sub">{{ bb_once_sub | escape }}</span>
+                          {%- comment -%} Kompakt ohne Größenwahl (Kreatin, 07.11.2026): Versandschwelle und Kosten für
+                              die Hinweiszeile bei „Einmalig“, sonst steht dort unter der Schwelle fälschlich „Versandfrei.“.
+                              Nur mit compact_once_ship, damit NAD⁺ und AGE&DNA unverändert bleiben. {%- endcomment -%}
+                          {%- if section.settings.bb_compact and section.settings.compact_once_ship -%}
+                            {%- capture lt_ship_rule_c -%}{%- render 'lt-shipping-rule' -%}{%- endcapture -%}
+                            {%- assign lt_ship_rule_c = lt_ship_rule_c | split: '|' -%}
+                            <span data-lt-once-subline data-ship-free="{{ lt_ship_rule_c[1] | plus: 0 }}" data-ship-cost-label="{{ lt_ship_rule_c[0] | plus: 0 | money | escape }}" hidden></span>
+                          {%- endif -%}
                         {%- endif -%}
                       </span>
                       <span class="lt-bb-card__prices">
@@ -1424,8 +1432,8 @@
             {%- if section.settings.bb_compact -%}
               {%- comment -%} Kompakt: eine Zeile Takt und Versand des gewählten Modus, darunter der
                   Grundpreis genau einmal (PAngV), beides aus dem Kompakt-JS. {%- endcomment -%}
-              <p class="lt-bb__hint" data-lt-bb-hint aria-live="polite"></p>
-              <p class="lt-bb__unitline" data-lt-bb-unitline{% if section.settings.compact_amount_text != blank %} data-amount-text="{{ section.settings.compact_amount_text | escape }}" data-days="{{ bb_supply_days | plus: 0 }}"{% endif %}></p>
+              <p class="lt-bb__hint" data-lt-bb-hint{% if section.settings.compact_sub_hint != blank %} data-sub-hint="{{ section.settings.compact_sub_hint | escape }}"{% endif %} aria-live="polite"></p>
+              <p class="lt-bb__unitline" data-lt-bb-unitline{% if section.settings.compact_amount_text != blank %} data-amount-text="{{ section.settings.compact_amount_text | escape }}" data-days="{{ bb_supply_days | plus: 0 }}"{% if section.settings.compact_amount_grams > 0 %} data-amount-grams="{{ section.settings.compact_amount_grams | plus: 0 }}"{% endif %}{% endif %}></p>
             {%- endif -%}
             {%- comment -%}
               Zusatzartikel-Häkchen unter der Kaufart (Conversion-Plan 3.3, 29.09.2026):
@@ -2577,12 +2585,18 @@
             if (planName) planName = planName.charAt(0).toLowerCase() + planName.slice(1);
             // „Jederzeit kündbar“ stand bis 26.10. als Unterzeile in der Abo-Karte; die Karten
             // tragen jetzt nur Name und Preis wie die Größen-Pills, der Satz wandert hierher.
-            hint.textContent = planName ? 'Lieferung ' + planName + ', versandfrei, jederzeit kündbar.' : 'Versandfrei, jederzeit kündbar.';
+            // Fester Abo-Hinweis (Kreatin, 07.11.2026): ohne Größenwahl gibt es keinen Plan-Namen im DOM,
+            // compact_sub_hint trägt den Takt dann als Text. Leer = wie bisher.
+            var fixedHint = hint.getAttribute('data-sub-hint');
+            if (fixedHint) hint.textContent = fixedHint;
+            else hint.textContent = planName ? 'Lieferung ' + planName + ', versandfrei, jederzeit kündbar.' : 'Versandfrei, jederzeit kündbar.';
           } else {
             var once = section.querySelector('[data-lt-once-subline]');
             var free = once ? parseInt(once.dataset.shipFree, 10) : NaN;
             var costLabel = once ? once.dataset.shipCostLabel : '';
-            if (!isNaN(free) && !isNaN(onceC) && onceC < free && costLabel) {
+            // Ohne Größenwahl gibt es kein aktives Größen-Radio, der Einmalpreis steht dann an der gewählten Karte.
+            var onceShipC = !isNaN(onceC) ? onceC : (activeCard ? parseInt(activeCard.dataset.oncePrice, 10) : NaN);
+            if (!isNaN(free) && !isNaN(onceShipC) && onceShipC < free && costLabel) {
               hint.textContent = 'Zzgl. ' + costLabel + ' Versand, versandfrei ab ' + formatPrice(free) + '.';
             } else {
               hint.textContent = 'Versandfrei.';
@@ -2598,7 +2612,10 @@
             var days = parseInt(unitLine.getAttribute('data-days'), 10);
             var cardC = activeCard ? parseInt(isSub ? activeCard.dataset.subPrice : activeCard.dataset.oncePrice, 10) : NaN;
             var dayC = !isNaN(current) ? current : cardC;
-            unitLine.textContent = amountText + ((days > 0 && !isNaN(dayC)) ? ' · ' + formatPrice(Math.round(dayC / days)) + ' am Tag' : '');
+            // Mit Füllmenge (compact_amount_grams, Kreatin 07.11.2026) folgt der Grundpreis je 100 g statt des Preises am Tag.
+            var amountG = parseInt(unitLine.getAttribute('data-amount-grams'), 10);
+            if (amountG > 0) unitLine.textContent = amountText + (!isNaN(dayC) ? ' · ' + formatPrice(Math.round(dayC / amountG * 100)) + '/100 g' : '');
+            else unitLine.textContent = amountText + ((days > 0 && !isNaN(dayC)) ? ' · ' + formatPrice(Math.round(dayC / days)) + ' am Tag' : '');
           } else {
             unitLine.textContent = (!isNaN(current) && g > 0) ? formatPrice(Math.round(current / g * 100)) + '/100 g' : '';
           }
@@ -5069,6 +5086,25 @@
       "id": "compact_amount_text",
       "label": "Kompakt: Mengenzeile unter den Karten",
       "info": "Zum Beispiel „60 Kapseln für 30 Tage“. Der Preis am Tag wird angehängt. Leer = Grundpreis je 100 g wie bisher."
+    },
+    {
+      "type": "number",
+      "id": "compact_amount_grams",
+      "label": "Kompakt: Füllmenge in g (Grundpreis statt Tagespreis)",
+      "info": "Nur mit Mengenzeile. Zum Beispiel 300: hängt „€/100 g“ statt „€ am Tag“ an. Leer = Preis am Tag."
+    },
+    {
+      "type": "text",
+      "id": "compact_sub_hint",
+      "label": "Kompakt: fester Abo-Hinweis unter den Karten",
+      "info": "Für Produkte ohne Größenwahl, z. B. „Lieferung alle 2 Monate, versandfrei, jederzeit kündbar.“ Leer = automatisch."
+    },
+    {
+      "type": "checkbox",
+      "id": "compact_once_ship",
+      "label": "Kompakt ohne Größenwahl: Versandkosten bei Einmalig nennen",
+      "info": "Unter der Versandgrenze steht dann „Zzgl. 4,90 € Versand, versandfrei ab 49 €.“ statt „Versandfrei.“",
+      "default": false
     },
     {
       "type": "range",
