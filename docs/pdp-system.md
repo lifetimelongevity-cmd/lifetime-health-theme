@@ -162,17 +162,17 @@ Prüfbericht je Charge.
 
 Template: `templates/product.06_resveratrol.json` (Suffix `06_resveratrol`, am Produkt bestätigt 08.11.2026).
 Seit 08.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-resveratrol-pdp-2026-11-08.html` (BJ-Freigabe
-„Passt, Template bauen“), gleiche Kette wie NAD⁺ und Kreatin. **Noch nicht live.** Vorschau-Theme `194213871991`
+„Passt, Template bauen“, Copy in der Grauzonen-Fassung aus Commit `e9e85f1`), gleiche Kette wie NAD⁺ und Kreatin. **Noch nicht live.** Vorschau-Theme `194213871991`
 („Claude Resveratrol-PDP (08.11.)“). 6 Einträge in `order`, kein `main_product_hidden`.
 
 | # | Section-Key | Typ | Rolle |
 |---|---|---|---|
-| 1 | `main` | `lt-pdp-hero` | Titelzeile „Für starke Knochen nach den Wechseljahren.“, drei Punkte, Zeile „Über 98 % Reinheit · Etikett ansehen“, kompakte Kaufzone mit festem Abo-Hinweis und Versandkosten bei „Einmalig“, Tagespreis wie NAD⁺ (kein `compact_amount_grams`, Kapselgewicht fehlt). Galerie: Dose, dann `gallery_extra_1–3` |
-| 2 | `wirkprinzip` | `lt-pdp-wirkprinzip` | Einblendung mit +1,3 % (Wong 2020, RESHAW), Rollen ohne Symbol (`stage_icon: none`) |
+| 1 | `main` | `lt-pdp-hero` | Titelzeile „Für Frauen, die an ihre Knochen denken.“, drei Punkte, Zeile „Über 98 % Reinheit · Etikett ansehen“, kompakte Kaufzone mit festem Abo-Hinweis und Versandkosten bei „Einmalig“, Tagespreis wie NAD⁺ (kein `compact_amount_grams`, Kapselgewicht fehlt). Galerie: Dose, dann `gallery_extra_1–3` |
+| 2 | `wirkprinzip` | `lt-pdp-wirkprinzip` | „Resveratrol und Knochen.“, Einblendung mit +1,3 % (Wong 2020, RESHAW, mit Hinweis auf ein anderes Präparat), Rollen „Warum Knochen?“ und „Ein Pflanzenstoff“ ohne Symbol (`stage_icon: none`) |
 | 3 | `belege` | `lt-pdp-belege` | Bildkarte „Resveratrol, hochrein“ (Stillleben, Marken Über 98 % und Vegan), ohne Kundenstimmen |
 | 4 | `loox_reviews` | `lt-pdp-reviews-all` | Lade mit allen Loox-Bewertungen |
 | 5 | `produktfakten` | `lt-pdp-produktfakten` | Fakten mit Etikett (Zoom 1,93 bei 0 % 17,5 %), Kapsel-Symbol (`fact_icon: kapsel`) |
-| 6 | `faq_accordion` | `crs-faq-accordion` | 6 Fragen, Versand/Abo/Garantie vorn, dann Wirkung, Vitamin D und Calcium, Medikamente |
+| 6 | `faq_accordion` | `crs-faq-accordion` | 6 Fragen, Versand/Abo/Garantie vorn, dann „Merke ich etwas?“, Calcium und Vitamin D, Medikamente |
 
 Keine Section-Erweiterung nötig, alle Einstellungen gab es seit NAD⁺ und Kreatin. Bilder in den Shopify-Dateien:
 `resveratrol-galerie-travertin.png`, `resveratrol-galerie-frau.jpg`, `resveratrol-etikett.jpg` (Ausschnitt
