@@ -139,8 +139,8 @@ Lade (Schwermetalle, Verunreinigungen); ein verlinkbarer Prüfbericht je Charge 
 
 Template: `templates/product.05_kreatin.json` (Suffix `05_kreatin`, am Produkt bestätigt 07.11.2026).
 Seit 07.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-kreatin-pdp-2026-11-06.html` (BJ-Freigabe
-07.11.), gleiche Kette wie NAD⁺. **Wartet auf BJs Push**, zusammen mit den NAD⁺-Commits `822c556` und
-`cfb2c2d`, auf denen die Kaufzone aufsetzt. Abgenommen im Vorschau-Theme `194212397431`
+07.11.), gleiche Kette wie NAD⁺. **Live seit 08.11.2026** (BJ-Push per Theme Manager, Commit `ef584c2`,
+zusammen mit den NAD⁺-Commits `822c556` und `cfb2c2d`, auf denen die Kaufzone aufsetzt). Abgenommen im Vorschau-Theme `194212397431`
 („Claude Kreatin-PDP (07.11.)“). 6 Einträge in `order`, kein `main_product_hidden`.
 
 | # | Section-Key | Typ | Rolle |
