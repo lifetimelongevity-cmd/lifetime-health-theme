@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entwurf D3+K2-PDP</title>
+<meta name="description" content="Entwurf der D3+K2-Produktseite nach Jobs to be Done, Progressive Disclosure und Poka-Yoke, gebaut wie die Live-NMN-, NAD⁺- und Kreatin-PDP. Nur Vorschau, kein Produktivcode.">
+<style>
+  /* Lato wie im Live-Shop: dieselben Dateien und Schnitte (400, 500, 600; 700 fällt wie live auf 600) */
+  @font-face{font-family:Lato;font-weight:400;font-style:normal;font-display:swap;src:url("https://www.lifetime-health.de/cdn/fonts/lato/lato_n4.c3b93d431f0091c8be23185e15c9d1fee1e971c5.woff2") format("woff2")}
+  @font-face{font-family:Lato;font-weight:500;font-style:normal;font-display:swap;src:url("https://www.lifetime-health.de/cdn/fonts/lato/lato_n5.b2fec044fbe05725e71d90882e5f3b21dae2efbd.woff2") format("woff2")}
+  @font-face{font-family:Lato;font-weight:600;font-style:normal;font-display:swap;src:url("https://www.lifetime-health.de/cdn/fonts/lato/lato_n6.38d0e3b23b74a60f769c51d1df73fac96c580d59.woff2") format("woff2")}
+  /* Werte gemessen an der Live-NMN-PDP (05.11.2026, 1280 und 375 px), Namen wie assets/theme.css :root */
+  :root{
+    /* Farben */
+    --color-ink:#26251e; --color-paper:#f7f7f4; --color-warm:#f2f1ed; --color-white:#fff;
+    --color-dark:#364f56; --color-teal:#65c0b6; --color-star:#f4b740; --color-gray-600:#525252; --color-ink-muted:#6b6b63;
+    --ink-sec:rgba(38,37,30,.72); --ink-ter:rgba(38,37,30,.66); --ink-icon:rgba(38,37,30,.38);
+    --rule-faint:rgba(38,37,30,.05); --rule:rgba(38,37,30,.08); --rule-strong:rgba(38,37,30,.1);
+    --chip-bg:#e6f4f1;
+    /* Schrift: sechs Größen, zwei Gewichte, fünf Zeilenhöhen. Alles Stufen der Live-NMN-PDP (05.11.2026).
+       Größen je Viewport 375 / 1280: Zahl 48/56 · Titel 30/36 · Abschnitt 24/28 · Text 16 · Klein 14 · Mikro 12 */
+    --font-heading:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --font-body:Lato,-apple-system,BlinkMacSystemFont,sans-serif;
+    --text-stat:48px; --text-h1:min(36px,8vw); --text-h2:28px;
+    --text-body:16px; --text-body-sm:14px; --text-micro:12px;
+    /* Nur in den geteilten Bausteinen (Hero, Belege, FAQ, Sticky), dort wie live NMN */
+    --text-body-lg:18px; --text-buy:15px; --text-fine:13px;
+    --leading-copy:1.5; --leading-answer:1.65; --weight-medium:500; --weight-bold:700;
+    --leading-stat:1; --leading-heading:1.15; --leading-tight:1.25; --leading-body:1.4; --leading-relaxed:1.6;
+    --weight-regular:400; --weight-semibold:600;
+    /* Abstände, Radien, Breiten */
+    --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px; --space-8:64px; --space-9:80px;
+    --radius-card:4px; --radius-lg:16px; --radius-full:999px;
+    --page-max:1280px; --page-gutter:var(--space-4); --belege-max:960px; --measure:32rem;
+    /* Kaufzone */
+    --pick-h:49px; --cta-h:48px; --icon:16px; --icon-gap:9px; --thumb:64px;
+    --section-y:min(80px,15vw);
+    /* Notizen für BJ, nicht Teil der Seite */
+    --note-bg:#fbf5e4; --note-line:#e6d6a6; --note-ink:#6b5a24;
+  }
+  @media (min-width:768px){ :root{--page-gutter:var(--space-5)} }
+  @media (min-width:840px){ :root{--text-stat:56px} }
+  /* H2 mobil 28 px wie die gerenderten Sections, nur die FAQ hat 24 px */
+  @media (max-width:860px){ .faq .hs{font-size:24px} }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:var(--font-body);font-size:var(--text-body);line-height:var(--leading-body);color:var(--color-ink);background:var(--color-paper);overflow-x:hidden}
+  a{color:inherit}
+  h1,h2,h3,p,ul{margin:0}
+  h3{font-size:var(--text-body)}
+  b,strong,h3{font-weight:var(--weight-semibold)}
+  ul{padding:0;list-style:none}
+  button{font:inherit;color:inherit}
+  img{max-width:100%;display:block}
+  summary{list-style:none;cursor:pointer}
+  summary::-webkit-details-marker{display:none}
+  .wrap{max-width:var(--page-max);margin:0 auto;padding:0 var(--page-gutter)}
+  .chev{flex:none;width:var(--icon);height:var(--icon);color:var(--ink-ter);transition:transform .2s ease}
+  details[open]>summary .chev{transform:rotate(180deg)}
+
+  /* Kopf (Platzhalter für den Theme-Header) */
+  .hd{height:57px;display:flex;align-items:center;justify-content:space-between}
+  .hd img{height:24px;width:auto}
+  .hd__r{display:flex;gap:var(--space-4);color:var(--ink-sec);font-size:var(--text-body-sm)}
+
+  /* Überschriften: crs-heading-stack, headline-md (Titel + Untertitel ein Block, nur die Farbe gedämpft) */
+  .hs{font-family:var(--font-heading);font-size:var(--text-h2);line-height:var(--leading-heading);font-weight:var(--weight-regular);letter-spacing:-.01em;margin-bottom:var(--space-6)}
+  .hs span{display:block;color:var(--ink-sec)}
+
+  /* 1 · Hero (lt-pdp-hero) */
+  .hero{background:var(--color-paper)}
+  .hero .wrap{padding-top:var(--space-2);padding-bottom:var(--space-7)}
+  .hero__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-3) var(--space-5)}
+  .gal__main{background:var(--color-warm);border-radius:var(--radius-card);aspect-ratio:343/316;overflow:hidden}
+  .gal__main img{width:100%;height:100%;object-fit:contain}
+  .thumbs{display:flex;justify-content:center;gap:var(--space-2);margin-top:var(--space-2)}
+  .thumb{width:24px;height:6px;padding:0;border:0;border-radius:var(--radius-full);background:var(--color-ink);opacity:.5;cursor:pointer;overflow:hidden}
+  .thumb img{display:none}
+  .thumb.on{opacity:1}
+
+  .rating{display:inline-flex;align-items:center;gap:6px;margin:-4px 0 6px;padding:4px 0}
+  .rating__stars{font-size:var(--text-fine);line-height:var(--leading-stat);letter-spacing:.04em;color:var(--color-star)}
+  .rating b{font-size:var(--text-fine);font-weight:var(--weight-medium)}
+  .rating__count{font-size:var(--text-micro);color:var(--ink-sec)}
+  h1{font-family:var(--font-heading);font-size:var(--text-h1);line-height:var(--leading-heading);font-weight:var(--weight-regular);letter-spacing:-.02em;margin:var(--space-1) 0 var(--space-5)}
+  h1 span{display:block;color:var(--ink-sec)}
+  .pts{display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-5)}
+  .pts li{display:flex;align-items:flex-start;gap:var(--icon-gap);font-size:var(--text-body-sm);line-height:var(--leading-copy);color:var(--ink-sec)}
+  .pts svg{flex:none;margin-top:var(--space-1);color:var(--color-ink)}
+
+  .lbl{font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec);margin-bottom:var(--space-2)}
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)}
+  .mode{height:var(--pick-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--color-white);border:1px solid var(--rule-strong);border-radius:var(--radius-card);padding:6px var(--space-1);cursor:pointer;line-height:1.1}
+  .mode span{font-size:var(--text-body-sm);font-weight:var(--weight-medium)}
+  .mode b{font-size:var(--text-body-sm);font-weight:var(--weight-regular);color:var(--ink-sec)}
+  .mode.on{border-color:var(--color-ink);box-shadow:inset 0 0 0 .5px var(--color-ink)}
+  .hint{margin-top:6px;font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec)}
+  .cta{display:block;width:100%;height:var(--cta-h);margin-top:var(--space-4);padding:0 15px;border:0;border-radius:var(--radius-full);background:var(--color-dark);color:var(--color-white);font-size:var(--text-buy);font-weight:var(--weight-medium);cursor:pointer}
+  /* Unter dem Knopf wie live NMN (lt-pdp-hero__post-cta--compact): Chip, dann eine Zeile Versand · Garantie */
+  .post{display:flex;flex-direction:column;align-items:center;gap:var(--space-2);margin-top:var(--space-3)}
+  .chip{display:inline-block;background:var(--chip-bg);border-radius:var(--radius-card);padding:var(--space-1) var(--space-3);font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec)}
+  .chip[hidden]{display:none}
+  .chip b{font-weight:var(--weight-medium);color:var(--color-ink)}
+  .post-line{font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec);text-align:center}
+  .post-line button{appearance:none;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline dotted;text-underline-offset:.125em}
+  /* Garantie-Dialog (crs-micro-dialog, assets/lt-pdp.css) */
+  .dlg{max-width:min(92vw,28rem);width:100%;margin:auto;padding:0;border:1px solid #e5e5e5;border-radius:12px;background:var(--color-white);box-shadow:0 4px 12px rgba(0,0,0,.08);color:var(--color-ink)}
+  .dlg::backdrop{background:color-mix(in srgb,var(--color-dark) 35%,transparent)}
+  .dlg__inner{position:relative;padding:var(--space-6) var(--space-5) var(--space-5)}
+  .dlg__close{position:absolute;top:var(--space-3);right:var(--space-3);width:var(--space-6);height:var(--space-6);display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:2px;background:transparent;color:var(--color-gray-600);font-size:24px;line-height:1;cursor:pointer}
+  .dlg__close:hover{background:var(--color-warm);color:var(--color-ink)}
+  .dlg__title{font-family:var(--font-heading);font-size:20px;font-weight:var(--weight-semibold);line-height:var(--leading-tight);margin:0 var(--space-7) var(--space-3) 0;padding-right:var(--space-2)}
+  .dlg__body{line-height:var(--leading-relaxed);color:var(--color-gray-600)}
+  .dlg__body p+p{margin-top:var(--space-3)}
+
+  @media (min-width:768px){
+    .hero .wrap{padding-top:var(--space-9);padding-bottom:var(--space-8)}
+    .hero__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--space-6);align-items:start}
+    .gal{position:sticky;top:var(--space-5)}
+    .gal__main{aspect-ratio:1/1}
+    .thumbs{margin-top:var(--space-4);gap:23px}
+    .thumb{width:var(--thumb);height:var(--thumb);border:1px solid var(--rule-strong);border-radius:var(--radius-card);background:var(--color-paper);opacity:.62}
+    .thumb img{display:block;width:100%;height:100%;object-fit:cover}
+    .lbl{margin-top:0}
+  }
+
+  /* 2 · Wirkprinzip (lt-pdp-wirkprinzip, Fläche und Abstände aus product.12_nad-liposomal-2.json) */
+  .wp{background:var(--color-warm);padding:var(--section-y) 0}
+  .wp__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-6)}
+  .wp__h{margin-bottom:0}
+  .einbl{position:relative;margin:0;border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:4/5}
+  .einbl>img{width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+  .glass{position:absolute;left:5%;right:5%;bottom:5%;background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(14px) saturate(1.1);backdrop-filter:blur(14px) saturate(1.1);border:1px solid rgba(255,255,255,.7);border-radius:14px;padding:var(--space-4) var(--space-4) var(--space-3);box-shadow:0 8px 28px rgba(38,37,30,.18)}
+  .stat__n{font-family:var(--font-heading);font-size:var(--text-stat);line-height:var(--leading-stat);font-weight:var(--weight-semibold);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .stat__t{margin-top:var(--space-1);font-size:var(--text-body-sm);line-height:var(--leading-body);color:var(--ink-sec)}
+  .bars{margin-top:var(--space-3);display:grid;gap:var(--space-2)}
+  .bar{display:grid;grid-template-columns:84px 1fr;gap:var(--space-3);align-items:center;font-size:var(--text-micro);color:var(--ink-sec)}
+  .bar__fill{height:10px;border-radius:var(--radius-full);background:var(--color-teal)}
+  .bar--b .bar__fill{background:var(--color-dark)}
+  .src{margin-top:var(--space-3);font-size:var(--text-micro);line-height:var(--leading-body);color:var(--ink-ter)}
+  .src a{color:inherit;text-underline-offset:2px}
+  .roles>div+div{margin-top:var(--space-5);padding-top:var(--space-5);border-top:1px solid var(--rule-strong)}
+  .roles h3{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-body);font-weight:var(--weight-semibold);line-height:var(--leading-body);margin-bottom:var(--space-1)}
+  .roles h3 svg{flex:none;color:var(--color-dark)}
+  .fact--pflicht b{color:var(--color-ink)}
+  .roles p{line-height:var(--leading-relaxed);max-width:52ch}
+  @media (min-width:900px){
+    .wp__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"h fig" "roles fig";column-gap:var(--space-8);row-gap:var(--space-6);align-items:start}
+    .wp__h{grid-area:h;align-self:end}
+    .einbl{grid-area:fig;align-self:center;aspect-ratio:4/3}
+    .einbl>img{object-position:50% 8%}
+    .roles{grid-area:roles}
+  }
+
+  /* 3 · Belege-Karten (lt-pdp-belege, CSS aus dem Theme) */
+  .ltbg{background:var(--color-warm);padding:var(--space-6) 0 var(--space-4)}
+  .ltbg__grid{display:grid;gap:var(--space-3);max-width:var(--belege-max);margin:0 auto}
+  .ltbg__card{background:var(--color-white);border:1px solid var(--rule-faint);border-radius:var(--radius-card);padding:var(--space-5);min-width:0}
+  .ltbg__label{font-size:var(--text-micro);line-height:var(--leading-tight);letter-spacing:.06em;text-transform:uppercase;font-weight:var(--weight-regular);color:var(--ink-sec)}
+  .ltbg__big{font-family:var(--font-heading);font-size:var(--text-stat);font-weight:var(--weight-regular);letter-spacing:-.02em;line-height:var(--leading-stat);margin-top:var(--space-3)}
+  .ltbg__big--num{font-weight:var(--weight-bold);font-variant-numeric:tabular-nums}
+  .ltbg__big-label{display:block;font-family:var(--font-body);font-size:var(--text-body-sm);font-weight:var(--weight-regular);letter-spacing:0;line-height:var(--leading-body);color:var(--ink-sec);margin-top:var(--space-2)}
+  /* Bildkarte (neu, nur NAD⁺): „Was drin ist“ und „Die Form“ als eine Karte. Gestapelt wie die alte Karte 2 */
+  .ltbg__big-sub{display:block;color:var(--ink-sec)}
+  .ltbg__fig{position:relative;margin:var(--space-3) 0 0;aspect-ratio:5/2;border-radius:var(--radius-card);overflow:hidden;background:var(--color-warm)}
+  .ltbg__stage{position:absolute;inset:0}
+  .ltbg__stage img{width:100%;height:100%;object-fit:cover;object-position:70% 50%}
+  .ltbg__marks{display:none}
+  .ltbg__zeilen{margin-top:var(--space-4)}
+  .ltbg__zeile{padding:var(--space-3) 0;border-top:1px solid var(--rule);line-height:var(--leading-body)}
+  .ltbg__zeile:first-child{border-top:0;padding-top:0}
+  .ltbg__zeile-kopf{font-weight:var(--weight-bold);margin-right:var(--space-1)}
+  .ltbg__person{display:flex;gap:var(--space-3);align-items:center;margin-top:var(--space-3)}
+  .ltbg__person img{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:none}
+  .ltbg__person-name{font-weight:var(--weight-bold);line-height:var(--leading-tight)}
+  .ltbg__person-role{margin-top:2px;font-size:var(--text-body-sm);line-height:var(--leading-body);color:var(--ink-sec)}
+  .ltbg__details{margin-top:var(--space-3);border-top:1px solid var(--rule)}
+  .ltbg__summary{display:flex;justify-content:space-between;align-items:center;gap:var(--space-2);padding-top:var(--space-3);font-size:var(--text-body-sm);font-weight:var(--weight-semibold)}
+  .ltbg__summary .chev{color:inherit}
+  .ltbg__body{padding-top:var(--space-3);font-size:var(--text-body-sm);line-height:var(--leading-body);color:var(--ink-sec)}
+  .ltbg__body p{margin-bottom:var(--space-2)}
+  .ltbg__quotes{margin-top:var(--space-3)}
+  .ltbg__quote{padding:var(--space-4) 0;border-top:1px solid var(--rule)}
+  .ltbg__quote:first-child{border-top:0;padding-top:0}
+  .ltbg__quote--photo{display:flex;gap:var(--space-3);align-items:flex-start}
+  .ltbg__quote--photo img{width:56px;height:74px;object-fit:cover;border-radius:var(--radius-card);flex:none}
+  .ltbg__stars{display:flex;gap:2px;color:var(--color-star);margin-bottom:var(--space-2)}
+  .ltbg__quote-text{line-height:var(--leading-body)}
+  .ltbg__quote-meta{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-1) var(--space-3);margin-top:var(--space-2);font-size:var(--text-body-sm);line-height:var(--leading-tight)}
+  .ltbg__quote-name{font-weight:var(--weight-semibold)}
+  .ltbg__verified{display:inline-flex;align-items:center;gap:4px;font-size:var(--text-micro);font-weight:var(--weight-medium);color:var(--ink-sec);white-space:nowrap}
+  .ltbg__quote-date{font-size:var(--text-micro);color:var(--ink-ter);font-variant-numeric:tabular-nums}
+  @media (min-width:840px){
+    .ltbg__card{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:var(--space-6);padding:var(--space-6);align-items:start}
+    .ltbg__main{border-left:1px solid var(--rule);padding-left:var(--space-6);padding-top:calc(var(--text-micro) * var(--leading-tight) + var(--space-3))}
+    .ltbg__main>:first-child{margin-top:0}
+    /* Bildkarte bleibt bis 1007 px gestapelt */
+    .ltbg__card--bild{display:block}
+    .ltbg__card--bild .ltbg__main{border-left:0;padding:0}
+    .ltbg__card--bild .ltbg__zeilen{margin-top:var(--space-4)}
+  }
+  /* Ab 1008 px ist die Karte immer 960 px breit: Text links (528), Bild randlos rechts (432), Lade als Fußzeile.
+     Die Bühne ist das ganze Bild in 2:1 auf Kartenhöhe, rechts angeschlagen. Die Marken sitzen in Prozent
+     des Bildes, also am Motiv, egal wie hoch die Karte wird. */
+  @media (min-width:1008px){
+    .ltbg__card--bild{display:grid;grid-template-columns:minmax(0,11fr) minmax(0,9fr);grid-template-rows:auto 1fr auto;grid-template-areas:"head fig" "main fig" "lade lade";gap:0;padding:0;overflow:hidden}
+    .ltbg__card--bild .ltbg__head{grid-area:head;padding:var(--space-6) var(--space-6) 0}
+    .ltbg__card--bild .ltbg__main{grid-area:main;padding:var(--space-5) var(--space-6) var(--space-6)}
+    .ltbg__card--bild .ltbg__zeilen{margin-top:0}
+    .ltbg__zeile{text-wrap:balance}
+    .ltbg__fig{grid-area:fig;align-self:stretch;margin:0;aspect-ratio:auto;border-radius:0}
+    .ltbg__stage{inset:0 0 0 auto;aspect-ratio:2/1}
+    .ltbg__marks{display:block}
+    .ltbg__mark{position:absolute;left:var(--mark-x);top:var(--mark-y);transform:translate(-100%,-50%);display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-micro);line-height:var(--leading-stat);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+    .ltbg__mark-line{position:relative;width:var(--mark-reach);height:1px;background:var(--ink-icon)}
+    .ltbg__mark-line::after{content:"";position:absolute;right:-2.5px;top:-2px;width:5px;height:5px;border-radius:50%;background:var(--color-ink)}
+    .ltbg__mark--kern{--mark-x:67.7%;--mark-y:42%;--mark-reach:128px}
+    .ltbg__mark--huelle{--mark-x:62.1%;--mark-y:66.7%;--mark-reach:79px}
+    .ltbg__card--bild .ltbg__details{grid-area:lade;margin-top:0}
+    .ltbg__card--bild .ltbg__summary{padding:var(--space-4) var(--space-6)}
+    .ltbg__card--bild .ltbg__body{display:grid;grid-template-columns:minmax(0,11fr) minmax(0,9fr);padding:0 0 var(--space-5)}
+    .ltbg__card--bild .ltbg__body p{margin:0;padding:0 var(--space-6)}
+    .ltbg__card--bild .ltbg__body p+p{padding-left:0}
+  }
+
+  /* 4 · Loox-Lade (lt-pdp-reviews-all) */
+  .ltra{background:var(--color-warm);padding-bottom:var(--space-7)}
+  .ltra .wrap{max-width:var(--belege-max)}
+  .ltra__details{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+  .ltra__summary{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:var(--space-4) 0;font-weight:var(--weight-semibold);line-height:var(--leading-body);color:var(--color-gray-600)}
+  .ltra__panel{padding-bottom:var(--space-5);font-size:var(--text-body-sm);color:var(--ink-sec)}
+
+  /* 5 · Produktfakten (lt-pdp-produktfakten, Fläche und Karte aus product.12_nad-liposomal-2.json) */
+  .pf{background:var(--color-warm);padding:var(--section-y) 0}
+  .pf__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-6)}
+  .facts{background:var(--color-white);border-radius:var(--radius-lg);padding:var(--space-6)}
+  .fact{display:flex;justify-content:space-between;gap:var(--space-4);padding:var(--space-3) 0;border-top:1px solid var(--rule-strong);line-height:var(--leading-relaxed)}
+  .fact:first-child{border-top:0;padding-top:0}
+  .fact span{color:var(--ink-sec)}
+  .fact b{text-align:right;font-weight:var(--weight-semibold)}
+  .intake{display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-1)}
+  .intake svg{color:var(--color-dark)}
+  .etikett{position:relative;display:block;border-radius:var(--radius-lg);overflow:hidden;background:var(--color-white);border:1px solid var(--rule);aspect-ratio:16/10;cursor:zoom-in}
+  .etikett img{width:100%;height:100%;object-fit:cover;object-position:0% 50%;transform:scale(1.9);transform-origin:4% 46%}
+  .etikett span{position:absolute;right:var(--space-2);bottom:var(--space-2);font-size:var(--text-micro);background:rgba(255,255,255,.92);border-radius:var(--radius-full);padding:var(--space-1) var(--space-3)}
+  .facts .ltbg__details{margin-top:var(--space-4)}
+  .facts .ltbg__body{line-height:var(--leading-relaxed)}
+  @media (min-width:900px){
+    .pf__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-7)}
+    .facts{padding:var(--space-7)}
+  }
+
+  /* 6 · FAQ (crs-faq-accordion) */
+  .faq{background:var(--color-paper);padding:var(--section-y) 0}
+  .faq__layout{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-6)}
+  .faq__left{padding-top:var(--space-1)}
+  .faq__left .hs{margin-bottom:0}
+  .faq__item{border-top:1px solid var(--rule-faint)}
+  .faq__item:last-of-type{border-bottom:1px solid var(--rule-faint)}
+  .faq__q{display:flex;justify-content:space-between;align-items:center;gap:var(--space-4);padding:15.68px 0 16.8px}
+  .faq__q span{line-height:var(--leading-copy);max-width:var(--measure)}
+  .faq__a{margin-bottom:var(--space-4);line-height:var(--leading-answer);color:var(--ink-sec);max-width:var(--measure)}
+  @media (min-width:1025px){
+    .faq__layout{grid-template-columns:1fr 1fr;gap:0}
+    .faq__left{padding-right:var(--space-7)}
+    .faq__left .hs{position:sticky;top:var(--space-9)}
+  }
+
+  /* Bildstelle */
+  .ph{background:repeating-linear-gradient(135deg,#efede7 0 10px,#f5f4f0 10px 20px);border:1px dashed #c9c6bb;border-radius:var(--radius-lg);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:var(--space-5);color:var(--ink-sec);font-size:var(--text-body-sm);min-height:220px}
+  .ph b{font-size:var(--text-micro);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-ter);margin-bottom:var(--space-2)}
+  .ph p{max-width:34ch}
+
+  /* Sticky-Kaufleiste (lt-sticky-atc) */
+  .sticky{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--color-paper);border-top:1px solid #e5e5e5;box-shadow:0 -6px 8px rgba(0,0,0,.08);padding:var(--space-2) var(--space-4);display:flex;align-items:center;gap:var(--space-4);transform:translateY(110%);transition:transform .2s}
+  .sticky.show{transform:none}
+  .sticky .meta{flex:1;min-width:0;line-height:var(--leading-body)}
+  .sticky .meta b{display:block;font-size:var(--text-fine);font-weight:var(--weight-medium)}
+  .sticky .meta span{font-size:var(--text-micro);color:var(--color-ink-muted)}
+  .sticky .cta{width:auto;height:44px;margin:0;padding:0 var(--space-4);font-size:var(--text-body-sm);flex:none}
+
+  .ft{padding:var(--space-6) var(--page-gutter);border-top:1px solid var(--rule);font-size:var(--text-body-sm);color:var(--ink-ter)}
+
+  /* Notizen für BJ (nicht Teil der Seite) */
+  .note{background:var(--note-bg);border:1px solid var(--note-line);border-radius:var(--radius-card);padding:var(--space-3) var(--space-4);color:var(--note-ink);font-size:var(--text-body-sm);line-height:var(--leading-body);margin-top:var(--space-4)}
+  .ltbg .note{max-width:var(--belege-max);margin:var(--space-4) auto 0}
+  .tag{display:inline-block;font-size:var(--text-micro);letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--note-line);border-radius:var(--radius-full);padding:0 var(--space-2);margin-right:var(--space-1);background:var(--color-white)}
+  .tag--q{background:#fff2c7}
+  body.clean .note,body.clean .bj{display:none}
+  .toggle{position:absolute;top:64px;right:var(--space-3);z-index:10;background:var(--color-ink);color:var(--color-white);border:0;border-radius:var(--radius-full);padding:var(--space-2) var(--space-4);font-size:var(--text-micro);cursor:pointer}
+  .bj{background:var(--note-bg);border-top:1px solid var(--note-line);padding:var(--space-7) 0 var(--space-9)}
+  .bj h2{font-family:var(--font-heading);font-weight:var(--weight-regular);font-size:var(--text-h2)}
+  .bj h3{margin-top:var(--space-5)}
+  .bj ul{margin-top:var(--space-2);display:grid;gap:var(--space-2)}
+  .bj li{font-size:var(--text-body-sm);padding-left:var(--space-4);position:relative}
+  .bj li::before{content:"·";position:absolute;left:var(--space-1);font-weight:var(--weight-semibold)}
+  .bj p{margin-top:var(--space-2);color:var(--ink-sec);font-size:var(--text-body-sm);max-width:68ch}
+
+  /* Ergänzungen Kreatin (nur was der NAD⁺-Entwurf nicht hatte, Werte wie live NAD⁺/NMN gemessen 06.11.2026) */
+  /* Prüf-/Etikett-Zeile unter den Punkten (lt-pdp-hero__coa) */
+  .coa{display:flex;align-items:center;gap:var(--icon-gap);flex-wrap:wrap;margin:calc(var(--space-1) * -1) 0 var(--space-4);font-size:var(--text-body-sm);line-height:var(--leading-copy)}
+  .coa svg{flex:none;color:var(--color-ink)}
+  .coa a{text-decoration:underline dotted;text-underline-offset:.2em}
+  /* Zweite Hinweiszeile unter den Karten: Menge · Grundpreis (einmal, klein, grau) */
+  .hint+.hint{margin-top:0}
+  /* Galerie-Platzhalter */
+  .gal__main .ph{height:100%;min-height:0;border-radius:0;border:0}
+  .thumb--ph{background:repeating-linear-gradient(135deg,#efede7 0 6px,#f5f4f0 6px 12px);font-size:0;color:transparent}
+  @media (min-width:768px){ .thumb--ph{display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink-ter);line-height:1.1;text-align:center;padding:2px} }
+  /* Marken am Stillleben (Prozent des Bildes 1774 × 887) */
+  @media (min-width:1008px){ .ltbg__mark--kern{--mark-x:69%;--mark-y:34%;--mark-reach:72px} .ltbg__mark--huelle{--mark-x:61%;--mark-y:68%;--mark-reach:56px} }
+  .einbl>img.fokus{object-position:50% 100%}
+  @media (min-width:900px){ .einbl>img.fokus{object-position:50% 45%} }
+  .einbl>.ph{position:absolute;inset:0;border-radius:0;border:0;justify-content:flex-start;padding-top:var(--space-6)}
+  .ltbg__fig .ph{position:absolute;inset:0;min-height:0;border-radius:0;border:0;padding:var(--space-3)}
+  @media (min-width:1008px){ .ltbg__stage:has(.ph){inset:0;aspect-ratio:auto} }
+</style>
+<style>
+  /* Marken am Stillleben (Prozent des Bildes 1774 × 887) */
+  @media (min-width:1008px){ .ltbg__mark--kern{--mark-x:66.5%;--mark-y:45%;--mark-reach:28px} .ltbg__mark--huelle{--mark-x:65.5%;--mark-y:62%;--mark-reach:28px} }
+</style>
+
+</head>
+<body>
+
+<button class="toggle" id="toggle" type="button">Notizen ausblenden</button>
+
+<header class="hd wrap">
+  <img src="https://www.lifetime-health.de/cdn/shop/files/logo-lifetime-black.svg?v=1705418762" alt="LIFETIME" width="156" height="24">
+  <div class="hd__r"><span>Suche</span><span>Warenkorb</span></div>
+</header>
+
+<main>
+
+<!-- 1 · Hero mit Kaufzone (lt-pdp-hero, kompakt wie NMN, NAD⁺ und Kreatin) -->
+<section class="hero">
+  <div class="wrap hero__grid">
+    <div class="gal">
+      <div class="gal__main" id="galMain">
+        <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-2140133.jpg?v=1768563311&width=2048" alt="LIFETIME D3+K2 Sofortspray, Braunglasflasche mit 30 ml">
+      </div>
+      <div class="thumbs" id="thumbs">
+        <button class="thumb on" type="button" aria-label="Bild 1" data-src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-2140133.jpg?v=1768563311&width=2048" data-alt="LIFETIME D3+K2 Sofortspray, Braunglasflasche mit 30 ml"><img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-2140133.jpg?v=1768563311&width=160" alt=""></button>
+        <button class="thumb" type="button" aria-label="Bild 2" data-src="entwurf-d3k2-pdp-2026-11-08/galerie-travertin.jpg" data-alt="D3+K2-Spray auf einem Travertinblock vor warmer Wand mit Blattschatten"><img src="entwurf-d3k2-pdp-2026-11-08/galerie-travertin.jpg" alt=""></button>
+        <button class="thumb" type="button" aria-label="Bild 3" data-src="https://images.pexels.com/photos/6873934/pexels-photo-6873934.jpeg?auto=compress&cs=tinysrgb&w=1600&h=1600&fit=crop" data-alt="Lachende Frau um 55 im Mantel, von der Seite"><img src="https://images.pexels.com/photos/6873934/pexels-photo-6873934.jpeg?auto=compress&cs=tinysrgb&w=200&h=200&fit=crop" alt=""></button>
+        <button class="thumb" type="button" aria-label="Bild 4" data-src="entwurf-d3k2-pdp-2026-11-08/etikett.jpg" data-alt="Etikett der Flasche, abgerollt"><img src="entwurf-d3k2-pdp-2026-11-08/etikett.jpg" alt=""></button>
+      </div>
+      <div class="note"><span class="tag">Geändert</span> Vier Bilder ohne Text: Flasche · Flasche auf Travertin (Codex, ohne Menschen, die echte Flasche eingesetzt) · Frau · Etikett. Die vier Alt-Bilder trugen Text wie „Schnelle Wirkung“ und „Hoch bioverfügbar“, dafür gibt es keinen Beleg.<br><span class="tag tag--q">Bild</span> Die Frau ist ein Pexels-Foto (Teona Swift, Nr. 6873934, 4000 × 6000), ohne Produkt. Hier noch direkt von Pexels eingebunden, heruntergeladen wird erst nach deiner Freigabe.</div>
+    </div>
+
+    <div>
+      <div class="rating"><span class="rating__stars" aria-hidden="true">★★★★★</span><b>4,7</b><span class="rating__count">· 7 Produktbewertungen</span></div>
+      <h1>Vitamin D3 + K2 Spray <span>Für Knochen, die halten.</span></h1>
+      <ul class="pts">
+        <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Vitamin D und Vitamin K tragen zur Erhaltung normaler Knochen bei.</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Zwei Sprühstöße am Tag statt Kapseln.</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Für die Wechseljahre und die Monate mit wenig Sonne.</span></li>
+      </ul>
+      <p class="coa"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 1.75h5.5L12.25 4.5v9.75H4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M9.25 1.75V4.75h3" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M6 9.25l1.5 1.5 2.75-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Vegan und glutenfrei</span><a href="entwurf-d3k2-pdp-2026-11-08/etikett.jpg" target="_blank" rel="noopener">Etikett ansehen</a></p>
+      <div class="note"><span class="tag">Geändert</span> Der Titel hat jetzt einen Job statt zwei, Knochen ab 50. Punkt 1 ist der zugelassene Claim (VO (EU) 432/2012) für beide Wirkstoffe, Punkt 2 der stärkste Hebel, Punkt 3 ihre Lage statt „viel drinnen, tierische Produkte, schlapp“.<br><span class="tag tag--q">Offen</span> Titelzeile, Vorschlag „Für Knochen, die halten.“ (Reihe „Für Energie wie früher.“, „Für Kraft, die bleibt.“). In der Prüfzeile steht nicht „Laborgeprüft“, denn dafür fehlt der Beleg (Prüfbericht je Charge, siehe unten).</div>
+
+      <div class="modes" id="modes">
+        <button class="mode on" type="button" data-mode="sub"><span>Im Abo</span><b>17,91 €</b></button>
+        <button class="mode" type="button" data-mode="once"><span>Einmalig</span><b>19,90 €</b></button>
+      </div>
+      <p class="hint" id="hint">Lieferung alle 75 Tage, versandfrei, jederzeit kündbar.</p>
+      <p class="hint" id="unit">30 ml für 75 Tage · 597,00 €/l</p>
+
+      <button class="cta" id="cta" type="button">Abo starten, 17,91 €</button>
+      <div class="post">
+        <p class="chip" id="save">Du sparst <b>1,99 €</b></p>
+        <p class="post-line"><span>Versand in 1–2 Werktagen</span><span aria-hidden="true"> · </span><button type="button" id="guar-open" aria-haspopup="dialog" aria-controls="guar-dlg">90 Tage Geld zurück</button></p>
+      </div>
+      <dialog class="dlg" id="guar-dlg" aria-labelledby="guar-title">
+        <div class="dlg__inner">
+          <button type="button" class="dlg__close" data-close aria-label="Schließen"><span aria-hidden="true">×</span></button>
+          <h2 class="dlg__title" id="guar-title">90-Tage Geld-zurück-Garantie</h2>
+          <div class="dlg__body">
+            <p>Auch wenn du nichts merkst: Du bekommst den vollen Kaufbetrag zurück. Eine E-Mail innerhalb von 90 Tagen nach Erhalt genügt.</p>
+            <p>Die Garantie gilt für deine erste Bestellung, einmalig oder im Abo. Dein gesetzliches Widerrufsrecht bleibt davon unberührt.</p>
+          </div>
+        </div>
+      </dialog>
+      <div class="note"><span class="tag">Wie NMN</span> Die Karten tragen nur Kaufart und Preis, der Preis steht im Knopf, darunter Chip und eine Zeile. Der Garantie-Dialog hat den Wortlaut von Kreatin und Resveratrol.<br><span class="tag tag--q">Offen: Abo</span> Das Produkt hat heute keinen Selling Plan, die Live-Karte „Monatlich 17,91 €“ verkauft also kein Abo. Mein Vorschlag ist ein Plan alle 75 Tage, passend zur Flasche. Ohne Plan bleibt nur „Einmalig“ (<code>show_subscription_toggle</code> aus).<br><span class="tag tag--q">Offen: Grundpreis</span> Nach § 5 PAngV ist bei abgepackter Ware 1 Liter die Einheit, also 663,33 €/l einmalig und 597,00 €/l im Abo. Du hast 100 ml (66,33 €) genannt. Sag mir, welche Einheit es wird.<br><span class="tag tag--q">Braucht Erweiterung</span> <code>lt-pdp-hero</code> kann nur „/100 g“ (Zeilen 2617 und 2620, Setting <code>compact_amount_grams</code>). Für Chat 3: Einheiten-Setting mit Default g, andere Seiten bleiben gleich.<br><span class="tag tag--q">Offen</span> Eine Flasche kommt mit 19,90 € nie an die Versandgrenze von 49 €. Eine Mehrfach-Packung oder eine zweite Variante wäre die Antwort darauf. Angelegt habe ich nichts.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · Wirkprinzip (lt-pdp-wirkprinzip, Darstellung „Einblendung“) -->
+<section class="wp">
+  <div class="wrap">
+    <div class="wp__grid">
+      <h2 class="hs wp__h">Deine Knochen brauchen beides <span>Vitamin D und Vitamin K, in einem Spray.</span></h2>
+
+      <figure class="einbl">
+        <img src="https://images.pexels.com/photos/7236504/pexels-photo-7236504.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="Lächelnde Frau um 60 mit gelbem Schal draußen im Schnee" class="fokus">
+        <figcaption class="glass">
+          <p class="stat__n">63 %</p>
+          <p class="stat__t">der Frauen von 45 bis 64 in Deutschland liegen unter 50 nmol/l Vitamin D im Blut, dem Wert für eine ausreichende Versorgung.</p>
+          <p class="src">DEGS1, gemessen 2008 bis 2011, kein Präparat getestet. <a href="https://doi.org/10.1186/s12889-015-2016-7" target="_blank" rel="noopener">Rabenberg et al., BMC Public Health 2015</a></p>
+        </figcaption>
+      </figure>
+
+      <div class="roles">
+        <div>
+          <h3>Vitamin D3</h3>
+          <p>Von Oktober bis März ist die Sonne in Deutschland zu schwach, damit deine Haut genug Vitamin D bildet. Vitamin D trägt zu einer normalen Aufnahme und Verwertung von Calcium und Phosphor bei und zur Erhaltung normaler Knochen.</p>
+        </div>
+        <div>
+          <h3>Vitamin K2</h3>
+          <p>Vitamin K trägt ebenfalls zur Erhaltung normaler Knochen bei. Bei uns ist es K2 in der Form MK-7.</p>
+        </div>
+        <div>
+          <h3>Auch für Muskeln und Abwehr</h3>
+          <p>Vitamin D trägt außerdem zur Erhaltung einer normalen Muskelfunktion und zu einer normalen Funktion des Immunsystems bei.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="note"><span class="tag">Geändert</span> Ersetzt die drei Textblöcke zum selben Inhalt. Das Duo tragen jetzt der zugelassene Calcium-Satz und der K-Knochen-Satz, Muskeln und Immunsystem stehen als Nebenrolle. Es entfallen „gezielt in die Knochen geleitet“, „nicht in die Gefäße“, „Aufnahme über die Mundschleimhaut“ und „Immunsystem stärken“, Sturz-Claim und Menopausen-Claim sind nicht drin.<br><span class="tag">Geprüft</span> 63 % ist die Summe aus 28,8 % unter 30 und 34,5 % von 30 bis unter 50 nmol/l (Rabenberg 2015, DEGS1, Tabelle 2, Volltext). Das Oktober-bis-März-Argument stammt aus der <a href="https://www.bfr.bund.de/cm/343/ausgewaehlte-fragen-und-antworten-zu-vitamin-d.pdf">BfR-FAQ zu Vitamin D</a>.<br><span class="tag tag--q">Bild</span> Pexels-Foto (cottonbro studio, Nr. 7236504, 4000 × 6000, 24 MP, unter der Shopify-Grenze), Gesicht sichtbar, ohne Produkt, Winterlicht zum Thema. Direkt eingebunden bis zu deiner Freigabe, danach schneide ich es so zu, dass die Glaskarte mobil und am Desktop kein Gesicht verdeckt.</div>
+  </div>
+</section>
+
+<!-- 3 · Belege-Karte als Bildkarte (lt-pdp-belege, Karte 1 aus, Kundenstimmen aus) -->
+<section class="ltbg">
+  <div class="wrap">
+    <div class="ltbg__grid">
+
+      <article class="ltbg__card ltbg__card--bild">
+        <div class="ltbg__head">
+          <h2 class="ltbg__label">Was drin ist</h2>
+          <p class="ltbg__big">D3 und K2,<span class="ltbg__big-sub">gelöst in MCT-Öl</span></p>
+        </div>
+        <figure class="ltbg__fig">
+          <div class="ltbg__stage">
+            <img src="entwurf-d3k2-pdp-2026-11-08/stillleben.jpg" alt="D3+K2-Spray auf Travertin, daneben eine kleine Schale mit goldenen Öltropfen" width="1774" height="887">
+            <ul class="ltbg__marks" aria-hidden="true">
+              <li class="ltbg__mark ltbg__mark--kern">D3 und K2 MK-7<span class="ltbg__mark-line"></span></li>
+              <li class="ltbg__mark ltbg__mark--huelle">MCT-Öl<span class="ltbg__mark-line"></span></li>
+            </ul>
+          </div>
+        </figure>
+        <div class="ltbg__main">
+          <ul class="ltbg__zeilen">
+            <li class="ltbg__zeile"><span class="ltbg__zeile-kopf">D3 und K2 MK-7</span> <span class="ltbg__zeile-text">D3 als Cholecalciferol, die Form, die auch deine Haut in der Sonne bildet. K2 in der All-Trans-Form.</span></li>
+            <li class="ltbg__zeile"><span class="ltbg__zeile-kopf">MCT-Öl</span> <span class="ltbg__zeile-text">Beide Vitamine lösen sich in Fett, deshalb das Öl.</span></li>
+          </ul>
+          <div class="ltbg__person">
+            <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/volker-podcast.png?v=1766075350" alt="">
+            <div><p class="ltbg__person-name">Prof. Dr. med. Volker Limmroth</p><p class="ltbg__person-role">Chefarzt Neurologie, prüft, was wir veröffentlichen</p></div>
+          </div>
+        </div>
+        <details class="ltbg__details">
+          <summary class="ltbg__summary"><span>Herstellung und Firma</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="ltbg__body">
+            <p>Hergestellt nach HACCP. Das Spray ist vegan und glutenfrei.</p>
+            <p>LIFETIME ist die Diga Health GmbH, eingetragen beim Amtsgericht Köln unter HRB 64399.</p>
+          </div>
+        </details>
+      </article>
+
+    </div>
+    <div class="note"><span class="tag">Wie NAD⁺</span> Bildkarte statt Rahmen mit Zahl, weil wir keinen eigenen Messwert haben. Die Marken beginnen mit denselben Wörtern wie die zwei Zeilen links.<br><span class="tag">Raus</span> Die Stimmen-Karte: Loox hat 7 Bewertungen, nur eine mit Text, und die handelt von der Lieferung. „GMP“ fällt weg, auf dem Etikett steht nur HACCP.<br><span class="tag tag--q">Bild</span> Stillleben per Codex, ohne Menschen, 1774 × 887 px. Etikett-Hauptangaben geprüft, Kleindruck seitlich nicht pixelgenau.<br><span class="tag tag--q">Offen</span> Prüfbericht je Charge: Live steht „Laborgeprüft“ ohne Beleg. Gibt es einen? Dann trägt die Karte eine echte Zahl. Und die K2-Herkunft laut Lieferant, das Etikett nennt keine.</div>
+  </div>
+</section>
+
+<!-- 4 · Loox-Lade (lt-pdp-reviews-all) -->
+<section class="ltra">
+  <div class="wrap">
+    <details class="ltra__details">
+      <summary class="ltra__summary"><span>Alle <strong>7</strong> Bewertungen lesen</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="ltra__panel"><p>Hier öffnet sich im Theme das Loox-Widget mit allen Bewertungen, Schnitt 4,7.</p></div>
+    </details>
+  </div>
+</section>
+
+<!-- 5 · Produktfakten (lt-pdp-produktfakten, Darstellung „Fakten“) -->
+<section class="pf">
+  <div class="wrap">
+    <h2 class="hs">Zusammensetzung und Einnahme <span>Gehalt und Verzehrempfehlung.</span></h2>
+    <div class="pf__grid">
+      <a class="etikett" href="entwurf-d3k2-pdp-2026-11-08/etikett.jpg" target="_blank" rel="noopener">
+        <img src="entwurf-d3k2-pdp-2026-11-08/etikett.jpg" alt="Etikett der Flasche, Ausschnitt mit Inhaltsstoffen und Verzehrempfehlung" style="transform:scale(1.9);transform-origin:0% 34.5%">
+        <span>Etikett vergrößern</span>
+      </a>
+      <div class="facts">
+        <div class="fact"><span>Vitamin D3</span><b>50 µg (2.000 I.E.) am Tag</b></div>
+        <div class="fact"><span>Vitamin K2</span><b>40 µg am Tag</b></div>
+        <div class="fact"><span>Einnahme</span><b class="intake"><svg width="44" height="22" viewBox="0 0 56 28" fill="none" aria-hidden="true"><path d="M8 11h10V5H8zM5 27V15c0-2 1.5-4 3-4h10c1.5 0 3 2 3 4v12z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="27" cy="8" r="1.6" fill="currentColor"/><circle cx="35" cy="4" r="1.6" fill="currentColor"/><circle cx="35" cy="12" r="1.6" fill="currentColor"/><circle cx="44" cy="2.5" r="1.6" fill="currentColor"/><circle cx="44" cy="8" r="1.6" fill="currentColor"/><circle cx="44" cy="14" r="1.6" fill="currentColor"/></svg>2 Sprühstöße täglich in den Mundraum, vor Gebrauch schütteln</b></div>
+        <div class="fact"><span>Eine Flasche</span><b>30 ml, 75 Portionen</b></div>
+        <div class="fact fact--pflicht"><span>Bei Blutverdünnern</span><b>Frag vorher deine Ärztin</b></div>
+        <details class="ltbg__details">
+          <summary class="ltbg__summary"><span>Zutaten und Pflichthinweise</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="ltbg__body">
+            <p><b>Zutaten:</b> MCT Öl, Vitamin K2 MK7 All-Trans, Vitamin D3 (Cholecalciferol).</p><p>Je Portion (2 Sprühstöße): Vitamin D3 1.000 % NRV, Vitamin K2 53 % NRV. NRV = Nährstoffbezugswerte gemäß VO (EU) Nr. 1169/2011.</p>
+            <p>Die angegebene empfohlene tägliche Verzehrmenge darf nicht überschritten werden. Nahrungsergänzungsmittel sind kein Ersatz für eine ausgewogene und abwechslungsreiche Ernährung und eine gesunde Lebensweise. Außerhalb der Reichweite von kleinen Kindern aufbewahren. Vor Licht geschützt, kühl und trocken lagern.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="note"><span class="tag">Geändert</span> Etikett plus eine Lade statt drei Akkordeons. Alle Mengen stehen hier einmal und nur vom Etikett, „75 Portionen“ sonst nirgends. „Ca. 37 Tage“ und 0,54 €/Tag von der Live-Seite sind falsch und kommen nicht mehr vor.<br><span class="tag">Neu</span> Die Zeile zu Blutverdünnern steht auf Ebene 1, weil Marcumar in dieser Altersgruppe häufig ist und Etikett und Live-Seite schweigen.<br><span class="tag tag--q">Bild</span> Etikett aus deiner Druck-PDF, 2400 px breit. Der Ausschnitt zeigt Tabelle und Verzehrempfehlung (Zoom 1,9 bei 0 % 34,5 %).<br><span class="tag tag--q">Braucht Erweiterung</span> <code>fact_icon</code> braucht ein Symbol „Sprühstoß“, heute gibt es Kapseln und Messlöffel.<br><span class="tag tag--q">Offen</span> Beim nächsten Etikettendruck: Blutverdünner-Hinweis ergänzen, „abwechslungsreiche“ fehlt, die Anschrift ist Berlin, und das Siegel sagt „Immune Essential“, während die Seite jetzt von den Knochen kommt.</div>
+  </div>
+</section>
+
+<!-- 6 · FAQ (crs-faq-accordion), Versand, Abo und Garantie wörtlich wie NMN -->
+<section class="faq">
+  <div class="wrap faq__layout">
+    <div class="faq__left"><h2 class="hs">Häufige Fragen</h2></div>
+    <div>
+      <details class="faq__item"><summary class="faq__q"><span>Was kostet der Versand?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Im Abo nichts. Beim Einmalkauf in Deutschland ab 49 € versandfrei, darunter 4,90 €. Wir verschicken in 1–2 Werktagen.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Kann ich das Abo jederzeit kündigen?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Ja, im Kundenkonto, ohne Frist und ohne Anruf.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Wie funktioniert die Geld-zurück-Garantie?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Hält die erste Lieferung nicht, was wir beschreiben, gibt es 90 Tage lang den vollen Betrag zurück per E-Mail. Dein Widerrufsrecht bleibt unberührt.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Ich nehme Blutverdünner. Darf ich das Spray nehmen?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Frag vorher deine Ärztin. Vitamin K wirkt auf die Blutgerinnung und kann die Wirkung von Mitteln wie Marcumar verändern.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Wie nehme ich es, und wie lange reicht eine Flasche?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Schütteln, dann zwei Sprühstöße in den Mundraum, jeden Tag. Mehr solltest du nicht nehmen, und Vitamin D aus anderen Präparaten zählt mit. So reicht eine Flasche 75 Tage. Deshalb kommt sie im Abo alle 75 Tage und nicht jeden Monat.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Merke ich etwas?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Knochen spürt man nicht. Deinen Vitamin-D-Wert kann deine Ärztin messen.</p></details>
+      <div class="note"><span class="tag">Wie NMN</span> Die ersten drei Fragen sind wortgleich mit Live-NMN. Danach kommen die Hürden der Käuferin: Blutverdünner, Aufwand samt Reichweite, „Merke ich etwas?“ ohne Versprechen über den Claim hinaus.<br><span class="tag">Bild</span> Hier ist keins nötig.</div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- Für BJ: Änderungsliste -->
+<section class="bj">
+  <div class="wrap">
+    <h2>Für BJ: was sich ändert</h2>
+    <p><b>Job der Seite:</b> Ich bin um die 55, in den Wechseljahren, sehe im Winter kaum Sonne und will mit möglichst wenig Aufwand etwas für meine Knochen tun, ohne wieder eine Kapsel zu vergessen oder etwas falsch zu machen.</p>
+    <p><b>Hürden und wie die Seite sie abbaut:</b> Gewohnheit (noch ein Präparat, das liegen bleibt): zwei Sprühstöße statt Kapseln. Angst (zu viel, verträgt sich das mit meinen Tabletten?): eine Dosis vom Etikett, Blutverdünner-Zeile, FAQ. Aufwand (nachbestellen): Abo im Takt der Flasche. Fehlkauf: 90 Tage Geld zurück.</p>
+
+    <h3>Fliegt raus</h3>
+    <ul>
+      <li>H1 „Das Duo, das dein Immunsystem und deine Knochen wirklich brauchen“: zwei Jobs in einem Satz.</li>
+      <li>„Für wen geeignet?“ (viel drinnen, tierische Produkte, schlapp): nicht ihre Lage.</li>
+      <li>„Unsere Bestseller“ und „Synergie-Set für Ausdauer &amp; Leistung“: fremder Job.</li>
+      <li><code>main_product_hidden</code> (986 px nach der FAQ): wiederholt Titelpunkte, Dosierung und Beschreibung.</li>
+      <li>Vier Galeriebilder mit Text wie „Schnelle Wirkung“ und „Hoch bioverfügbar“: unbelegt und Doppelung.</li>
+      <li>„Monatlich“ als Abo-Karte: verkauft heute nichts und ließe bei 75 Tagen Reichweite den Vorrat wachsen.</li>
+      <li>Vier Lieferzeit-Aussagen: übrig bleibt „Versand in 1–2 Werktagen“.</li>
+      <li>„ca. 37 Tage“, 0,54 €/Tag, „GMP“: falsch oder nicht auf dem Etikett.</li>
+      <li>„Gezielt in die Knochen geleitet“, „nicht in die Gefäße“, „Mundschleimhaut“, „Immunsystem stärken“: kein zugelassener Claim.</li>
+    </ul>
+
+    <h3>Kommt neu rein</h3>
+    <ul>
+      <li>Titelzeile „Für Knochen, die halten.“ und der Knochen-Claim als Punkt 1: ein Job.</li>
+      <li>„Zwei Sprühstöße am Tag statt Kapseln.“ in Punkt 2: der echte Vorteil steht jetzt vorn.</li>
+      <li>Einblendung 63 % über einem echten Winterfoto: ihre Lage als Zahl.</li>
+      <li>Bildkarte „D3 und K2, gelöst in MCT-Öl“ mit Limmroth: Inhalt statt Icon-Leiste.</li>
+      <li>Blutverdünner-Zeile in den Fakten und eigene FAQ-Frage: Sicherheit, bisher fehlte beides.</li>
+      <li>Kaufzone und FAQ wie Live-NMN: gleiche Bedienung auf jeder PDP.</li>
+    </ul>
+
+    <h3>Ändert sich</h3>
+    <ul>
+      <li>Rund 5.900 px in acht Sections werden sechs: Hero, Wirkprinzip, Belege, Loox-Lade, Fakten, FAQ.</li>
+      <li>Abo-Takt 75 Tage statt monatlich: Lieferung und Flasche laufen gleich.</li>
+      <li>Grundpreis statt €/Tag und bei „Einmalig“ die Versandkosten: nie „Versandfrei“ unter 49 €.</li>
+      <li>Pflichtangaben: Etikett plus eine Lade statt drei Akkordeons.</li>
+      <li>Muskeln und Immunsystem: aus dem Titel in die dritte Rolle.</li>
+    </ul>
+
+    <h3>Zwei Ebenen</h3>
+    <p>Ebene 1: Urteil (Titel, drei Punkte, 63 %), nächster Handgriff (Kaufart, Knopf), Einnahme und Blutverdünner. Ebene 2 hinter klar benannten Laden: Herstellung und Firma, Zutaten und Pflichthinweise, Bewertungen, FAQ.</p>
+
+    <h3>Fehler, die die Form verhindert</h3>
+    <ul>
+      <li>Zu viel Vorrat: Abo-Takt gleich Reichweite.</li>
+      <li>Falsche Versanderwartung: Bei „Einmalig“ steht 4,90 € direkt unter den Karten.</li>
+      <li>Blutverdünner übersehen: Zeile auf Ebene 1, nicht nur in der FAQ.</li>
+      <li>Doppelt Vitamin D: FAQ sagt, dass andere Präparate mitzählen.</li>
+      <li>Dosis verwechseln: eine Angabe auf der ganzen Seite, vom Etikett.</li>
+      <li>Abo ohne Plan: Karte aus, solange kein Selling Plan existiert.</li>
+    </ul>
+
+    <h3>Braucht Erweiterung in Chat 3 (Default aus, andere Seiten bleiben gleich)</h3>
+    <ul>
+      <li><code>lt-pdp-hero</code>: Einheiten-Setting für den Grundpreis (ml oder l statt g).</li>
+      <li><code>lt-pdp-produktfakten</code>: Symbol „Sprühstoß“ in <code>fact_icon</code>.</li>
+    </ul>
+
+    <h3>Offen bei dir</h3>
+    <ul>
+      <li>Titelzeile: „Für Knochen, die halten.“ oder etwas anderes?</li>
+      <li>Abo-Plan anlegen, Takt 75 Tage? Ohne Plan nur „Einmalig“.</li>
+      <li>Grundpreis je Liter (PAngV) oder 100 ml?</li>
+      <li>Mehrfach-Packung oder zweite Variante, damit eine Bestellung über 49 € kommt?</li>
+      <li>Gibt es einen Prüfbericht je Charge?</li>
+      <li>K2-Herkunft laut Lieferant.</li>
+      <li>Zwei Pexels-Fotos freigeben (Nr. 6873934 und 7236504).</li>
+    </ul>
+  </div>
+</section>
+
+<footer class="ft">Entwurf 08.11.2026. Footer wie im Theme. Nur Vorschau, kein Produktivcode.</footer>
+
+<div class="sticky" id="sticky">
+  <div class="meta"><b>Vitamin D3 + K2 Spray</b><span id="st-sub">Im Abo, alle 75 Tage</span></div>
+  <button class="cta" id="st-cta" type="button">Abo starten, 17,91 €</button>
+</div>
+
+<script>
+(function(){
+  var modes=document.querySelectorAll('#modes .mode'), mode='sub';
+  var P={sub:17.91,once:19.90};
+  function eur(n){return n.toFixed(2).replace('.',',')+' €';}
+  function render(){
+    var label=(mode==='sub'?'Abo starten, ':'Einmalig kaufen, ')+eur(P[mode]);
+    document.getElementById('cta').textContent=label;
+    document.getElementById('st-cta').textContent=label;
+    document.getElementById('save').hidden=mode!=='sub';
+    document.getElementById('st-sub').textContent=mode==='sub'?'Im Abo, alle 75 Tage':'Einmalig';
+    document.getElementById('hint').textContent=mode==='sub'
+      ?'Lieferung alle 75 Tage, versandfrei, jederzeit kündbar.'
+      :'Zzgl. 4,90 € Versand, versandfrei ab 49 €.';
+    document.getElementById('unit').textContent='30 ml für 75 Tage · '+eur(P[mode]/0.03)+'/l';
+  }
+  modes.forEach(function(b){b.addEventListener('click',function(){
+    modes.forEach(function(x){x.classList.remove('on')}); b.classList.add('on'); mode=b.dataset.mode; render();
+  })});
+
+  var main=document.getElementById('galMain'), thumbs=document.querySelectorAll('#thumbs .thumb');
+  thumbs.forEach(function(t){t.addEventListener('click',function(){
+    thumbs.forEach(function(x){x.classList.remove('on')}); t.classList.add('on');
+    main.innerHTML='<img src="'+t.dataset.src+'" alt="'+t.dataset.alt+'">';
+  })});
+
+  var dlg=document.getElementById('guar-dlg');
+  document.getElementById('guar-open').addEventListener('click',function(){dlg.showModal()});
+  dlg.addEventListener('click',function(e){if(e.target===dlg||e.target.closest('[data-close]'))dlg.close()});
+
+  var tg=document.getElementById('toggle');
+  tg.addEventListener('click',function(){
+    var c=document.body.classList.toggle('clean');
+    tg.textContent=c?'Notizen einblenden':'Notizen ausblenden';
+  });
+
+  var st=document.getElementById('sticky'), cta=document.getElementById('cta');
+  new IntersectionObserver(function(e){ st.classList.toggle('show', !e[0].isIntersecting && e[0].boundingClientRect.top<0); },{threshold:0}).observe(cta);
+  render();
+})();
+</script>
+</body>
+</html>
