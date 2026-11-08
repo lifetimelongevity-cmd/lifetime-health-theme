@@ -179,6 +179,23 @@ Keine Section-Erweiterung nötig, alle Einstellungen gab es seit NAD⁺ und Krea
 2048 × 770 aus dem Etikett-Original, y = 640), `resveratrol-wirkprinzip-park.jpg`, `resveratrol-stillleben.png`.
 Offen: Prüfbericht je Charge, Kapselgewicht, Dosis, Herkunft und Medikamenten-Hinweis laut Novel-Food-Zulassung (Anwalt).
 
+## PDP D3+K2 (`/products/vitamin-d3-k2-spray`)
+
+Template: `templates/product.07_d3k2.json` (Suffix `07_d3k2`, am Produkt bestätigt 08.11.2026).
+Seit 08.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-d3k2-pdp-2026-11-08.html` (BJ-Freigabe „Ja, mit Vorschlägen“), gleiche Kette wie NAD⁺, Kreatin und Resveratrol. **Noch nicht live.** Vorschau-Theme `194218819959` („Claude D3K2-PDP (08.11.)“). 6 Einträge in `order`, kein `main_product_hidden`.
+
+| # | Section-Key | Typ | Rolle |
+|---|---|---|---|
+| 1 | `main` | `lt-pdp-hero` | Titelzeile „Für Knochen, die halten.“, drei Punkte, Zeile „Vegan und glutenfrei · Etikett ansehen“, nur Einmalig (`show_price_standalone`, kein Selling Plan), darunter Versandkosten und „30 ml für 75 Tage · 663,33 €/l“ |
+| 2 | `wirkprinzip` | `lt-pdp-wirkprinzip` | „Deine Knochen brauchen beides.“, Einblendung 63 % (Rabenberg 2015, DEGS1), Rollen D3, K2, Muskeln und Abwehr ohne Symbol |
+| 3 | `belege` | `lt-pdp-belege` | Bildkarte „D3 und K2, gelöst in MCT-Öl“, Marken D3 und K2 MK-7 und MCT-Öl, ohne Kundenstimmen |
+| 4 | `loox_reviews` | `lt-pdp-reviews-all` | Lade mit allen Loox-Bewertungen |
+| 5 | `produktfakten` | `lt-pdp-produktfakten` | Fakten mit Etikett (Zoom 1,9 bei 0 % 37 %), Sprühstoß-Symbol, Zeile Blutverdünner |
+| 6 | `faq_accordion` | `crs-faq-accordion` | 5 Fragen: Versand, Garantie, Blutverdünner, Einnahme und Reichweite, „Merke ich etwas?“. Abo-Frage fehlt, solange es kein Abo gibt |
+
+Erweiterungen, alle mit Default aus: `compact_amount_unit` (g oder ml) in `lt-pdp-hero`; Versand- und Grundpreiszeile im Pfad ohne Abo (nur mit `compact_once_ship` bzw. `compact_amount_text`); `fact_icon: spruehstoss` in `lt-pdp-produktfakten`; `einbl_mobile_vw` in `lt-pdp-wirkprinzip` (180 bei Querformat, sonst lädt das Handy zu klein). Bilder in den Shopify-Dateien: `d3k2-galerie-travertin.png`, `d3k2-galerie-frau.jpg`, `d3k2-etikett.jpg`, `d3k2-wirkprinzip-yoga.jpg`, `d3k2-stillleben.png`.
+Offen: Abo-Plan (dann `show_subscription_toggle` an, `compact_sub_hint` „Lieferung alle 75 Tage, versandfrei, jederzeit kündbar.“, FAQ wörtlich von NMN), zweite Packungsgröße, Prüfbericht je Charge, K2-Herkunft.
+
 ## Konvention `main_product_hidden`
 
 Beide Templates führen die Theme-Section `main-product` unter dem Key `main_product_hidden`

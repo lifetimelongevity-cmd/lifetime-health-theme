@@ -211,12 +211,15 @@
         extra_class: 'ltwp__header ltwp__h'
       -%}
       {%- if section.settings.image != blank -%}
+        {%- comment -%} Querformat füllt mobil die hohe Kachel, das Bild läuft seitlich über: sizes muss das mitrechnen (D3+K2, 08.11.2026). {%- endcomment -%}
+        {%- assign wp_einbl_vw = section.settings.einbl_mobile_vw | default: 100 -%}
+        {%- assign wp_einbl_sizes = '(min-width: 900px) 50vw, ' | append: wp_einbl_vw | append: 'vw' -%}
         <figure class="ltwp__einbl">
           {{ section.settings.image
              | image_url: width: 1400
              | image_tag:
                loading: 'lazy',
-               sizes: '(min-width: 900px) 50vw, 100vw',
+               sizes: wp_einbl_sizes,
                widths: '480, 720, 960, 1200, 1400',
                alt: wp_img_alt,
                class: 'ltwp__einbl-img' }}
@@ -684,6 +687,7 @@
     { "type": "text", "id": "bar_2_label", "label": "Balken 2: Beschriftung" },
     { "type": "number", "id": "bar_2_value", "label": "Balken 2: Länge in %" },
     { "type": "text", "id": "bars_aria", "label": "Balken: Beschreibung für Screenreader" },
+    { "type": "number", "id": "einbl_mobile_vw", "label": "Einblendung: Bildbreite mobil in vw (leer = 100)", "info": "Bei Querformat größer, sonst lädt das Handy zu klein. Zum Beispiel 180 bei 3:2." },
     { "type": "text", "id": "source_prefix", "label": "Einblendung: Satz vor der Quelle", "info": "Zum Beispiel „Hautproben von 49 Menschen.“" },
     {
       "type": "header",

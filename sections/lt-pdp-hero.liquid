@@ -1433,7 +1433,7 @@
               {%- comment -%} Kompakt: eine Zeile Takt und Versand des gewählten Modus, darunter der
                   Grundpreis genau einmal (PAngV), beides aus dem Kompakt-JS. {%- endcomment -%}
               <p class="lt-bb__hint" data-lt-bb-hint{% if section.settings.compact_sub_hint != blank %} data-sub-hint="{{ section.settings.compact_sub_hint | escape }}"{% endif %} aria-live="polite"></p>
-              <p class="lt-bb__unitline" data-lt-bb-unitline{% if section.settings.compact_amount_text != blank %} data-amount-text="{{ section.settings.compact_amount_text | escape }}" data-days="{{ bb_supply_days | plus: 0 }}"{% if section.settings.compact_amount_grams > 0 %} data-amount-grams="{{ section.settings.compact_amount_grams | plus: 0 }}"{% endif %}{% endif %}></p>
+              <p class="lt-bb__unitline" data-lt-bb-unitline{% if section.settings.compact_amount_text != blank %} data-amount-text="{{ section.settings.compact_amount_text | escape }}" data-days="{{ bb_supply_days | plus: 0 }}"{% if section.settings.compact_amount_grams > 0 %} data-amount-grams="{{ section.settings.compact_amount_grams | plus: 0 }}"{% if section.settings.compact_amount_unit == 'ml' %} data-amount-unit="ml"{% endif %}{% endif %}{% endif %}></p>
             {%- endif -%}
             {%- comment -%}
               Zusatzartikel-Häkchen unter der Kaufart (Conversion-Plan 3.3, 29.09.2026):
@@ -1697,6 +1697,30 @@
               {%- if lt_payment_note != blank -%}
                 <span class="lt-price-direct__payment">{{ lt_payment_note | escape }}</span>
                 {%- assign lt_payment_note_rendered = true -%}
+              {%- endif -%}
+              {%- comment -%} Nur Einmalig, kompakt (D3+K2, 08.11.2026): ohne Abo-Karten gibt es die Kompakt-Zeilen
+                  aus dem JS nicht. Versandkosten unter der Schwelle und Grundpreis stehen deshalb direkt im HTML.
+                  Beide nur mit compact_once_ship bzw. compact_amount_text, AGE&DNA bleibt unverändert. {%- endcomment -%}
+              {%- if section.settings.bb_compact -%}
+                {%- if section.settings.compact_once_ship -%}
+                  {%- capture lt_ship_rule_d -%}{%- render 'lt-shipping-rule' -%}{%- endcapture -%}
+                  {%- assign lt_ship_rule_d = lt_ship_rule_d | split: '|' -%}
+                  {%- assign lt_ship_free_d = lt_ship_rule_d[1] | plus: 0 -%}
+                  {%- if lt_pill_1_once < lt_ship_free_d -%}
+                    <p class="lt-bb__hint">Zzgl. {{ lt_ship_rule_d[0] | plus: 0 | money }} Versand, versandfrei ab {{ lt_ship_free_d | money_without_trailing_zeros }}.</p>
+                  {%- endif -%}
+                {%- endif -%}
+                {%- if section.settings.compact_amount_text != blank -%}
+                  {%- assign lt_amount_d = section.settings.compact_amount_grams | plus: 0 -%}
+                  <p class="lt-bb__unitline">
+                    {{- section.settings.compact_amount_text | escape -}}
+                    {%- if lt_amount_d > 0 -%}
+                      {%- if section.settings.compact_amount_unit == 'ml' %} · {{ lt_pill_1_once | times: 1000.0 | divided_by: lt_amount_d | round | money }}/l
+                      {%- else %} · {{ lt_pill_1_once | times: 100.0 | divided_by: lt_amount_d | round | money }}/100 g
+                      {%- endif -%}
+                    {%- endif -%}
+                  </p>
+                {%- endif -%}
               {%- endif -%}
             </div>
             {%- endif -%}
@@ -2614,7 +2638,9 @@
             var dayC = !isNaN(current) ? current : cardC;
             // Mit Füllmenge (compact_amount_grams, Kreatin 07.11.2026) folgt der Grundpreis je 100 g statt des Preises am Tag.
             var amountG = parseInt(unitLine.getAttribute('data-amount-grams'), 10);
-            if (amountG > 0) unitLine.textContent = amountText + (!isNaN(dayC) ? ' · ' + formatPrice(Math.round(dayC / amountG * 100)) + '/100 g' : '');
+            // Flüssiges wird je Liter ausgewiesen (compact_amount_unit, § 5 PAngV, D3+K2 08.11.2026).
+            var amountMl = unitLine.getAttribute('data-amount-unit') === 'ml';
+            if (amountG > 0) unitLine.textContent = amountText + (!isNaN(dayC) ? ' · ' + formatPrice(Math.round(dayC / amountG * (amountMl ? 1000 : 100))) + (amountMl ? '/l' : '/100 g') : '');
             else unitLine.textContent = amountText + ((days > 0 && !isNaN(dayC)) ? ' · ' + formatPrice(Math.round(dayC / days)) + ' am Tag' : '');
           } else {
             unitLine.textContent = (!isNaN(current) && g > 0) ? formatPrice(Math.round(current / g * 100)) + '/100 g' : '';
@@ -5090,8 +5116,18 @@
     {
       "type": "number",
       "id": "compact_amount_grams",
-      "label": "Kompakt: Füllmenge in g (Grundpreis statt Tagespreis)",
+      "label": "Kompakt: Füllmenge in g oder ml (Grundpreis statt Tagespreis)",
       "info": "Nur mit Mengenzeile. Zum Beispiel 300: hängt „€/100 g“ statt „€ am Tag“ an. Leer = Preis am Tag."
+    },
+    {
+      "type": "select",
+      "id": "compact_amount_unit",
+      "label": "Kompakt: Einheit der Füllmenge",
+      "options": [
+        { "value": "g", "label": "Gramm (Grundpreis je 100 g)" },
+        { "value": "ml", "label": "Milliliter (Grundpreis je Liter)" }
+      ],
+      "default": "g"
     },
     {
       "type": "text",
