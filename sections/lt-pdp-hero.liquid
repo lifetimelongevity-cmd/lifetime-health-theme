@@ -133,6 +133,7 @@
   data-lt-compact="{% if section.settings.bb_compact %}1{% else %}0{% endif %}"
   data-lt-sticky-show-compare="{% if lt_sticky_show_compare_price %}1{% else %}0{% endif %}"
   data-lt-pkg-chip="{% if section.settings.pkg_chip_compare %}1{% else %}0{% endif %}"
+  {%- if section.settings.bw_pkg2_price_cents > 0 %} data-lt-bw-pkg2-price="{{ section.settings.bw_pkg2_price_cents }}"{% endif %}
   {%- if section.settings.bb_compact and section.settings.compact_gallery_ratio > 0 %} style="--lt-compact-gallery: {{ section.settings.compact_gallery_ratio }}%"{% endif %}
 >
   <div class="lt-pdp-hero__container">
@@ -1079,7 +1080,7 @@
               </script>
             {%- endif -%}
             {%- if section.settings.show_promo_banner and section.settings.promo_banner_title != blank and lt_show_packages == false -%}
-              <div class="lt-promo-banner" role="note">
+              <div class="lt-promo-banner" role="note"{% if section.settings.promo_banner_bw_only %} data-lt-bw-only{% endif %}>
                 <span class="lt-promo-banner__tag">{{ section.settings.promo_banner_tag | default: 'Aktion' | escape }}</span>
                 <span class="lt-promo-banner__text">
                   <span class="lt-promo-banner__title">{{ section.settings.promo_banner_title | escape }}</span>
@@ -1645,7 +1646,7 @@
                   Karte raus (currentScript.previousElementSibling, deshalb muss das Script direkt
                   hinter dem Element stehen). {%- endcomment -%}
               {%- if section.settings.show_promo_banner and section.settings.promo_banner_title != blank -%}
-                <div class="lt-promo-card" role="note">
+                <div class="lt-promo-card" role="note"{% if section.settings.promo_banner_bw_only %} data-lt-bw-only{% endif %}>
                   <span class="lt-promo-card__tag">{{ section.settings.promo_banner_tag | default: 'Aktion' | escape }}</span>
                   <span class="lt-promo-card__text">
                     <span class="lt-promo-card__headline">
@@ -1849,6 +1850,31 @@
                   </span>
                 </div>
               {%- endif -%}
+            {%- endif -%}
+            {%- comment -%} Black Week 23.–30.11.2026: Zeile über dem Knopf, die sagt, ob die gewählte
+                Größe das Geschenk auslöst. Die kleinste Variante ist das Geschenk, jede größere
+                löst es aus (Einmalkauf und Abo-Start, so ist der Shopify-Rabatt gebaut). Sichtbar nur im
+                Zeitfenster (data-lt-bw-only), Text und Warenkorb-Logik setzt das Skript unten. {%- endcomment -%}
+            {%- if section.settings.bw_gift_enable and lt_show_sizes and product.variants.size > 1 -%}
+              {%- liquid
+                assign lt_bw_gift_buy = ''
+                for v in product.variants
+                  unless forloop.first
+                    assign lt_bw_gift_buy = lt_bw_gift_buy | append: v.id | append: ','
+                  endunless
+                endfor
+              -%}
+              <p
+                class="lt-bw-gift"
+                data-lt-bw-only
+                data-lt-bw-gift
+                data-gift-id="{{ product.variants.first.id }}"
+                data-gift-buy="{{ lt_bw_gift_buy }}"
+                data-text-on="{{ section.settings.bw_gift_text | default: '+ 30 g gratis dazu' | escape }}"
+                data-text-nudge="{{ section.settings.bw_gift_nudge | default: 'Ab 60 g legen wir 30 g gratis dazu.' | escape }}"
+                aria-live="polite"
+                hidden
+              ></p>
             {%- endif -%}
             <div class="product__cart-functions">
               <div class="flex-buttons">
@@ -2521,6 +2547,33 @@
           if (this.checked) applyPkg(this);
         });
       });
+      // Black Week 23.–30.11.2026: Paket 2 zum Aktionspreis (bw_pkg2_price_cents). Den Rabatt
+      // rechnet Shopify an der Kasse („Black Week: Nachmessung geschenkt“), die Karte muss
+      // denselben Preis zeigen. Im Zeitfenster trägt die Karte den Aktionspreis und die
+      // Ersparnis gegen ihren regulären Preis, sie ist vorgewählt (außer bei ?variant=),
+      // und applyPkg zieht Knopf, Sticky und Chip aus denselben data-Werten nach.
+      const bwPkgPrice = parseInt(section.getAttribute('data-lt-bw-pkg2-price'), 10) || 0;
+      if (bwPkgPrice > 0 && window.LTBlackWeek && window.LTBlackWeek.on) {
+        const bwInp = pkgGroup.querySelectorAll('.lt-pkg__input')[1];
+        const bwRegular = bwInp ? parseInt(bwInp.dataset.oncePrice, 10) || 0 : 0;
+        if (bwInp && !bwInp.disabled && bwRegular > bwPkgPrice) {
+          bwInp.dataset.oncePrice = String(bwPkgPrice);
+          bwInp.dataset.saveCents = String(bwRegular - bwPkgPrice);
+          const bwCard = bwInp.closest('[data-lt-pkg]');
+          const bwPriceEl = bwCard ? bwCard.querySelector('.lt-pkg__price') : null;
+          if (bwPriceEl) bwPriceEl.textContent = formatPkgPrice(bwPkgPrice);
+          const bwSaveEl = bwCard ? bwCard.querySelector('.lt-pkg__save') : null;
+          if (bwSaveEl) bwSaveEl.textContent = 'Du sparst ' + formatPkgPrice(bwRegular - bwPkgPrice);
+          // Paketvergleich darunter: die Preiszelle von Paket 2 in der Summenzeile mitziehen
+          const bwSumCells = section.querySelectorAll('.lt-pkg-table__sum td');
+          if (bwSumCells[1] && bwSumCells[1].textContent.trim() === formatPkgPrice(bwRegular)) {
+            bwSumCells[1].textContent = formatPkgPrice(bwPkgPrice);
+          }
+          if (!/[?&]variant=/.test(window.location.search)) {
+            pkgGroup.querySelectorAll('.lt-pkg__input').forEach(i => { i.checked = i === bwInp; });
+          }
+        }
+      }
       const basePkg = pkgGroup.querySelector('.lt-pkg__input:checked:not(:disabled)')
         || pkgGroup.querySelector('.lt-pkg__input:not(:disabled)');
       if (basePkg) {
@@ -3225,6 +3278,86 @@
     }
     // --------------------------------------------------------------------
 
+    // --- Black Week 23.–30.11.2026: kleinste Größe gratis ------------------
+    // Shopify legt das „Y“ eines Nimm-X-zahl-Y-Rabatts nicht selbst in den Korb. Wählt
+    // jemand im Zeitfenster eine größere Größe, geht die kleinste Größe im selben
+    // /cart/add.js-Aufruf mit (items[], Muster wie beim Zusatzartikel darüber); der
+    // automatische Rabatt „Black Week: 30 g NMN gratis“ setzt sie an der Kasse auf 0 €.
+    // Das gilt für Einmalkauf und Abo-Start; das Geschenk selbst geht immer als
+    // Einmalartikel in den Korb, der Abo-Plan hängt nur an der gekauften Größe. Liegt die
+    // kleinste Größe schon im Korb, kommt keine zweite dazu. Außerhalb des Zeitfensters
+    // (window.LTBlackWeek.on) ist der Block tot. Steht NACH dem Zusatzartikel-Hook, weil
+    // beide am selben Submit hängen und dieser hier dessen items[] fortschreibt.
+    const bwGift = section.querySelector('[data-lt-bw-gift]');
+    const bwForm = section.querySelector('form[data-type="add-to-cart-form"]');
+    if (bwGift && bwForm && window.LTBlackWeek && window.LTBlackWeek.on) {
+      const bwGiftId = bwGift.dataset.giftId;
+      const bwBuy = (bwGift.dataset.giftBuy || '').split(',').filter(Boolean);
+      let bwGiftInCart = false;
+      const bwState = function () {
+        const idEl = bwForm.querySelector('[name="id"]');
+        return { qualifies: !!idEl && bwBuy.indexOf(String(idEl.value)) !== -1 };
+      };
+      const bwRender = function () {
+        bwGift.hidden = false;
+        bwGift.textContent = bwState().qualifies ? bwGift.dataset.textOn : bwGift.dataset.textNudge;
+      };
+      const bwRefreshCart = function () {
+        fetch('/cart.js', { headers: { Accept: 'application/json' } })
+          .then(r => r.json())
+          .then(cart => {
+            bwGiftInCart = (cart.items || []).some(i => String(i.variant_id) === bwGiftId);
+          })
+          .catch(() => {});
+      };
+      section.addEventListener('change', () => window.setTimeout(bwRender, 0));
+      section.addEventListener('click', () => window.setTimeout(bwRender, 0));
+
+      bwForm.addEventListener('submit', function () {
+        const s = bwState();
+        if (!window.LTBlackWeek.on || !s.qualifies || bwGiftInCart) return;
+        const has = name => !!bwForm.querySelector('input[type="hidden"][name="' + name + '"]');
+        const extra = [];
+        const put = (name, value) => {
+          const el = document.createElement('input');
+          el.type = 'hidden';
+          el.name = name;
+          el.value = value;
+          bwForm.appendChild(el);
+          extra.push(el);
+        };
+        let base = [];
+        if (has('items[0][id]')) {
+          // Der Zusatzartikel-Hook hat das Formular schon auf items[] umgestellt.
+          let n = 1;
+          while (has('items[' + n + '][id]')) n += 1;
+          put('items[' + n + '][id]', bwGiftId);
+          put('items[' + n + '][quantity]', '1');
+        } else {
+          const idEl = bwForm.querySelector('[name="id"]');
+          const qtyEl = bwForm.querySelector('[name="quantity"]');
+          const planEl = bwForm.querySelector('[name="selling_plan"]');
+          put('items[0][id]', idEl.value);
+          put('items[0][quantity]', (qtyEl && qtyEl.value) || '1');
+          if (planEl && planEl.value) put('items[0][selling_plan]', planEl.value);
+          put('items[1][id]', bwGiftId);
+          put('items[1][quantity]', '1');
+          base = [idEl, qtyEl, planEl].filter(Boolean);
+          base.forEach(el => { el.disabled = true; });
+        }
+        window.setTimeout(() => {
+          extra.forEach(el => el.remove());
+          base.forEach(el => { el.disabled = false; });
+        }, 0);
+      }, true);
+
+      const bwProductForm = bwForm.closest('product-form');
+      if (bwProductForm) bwProductForm.addEventListener('add-to-cart', bwRefreshCart);
+      bwRefreshCart();
+      window.setTimeout(bwRender, 0);
+    }
+    // --------------------------------------------------------------------
+
     const initialCard = section.querySelector('.lt-bb-card__input:checked')?.closest('[data-lt-bb-card]');
     if (initialCard) {
       selectCard(initialCard);
@@ -3479,6 +3612,16 @@
   line-height: 1.4;
 }
 .lt-promo-card[hidden] { display: none; }
+/* Black Week 23.–30.11.2026: Geschenk-Zeile direkt über dem Knopf */
+.lt-bw-gift {
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+  font-weight: var(--weight-semibold);
+  text-align: center;
+  color: var(--lt-text, #26251e);
+}
+.lt-bw-gift[hidden] { display: none; }
 .lt-promo-card__tag {
   flex-shrink: 0;
   margin-top: 1px; /* setzt die Pille auf die Grundlinie der ersten Textzeile */
@@ -4619,6 +4762,13 @@
       "default": "2026-07-16T23:59:59"
     },
     {
+      "type": "checkbox",
+      "id": "promo_banner_bw_only",
+      "label": "Aktions-Banner nur in der Black Week zeigen",
+      "info": "Das Zeitfenster steht in snippets/lt-black-week.liquid.",
+      "default": false
+    },
+    {
       "type": "header",
       "content": "Quiz-Vorteil"
     },
@@ -4659,6 +4809,35 @@
       "label": "Quiz-Countdown-Enddatum",
       "info": "ISO-Format. Muss zum endsAt des aktiven Quiz-Rabatts in Shopify passen.",
       "default": "2026-08-05T23:59:59"
+    },
+    {
+      "type": "header",
+      "content": "Black Week"
+    },
+    {
+      "type": "checkbox",
+      "id": "bw_gift_enable",
+      "label": "Kleinste Größe gratis zu jeder größeren",
+      "info": "Nur im Zeitfenster aus snippets/lt-black-week.liquid. Braucht den automatischen Rabatt in Shopify.",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "bw_gift_text",
+      "label": "Zeile bei größerer Größe",
+      "default": "+ 30 g gratis dazu"
+    },
+    {
+      "type": "text",
+      "id": "bw_gift_nudge",
+      "label": "Zeile bei kleinster Größe",
+      "default": "Ab 60 g legen wir 30 g gratis dazu."
+    },
+    {
+      "type": "number",
+      "id": "bw_pkg2_price_cents",
+      "label": "Aktionspreis Paket 2 in Cent",
+      "info": "Leer = aus. Zeigt Paket 2 im Zeitfenster zu diesem Preis und wählt es vor. Der Rabatt selbst liegt in Shopify."
     },
     {
       "type": "header",

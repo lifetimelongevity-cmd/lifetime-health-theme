@@ -1,0 +1,307 @@
+{% comment %}
+  lt-black-week — Sammelseite der Black Week 2026 (/pages/black-week, 10.11.2026).
+
+  Eine Seite, drei Zustände. Welcher gilt, setzt snippets/lt-black-week.liquid als
+  html[data-lt-bw]:
+  - before (auch ohne JavaScript): Ankündigung und Anmeldung für den Frühzugang.
+    Die Adresse geht per Client-Subscribe an die Klaviyo-Liste aus den Settings
+    (assets/lt-about-signup.js, dasselbe Muster wie auf /pages/ueber-lifetime).
+  - on: Countdown auf das echte Ende, je Angebot eine Karte, Vertrauenszeile, Fragen.
+  - after: ein Satz und die Wege zu den Produkten.
+
+  Preise und Ersparnis stehen als Text in den Blöcken, weil der Rabatt in Shopify
+  liegt (automatische Rabatte) und die Variantenpreise unverändert bleiben.
+
+  Dominantes Element: die zwei Angebotskarten.
+  Bildstellen: je Karte ein Bild (Setting, sonst das Produktbild). NMN: der 60-g-Beutel
+  mit dem 30-g-Beutel daneben. Test: das Ergebnis in der App, nicht das Kit.
+{% endcomment %}
+
+<script src="{{ 'lt-about-signup.js' | asset_url }}" defer></script>
+
+{%- liquid
+  assign bw_form_id = 'black-week-' | append: section.id
+  assign bw_rating_raw = shop.metafields.loox.avg_rating | plus: 0
+  assign bw_rating = '4,7'
+  if bw_rating_raw > 0
+    assign bw_rating = bw_rating_raw | round: 1 | replace: '.', ','
+  endif
+  assign bw_count_raw = shop.metafields.loox.num_reviews | plus: 0
+  assign bw_count = '121'
+  if bw_count_raw > 0
+    assign bw_count = bw_count_raw
+  endif
+  assign bw_trust = section.settings.trust_line | replace: '[rating]', bw_rating | replace: '[count]', bw_count
+-%}
+
+<section class="lt-bw">
+  <div class="lt-bw__wrap">
+    {% render 'section-heading-crs',
+      heading: section.settings.heading,
+      subheading: section.settings.subheading,
+      align: 'left',
+      headline_lg: true,
+      heading_tag: 'h1',
+      extra_class: 'lt-bw__header'
+    %}
+
+    {%- comment -%} Vor dem Start, auch ohne JavaScript {%- endcomment -%}
+    <div class="lt-bw__phase lt-bw__phase--before">
+      {%- if section.settings.pre_text != blank -%}
+        <p class="lt-bw__lead">{{ section.settings.pre_text | escape }}</p>
+      {%- endif -%}
+      <div
+        class="lt-bw__signup"
+        data-lt-about-signup
+        data-klaviyo-company-id="{{ section.settings.klaviyo_company_id | escape }}"
+        data-klaviyo-list-id="{{ section.settings.klaviyo_list_id | escape }}"
+        data-klaviyo-source="Black Week 2026"
+      >
+        {%- form 'customer', id: bw_form_id, class: 'lt-bw__form' -%}
+          {%- if form.posted_successfully? -%}
+            <p class="lt-bw__success">{{ section.settings.success_text | escape }}</p>
+          {%- else -%}
+            <input type="hidden" name="contact[tags]" value="newsletter,black-week">
+            <label class="lt-bw__label" for="Email-{{ bw_form_id }}">{{ section.settings.field_label | escape }}</label>
+            <div class="lt-bw__fieldset">
+              <input
+                type="email"
+                class="lt-bw__input"
+                id="Email-{{ bw_form_id }}"
+                name="contact[email]"
+                value="{% if customer %}{{ customer.email }}{% endif %}"
+                placeholder="name@beispiel.de"
+                autocomplete="email"
+                autocorrect="off"
+                autocapitalize="off"
+                spellcheck="false"
+                required
+                data-signup-input
+              >
+              <button type="submit" class="lt-bw__btn" data-signup-button data-busy-label="Einen Moment">
+                {{ section.settings.button_label | escape }}
+              </button>
+            </div>
+            <p class="lt-bw__error" role="alert" data-signup-error hidden></p>
+            {%- if section.settings.consent_text != blank -%}
+              <p class="lt-bw__small">{{ section.settings.consent_text | escape }}</p>
+            {%- endif -%}
+          {%- endif -%}
+        {%- endform -%}
+        <p class="lt-bw__success" role="status" data-signup-success hidden>{{ section.settings.success_text | escape }}</p>
+      </div>
+    </div>
+
+    {%- comment -%} Während der Aktion {%- endcomment -%}
+    <div class="lt-bw__phase lt-bw__phase--on">
+      <p class="lt-bw__lead lt-bw__timer">
+        {{ section.settings.timer_label | escape }} <strong data-lt-bw-countdown>–</strong>
+      </p>
+
+      <div class="lt-bw__offers">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'offer' -%}
+            {%- liquid
+              assign bw_product = block.settings.product
+              assign bw_url = bw_product.url | default: '#'
+              if block.settings.variant_id != blank
+                assign bw_url = bw_url | append: '?variant=' | append: block.settings.variant_id | append: '&bw=1'
+              endif
+              assign bw_image = block.settings.image | default: bw_product.featured_image
+            -%}
+            <article class="lt-bw__card" {{ block.shopify_attributes }}>
+              {%- if bw_image != blank -%}
+                <a class="lt-bw__media" href="{{ bw_url }}" tabindex="-1" aria-hidden="true">
+                  {{ bw_image | image_url: width: 900 | image_tag: loading: 'lazy', widths: '450, 900', sizes: '(min-width: 750px) 50vw, 100vw', alt: '' }}
+                </a>
+              {%- endif -%}
+              <div class="lt-bw__body">
+                {%- if block.settings.kicker != blank -%}
+                  <p class="lt-bw__kicker">{{ block.settings.kicker | escape }}</p>
+                {%- endif -%}
+                <h2 class="lt-bw__title">{{ block.settings.title | escape }}</h2>
+                {%- if block.settings.text != blank -%}
+                  <p class="lt-bw__text">{{ block.settings.text | escape }}</p>
+                {%- endif -%}
+                <p class="lt-bw__price">{{ block.settings.price_line | escape }}</p>
+                <a class="lt-bw__btn" href="{{ bw_url }}">{{ block.settings.cta_label | escape }}</a>
+                {%- if block.settings.save_line != blank -%}
+                  <p class="lt-bw__save">{{ block.settings.save_line | escape }}</p>
+                {%- endif -%}
+              </div>
+            </article>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+
+      {%- if bw_trust != blank -%}
+        <p class="lt-bw__trust">{{ bw_trust | escape }}</p>
+      {%- endif -%}
+
+      <div class="lt-bw__faq">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'faq' -%}
+            <details class="lt-bw__faq-item" {{ block.shopify_attributes }}>
+              <summary>{{ block.settings.question | escape }}</summary>
+              <div class="lt-bw__faq-answer">{{ block.settings.answer }}</div>
+            </details>
+          {%- endif -%}
+        {%- endfor -%}
+      </div>
+    </div>
+
+    {%- comment -%} Nach dem Ende {%- endcomment -%}
+    <div class="lt-bw__phase lt-bw__phase--after">
+      <p class="lt-bw__lead">{{ section.settings.after_text | escape }}</p>
+      <p class="lt-bw__links">
+        {%- for block in section.blocks -%}
+          {%- if block.type == 'offer' and block.settings.product != blank -%}
+            <a href="{{ block.settings.product.url }}">{{ block.settings.kicker | default: block.settings.product.title | escape }}</a>
+          {%- endif -%}
+        {%- endfor -%}
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    var out = document.querySelector('#shopify-section-{{ section.id }} [data-lt-bw-countdown]');
+    var bw = window.LTBlackWeek;
+    if (!out || !bw || !bw.on) return;
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    var iv = null;
+    function tick() {
+      var diff = bw.end - Date.now();
+      if (diff <= 0) {
+        if (iv) clearInterval(iv);
+        return;
+      }
+      var d = Math.floor(diff / 86400000);
+      var h = Math.floor((diff % 86400000) / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      var s = Math.floor((diff % 60000) / 1000);
+      out.textContent = (d > 0 ? d + ' T ' : '') + pad(h) + ':' + pad(m) + ':' + pad(s);
+    }
+    tick();
+    iv = setInterval(tick, 1000);
+  })();
+</script>
+
+{% stylesheet %}
+.lt-bw { background: var(--color-paper); color: var(--color-ink); font-family: var(--font-body); }
+.lt-bw__wrap { max-width: 72rem; margin: 0 auto; padding: var(--space-7) var(--gutter-container, 20px) var(--space-8); }
+.lt-bw__header { margin-bottom: var(--space-5); }
+
+.lt-bw__phase { display: none; }
+html:not([data-lt-bw='on']):not([data-lt-bw='after']) .lt-bw__phase--before { display: block; }
+html[data-lt-bw='on'] .lt-bw__phase--on { display: block; }
+html[data-lt-bw='after'] .lt-bw__phase--after { display: block; }
+
+.lt-bw__lead { max-width: 40rem; margin: 0 0 var(--space-5); font-size: var(--text-body-lg); line-height: var(--leading-body); }
+.lt-bw__timer strong { font-variant-numeric: tabular-nums; }
+
+.lt-bw__offers { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+.lt-bw__card { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid var(--color-gray-200); border-radius: var(--radius-lg); background: var(--color-light-warm); }
+.lt-bw__media { display: block; aspect-ratio: 3 / 2; overflow: hidden; }
+.lt-bw__media img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.lt-bw__body { display: flex; flex: 1; flex-direction: column; gap: var(--space-2); padding: var(--space-5); }
+.lt-bw__kicker { margin: 0; font-size: var(--text-body); color: var(--color-ink-muted); }
+.lt-bw__title { margin: 0; font-family: var(--font-heading); font-size: var(--text-body-lg); font-weight: var(--weight-bold); line-height: var(--leading-tight); }
+.lt-bw__text { margin: 0; font-size: var(--text-body); line-height: var(--leading-body); }
+.lt-bw__price { margin: var(--space-2) 0 var(--space-3); font-size: var(--text-body-lg); font-weight: var(--weight-semibold); }
+.lt-bw__save { margin: 0; font-size: var(--text-body); color: var(--color-ink-muted); text-align: center; }
+
+.lt-bw__btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 100%; min-height: 52px; padding: 14px var(--space-6); margin-top: auto;
+  border: 0; border-radius: var(--radius-full);
+  background: var(--color-cta-bg); color: var(--color-cta-text);
+  font-family: var(--font-body); font-size: var(--text-body); font-weight: var(--weight-semibold);
+  text-decoration: none; cursor: pointer; transition: opacity var(--ease-default);
+}
+.lt-bw__btn:hover { opacity: 0.92; }
+.lt-bw__btn:disabled { opacity: 0.6; cursor: default; }
+
+.lt-bw__trust { margin: var(--space-5) 0 0; font-size: var(--text-body); color: var(--color-ink-muted); }
+
+.lt-bw__faq { max-width: 40rem; margin-top: var(--space-7); border-top: 1px solid var(--color-gray-200); }
+.lt-bw__faq-item { border-bottom: 1px solid var(--color-gray-200); }
+.lt-bw__faq-item summary { padding: var(--space-4) 0; font-size: var(--text-body-lg); font-weight: var(--weight-semibold); cursor: pointer; }
+.lt-bw__faq-answer { padding-bottom: var(--space-4); font-size: var(--text-body); line-height: var(--leading-relaxed); }
+.lt-bw__faq-answer p { margin: 0 0 var(--space-2); }
+
+.lt-bw__signup { max-width: 32rem; }
+.lt-bw__label { display: block; margin-bottom: var(--space-2); font-size: var(--text-body); font-weight: var(--weight-semibold); }
+.lt-bw__fieldset { display: flex; flex-direction: column; gap: var(--space-2); }
+.lt-bw__input {
+  width: 100%; min-height: 52px; padding: 0 var(--space-4);
+  border: 1px solid var(--color-gray-400); border-radius: var(--radius-md);
+  background: var(--color-paper); color: var(--color-ink);
+  font-family: var(--font-body); font-size: var(--text-body);
+}
+.lt-bw__small { margin: var(--space-3) 0 0; font-size: var(--text-body); line-height: var(--leading-body); color: var(--color-ink-muted); }
+.lt-bw__error { margin: var(--space-2) 0 0; font-size: var(--text-body); color: var(--color-promo); }
+.lt-bw__success { margin: 0; font-size: var(--text-body-lg); font-weight: var(--weight-semibold); }
+.lt-bw__error[hidden], .lt-bw__success[hidden], .lt-bw__form[hidden] { display: none; }
+
+.lt-bw__links { display: flex; flex-wrap: wrap; gap: var(--space-4); margin: 0; font-size: var(--text-body-lg); }
+.lt-bw__links a { color: var(--color-ink); }
+
+@media screen and (min-width: 750px) {
+  .lt-bw__wrap { padding-top: var(--space-8); padding-bottom: var(--space-9); }
+  .lt-bw__offers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-5); }
+  .lt-bw__fieldset { flex-direction: row; }
+  .lt-bw__fieldset .lt-bw__btn { width: auto; flex: none; margin-top: 0; }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "LT Black Week",
+  "tag": "section",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Überschrift", "default": "Black Week bei LIFETIME" },
+    { "type": "text", "id": "subheading", "label": "Unterzeile", "default": "23. bis 30. November." },
+    { "type": "header", "content": "Vor dem Start" },
+    { "type": "textarea", "id": "pre_text", "label": "Text", "default": "30 g NMN geschenkt und die Nachmessung zum Test dazu. Trag dich ein, dann kaufst du schon am Sonntagabend, 22.11., ab 18 Uhr." },
+    { "type": "text", "id": "field_label", "label": "Feldbeschriftung", "default": "Deine E-Mail-Adresse" },
+    { "type": "text", "id": "button_label", "label": "Knopf", "default": "Früher kaufen" },
+    { "type": "textarea", "id": "consent_text", "label": "Einwilligungszeile", "default": "Du bekommst unsere Mails zur Black Week und danach Longevity-Wissen und Angebote, etwa zweimal im Monat. Abmelden geht mit einem Klick." },
+    { "type": "text", "id": "success_text", "label": "Bestätigung", "default": "Du stehst auf der Liste. Sonntag, 22.11., 18 Uhr kommt deine Mail." },
+    { "type": "text", "id": "klaviyo_company_id", "label": "Klaviyo Public API Key", "default": "Tp4TCT" },
+    { "type": "text", "id": "klaviyo_list_id", "label": "Klaviyo Listen-ID", "info": "Leer = das Formular legt nur einen Shopify-Kontakt an." },
+    { "type": "header", "content": "Während der Aktion" },
+    { "type": "text", "id": "timer_label", "label": "Countdown-Label", "default": "Endet in" },
+    { "type": "text", "id": "trust_line", "label": "Vertrauenszeile", "info": "[rating] und [count] kommen aus Loox.", "default": "★ [rating]/5 aus [count] Bewertungen · 90 Tage Rückgabe · Versand in 1–2 Werktagen" },
+    { "type": "header", "content": "Nach dem Ende" },
+    { "type": "text", "id": "after_text", "label": "Text", "default": "Die Black Week 2026 ist vorbei. Die Produkte findest du weiter hier:" }
+  ],
+  "blocks": [
+    {
+      "type": "offer",
+      "name": "Angebot",
+      "settings": [
+        { "type": "product", "id": "product", "label": "Produkt" },
+        { "type": "text", "id": "variant_id", "label": "Varianten-ID für den Link" },
+        { "type": "image_picker", "id": "image", "label": "Bild", "info": "Leer = Produktbild." },
+        { "type": "text", "id": "kicker", "label": "Produktzeile" },
+        { "type": "text", "id": "title", "label": "Angebot", "default": "Angebot" },
+        { "type": "textarea", "id": "text", "label": "Text" },
+        { "type": "text", "id": "price_line", "label": "Preiszeile", "default": "Preis" },
+        { "type": "text", "id": "cta_label", "label": "Knopf", "default": "Ansehen" },
+        { "type": "text", "id": "save_line", "label": "Zeile unter dem Knopf" }
+      ]
+    },
+    {
+      "type": "faq",
+      "name": "Frage",
+      "settings": [
+        { "type": "text", "id": "question", "label": "Frage", "default": "Frage" },
+        { "type": "richtext", "id": "answer", "label": "Antwort", "default": "<p>Antwort</p>" }
+      ]
+    }
+  ],
+  "presets": [{ "name": "LT Black Week" }]
+}
+{% endschema %}
