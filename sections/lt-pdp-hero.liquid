@@ -1943,7 +1943,16 @@
               (dynamisch, Kompakt-JS) und eine Zeile Versand plus Garantie. Die Garantie öffnet
               weiter das Popup, Kündbarkeit steht in der Abo-Kachel, Zahlarten entfallen hier. {%- endcomment -%}
           <div class="lt-pdp-hero__post-cta lt-pdp-hero__post-cta--compact{% if section.settings.compact_post_row %} lt-pdp-hero__post-cta--row{% endif %}">
-            <button type="button" class="lt-save-chip" data-lt-save-chip hidden disabled><span class="lt-save-chip__lead" data-lt-save-lead>Du sparst</span> <span class="lt-save-chip__amt" data-lt-save-amt></span><span class="lt-save-chip__go" aria-hidden="true"> →</span></button>
+            {%- comment -%} Versand in die Ersparnis (TMG, 16.11.2026): ohne Größenwahl und unter der Versandgrenze
+                zählt der Chip die Versandkosten des Landes zum Einmalpreis. Daten nur mit compact_save_ship,
+                alle anderen Templates rendern den Chip unverändert. {%- endcomment -%}
+            {%- if section.settings.compact_save_ship and lt_show_sizes != true -%}
+              {%- capture lt_ship_rule_s -%}{%- render 'lt-shipping-rule' -%}{%- endcapture -%}
+              {%- assign lt_ship_rule_s = lt_ship_rule_s | split: '|' -%}
+              <button type="button" class="lt-save-chip" data-lt-save-chip data-ship-cost="{{ lt_ship_rule_s[0] | plus: 0 }}" data-ship-free="{{ lt_ship_rule_s[1] | plus: 0 }}" hidden disabled><span class="lt-save-chip__lead" data-lt-save-lead>Du sparst</span> <span class="lt-save-chip__amt" data-lt-save-amt></span><span class="lt-save-chip__tail" data-lt-save-tail hidden> inkl. Versand</span><span class="lt-save-chip__go" aria-hidden="true"> →</span></button>
+            {%- else -%}
+              <button type="button" class="lt-save-chip" data-lt-save-chip hidden disabled><span class="lt-save-chip__lead" data-lt-save-lead>Du sparst</span> <span class="lt-save-chip__amt" data-lt-save-amt></span><span class="lt-save-chip__go" aria-hidden="true"> →</span></button>
+            {%- endif -%}
             {%- capture lt_guarantee_inline -%}
               {%- if lt_guarantee_popup_plain != '' -%}
                 <button type="button" class="lt-pdp-hero__post-line-btn" data-crs-dialog-open aria-haspopup="dialog" aria-controls="crs-lt-hero-guarantee-{{ section.id }}">{{ lt_guarantee_line | escape }}</button>
@@ -2607,6 +2616,8 @@
       var chip = section.querySelector('[data-lt-save-chip]');
       var chipLead = chip ? chip.querySelector('[data-lt-save-lead]') : null;
       var chipAmt = chip ? chip.querySelector('[data-lt-save-amt]') : null;
+      // Zusatz „inkl. Versand“ nur mit compact_save_ship (TMG, 16.11.2026), sonst gibt es das Element nicht.
+      var chipTail = chip ? chip.querySelector('[data-lt-save-tail]') : null;
       var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       var chipRaf = 0;
       function parseCents(txt) {
@@ -2620,12 +2631,13 @@
       function fmtSave(c) {
         return c % 100 === 0 ? (c / 100) + ' €' : formatPrice(c);
       }
-      function setChip(lead, cents, actionable, instant) {
+      function setChip(lead, cents, actionable, instant, tail) {
         if (!chip || isNaN(cents) || cents <= 0) { if (chip) chip.hidden = true; return; }
         chipLead.textContent = lead;
         chip.disabled = !actionable;
         chip.classList.toggle('is-actionable', actionable);
-        chip.setAttribute('aria-label', lead + ' ' + fmtSave(cents) + (actionable ? ', Abo wählen' : ''));
+        if (chipTail) chipTail.hidden = !tail;
+        chip.setAttribute('aria-label', lead + ' ' + fmtSave(cents) + (tail && chipTail ? chipTail.textContent : '') + (actionable ? ', Abo wählen' : ''));
         var from = parseInt(chip.dataset.cents, 10);
         var wasHidden = chip.hidden;
         chip.hidden = false;
@@ -2732,8 +2744,16 @@
           // zeigt wie bei NMN die Abo-Ersparnis und schaltet bei „Einmalig“ per Tipp aufs Abo.
           var aboIn = section.querySelector('[data-bb-kind="sub"] .lt-bb-card__input');
           var aboSave = aboIn ? parseInt(aboIn.dataset.oncePrice, 10) - parseInt(aboIn.dataset.subPrice, 10) : NaN;
+          // Versand in die Ersparnis (compact_save_ship, TMG 16.11.2026): liegt der Einmalpreis unter der
+          // Versandgrenze des Landes, kostet der Einmalkauf Preis plus Versand, das Abo ist versandfrei.
+          // Der Chip zählt dann den Versand mit und sagt es im Abo dazu.
+          var shipC = parseInt(chip.dataset.shipCost, 10);
+          var shipFree = parseInt(chip.dataset.shipFree, 10);
+          var aboOnce = aboIn ? parseInt(aboIn.dataset.oncePrice, 10) : NaN;
+          var inclShip = chipTail && shipC > 0 && shipFree > 0 && aboOnce < shipFree;
+          if (inclShip && aboSave > 0) aboSave += shipC;
           if (directTxt) { setChip('Du sparst', parseCents(directTxt.replace(/^Du sparst\s*/, '')), false); direct.hidden = true; }
-          else if (aboSave > 0) { setChip(isSub ? 'Du sparst' : 'Im Abo sparst du', aboSave, !isSub); }
+          else if (aboSave > 0) { setChip(isSub ? 'Du sparst' : 'Im Abo sparst du', aboSave, !isSub, false, inclShip && isSub); }
           else { chip.hidden = true; }
         } else if (chip) {
           var base = sizes[0];
@@ -5327,6 +5347,13 @@
       "id": "compact_once_ship",
       "label": "Kompakt ohne Größenwahl: Versandkosten bei Einmalig nennen",
       "info": "Unter der Versandgrenze steht dann „Zzgl. 4,90 € Versand, versandfrei ab 49 €.“ statt „Versandfrei.“",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "compact_save_ship",
+      "label": "Kompakt: Versand in die Ersparnis rechnen",
+      "info": "Nur ohne Größenwahl und wenn der Einmalpreis unter der Versandgrenze liegt. Der Chip zählt dann die Versandkosten zum Einmalpreis: „Du sparst 6,39 € inkl. Versand“.",
       "default": false
     },
     {
