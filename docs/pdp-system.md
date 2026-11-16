@@ -199,7 +199,7 @@ Offen: Abo-Plan (dann `show_subscription_toggle` an, `compact_sub_hint` „Liefe
 ## PDP TMG (`/products/betain-tmg-kapseln`)
 
 Template: `templates/product.01_tmg.json` (Suffix `01_tmg`, am Produkt bestätigt 16.11.2026).
-Seit 16.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-tmg-pdp-2026-11-16.html` (BJ-Freigabe „Ja, Template bauen“), gleiche Kette wie NAD⁺, Kreatin, Resveratrol und D3+K2. **Noch nicht live.** Vorschau-Theme `194334196087` („Claude TMG-PDP (16.11.)“). 6 Einträge in `order`, kein `main_product_hidden` mehr (vorher 10 Sections samt sichtbarem zweitem Hero).
+Seit 16.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-tmg-pdp-2026-11-16.html` (BJ-Freigabe „Ja, Template bauen“), gleiche Kette wie NAD⁺, Kreatin, Resveratrol und D3+K2. **Live seit 16.11.2026** (BJ-Ansage „deploy“, gezielter CLI-Push nur von `templates/product.01_tmg.json` und `sections/lt-pdp-hero.liquid`, je Datei zurückgezogen und verglichen, Seite im Browser geprüft). Der Hero ging als Live-Fassung plus TMG-Patch hoch: die Hero-Zeilen aus D3+K2 (`15136b1`) und Black Week (`e460e0e`, `4906b33`) sind weiter **nicht** live. Abgenommen im Vorschau-Theme `194334196087` („Claude TMG-PDP (16.11.)“). 6 Einträge in `order`, kein `main_product_hidden` mehr (vorher 10 Sections samt sichtbarem zweitem Hero).
 
 | # | Section-Key | Typ | Rolle |
 |---|---|---|---|
