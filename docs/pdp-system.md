@@ -81,33 +81,19 @@ wiederholt den Kauf am Seitenende. Kaufknöpfe: Hero, Warum jetzt, Garantie, Lei
 
 ## PDP Spermidin (`/products/spermidin-kapseln`)
 
-Template: `templates/product.02_spermidin.json` (Suffix `02_spermidin`). Seit dem 2026-07-29 der
-**Referenzfall für Supplements** und die Vorlage für die Wellen W1–W3. 10 Einträge in `order`,
-davon 1 deaktiviert.
+Template: `templates/product.02_spermidin.json` (Suffix `02_spermidin`, am Produkt bestätigt 16.11.2026). Stand des Entwurfs `docs/entwurf-spermidin-pdp-2026-11-16.html` (Entwurf-Commit `cd0baeb`, BJ-Freigabe „Ja, Template bauen“), gleiche Kette wie TMG, Grauzonen-Fassung wie Resveratrol (für Spermidin ist kein Claim zugelassen, der Haarzyklus-Claim ist mit VO (EU) 1017/2013 abgelehnt, das Etikett hat keine Begleitnährstoffe). **Live seit 16.11.2026, 18:03**: Der Theme Manager hat das noch unkommittierte Template mit BJs Push mitgenommen (Commit `77dd089`, zusammen mit CaAKG und Hyaluron). Kein Vorschau-Theme. Live headless bei 375 und 1280 px gemessen (kein Überlauf, keine Konsolenfehler, H1 30/36 px, H2 28 px, FAQ mobil 24 px), Warenkorb im eingebauten Browser getestet (Abo 26,91 € mit Plan „Jeden Monat“, Einmalig 29,90 € mit „Zzgl. 4,90 € Versand“). 6 Einträge in `order`, kein `main_product_hidden` mehr (vorher 9 sichtbare Sections, die alte Supplement-Kette vom 29.07.).
 
-| # | Section-Key | Typ (`sections/*.liquid`) | Stufe | Rolle |
-|---|---|---|---|---|
-| 1 | `main` | `lt-pdp-hero` | Aufmerksamkeit + Handlung | Hero, Abo/Einmal-Buybox, vier Trust-Zeilen, Sticky-ATC. `trust_4` trägt den Allergenhinweis mit Popup |
-| 2 | `logo_garden` | `crs-logo-garden` | Vertrauen | Medienlogos wie NMN |
-| 3 | `feature_grid` | `crs-feature-grid` | Verständnis | Vier Unterscheidungsmerkmale, zweispaltig |
-| 4 | `wirkprinzip` | `lt-pdp-wirkprinzip` | Verständnis | Drei Stufen: Vorkommen, Rohstoff, Standardisierung. Claimfrei, ohne Bild |
-| 5 | `produktfakten` | `lt-pdp-produktfakten` | Risikoreduktion | LMIV/NemV-Pflichtangaben dreispaltig: Gehalt, Zutaten, Verzehrempfehlung |
-| 6 | `comparison_table` | `lt-comparison-table` | Vertrauen | Abgrenzung gegen typische Anbieter, sechs Zeilen |
-| 7 | `1721223701af92f7b4` | `apps` | Vertrauen | Loox-Widget, rendert clientseitig |
-| 8 | `risk_free_close` | `crs-risk-free-close` | Handlung | Abo-Close mit vier Trust-Zeilen |
-| 9 | `faq_accordion` | `crs-faq-accordion` | Risikoreduktion | 10 Fragen, Rohstoff/Allergen/Zielgruppe auf den Positionen 1 bis 3 |
-| 10 | `main_product_hidden` | `main-product` | keine | `"disabled": true`, rendert nicht |
+| # | Section-Key | Typ | Rolle |
+|---|---|---|---|
+| 1 | `main` | `lt-pdp-hero` | Titelzeile „Für alle, die an ihre Zellen denken.“, Punkte „Spermidin steckt in Weizenkeimen, Pilzen und reifem Käse.“, „10 mg am Tag in 2 Kapseln, aus Weizenkeimextrakt.“, „Jede Charge im Labor geprüft.“, Zeile „Vegane Kapsel · Etikett ansehen“. Kompakte Kaufzone wie TMG mit Chip „Du sparst 7,89 € inkl. Versand“ (`compact_save_ship`) und Tagespreis („60 Kapseln für 30 Tage“, keine Füllmenge in Gramm). `trust_4` „Enthält Weizen (Gluten)“ als Notiz mit Dialog „Allergen und Zielgruppe“ (LMIV Art. 14, Allergen vor dem Kauf). Galerie: erstes Produktbild, dann `gallery_extra_1–3` |
+| 2 | `wirkprinzip` | `lt-pdp-wirkprinzip` | „Spermidin steckt in jeder Zelle. Und in dem, was du isst.“, Einblendung ohne Glaskarte (Kiechl 2018, 5,7 Jahre, nur Abstract gelesen), Rollen „Was Spermidin ist“, „Was die Forschung untersucht“ (Autophagie als Forschungsgegenstand, erklärt das Siegel CELL RECYCLE), „Wie du es nimmst“. Querformat-Foto, `einbl_mobile_vw: 190` |
+| 3 | `belege` | `lt-pdp-belege` | Bildkarte „Spermidin, aus Weizenkeimen“ (Marken 10 mg bei 71/50 und Weizenkeim bei 64/84), dazu Stimmen-Karte mit drei echten Loox-Texten (Katharina B., Anna R., Martina B., keine Wirkaussage) |
+| 4 | `loox_reviews` | `lt-pdp-reviews-all` | Lade mit allen Loox-Bewertungen (9, Schnitt 4,9) |
+| 5 | `produktfakten` | `lt-pdp-produktfakten` | Fakten mit Etikett (Zoom 1,85 bei 0,5 % 17,5 %, Ausschnitt ohne die Siegelspalte mit „Glutenfrei“), Kapsel-Symbol, vierte Zeile „Allergen: Enthält Weizen (Gluten)“. Zutaten mit der zugelassenen Bezeichnung „WEIZENkeimextrakt mit hohem Spermidingehalt“, Lade mit Gehalt je Portion und dem Ausschluss von Schwangeren und Stillenden (Unionsliste VO (EU) 2017/2470, Berichtigung 2018/1023) |
+| 6 | `faq_accordion` | `crs-faq-accordion` | 6 Fragen, Versand/Abo/Garantie wörtlich von NMN, dann Gluten, „Merke ich etwas?“ (mit Link auf den Blog-Beitrag `was-ist-spermidin`), „Für wen ist Spermidin nicht gedacht?“ |
 
-Die Kette folgt der NMN-Schlusslogik (Close vor FAQ), nicht der von AGE&DNA. Sie ist bewusst
-kürzer als beide Nordsterne: die vier optionalen Beweis-Slots (`lt-pdp-laborwerte`,
-`crs-metrics-row`, `crs-expert-quotes`, `crs-customer-reviews`) fallen an Gate G3 aus, weil für
-Supplements weder Prüfbericht noch belegte Zahl noch produktbezogenes Limmroth-Statement noch
-genug substanzielle Loox-Bewertungen existieren. Die Begründung je Produkt steht in
-`pdp-supplement-rollout.md`.
-
-Die Loox-Section hat keine Farb-Settings und erbt den Body-Hintergrund `#f7f7f4`. Sie steht
-deshalb an Position 7, wo die Flächen-Alternation ohnehin `#f7f7f4` verlangt. Verschiebt man
-sie, kippt der Rhythmus.
+Keine Section-Erweiterung nötig. Bilder in den Shopify-Dateien: `spermidin-galerie-travertin.png` (Codex, Dose mit CELL RECYCLE), `spermidin-galerie-frau.jpg` (Pexels 3893500, Elina Fairytale, quadratisch aus der Mitte), `spermidin-etikett.jpg` (Druck 18.06.2025, Charge SPE252001, 1660 × 680 ohne Siegelspalte), `spermidin-wirkprinzip-kueche.jpg` (Pexels 3893737, 5617 × 3744 unbeschnitten), `spermidin-stillleben.png` (Codex, 1774 × 887). Die Dosis bleibt bei 10 mg (BJ-Entscheid 29.07.).
+Offen: Erstes Produktbild zeigt noch das Siegel CELL STABILITY (Produktmedien, das Foto mit CELL RECYCLE liegt als `spermidin-1_1364aed9-….jpg` in den Dateien, Tausch braucht BJs Ja), Glaskarte Kiechl 2018 (Volltext), Titelzeile, Garantie-Wortlaut, Prüfbericht je Charge SPE252001, Etikett (zugelassene Bezeichnung, Schwangere und Stillende, Glutenfrei-Siegel, Berlin, Spezifikation des Extrakts laut Rohstoff-Zertifikat 11,2 mg/g gegen 0,8 bis 2,4 mg/g der Zulassung, Anwalt).
 
 ## PDP NAD⁺ (`/products/nad-booster`)
 
