@@ -14,8 +14,9 @@ Beleg-Abschnitte bleiben ruhig. **NMN-PDP ohne Menschen** (BJ 16.11.).
 
 ## Stand
 
-Vorschau auf dem unveröffentlichten Theme **„Claude Bildwelt Vorschau (16.11.)“ (#193736180087)**,
-Basis ist der Live-Stand vom 16.11. Live ist nichts geändert.
+**Von BJ am 16.11. freigegeben und im Repo, wartet auf den Push über den Theme Manager.** Live ist
+bis dahin nichts geändert. Die Vorschau liegt weiter auf dem unveröffentlichten Theme
+**„Claude Bildwelt Vorschau (16.11.)“ (#193736180087)**, Basis war der Live-Stand vom 16.11.
 
 - Katalog: https://lifetime-health-de.myshopify.com/collections/all?preview_theme_id=193736180087
 - Wissenschaft: https://lifetime-health-de.myshopify.com/pages/science?preview_theme_id=193736180087
@@ -33,13 +34,14 @@ Aufnahmen in `vorschau/`.
 | Wissenschaft | Schluss-Leiste am Seitenende, im Validierungs-Block das Laufpaar statt der kühlen Schwimmerin | nur Template |
 | NMN-PDP | Schluss-Leiste mit drei Fakten und Karte „Der Rohstoff“ als Bildkarte, beides mit dem Stillleben ohne Menschen | nur Template |
 
-Alle neuen Settings stehen per Default auf aus. Die Sections sind im Repo, die Template-Änderungen
-**nicht**: sie liegen nur im Vorschau-Theme, damit ein normaler Push sie nicht versehentlich live
-nimmt. Nach der Freigabe:
+Alle neuen Settings stehen per Default auf aus. Sections und Templates sind im Repo. Die drei
+Templates (`collection.katalog.json`, `page.science.json`, `product.nmn-pulver.json`) sind inhaltlich
+gleich der Vorschau-Fassung, gegengeprüft am 16.11. `templates-patch.py` bleibt als Protokoll liegen:
+es schreibt dieselben Änderungen auf einen frisch gezogenen Live-Stand, formatiert `page.science.json`
+dabei aber um, deshalb ist die Datei im Repo von Hand an denselben drei Stellen geändert.
 
-```bash
-python3 docs/bildwelt-2026-11-16/templates-patch.py .
-```
+Nach dem Push prüfen: Katalog, `/pages/science` und NMN-PDP je bei 1280 und 390 px, auf der NMN-PDP
+Variantenwahl und Warenkorb (das Template hat eine Section mehr, 6 von höchstens 25).
 
 ## Motive (16.11.2026, ChatGPT, Projekt `ki-bilder`)
 
