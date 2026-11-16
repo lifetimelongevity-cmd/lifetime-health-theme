@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-11-08
+last_review: 2026-11-16
 canonical_for: pdp-section-system und live-reihenfolge
 ---
 
@@ -196,6 +196,23 @@ Seit 08.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-d3k2-pdp-2026-11-
 Erweiterungen, alle mit Default aus: `compact_amount_unit` (g oder ml) in `lt-pdp-hero`; Versand- und Grundpreiszeile im Pfad ohne Abo (nur mit `compact_once_ship` bzw. `compact_amount_text`); `fact_icon: spruehstoss` in `lt-pdp-produktfakten`; `einbl_mobile_vw` in `lt-pdp-wirkprinzip` (180 bei Querformat, sonst lädt das Handy zu klein). Bilder in den Shopify-Dateien: `d3k2-galerie-travertin.png`, `d3k2-galerie-frau.jpg`, `d3k2-etikett.jpg`, `d3k2-wirkprinzip-yoga.jpg`, `d3k2-stillleben.png`.
 Offen: Abo-Plan (dann `show_subscription_toggle` an, `compact_sub_hint` „Lieferung alle 75 Tage, versandfrei, jederzeit kündbar.“, FAQ wörtlich von NMN), zweite Packungsgröße, Prüfbericht je Charge, K2-Herkunft.
 
+## PDP TMG (`/products/betain-tmg-kapseln`)
+
+Template: `templates/product.01_tmg.json` (Suffix `01_tmg`, am Produkt bestätigt 16.11.2026).
+Seit 16.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-tmg-pdp-2026-11-16.html` (BJ-Freigabe „Ja, Template bauen“), gleiche Kette wie NAD⁺, Kreatin, Resveratrol und D3+K2. **Noch nicht live.** Vorschau-Theme `194334196087` („Claude TMG-PDP (16.11.)“). 6 Einträge in `order`, kein `main_product_hidden` mehr (vorher 10 Sections samt sichtbarem zweitem Hero).
+
+| # | Section-Key | Typ | Rolle |
+|---|---|---|---|
+| 1 | `main` | `lt-pdp-hero` | Titelzeile „Für deinen Homocystein-Stoffwechsel.“, Punkt 1 ist der zugelassene Betain-Claim (VO 432/2012), Zeile „Über 98 % Reinheit · Etikett ansehen“, kompakte Kaufzone mit festem Abo-Hinweis, Versandkosten bei „Einmalig“ und Tagespreis („60 Kapseln für 30 Tage“, kein `compact_amount_grams`, Kapselgewicht fehlt). Chip mit Versand (`compact_save_ship`): „Du sparst 6,39 € inkl. Versand“. Garantie-Dialog im NMN-Wortlaut. Galerie: Dose, dann `gallery_extra_1–3` |
+| 2 | `wirkprinzip` | `lt-pdp-wirkprinzip` | „Betain wandelt Homocystein um.“, Einblendung ohne Glaskarte (`stat_value` leer, keine Betain-Studie mit 50- bis 65-Jährigen), drei Rollen ohne Symbol; die dritte trägt beide Pflichtinfos des Claims (1,5 g = 3 Kapseln, über 4 g Cholesterin) |
+| 3 | `belege` | `lt-pdp-belege` | Bildkarte „Betain, hochrein“ (Stillleben, Marken Über 98 % und Vegan), ohne Kundenstimmen |
+| 4 | `loox_reviews` | `lt-pdp-reviews-all` | Lade mit allen Loox-Bewertungen |
+| 5 | `produktfakten` | `lt-pdp-produktfakten` | Fakten mit Etikett (Zoom 1,8 bei 4,5 % 11 %), Kapsel-Symbol, Verzehrempfehlung 2 Kapseln wie das Etikett, 4-g-Warnung in der Lade |
+| 6 | `faq_accordion` | `crs-faq-accordion` | 6 Fragen, Versand/Abo/Garantie wörtlich von NMN, dann „Merke ich etwas?“, B-Vitamine, Cholesterin |
+
+Erweiterung in `lt-pdp-hero`, Default aus: `compact_save_ship` („Kompakt: Versand in die Ersparnis rechnen“). Ohne Größenwahl und mit Einmalpreis unter der Versandgrenze aus `lt-shipping-rule` zählt der Chip die Versandkosten des Landes zum Einmalpreis (DE: 14,90 + 4,90 − 13,41 = 6,39 €). Im Abo steht „inkl. Versand“ dahinter, bei „Einmalig“ „Im Abo sparst du 6,39 €“ mit Tipp aufs Abo. Nur TMG setzt den Schalter; Kreatin und NMN im Vorschau-Theme gegen Live verglichen, Chip und Hinweise gleich. Bilder in den Shopify-Dateien: `tmg-galerie-travertin.png`, `tmg-galerie-frau.jpg` (Pexels 6927887, quadratisch 4259 × 4259), `tmg-wirkprinzip-kueche.jpg` (Pexels 6927897, 3916 × 5874 unbeschnitten, Gesicht bleibt mit der festen Bildposition mobil und am Desktop im Bild), `tmg-stillleben.png`, `tmg-etikett.jpg` (2520 × 945).
+Offen: Titelzeile, Doppelpack, Prüfbericht je Charge TMG252001, Kapselgewicht, Garantie-Wortlaut (NMN oder „Auch wenn du nichts merkst“), Anwalt (Pflichtinfo am Hero-Claim, 2 gegen 3 Kapseln).
+
 ## Konvention `main_product_hidden`
 
 Beide Templates führen die Theme-Section `main-product` unter dem Key `main_product_hidden`
@@ -212,7 +229,8 @@ Warenkorb-Form) läuft über `lt-pdp-hero`.
   `main_product_hidden` aktiv und rendert, weil es Beschreibung, Nährwerte und Verzehrempfehlung
   trägt. Seit 29.09.2026 sind in 01 und 03 bis 11 dort der `buy_buttons`-Block und
   `sticky_add_to_cart` aus (vorher drei Warenkorb-Formulare pro Seite); gekauft wird nur über
-  `lt-pdp-hero`.
+  `lt-pdp-hero`. Seit November 2026 haben NAD⁺ (12), Kreatin (05), Resveratrol (06), D3+K2 (07)
+  und TMG (01) den Eintrag gar nicht mehr, sie laufen auf der Kette mit sechs Sections oben.
 
 ## Preisquelle (häufige Fehlannahme)
 
