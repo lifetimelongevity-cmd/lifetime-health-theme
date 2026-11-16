@@ -279,6 +279,22 @@ Template: `templates/product.10_hyaluron.json` (Suffix `10_hyaluron`, am Produkt
 Erweiterung in `lt-pdp-hero`, Default unverändert: `compact_amount_unit` hat den Wert `kg` (Commit `e574a5e`). § 5 Abs. 1 PAngV verlangt seit 28.05.2022 bei Fertigpackungen den Grundpreis je kg, die 100-g-Einheit gilt nur noch für lose Ware. Nur Hyaluron setzt den Wert, Kreatin zeigt live weiter „7,47 €/100 g“. Bilder in den Shopify-Dateien: `hyaluron-galerie-travertin.png`, `hyaluron-galerie-frau.jpg` (Pexels 7530606, Mikhail Nilov, quadratisch y 200 bis 4200), `hyaluron-wirkprinzip-fenster.jpg` (Pexels 7530591, 4000 × 6000 unbeschnitten), `hyaluron-stillleben.png`, `hyaluron-etikett.jpg`.
 Offen: Fermentation am Rohstoff-Datenblatt bestätigen, Prüfbericht je Charge, Doppelpack (57,80 € wäre versandfrei), Kapselfarbe, Garantie-Wortlaut, Etikett (Berlin, Siegel „SKIN & JOINT REGEN“, verkürzter Pflichthinweis), Grundpreis je kg auch für Kreatin setzen.
 
+## PDP CaAKG (`/products/caakg-kapseln`)
+
+Template: `templates/product.03_caakg.json` (Suffix `03_caakg`, am Produkt bestätigt 16.11.2026). Stand des Entwurfs `docs/entwurf-caakg-pdp-2026-11-16.html` (Entwurf-Commit `1d55f45`, BJ-Freigabe „Ja, Template bauen“), gleiche Kette wie TMG, mit zugelassenem Claim des Begleitnährstoffs Calcium (VO 432/2012, 180 mg je 2 Kapseln = 22,5 % NRV). **Live seit 16.11.2026, 18:03**: Der Theme Manager hat das noch unkommittierte Template mit BJs Push mitgenommen (Commit `77dd089`, zusammen mit Spermidin und Hyaluron), per Pull gegen das Repo geprüft. Kein Vorschau-Theme. Live headless bei 375 und 1280 px gemessen (kein Überlauf, alle Bilder laden, nur Bot-403 von Shop Pay und einem Lambda-Pixel), Warenkorb im eingebauten Browser getestet (Abo 22,41 € mit Plan „Jeden Monat“, Einmalig 24,90 € mit Chip „Im Abo sparst du 7,39 €“). 6 Einträge in `order`, kein `main_product_hidden` mehr (vorher 8 Sections samt sichtbarem zweitem Hero, drei Rich-Texts und leerer Empfehlungs-Section).
+
+| # | Section-Key | Typ | Rolle |
+|---|---|---|---|
+| 1 | `main` | `lt-pdp-hero` | Titelzeile „Für dein biologisches Alter.“, Punkt 1 ist der Calcium-Claim „Calcium wird für die Erhaltung normaler Knochen benötigt.“, Punkt 2 „1 g am Tag, so viel wie in der Studie.“, Zeile „Über 98 % Reinheit · Etikett ansehen“. Kompakte Kaufzone wie TMG mit Chip „Du sparst 7,39 € inkl. Versand“ (`compact_save_ship`) und Tagespreis („60 Kapseln für 30 Tage“, Kapselgewicht fehlt). Galerie: Dose, dann `gallery_extra_1–3` |
+| 2 | `wirkprinzip` | `lt-pdp-wirkprinzip` | „AKG und dein biologisches Alter.“, Einblendung mit Glaskarte −7 Jahre (Demidenko 2021, Rejuvant, Mittelwert der 14 Frauen, Median 64 Jahre, 1 g CaAKG mit Vitamin D, ohne Vergleichsgruppe, am Volltext PMC8660611 geprüft), Rollen „Warum AKG?“ und „Und das Calcium?“ ohne Symbol |
+| 3 | `belege` | `lt-pdp-belege` | Bildkarte „CaAKG, hochrein“ (Marken Über 98 % und Vegan wie TMG), ohne Kundenstimmen (Loox: 10 Bewertungen, fünf „Kein Kommentar“) |
+| 4 | `loox_reviews` | `lt-pdp-reviews-all` | Lade mit allen Loox-Bewertungen |
+| 5 | `produktfakten` | `lt-pdp-produktfakten` | Fakten mit Etikett (Zoom 1,95 bei 3 % 6 %, gerendert aus der Druckfreigabe `CaAKG-print-2025-06-18.pdf`, 2520 × 945, Charge CAA252001), Zeile „davon Calcium 180 mg“ für den Claim, Kapsel-Symbol, Gehalt mit NRV als erster Satz der Lade |
+| 6 | `faq_accordion` | `crs-faq-accordion` | 6 Fragen, Versand/Abo/Garantie wörtlich von NMN, dann „Merke ich etwas?“ (Link AGE&DNA-Test), „Brauche ich Vitamin D dazu?“ (Link D3+K2-Spray), „Ich nehme schon Calcium.“ |
+
+Keine Section-Erweiterung. Novel Food: Katalog-Eintrag „Alpha-Ketoglutarate Calcium“ (Stand 18.12.2025) nicht neuartig in Nahrungsergänzungsmitteln. Bilder in den Shopify-Dateien: `caakg-galerie-travertin.png`, `caakg-galerie-frau.jpg` (Pexels 6787553, Marcus Aurelius, quadratisch 3467 × 3467), `caakg-wirkprinzip-gewaechshaus.jpg` (Pexels 6787551, quadratisch 4480 × 4480, Gesicht bei 50 % der Breite und rund 18 % der Höhe), `caakg-stillleben.png`, `caakg-etikett.jpg`.
+Offen: Prüfbericht je Charge, Kapselgewicht, Doppelpack (49,80 € wäre versandfrei), Kapselfarbe, Garantie-Wortlaut, Anwalt (CaAKG fehlt in Anhang II der RL 2002/46, Glaskarte aus einer Studie ohne Vergleichsgruppe), Etikett (22,6 % statt 22,5 % NRV, Berlin, verkürzter Pflichthinweis), Warenkorb-Angebot zeigt auf CaAKG „NMN Pulver“.
+
 ## Konvention `main_product_hidden`
 
 Beide Templates führen die Theme-Section `main-product` unter dem Key `main_product_hidden`
