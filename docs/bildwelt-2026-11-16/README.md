@@ -59,7 +59,8 @@ Für weitere Bänder gilt dieselbe Bestellung: Querformat 3:2, Motiv in der rech
 das linke Drittel ruhig und dunkel. Hochformate taugen dafür nicht, es bleibt nur ein Streifen
 Oberkörper. **Kein verwischtes Gesicht** (BJ 16.11.): Die ersten Fassungen hatten verwischte
 Gesichter und wirkten in Küche und Bett unheimlich (`lt-kat-zellfunktion.webp`, `lt-kat-basis.webp`,
-`lt-kat-alltag.webp`, ungenutzt in den Shopify-Dateien). Jetzt ist in allen drei Bändern die Person
+`lt-kat-alltag.webp`, am 16.11. auf BJs Ansage aus den Shopify-Dateien gelöscht; die PNGs liegen
+weiter in `lifetime-mockups/ki-bilder/`). Jetzt ist in allen drei Bändern die Person
 von hinten zu sehen, das Bild ist scharf, und nur im Laufbild ist der Hintergrund bewegungsunscharf. Auf der NMN-PDP keine Menschen, keine Hände, keine Einnahme-Requisiten (Wasserglas,
 Löffel).
 
