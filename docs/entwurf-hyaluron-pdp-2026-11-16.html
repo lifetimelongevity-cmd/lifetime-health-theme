@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entwurf Hyaluron-PDP</title>
+<meta name="description" content="Entwurf der Hyaluron-Produktseite nach Jobs to be Done, Progressive Disclosure und Hicks Gesetz, gebaut wie die Live-NMN-, NAD⁺-, Kreatin- und TMG-PDP. Grauzonen-Fassung ohne Wirkversprechen. Nur Vorschau, kein Produktivcode.">
+<style>
+  /* Lato wie im Live-Shop: dieselben Dateien und Schnitte (400, 500, 600; 700 fällt wie live auf 600) */
+  @font-face{font-family:Lato;font-weight:400;font-style:normal;font-display:swap;src:url("https://www.lifetime-health.de/cdn/fonts/lato/lato_n4.c3b93d431f0091c8be23185e15c9d1fee1e971c5.woff2") format("woff2")}
+  @font-face{font-family:Lato;font-weight:500;font-style:normal;font-display:swap;src:url("https://www.lifetime-health.de/cdn/fonts/lato/lato_n5.b2fec044fbe05725e71d90882e5f3b21dae2efbd.woff2") format("woff2")}
+  @font-face{font-family:Lato;font-weight:600;font-style:normal;font-display:swap;src:url("https://www.lifetime-health.de/cdn/fonts/lato/lato_n6.38d0e3b23b74a60f769c51d1df73fac96c580d59.woff2") format("woff2")}
+  /* Werte gemessen an der Live-NMN-PDP (05.11.2026, 1280 und 375 px), Namen wie assets/theme.css :root */
+  :root{
+    /* Farben */
+    --color-ink:#26251e; --color-paper:#f7f7f4; --color-warm:#f2f1ed; --color-white:#fff;
+    --color-dark:#364f56; --color-teal:#65c0b6; --color-star:#f4b740; --color-gray-600:#525252; --color-ink-muted:#6b6b63;
+    --ink-sec:rgba(38,37,30,.72); --ink-ter:rgba(38,37,30,.66); --ink-icon:rgba(38,37,30,.38);
+    --rule-faint:rgba(38,37,30,.05); --rule:rgba(38,37,30,.08); --rule-strong:rgba(38,37,30,.1);
+    --chip-bg:#e6f4f1;
+    /* Schrift: sechs Größen, zwei Gewichte, fünf Zeilenhöhen. Alles Stufen der Live-NMN-PDP (05.11.2026).
+       Größen je Viewport 375 / 1280: Zahl 48/56 · Titel 30/36 · Abschnitt 24/28 · Text 16 · Klein 14 · Mikro 12 */
+    --font-heading:"Helvetica Neue",Helvetica,Arial,sans-serif;
+    --font-body:Lato,-apple-system,BlinkMacSystemFont,sans-serif;
+    --text-stat:48px; --text-h1:30px; --text-h2:28px;
+    --text-body:16px; --text-body-sm:14px; --text-micro:12px;
+    /* Nur in den geteilten Bausteinen (Hero, Belege, FAQ, Sticky), dort wie live NMN */
+    --text-body-lg:18px; --text-buy:15px; --text-fine:13px;
+    --leading-copy:1.5; --leading-answer:1.65; --weight-medium:500; --weight-bold:700;
+    --leading-stat:1; --leading-heading:1.15; --leading-tight:1.25; --leading-body:1.4; --leading-relaxed:1.6;
+    --weight-regular:400; --weight-semibold:600;
+    /* Abstände, Radien, Breiten */
+    --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-5:24px; --space-6:32px; --space-7:48px; --space-8:64px; --space-9:80px;
+    --radius-card:4px; --radius-lg:16px; --radius-full:999px;
+    --page-max:1280px; --page-gutter:var(--space-4); --belege-max:960px; --measure:32rem;
+    /* Kaufzone */
+    --pick-h:48px; --cta-h:48px; --icon:16px; --icon-gap:9px; --thumb:64px;
+    --section-y:min(80px,15vw);
+    /* Notizen für BJ, nicht Teil der Seite */
+    --note-bg:#fbf5e4; --note-line:#e6d6a6; --note-ink:#6b5a24;
+  }
+  @media (min-width:768px){ :root{--page-gutter:var(--space-5);--text-h1:36px} }
+  @media (min-width:840px){ :root{--text-stat:56px} }
+  /* H2 mobil 28 px wie die gerenderten Sections, nur die FAQ hat 24 px */
+  @media (max-width:860px){ .faq .hs{font-size:24px} }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;font-family:var(--font-body);font-size:var(--text-body);line-height:var(--leading-body);color:var(--color-ink);background:var(--color-paper);overflow-x:hidden}
+  a{color:inherit}
+  h1,h2,h3,p,ul{margin:0}
+  h3{font-size:var(--text-body)}
+  b,strong,h3{font-weight:var(--weight-semibold)}
+  ul{padding:0;list-style:none}
+  button{font:inherit;color:inherit}
+  img{max-width:100%;display:block}
+  summary{list-style:none;cursor:pointer}
+  summary::-webkit-details-marker{display:none}
+  .wrap{max-width:var(--page-max);margin:0 auto;padding:0 var(--page-gutter)}
+  .chev{flex:none;width:var(--icon);height:var(--icon);color:var(--ink-ter);transition:transform .2s ease}
+  details[open]>summary .chev{transform:rotate(180deg)}
+
+  /* Kopf (Platzhalter für den Theme-Header) */
+  .hd{height:57px;display:flex;align-items:center;justify-content:space-between}
+  .hd img{height:24px;width:auto}
+  .hd__r{display:flex;gap:var(--space-4);color:var(--ink-sec);font-size:var(--text-body-sm)}
+
+  /* Überschriften: crs-heading-stack, headline-md (Titel + Untertitel ein Block, nur die Farbe gedämpft) */
+  .hs{font-family:var(--font-heading);font-size:var(--text-h2);line-height:var(--leading-heading);font-weight:var(--weight-regular);letter-spacing:-.01em;margin-bottom:var(--space-6)}
+  .hs span{display:block;color:var(--ink-sec)}
+
+  /* 1 · Hero (lt-pdp-hero) */
+  .hero{background:var(--color-paper)}
+  .hero .wrap{padding-top:var(--space-2);padding-bottom:var(--space-7)}
+  .hero__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-3) var(--space-5)}
+  .gal__main{background:var(--color-warm);border-radius:var(--radius-card);aspect-ratio:343/316;overflow:hidden}
+  .gal__main img{width:100%;height:100%;object-fit:contain}
+  .thumbs{display:flex;justify-content:center;gap:var(--space-2);margin-top:var(--space-2)}
+  .thumb{width:24px;height:6px;padding:0;border:0;border-radius:var(--radius-full);background:var(--color-ink);opacity:.5;cursor:pointer;overflow:hidden}
+  .thumb img{display:none}
+  .thumb.on{opacity:1}
+
+  .rating{display:inline-flex;align-items:center;gap:6px;margin:-4px 0 6px;padding:4px 0}
+  .rating__stars{font-size:var(--text-fine);line-height:var(--leading-stat);letter-spacing:.04em;color:var(--color-star)}
+  .rating b{font-size:var(--text-fine);font-weight:var(--weight-medium)}
+  .rating__count{font-size:var(--text-micro);color:var(--ink-sec)}
+  h1{font-family:var(--font-heading);font-size:var(--text-h1);line-height:var(--leading-heading);font-weight:var(--weight-regular);letter-spacing:-.02em;margin:var(--space-1) 0 var(--space-5)}
+  h1 span{display:block;color:var(--ink-sec)}
+  .pts{display:flex;flex-direction:column;gap:var(--space-2);margin-bottom:var(--space-5)}
+  .pts li{display:flex;align-items:flex-start;gap:var(--icon-gap);font-size:var(--text-body-sm);line-height:var(--leading-copy);color:var(--ink-sec)}
+  .pts svg{flex:none;margin-top:var(--space-1);color:var(--color-ink)}
+
+  .lbl{font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec);margin-bottom:var(--space-2)}
+  .modes{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-2)}
+  .mode{height:var(--pick-h);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:var(--color-white);border:1px solid var(--rule-strong);border-radius:var(--radius-card);padding:6px var(--space-1);cursor:pointer;line-height:1.1}
+  .mode span{font-size:var(--text-body-sm);font-weight:var(--weight-medium)}
+  .mode b{font-size:var(--text-body-sm);font-weight:var(--weight-regular);color:var(--ink-sec)}
+  .mode.on{border-color:var(--color-ink);box-shadow:inset 0 0 0 .5px var(--color-ink)}
+  .hint{margin-top:6px;font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec)}
+  .cta{display:block;width:100%;height:var(--cta-h);margin-top:var(--space-4);padding:0 15px;border:0;border-radius:var(--radius-full);background:var(--color-dark);color:var(--color-white);font-size:var(--text-buy);font-weight:var(--weight-medium);cursor:pointer}
+  /* Unter dem Knopf wie live NMN (lt-pdp-hero__post-cta--compact): Chip, dann eine Zeile Versand · Garantie */
+  .post{display:flex;flex-direction:column;align-items:center;gap:var(--space-2);margin-top:var(--space-3)}
+  .chip{display:inline-block;background:var(--chip-bg);border-radius:var(--radius-card);padding:var(--space-1) var(--space-3);font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec)}
+  .chip[hidden]{display:none}
+  .chip b{font-weight:var(--weight-medium);color:var(--color-ink)}
+  .post-line{font-size:var(--text-fine);line-height:var(--leading-body);color:var(--ink-sec);text-align:center}
+  .post-line button{appearance:none;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-decoration:underline dotted;text-underline-offset:.125em}
+  /* Garantie-Dialog (crs-micro-dialog, assets/lt-pdp.css) */
+  .dlg{max-width:min(92vw,28rem);width:100%;margin:auto;padding:0;border:1px solid #e5e5e5;border-radius:12px;background:var(--color-white);box-shadow:0 4px 12px rgba(0,0,0,.08);color:var(--color-ink)}
+  .dlg::backdrop{background:color-mix(in srgb,var(--color-dark) 35%,transparent)}
+  .dlg__inner{position:relative;padding:var(--space-6) var(--space-5) var(--space-5)}
+  .dlg__close{position:absolute;top:var(--space-3);right:var(--space-3);width:var(--space-6);height:var(--space-6);display:inline-flex;align-items:center;justify-content:center;padding:0;border:0;border-radius:2px;background:transparent;color:var(--color-gray-600);font-size:24px;line-height:1;cursor:pointer}
+  .dlg__close:hover{background:var(--color-warm);color:var(--color-ink)}
+  .dlg__title{font-family:var(--font-heading);font-size:20px;font-weight:var(--weight-semibold);line-height:var(--leading-tight);margin:0 var(--space-7) var(--space-3) 0;padding-right:var(--space-2)}
+  .dlg__body{line-height:var(--leading-relaxed);color:var(--color-gray-600)}
+  .dlg__body p+p{margin-top:var(--space-3)}
+
+  @media (min-width:768px){
+    .hero .wrap{padding-top:var(--space-9);padding-bottom:var(--space-8)}
+    .hero__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--space-6);align-items:start}
+    .gal{position:sticky;top:var(--space-5)}
+    .gal__main{aspect-ratio:1/1}
+    .thumbs{margin-top:var(--space-4);gap:23px}
+    .thumb{width:var(--thumb);height:var(--thumb);border:1px solid var(--rule-strong);border-radius:var(--radius-card);background:var(--color-paper);opacity:.62}
+    .thumb img{display:block;width:100%;height:100%;object-fit:cover}
+    .lbl{margin-top:0}
+  }
+
+  /* 2 · Wirkprinzip (lt-pdp-wirkprinzip, Fläche und Abstände aus product.12_nad-liposomal-2.json) */
+  .wp{background:var(--color-warm);padding:var(--section-y) 0}
+  .wp__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-6)}
+  .wp__h{margin-bottom:0}
+  .einbl{position:relative;margin:0;border-radius:var(--radius-lg);overflow:hidden;aspect-ratio:4/5}
+  .einbl>img{width:100%;height:100%;object-fit:cover;object-position:50% 20%}
+  .glass{position:absolute;left:5%;right:5%;bottom:5%;background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(14px) saturate(1.1);backdrop-filter:blur(14px) saturate(1.1);border:1px solid rgba(255,255,255,.7);border-radius:14px;padding:var(--space-4) var(--space-4) var(--space-3);box-shadow:0 8px 28px rgba(38,37,30,.18)}
+  .stat__n{font-family:var(--font-heading);font-size:var(--text-stat);line-height:var(--leading-stat);font-weight:var(--weight-semibold);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+  .stat__t{margin-top:var(--space-1);font-size:var(--text-body-sm);line-height:var(--leading-body);color:var(--ink-sec)}
+  .bars{margin-top:var(--space-3);display:grid;gap:var(--space-2)}
+  .bar{display:grid;grid-template-columns:84px 1fr;gap:var(--space-3);align-items:center;font-size:var(--text-micro);color:var(--ink-sec)}
+  .bar__fill{height:10px;border-radius:var(--radius-full);background:var(--color-teal)}
+  .bar--b .bar__fill{background:var(--color-dark)}
+  .src{margin-top:var(--space-3);font-size:var(--text-micro);line-height:var(--leading-body);color:var(--ink-ter)}
+  .src a{color:inherit;text-underline-offset:2px}
+  .roles>div+div{margin-top:var(--space-5);padding-top:var(--space-5);border-top:1px solid var(--rule-strong)}
+  .roles h3{display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-body);font-weight:var(--weight-semibold);line-height:var(--leading-body);margin-bottom:var(--space-1)}
+  .roles h3 svg{flex:none;color:var(--color-dark)}
+  .fact--pflicht b{color:var(--color-ink)}
+  .roles p{line-height:var(--leading-relaxed);max-width:52ch}
+  @media (min-width:900px){
+    .wp__grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"h fig" "roles fig";column-gap:var(--space-8);row-gap:var(--space-6);align-items:start}
+    .wp__h{grid-area:h;align-self:end}
+    .einbl{grid-area:fig;align-self:center;aspect-ratio:4/3}
+    .einbl>img{object-position:50% 8%}
+    .roles{grid-area:roles}
+  }
+
+  /* 3 · Belege-Karten (lt-pdp-belege, CSS aus dem Theme) */
+  .ltbg{background:var(--color-warm);padding:var(--space-6) 0 var(--space-4)}
+  .ltbg__grid{display:grid;gap:var(--space-3);max-width:var(--belege-max);margin:0 auto}
+  .ltbg__card{background:var(--color-white);border:1px solid var(--rule-faint);border-radius:var(--radius-card);padding:var(--space-5);min-width:0}
+  .ltbg__label{font-size:var(--text-micro);line-height:var(--leading-tight);letter-spacing:.06em;text-transform:uppercase;font-weight:var(--weight-regular);color:var(--ink-sec)}
+  .ltbg__big{font-family:var(--font-heading);font-size:var(--text-stat);font-weight:var(--weight-regular);letter-spacing:-.02em;line-height:var(--leading-stat);margin-top:var(--space-3)}
+  .ltbg__big--num{font-weight:var(--weight-bold);font-variant-numeric:tabular-nums}
+  .ltbg__big-label{display:block;font-family:var(--font-body);font-size:var(--text-body-sm);font-weight:var(--weight-regular);letter-spacing:0;line-height:var(--leading-body);color:var(--ink-sec);margin-top:var(--space-2)}
+  /* Bildkarte (neu, nur NAD⁺): „Was drin ist“ und „Die Form“ als eine Karte. Gestapelt wie die alte Karte 2 */
+  .ltbg__big-sub{display:block;color:var(--ink-sec)}
+  .ltbg__fig{position:relative;margin:var(--space-3) 0 0;aspect-ratio:5/2;border-radius:var(--radius-card);overflow:hidden;background:var(--color-warm)}
+  .ltbg__stage{position:absolute;inset:0}
+  .ltbg__stage img{width:100%;height:100%;object-fit:cover;object-position:70% 50%}
+  .ltbg__marks{display:none}
+  .ltbg__zeilen{margin-top:var(--space-4)}
+  .ltbg__zeile{padding:var(--space-3) 0;border-top:1px solid var(--rule);line-height:var(--leading-body)}
+  .ltbg__zeile:first-child{border-top:0;padding-top:0}
+  .ltbg__zeile-kopf{font-weight:var(--weight-bold);margin-right:var(--space-1)}
+  .ltbg__person{display:flex;gap:var(--space-3);align-items:center;margin-top:var(--space-3)}
+  .ltbg__person img{width:48px;height:48px;border-radius:50%;object-fit:cover;flex:none}
+  .ltbg__person-name{font-weight:var(--weight-bold);line-height:var(--leading-tight)}
+  .ltbg__person-role{margin-top:2px;font-size:var(--text-body-sm);line-height:var(--leading-body);color:var(--ink-sec)}
+  .ltbg__details{margin-top:var(--space-3);border-top:1px solid var(--rule)}
+  .ltbg__summary{display:flex;justify-content:space-between;align-items:center;gap:var(--space-2);padding-top:var(--space-3);font-size:var(--text-body-sm);font-weight:var(--weight-semibold)}
+  .ltbg__summary .chev{color:inherit}
+  .ltbg__body{padding-top:var(--space-3);font-size:var(--text-body-sm);line-height:var(--leading-body);color:var(--ink-sec)}
+  .ltbg__body p{margin-bottom:var(--space-2)}
+  .ltbg__quotes{margin-top:var(--space-3)}
+  .ltbg__quote{padding:var(--space-4) 0;border-top:1px solid var(--rule)}
+  .ltbg__quote:first-child{border-top:0;padding-top:0}
+  .ltbg__quote--photo{display:flex;gap:var(--space-3);align-items:flex-start}
+  .ltbg__quote--photo img{width:56px;height:74px;object-fit:cover;border-radius:var(--radius-card);flex:none}
+  .ltbg__stars{display:flex;gap:2px;color:var(--color-star);margin-bottom:var(--space-2)}
+  .ltbg__quote-text{line-height:var(--leading-body)}
+  .ltbg__quote-meta{display:flex;flex-wrap:wrap;align-items:center;gap:var(--space-1) var(--space-3);margin-top:var(--space-2);font-size:var(--text-body-sm);line-height:var(--leading-tight)}
+  .ltbg__quote-name{font-weight:var(--weight-semibold)}
+  .ltbg__verified{display:inline-flex;align-items:center;gap:4px;font-size:var(--text-micro);font-weight:var(--weight-medium);color:var(--ink-sec);white-space:nowrap}
+  .ltbg__quote-date{font-size:var(--text-micro);color:var(--ink-ter);font-variant-numeric:tabular-nums}
+  @media (min-width:840px){
+    .ltbg__card{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:var(--space-6);padding:var(--space-6);align-items:start}
+    .ltbg__main{border-left:1px solid var(--rule);padding-left:var(--space-6);padding-top:calc(var(--text-micro) * var(--leading-tight) + var(--space-3))}
+    .ltbg__main>:first-child{margin-top:0}
+    /* Bildkarte bleibt bis 1007 px gestapelt */
+    .ltbg__card--bild{display:block}
+    .ltbg__card--bild .ltbg__main{border-left:0;padding:0}
+    .ltbg__card--bild .ltbg__zeilen{margin-top:var(--space-4)}
+  }
+  /* Ab 1008 px ist die Karte immer 960 px breit: Text links (528), Bild randlos rechts (432), Lade als Fußzeile.
+     Die Bühne ist das ganze Bild in 2:1 auf Kartenhöhe, rechts angeschlagen. Die Marken sitzen in Prozent
+     des Bildes, also am Motiv, egal wie hoch die Karte wird. */
+  @media (min-width:1008px){
+    .ltbg__card--bild{display:grid;grid-template-columns:minmax(0,11fr) minmax(0,9fr);grid-template-rows:auto 1fr auto;grid-template-areas:"head fig" "main fig" "lade lade";gap:0;padding:0;overflow:hidden}
+    .ltbg__card--bild .ltbg__head{grid-area:head;padding:var(--space-6) var(--space-6) 0}
+    .ltbg__card--bild .ltbg__main{grid-area:main;padding:var(--space-5) var(--space-6) var(--space-6)}
+    .ltbg__card--bild .ltbg__zeilen{margin-top:0}
+    .ltbg__zeile{text-wrap:balance}
+    .ltbg__fig{grid-area:fig;align-self:stretch;margin:0;aspect-ratio:auto;border-radius:0}
+    .ltbg__stage{inset:0 0 0 auto;aspect-ratio:2/1}
+    .ltbg__marks{display:block}
+    .ltbg__mark{position:absolute;left:var(--mark-x);top:var(--mark-y);transform:translate(-100%,-50%);display:flex;align-items:center;gap:var(--space-2);font-size:var(--text-micro);line-height:var(--leading-stat);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+    .ltbg__mark-line{position:relative;width:var(--mark-reach);height:1px;background:var(--ink-icon)}
+    .ltbg__mark-line::after{content:"";position:absolute;right:-2.5px;top:-2px;width:5px;height:5px;border-radius:50%;background:var(--color-ink)}
+    .ltbg__mark--kern{--mark-x:67.7%;--mark-y:42%;--mark-reach:128px}
+    .ltbg__mark--huelle{--mark-x:62.1%;--mark-y:66.7%;--mark-reach:79px}
+    .ltbg__card--bild .ltbg__details{grid-area:lade;margin-top:0}
+    .ltbg__card--bild .ltbg__summary{padding:var(--space-4) var(--space-6)}
+    .ltbg__card--bild .ltbg__body{display:grid;grid-template-columns:minmax(0,11fr) minmax(0,9fr);padding:0 0 var(--space-5)}
+    .ltbg__card--bild .ltbg__body p{margin:0;padding:0 var(--space-6)}
+    .ltbg__card--bild .ltbg__body p+p{padding-left:0}
+  }
+
+  /* 4 · Loox-Lade (lt-pdp-reviews-all) */
+  .ltra{background:var(--color-warm);padding-bottom:var(--space-7)}
+  .ltra .wrap{max-width:var(--belege-max)}
+  .ltra__details{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+  .ltra__summary{display:flex;align-items:center;justify-content:space-between;gap:var(--space-4);padding:var(--space-4) 0;font-weight:var(--weight-semibold);line-height:var(--leading-body);color:var(--color-gray-600)}
+  .ltra__panel{padding-bottom:var(--space-5);font-size:var(--text-body-sm);color:var(--ink-sec)}
+
+  /* 5 · Produktfakten (lt-pdp-produktfakten, Fläche und Karte aus product.12_nad-liposomal-2.json) */
+  .pf{background:var(--color-warm);padding:var(--section-y) 0}
+  .pf__grid{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-6)}
+  .facts{background:var(--color-white);border-radius:var(--radius-lg);padding:var(--space-6)}
+  .fact{display:flex;justify-content:space-between;gap:var(--space-4);padding:var(--space-3) 0;border-top:1px solid var(--rule-strong);line-height:var(--leading-relaxed)}
+  .fact:first-child{border-top:0;padding-top:0}
+  .fact span{color:var(--ink-sec)}
+  .fact b{text-align:right;font-weight:var(--weight-semibold)}
+  .intake{display:flex;flex-direction:column;align-items:flex-end;gap:var(--space-1)}
+  .intake svg{color:var(--color-dark)}
+  .etikett{position:relative;display:block;border-radius:var(--radius-lg);overflow:hidden;background:var(--color-white);border:1px solid var(--rule);aspect-ratio:16/10;cursor:zoom-in}
+  .etikett img{width:100%;height:100%;object-fit:cover;object-position:0% 50%;transform:scale(1.9);transform-origin:4% 46%}
+  .etikett span{position:absolute;right:var(--space-2);bottom:var(--space-2);font-size:var(--text-micro);background:rgba(255,255,255,.92);border-radius:var(--radius-full);padding:var(--space-1) var(--space-3)}
+  .facts .ltbg__details{margin-top:var(--space-4)}
+  .facts .ltbg__body{line-height:var(--leading-relaxed)}
+  @media (min-width:900px){
+    .pf__grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:var(--space-7)}
+    .facts{padding:var(--space-7)}
+  }
+
+  /* 6 · FAQ (crs-faq-accordion) */
+  .faq{background:var(--color-paper);padding:var(--section-y) 0}
+  .faq__layout{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--space-6)}
+  .faq__left{padding-top:var(--space-1)}
+  .faq__left .hs{margin-bottom:0}
+  .faq__item{border-top:1px solid var(--rule-faint)}
+  .faq__item:last-of-type{border-bottom:1px solid var(--rule-faint)}
+  .faq__q{display:flex;justify-content:space-between;align-items:center;gap:var(--space-4);padding:15.68px 0 16.8px}
+  .faq__q span{line-height:var(--leading-copy);max-width:var(--measure)}
+  .faq__a{margin-bottom:var(--space-4);line-height:var(--leading-answer);color:var(--ink-sec);max-width:var(--measure)}
+  @media (min-width:1025px){
+    .faq__layout{grid-template-columns:1fr 1fr;gap:0}
+    .faq__left{padding-right:var(--space-7)}
+    .faq__left .hs{position:sticky;top:var(--space-9)}
+  }
+
+
+  /* Sticky-Kaufleiste (lt-sticky-atc) */
+  .sticky{position:fixed;left:0;right:0;bottom:0;z-index:5;background:var(--color-paper);border-top:1px solid #e5e5e5;box-shadow:0 -6px 8px rgba(0,0,0,.08);padding:var(--space-2) var(--space-4);display:flex;align-items:center;gap:var(--space-4);transform:translateY(110%);transition:transform .2s}
+  .sticky.show{transform:none}
+  .sticky .meta{flex:1;min-width:0;line-height:var(--leading-body)}
+  .sticky .meta b{display:block;font-size:var(--text-fine);font-weight:var(--weight-medium)}
+  .sticky .meta span{font-size:var(--text-micro);color:var(--color-ink-muted)}
+  .sticky .cta{width:auto;height:44px;margin:0;padding:0 var(--space-4);font-size:var(--text-body-sm);flex:none}
+
+  .ft{padding:var(--space-6) var(--page-gutter);border-top:1px solid var(--rule);font-size:var(--text-body-sm);color:var(--ink-ter)}
+
+  /* Notizen für BJ (nicht Teil der Seite) */
+  .note{background:var(--note-bg);border:1px solid var(--note-line);border-radius:var(--radius-card);padding:var(--space-3) var(--space-4);color:var(--note-ink);font-size:var(--text-body-sm);line-height:var(--leading-body);margin-top:var(--space-4)}
+  .ltbg .note{max-width:var(--belege-max);margin:var(--space-4) auto 0}
+  .tag{display:inline-block;font-size:var(--text-micro);letter-spacing:.06em;text-transform:uppercase;border:1px solid var(--note-line);border-radius:var(--radius-full);padding:0 var(--space-2);margin-right:var(--space-1);background:var(--color-white)}
+  .tag--q{background:#fff2c7}
+  body.clean .note,body.clean .bj{display:none}
+  .toggle{position:absolute;top:64px;right:var(--space-3);z-index:10;background:var(--color-ink);color:var(--color-white);border:0;border-radius:var(--radius-full);padding:var(--space-2) var(--space-4);font-size:var(--text-micro);cursor:pointer}
+  .bj{background:var(--note-bg);border-top:1px solid var(--note-line);padding:var(--space-7) 0 var(--space-9)}
+  .bj h2{font-family:var(--font-heading);font-weight:var(--weight-regular);font-size:var(--text-h2)}
+  .bj h3{margin-top:var(--space-5)}
+  .bj ul{margin-top:var(--space-2);display:grid;gap:var(--space-2)}
+  .bj li{font-size:var(--text-body-sm);padding-left:var(--space-4);position:relative}
+  .bj li::before{content:"·";position:absolute;left:var(--space-1);font-weight:var(--weight-semibold)}
+  .bj p{margin-top:var(--space-2);color:var(--ink-sec);font-size:var(--text-body-sm);max-width:68ch}
+
+  /* Ergänzungen Kreatin (nur was der NAD⁺-Entwurf nicht hatte, Werte wie live NAD⁺/NMN gemessen 06.11.2026) */
+  /* Prüf-/Etikett-Zeile unter den Punkten (lt-pdp-hero__coa) */
+  .coa{display:flex;align-items:center;gap:var(--icon-gap);flex-wrap:wrap;margin:calc(var(--space-1) * -1) 0 var(--space-4);font-size:var(--text-body-sm);line-height:var(--leading-copy)}
+  .coa svg{flex:none;color:var(--color-ink)}
+  .coa a{text-decoration:underline dotted;text-underline-offset:.2em}
+  /* Zweite Hinweiszeile unter den Karten: Menge · Grundpreis (einmal, klein, grau) */
+  .hint+.hint{margin-top:0}
+  /* Ergänzungen Hyaluron (16.11.2026) */
+  /* Marken am Stillleben (Prozent des Bildes 1774 × 887): Dose bei 64 bis 83 %, Schälchen bei 41 bis 61 %.
+     Die Karte zeigt das Bild erst ab 45 %, die Marke „Vegan“ sitzt deshalb auf den rechten Kapseln */
+  @media (min-width:1008px){ .ltbg__mark--kern{--mark-x:68%;--mark-y:47%;--mark-reach:40px} .ltbg__mark--huelle{--mark-x:57%;--mark-y:70%;--mark-reach:24px} }
+  /* Galerie-Foto (Pexels, Hochformat): im Entwurf per object-fit beschnitten, im Theme quadratisch zugeschnitten hochgeladen */
+  .gal__main img.fit{object-fit:cover;object-position:50% 18%}
+  .glass[hidden]{display:none}
+  button.chip{border:0;cursor:pointer}
+  .opt{appearance:none;border:1px solid var(--note-line);background:var(--color-white);color:var(--note-ink);border-radius:var(--radius-full);padding:2px var(--space-3);font:inherit;font-size:var(--text-micro);cursor:pointer;margin-top:var(--space-2)}
+</style>
+
+</head>
+<body>
+
+<button class="toggle" id="toggle" type="button">Notizen ausblenden</button>
+
+<header class="hd wrap">
+  <img src="https://www.lifetime-health.de/cdn/shop/files/logo-lifetime-black.svg?v=1705418762" alt="LIFETIME" width="156" height="24">
+  <div class="hd__r"><span>Suche</span><span>Warenkorb</span></div>
+</header>
+
+<main>
+
+<!-- 1 · Hero mit Kaufzone (lt-pdp-hero, kompakt wie NMN, NAD⁺, Kreatin und TMG) -->
+<section class="hero">
+  <div class="wrap hero__grid">
+    <div class="gal">
+      <div class="gal__main" id="galMain">
+        <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-2875370.jpg?v=1768563312&width=2048" alt="LIFETIME Hyaluron, Dose mit 60 Kapseln">
+      </div>
+      <div class="thumbs" id="thumbs">
+        <button class="thumb on" type="button" aria-label="Bild 1" data-src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-2875370.jpg?v=1768563312&width=2048" data-alt="LIFETIME Hyaluron, Dose mit 60 Kapseln"><img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/product-2875370.jpg?v=1768563312&width=160" alt=""></button>
+        <button class="thumb" type="button" aria-label="Bild 2" data-src="entwurf-hyaluron-pdp-2026-11-16/galerie-travertin.jpg" data-alt="Hyaluron-Dose auf einem Travertinblock vor warmer Wand, davor zwei Kapseln"><img src="entwurf-hyaluron-pdp-2026-11-16/galerie-travertin.jpg" alt=""></button>
+        <button class="thumb" type="button" aria-label="Bild 3" data-fit="1" data-src="https://images.pexels.com/photos/7530606/pexels-photo-7530606.jpeg?auto=compress&cs=tinysrgb&w=1600" data-alt="Frau um 58 sitzt lächelnd am Fenster und trinkt ein Glas Wasser"><img src="https://images.pexels.com/photos/7530606/pexels-photo-7530606.jpeg?auto=compress&cs=tinysrgb&w=200" alt=""></button>
+        <button class="thumb" type="button" aria-label="Bild 4" data-src="entwurf-hyaluron-pdp-2026-11-16/etikett.jpg" data-alt="Etikett der Hyaluron-Dose, abgerollt"><img src="entwurf-hyaluron-pdp-2026-11-16/etikett.jpg" alt=""></button>
+      </div>
+      <div class="note"><span class="tag">Geändert</span> Galerie mit 4 Bildern ohne Text: Dose · Dose auf Travertin · Frau um 58 · Etikett. Raus sind die drei Bilder mit Text im Bild: „Feuchtigkeit von innen, für Spannkraft &amp; Elastizität“ über Wasserblasen, die Häkchen-Grafik „Erhält Elastizität &amp; Feuchtigkeit · Unterstützt Gelenkfunktion“ und „Für glatte Haut und geschmeidige Gelenke“ mit dem Siegel über einem Bein im Schaumbad.<br><span class="tag">Bild</span> Bild 2 ist ein kuratierter Produktshot (Codex, ohne Menschen, echte Dose freigestellt aus dem Shopify-Produktbild, Etikett-Hauptangaben geprüft). Bild 3 ist ein echtes Pexels-Foto ohne Produkt: Mikhail Nilov, Nr. 7530606, Original 4000 × 6000. Dieselbe Frau trägt das Wirkprinzip.<br><span class="tag tag--q">Freigabe</span> Die beiden Pexels-Fotos sind hier nur verlinkt. Erst mit deinem Ja lade ich die Originale herunter und schneide Bild 3 quadratisch zu.</div>
+    </div>
+
+    <div>
+      <div class="rating"><span class="rating__stars" aria-hidden="true">★★★★★</span><b>4,8</b><span class="rating__count">· 5 Produktbewertungen</span></div>
+      <h1>Hyaluron-Kapseln <span>Für Haut, die trockener wird.</span></h1>
+      <ul class="pts">
+        <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Erforscht an Frauen zwischen 45 und 65.</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Derselbe Stoff, der in deiner Haut Wasser bindet.</span></li>
+        <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1" opacity="0.35"/><path d="M5 8l2.5 2.5 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Jede Charge im Labor geprüft.</span></li>
+      </ul>
+      <p class="coa"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 1.75h5.5L12.25 4.5v9.75H4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M9.25 1.75V4.75h3" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M6 9.25l1.5 1.5 2.75-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Über 99 % Reinheit</span><a href="entwurf-hyaluron-pdp-2026-11-16/etikett.jpg" target="_blank" rel="noopener">Etikett ansehen</a></p>
+      <div class="note"><span class="tag">Geändert</span> Ein Job statt sieben. Raus sind das Badge „Haut &amp; Gelenke“, die H1 „Feuchtigkeit, Elastizität, Gelenkfunktion — von innen.“ (mit Gedankenstrich), die Punkte „Unterstützt Hautelastizität &amp; Faltenbild“ und „Trägt zur normalen Gelenkfunktion bei“ (klingt wie ein zugelassener Claim, ist aber keiner) und die Symbole „Haut-Feuchtigkeit · Gelenk-Komfort · Bindegewebe“.<br><span class="tag">Grauzone</span> Die Titelzeile spricht die Lage an, ohne Wirkung zu versprechen. Punkt 1 nennt die Forschung, Punkt 2 ist eine Tatsache über den Körper, keine über die Kapsel. Punkt 3 ist die Herstellerangabe wie bei NAD⁺ und TMG, das Etikett trägt das Siegel „Laborgeprüft“.<br><span class="tag">Geprüft</span> Punkt 1: Skin Res Technol 2023 (Volltext PMC10661223), randomisiert und doppelblind, darin 67 Frauen von 45 bis 65 Jahren, 100 oder 200 mg Hyaluronsäure am Tag oder Placebo, 12 Wochen. „Über 99 % Reinheit“ steht so auf dem Etikett.<br><span class="tag tag--q">Offen</span> Titelzeile: „Für Haut, die trockener wird.“ (jetzt, nennt die Lage) oder „Für Frauen, die an ihre Haut denken.“ (wörtlich das Resveratrol-Muster, schließt aber das Drittel Männer aus)?</div>
+
+      <div class="modes" id="modes">
+        <button class="mode on" type="button" data-mode="sub"><span>Im Abo</span><b>26,01 €</b></button>
+        <button class="mode" type="button" data-mode="once"><span>Einmalig</span><b>28,90 €</b></button>
+      </div>
+      <p class="hint" id="hint">Lieferung jeden Monat, versandfrei, jederzeit kündbar.</p>
+      <p class="hint" id="unit">60 Kapseln für 30 Tage · 530,82 €/kg</p>
+
+      <button class="cta" id="cta" type="button">Abo starten, 26,01 €</button>
+      <div class="post">
+        <button type="button" class="chip" id="save">Du sparst <b>7,79 €</b> inkl. Versand</button>
+        <p class="post-line"><span>Versand in 1–2 Werktagen</span><span aria-hidden="true"> · </span><button type="button" id="guar-open" aria-haspopup="dialog" aria-controls="guar-dlg">90 Tage Geld zurück</button></p>
+      </div>
+      <dialog class="dlg" id="guar-dlg" aria-labelledby="guar-title">
+        <div class="dlg__inner">
+          <button type="button" class="dlg__close" data-close aria-label="Schließen"><span aria-hidden="true">×</span></button>
+          <h2 class="dlg__title" id="guar-title">90-Tage Geld-zurück-Garantie</h2>
+          <div class="dlg__body">
+            <p>Wenn deine erste Lieferung nicht hält, was wir hier beschreiben, bekommst du den vollen Kaufbetrag zurück. Das gilt für Qualität und Zustand der Ware ebenso wie für die Dokumentation. Eine E-Mail innerhalb von 90 Tagen nach Erhalt genügt.</p>
+            <p>Die Garantie gilt für deine erste Bestellung, einmalig oder im Abo. Dein gesetzliches Widerrufsrecht bleibt davon unberührt.</p>
+          </div>
+        </div>
+      </dialog>
+      <div class="note"><span class="tag">Wie TMG</span> Karten nur mit Kaufart und Preis, fester Abo-Hinweis (<code>compact_sub_hint</code>), bei „Einmalig“ die Versandkosten (<code>compact_once_ship</code>), Preis im Knopf, Chip mit Versand (<code>compact_save_ship</code>): einmalig 28,90 € plus 4,90 € Versand sind 33,80 €, im Abo 26,01 € versandfrei, also 7,79 €. Garantie-Dialog im NMN-Wortlaut. Raus: „Monatlich“, „SPARE 2,89 €“ plus „Du sparst 2,89 €“, Streichpreis, zweimal „1 Dose (ca. 30 Tage)“, zwei €/Tag-Werte, ODER, die drei Abo-Vorteile mit PDF „Longevity 101“, „Meist morgen verschickt“, die Trust-Zeilen „Versandkostenfrei ab 49 €“, „Lieferung in 2–3 Werktagen“, „Im Abo 10 % sparen“ und die Limmroth-Karte (steht jetzt in den Belegen).<br><span class="tag">Neu</span> Grundpreis statt Tagespreis: Das Etikett nennt ℮ 49 g, also 530,82 €/kg im Abo und 589,80 €/kg einmalig.<br><span class="tag tag--q">Braucht Erweiterung</span> <code>compact_amount_grams</code> rechnet heute je 100 g (53,08 €/100 g). Die Preisangabenverordnung verlangt seit Mai 2022 den Grundpreis je Kilogramm, die 100-g-Ausnahme ist weggefallen. Dafür bräuchte <code>compact_amount_unit</code> den Wert „g, je kg“, Default bleibt wie heute. Kreatin zeigt live ebenfalls den Preis je 100 g.</div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 · Wirkprinzip (lt-pdp-wirkprinzip, Darstellung „Einblendung“, ohne Glaskarte) -->
+<section class="wp">
+  <div class="wrap">
+    <div class="wp__grid">
+      <h2 class="hs wp__h">Hyaluronsäure bindet Wasser. <span>Ältere Haut hat weniger davon.</span></h2>
+
+      <figure class="einbl">
+        <img src="https://images.pexels.com/photos/7530591/pexels-photo-7530591.jpeg?auto=compress&cs=tinysrgb&w=1600" alt="Frau um 58 mit einem Glas Wasser am Fenster, vor ihr ein Monstera-Blatt">
+        <figcaption class="glass" id="glass" hidden>
+          <p class="stat__n">+11 %</p>
+          <p class="stat__t">Feuchtigkeit der Gesichtshaut nach 12 Wochen mit 120 mg Hyaluronsäure am Tag. In der Placebo-Gruppe blieb sie gleich.</p>
+          <p class="src">40 Erwachsene zwischen 35 und 64, im Schnitt 44 Jahre, ein anderes Präparat als dieses. <a href="https://doi.org/10.3390/nu13072220" target="_blank" rel="noopener">Hsu et al., Nutrients 2021</a></p>
+        </figcaption>
+      </figure>
+
+      <div class="roles">
+        <div>
+          <h3>Was Hyaluronsäure ist</h3>
+          <p>Ein Zuckermolekül, das dein Körper selbst bildet. Etwa die Hälfte davon steckt in der Haut. Dort hält es Wasser fest.</p>
+        </div>
+        <div>
+          <h3>Was mit den Jahren passiert</h3>
+          <p>Die Haut bildet weniger davon nach. Nach den Wechseljahren fühlt sie sich oft trockener und dünner an.</p>
+        </div>
+        <div>
+          <h3>Was die Forschung prüft</h3>
+          <p>Ob Hyaluronsäure aus dem Darm in die Haut gelangt. Eine Studie begleitete 67 Frauen zwischen 45 und 65 über 12 Wochen und maß die Feuchtigkeit ihrer Haut.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="note"><span class="tag">Geändert</span> Die Herleitung stand dreimal auf der Seite: in den Reitern „Warum Hyaluron?“ (Hydration der Zellen, Gelenkschutz, Zellstruktur bewahren), im Text „Elastizität erhalten“ und in „Für wen geeignet?“. Jetzt einmal, in drei Sätzen ohne Fachwort. Raus: „gesunde Zellalterung“, „Gelenkschmierstoff“, „bei hoher Belastung“, „beim Sport“, „ein Mangel kann sich zeigen“ und die Wasserblasen.<br><span class="tag">Wie TMG</span> Ohne Glaskarte. Gesucht habe ich nach Placebo-Studien mit reiner Hyaluronsäure zum Schlucken und Frauen zwischen 50 und 65. Die einzige mit dieser Altersgruppe (Skin Res Technol 2023, 67 Frauen von 45 bis 65) vergleicht nur mit dem Ausgangswert, und ihre Zahlen stehen nur in Grafiken. Göllner 2017 (20 Frauen von 45 bis 60) prüfte ein Mischpräparat mit Biotin, Vitamin C, Kupfer und Zink, ohne Placebo. Michelotti 2021 (60 Frauen, 200 mg) liegt nicht im Volltext vor, das Alter fehlt in der Zusammenfassung.<br><button class="opt" type="button" id="glassToggle">Option zeigen: Glaskarte mit Hsu +11 %</button><br><span class="tag">Geprüft</span> Hsu 2021 am Volltext (PMC8308347), Tabelle 2: Corneometer Gesicht in der Hyaluron-Gruppe 49,5 auf 54,9 (+10,9 %), Placebo 49,1 auf 48,8, Unterschied nach 12 Wochen p = 0,02. Präparat Hyabest, 120 mg am Tag, finanziert vom Hersteller Kewpie. 40 Menschen, 29 Frauen, im Schnitt 44 Jahre. Darum ist die Option aus: Die Altersgruppe passt nicht. „Etwa die Hälfte davon steckt in der Haut“: Kawada et al., Nutr J 2014 (PMC4110621), Zusammenfassung.<br><span class="tag">Bild</span> Echtes Pexels-Foto, Mikhail Nilov, Nr. 7530591, Original 4000 × 6000 (24 MP), ohne Produkt, unbeschnitten. Das Gesicht sitzt bei etwa 30 % der Höhe und bleibt mit der festen Bildposition der Section (50 % 20 % mobil, 50 % 8 % ab 900 px) sichtbar, auch mit Glaskarte. Das Glas Wasser trägt das Thema, ohne Produkt.<br><span class="tag tag--q">Grauzone</span> „Nach den Wechseljahren fühlt sie sich oft trockener an“ beschreibt die Lage, nicht die Kapsel. Rolle 3 nennt nur, was gemessen wurde, kein Ergebnis.</div>
+  </div>
+</section>
+
+<!-- 3 · Belege-Karte als Bildkarte (lt-pdp-belege, Karte 1 aus, Kundenstimmen aus) -->
+<section class="ltbg">
+  <div class="wrap">
+    <div class="ltbg__grid">
+
+      <article class="ltbg__card ltbg__card--bild">
+        <div class="ltbg__head">
+          <h2 class="ltbg__label">Was drin ist</h2>
+          <p class="ltbg__big">Hyaluronsäure,<span class="ltbg__big-sub">hochrein</span></p>
+        </div>
+        <figure class="ltbg__fig">
+          <div class="ltbg__stage">
+            <img src="entwurf-hyaluron-pdp-2026-11-16/stillleben.jpg" alt="Hyaluron-Dose auf Travertin, daneben ein Keramikschälchen mit weißen Kapseln" width="1774" height="887">
+            <ul class="ltbg__marks" aria-hidden="true">
+              <li class="ltbg__mark ltbg__mark--kern">Über 99 %<span class="ltbg__mark-line"></span></li>
+              <li class="ltbg__mark ltbg__mark--huelle">Vegan<span class="ltbg__mark-line"></span></li>
+            </ul>
+          </div>
+        </figure>
+        <div class="ltbg__main">
+          <ul class="ltbg__zeilen">
+            <li class="ltbg__zeile"><span class="ltbg__zeile-kopf">Über 99 %</span> <span class="ltbg__zeile-text">So rein ist die Hyaluronsäure, 300 mg in jeder Kapsel.</span></li>
+            <li class="ltbg__zeile"><span class="ltbg__zeile-kopf">Vegan</span> <span class="ltbg__zeile-text">Aus Fermentation statt aus Hahnenkamm. Hülle aus Pflanzenzellulose, glutenfrei.</span></li>
+          </ul>
+          <div class="ltbg__person">
+            <img src="https://cdn.shopify.com/s/files/1/0621/2173/8340/files/volker-podcast.png?v=1766075350" alt="">
+            <div><p class="ltbg__person-name">Prof. Dr. med. Volker Limmroth</p><p class="ltbg__person-role">Chefarzt Neurologie, prüft, was wir veröffentlichen</p></div>
+          </div>
+        </div>
+        <details class="ltbg__details">
+          <summary class="ltbg__summary"><span>Herstellung und Firma</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="ltbg__body">
+            <p>Hergestellt nach HACCP. Jede Charge wird auf Schadstoffe und Schwermetalle untersucht.</p>
+            <p>LIFETIME ist die Diga Health GmbH, eingetragen beim Amtsgericht Köln unter HRB 64399.</p>
+          </div>
+        </details>
+      </article>
+
+    </div>
+    <div class="note"><span class="tag">Wie TMG</span> Kein Prüfbericht je Charge, also Bildkarte statt Rahmen mit großer Zahl. Stimmen-Karte aus: Loox hat 5 Bewertungen (4,8), alle nur mit Sternen, ohne Text. Die Siegel-Leiste (Laborgeprüft, &gt;99 % Reinheit, 100 % Vegan, GMP &amp; HACCP) steckt jetzt in dieser Karte und ihrer Lade. „GMP“ fliegt raus, das Etikett nennt nur HACCP. Bild: Codex, ohne Menschen, 1774 × 887.<br><span class="tag">Neu</span> Die Herkunft ist die eine Zeile, die NMN, TMG und Resveratrol nicht haben: Hyaluronsäure kommt entweder aus Hahnenkamm oder aus Fermentation. Vegan heißt Fermentation. Das nimmt die Frage „Ist da Tier drin?“ vorweg und unterscheidet von billigen Angeboten.<br><span class="tag tag--q">Offen</span> Steht „Fermentation“ auf dem Datenblatt des Rohstoffs? Ich habe es aus „vegan“ auf dem Etikett geschlossen. Ohne Datenblatt wird die Zeile zu „Hülle aus Pflanzenzellulose, ohne Gelatine. Glutenfrei.“ wie bei TMG. Und: Gibt es einen Prüfbericht je Charge? Sind die Kapseln weiß, wie Codex sie gemalt hat?</div>
+  </div>
+</section>
+
+<!-- 4 · Loox-Lade (lt-pdp-reviews-all) -->
+<section class="ltra">
+  <div class="wrap">
+    <details class="ltra__details">
+      <summary class="ltra__summary"><span>Alle <strong>5</strong> Bewertungen lesen</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+      <div class="ltra__panel"><p>Hier öffnet sich im Theme das Loox-Widget mit allen Bewertungen, Schnitt 4,8.</p></div>
+    </details>
+  </div>
+</section>
+
+<!-- 5 · Produktfakten (lt-pdp-produktfakten, Darstellung „Fakten“) -->
+<section class="pf">
+  <div class="wrap">
+    <h2 class="hs">Zusammensetzung und Einnahme <span>Gehalt und Verzehrempfehlung.</span></h2>
+    <div class="pf__grid">
+      <a class="etikett" href="entwurf-hyaluron-pdp-2026-11-16/etikett.jpg" target="_blank" rel="noopener">
+        <img src="entwurf-hyaluron-pdp-2026-11-16/etikett.jpg" alt="Etikett der Dose, Ausschnitt mit Inhaltsstoffen und Verzehrempfehlung" style="transform:scale(1.5);transform-origin:0% 0%">
+        <span>Etikett vergrößern</span>
+      </a>
+      <div class="facts">
+        <div class="fact"><span>Hyaluronsäure</span><b>600 mg am Tag</b></div>
+        <div class="fact"><span>Einnahme</span><b class="intake"><svg width="44" height="22" viewBox="0 0 56 28" fill="none" aria-hidden="true"><rect x="4" y="7" width="48" height="14" rx="7" stroke="currentColor" stroke-width="1.6"/><path d="M28 7v14" stroke="currentColor" stroke-width="1.6"/></svg>2 Kapseln täglich zu einer Mahlzeit</b></div>
+        <div class="fact"><span>Eine Dose</span><b>60 Kapseln, reicht 30 Tage</b></div>
+        <details class="ltbg__details">
+          <summary class="ltbg__summary"><span>Zutaten und Pflichthinweise</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary>
+          <div class="ltbg__body">
+            <p><b>Zutaten:</b> Reismehl, Hyaluronsäure, Hydroxypropylmethylcellulose (Kapselhülle).</p>
+            <p><b>Verzehrempfehlung:</b> Täglich 2 Kapseln mit ausreichend Flüssigkeit, vorzugsweise zu einer Mahlzeit, einnehmen.</p>
+            <p>Die angegebene empfohlene tägliche Verzehrmenge darf nicht überschritten werden. Nahrungsergänzungsmittel sind kein Ersatz für eine ausgewogene und abwechslungsreiche Ernährung und eine gesunde Lebensweise. Außerhalb der Reichweite von kleinen Kindern aufbewahren. Kühl und trocken lagern sowie vor Licht schützen.</p>
+          </div>
+        </details>
+      </div>
+    </div>
+    <div class="note"><span class="tag">Geändert</span> Ersetzt das sichtbare <code>main_product_hidden</code>, einen zweiten Hero unter der FAQ mit Sternen, „Bindet Feuchtigkeit von Innen – für Haut &amp; Gelenke“, vier Häkchen, „Sofort lieferbar: In 1–3 Werktagen“, dem Kasten „Dosierung &amp; Inhalt“ und drei Reitern. Gehalt, Einnahme und Reichweite stehen einmal und nur vom Druck-Etikett (<code>Hyaluron_60.pdf</code>, Stand 17.03.2025, SKU LT-HYA-C-60): 600 mg je Portion aus 2 Kapseln, 60 Kapseln, ℮ 49 g, 30 Tage. Die Pflichthinweise in der Lade haben den vollen Wortlaut wie bei NAD⁺ und TMG. Das Etikett-Bild ist aus dem Druck-PDF gerendert (2522 × 881) und zeigt den linken Teil ohne Anschrift.<br><span class="tag tag--q">Offen</span> Etikett: Dort stehen noch Berlin (Pappelallee 78), das Siegel „SKIN &amp; JOINT REGEN“ und der verkürzte Hinweis („ausgewogene Ernährung“, „von Kindern“). Wie bei NAD⁺, Kreatin, Resveratrol und TMG.</div>
+  </div>
+</section>
+
+<!-- 6 · FAQ (crs-faq-accordion), Versand, Abo und Garantie vorn wie NMN -->
+<section class="faq">
+  <div class="wrap faq__layout">
+    <div class="faq__left"><h2 class="hs">Häufige Fragen</h2></div>
+    <div>
+      <details class="faq__item"><summary class="faq__q"><span>Was kostet der Versand?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Im Abo nichts. Beim Einmalkauf in Deutschland ab 49 € versandfrei, darunter 4,90 €. Wir verschicken in 1–2 Werktagen.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Kann ich das Abo jederzeit kündigen?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Ja, im Kundenkonto, ohne Frist und ohne Anruf.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Wie funktioniert die Geld-zurück-Garantie?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Hält die erste Lieferung nicht, was wir beschreiben, gibt es 90 Tage lang den vollen Betrag zurück per E-Mail. Dein Widerrufsrecht bleibt unberührt.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Wann merke ich etwas?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Die Studien liefen 8 bis 12 Wochen und maßen die Haut mit Geräten. Plane deshalb mindestens drei Dosen ein. Das Abo liefert sie dir automatisch.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Ich creme schon. Brauche ich das?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Creme bleibt auf der obersten Hautschicht. Die Kapsel nimmt den Weg über den Darm. Das eine ersetzt das andere nicht.</p></details>
+      <details class="faq__item"><summary class="faq__q"><span>Auf der Dose steht „Joint“. Was ist mit den Gelenken?</span><svg class="chev" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M4 6.25 8 10.25 12 6.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></summary><p class="faq__a">Hyaluronsäure steckt auch in der Gelenkflüssigkeit. Die Studien, die wir hier nennen, haben die Haut untersucht. Deshalb geht es auf dieser Seite um die Haut.</p></details>
+      <div class="note"><span class="tag">Geändert</span> Versand, Abo und Garantie stehen vorn, wörtlich von NMN. Danach die drei Hürden: Wann merke ich etwas, brauche ich das neben meiner Creme, und was ist mit den Gelenken, die auf der Dose stehen. Raus ist die alte FAQ „Fragen zu Hyaluron“ mit acht Fragen in gemischter Du- und Sie-Form, darunter „Nebenwirkungen?“ (Antwort an „Sie“) und „Wie lange reicht eine Packung?“ (steht jetzt in den Produktfakten).<br><span class="tag">Hormozi</span> „Plane mindestens drei Dosen ein“ macht aus der Studiendauer ein Argument fürs Abo. Die Studien liefen 8 bis 12 Wochen (Hsu 2021, Skin Res Technol 2023).<br><span class="tag tag--q">Offen</span> Garantie: Wörtlich von NMN heißt es „Hält die erste Lieferung nicht, was wir beschreiben“, ebenso im Dialog oben. NAD⁺, Kreatin, Resveratrol und D3+K2 haben im Dialog „Auch wenn du nichts merkst“. Bei Haut, die man erst nach Wochen beurteilen kann, trifft diese Fassung die Hürde besser. Willst du sie hier?</div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- Für BJ: Änderungsliste -->
+<section class="bj">
+  <div class="wrap">
+    <h2>Für BJ: was sich ändert</h2>
+    <p><b>Job der Seite:</b> Eine Frau um 58 merkt, dass ihre Haut seit den Wechseljahren trockener und dünner wird. Sie cremt schon und fragt sich, ob sie von innen etwas tun kann, ohne auf ein leeres Versprechen hereinzufallen. <b>Größte Hürde</b> ist die Skepsis „Kommt Hyaluronsäure aus der Kapsel überhaupt an?“. Sie baut sich über die Erklärung in drei Sätzen ab, über die Studie mit Frauen ihres Alters, das Etikett, die Herkunft aus Fermentation und Limmroth. Die Gewohnheit „Ich creme schon“ beantwortet die FAQ. Den Aufwand nehmen das Monats-Abo und 2 Kapseln am Tag weg, das Risiko eines Fehlkaufs die Garantie.</p>
+
+    <h3>Fliegt raus</h3>
+    <ul>
+      <li>Badge „Haut &amp; Gelenke“, H1 „Feuchtigkeit, Elastizität, Gelenkfunktion — von innen.“, Symbole „Haut-Feuchtigkeit · Gelenk-Komfort · Bindegewebe“, Reiter „Hydration der Zellen · Gelenkschutz · Zellstruktur bewahren“: sieben Jobs ohne Gewinner.</li>
+      <li>„Unterstützt Hautelastizität &amp; Faltenbild“ und „Trägt zur normalen Gelenkfunktion bei“: Für Hyaluronsäure ist kein Claim zugelassen, „Helps to maintain good skin hydration“ ist ausdrücklich abgelehnt (VO (EU) 1066/2013).</li>
+      <li>„beim Sport oder im Alltag“, „bei starker körperlicher Belastung“: Sportler-Sprache.</li>
+      <li>„Warum Hyaluron?“, „Elastizität erhalten“ und „Für wen geeignet?“: dreimal dieselbe Herleitung, jetzt einmal im Wirkprinzip.</li>
+      <li>Zweiter Hero <code>main_product_hidden</code> unter der FAQ: doppelt, mit „Sofort lieferbar“ und dem Kasten „Dosierung &amp; Inhalt“.</li>
+      <li>Kaufzone mit „SPARE 2,89 €“, „Du sparst 2,89 €“, Streichpreis, zwei €/Tag-Werten, ODER und PDF-Bonus: deine Buybox-Regeln.</li>
+      <li>Vier Lieferzeiten (Leiste 1–3, Hero 2–3, „Meist morgen“, „Sofort lieferbar 1–3“): Übrig bleibt eine Zeile.</li>
+      <li>Galeriebilder mit Text, Wasserblasen und Schaumbad: Text im Bild, Versprechen im Bild.</li>
+      <li>„Empfehlungen für dich“ mit vier anderen Produkten vor der FAQ: vier Abzweigungen weg vom Kauf.</li>
+      <li>FAQ in gemischter Du- und Sie-Form, „GMP“: Das Etikett nennt nur HACCP.</li>
+    </ul>
+
+    <h3>Kommt neu rein</h3>
+    <ul>
+      <li>Titelzeile „Für Haut, die trockener wird.“: ein Job statt sieben, ohne Wirkversprechen.</li>
+      <li>Punkt „Erforscht an Frauen zwischen 45 und 65.“: die Altersgruppe der Käuferin, am Volltext geprüft.</li>
+      <li>Wirkprinzip „Hyaluronsäure bindet Wasser.“ in drei Sätzen, mit echtem Foto einer Frau um 58 und einem Glas Wasser.</li>
+      <li>Belege als Bildkarte „Hyaluronsäure, hochrein“ mit der Herkunft (Fermentation statt Hahnenkamm), Limmroth und Lade zur Herstellung.</li>
+      <li>Produktfakten mit dem echten Etikett: eine Quelle für Menge, Dosis und Reichweite.</li>
+      <li>FAQ „Wann merke ich etwas?“, „Ich creme schon“ und „Was ist mit den Gelenken?“: die drei Fragen vor dem Kauf, die dritte stellt die Dose selbst.</li>
+    </ul>
+
+    <h3>Ändert sich</h3>
+    <ul>
+      <li>Kette wie NAD⁺, Kreatin und TMG, 6 statt 8 Sections: Hero, Wirkprinzip, Belege, Loox, Produktfakten, FAQ.</li>
+      <li>Kaufzone wie TMG: „Abo starten, 26,01 €“, fester Abo-Hinweis, bei „Einmalig“ zzgl. 4,90 € Versand, Chip „Du sparst 7,79 € inkl. Versand“. Unter 49 € steht nie „Versandfrei“.</li>
+      <li>Grundpreis aus der Füllmenge 49 g statt Preis am Tag.</li>
+      <li>Durchgehend Du-Form, eine Lieferzeit, Reinheit vom Etikett, Loox als Lade „Alle 5 Bewertungen lesen“.</li>
+    </ul>
+
+    <h3>Braucht Erweiterung (Default aus, alle anderen PDPs bleiben gleich)</h3>
+    <ul>
+      <li><code>lt-pdp-hero</code>: Grundpreis je Kilogramm. Neuer Wert in <code>compact_amount_unit</code>, Default wie heute (je 100 g). Ohne Erweiterung steht 53,08 €/100 g da wie bei Kreatin.</li>
+    </ul>
+
+    <h3>Kompass</h3>
+    <ul>
+      <li><b>Hebt das Ergebnis:</b> klare Lage in der Titelzeile, Erklärung in drei Sätzen.</li>
+      <li><b>Hebt die Sicherheit:</b> Studie mit Frauen ihres Alters, Etikett, Fermentation, Limmroth, Garantie.</li>
+      <li><b>Senkt den Aufwand:</b> Monats-Abo versandfrei, 2 Kapseln am Tag, „Plane drei Dosen ein“ statt Rätseln.</li>
+      <li><b>Würde man vermissen:</b> Ein Kandidat zum Streichen bleibt Punkt 2 im Hero („Derselbe Stoff, der in deiner Haut Wasser bindet“). Das Wirkprinzip sagt es noch einmal.</li>
+    </ul>
+
+    <h3>Offen</h3>
+    <ul>
+      <li>Titelzeile: „Für Haut, die trockener wird.“ oder „Für Frauen, die an ihre Haut denken.“?</li>
+      <li>Pexels-Freigabe: Nr. 7530606 (Galerie) und Nr. 7530591 (Wirkprinzip), Mikhail Nilov, je 4000 × 6000. Erst nach deinem Ja lade ich die Originale.</li>
+      <li>Glaskarte: ohne Zahl (jetzt) oder Hsu +11 % mit Altersschnitt 44?</li>
+      <li>Grundpreis je kg: Soll ich die Erweiterung bauen? Sie würde auch Kreatin auf €/kg bringen, wenn du dort den Wert setzt.</li>
+      <li>Fermentation: Steht sie auf dem Datenblatt des Rohstoffs?</li>
+      <li>Packung: Ein Doppelpack läge mit 57,80 € über 49 € und wäre versandfrei. Willst du eine zweite Variante?</li>
+      <li>Prüfbericht je Charge, Kapselfarbe weiß?</li>
+      <li>Garantie-Wortlaut: NMN (jetzt) oder „Auch wenn du nichts merkst“?</li>
+      <li>Etikett: Berliner Anschrift, Siegel „SKIN &amp; JOINT REGEN“ und verkürzter Pflichthinweis, nur zur Info.</li>
+      <li>Shopify-Feld, nicht Teil des Entwurfs: Die Produktbeschreibung sagt „hergestellt in der EU“ und „unabhängig laborgeprüft“. Beides steht nicht auf dem Etikett.</li>
+    </ul>
+  </div>
+</section>
+
+<footer class="ft">Entwurf 16.11.2026. Footer wie im Theme. Nur Vorschau, kein Produktivcode.</footer>
+
+<div class="sticky" id="sticky">
+  <div class="meta"><b>Hyaluron-Kapseln</b><span id="st-sub">Im Abo, jeden Monat</span></div>
+  <button class="cta" id="st-cta" type="button">Abo starten, 26,01 €</button>
+</div>
+
+<script>
+(function(){
+  var modes=document.querySelectorAll('#modes .mode'), mode='sub';
+  var P={sub:26.01,once:28.90}, SHIP=4.90, FREE=49, GRAMS=49;
+  function eur(n){return n.toFixed(2).replace('.',',')+' €';}
+  function render(){
+    var label=(mode==='sub'?'Abo starten, ':'Einmalig kaufen, ')+eur(P[mode]);
+    document.getElementById('cta').textContent=label;
+    document.getElementById('st-cta').textContent=label;
+    var save=P.once+(P.once<FREE?SHIP:0)-P.sub;
+    document.getElementById('save').innerHTML=mode==='sub'
+      ?'Du sparst <b>'+eur(save)+'</b> inkl. Versand'
+      :'Im Abo sparst du <b>'+eur(save)+'</b> →';
+    document.getElementById('st-sub').textContent=mode==='sub'?'Im Abo, jeden Monat':'Einmalig';
+    document.getElementById('hint').textContent=mode==='sub'
+      ?'Lieferung jeden Monat, versandfrei, jederzeit kündbar.'
+      :'Zzgl. 4,90 € Versand, versandfrei ab 49 €.';
+    document.getElementById('unit').textContent='60 Kapseln für 30 Tage · '+eur(Math.round(P[mode]*100000/GRAMS)/100)+'/kg';
+  }
+  function setMode(m){
+    modes.forEach(function(x){x.classList.toggle('on',x.dataset.mode===m)}); mode=m; render();
+  }
+  modes.forEach(function(b){b.addEventListener('click',function(){setMode(b.dataset.mode)})});
+  document.getElementById('save').addEventListener('click',function(){ if(mode==='once') setMode('sub'); });
+
+  var main=document.getElementById('galMain'), thumbs=document.querySelectorAll('#thumbs .thumb');
+  thumbs.forEach(function(t){t.addEventListener('click',function(){
+    thumbs.forEach(function(x){x.classList.remove('on')}); t.classList.add('on');
+    main.innerHTML='<img'+(t.dataset.fit?' class="fit"':'')+' src="'+t.dataset.src+'" alt="'+t.dataset.alt+'">';
+  })});
+
+  var dlg=document.getElementById('guar-dlg');
+  document.getElementById('guar-open').addEventListener('click',function(){dlg.showModal()});
+  dlg.addEventListener('click',function(e){if(e.target===dlg||e.target.closest('[data-close]'))dlg.close()});
+
+  var glass=document.getElementById('glass'), gt=document.getElementById('glassToggle');
+  gt.addEventListener('click',function(){
+    glass.hidden=!glass.hidden;
+    gt.textContent=glass.hidden?'Option zeigen: Glaskarte mit Hsu +11 %':'Option ausblenden (Vorschlag: ohne Zahl)';
+  });
+
+  var tg=document.getElementById('toggle');
+  tg.addEventListener('click',function(){
+    var c=document.body.classList.toggle('clean');
+    tg.textContent=c?'Notizen einblenden':'Notizen ausblenden';
+  });
+
+  var st=document.getElementById('sticky'), cta=document.getElementById('cta');
+  new IntersectionObserver(function(e){ st.classList.toggle('show', !e[0].isIntersecting && e[0].boundingClientRect.top<0); },{threshold:0}).observe(cta);
+  render();
+})();
+</script>
+</body>
+</html>
