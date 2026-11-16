@@ -35,7 +35,7 @@
 {%- endcomment -%}
 {%- if lsh_band -%}
 <section id="section-{{ section.id }}" class="lsh lsh--band">
-  <div class="lsh__band" style="--lsh-band-bg: {{ section.settings.band_bg }};">
+  <div class="lsh__band{% if section.settings.band_verlauf == 'stark' %} lsh__band--stark{% endif %}" style="--lsh-band-bg: {{ section.settings.band_bg }};{% if section.settings.position_desktop != blank %} --lsh-pos-d: {{ section.settings.position_desktop | escape }};{% endif %}{% if section.settings.position_mobile != blank %} --lsh-pos-m: {{ section.settings.position_mobile | escape }};{% endif %}">
     <div class="lsh__band-bild">
       <picture>
         <source
@@ -72,6 +72,17 @@
           {%- endif -%}
         </div>
       </div>
+      {%- comment -%} Knöpfe wie im Vollbild-Hero der Startseite (heller Knopf, Ghost-Knopf). Leer = keine. {%- endcomment -%}
+      {%- if section.settings.cta_label != blank or section.settings.cta_2_label != blank -%}
+        <div class="lsh__band-knoepfe">
+          {%- if section.settings.cta_label != blank -%}
+            <a class="lsh__band-knopf lsh__band-knopf--hell" href="{{ section.settings.cta_url | default: '/products/lifetime-age-dna' }}">{{ section.settings.cta_label | escape }}</a>
+          {%- endif -%}
+          {%- if section.settings.cta_2_label != blank -%}
+            <a class="lsh__band-knopf lsh__band-knopf--ghost" href="{{ section.settings.cta_2_url | default: '/products/lifetime-age-dna' }}">{{ section.settings.cta_2_label | escape }}</a>
+          {%- endif -%}
+        </div>
+      {%- endif -%}
     </div>
   </div>
 </section>
@@ -210,7 +221,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 50% 62%;
+  object-position: var(--lsh-pos-m, 50% 62%);
   -webkit-mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
   mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
 }
@@ -222,11 +233,33 @@
   padding: var(--space-2) 20px var(--space-7);
 }
 .lsh__band-text .crs-heading-stack__subtitle { max-width: 30ch; }
+.lsh__band-knoepfe { display: flex; gap: var(--space-3); margin-top: var(--space-5); }
+.lsh__band-knopf {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 48px;
+  padding: 14px 12px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  line-height: 1.25;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.lsh__band-knopf--hell { background: var(--color-paper); color: var(--color-dark); }
+.lsh__band-knopf--hell:hover { background: var(--color-white); }
+.lsh__band-knopf--ghost { background: transparent; color: var(--color-paper); border: 1px solid rgba(247, 247, 244, 0.85); }
+.lsh__band-knopf--ghost:hover { background: rgba(247, 247, 244, 0.14); }
+.lsh__band-knopf:focus-visible { outline: 2px solid var(--color-paper); outline-offset: 4px; }
 @media (min-width: 641px) { .lsh__band-text { padding-left: 24px; padding-right: 24px; } }
 @media (min-width: 769px) {
   .lsh__band { display: flex; align-items: center; height: clamp(360px, 36vw, 560px); }
   .lsh__band-bild { position: absolute; inset: 0; aspect-ratio: auto; }
-  .lsh__band-img { object-position: 100% 58%; -webkit-mask-image: none; mask-image: none; }
+  .lsh__band-img { object-position: var(--lsh-pos-d, 100% 58%); -webkit-mask-image: none; mask-image: none; }
   .lsh__band::after {
     content: "";
     position: absolute;
@@ -234,7 +267,13 @@
     pointer-events: none;
     background: linear-gradient(to right, rgba(38, 37, 30, 0.32) 0%, rgba(38, 37, 30, 0.12) 38%, rgba(38, 37, 30, 0) 55%);
   }
+  /* Starker Verlauf für helle Fotos, Werte wie die Personen-Folie im Hero der Startseite. */
+  .lsh__band--stark::after {
+    background: linear-gradient(to right, rgba(38, 37, 30, 0.72) 0%, rgba(38, 37, 30, 0.42) 40%, rgba(38, 37, 30, 0.14) 62%, rgba(38, 37, 30, 0) 80%);
+  }
   .lsh__band-text { width: 100%; padding-top: 0; padding-bottom: 0; }
+  .lsh__band-knoepfe { margin-top: var(--space-6); }
+  .lsh__band-knopf { flex: 0 0 auto; padding: 15px 26px; }
 }
 @media (min-width: 1025px) { .lsh__band-text { padding-left: 40px; padding-right: 40px; } }
 
@@ -275,6 +314,16 @@
     { "type": "image_picker", "id": "image",          "label": "Bild (im Bildband: Querformat)" },
     { "type": "image_picker", "id": "image_mobile",   "label": "Bildband: Hochformat fürs Handy", "info": "Leer = dasselbe Bild." },
     { "type": "color",        "id": "band_bg",        "label": "Bildband: Grundfarbe", "default": "#364f56", "info": "Die Farbe, in die das Bild auf dem Handy nach unten ausläuft. Am Bildgrund ausrichten." },
+    { "type": "select",       "id": "band_verlauf",   "label": "Bildband: Verlauf hinter der Schrift", "default": "leicht", "options": [
+      { "value": "leicht", "label": "Leicht (dunkles Bild)" },
+      { "value": "stark",  "label": "Stark (helles Foto)" }
+    ] },
+    { "type": "text",         "id": "position_desktop", "label": "Bildband: Ausschnitt Desktop", "info": "Wie CSS object-position, z. B. 100% 50%. Leer = 100% 58%." },
+    { "type": "text",         "id": "position_mobile",  "label": "Bildband: Ausschnitt Handy", "info": "Leer = 50% 62%." },
+    { "type": "text",         "id": "cta_label",      "label": "Bildband: Knopf 1 (hell)" },
+    { "type": "url",          "id": "cta_url",        "label": "Bildband: Ziel Knopf 1" },
+    { "type": "text",         "id": "cta_2_label",    "label": "Bildband: Knopf 2 (Umriss)" },
+    { "type": "url",          "id": "cta_2_url",      "label": "Bildband: Ziel Knopf 2" },
     { "type": "text",         "id": "image_alt",      "label": "Bild Alt-Text" },
     { "type": "color",        "id": "color_bg",       "label": "Hintergrund",     "default": "#f7f7f4" },
     { "type": "color",        "id": "color_text",     "label": "Textfarbe",       "default": "#26251e" },

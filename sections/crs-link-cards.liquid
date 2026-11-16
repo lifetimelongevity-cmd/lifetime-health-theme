@@ -66,8 +66,59 @@
       </header>
     {%- endif -%}
     {%- if section.blocks.size > 0 -%}
-      <div class="lc-grid">
+      {%- comment -%}
+        Foto-Karte (16.11.2026): Karte mit Foto und Linkziel wird zur Bildfläche mit Text darauf,
+        wie die Bereichs-Karten der Startseite, und ist als Ganzes der Link. Ohne Foto bleibt die
+        Karte, wie sie war. Sobald eine Karte ein Foto trägt, läuft die Reihe auf dem Handy seitlich.
+      {%- endcomment -%}
+      {%- liquid
+        assign lc_hat_foto = false
+        for block in section.blocks
+          if block.settings.image != blank and block.settings.link_url != blank
+            assign lc_hat_foto = true
+          endif
+        endfor
+      -%}
+      <div class="lc-grid{% if lc_hat_foto %} lc-grid--foto{% endif %}">
         {%- for block in section.blocks -%}
+          {%- if block.settings.image != blank and block.settings.link_url != blank -%}
+            {%- liquid
+              assign lc_foto_extern = false
+              if block.settings.link_url contains '://'
+                unless block.settings.link_url contains request.host
+                  assign lc_foto_extern = true
+                endunless
+              endif
+            -%}
+            <a
+              class="lc-card lc-card--foto"
+              href="{{ block.settings.link_url }}"
+              {% if lc_foto_extern %}target="_blank" rel="noopener noreferrer"{% endif %}
+              {{ block.shopify_attributes }}
+            >
+              {{
+                block.settings.image
+                | image_url: width: 800
+                | image_tag:
+                  loading: 'lazy',
+                  widths: '320, 480, 640, 800',
+                  sizes: '(min-width: 1025px) 24vw, (min-width: 641px) 48vw, 78vw',
+                  class: 'lc-foto',
+                  alt: ''
+              }}
+              <span class="lc-foto-text">
+                {%- if block.settings.title != blank -%}
+                  <h3 class="lc-foto-titel">{{ block.settings.title | escape }}</h3>
+                {%- endif -%}
+                {%- if block.settings.description != blank -%}
+                  <span class="lc-foto-satz">{{ block.settings.description | escape }}</span>
+                {%- endif -%}
+                {%- if block.settings.link_label != blank -%}
+                  <span class="lc-foto-link">{{ block.settings.link_label | escape }}{% if lc_foto_extern %}&nbsp;↗{% endif %}</span>
+                {%- endif -%}
+              </span>
+            </a>
+          {%- else -%}
           <div class="lc-card" {{ block.shopify_attributes }}>
             <div class="lc-card-body">
               {%- if block.settings.title != blank -%}
@@ -142,6 +193,7 @@
               </div>
             {%- endif -%}
           </div>
+          {%- endif -%}
         {%- endfor -%}
       </div>
     {%- endif -%}
@@ -246,6 +298,62 @@
   opacity: 0.92;
 }
 
+/* Foto-Karte: Bild als Fläche, Verlauf und Schrift wie .ltbk__karte auf der Startseite */
+.lc-grid--foto { gap: var(--space-4); }
+.lc-card.lc-card--foto {
+  position: relative;
+  display: block;
+  height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-lg);
+  aspect-ratio: 4 / 5;
+  overflow: hidden;
+  background: var(--color-dark);
+  color: var(--color-paper);
+  text-decoration: none;
+}
+.lc-foto { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+.lc-card--foto:hover .lc-foto { transform: scale(1.03); }
+.lc-card--foto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(38, 37, 30, 0.88) 0%, rgba(38, 37, 30, 0.5) 42%, rgba(38, 37, 30, 0) 70%);
+}
+.lc-foto-text { position: absolute; left: 0; right: 0; bottom: 0; z-index: 1; display: block; padding: var(--space-4); }
+.lc-foto-titel {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: var(--text-section);
+  font-weight: var(--weight-regular);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--color-paper);
+}
+.lc-foto-satz {
+  display: block;
+  margin-top: var(--space-1);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: 1.45;
+  color: rgba(247, 247, 244, 0.85);
+}
+.lc-foto-link {
+  display: inline-block;
+  margin-top: var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  color: var(--color-paper);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.lc-card--foto:focus-visible { outline: 2px solid var(--color-dark); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .lc-foto { transition: none; }
+  .lc-card--foto:hover .lc-foto { transform: none; }
+}
+
 /* Tablet — 2 columns */
 @media (max-width: 1024px) {
   .lc-grid {
@@ -258,6 +366,19 @@
   .lc-grid {
     grid-template-columns: 1fr;
   }
+  /* Foto-Karten laufen seitlich wie die Bereichs-Karten der Startseite, sonst wären es vier Bildschirme. */
+  .lc-grid.lc-grid--foto {
+    display: flex;
+    margin: 0 calc(var(--space-4) * -1);
+    padding: 0 var(--space-4);
+    gap: var(--space-3);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 0 var(--space-4);
+    scrollbar-width: none;
+  }
+  .lc-grid.lc-grid--foto::-webkit-scrollbar { display: none; }
+  .lc-grid--foto > .lc-card { flex: 0 0 78%; max-width: 320px; scroll-snap-align: start; }
 }
 {% endstylesheet %}
 
@@ -382,6 +503,12 @@
           "id": "description",
           "label": "Beschreibung",
           "default": "Erhalte Antworten von unserem Team und der Community."
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Foto (macht daraus eine Foto-Karte)",
+          "info": "Hochformat. Braucht eine Link-URL, die ganze Karte ist dann der Link. Leer = Karte wie bisher."
         },
         {
           "type": "header",

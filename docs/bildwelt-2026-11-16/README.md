@@ -64,9 +64,28 @@ weiter in `lifetime-mockups/ki-bilder/`). Jetzt ist in allen drei Bändern die P
 von hinten zu sehen, das Bild ist scharf, und nur im Laufbild ist der Hintergrund bewegungsunscharf. Auf der NMN-PDP keine Menschen, keine Hände, keine Einnahme-Requisiten (Wasserglas,
 Löffel).
 
+## Teil 2: Wissenschaft, Auftakt und „Mehr erfahren“ (16.11.2026, nur Vorschau)
+
+Auf dem Vorschau-Theme, **noch nicht freigegeben, Template nicht im Repo.**
+
+| Stelle | Änderung | Wo |
+|---|---|---|
+| Hero | Bildband mit Labor-Motiv statt Kasten mit Limmroth-Foto, zwei Knöpfe auf dem Bild | `lt-science-hero` statt `lt-science-proof-hero`; neue Settings `cta_*`, `band_verlauf`, `position_*` |
+| „Mehr erfahren“ | vier Foto-Karten statt grauer Textkarten, am Handy seitlich wischbar | `crs-link-cards`, Block-Setting `image` |
+
+Die Sections sind im Repo (Settings per Default aus, `crs-link-cards` läuft auf rund 20
+Artikel-Templates unverändert weiter). Das Template liegt nur im Vorschau-Theme, Änderung in
+`templates-patch-2.py`. Limmroth steht weiter im Block „Ein Arzt prüft die Inhalte“. Der zweite
+Knopf heißt in der Vorschau „Zum Test“ statt „Zum AGE & DNA-Test“, damit beide bei 375 px
+nebeneinander passen. Die Aufnahmen `vorschau/science-*.jpg` zeigen noch die lange Fassung.
+
+Motive: `lt-sci-hero-labor.webp` (neu, ChatGPT), `lt-sci-probe.webp` (vorhandenes Probe-Bild),
+dazu drei Bereichsbilder der Startseite (`lt-hp-bereich-lesen-handy`, `-markt-gemuese`,
+`-ki-bewegung-c`).
+
 ## Noch nicht gebaut (Reihenfolge aus dem Konzept)
 
-1. Wissenschaft: Limmroth am Mikro groß als Auftakt, „Mehr erfahren“ als Foto-Karten.
+1. Wissenschaft, Auftakt und „Mehr erfahren“: gebaut, siehe Teil 2, wartet auf Freigabe.
 2. AGE&DNA-PDP: Stimmen als Foto-Karten statt Text-Bewertungen, Ablauf-Schritte mit Bildern.
 3. Neben-PDPs: Leiste und Lifestyle-Bild an zweiter Stelle der Galerie.
 4. `DESIGN.md` nachziehen (Foto-Hero ist dort noch untersagt).
