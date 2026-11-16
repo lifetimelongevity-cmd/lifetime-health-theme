@@ -3,8 +3,8 @@
 
 Setzt die Template-Änderungen auf einen Theme-Ordner: python3 templates-patch.py <theme-root>
 Läuft auf dem Repo und auf einem frisch gezogenen Live-Stand (Kommentarkopf bleibt erhalten).
-Mehrfach ausführbar. Motive mit PLATZHALTER sind vorhandene Startseiten-Bilder, bis die
-neuen Motive erzeugt sind (Prompts in README.md).
+Mehrfach ausführbar. Die vier neuen Motive (lt-kat-*, lt-nmn-stillleben) liegen seit 16.11. in
+den Shopify-Dateien, Prompts in README.md.
 """
 import json, re, sys
 from pathlib import Path
@@ -35,10 +35,10 @@ hero.update({
     "image_alt": "LIFETIME Kollektion: AGE & DNA-Test, NMN, Kreatin, Fisetin, Spermidin und TMG",
     "padding_top": 0,
 })
-gruppen = {  # PLATZHALTER-Motive
-    "grp_zellfunktion": ("lt-hp-bereich-ki-bewegung-c.webp", "Die Stoffe, an denen die Alternsforschung arbeitet.", "50% 26%"),
-    "grp_basis": ("lt-hp-bereich-markt-gemuese.webp", "Die Grundlage, bevor du feiner einstellst.", "70% 30%"),
-    "grp_alltag": ("lt-hp-bereich-schlafen.webp", "Für das, was du jeden Tag merkst.", "40% 46%"),
+gruppen = {  # Motive vom 16.11.2026 (ChatGPT, Projekt ki-bilder), Querformat 3:2, Motiv rechts
+    "grp_zellfunktion": ("lt-kat-zellfunktion.webp", "Die Stoffe, an denen die Alternsforschung arbeitet.", "60% 14%"),
+    "grp_basis": ("lt-kat-basis.webp", "Die Grundlage, bevor du feiner einstellst.", "70% 34%"),
+    "grp_alltag": ("lt-kat-alltag.webp", "Für das, was du jeden Tag merkst.", "70% 62%"),
 }
 for key, (bild, satz, pos) in gruppen.items():
     d["sections"]["naehrstoffe"]["blocks"][key]["settings"].update({"image": IMG + bild, "text": satz, "position": pos})
@@ -77,7 +77,7 @@ d["sections"]["schluss"] = {
         "button_label": "Größe wählen →",
         "button_url": "#main",
         "small": "Versand in 1–2 Werktagen · 90 Tage Geld zurück",
-        "image": IMG + "nad-liposom.jpg",  # PLATZHALTER, bis das NMN-Stillleben da ist
+        "image": IMG + "lt-nmn-stillleben.webp",
         "footer_nahtlos": True,
         "kompakt_mobil": True,
         "fakt_1_zahl": "100,1 %",
@@ -88,6 +88,11 @@ d["sections"]["schluss"] = {
         "fakt_3_text": "Geld zurück",
     },
 }
+# Karte „Der Rohstoff“ wird zur Bildkarte (Muster NAD⁺), dasselbe Stillleben, scharf
+d["sections"]["belege"]["settings"].update({
+    "rohstoff_image": IMG + "lt-nmn-stillleben.webp",
+    "rohstoff_image_alt": "Uhrglas mit weißem Pulver, Laborspatel und Messzylinder auf Travertin",
+})
 order = d["order"]
 if "schluss" not in order:
     order.insert(order.index("main_product_hidden") if "main_product_hidden" in order else len(order), "schluss")
