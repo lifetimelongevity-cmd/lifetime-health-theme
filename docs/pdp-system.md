@@ -162,7 +162,7 @@ Prüfbericht je Charge.
 
 Template: `templates/product.06_resveratrol.json` (Suffix `06_resveratrol`, am Produkt bestätigt 08.11.2026).
 Seit 08.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-resveratrol-pdp-2026-11-08.html` (BJ-Freigabe
-„Passt, Template bauen“, Copy in der Grauzonen-Fassung aus Commit `e9e85f1`), gleiche Kette wie NAD⁺ und Kreatin. **Noch nicht live.** Vorschau-Theme `194213871991`
+„Passt, Template bauen“, Copy in der Grauzonen-Fassung aus Commit `e9e85f1`), gleiche Kette wie NAD⁺ und Kreatin. **Live seit 16.11.2026** (mit einem vollen Push des Repo-Stands am Nachmittag, per Pull gegen HEAD und im Browser bestätigt). Vorschau-Theme `194213871991`
 („Claude Resveratrol-PDP (08.11.)“). 6 Einträge in `order`, kein `main_product_hidden`.
 
 | # | Section-Key | Typ | Rolle |
@@ -182,7 +182,7 @@ Offen: Prüfbericht je Charge, Kapselgewicht, Dosis, Herkunft und Medikamenten-H
 ## PDP D3+K2 (`/products/vitamin-d3-k2-spray`)
 
 Template: `templates/product.07_d3k2.json` (Suffix `07_d3k2`, am Produkt bestätigt 08.11.2026).
-Seit 08.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-d3k2-pdp-2026-11-08.html` (BJ-Freigabe „Ja, mit Vorschlägen“), gleiche Kette wie NAD⁺, Kreatin und Resveratrol. **Noch nicht live.** Vorschau-Theme `194218819959` („Claude D3K2-PDP (08.11.)“). 6 Einträge in `order`, kein `main_product_hidden`.
+Seit 08.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-d3k2-pdp-2026-11-08.html` (BJ-Freigabe „Ja, mit Vorschlägen“), gleiche Kette wie NAD⁺, Kreatin und Resveratrol. **Live seit 16.11.2026** (mit demselben vollen Push wie Resveratrol, samt den drei Section-Erweiterungen, per Pull gegen HEAD und im Browser bestätigt). Vorschau-Theme `194218819959` („Claude D3K2-PDP (08.11.)“). 6 Einträge in `order`, kein `main_product_hidden`.
 
 | # | Section-Key | Typ | Rolle |
 |---|---|---|---|
@@ -199,7 +199,7 @@ Offen: Abo-Plan (dann `show_subscription_toggle` an, `compact_sub_hint` „Liefe
 ## PDP TMG (`/products/betain-tmg-kapseln`)
 
 Template: `templates/product.01_tmg.json` (Suffix `01_tmg`, am Produkt bestätigt 16.11.2026).
-Seit 16.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-tmg-pdp-2026-11-16.html` (BJ-Freigabe „Ja, Template bauen“), gleiche Kette wie NAD⁺, Kreatin, Resveratrol und D3+K2. **Live seit 16.11.2026** (BJ-Ansage „deploy“, gezielter CLI-Push nur von `templates/product.01_tmg.json` und `sections/lt-pdp-hero.liquid`, je Datei zurückgezogen und verglichen, Seite im Browser geprüft). Der Hero ging als Live-Fassung plus TMG-Patch hoch: die Hero-Zeilen aus D3+K2 (`15136b1`) und Black Week (`e460e0e`, `4906b33`) sind weiter **nicht** live. Abgenommen im Vorschau-Theme `194334196087` („Claude TMG-PDP (16.11.)“). 6 Einträge in `order`, kein `main_product_hidden` mehr (vorher 10 Sections samt sichtbarem zweitem Hero).
+Seit 16.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-tmg-pdp-2026-11-16.html` (BJ-Freigabe „Ja, Template bauen“), gleiche Kette wie NAD⁺, Kreatin, Resveratrol und D3+K2. **Live seit 16.11.2026** (BJ-Ansage „deploy“, gezielter CLI-Push nur von `templates/product.01_tmg.json` und `sections/lt-pdp-hero.liquid`, je Datei zurückgezogen und verglichen, Seite im Browser geprüft). Der Hero ging zuerst als Live-Fassung plus TMG-Patch hoch; seit dem vollen Push am selben Nachmittag entspricht er wieder HEAD, samt D3+K2- und Black-Week-Zeilen. Abgenommen im Vorschau-Theme `194334196087` („Claude TMG-PDP (16.11.)“). 6 Einträge in `order`, kein `main_product_hidden` mehr (vorher 10 Sections samt sichtbarem zweitem Hero).
 
 | # | Section-Key | Typ | Rolle |
 |---|---|---|---|
