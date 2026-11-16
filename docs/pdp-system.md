@@ -261,6 +261,22 @@ Template: `templates/product.11_b-komplex.json` (Suffix `11_b-komplex`, am Produ
 Keine eigene Section-Erweiterung. **Braucht beim Push `e574a5e`** (`compact_amount_unit` „kg“ in `lt-pdp-hero`, aus der Hyaluron-Sitzung), sonst kennt das Live-Schema den Wert nicht; im Vorschau-Theme lief der Hero deshalb als HEAD-Fassung (Live plus genau dieser Commit). Kein Novel Food, alle acht Formen stehen in Anhang II der RL 2002/46/EG; die BfR-Höchstmengenvorschläge 2021 (B6 3,5 mg, Folsäure 200 µg, B12 25 µg) liegen unter dem Etikett, sind aber nicht verbindlich. Bilder in den Shopify-Dateien: `b-komplex-galerie-travertin.jpg`, `b-komplex-galerie-frau.jpg` (Pexels 5698211, quadratisch 4000 × 4000), `b-komplex-wirkprinzip-strasse.jpg` (Pexels 5698219, quadratisch 4000 × 4000, Gesicht bei 23 % der Höhe), `b-komplex-stillleben.jpg`, `b-komplex-etikett.jpg` (2529 × 883).
 Offen: zweite Packungsgröße, Prüfbericht je Charge, Kapselfarbe (Codex malte klare Kapseln mit hellgelbem Pulver), Etikett (Berlin).
 
+## PDP Schlafspray (`/products/schlafspray-mit-melatonin`)
+
+Template: `templates/product.08_schlafspray.json` (Suffix `08_schlafspray`, am Produkt bestätigt 16.11.2026). Seit 16.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-schlafspray-pdp-2026-11-16.html` (BJ-Freigabe „Ja, Template bauen“, Entwurf-Commit `dec0df9`, Template-Commits `3e25e78` und `e359fec`), gleiche Kette wie D3+K2, **ohne Abo**. **Wartet auf BJs Push.** Abgenommen im Vorschau-Theme `194338095479` („Claude Schlafspray-PDP (16.11.)“, Live-Stand plus nur dieses Template), headless bei 375 und 1280 px gemessen, Warenkorb in Chrome getestet (19,90 €, ohne Selling Plan). 6 Einträge in `order`, kein `main_product_hidden` mehr (vorher 8 Sections samt sichtbarem zweitem Hero, Icon-Leiste, zwei Rich-Texts und leeren Empfehlungen).
+
+| # | Section-Key | Typ | Rolle |
+|---|---|---|---|
+| 1 | `main` | `lt-pdp-hero` | Titelzeile „Für Nächte, die früher beginnen.“, Punkt 1 der Einschlaf-Claim (VO 432/2012), Zeile „Vegan und glutenfrei · Etikett ansehen“, nur Einmalig (`show_price_standalone`, das Produkt hat keinen Selling Plan; live stand eine Abo-Karte, die ohne Abo 19,90 € verkaufte), Versandkosten und „30 ml für 75 Nächte · 663,33 €/l“. Galerie: Flasche, dann `gallery_extra_1–3` |
+| 2 | `wirkprinzip` | `lt-pdp-wirkprinzip` | „Melatonin ist das Signal für die Nacht.“, Einblendung 54 % (DEGS1, Schlack 2013, Tabelle 1: Frauen 40 bis 59 mit Einschlafproblemen im letzten Monat, ab 60 67 %), drei Rollen ohne Symbol; Rolle 2 und 3 tragen beide Claims mit Pflichtinfo im EUR-Lex-Wortlaut (Einschlafzeit nur bei genau 1 mg je Portion, Jetlag ab 0,5 mg) |
+| 3 | `belege` | `lt-pdp-belege` | Bildkarte „Drei Zutaten, sonst nichts“ (Stillleben, beide Marken an der Flasche), ohne Kundenstimmen (Loox: 2 Bewertungen ohne Text) |
+| 4 | `loox_reviews` | `lt-pdp-reviews-all` | Lade mit allen Loox-Bewertungen |
+| 5 | `produktfakten` | `lt-pdp-produktfakten` | Fakten mit Etikett (Zoom 1,9 bei 0 % 40 %), Sprühstoß-Symbol, Zeile „Nicht für: Schwangere, Stillende, unter 18“, Risikogruppen der BfR-Stellungnahme 038/2024 in der Lade. Werte vom Druck-PDF `Schlafspray_30[96]` (SKU LT-MEL-S-30) |
+| 6 | `faq_accordion` | `crs-faq-accordion` | 6 Fragen: Versand und Garantie wie D3+K2, Einnahme samt „danach nicht mehr Auto fahren“, „Merke ich etwas?“, „Macht Melatonin abhängig?“ (Circadin-Fachinformation 5.1: keine Entzugserscheinungen), „Wer sollte es nicht nehmen?“. Abo-Frage fehlt, solange es kein Abo gibt |
+
+Keine Section-Erweiterung, alles gibt es seit D3+K2 (`show_price_standalone`, `compact_amount_unit: ml`, `fact_icon: spruehstoss`, `einbl_mobile_vw`, hier 200 für das Querformat 1,67). Arzneimittelgrenze: OVG NRW, 28.10.2021, 13 A 1376/17 (2 × 0,5 mg am Tag ist Lebensmittel), zuständig ist NRW, solange der Sitz in Köln ist. Bilder in den Shopify-Dateien: `schlafspray-galerie-travertin.png`, `schlafspray-galerie-frau.jpg` (Pexels 5473283, quadratisch 2000 × 2000), `schlafspray-wirkprinzip-bett.jpg` (Pexels 6916768, beschnitten auf 5895 × 3539, Gesicht bei 30 % der Höhe), `schlafspray-stillleben.png`, `schlafspray-etikett.jpg` (2591 × 1489).
+Offen: Mehrfach-Packung (eine Flasche kommt nie an 49 €), Gehaltsmessung je Charge, Etikett (Berlin, „abwechslungsreiche“, BfR-Hinweis zu den Risikogruppen).
+
 ## Konvention `main_product_hidden`
 
 Beide Templates führen die Theme-Section `main-product` unter dem Key `main_product_hidden`
