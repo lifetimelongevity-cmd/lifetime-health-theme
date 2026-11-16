@@ -66,7 +66,16 @@ Löffel).
 
 ## Teil 2: Wissenschaft, Auftakt und „Mehr erfahren“ (16.11.2026)
 
-**Von BJ am 16.11. freigegeben, Template im Repo, wartet auf den Push.** Teil 1 ist seit 16.11. live.
+**Live seit 16.11.2026** (BJ: „deploy“, Commit `28d1491`). Gepusht wurden nur die drei Dateien dieses Teils, einzeln, und per Rückzug vom Live-Theme gegengeprüft. Teil 1 ist ebenfalls seit 16.11. live.
+
+Live geprüft: `/pages/science` bei 1280 und 375 px (Bildband, beide Knöpfe passen, vier Foto-Karten,
+Leiste, kein horizontales Scrollen, keine Skriptfehler) und der Artikel `epigenetische-uhren`
+(Link-Karten unverändert als Textkarten). Nicht geprüft: Wischen der Foto-Karten per Touch, die
+übrigen Artikel-Templates einzeln.
+
+**Kein voller Push:** Beim Abgleich wichen rund 28 weitere Templates zwischen Live und Repo ab
+(PDPs, NMN-Artikel, Quiz-Seiten). Ein Teil davon ist Shopifys Normalisierung (Settings, die das
+Schema nicht kennt, fallen live weg), der Rest ist ungeprüft. Vor dem nächsten vollen Push ansehen.
 
 | Stelle | Änderung | Wo |
 |---|---|---|
