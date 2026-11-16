@@ -229,6 +229,22 @@ Template: `templates/product.09_astafit.json` (Suffix `09_astafit`, am Produkt b
 Keine eigene Section-Erweiterung. **Braucht beim Push `e574a5e`** (`compact_amount_unit` „kg“ in `lt-pdp-hero`, aus der Hyaluron-Sitzung), sonst kennt das Live-Schema den Wert nicht. Novel Food: Die ganze Alge ist in Nahrungsergänzungsmitteln laut EU-Katalog nicht neuartig; die 8-mg-Grenze und der 14-Jahre-Hinweis der Unionsliste gelten für das Oleoresin. Bilder in den Shopify-Dateien: `astaxanthin-galerie-travertin.png`, `astaxanthin-galerie-frau.jpg` (Pexels 8784551, quadratisch 4900 × 4900), `astaxanthin-wirkprinzip-garten.jpg` (Pexels 8784712, auf 4075 × 6109 verkleinert), `astaxanthin-stillleben.png`, `astaxanthin-etikett.jpg` (2529 × 883).
 Offen: Bestand, Bezug der „>99 % Reinheit“ auf dem Etikett, astafit®-Datenblatt (ganze Alge oder Oleoresin, Herkunft Österreich), Kapselfarbe, Prüfbericht je Charge, Garantie-Wortlaut, Etikett (Berlin, 14-Jahre-Hinweis).
 
+## PDP Fisetin (`/products/fisetin-kapseln`)
+
+Template: `templates/product.04_fisetin.json` (Suffix `04_fisetin`, am Produkt bestätigt 16.11.2026). Seit 16.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-fisetin-pdp-2026-11-16.html` (BJ-Freigabe „Ja, Template bauen“, Commit `8fb6615`), gleiche Kette wie TMG. **Wartet auf BJs Push.** Kein Vorschau-Theme (BJ: „alle ohne vorschau theme“), geprüft nur per `lt-check` und `shopify theme check` sowie headless am HTML-Entwurf bei 375 und 1280 px. Den Lauf im Shop nach dem Push live in Chrome prüfen. 6 Einträge in `order`, kein `main_product_hidden` mehr (vorher 9 Sections samt sichtbarem zweitem Hero, mTOR-Abschnitt und zwei leeren Sections).
+
+| # | Section-Key | Typ | Rolle |
+|---|---|---|---|
+| 1 | `main` | `lt-pdp-hero` | Titelzeile „Für alle, die Fisetin schon kennen.“ (Grauzonen-Fassung, kein zugelassener Claim), drei Punkte (Studien laut ClinicalTrials.gov, Einnahme, Laborprüfung), Zeile „Über 98 % Reinheit · Etikett ansehen“, kompakte Kaufzone mit festem Abo-Hinweis, Versandkosten bei „Einmalig“, Chip mit Versand (7,89 €) und Tagespreis („60 Kapseln für 30 Tage“, Kapselgewicht fehlt). Garantie-Dialog „Auch wenn du nichts merkst“. Galerie: Dose, dann `gallery_extra_1–3` |
+| 2 | `wirkprinzip` | `lt-pdp-wirkprinzip` | „Fisetin und das Älterwerden.“, Einblendung ohne Glaskarte (keine Studie mit Ergebnis an 50- bis 65-Jährigen), drei Rollen ohne Symbol: Vorkommen, Forschungsfrage, Herkunft aus dem Fisetholz |
+| 3 | `belege` | `lt-pdp-belege` | Bildkarte „Fisetin, hochrein“ (Stillleben, Marken Über 98 % und Vegan), ohne Kundenstimmen (Loox: 7 Bewertungen, keine mit Produktbezug) |
+| 4 | `loox_reviews` | `lt-pdp-reviews-all` | Lade mit allen Loox-Bewertungen (live stand der alte Loox-Block auf `is_sample: true`) |
+| 5 | `produktfakten` | `lt-pdp-produktfakten` | Fakten mit Etikett (Zoom 1,8 bei 4,5 % 11 %, gleiches Layout wie TMG), Kapsel-Symbol, Werte vom Druck-PDF vom 18.06.2025 (SKU LT-FIS-C-60) |
+| 6 | `faq_accordion` | `crs-faq-accordion` | 6 Fragen, Versand/Abo/Garantie wörtlich von NMN, dann „Merke ich etwas?“, „Ist das die Menge aus den Studien?“ (Mayo: 20 mg/kg an 2 Tagen), Medikamente (Statine, Blutverdünner laut Mayo-Ausschlüssen) |
+
+Keine Section-Erweiterung, `compact_save_ship` ist seit TMG live. **Novel Food:** Fisetin ≥ 98 % aus der Rinde des Perückenstrauchs ist laut EU-Katalog neuartig (Art.-4-Konsultation Tschechien, Stand 14.04.2026) und nicht in der Unionsliste (konsolidiert 10.08.2026); Rinde, Blatt und Blüte des Strauchs sind in Nahrungsergänzungsmitteln nicht neuartig. BJ-Entscheid 16.11.: trotzdem als Nahrungsergänzungsmittel in der Grauzonen-Fassung. Bilder in den Shopify-Dateien: `fisetin-galerie-travertin.png`, `fisetin-galerie-frau.jpg` (Pexels 7530822, quadratisch 4000 × 4000), `fisetin-wirkprinzip-kueche.jpg` (Pexels 7530812, 4000 × 6000 unbeschnitten, Gesicht bei 57 % / 28 %), `fisetin-stillleben.png`, `fisetin-etikett.jpg` (2520 × 946).
+Offen: Titelzeile (Alternative „Für Frauen, die an ihre Zellen denken.“), Glaskarte „3 kg Erdbeeren“ (Volltext Arai 2000 ungeprüft), Doppelpack, Prüfbericht je Charge FIS252001, Kapselgewicht, Kapselfarbe, Anwalt (Novel Food), Etikett (Berlin, „Cell Detox“), drei Shopify-Produktbilder mit Claim-Text in den Produktmedien.
+
 ## Konvention `main_product_hidden`
 
 Beide Templates führen die Theme-Section `main-product` unter dem Key `main_product_hidden`
