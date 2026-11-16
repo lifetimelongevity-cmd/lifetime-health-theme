@@ -1434,7 +1434,7 @@
               {%- comment -%} Kompakt: eine Zeile Takt und Versand des gewählten Modus, darunter der
                   Grundpreis genau einmal (PAngV), beides aus dem Kompakt-JS. {%- endcomment -%}
               <p class="lt-bb__hint" data-lt-bb-hint{% if section.settings.compact_sub_hint != blank %} data-sub-hint="{{ section.settings.compact_sub_hint | escape }}"{% endif %} aria-live="polite"></p>
-              <p class="lt-bb__unitline" data-lt-bb-unitline{% if section.settings.compact_amount_text != blank %} data-amount-text="{{ section.settings.compact_amount_text | escape }}" data-days="{{ bb_supply_days | plus: 0 }}"{% if section.settings.compact_amount_grams > 0 %} data-amount-grams="{{ section.settings.compact_amount_grams | plus: 0 }}"{% if section.settings.compact_amount_unit == 'ml' %} data-amount-unit="ml"{% endif %}{% endif %}{% endif %}></p>
+              <p class="lt-bb__unitline" data-lt-bb-unitline{% if section.settings.compact_amount_text != blank %} data-amount-text="{{ section.settings.compact_amount_text | escape }}" data-days="{{ bb_supply_days | plus: 0 }}"{% if section.settings.compact_amount_grams > 0 %} data-amount-grams="{{ section.settings.compact_amount_grams | plus: 0 }}"{% if section.settings.compact_amount_unit == 'ml' %} data-amount-unit="ml"{% elsif section.settings.compact_amount_unit == 'kg' %} data-amount-unit="kg"{% endif %}{% endif %}{% endif %}></p>
             {%- endif -%}
             {%- comment -%}
               Zusatzartikel-Häkchen unter der Kaufart (Conversion-Plan 3.3, 29.09.2026):
@@ -1717,6 +1717,7 @@
                     {{- section.settings.compact_amount_text | escape -}}
                     {%- if lt_amount_d > 0 -%}
                       {%- if section.settings.compact_amount_unit == 'ml' %} · {{ lt_pill_1_once | times: 1000.0 | divided_by: lt_amount_d | round | money }}/l
+                      {%- elsif section.settings.compact_amount_unit == 'kg' %} · {{ lt_pill_1_once | times: 1000.0 | divided_by: lt_amount_d | round | money }}/kg
                       {%- else %} · {{ lt_pill_1_once | times: 100.0 | divided_by: lt_amount_d | round | money }}/100 g
                       {%- endif -%}
                     {%- endif -%}
@@ -2713,7 +2714,9 @@
             var amountG = parseInt(unitLine.getAttribute('data-amount-grams'), 10);
             // Flüssiges wird je Liter ausgewiesen (compact_amount_unit, § 5 PAngV, D3+K2 08.11.2026).
             var amountMl = unitLine.getAttribute('data-amount-unit') === 'ml';
-            if (amountG > 0) unitLine.textContent = amountText + (!isNaN(dayC) ? ' · ' + formatPrice(Math.round(dayC / amountG * (amountMl ? 1000 : 100))) + (amountMl ? '/l' : '/100 g') : '');
+            // Feste Ware je Kilogramm (compact_amount_unit „kg“, § 5 Abs. 1 PAngV seit 28.05.2022, Hyaluron 16.11.2026).
+            var amountKg = unitLine.getAttribute('data-amount-unit') === 'kg';
+            if (amountG > 0) unitLine.textContent = amountText + (!isNaN(dayC) ? ' · ' + formatPrice(Math.round(dayC / amountG * ((amountMl || amountKg) ? 1000 : 100))) + (amountMl ? '/l' : (amountKg ? '/kg' : '/100 g')) : '');
             else unitLine.textContent = amountText + ((days > 0 && !isNaN(dayC)) ? ' · ' + formatPrice(Math.round(dayC / days)) + ' am Tag' : '');
           } else {
             unitLine.textContent = (!isNaN(current) && g > 0) ? formatPrice(Math.round(current / g * 100)) + '/100 g' : '';
@@ -5332,6 +5335,7 @@
       "label": "Kompakt: Einheit der Füllmenge",
       "options": [
         { "value": "g", "label": "Gramm (Grundpreis je 100 g)" },
+        { "value": "kg", "label": "Gramm (Grundpreis je kg)" },
         { "value": "ml", "label": "Milliliter (Grundpreis je Liter)" }
       ],
       "default": "g"
