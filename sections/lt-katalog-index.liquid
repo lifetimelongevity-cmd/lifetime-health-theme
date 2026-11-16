@@ -13,6 +13,9 @@
 {%- endcomment -%}
 
 {% style %}
+  {%- if section.settings.footer_nahtlos %}
+  body .main-footer { margin-top: 0; border-top: 0; } /* wie lt-leiste: section-footer.css lädt später */
+  {%- endif %}
   #section-{{ section.id }} {
     padding-top:    {{ section.settings.padding_top }}px;
     padding-bottom: {{ section.settings.padding_bottom }}px;
@@ -27,7 +30,19 @@
   }
 {% endstyle %}
 
-<section id="section-{{ section.id }}" class="lki">
+{%- comment -%}
+  Mit Foto (16.11.2026) wird der Index zur Schluss-Leiste des Katalogs: dasselbe verwischte
+  Foto wie in lt-leiste, rechts im Teal auslaufend, die Liste rückt in zwei Spalten nach links.
+  Ohne Foto bleibt der Block, wie er war.
+{%- endcomment -%}
+<section id="section-{{ section.id }}" class="lki{% if section.settings.image != blank %} lki--bild{% endif %}">
+  {%- if section.settings.image != blank -%}
+    {{
+      section.settings.image
+      | image_url: width: 1120
+      | image_tag: loading: 'lazy', widths: '560, 1120', sizes: '(min-width: 901px) 60vw, 100vw', class: 'lki__foto', alt: ''
+    }}
+  {%- endif -%}
   <div class="lki__inner">
 
     {%- if section.settings.heading != blank or section.settings.subheading != blank -%}
@@ -156,6 +171,44 @@
   flex-shrink: 0;
 }
 
+/* Mit Foto: Verlauf und Unschärfe wie .ltl2 in lt-leiste, damit beide Schlussblöcke gleich aussehen. */
+.lki--bild {
+  position: relative;
+  overflow: hidden;
+}
+
+.lki__foto {
+  position: absolute;
+  top: -8%;
+  right: -6%;
+  width: 62%;
+  height: 116%;
+  object-fit: cover;
+  filter: blur(26px) brightness(0.9) saturate(1.05);
+}
+
+.lki--bild::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(90deg, var(--color-dark) 46%, rgba(54, 79, 86, 0.86) 56%, rgba(54, 79, 86, 0.35) 72%, rgba(54, 79, 86, 0) 88%),
+    linear-gradient(180deg, rgba(54, 79, 86, 0) 60%, var(--color-dark) 100%);
+}
+
+.lki--bild .lki__inner {
+  position: relative;
+  z-index: 1;
+}
+
+.lki--bild .lki__nav {
+  max-width: 58%;
+}
+
+.lki--bild .lki__list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 @media (max-width: 989px) {
   .lki__list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -175,6 +228,17 @@
   .lki__head {
     margin-bottom: var(--space-5);
   }
+}
+
+@media (max-width: 900px) {
+  .lki__foto { top: -6%; right: -8%; width: 116%; height: 240px; }
+  .lki--bild::after { background: linear-gradient(180deg, rgba(54, 79, 86, 0) 0, rgba(54, 79, 86, 0.6) 110px, var(--color-dark) 200px); }
+  .lki--bild .lki__inner { padding-top: 150px; }
+  .lki--bild .lki__nav { max-width: none; }
+}
+
+@media (max-width: 767px) {
+  .lki--bild .lki__list { grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -214,6 +278,19 @@
       "id": "bg_color",
       "label": "Hintergrund",
       "default": "#364f56"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Foto (wird verwischt)",
+      "info": "Macht den Index zur Schluss-Leiste: Foto rechts, Liste in zwei Spalten links. Leer = wie bisher."
+    },
+    {
+      "type": "checkbox",
+      "id": "footer_nahtlos",
+      "label": "Nahtlos in den Footer",
+      "default": false,
+      "info": "Footer ohne Abstand und ohne Linie. Nur einschalten, wenn der Index die letzte Section der Seite ist."
     },
     {
       "type": "range",

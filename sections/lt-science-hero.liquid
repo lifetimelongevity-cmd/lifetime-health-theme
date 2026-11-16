@@ -19,7 +19,63 @@
   if lsh_alt == blank
     assign lsh_alt = section.settings.image.alt
   endif
+  assign lsh_band = false
+  if section.settings.layout == 'bildband' and section.settings.image != blank
+    assign lsh_band = true
+  endif
+  assign lsh_mobil = section.settings.image_mobile | default: section.settings.image
 -%}
+
+{%- comment -%}
+  Layout „Bildband“ (16.11.2026, Katalog): das Bild ist die Fläche, die Überschrift steht darauf,
+  wie im Vollbild-Hero der Startseite, nur flacher. Ab 769 px randloses Querformat, Text links,
+  Ausschnitt rechtsbündig. Darunter das Hochformat oben, unten weich in die Grundfarbe ausgeblendet,
+  Text darunter auf derselben Farbe. Default bleibt „Text links, Bild rechts“, die anderen Seiten
+  mit dieser Section ändern sich nicht.
+{%- endcomment -%}
+{%- if lsh_band -%}
+<section id="section-{{ section.id }}" class="lsh lsh--band">
+  <div class="lsh__band" style="--lsh-band-bg: {{ section.settings.band_bg }};">
+    <div class="lsh__band-bild">
+      <picture>
+        <source
+          media="(max-width: 768px)"
+          srcset="{{ lsh_mobil | image_url: width: 600 }} 600w, {{ lsh_mobil | image_url: width: 900 }} 900w, {{ lsh_mobil | image_url: width: 1122 }} 1122w"
+          sizes="100vw"
+          width="{{ lsh_mobil.width }}"
+          height="{{ lsh_mobil.height }}"
+        >
+        {{
+          section.settings.image
+          | image_url: width: 2000
+          | image_tag:
+            loading: 'eager',
+            fetchpriority: 'high',
+            widths: '900, 1200, 1672, 2000',
+            sizes: '100vw',
+            class: 'lsh__band-img',
+            alt: lsh_alt
+        }}
+      </picture>
+    </div>
+    <div class="lsh__band-text">
+      <div class="crs-heading-stack crs-heading-stack--align-left crs-heading-stack--headline-lg crs-heading-stack--homepage-truth crs-heading-stack--on-dark">
+        {%- if section.settings.kicker != blank -%}
+          <p class="crs-heading-stack__kicker">{{ section.settings.kicker | escape }}</p>
+        {%- endif -%}
+        <div class="crs-heading-stack__pair">
+          {%- if section.settings.headline != blank -%}
+            <h1 class="crs-heading-stack__title">{{ section.settings.headline | escape }}</h1>
+          {%- endif -%}
+          {%- if section.settings.subheading != blank -%}
+            <p class="crs-heading-stack__subtitle">{{ section.settings.subheading | escape }}</p>
+          {%- endif -%}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{%- else -%}
 
 <section id="section-{{ section.id }}" class="lsh">
   <div class="lsh__container">
@@ -66,6 +122,7 @@
 
   </div>
 </section>
+{%- endif -%}
 
 {% stylesheet %}
 /*
@@ -138,6 +195,49 @@
   opacity: 0.25;
 }
 
+/* — Bildband — */
+.lsh--band { overflow: visible; }
+.lsh__band {
+  position: relative;
+  overflow: hidden;
+  background: var(--lsh-band-bg, var(--color-dark));
+  color: var(--color-paper);
+}
+.lsh__band-bild { position: relative; aspect-ratio: 5 / 4; overflow: hidden; }
+.lsh__band-bild picture { display: block; width: 100%; height: 100%; }
+.lsh__band-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 62%;
+  -webkit-mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, black 72%, transparent 100%);
+}
+.lsh__band-text {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--space-2) 20px var(--space-7);
+}
+.lsh__band-text .crs-heading-stack__subtitle { max-width: 30ch; }
+@media (min-width: 641px) { .lsh__band-text { padding-left: 24px; padding-right: 24px; } }
+@media (min-width: 769px) {
+  .lsh__band { display: flex; align-items: center; height: clamp(360px, 36vw, 560px); }
+  .lsh__band-bild { position: absolute; inset: 0; aspect-ratio: auto; }
+  .lsh__band-img { object-position: 100% 58%; -webkit-mask-image: none; mask-image: none; }
+  .lsh__band::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to right, rgba(38, 37, 30, 0.32) 0%, rgba(38, 37, 30, 0.12) 38%, rgba(38, 37, 30, 0) 55%);
+  }
+  .lsh__band-text { width: 100%; padding-top: 0; padding-bottom: 0; }
+}
+@media (min-width: 1025px) { .lsh__band-text { padding-left: 40px; padding-right: 40px; } }
+
 /* — Responsive — */
 @media (max-width: 1024px) {
   .lsh__container {
@@ -168,7 +268,13 @@
     { "type": "text",         "id": "kicker",         "label": "Kicker",          "default": "Wissenschaft" },
     { "type": "textarea",     "id": "headline",       "label": "Headline",        "default": "Altern ist unvermeidlich. Wie wir altern, ist beeinflussbar." },
     { "type": "textarea",     "id": "subheading",     "label": "Subheading",      "default": "Langlebigkeit beginnt nicht mit Trends, sondern mit Biologie. Wer versteht, was im Körper mit dem Alter passiert, kann gezielter entscheiden, was wirklich sinnvoll ist — und was nicht." },
-    { "type": "image_picker", "id": "image",          "label": "Bild rechts" },
+    { "type": "select",       "id": "layout",         "label": "Layout", "default": "split", "options": [
+      { "value": "split",    "label": "Text links, Bild rechts" },
+      { "value": "bildband", "label": "Bildband, Text auf dem Bild" }
+    ] },
+    { "type": "image_picker", "id": "image",          "label": "Bild (im Bildband: Querformat)" },
+    { "type": "image_picker", "id": "image_mobile",   "label": "Bildband: Hochformat fürs Handy", "info": "Leer = dasselbe Bild." },
+    { "type": "color",        "id": "band_bg",        "label": "Bildband: Grundfarbe", "default": "#364f56", "info": "Die Farbe, in die das Bild auf dem Handy nach unten ausläuft. Am Bildgrund ausrichten." },
     { "type": "text",         "id": "image_alt",      "label": "Bild Alt-Text" },
     { "type": "color",        "id": "color_bg",       "label": "Hintergrund",     "default": "#f7f7f4" },
     { "type": "color",        "id": "color_text",     "label": "Textfarbe",       "default": "#26251e" },

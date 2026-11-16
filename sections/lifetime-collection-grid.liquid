@@ -165,7 +165,33 @@
 
       {%- if block.type == 'group_label' -%}
         {%- if block.settings.label != blank -%}
-          <p class="cg-group" {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</p>
+          {%- if block.settings.image != blank -%}
+            {%- comment -%}
+              Gruppenmarke als Bildband (16.11.2026): das Foto ist die Fläche, Marke und ein Satz
+              stehen darauf, wie die Foto-Karten der Startseite, nur quer. Ohne Bild bleibt die
+              Marke die 12-px-Versalzeile wie bisher.
+            {%- endcomment -%}
+            <div class="cg-group cg-group--bild"{% if block.settings.position != blank %} style="--cg-pos: {{ block.settings.position | escape }};"{% endif %} {{ block.shopify_attributes }}>
+              {{
+                block.settings.image
+                | image_url: width: 1600
+                | image_tag:
+                  loading: 'lazy',
+                  widths: '640, 900, 1200, 1600',
+                  sizes: '(min-width: 1280px) 1200px, 100vw',
+                  class: 'cg-group__foto',
+                  alt: ''
+              }}
+              <div class="cg-group__text">
+                <h3 class="cg-group__titel">{{ block.settings.label | escape }}</h3>
+                {%- if block.settings.text != blank -%}
+                  <p class="cg-group__satz">{{ block.settings.text | escape }}</p>
+                {%- endif -%}
+              </div>
+            </div>
+          {%- else -%}
+            <p class="cg-group" {{ block.shopify_attributes }}>{{ block.settings.label | escape }}</p>
+          {%- endif -%}
         {%- endif -%}
 
       {%- else -%}
@@ -383,6 +409,98 @@
     text-transform: uppercase;
     line-height: 1.4;
     color: var(--color-ink-muted);
+  }
+
+  /*  Gruppenmarke als Bildband
+     Eigene Fläche statt Hairline und Versalzeile. Verlauf von links wie im
+     Hero der Startseite, damit die Schrift auf jedem Motiv 4,5:1 hält. */
+  .section-{{ section.id }}-cg .cg-group.cg-group--bild {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: 168px;
+    padding: 0;
+    border-top: 0;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--color-dark);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  .section-{{ section.id }}-cg .cg-group__foto {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--cg-pos, 60% 36%);
+  }
+
+  .section-{{ section.id }}-cg .cg-group--bild::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top, rgba(38, 37, 30, 0.88) 0%, rgba(38, 37, 30, 0.7) 34%, rgba(38, 37, 30, 0.2) 62%, rgba(38, 37, 30, 0) 80%);
+  }
+
+  .section-{{ section.id }}-cg .cg-group__text {
+    position: relative;
+    z-index: 1;
+    padding: var(--space-4);
+    max-width: 30rem;
+  }
+
+  .section-{{ section.id }}-cg .cg-group__titel {
+    margin: 0;
+    font-family: var(--font-heading);
+    font-size: 22px;
+    font-weight: var(--weight-regular);
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    color: var(--color-paper);
+  }
+
+  .section-{{ section.id }}-cg .cg-group__satz {
+    margin: var(--space-1) 0 0;
+    font-family: var(--font-body);
+    font-size: var(--text-body-sm);
+    font-weight: var(--weight-regular);
+    line-height: 1.45;
+    color: rgba(247, 247, 244, 0.85);
+  }
+
+  /* Ab 990 px: Foto nur rechts, links läuft es ins Teal aus (Aufbau wie lt-leiste, aber scharf).
+     Die Motive sind Hochformate; über die volle Breite bliebe nur ein Streifen Oberkörper. */
+  @media (min-width: 990px) {
+    .section-{{ section.id }}-cg .cg-group.cg-group--bild {
+      min-height: 256px;
+      align-items: center;
+    }
+
+    .section-{{ section.id }}-cg .cg-group__foto {
+      left: auto;
+      right: 0;
+      width: 54%;
+    }
+
+    .section-{{ section.id }}-cg .cg-group--bild::after {
+      background: linear-gradient(to right, var(--color-dark) 0%, var(--color-dark) 46%, rgba(54, 79, 86, 0.6) 58%, rgba(54, 79, 86, 0) 76%);
+    }
+
+    .section-{{ section.id }}-cg .cg-group__text {
+      padding: var(--space-6);
+      max-width: 46%;
+    }
+
+    .section-{{ section.id }}-cg .cg-group__titel {
+      font-size: var(--text-h2);
+    }
+
+    .section-{{ section.id }}-cg .cg-group__satz {
+      font-size: var(--text-body);
+    }
   }
 
   .section-{{ section.id }}-cg .cg-list > .cg-group:first-child {
@@ -809,6 +927,23 @@
           "id": "label",
           "label": "Marke",
           "default": "Gruppe"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Foto (macht daraus ein Bildband)",
+          "info": "Querformat, Motiv rechts, links ruhig. Leer = Versalzeile wie bisher."
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Ein Satz auf dem Bildband"
+        },
+        {
+          "type": "text",
+          "id": "position",
+          "label": "Bildausschnitt",
+          "info": "Wie CSS object-position, z. B. 50% 30%. Leer = 60% 36%."
         }
       ]
     }
