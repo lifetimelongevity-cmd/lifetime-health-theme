@@ -49,13 +49,16 @@ Originale in `lifetime-mockups/ki-bilder/`, Prompts in `lifetime-mockups/lifesty
 | Stelle | Datei | Format |
 |---|---|---|
 | Katalog, Band Zellfunktion | `lt-kat-zellfunktion.webp` | 1536 × 1024 |
-| Katalog, Band Basisversorgung | `lt-kat-basis.webp` | 1536 × 1024 |
-| Katalog, Band Haut, Gelenke, Schlaf | `lt-kat-alltag.webp` | 1536 × 1024 |
+| Katalog, Band Basisversorgung | `lt-kat-basis-2.webp` | 1536 × 1024 |
+| Katalog, Band Haut, Gelenke, Schlaf | `lt-kat-alltag-2.webp` | 1536 × 1024 |
 | NMN-PDP, Leiste (verwischt) und Bildkarte „Der Rohstoff“ (scharf) | `lt-nmn-stillleben.webp` | 1774 × 887 |
 
 Für weitere Bänder gilt dieselbe Bestellung: Querformat 3:2, Motiv in der rechten Bildhälfte,
 das linke Drittel ruhig und dunkel. Hochformate taugen dafür nicht, es bleibt nur ein Streifen
-Oberkörper. Auf der NMN-PDP keine Menschen, keine Hände, keine Einnahme-Requisiten (Wasserglas,
+Oberkörper. **Bewegungsunschärfe nur bei Sport** (BJ 16.11.): Die ersten Fassungen von Küche und
+Schlaf hatten verwischte Gesichter und wirkten unheimlich (`lt-kat-basis.webp`, `lt-kat-alltag.webp`,
+ungenutzt in den Shopify-Dateien). In ruhigen Szenen ist das Bild scharf und die Person von hinten
+zu sehen. Auf der NMN-PDP keine Menschen, keine Hände, keine Einnahme-Requisiten (Wasserglas,
 Löffel).
 
 ## Noch nicht gebaut (Reihenfolge aus dem Konzept)

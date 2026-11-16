@@ -37,8 +37,10 @@ hero.update({
 })
 gruppen = {  # Motive vom 16.11.2026 (ChatGPT, Projekt ki-bilder), Querformat 3:2, Motiv rechts
     "grp_zellfunktion": ("lt-kat-zellfunktion.webp", "Die Stoffe, an denen die Alternsforschung arbeitet.", "60% 14%"),
-    "grp_basis": ("lt-kat-basis.webp", "Die Grundlage, bevor du feiner einstellst.", "70% 34%"),
-    "grp_alltag": ("lt-kat-alltag.webp", "Für das, was du jeden Tag merkst.", "70% 62%"),
+    # Küche und Schlaf in zweiter Fassung: scharf, Person von hinten. Verwischte Gesichter wirken
+    # in ruhigen Szenen unheimlich (BJ 16.11.), Unschärfe bleibt dem Sport vorbehalten.
+    "grp_basis": ("lt-kat-basis-2.webp", "Die Grundlage, bevor du feiner einstellst.", "70% 45%"),
+    "grp_alltag": ("lt-kat-alltag-2.webp", "Für das, was du jeden Tag merkst.", "80% 30%"),
 }
 for key, (bild, satz, pos) in gruppen.items():
     d["sections"]["naehrstoffe"]["blocks"][key]["settings"].update({"image": IMG + bild, "text": satz, "position": pos})
