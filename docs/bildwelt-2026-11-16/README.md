@@ -64,9 +64,9 @@ weiter in `lifetime-mockups/ki-bilder/`). Jetzt ist in allen drei Bändern die P
 von hinten zu sehen, das Bild ist scharf, und nur im Laufbild ist der Hintergrund bewegungsunscharf. Auf der NMN-PDP keine Menschen, keine Hände, keine Einnahme-Requisiten (Wasserglas,
 Löffel).
 
-## Teil 2: Wissenschaft, Auftakt und „Mehr erfahren“ (16.11.2026, nur Vorschau)
+## Teil 2: Wissenschaft, Auftakt und „Mehr erfahren“ (16.11.2026)
 
-Auf dem Vorschau-Theme, **noch nicht freigegeben, Template nicht im Repo.**
+**Von BJ am 16.11. freigegeben, Template im Repo, wartet auf den Push.** Teil 1 ist seit 16.11. live.
 
 | Stelle | Änderung | Wo |
 |---|---|---|
@@ -74,8 +74,10 @@ Auf dem Vorschau-Theme, **noch nicht freigegeben, Template nicht im Repo.**
 | „Mehr erfahren“ | vier Foto-Karten statt grauer Textkarten, am Handy seitlich wischbar | `crs-link-cards`, Block-Setting `image` |
 
 Die Sections sind im Repo (Settings per Default aus, `crs-link-cards` läuft auf rund 20
-Artikel-Templates unverändert weiter). Das Template liegt nur im Vorschau-Theme, Änderung in
-`templates-patch-2.py`. Limmroth steht weiter im Block „Ein Arzt prüft die Inhalte“. Der zweite
+Artikel-Templates unverändert weiter). `templates/page.science.json` ist im Repo von Hand an
+denselben Stellen geändert und inhaltlich gleich der Vorschau-Fassung (`templates-patch-2.py`
+bleibt als Protokoll). Nach dem Push prüfen: `/pages/science` bei 1280 und 375 px, die beiden
+Knöpfe im Hero, Wischen der Foto-Karten am Handy, dazu ein Artikel mit Link-Karten. Limmroth steht weiter im Block „Ein Arzt prüft die Inhalte“. Der zweite
 Knopf heißt in der Vorschau „Zum Test“ statt „Zum AGE & DNA-Test“, damit beide bei 375 px
 nebeneinander passen. Die Aufnahmen `vorschau/science-*.jpg` zeigen noch die lange Fassung.
 
@@ -85,7 +87,7 @@ dazu drei Bereichsbilder der Startseite (`lt-hp-bereich-lesen-handy`, `-markt-ge
 
 ## Noch nicht gebaut (Reihenfolge aus dem Konzept)
 
-1. Wissenschaft, Auftakt und „Mehr erfahren“: gebaut, siehe Teil 2, wartet auf Freigabe.
+1. Wissenschaft, Auftakt und „Mehr erfahren“: gebaut und freigegeben, siehe Teil 2.
 2. AGE&DNA-PDP: Stimmen als Foto-Karten statt Text-Bewertungen, Ablauf-Schritte mit Bildern.
 3. Neben-PDPs: Leiste und Lifestyle-Bild an zweiter Stelle der Galerie.
 4. `DESIGN.md` nachziehen (Foto-Hero ist dort noch untersagt).
