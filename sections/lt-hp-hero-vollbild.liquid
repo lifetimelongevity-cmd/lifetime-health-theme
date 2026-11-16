@@ -132,15 +132,28 @@
                       height="{{ bild_mobil.height }}"
                     >
                   {%- endif -%}
-                  {{
-                    bild_desk
-                    | image_url: width: 2000
-                    | image_tag:
-                      loading: 'lazy',
-                      widths: '900, 1200, 1672, 2000',
-                      sizes: '100vw',
-                      alt: bild_desk.alt
-                  }}
+                  {%- if forloop.first -%}
+                    {{
+                      bild_desk
+                      | image_url: width: 2000
+                      | image_tag:
+                        loading: 'eager',
+                        fetchpriority: 'high',
+                        widths: '900, 1200, 1672, 2000',
+                        sizes: '100vw',
+                        alt: bild_desk.alt
+                    }}
+                  {%- else -%}
+                    {{
+                      bild_desk
+                      | image_url: width: 2000
+                      | image_tag:
+                        loading: 'lazy',
+                        widths: '900, 1200, 1672, 2000',
+                        sizes: '100vw',
+                        alt: bild_desk.alt
+                    }}
+                  {%- endif -%}
                 </picture>
               {%- endif -%}
             </div>
