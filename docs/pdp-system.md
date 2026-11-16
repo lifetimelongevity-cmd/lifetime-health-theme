@@ -213,6 +213,22 @@ Seit 16.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-tmg-pdp-2026-11-1
 Erweiterung in `lt-pdp-hero`, Default aus: `compact_save_ship` („Kompakt: Versand in die Ersparnis rechnen“). Ohne Größenwahl und mit Einmalpreis unter der Versandgrenze aus `lt-shipping-rule` zählt der Chip die Versandkosten des Landes zum Einmalpreis (DE: 14,90 + 4,90 − 13,41 = 6,39 €). Im Abo steht „inkl. Versand“ dahinter, bei „Einmalig“ „Im Abo sparst du 6,39 €“ mit Tipp aufs Abo. Nur TMG setzt den Schalter; Kreatin und NMN im Vorschau-Theme gegen Live verglichen, Chip und Hinweise gleich. Bilder in den Shopify-Dateien: `tmg-galerie-travertin.png`, `tmg-galerie-frau.jpg` (Pexels 6927887, quadratisch 4259 × 4259), `tmg-wirkprinzip-kueche.jpg` (Pexels 6927897, 3916 × 5874 unbeschnitten, Gesicht bleibt mit der festen Bildposition mobil und am Desktop im Bild), `tmg-stillleben.png`, `tmg-etikett.jpg` (2520 × 945).
 Offen: Titelzeile, Doppelpack, Prüfbericht je Charge TMG252001, Kapselgewicht, Garantie-Wortlaut (NMN oder „Auch wenn du nichts merkst“), Anwalt (Pflichtinfo am Hero-Claim, 2 gegen 3 Kapseln).
 
+## PDP Astaxanthin (`/products/astaxanthin-kapseln`)
+
+Template: `templates/product.09_astafit.json` (Suffix `09_astafit`, am Produkt bestätigt 16.11.2026; der Dateiname sagt Astafit, das Produkt heißt Astaxanthin). Seit 16.11.2026 lokal auf dem Stand des Entwurfs `docs/entwurf-astaxanthin-pdp-2026-11-16.html` (BJ-Freigabe „Ja, Template bauen“), gleiche Kette wie TMG. **Wartet auf BJs Push.** Abgenommen im Vorschau-Theme `194338029943` („Claude Astaxanthin-PDP (16.11.)“), headless bei 375 und 1280 px gemessen. 6 Einträge in `order`, kein `main_product_hidden` mehr (vorher 8 Sections samt sichtbarem zweitem Hero). **Bestand 0 bei Verkauf gesperrt, der Knopf zeigt „Ausverkauft“**, letzte Bestellung 31.12.2025.
+
+| # | Section-Key | Typ | Rolle |
+|---|---|---|---|
+| 1 | `main` | `lt-pdp-hero` | Titelzeile „Für Haut nach vielen Sommern.“ (Grauzonen-Fassung, kein zugelassener Claim), drei Punkte, Zeile „Original astafit® · Etikett ansehen“ statt Reinheit (in 320 mg Alge stecken 8 mg Astaxanthin, also 2,5 %), kompakte Kaufzone mit festem Abo-Hinweis, Versandkosten bei „Einmalig“, Chip mit Versand (7,19 €) und Grundpreis je kg aus ℮ 52 g (`compact_amount_grams: 52`, `compact_amount_unit: kg`). Galerie: Dose, dann `gallery_extra_1–3` |
+| 2 | `wirkprinzip` | `lt-pdp-wirkprinzip` | „Astaxanthin und Haut.“, Einblendung ohne Glaskarte (Tominaga 2017: 65 Frauen von 35 bis 60, kein Gruppenunterschied), drei Rollen ohne Symbol: Herkunft der Farbe, was gemessen wurde, 8 mg und die EFSA-Menge |
+| 3 | `belege` | `lt-pdp-belege` | Bildkarte „Astaxanthin, aus der Alge“ (Stillleben, Marken „8 mg am Tag“ und „Vegan“), ohne Kundenstimmen (Loox: 6 Bewertungen, alle ohne Text) |
+| 4 | `loox_reviews` | `lt-pdp-reviews-all` | Lade mit allen Loox-Bewertungen |
+| 5 | `produktfakten` | `lt-pdp-produktfakten` | Fakten mit Etikett (Zoom 1,65 bei 2 % 11,4 %), Kapsel-Symbol, Werte vom Druck-PDF vom 17.03.2025 (SKU LT-AST-C-60) |
+| 6 | `faq_accordion` | `crs-faq-accordion` | 6 Fragen, Versand/Abo/Garantie wörtlich von NMN, dann „Merke ich etwas?“, Sonnencreme, „Wie viel ist sicher?“ (EFSA 2020: 8 mg am Tag für Erwachsene, nicht unter 14 Jahren) |
+
+Keine eigene Section-Erweiterung. **Braucht beim Push `e574a5e`** (`compact_amount_unit` „kg“ in `lt-pdp-hero`, aus der Hyaluron-Sitzung), sonst kennt das Live-Schema den Wert nicht. Novel Food: Die ganze Alge ist in Nahrungsergänzungsmitteln laut EU-Katalog nicht neuartig; die 8-mg-Grenze und der 14-Jahre-Hinweis der Unionsliste gelten für das Oleoresin. Bilder in den Shopify-Dateien: `astaxanthin-galerie-travertin.png`, `astaxanthin-galerie-frau.jpg` (Pexels 8784551, quadratisch 4900 × 4900), `astaxanthin-wirkprinzip-garten.jpg` (Pexels 8784712, auf 4075 × 6109 verkleinert), `astaxanthin-stillleben.png`, `astaxanthin-etikett.jpg` (2529 × 883).
+Offen: Bestand, Bezug der „>99 % Reinheit“ auf dem Etikett, astafit®-Datenblatt (ganze Alge oder Oleoresin, Herkunft Österreich), Kapselfarbe, Prüfbericht je Charge, Garantie-Wortlaut, Etikett (Berlin, 14-Jahre-Hinweis).
+
 ## Konvention `main_product_hidden`
 
 Beide Templates führen die Theme-Section `main-product` unter dem Key `main_product_hidden`
