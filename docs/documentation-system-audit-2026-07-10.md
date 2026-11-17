@@ -1,5 +1,5 @@
 ---
-status: living
+status: snapshot
 last_review: 2026-07-10
 canonical_for: documentation-housekeeping-report-2026-07-10
 ---

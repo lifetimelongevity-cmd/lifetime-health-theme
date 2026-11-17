@@ -1,5 +1,18 @@
+---
+status: superseded
+last_review: 2026-11-17
+canonical_for: homepage-blueprint-v2
+---
+
+> Überholt. Aktuell ist docs/startseite-v2/README.md (Startseite im AG1-Stil, live seit 26.10.2026).
+
 # Blueprint V2: `homepage.json`
 ## LIFETIME Longevity & Health — Homepage
+
+> **Umfangszahlen auf den Portal-Stand gezogen (06.08.2026):** 23 DNA-Kategorien, keine feste
+> Reportzahl, sechs epigenetische Bereiche mit MethylPace statt „biologisches Alter". Copy unten
+> ist angeglichen und deckt sich mit dem Theme. Beleg:
+> `docs/age-dna-product-fact-sheet.md` § Portal-Audit 2026-08-06.
 
 **Version:** 2 — Conversion-First Revision
 **Zweck:** Aufgabenbeschreibung für Cursor / Entwicklungs-Referenz
@@ -274,7 +287,7 @@ Block settings:
 
 **4 Features (Deliverables, nicht Benefits):**
 1. Biologisches Alter (epigenetische Methylierungsanalyse)
-2. 187 DNA-Reports (16 Kategorien)
+2. 23 DNA-Kategorien
 3. KI Health Coach (personalisierte App-Empfehlungen)
 4. Eurofins Laboranalyse (ISO 9001/17025/13485)
 

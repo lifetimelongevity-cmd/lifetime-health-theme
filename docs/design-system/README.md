@@ -13,8 +13,7 @@ Karten in Gruppen einsortiert.
 
 ## Source of Truth
 
-Die Tokens stammen 1:1 aus `assets/theme.css :root` (gespiegelt in
-`docs/design-governance.md §3`). Die Komponenten sind aus den approved
+Die Tokens stammen 1:1 aus `assets/theme.css :root` (Regeln in `CLAUDE.md`). Die Komponenten sind aus den approved
 `_examples/` und `snippets/section-heading-crs.liquid` abgeleitet. **Der Code im
 Theme bleibt SoT.** Ändert sich ein Token oder eine Komponente im Theme, wird
 dieses Bundle neu generiert und neu gesynct, nicht umgekehrt.

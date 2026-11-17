@@ -1,5 +1,5 @@
 ---
-status: living
+status: superseded
 last_review: 2026-11-04
 canonical_for: pdp-rollout-hero-matrix-und-gates
 ---

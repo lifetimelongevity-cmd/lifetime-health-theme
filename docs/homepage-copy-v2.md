@@ -1,5 +1,18 @@
+---
+status: superseded
+last_review: 2026-11-17
+canonical_for: homepage-copy-v2
+---
+
+> Überholt. Aktuell ist docs/startseite-v2/README.md (Startseite im AG1-Stil, live seit 26.10.2026).
+
 # Homepage Copy: `homepage.json`
 ## LIFETIME Longevity & Health — Homepage
+
+> **Umfangszahlen auf den Portal-Stand gezogen (06.08.2026):** 23 DNA-Kategorien, keine feste
+> Reportzahl, sechs epigenetische Bereiche mit MethylPace statt „biologisches Alter". Copy unten
+> ist angeglichen und deckt sich mit dem Theme. Beleg:
+> `docs/age-dna-product-fact-sheet.md` § Portal-Audit 2026-08-06.
 **Version:** 2 — Conversion-First Revision
 **Sprache:** Deutsch
 **Ton:** Klinisch-editorial. Keine Hype-Sprache. Keine Lifestyle-Brand-Ästhetik.
@@ -15,7 +28,7 @@ eyebrow:                    "Longevity Diagnostics"
 heading_before:             "Dein Körper altert"
 heading_after:              "als du denkst."
 
-subheading:                 "Finde es heraus – mit deinem biologischen Alter, 187 DNA-Reports und einem persönlichen KI Health Coach."
+subheading:                 "Finde es heraus – mit deinem biologischen Alter, DNA-Ergebnissen aus 23 Kategorien und einem persönlichen KI Health Coach."
 
 cta_label:                  "Biologisches Alter testen"
 cta_url:                    "/products/age-dna-test"
@@ -122,7 +135,7 @@ expert_image_url:           "[Bild einfügen: Prof. Dr. Limmroth Portrait]"
 step_number:                "01"
 step_label:                 "Messen"
 step_headline:              "AGE & DNA-Test"
-step_body:                  "Eine Speichelprobe. Zwei Analyseebenen. Dein biologisches Alter und 187 DNA-Reports – analysiert von Eurofins."
+step_body:                  "Eine Speichelprobe. Zwei Analyseebenen. Dein biologisches Alter und DNA-Ergebnisse aus 23 Kategorien, analysiert von Eurofins."
 step_is_primary:            true
 step_product_name:          "AGE & DNA-Test"
 step_product_url:           "/products/age-dna-test"
@@ -184,8 +197,8 @@ feature_body:               "Epigenetische Methylierungsanalyse – du siehst, o
 **Feature 2**
 ```
 feature_icon:               "dna"
-feature_title:              "187 DNA-Reports"
-feature_body:               "Genetische Analyse aus 16 Bereichen: Supplements, Vitamine, Schlaf, Herzgesundheit, Haut und mehr."
+feature_title:              "23 DNA-Kategorien"
+feature_body:               "Genetische Analyse aus 23 Kategorien: Supplements, Vitamine, Schlaf, Herzgesundheit, Haut und mehr."
 ```
 
 **Feature 3**
@@ -441,7 +454,7 @@ callout_text:               "Eurofins Genomics ist eines der führenden Genomik-
 ```
 step_number:                "05"
 step_title:                 "Ergebnisse in der App"
-step_body:                  "Dein biologisches Alter, 187 DNA-Reports, Epigenetik-Scores und dein persönlicher KI Health Coach – alles an einem Ort, jederzeit abrufbar."
+step_body:                  "Dein biologisches Alter, DNA-Ergebnisse aus 23 Kategorien, Epigenetik-Scores und dein persönlicher KI Health Coach – alles an einem Ort, jederzeit abrufbar."
 step_timeframe:             "Lebenslang verfügbar"
 show_callout:               false
 callout_text:               ""

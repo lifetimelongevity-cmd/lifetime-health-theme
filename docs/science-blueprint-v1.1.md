@@ -1,3 +1,11 @@
+---
+status: superseded
+last_review: 2026-11-17
+canonical_for: science-blueprint-v1.1
+---
+
+> Überholt. Aktuell ist die Live-Seite /pages/science (Hero als Bildband seit 16.11.2026, Kette in docs/live-pages-map.md).
+
 # Blueprint V1.1: `page.science.json`
 ## LIFETIME Health — Wissenschaft-Seite
 

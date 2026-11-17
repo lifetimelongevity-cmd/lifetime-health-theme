@@ -1,5 +1,5 @@
 ---
-status: living
+status: snapshot
 last_review: 2026-06-04
 canonical_for: mobile-lp-audit-findings-quiz-age
 supersedes: []

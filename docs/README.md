@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-10-28
+last_review: 2026-11-17
 canonical_for: documentation-index-and-hierarchy
 ---
 
@@ -20,16 +20,14 @@ Dieses Verzeichnis trennt aktive Projekt-Guidance von historischen Briefings.
 | Aufbau der PDPs | `/docs/pdp-system.md` |
 | Messaging im Detail | `/docs/conversion-messaging.md` |
 | Heading-System, ausführlich | `/docs/section-heading-stack.md` |
-| Neues Produkt anlegen | `/docs/lt-pdp-template-notes.md` |
+| Neues Produkt anlegen | `/docs/lt-pdp-template-notes.md`, Ablauf in `/docs/pdp-startprompt.md` |
 | Live-Stand, wartende Pushes | `/docs/theme-status.md` |
 | Visuelle Sprache (Impeccable) | `/DESIGN.md` |
-| Langfassungen zu Design (Hintergrund, keine Pflichtlektüre) | `/docs/design-governance.md`, `/docs/design-components.md` |
 
 ## Active Supporting Docs
 
 | Group | Files |
 |---|---|
-| Science / homepage implementation specs | `homepage-*`, `science-*`, `ueber-lifetime-rebuild-prompt.md` |
 | Quiz docs | `lifetime-quiz-spec.md`, `lifetime-doctor-quiz-spec.md`, `lifetime-quiz-shopify-setup.md`, `mobile-lp-audit-2026-06-04.md` |
 | GEO / content strategy | `geo-dashboard.html`, `geo-strategy.md`, `geo-action-plan.md`, `geo-prompt-panel.md`, `geo-prompt-baseline-2026-07-29.md`, `geo-claim-ledger.md`, `age-dna-product-fact-sheet.md`, `age-dna-evidence-request-pack-2026-07-29.md`, `geo-p0-technical-audit-2026-07-29.md`, `geo-p0-url-decision-list-2026-07-29.md`, `age-dna-geo/`, `nmn-blog-geo/`, `blog-design-best-practices.md` |
 | AGE&DNA-PDP upgrade package | `PDP-DNA-UPGRADE/` (`README.md`, `01-rmbc-kontext.md` copy/offer layer, `02-massnahmen.md`, `03-cro-befunde.md` measured CRO layer) |

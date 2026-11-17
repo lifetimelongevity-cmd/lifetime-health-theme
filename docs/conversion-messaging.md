@@ -1,3 +1,9 @@
+---
+status: living
+last_review: 2026-11-17
+canonical_for: messaging-im-detail
+---
+
 # Conversion Messaging System
 
 > Messaging and narrative governance for LIFETIME product pages and buy modules.  
@@ -29,7 +35,7 @@ English may be used only for internal logic or when explicitly required.
 
 ### What this document does NOT control
 
-- Layout, spacing, typography, colors → `/docs/design-governance.md`  
+- Layout, spacing, typography, colors → `/CLAUDE.md` § CSS und Farben, § Gestaltung  
 - Shopify structure and functionality → unchanged  
 - Component logic, CSS, backend → outside of scope  
 - Medical claims or product truths → compliance first  
@@ -37,7 +43,7 @@ English may be used only for internal logic or when explicitly required.
 ### Hierarchy
 
 1. Product truth and compliance override any messaging preference  
-2. `/docs/design-governance.md` controls all visual decisions  
+2. `/CLAUDE.md` controls all visual decisions  
 3. This document only controls **what is said** – not how it looks  
 4. Shopify architecture remains untouched  
 

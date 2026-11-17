@@ -115,7 +115,7 @@ components:
 SCOPE: This file records the visual world of the homepage REDESIGN PREVIEW
 (docs/homepage-dossier-preview.html, "Klinisches Dossier", reviewer disposition: ship).
 It is NOT the token authority for the live Shopify theme. The incumbent token source
-for the live theme remains docs/design-governance.md §3 and .cursor/rules/design-tokens.mdc.
+for the live theme is assets/theme.css :root (rules in CLAUDE.md § CSS und Farben).
 This file records what the dossier world ADDS or DECIDES on top of that incumbent
 palette, so a later Liquid translation can follow it.
 -->

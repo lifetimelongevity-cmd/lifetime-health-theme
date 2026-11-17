@@ -52,6 +52,7 @@ Live-Shopify-Theme von LIFETIME („Combine“ v3.1.1 von KrownThemes, stark umg
 
 - **Überschriften immer über `snippets/section-heading-crs.liquid`** (`crs-heading-stack`). Titel und Untertitel sind ein Block in derselben Größe und Schrift, nur die Deckkraft unterscheidet sie. Kein eigenes Heading-CSS. Details: `docs/section-heading-stack.md`.
 - **Kein farbiges `border-left`** als Akzent. Stattdessen eine getönte Karte mit vollem Rahmen.
+- **Icons:** Phosphor thin (Iconify `ph:*-thin`), einfarbig in `currentColor`, ohne farbige Kreise. Fehlt ein Icon, ein eigenes SVG im selben Stil, kein anderes Set. Eingebunden als Snippet mit `case`-Mapping.
 - Kein `#000` als Hintergrund, keine neue Schriftfamilie. Überschriften in `--font-heading`, Text in `--font-body`.
 - Mobil zuerst (375 px), ohne horizontales Scrollen. Jede Section hat genau ein dominantes Element. Höchstens drei Schriftgrößen je Section.
 - Weniger ist mehr: Was nur da ist, weil es leicht zu bauen war, fliegt raus.

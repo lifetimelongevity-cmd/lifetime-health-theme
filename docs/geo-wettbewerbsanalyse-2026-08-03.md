@@ -1,5 +1,5 @@
 ---
-status: living
+status: snapshot
 last_review: 2026-08-03
 canonical_for: geo-wettbewerber-und-umsetzungsplan
 supersedes: []

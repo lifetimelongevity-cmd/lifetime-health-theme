@@ -1,5 +1,5 @@
 ---
-status: living
+status: snapshot
 last_review: 2026-07-02
 canonical_for: ueber-lifetime-page-rebuild-brief
 ---

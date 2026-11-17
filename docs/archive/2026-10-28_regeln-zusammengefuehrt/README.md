@@ -14,3 +14,4 @@ Zusammengeführt in `lifetime-health-theme/CLAUDE.md`. Grund: Die Regeln standen
 | `AGENTS.md` | Langfassung mit Quellen-Hierarchie und Lieferhinweisen |
 | `shopify-AGENTS.md` | `shopify/AGENTS.md` |
 | `cursor-rules/*.mdc` | `.cursor/rules/` (nur Cursor hat sie geladen) |
+| `design-components.md`, `shopify-rules.md`, `design-governance.md`, `design-icon-system.md` | `docs/`, bis 17.11.2026 als living geführt (Zwilling der `.mdc`, Token-Werte, Motiv-Sperrliste von Juli). Die Icon-Regel steht seither in CLAUDE.md § Gestaltung |

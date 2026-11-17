@@ -1,5 +1,5 @@
 ---
-status: living
+status: superseded
 last_review: 2026-07-29
 canonical_for: pdp-refit-briefing-16-alt-pdps
 ---

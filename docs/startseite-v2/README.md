@@ -150,7 +150,7 @@ Offen für den Bau: Die Hero-Unterzeile live steht bei Deckkraft 0.55 statt 0.72
 
 ## Icons
 
-Nur Phosphor thin (`ph:*-thin`, Iconify), einfarbig in `currentColor`, ohne farbige Kreise, siehe `docs/design-icon-system.md`. In der Vorschau: Ablauf (`package`, `test-tube`, `cpu`, `device-mobile`, 36 px), Häkchen im Befund (`check`), Video-Knopf (`play`). Die Pfeile in den DNA- und Ergebniskarten bilden die App nach und bleiben.
+Nur Phosphor thin (`ph:*-thin`, Iconify), einfarbig in `currentColor`, ohne farbige Kreise, siehe `CLAUDE.md` § Gestaltung. In der Vorschau: Ablauf (`package`, `test-tube`, `cpu`, `device-mobile`, 36 px), Häkchen im Befund (`check`), Video-Knopf (`play`). Die Pfeile in den DNA- und Ergebniskarten bilden die App nach und bleiben.
 
 ## Bilder
 
