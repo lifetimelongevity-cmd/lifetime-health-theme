@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-10-26
+last_review: 2026-11-17
 canonical_for: startseite-umbau-2026-10
 supersedes: [../../../lifetime-produktdetails/hormozi/2026-09-22_page-homepage.md]
 review_cadence_days: 14
@@ -40,6 +40,12 @@ Deaktiviert im Template, als Rückweg mit allen Settings: `hero` (`crs-hero-type
 **Stolperstein beim Push:** Die Section mit dem neuen Setting muss *vor* dem Template auf dem Theme sein. Beim ersten Push war das Schema von `lt-hp-stimmen` ungültig (Option-Label über 50 Zeichen), Shopify hat `layout: raster` aus dem Template still verworfen; nach dem Fix Template nochmal pushen (vorher `touch`, sonst überspringt die CLI es als „nicht neuer“). Das Dev-Theme hatte vor dem Umbau einen älteren `index.json` als `main` (Stand vor 26.10.), deshalb nach `theme pull` immer gegen Git diffen und von der Git-Fassung ausgehen.
 
 **Bilder neu in den Shopify-Dateien (26.10.):** `lt-hp-hero-produkte-hand.webp` (Folie 2), `lt-hp-hero-laufen-paar.webp` (aus `lifetime-mockups/lifestyle/sport-laufen-paar.jpg`, 1122 × 1402, Quelle hier als `bilder/hero-laufen-paar.webp`), `lt-hp-stimme-anja.webp`, `lt-hp-stimme-julia.webp`. Weg wie am 08.10.: `stagedUploadsCreate` über den Shopify-MCP, POST per curl, `fileCreate`.
+
+**Hero in HD (17.11.2026, BJ: „leicht verpixelt, muss scharf sein“).** Ursache war die Auflösung, nicht die Kompression (PSNR gegen das PNG-Original 41 dB): Das Kollektionsbild hatte 1672 px, das Laufpaar 1122 px, ein 1440er-Retina-Desktop braucht 2880. Neue Shopify-Dateien, Quellen hier in `bilder/`: `lt-hp-hero-kollektion-desktop-hd.webp` (3344 × 1882), `lt-hp-hero-kollektion-mobil-hd.webp` (2244 × 2804), `lt-hp-hero-laufen-paar-hd.webp` (3366 × 4206). Die alten Dateien bleiben in Shopify als Rückweg.
+
+- **Weg:** Real-ESRGAN (`realesrgan-x4plus`, macOS-Release v0.2.5.0 von GitHub, lokal, ×4 und dann per Lanczos auf ×2 bzw. ×3). Das Kollektionsbild ist selbst ein KI-Rendering, die Etikettenschrift war darin nur angedeutet; der Upscaler macht daraus scharfe, falsche Buchstaben (BJ: „Texte komplett verändert“). Deshalb liegen über allen sechs Produkten die echten Verpackungsdateien aus `~/Desktop/Projekte/Produkte/1 AKTUELL`, per SIFT-Homografie eingepasst, Farbe und Licht aus dem Rendering übernommen, Verdeckungen (Hand, Dosen davor) ausgespart. Beim Beutel nur die dunkle Logo-Schrift, kein Produktname (VSW). Badge „EPIGENETIK & DNA“ separat aus dem Box-Foto. Röhrchen und Nährwerttabelle am Dosenrand haben keine Vorlage, dort steht das unveränderte Original, nur vergrößert. Laufpaar ohne Text: hochskaliert, feines Filmkorn wieder drauf. Rezept (Skript und Produktpositionen): `bilder/hero-hd-rezept/`.
+- **Section:** `image_tag` kappt `widths` beim Wert aus `image_url: width`, darum steht dort jetzt die größte Breite (3344 bzw. 3200). Mobile `sizes` nach echter Bildbreite (Kollektion höchstens 330 bzw. 604 px, Laufpaar Folienhöhe × Seitenverhältnis), vorher `100vw`.
+- **Geprüft:** Vorschau-Theme #194353267063 per Puppeteer: Desktop 1440 @2× lädt `width=3344` bzw. `3200`, iPhone 375 @3× lädt 990 bzw. 1500, kein horizontales Scrollen, Konsole nur die zwei 403, die auch live auftreten.
 
 **Offen bei BJ:** `DESIGN.md` verbietet Foto-Hintergründe im Hero, der Umbau bricht das absichtlich; `DESIGN.md` nachziehen oder Umbau verwerfen. Ob Kopfzeile auf dem Foto liegen soll (wie bei Vollbild-Heros üblich) statt darüber. Ob ein 10-Sekunden-Mitzieher das Foto ersetzt. NMN ist weiter nicht auf der Startseite.
 
