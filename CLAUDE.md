@@ -75,7 +75,7 @@ Live-Shopify-Theme von LIFETIME („Combine“ v3.1.1 von KrownThemes, stark umg
 | Frage | Datei |
 |---|---|
 | Welche URL rendert welches Template und welche Section? | `docs/live-pages-map.md` |
-| Aufbau und Section-Reihenfolge der PDPs | `docs/pdp-system.md` |
+| Section-Ketten der PDPs, Supplement-URLs, offene Punkte je PDP | `docs/pdp-system.md` |
 | Felder beim Anlegen eines neuen Produkts | `docs/lt-pdp-template-notes.md` |
 | Messaging im Detail | `docs/conversion-messaging.md` |
 | Was ist live, was wartet auf Push? | `docs/theme-status.md` |

@@ -1,6 +1,6 @@
 ---
 status: living
-last_review: 2026-09-29
+last_review: 2026-11-17
 canonical_for: live-page-slug-to-template-mapping
 ---
 
@@ -127,8 +127,8 @@ Diese 5 Seiten sind das Fundament (siehe `CLAUDE.md` § Kanonisches Fundament). 
 | # | Live-URL | Template | Haupt-Section(s) |
 |---|---|---|---|
 | 1 | `/` (Startseite) | `templates/index.json` | Homepage-Stack (`lt-hp-*`) |
-| 2 | `/products/lifetime-age-dna` (AGE&DNA-Test, €349) | `templates/product.age-dna-test.json` | PDP-Stack (`lt-pdp-*`) |
-| 3 | `/pages/science` | `templates/page.science.json` | `lt-science-proof-hero` → `lt-science-split` (warum) → `lt-benefits` → `lt-science-split` (epigenetik) → `lt-science-split` (genetik) → `lt-hp-science` → `lt-science-bento` → `lt-science-scope` → `crs-risk-free-close` → `crs-faq-accordion` → `crs-link-cards` |
+| 2 | `/products/lifetime-age-dna` (AGE&DNA-Test, €395) | `templates/product.age-dna-test.json` | PDP-Stack (`lt-pdp-*`) |
+| 3 | `/pages/science` | `templates/page.science.json` | `lt-science-hero` (Bildband, seit 16.11.2026, vorher `lt-science-proof-hero`) → `lt-science-split` (warum) → `lt-benefits` → `lt-science-split` (epigenetik) → `lt-science-split` (genetik) → `lt-hp-science` → `lt-science-bento` → `lt-science-scope` → `crs-risk-free-close` → `crs-faq-accordion` → `crs-link-cards` (Foto-Karten) → `lt-leiste` |
 | 4 | `/pages/quiz-age` | `templates/page.quiz-age.json` | `sections/lt-pdp-quiz-v2.liquid` |
 | 5 | `/products/lifetime-nmn` (NMN Pulver) | `templates/product.nmn-pulver.json` | PDP-Stack |
 
@@ -268,8 +268,10 @@ Diese 5 Seiten sind das Fundament (siehe `CLAUDE.md` § Kanonisches Fundament). 
 
 | Live-URL | Template | Haupt-Section(s) |
 |---|---|---|
-| `/products/lifetime-age-dna` (AGE&DNA-Test, €349) | `templates/product.age-dna-test.json` | PDP-Stack (`lt-pdp-*`) |
+| `/products/lifetime-age-dna` (AGE&DNA-Test, €395) | `templates/product.age-dna-test.json` | PDP-Stack (`lt-pdp-*`) |
 | `/products/lifetime-nmn` (NMN Pulver) | `templates/product.nmn-pulver.json` | PDP-Stack |
+
+Die zwölf Supplement-PDPs mit URL und Template-Suffix stehen in `docs/pdp-system.md` § Die Ketten.
 
 ## Sonstige aktive Pages
 
@@ -281,7 +283,7 @@ geprüft. „Wörter" = sichtbarer Text der Template-Sections, ohne Header/Foote
 | Live-Slug | Template (Suffix) | Sections live | Wörter | Notiz |
 |---|---|---|---|---|
 | `/pages/biologisches-alter-testen` | `page.biologisches-alter-testen.json` | `lt-science-proof-hero` → `lt-age-test-guide` → `crs-faq-accordion` → `lt-hp-cta-close` | ca. 1.154 | Neutraler GEO-Entscheidungshub zu Methoden, Aussagegrenzen und Auswahlkriterien. Fünf Primärquellen, zwölf sichtbare FAQ-Antworten mit `FAQPage`, transparente Produktzuordnung. Aus `/pages/science` verlinkt; CTAs zu Quiz und PDP |
-| `/pages/ueber-lifetime` | `page.ueber-lifetime.json` | `lt-science-hero` → `lt-about-mission` → `lt-benefits` → `lt-stat-callout` → `lt-quote` → `video` → `lt-about-experts` → `lt-about-team` | 622 | **Der Push ist erfolgt**, die Rebuild-Sections rendern live. Die frühere Notiz „Live-Push ausstehend" (2026-07-02) war überholt |
+| `/pages/ueber-lifetime` | `page.ueber-lifetime.json` | `lt-about-roster` → `lt-about-experts` (Limmroth) → `lt-about-founder` → `lt-about-principles` → `lt-about-team` → `lt-about-experts` → `lt-about-signup` | 622 | Live per curl bestätigt 17.11.2026 (seit 11.08. umgebaut, die alte Kette mit `lt-science-hero`, `lt-benefits` und `lt-quote` stand hier bis 17.11.) |
 | `/pages/longevity` | `page.longevity.json` | `lt-guide` (eine Section, 44 Blöcke) | 1.307 | „Longevity Blueprint", **die inhaltsstärkste Nicht-PDP-Seite des Shops** und bis 2026-07-28 in diesem Doc überhaupt nicht geführt. Seit dem Menü-Karten-Push aus der mobilen Schublade verlinkt. **Am 2026-07-28 neu gebaut**, siehe Kasten unten |
 | `/pages/nmn-deutschland` | `page.nmn-deutschland.json` | `lt-science-hero` → `crs-novel-food` → `lt-benefits` → `lt-blog-cards` → `crs-faq-accordion` → `lt-hp-cta-close` | 717 | Novel-Food-Rechtsstatus NMN. Aus dem **Footer** verlinkt (also auf jeder Seite) plus aus `product.nmn-pulver.json` |
 | `/pages/was-ist-enthalten` | `page.whats-inside.json` (**Suffix ≠ Slug**) | `lt-page-report-intro` → `lt-page-whats-inside-tabs` → `crs-risk-free-close` | 470 | „Was der Test misst". Aus Header-Menü, `index.json` und `product.age-dna-test.json` verlinkt |
