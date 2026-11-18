@@ -16,7 +16,7 @@ window.PP_KONFIG = {
   anmeldeschlussA: '2026-12-15T23:59:59+01:00',
 
   schalter: {
-    garantie: false,   // „Ihr Urteil zählt“ (Entscheidung 3, BJ)
+    garantie: true,    // „Ihr Urteil zählt“, entschieden BJ 18.11.2026 (fünf Bedingungen, Gesamtplan)
     pub200: false,     // „über 200 wissenschaftliche Veröffentlichungen“ (erst mit Publikationsliste)
     minuten15: false,  // „15 Minuten“ beim Kollegengespräch (Volker bestätigt Dauer)
     buch: true,        // Buchzeile mit Widmung

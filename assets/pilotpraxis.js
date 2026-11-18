@@ -1,5 +1,5 @@
 /* ERZEUGT von docs/pilotpraxis/bauen.py aus docs/pilotpraxis/pilotpraxis.js. Nicht von Hand ändern.
-   Pruefsumme: a9491829b9207524292bc35285b01358a5115f92cdaafe393990d93964cfa9b4 */
+   Pruefsumme: d5387eaff4a28a019a4596487beadd27d94ed104905c0da615e44fec16c7d773 */
 /* Pilotpraxis-Verkaufsseite (P2). Quelle: docs/pilotpraxis/pilotpraxis.js
    Wird im <head> ohne defer geladen: setzt Zustand und Schalter, bevor die Seite malt.
 
@@ -18,7 +18,7 @@ window.PP_KONFIG = {
   anmeldeschlussA: '2026-12-15T23:59:59+01:00',
 
   schalter: {
-    garantie: false,   // „Ihr Urteil zählt“ (Entscheidung 3, BJ)
+    garantie: true,    // „Ihr Urteil zählt“, entschieden BJ 18.11.2026 (fünf Bedingungen, Gesamtplan)
     pub200: false,     // „über 200 wissenschaftliche Veröffentlichungen“ (erst mit Publikationsliste)
     minuten15: false,  // „15 Minuten“ beim Kollegengespräch (Volker bestätigt Dauer)
     buch: true,        // Buchzeile mit Widmung
