@@ -1,0 +1,366 @@
+{% layout 'pilotpraxis' %}
+{%- comment -%}
+  ERZEUGT von docs/pilotpraxis/bauen.py aus docs/pilotpraxis/kardiologie.html. Nicht von Hand ändern:
+  Text in der Quelle ändern, dann /usr/bin/python3 docs/pilotpraxis/bauen.py
+  Pruefsumme: 60312057a749c37b5d584cb153351c6e2693195e66bf062984ba95d1ccc3d8f7
+{%- endcomment -%}
+<!-- Block 0: Fristleiste, nur Datum, nie die Aufnahmegrenze -->
+<div class="pp-frist" data-zustand="vormerken offen">
+  <span data-zustand="vormerken"><strong>Pilotphase Kardiologie</strong> · Anmeldung ab So 22.11., 18 Uhr<span data-wenn-nicht="vorschlagA"> · Anmeldeschluss Mo 30.11., 23:59</span><span data-wenn="vorschlagA"> · 299 € bis Mo 30.11., 23:59</span></span>
+  <span data-zustand="offen"><strong>Pilotphase Kardiologie</strong> · <span data-wenn-nicht="vorschlagA">Anmeldeschluss Mo 30.11., 23:59</span><span data-wenn="vorschlagA"><span data-wenn-nicht="nachpreis">299 € bis Mo 30.11., 23:59</span><span data-wenn="nachpreis">Anmeldeschluss Di 15.12., 23:59</span></span> · <span data-pp-rest></span></span>
+</div>
+
+<main>
+<!-- Block 1: Hero mit VSL -->
+<section class="pp-hero">
+  <div class="pp-spalte">
+    <p class="pp-callout">Für Kardiologinnen und Kardiologen</p>
+    <p class="pp-auswahl">Für niedergelassene Kardiologinnen und Kardiologen, die selbst entscheiden, was in ihre Sprechstunde kommt.</p>
+    <h1 data-pp-headline>Ihre Patienten fragen nach ihrem biologischen Alter. Kennen Sie Ihres?</h1>
+    <p class="pp-subline pp-subline--oben">Testen Sie AGE&amp;DNA an sich selbst: Ihr eigener Test aus einer Speichelprobe, Ihre Auswertung für die Praxis mit Ihren Werten und <span data-wenn="minuten15">15 Minuten </span>Kollegengespräch mit Prof. Dr. med. Volker Limmroth.</p>
+
+    <div class="pp-vsl" data-pp-vsl>
+      <img class="pp-vsl__bild" src="{{ 'pilotpraxis-limmroth.webp' | asset_url }}" width="900" height="900" alt="Prof. Dr. med. Volker Limmroth am Rednerpult" fetchpriority="high">
+      <div class="pp-vsl__text">
+        <p class="pp-vsl__zitat" data-wenn="zitat">„Testen Sie es zuerst an sich selbst, bevor Sie es einem Patienten empfehlen.“</p>
+        <p class="pp-vsl__name">Prof. Dr. med. Volker Limmroth · Neurologe, wissenschaftliche Leitung LIFETIME</p>
+      </div>
+      <video playsinline muted preload="metadata" poster="{{ 'pilotpraxis-limmroth.webp' | asset_url }}" aria-label="Video: Prof. Limmroth spricht zu Kolleginnen und Kollegen"></video>
+      <button type="button" class="pp-ton" data-pp-ton><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M19 5a10 10 0 0 1 0 14"/></svg>Mit Ton ansehen</button>
+    </div>
+
+    <!-- offen: ein Knopf, direkt in die Kasse -->
+    <div class="pp-cta-wrap" data-zustand="offen">
+      <a class="pp-knopf" data-pp-kauf="hero" href="#paket">Meinen Pilotplatz sichern<small><span data-wenn-nicht="nachpreis">299 €</span><span data-wenn="nachpreis">395 €</span> · direkt zur Kasse</small></a>
+      <p class="pp-cta-zeile"><span data-wenn-nicht="nachpreis">299 € statt 395 €</span><span data-wenn="nachpreis">395 €</span> · Kollegengespräch inklusive · <span data-wenn="garantie">Ihr Urteil zählt: Geld zurück</span><span data-wenn-nicht="garantie">90 Tage zurück, solange versiegelt</span></p>
+    </div>
+
+    <!-- vormerken: Mail-Feld in die Liste „Pilot Vormerkung“ -->
+    <form class="pp-form" id="vormerken" data-pp-form="vormerken" data-zustand="vormerken" novalidate>
+      <div class="pp-form__felder">
+        <p class="pp-form__titel">Die Anmeldung öffnet am So 22.11. um 18 Uhr.</p>
+        <p class="pp-form__text">Tragen Sie sich ein: Die Muster-Auswertung Kardiologie kommt sofort per Mail, der Anmeldelink am Sonntag um 18 Uhr. Eine Vormerkung reserviert keinen Platz.</p>
+        <label for="pp-mail-v">E-Mail</label>
+        <input id="pp-mail-v" type="email" name="email" autocomplete="email" required placeholder="name@praxis.de">
+        <label for="pp-praxis-v">Praxis (freiwillig)</label>
+        <input id="pp-praxis-v" type="text" name="praxis" autocomplete="organization" placeholder="Name Ihrer Praxis">
+        <label class="pp-check"><input type="checkbox" name="erinnerung" value="Ja"> Erinnern Sie mich bis zum Anmeldeschluss per Mail.</label>
+        <button type="submit" class="pp-knopf">Vormerken und Muster erhalten<small>Anmeldung ab So 22.11., 18 Uhr</small></button>
+        <p class="pp-form__meldung" data-pp-meldung aria-live="polite"></p>
+        <p class="pp-form__rechtlich">Mit dem Eintragen bekommen Sie von LIFETIME die Muster-Auswertung und Mails zur Pilotphase. Abmelden können Sie sich jederzeit über den Link in jeder Mail. <a href="/policies/privacy-policy">Datenschutz</a></p>
+      </div>
+      <p class="pp-form__danke" aria-live="polite"><strong>Danke, Sie sind vorgemerkt.</strong> Die Muster-Auswertung kommt per Mail, der Anmeldelink am So 22.11. um 18 Uhr.</p>
+    </form>
+
+    <!-- voll und geschlossen: Warteliste -->
+    <form class="pp-form" id="warteliste" data-pp-form="warteliste" data-zustand="voll geschlossen" novalidate>
+      <div class="pp-form__felder">
+        <p class="pp-form__titel" data-zustand="voll">Die Pilotphase Kardiologie ist voll.</p>
+        <p class="pp-form__text" data-zustand="voll">25 Praxen sind aufgenommen, Prof. Limmroth spricht mit jeder einzeln. Tragen Sie sich ein: Gibt es eine nächste Runde, erfahren Sie es zuerst.</p>
+        <p class="pp-form__titel" data-zustand="geschlossen">Die Anmeldung ist geschlossen.</p>
+        <p class="pp-form__text" data-zustand="geschlossen">Tragen Sie sich ein: Gibt es eine nächste Runde, erfahren Sie es zuerst.</p>
+        <label for="pp-mail-w">E-Mail</label>
+        <input id="pp-mail-w" type="email" name="email" autocomplete="email" required placeholder="name@praxis.de">
+        <label for="pp-praxis-w">Praxis (freiwillig)</label>
+        <input id="pp-praxis-w" type="text" name="praxis" autocomplete="organization" placeholder="Name Ihrer Praxis">
+        <button type="submit" class="pp-knopf">Für die nächste Runde vormerken</button>
+        <p class="pp-form__meldung" data-pp-meldung aria-live="polite"></p>
+        <p class="pp-form__rechtlich">Mit dem Eintragen bekommen Sie von LIFETIME Mails zur Pilotphase. Abmelden können Sie sich jederzeit über den Link in jeder Mail. <a href="/policies/privacy-policy">Datenschutz</a></p>
+      </div>
+      <p class="pp-form__danke" aria-live="polite"><strong>Danke, Sie stehen auf der Liste.</strong></p>
+    </form>
+
+    <p class="pp-subline pp-subline--unten">Testen Sie AGE&amp;DNA an sich selbst: Ihr eigener Test aus einer Speichelprobe, Ihre Auswertung für die Praxis mit Ihren Werten und <span data-wenn="minuten15">15 Minuten </span>Kollegengespräch mit Prof. Dr. med. Volker Limmroth.</p>
+    <span data-pp-hero-ende></span>
+  </div>
+</section>
+
+<!-- Block 2: Brief von Prof. Limmroth -->
+<section class="pp-block" id="brief">
+  <div class="pp-spalte">
+    <article class="pp-brief">
+      <div class="pp-brief__kopf">
+        <img src="{{ 'pilotpraxis-limmroth.webp' | asset_url }}" width="64" height="64" alt="" loading="lazy">
+        <p><strong>Prof. Dr. med. Volker Limmroth</strong>Ein Brief an Kolleginnen und Kollegen aus der Kardiologie</p>
+      </div>
+      <p class="pp-brief__anrede">Liebe Kollegin, lieber Kollege,</p>
+      <p>Ihre Patienten fragen nach ihrem biologischen Alter und bringen Gentests aus dem Internet mit. Sie sollen einordnen, was Sie selbst nie gesehen haben.</p>
+      <p>Sie kennen den Patienten: Er läuft, isst Gemüse, und sein LDL bleibt hoch. Ein Statin will er nicht, er lebe doch gesund. Nur 28 Prozent der behandelten Patienten in Deutschland erreichen ihr LDL-Ziel.<sup><a href="#beleg-2">2</a></sup> In einer randomisierten Studie der Mayo Clinic begannen 39 statt 22 Prozent ein Statin, wenn ihr Risiko die Gene mit einschloss.<sup><a href="#beleg-8">8</a></sup> Dort war es ein genetischer Score für die koronare Herzkrankheit. Unsere Auswertung zeigt die Veranlagung fürs Cholesterin, auf einer Skala.</p>
+      <p>Deshalb haben wir bei LIFETIME eine Auswertung für die Praxis gebaut. Zwei Seiten, das Wichtigste oben, nur die Werte, die in Ihrem Fach eine Entscheidung tragen. In der Kardiologie sind das biologisches Alter, Reserve und Entzündung, gemessen, und die Veranlagung bei Blutfetten, Blutdruck, Rhythmus und Ausdauer. Alles aus einer Speichelprobe, analysiert bei Eurofins Genomics nach ISO 17025.</p>
+      <p>Das Kalenderalter ist das Baujahr. Das biologische Alter ist eher der Kilometerstand. Ein einzelner Wert ist eine Standortbestimmung, keine Diagnose. Aussagekraft bekommt er im Verlauf, mit derselben Methode gemessen.</p>
+      <p>Ich bitte Sie um eines, bevor Sie das einem Patienten empfehlen: Testen Sie es an sich selbst. In einer Studie fühlten sich Ärzte nach ihrem eigenen Test sicher im Gespräch über Genetik, 59 statt 23 Prozent.<sup><a href="#beleg-1">1</a></sup> Lesen Sie Ihre Auswertung so, wie ein Patient sie Ihnen mitbringen würde. Dann sprechen wir <span data-wenn="minuten15">15 Minuten </span>darüber, von Kollege zu Kollege, und Sie sagen mir, was für Ihre Sprechstunde fehlt.</p>
+      <p>Ich führe jedes Kollegengespräch selbst, und jede Auswertung entsteht einzeln. Deshalb nehmen wir in die Pilotphase 25 kardiologische Praxen auf. <span data-wenn-nicht="vorschlagA">Anmeldeschluss ist der 30. November.</span><span data-wenn="vorschlagA"><span data-wenn-nicht="nachpreis">Bis zum 30. November kostet die Aufnahme 299 €, danach 395 €. </span>Anmeldeschluss ist der 15. Dezember.</span></p>
+      <p class="pp-brief__gruss">Herzlich</p>
+      <p class="pp-brief__name">Prof. Dr. med. Volker Limmroth</p>
+      <p class="pp-brief__titel">Chefarzt Neurologie<span data-wenn="pub200"> · über 200 wissenschaftliche Veröffentlichungen</span> · wissenschaftliche Leitung LIFETIME</p>
+    </article>
+    <div class="pp-cta-wrap">
+      <a class="pp-knopf" data-zustand="offen" data-pp-kauf="brief" href="#paket">Meinen Pilotplatz sichern<small><span data-wenn-nicht="nachpreis">299 €</span><span data-wenn="nachpreis">395 €</span> · direkt zur Kasse</small></a>
+      <a class="pp-knopf" data-zustand="vormerken" href="#vormerken">Vormerken und Muster erhalten<small>Anmeldung ab So 22.11., 18 Uhr</small></a>
+    </div>
+  </div>
+</section>
+
+<!-- Block 3: Muster-Auswertung mit Erläuterungen -->
+<section class="pp-block" id="auswertung">
+  <div class="pp-spalte">
+    <h2>So sieht Ihre Auswertung aus.</h2>
+    <p class="pp-unter">Ein Muster mit echten Werten, ohne Namen. Ihre trägt Ihre eigenen.</p>
+    <div class="pp-muster">
+      <figure>
+        <img src="{{ 'pilotpraxis-kardio-seite1.webp' | asset_url }}" width="1400" height="1981" alt="Muster der Auswertung für die Praxis, Kardiologie, Seite 1: biologisches Alter gegen Kalenderalter als große Zahl, daneben was trägt und was bremst, darunter die Bereiche mit Skalen" loading="lazy">
+      </figure>
+    </div>
+    <ol class="pp-ziffern">
+      <li><strong>Biologisches Alter gegen Kalenderalter</strong> als große Zahl, mit dem Abstand in Jahren und einer Skala.</li>
+      <li><strong>Trägt, bremst:</strong> Blutfette, Blutdruck, Rhythmus, Entzündung, Reserve und Ausdauer in zwei kurzen Spalten.</li>
+      <li><strong>Je Bereich:</strong> heute gemessen und veranlagt, jeweils als Skala.</li>
+      <li><strong>Nach der Nachmessung</strong> zeigt jede Skala beide Stände, der Ring ist die Erstmessung.</li>
+    </ol>
+    <p><strong>Drei Fragen, die sie beantwortet:</strong></p>
+    <ul class="pp-fragen">
+      <li>Wie ist das Cholesterin veranlagt?</li>
+      <li>Wie viel Reserve hat der Körper?</li>
+      <li>Wie gut ist er trainierbar?</li>
+    </ul>
+  </div>
+</section>
+
+<!-- Block 3b: Was die Auswertung nicht kann -->
+<section class="pp-block" id="grenzen">
+  <div class="pp-spalte">
+    <h2>Was die Auswertung nicht kann.</h2>
+    <ul class="pp-grenzen">
+      <li>Sie ist kein KHK-Score und kein FH-Gentest. Sie zeigt eine Veranlagung auf einer Skala, keine einzelne Variante.</li>
+      <li>Das LDL selbst misst Ihr Labor, nicht dieser Test.</li>
+      <li>Der Entzündungswert ist epigenetisch gemessen und kein hsCRP.</li>
+      <li>Sie ersetzt kein EKG.</li>
+      <li>Genetische Ergebnisse zeigen eine Veranlagung, keine Diagnose.</li>
+      <li>Gene allein ändern kein Verhalten. Deshalb messen wir nach.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- Block 4: Beweis -->
+<section class="pp-block" id="beweis">
+  <div class="pp-spalte">
+    <h2>Was Ärzte und Kunden sagen.</h2>
+    <figure class="pp-stimme pp-stimme--gross">
+      <blockquote>„Als Arzt war ich skeptisch. Aber der Test hat mich überzeugt. Die Methodik hinter dem MethylPace-Score ist solide. Das ist kein Consumer-Gadget.“</blockquote>
+      <figcaption>Dr. med. Stefan H., verifizierter Kauf</figcaption>
+    </figure>
+    <figure class="pp-stimme">
+      <blockquote>„Sehr empfehlenswert. Mein Arzt war vom detaillierten Ergebnis beeindruckt.“</blockquote>
+      <figcaption>Christian A., verifizierter Kauf</figcaption>
+    </figure>
+    <figure class="pp-stimme">
+      <blockquote>„Mein biologisches Alter liegt 6 Jahre über meinem chronologischen. Das hat mir nicht gefallen. Aber genau das ist der Punkt. Ich weiß jetzt, wo ich ansetzen muss. In 6 Monaten mache ich den Retest.“</blockquote>
+      <figcaption>Julia W., verifizierter Kauf</figcaption>
+    </figure>
+
+    <div class="pp-zahlen">
+      <div><strong>4,7 von 5</strong><span>aus 121 Bewertungen<sup><a href="#beleg-3">3</a></sup></span></div>
+      <div><strong>ISO 17025</strong><span>Analyse bei Eurofins Genomics<sup><a href="#beleg-5">5</a></sup></span></div>
+      <div><strong>23</strong><span>DNA-Kategorien, über 150 Einzelergebnisse<sup><a href="#beleg-4">4</a></sup></span></div>
+      <div><strong>6</strong><span>epigenetische Bereiche aus derselben Probe<sup><a href="#beleg-4">4</a></sup></span></div>
+    </div>
+    <p data-wenn="pub200">Prof. Limmroth hat über 200 wissenschaftliche Veröffentlichungen geschrieben.<sup><a href="#beleg-7">7</a></sup></p>
+
+    <div class="pp-app" data-pp-appdemo>
+      <p class="pp-app__titel">So sieht Ihr Ergebnis in der App aus.</p>
+      <p class="pp-klein">Echte Screens eines Testkunden.</p>
+      <video data-wenn="appdemo" controls playsinline preload="none" poster="{{ 'pilotpraxis-app-epi-methylpace.webp' | asset_url }}" aria-label="App-Demo, 60 Sekunden"></video>
+      <div class="pp-app__screens" data-wenn-nicht="appdemo">
+        <img src="{{ 'pilotpraxis-app-epi-kategorien.webp' | asset_url }}" width="600" height="1298" alt="App: sechs epigenetische Bereiche" loading="lazy">
+        <img src="{{ 'pilotpraxis-app-epi-methylpace.webp' | asset_url }}" width="600" height="1298" alt="App: biologisches Alter gegen Kalenderalter, mit Alterstempo" loading="lazy">
+        <img src="{{ 'pilotpraxis-app-dna-kategorien-1.webp' | asset_url }}" width="600" height="1298" alt="App: DNA-Kategorien" loading="lazy">
+        <img src="{{ 'pilotpraxis-app-dna-langlebigkeit-5-snps.webp' | asset_url }}" width="600" height="1298" alt="App: Ergebnis mit den Genen dahinter" loading="lazy">
+      </div>
+    </div>
+    <div class="pp-cta-wrap">
+      <a class="pp-knopf" data-zustand="offen" data-pp-kauf="beweis" href="#paket">Meinen Pilotplatz sichern<small><span data-wenn-nicht="nachpreis">299 €</span><span data-wenn="nachpreis">395 €</span> · direkt zur Kasse</small></a>
+    </div>
+  </div>
+</section>
+
+<!-- Block 5: Das Pilotpaket -->
+<section class="pp-block" id="paket">
+  <div class="pp-spalte">
+    <div class="pp-paket">
+      <h2>Ihr Pilotpaket Kardiologie.</h2>
+      <p class="pp-unter"><span data-wenn-nicht="vorschlagA">Nur für Praxen, nur bis 30. November.</span><span data-wenn="vorschlagA">Nur für Praxen, nur bis 15. Dezember.</span></p>
+      <ul class="pp-stack">
+        <li><span>Ihr AGE&amp;DNA-Test: Epigenetik und Genetik aus einer Probe, App, PDF-Export</span><span>395 €</span></li>
+        <li><span>Ihre Auswertung für die Praxis, Kardiologie, mit Ihren eigenen Werten</span><span>nur für Pilotpraxen</span></li>
+        <li><span><span data-wenn="minuten15">15 Minuten </span>Kollegengespräch mit Prof. Dr. med. Volker Limmroth, sobald Ihr Ergebnis da ist</span><span>nicht käuflich</span></li>
+        <li><span>Die Muster-Auswertung Kardiologie, sofort per Mail</span><span>sofort</span></li>
+        <li><span>Ihre epigenetische Nachmessung nach sechs Monaten</span><span>245 € statt 299 €</span></li>
+      </ul>
+
+      <div class="pp-preis" data-zustand="vormerken offen">
+        <span data-wenn-nicht="nachpreis">
+          <span class="pp-preis__alt">Regulär 395 €</span>
+          <span class="pp-preis__neu"><small data-zustand="vormerken">ab So 22.11., 18 Uhr: </small>299 €<small data-zustand="offen"> bis 30.11., 23:59</small></span>
+          <span class="pp-klein" data-wenn="vorschlagA">Danach 395 €. Anmeldeschluss ist der 15.12.</span>
+        </span>
+        <span data-wenn="nachpreis"><span class="pp-preis__neu">395 €</span></span>
+      </div>
+
+      <div class="pp-buch" data-wenn="buch">
+        <p><strong>Dazu, wenn Sie möchten:</strong> <em>Der Longevity-Kompass</em> (Prof. Limmroth, Dr. Wirtz, Ullstein 2025), mit persönlicher Widmung von Prof. Limmroth.</p>
+        <p class="pp-klein"><span data-wenn="firmenfeld">Tragen Sie dafür in der Kasse Ihre Praxis im Feld „Firma“ ein. Oder antworten </span><span data-wenn-nicht="firmenfeld">Antworten Sie dafür </span>auf die Bestellbestätigung mit dem Namen Ihrer Praxis.</p>
+      </div>
+
+      <p class="pp-aufnahme">Prof. Limmroth führt jedes Kollegengespräch selbst, und jede Auswertung entsteht einzeln. Deshalb nehmen wir in die Pilotphase 25 kardiologische Praxen auf.</p>
+      <p class="pp-klein" data-wenn="vorschlagA">Warum der 15. Dezember: Wer später einschickt, hat sein Ergebnis nicht vor der Runde zum Patientenmodell im Februar.</p>
+
+      <div data-zustand="offen">
+        <p class="pp-schluss-datum"><span data-wenn-nicht="vorschlagA">Anmeldeschluss: Mo 30.11., 23:59</span><span data-wenn="vorschlagA"><span data-wenn-nicht="nachpreis">299 € bis Mo 30.11., 23:59</span><span data-wenn="nachpreis">Anmeldeschluss: Di 15.12., 23:59</span></span> · <span data-pp-rest></span></p>
+        <div class="pp-cta-wrap">
+          <a class="pp-knopf" data-pp-kauf="paket" href="#paket">Meinen Pilotplatz sichern<small><span data-wenn-nicht="nachpreis">299 €</span><span data-wenn="nachpreis">395 €</span> · direkt zur Kasse</small></a>
+          <p class="pp-cta-zeile">Direkt zur Kasse, ohne Konto.<span data-wenn="firmenfeld"> Mit Ihrer Praxis im Feld „Firma“ kommt die Rechnung auf die Praxis.</span> PayPal, Karte, Apple Pay oder Klarna.</p>
+        </div>
+      </div>
+      <div data-zustand="vormerken">
+        <p class="pp-schluss-datum">Anmeldung ab So 22.11., 18 Uhr<span data-wenn-nicht="vorschlagA"> · Anmeldeschluss Mo 30.11., 23:59</span></p>
+        <div class="pp-cta-wrap"><a class="pp-knopf" href="#vormerken">Vormerken und Muster erhalten<small>Anmeldung ab So 22.11., 18 Uhr</small></a></div>
+      </div>
+      <div data-zustand="voll"><p class="pp-schluss-datum">Die Pilotphase Kardiologie ist voll. <a href="#warteliste">Für die nächste Runde vormerken</a></p></div>
+      <div data-zustand="geschlossen"><p class="pp-schluss-datum">Die Anmeldung ist geschlossen. <a href="#warteliste">Für die nächste Runde vormerken</a></p></div>
+
+      <p class="pp-wunsch">Was wir uns von Ihnen wünschen: Ihre Rückmeldung in fünf Fragen, was der Auswertung für Ihre Sprechstunde fehlt.</p>
+      <p class="pp-fuer">Die Pilotphase ist für Ärztinnen und Ärzte in eigener Praxis. Wir prüfen jede Anmeldung. Ohne Praxis führen wir Ihre Bestellung als regulären Test zum selben Preis aus. Den Test für alle gibt es <a data-pp-testseite href="/products/lifetime-age-dna">hier</a>.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Block 6: Garantie -->
+<section class="pp-block" id="garantie">
+  <div class="pp-spalte">
+    <div class="pp-garantie-box" data-wenn="garantie">
+      <div class="pp-siegel">Ihr Urteil zählt</div>
+      <div>
+        <h2>Ihr Urteil zählt.</h2>
+        <p>Bringt Ihnen die Auswertung nach unserem Gespräch für Ihre Sprechstunde nichts, schreiben Sie eine Mail, und Sie bekommen die 299 € zurück. Ihre Werte und das Buch behalten Sie.</p>
+        <p>Warum wir das anbieten: Wir wollen Ihr ehrliches Urteil. Ein Nein hilft uns so viel wie ein Ja.</p>
+        <p>Dazu gilt: Solange das Kit versiegelt ist, können Sie es 90 Tage zurückschicken. Ist Ihre Probe nicht auswertbar, schicken wir ein neues Kit.</p>
+        <p class="pp-klein">Bedingungen: Das Gespräch hat stattgefunden, die Mail kommt binnen 14 Tagen danach.</p>
+      </div>
+    </div>
+    <div class="pp-garantie-box" data-wenn-nicht="garantie">
+      <div class="pp-siegel">90 Tage</div>
+      <div>
+        <h2>Ohne Risiko.</h2>
+        <p>Solange das Kit versiegelt ist, können Sie es 90 Tage zurückschicken. Ist Ihre Probe nicht auswertbar, schicken wir ein neues Kit.</p>
+        <p>Kein Abo, kein Vertrag, keine Abnahme.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Block 7: Fragen der Kollegen, alle offen -->
+<section class="pp-block" id="fragen">
+  <div class="pp-spalte">
+    <h2>Fragen der Kollegen.</h2>
+    <dl class="pp-faq">
+      <dt>Wie valide ist das biologische Alter?</dt>
+      <dd>Ein Schätzwert, ehrlich eingeordnet. Es stammt aus einer veröffentlichten epigenetischen Uhr, die für Speichel gebaut ist.<sup><a href="#beleg-6">6</a></sup> Ein einzelner Wert ist eine Standortbestimmung. Aussagekraft bekommt er im Verlauf, mit derselben Methode gemessen.</dd>
+      <dt>Und die Genetik?</dt>
+      <dd>Veranlagung, keine Diagnose. Die Ergebnisse beruhen auf bekannten Varianten. In der App sehen Sie zu jedem Ergebnis die untersuchten Gene. Was veranlagt ist, beschreibt eine Neigung, keine Erkrankung, und ersetzt keine Abklärung.</dd>
+      <dt>Was ist mit dem Gendiagnostikgesetz?</dt>
+      <dd>Ihr Test, Ihr Ergebnis. Sie testen sich selbst, das Ergebnis geht nur an Sie. Ihr Arbeitgeber darf es weder verlangen noch nutzen (§ 21 GenDG). Wie Patienten später dazukommen, klären wir mit den Pilotpraxen, anwaltlich geprüft.</dd>
+      <dt>Wer sieht meine Daten?</dt>
+      <dd>Ihre Probe läuft unter einer Kit-ID. Die Daten liegen DSGVO-konform auf EU-Servern. Zugriff haben nur die Stellen, die Analyse und Bereitstellung brauchen. Löschen können Sie beantragen.</dd>
+      <dt>Wie viel Zeit kostet mich das?</dt>
+      <dd><span data-wenn="minuten15">Rund 25 Minuten: fünf für die Probe, 15 für das Gespräch, fünf für Ihre Rückmeldung.</span><span data-wenn-nicht="minuten15">Fünf Minuten für die Probe, das Kollegengespräch und fünf Minuten für Ihre Rückmeldung.</span></dd>
+      <dt>Was mache ich mit dem Ergebnis?</dt>
+      <dd>Sie urteilen. Sie lesen Ihre Auswertung so, wie ein Patient sie mitbringen würde, und entscheiden, ob sie in Ihre Sprechstunde gehört. Im Gespräch zeigt Prof. Limmroth, welche Werte in Ihrem Fach eine Entscheidung tragen.</dd>
+      <dt>Ist das seriös?</dt>
+      <dd>Prüfen Sie es an sich. Analyse bei Eurofins Genomics nach ISO 17025, wissenschaftliche Leitung Prof. Dr. med. Volker Limmroth<span data-wenn="pub200">, Autor von über 200 wissenschaftlichen Veröffentlichungen</span>. Kein Abo, keine Nahrungsergänzung im Paket.</dd>
+      <dt>Verpflichte ich mich zu etwas?</dt>
+      <dd>Nein. Kein Vertrag, keine Abnahme, keine Provision. Wir bitten Sie nur um Ihre ehrliche Rückmeldung.</dd>
+      <dt>Bekomme ich eine Rechnung auf die Praxis?</dt>
+      <dd><span data-wenn="firmenfeld">Ja. Tragen Sie in der Kasse Ihre Praxis im Feld „Firma“ ein.<span data-wenn="buch"> Dann kommt auch das Buch mit Widmung.</span></span><span data-wenn-nicht="firmenfeld">Ja. Antworten Sie auf die Bestellbestätigung mit dem Namen Ihrer Praxis.</span></dd>
+      <dt>Ich bin keine Ärztin und kein Arzt. Kann ich trotzdem bestellen?</dt>
+      <dd>Die Pilotphase ist für Ärztinnen und Ärzte in eigener Praxis, wir prüfen jede Anmeldung. Den Test gibt es für alle zum selben Preis <a data-pp-testseite href="/products/lifetime-age-dna">hier</a>. Bestellungen ohne Praxis führen wir als regulären Test aus.</dd>
+    </dl>
+  </div>
+</section>
+
+<!-- Block 7b: Belege -->
+<section class="pp-block pp-belege" id="belege">
+  <div class="pp-spalte">
+    <h2>Belege.</h2>
+    <ol>
+      <li id="beleg-1">Eigener Test und Sicherheit im Gespräch über Genetik (59 statt 23 %): Haga SB et al. J Pers Med 2019;9(2):29. <a href="https://doi.org/10.3390/jpm9020029" rel="noopener" target="_blank">doi.org/10.3390/jpm9020029</a>. 130 Hausärztinnen und Hausärzte in den USA; eine Koautorin arbeitet beim Testanbieter.</li>
+      <li id="beleg-2">LDL-Ziel in Deutschland (28 % der behandelten Patienten): DA-VINCI-Studie, Auswertung Deutschland. Atherosclerosis Plus 2022. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9833225/" rel="noopener" target="_blank">PMC9833225</a>.</li>
+      <li id="beleg-3">Bewertungen: 4,7 von 5 aus 121 verifizierten Käufen des AGE&amp;DNA-Tests über Loox, Stand 17.11.2026. Zitate gekürzt, Namen abgekürzt.</li>
+      <li id="beleg-4">23 DNA-Kategorien, über 150 Einzelergebnisse und sechs epigenetische Bereiche je Kit; Ergebnis sechs Wochen nach Probeneingang. Angaben von LIFETIME, geprüft an Kundenkits.</li>
+      <li id="beleg-5">Labor: Eurofins Genomics, akkreditiert nach ISO 17025. DNA-Methylierung (Illumina MethylationEPIC) und Genotypisierung aus derselben Speichelprobe.</li>
+      <li id="beleg-6">Methode des biologischen Alters: veröffentlichte epigenetische Uhr für Speichel. Die Literaturangabe nennen wir Ihnen auf Anfrage und im Kollegengespräch.</li>
+      <li id="beleg-7" value="7" data-wenn="pub200">Prof. Dr. med. Volker Limmroth: <a data-pp-publikationsliste href="#belege">Publikationsliste (PDF)</a>.</li>
+      <li id="beleg-8" value="8">Statinbeginn mit genetischer Risikoinformation (39 statt 22 %): Kullo IJ et al., MI-GENES. Circulation 2016. <a href="https://doi.org/10.1161/CIRCULATIONAHA.115.020109" rel="noopener" target="_blank">doi.org/10.1161/CIRCULATIONAHA.115.020109</a>. Randomisiert, n = 203. Getestet wurde ein genetischer Score für die koronare Herzkrankheit, nicht der Cholesterin-Wert dieser Auswertung.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- Block 8: So läuft Ihr Pilot -->
+<section class="pp-block" id="ablauf">
+  <div class="pp-spalte">
+    <h2><span data-wenn="minuten15">Rund 25 Minuten Ihrer Zeit.</span><span data-wenn-nicht="minuten15">So läuft Ihr Pilot.</span></h2>
+    <ol class="pp-ablauf">
+      <li><strong>Heute</strong>Pilotplatz sichern. Die Muster-Auswertung Kardiologie kommt sofort per Mail, die App können Sie gleich laden.</li>
+      <li><strong>In 2 bis 3 Werktagen</strong>Ihr Kit ist da. Probe in fünf Minuten, der Rückumschlag liegt bei.<span data-wenn="buch"> Haben Sie Ihre Praxis angegeben, folgt das Buch mit persönlicher Widmung.</span></li>
+      <li><strong>Sechs Wochen nach Probeneingang</strong>Ihr Ergebnis in der App. Die DNA-Ergebnisse kommen oft früher.</li>
+      <li><strong>Kurz danach</strong>Ihre Auswertung für die Praxis und <span data-wenn="minuten15">15 Minuten </span>Kollegengespräch mit Prof. Limmroth. Den Termin wählen Sie.</li>
+      <li><strong>Danach</strong>Ihre Rückmeldung in fünf Fragen. Mit den Pilotpraxen klären wir, wie Patienten dazukommen.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- Block 9: Schluss mit zwei Wegen -->
+<section class="pp-block" id="schluss" data-pp-schluss>
+  <div class="pp-spalte">
+    <h2>Sie haben zwei Möglichkeiten.</h2>
+    <div class="pp-wege">
+      <p>Sie warten, bis der erste Patient mit einem Longevity-Test in Ihre Sprechstunde kommt, und lesen ihn dann zum ersten Mal.</p>
+      <p>Oder Sie kennen die Antwort vorher, aus Ihren eigenen Werten.</p>
+    </div>
+    <div data-zustand="offen">
+      <p class="pp-schluss-datum" style="text-align:center">25 kardiologische Praxen · <span data-wenn-nicht="vorschlagA">Anmeldeschluss Mo 30.11., 23:59</span><span data-wenn="vorschlagA"><span data-wenn-nicht="nachpreis">299 € bis Mo 30.11., 23:59</span><span data-wenn="nachpreis">Anmeldeschluss Di 15.12., 23:59</span></span> · <span data-pp-rest></span></p>
+      <div class="pp-cta-wrap">
+        <a class="pp-knopf" data-pp-kauf="schluss" href="#paket">Meinen Pilotplatz sichern<small><span data-wenn-nicht="nachpreis">299 €</span><span data-wenn="nachpreis">395 €</span> · direkt zur Kasse</small></a>
+        <p class="pp-cta-zeile"><span data-wenn="garantie">Ihr Urteil zählt: Bringt es Ihnen nichts, bekommen Sie die 299 € zurück.</span><span data-wenn-nicht="garantie">Solange das Kit versiegelt ist, 90 Tage zurück.</span></p>
+      </div>
+    </div>
+    <div class="pp-cta-wrap" data-zustand="vormerken"><a class="pp-knopf" href="#vormerken">Vormerken und Muster erhalten<small>Anmeldung ab So 22.11., 18 Uhr</small></a></div>
+    <p data-zustand="voll geschlossen" style="text-align:center"><a href="#warteliste">Für die nächste Runde vormerken</a></p>
+  </div>
+</section>
+
+<!-- Block 10: P.S. -->
+<section class="pp-block" id="ps">
+  <div class="pp-spalte">
+    <p class="pp-ps"><strong>P.S.</strong> Wenn Sie nur eines lesen: Sie testen AGE&amp;DNA an sich selbst, wir sprechen <span data-wenn="minuten15">15 Minuten </span>über Ihr Ergebnis<span data-wenn="garantie">, und wenn es Ihnen für die Sprechstunde nichts bringt, bekommen Sie die 299 € zurück</span>. Weil ich jedes Gespräch selbst führe, nehmen wir 25 kardiologische Praxen auf. <span data-wenn-nicht="vorschlagA">Anmeldeschluss ist der 30. November, 23:59 Uhr.</span><span data-wenn="vorschlagA">Bis 30. November, 23:59 Uhr kostet die Aufnahme 299 €, Anmeldeschluss ist der 15. Dezember.</span></p>
+  </div>
+</section>
+</main>
+
+<footer class="pp-fuss">
+  <div class="pp-spalte">
+    <nav aria-label="Rechtliches">
+      <a href="/pages/impressum">Impressum</a>
+      <a href="/policies/privacy-policy">Datenschutz</a>
+      <a href="/policies/terms-of-service">AGB</a>
+      <a href="/policies/refund-policy">Widerrufsbelehrung und Widerruf</a>
+      <a href="/policies/shipping-policy">Versand</a>
+    </nav>
+    <p>LIFETIME · AGE&amp;DNA · Analyse bei Eurofins Genomics · wissenschaftliche Leitung Prof. Dr. med. Volker Limmroth</p>
+  </div>
+</footer>
+
+<!-- Feste Leiste unten, nur mobil, nur Datum -->
+<div class="pp-sticky" data-pp-sticky data-zustand="offen" aria-hidden="false">
+  <span><strong>Pilotplatz Kardiologie</strong><br><span data-wenn-nicht="nachpreis">299 € · bis 30.11.</span><span data-wenn="nachpreis">395 € · bis 15.12.</span></span>
+  <a class="pp-knopf" data-pp-kauf="sticky" href="#paket">Sichern</a>
+</div>

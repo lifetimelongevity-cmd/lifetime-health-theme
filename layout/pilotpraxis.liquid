@@ -1,0 +1,63 @@
+{%- comment -%}
+  Schlankes Layout der Pilotpraxis-Verkaufsseiten (Paket P2, Black Week 2026).
+  Ausgeliefert für templates/page.pilotpraxis-orthopaedie.liquid und -kardiologie.liquid.
+  Kein Theme-CSS, keine Kopfzeile, kein Theme-Footer: Die Seite ist ein Brief.
+  Consent und Messung wie in layout/theme.liquid und theme.campaign.liquid:
+  Consentmo-Consent-Mode-Skript vor allem anderen, content_for_header (Shopify-Pixel,
+  App-Einbettungen wie das Consentmo-Banner), GTM GTM-TMTRXHLQ.
+  Inhalt, CSS und JS kommen aus docs/pilotpraxis/ über docs/pilotpraxis/bauen.py.
+{%- endcomment -%}
+{%- liquid
+  if template.suffix contains 'kardiologie'
+    assign pp_fach = 'kardiologie'
+    assign pp_name = 'Kardiologie'
+    assign pp_beschreibung = 'Für Kardiologinnen und Kardiologen: Testen Sie AGE&DNA an sich selbst. Ihr Test, Ihre Auswertung für die Praxis und das Kollegengespräch mit Prof. Dr. med. Volker Limmroth.'
+  else
+    assign pp_fach = 'orthopaedie'
+    assign pp_name = 'Orthopädie'
+    assign pp_beschreibung = 'Für Orthopädinnen und Orthopäden: Testen Sie AGE&DNA an sich selbst. Ihr Test, Ihre Auswertung für die Praxis und das Kollegengespräch mit Prof. Dr. med. Volker Limmroth.'
+  endif
+  assign pp_titel = 'Pilotpraxis ' | append: pp_name | append: ' · AGE&DNA · LIFETIME'
+-%}
+<!doctype html>
+<html lang="de" data-pp-fach="{{ pp_fach }}">
+<head>
+  {% render 'gcm-integration-script' %}
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,follow">
+  {%- render 'favicon' -%}
+  <title>{{ pp_titel | escape }}</title>
+  <meta name="description" content="{{ pp_beschreibung | escape }}">
+  <link rel="canonical" href="{{ canonical_url }}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="LIFETIME">
+  <meta property="og:url" content="{{ canonical_url }}">
+  <meta property="og:title" content="{{ pp_titel | escape }}">
+  <meta property="og:description" content="{{ pp_beschreibung | escape }}">
+  <meta property="og:image" content="https:{{ 'pilotpraxis-limmroth.jpg' | asset_url }}">
+  <meta property="og:image:width" content="900">
+  <meta property="og:image:height" content="900">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://cdn.shopify.com">
+  {{ 'pilotpraxis.css' | asset_url | stylesheet_tag }}
+  {{ content_for_header }}
+  {%- comment -%} Synchron nach content_for_header: setzt Zustand und Schalter vor dem ersten Malen und liest Shopify.theme.role für die Vorschau-Parameter {%- endcomment -%}
+  {% # theme-check-disable ParserBlockingScript %}
+  <script src="{{ 'pilotpraxis.js' | asset_url }}"></script>
+  {% # theme-check-enable ParserBlockingScript %}
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-TMTRXHLQ');</script>
+  <!-- End Google Tag Manager -->
+</head>
+<body class="pp template-{{ template.name }} template-{{ template | replace: '.', ' ' | handle }}">
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TMTRXHLQ" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  {{ content_for_layout }}
+</body>
+</html>
