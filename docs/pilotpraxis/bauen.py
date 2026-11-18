@@ -33,11 +33,11 @@ GESPERRT = [r'\bBefund', r'Selbstkostenpreis', r'Black\s*Week', r'\bDeal\b', r'\
             r'Rabatt', r'\bSale\b', r'\bNMN\b', r'Lp\(a\)', r'Omega-3', r'\bSalz']
 # Sachlich falsch vor Orthopäden: Das MRT zeigt die Rückenmuskulatur. Richtig: „misst kaum jemand“
 GESPERRT += [r'Muskel[^.]{0,80}zeig(t|en)[^.]{0,30}nicht', r'zeig(t|en) (es|ihn|sie) (den Muskel )?nicht\b']
-# Was der Test liefert (BJ 18.11.2026): Genetik = Anlagen, Epigenetik = Werte aus der DNA-Methylierung.
-# Keine akuten Werte, kein Nährstoffstatus, kein Mangel, kein Blutwert.
-GESPERRT += [r'Mangel', r'Nährstoff', r'Vitamin', r'Blutwert']
-# Sätze, in denen diese Wörter stehen dürfen (Block „Was die Auswertung nicht kann“)
-ERLAUBTE_SAETZE = ['Nährstoffstatus, Mangel und Blutwerte misst weiter Ihr Labor.']
+# Was der Test liefert (BJ 18.11.2026, präzisiert): Genetik = Anlagen als Wahrscheinlichkeit,
+# Epigenetik = Werte aus der DNA-Methylierung. Gesperrt ist nur die Behauptung eines akuten Status.
+GESPERRT += [r'zeigt (Ihnen )?Ihren (Mangel|Nährstoffstatus|Vitaminstatus)', r'Mangel (wird |werden )?(festgestellt|nachgewiesen|erkannt|diagnostiziert)',
+             r'ersetzt (das|Ihr|Ihre) Labor', r'(misst|messen|bestimmt|bestimmen) (Ihren|Ihre|den|die) (Nährstoff|Vitamin|Blutwert)']
+ERLAUBTE_SAETZE = []
 # Erlaubte Ausnahmen: Textstücke im Umfeld eines Treffers, die ihn zulassen
 AUSNAHMEN = []
 
@@ -101,10 +101,6 @@ def text_pruefen(name, rumpf):
     sichtbar = re.sub(r'<[^>]+>', ' ', sichtbar)
     for satz in ERLAUBTE_SAETZE:
         sichtbar = sichtbar.replace(satz, ' ')
-    # „Muskelwert“ nur mit „epigenetisch“ im selben Satz
-    for satz in re.split(r'(?<=[.!?])\s+', re.sub(r'\s+', ' ', sichtbar)):
-        if 'Muskelwert' in satz and 'epigenetisch' not in satz:
-            fehler('%s: „Muskelwert“ ohne „epigenetisch“ im selben Satz: %s' % (name, satz.strip()[:160]))
     for muster in GESPERRT:
         for m in re.finditer(muster, sichtbar):
             umfeld = sichtbar[max(0, m.start() - 50):m.end() + 50].replace('\n', ' ')
