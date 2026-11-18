@@ -1,5 +1,5 @@
 /* ERZEUGT von docs/pilotpraxis/bauen.py aus docs/pilotpraxis/pilotpraxis.js. Nicht von Hand ändern.
-   Pruefsumme: 4f150e853b4c5e269c287c085a7995289c05d6cef0127fde6d135bdc03d2ac74 */
+   Pruefsumme: e4b9c2abe4a9f9191c775a49d8e616298e20340e0b77eae5f2fd8d38b8aa1767 */
 /* Pilotpraxis-Verkaufsseite (P2). Quelle: docs/pilotpraxis/pilotpraxis.js
    Wird im <head> ohne defer geladen: setzt Zustand und Schalter, bevor die Seite malt.
 
@@ -125,7 +125,7 @@ window.PP_KONFIG = {
   };
   var HEADLINES_FACH = {
     orthopaedie: {
-      o2: 'Bei 60 % der Schmerzfreien mit 50 zeigt das MRT eine Bandscheibenvorwölbung. Und den Muskel, der die Wirbelsäule trägt, zeigt es nicht.',
+      o2: '60 % der Schmerzfreien mit 50 haben im MRT eine Vorwölbung. Den Muskel misst kaum jemand.',
       o1: 'Röntgen und MRT zeigen das Gerüst. Den Muskel, der es trägt, misst kaum jemand.',
       o1s: 'Wie viel Muskel hat Ihr eigener Körper noch? In sechs Wochen haben Sie die Zahl.'
     },

@@ -31,6 +31,8 @@ ENDE = '<!-- PP-RUMPF-ENDE -->'
 # Leitplanken aus dem Gesamtplan: diese Wörter kommen im Seitentext nicht vor
 GESPERRT = [r'\bBefund', r'Selbstkostenpreis', r'Black\s*Week', r'\bDeal\b', r'\bAktion\b',
             r'Rabatt', r'\bSale\b', r'\bNMN\b', r'Lp\(a\)', r'Omega-3', r'\bSalz']
+# Sachlich falsch vor Orthopäden: Das MRT zeigt die Rückenmuskulatur. Richtig: „misst kaum jemand“
+GESPERRT += [r'Muskel[^.]{0,80}zeig(t|en)[^.]{0,30}nicht', r'zeig(t|en) (es|ihn|sie) (den Muskel )?nicht\b']
 # Erlaubte Ausnahmen: Textstücke im Umfeld eines Treffers, die ihn zulassen
 AUSNAHMEN = []
 
@@ -108,6 +110,10 @@ def main():
     nur_pruefen = '--pruefen' in sys.argv
     erzwingen = '--erzwingen' in sys.argv
     print('Pilotpraxis bauen (%s)' % ('nur prüfen' if nur_pruefen else 'schreiben'))
+    # Headlines und andere sichtbare Texte im Skript (Zeichenketten in einfachen Anführungszeichen)
+    js = open(os.path.join(QUELLE, 'pilotpraxis.js'), encoding='utf-8').read()
+    js_texte = ' | '.join(re.findall(r"'((?:[^'\\\n]|\\.)*)'", js))
+    text_pruefen('pilotpraxis.js', js_texte)
     bilder_quelle = os.path.join(QUELLE, 'img')
     bilder = sorted(f for f in os.listdir(bilder_quelle) if f.startswith('pilotpraxis-'))
 
