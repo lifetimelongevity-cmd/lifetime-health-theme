@@ -1,0 +1,74 @@
+{% comment %}
+  LIFETIME — BSFZ-Siegel (FuE-Bescheinigung)
+  ──────────────────────────────────────────
+  Kleine Siegelkarte: Siegel der Bescheinigungsstelle Forschungszulage links,
+  ein Titel und ein Satz rechts. Genutzt auf /pages/science (lt-science-split,
+  Section `warum`) und /pages/unsere-forschung (lt-wiss-forschung).
+  Das Siegel ist ein Theme-Asset (assets/bsfz-siegel-2026.svg, viewBox auf den
+  Ring zugeschnitten). Farben des Siegels bleiben original, sie gehören der BSFZ.
+
+  Parameter:
+  title        (string) — kurze Zeile, kräftig. Leer → nur Text.
+  text         (string) — ein Satz, gedämpft. Leer → nur Titel.
+  extra_class  (string) — optionale Zusatzklasse für Abstände in der Section.
+{% endcomment %}
+
+<div class="lt-bsfz{% if extra_class != blank %} {{ extra_class }}{% endif %}">
+  <img
+    class="lt-bsfz__seal"
+    src="{{ 'bsfz-siegel-2026.svg' | asset_url }}"
+    alt="FuE-Siegel der Bescheinigungsstelle Forschungszulage 2026"
+    width="72"
+    height="72"
+    loading="lazy"
+    decoding="async"
+  >
+  <p class="lt-bsfz__copy">
+    {%- if title != blank -%}
+      <strong class="lt-bsfz__title">{{ title | escape }}</strong>
+    {%- endif -%}
+    {%- if text != blank -%}
+      <span class="lt-bsfz__text">{{ text | escape }}</span>
+    {%- endif -%}
+  </p>
+</div>
+
+{% stylesheet %}
+.lt-bsfz {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: 30rem;
+  padding: var(--space-4);
+  background: var(--color-white, #fff);
+  border: 1px solid color-mix(in srgb, var(--color-ink, #26251e) 10%, transparent);
+  border-radius: var(--radius-md);
+}
+
+.lt-bsfz__seal {
+  flex: 0 0 auto;
+  display: block;
+  width: 72px;
+  height: 72px;
+}
+
+.lt-bsfz__copy {
+  margin: 0;
+  min-width: 0;
+  font-family: var(--font-body);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-body);
+}
+
+.lt-bsfz__title {
+  display: block;
+  font-weight: var(--weight-semibold);
+  color: var(--color-ink, #26251e);
+}
+
+.lt-bsfz__text {
+  display: block;
+  margin-top: 2px;
+  color: var(--color-ink-muted, rgba(38, 37, 30, 0.72));
+}
+{% endstylesheet %}

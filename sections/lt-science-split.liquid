@@ -84,6 +84,14 @@
           </a>
         </div>
       {%- endif -%}
+
+      {%- if section.settings.seal_enable -%}
+        {% render 'lt-bsfz-siegel',
+          title: section.settings.seal_title,
+          text: section.settings.seal_text,
+          extra_class: 'lts__seal'
+        %}
+      {%- endif -%}
     </div>
 
     <figure class="lts__media">
@@ -106,7 +114,7 @@
             <div class="lts__media-svg">{% render 'science-svg-genetik-anlagen' %}</div>
           {%- else -%}
         {%- if sp_img_src != blank -%}
-          <img src="{{ sp_img_src }}" alt="{{ sp_img_alt | escape }}" class="lts__media-img" loading="lazy">
+          <img src="{{ sp_img_src }}" alt="{{ sp_img_alt | escape }}" class="lts__media-img" width="1000" height="1000" loading="lazy">
         {%- elsif section.settings.image != blank -%}
           {{ section.settings.image | image_url: width: 1000 | image_tag: loading: 'lazy', class: 'lts__media-img', alt: sp_img_alt }}
         {%- endif -%}
@@ -245,6 +253,10 @@
   margin-top: var(--space-6);
 }
 
+.lts__seal {
+  margin-top: var(--space-6);
+}
+
 .lts-cta {
   display: inline-flex;
   align-items: center;
@@ -366,6 +378,10 @@
       ],
       "default": "soft"
     },
+    { "type": "header", "content": "BSFZ-Siegel (optional)" },
+    { "type": "checkbox", "id": "seal_enable", "label": "Siegel unter dem Text zeigen", "default": false },
+    { "type": "text", "id": "seal_title", "label": "Siegel: Titel", "default": "Staatlich bescheinigte Forschung" },
+    { "type": "textarea", "id": "seal_text", "label": "Siegel: Satz", "default": "Die Bescheinigungsstelle Forschungszulage hat unser Vorhaben als Forschung und Entwicklung anerkannt." },
     { "type": "header", "content": "Motiv" },
     {
       "type": "text", "id": "image_asset", "label": "Bild/SVG aus Theme-Assets oder URL",
