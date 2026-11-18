@@ -1,5 +1,5 @@
 /* ERZEUGT von docs/pilotpraxis/bauen.py aus docs/pilotpraxis/pilotpraxis.js. Nicht von Hand ändern.
-   Pruefsumme: e4b9c2abe4a9f9191c775a49d8e616298e20340e0b77eae5f2fd8d38b8aa1767 */
+   Pruefsumme: de87c3c3ecff0078b7e80ee38e2f9e60f93894bff95ff3aedaa6903562a9e929 */
 /* Pilotpraxis-Verkaufsseite (P2). Quelle: docs/pilotpraxis/pilotpraxis.js
    Wird im <head> ohne defer geladen: setzt Zustand und Schalter, bevor die Seite malt.
 
@@ -127,7 +127,7 @@ window.PP_KONFIG = {
     orthopaedie: {
       o2: '60 % der Schmerzfreien mit 50 haben im MRT eine Vorwölbung. Den Muskel misst kaum jemand.',
       o1: 'Röntgen und MRT zeigen das Gerüst. Den Muskel, der es trägt, misst kaum jemand.',
-      o1s: 'Wie viel Muskel hat Ihr eigener Körper noch? In sechs Wochen haben Sie die Zahl.'
+      o1s: 'Ihr eigener Muskelschwund-Wert, epigenetisch gemessen: In sechs Wochen haben Sie ihn.'
     },
     kardiologie: {
       k1: '„Ich esse doch gesund.“ Und das LDL bleibt hoch. Nur 28 % der behandelten Patienten in Deutschland erreichen ihr LDL-Ziel.',

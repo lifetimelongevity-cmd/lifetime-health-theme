@@ -125,7 +125,7 @@ window.PP_KONFIG = {
     orthopaedie: {
       o2: '60 % der Schmerzfreien mit 50 haben im MRT eine Vorwölbung. Den Muskel misst kaum jemand.',
       o1: 'Röntgen und MRT zeigen das Gerüst. Den Muskel, der es trägt, misst kaum jemand.',
-      o1s: 'Wie viel Muskel hat Ihr eigener Körper noch? In sechs Wochen haben Sie die Zahl.'
+      o1s: 'Ihr eigener Muskelschwund-Wert, epigenetisch gemessen: In sechs Wochen haben Sie ihn.'
     },
     kardiologie: {
       k1: '„Ich esse doch gesund.“ Und das LDL bleibt hoch. Nur 28 % der behandelten Patienten in Deutschland erreichen ihr LDL-Ziel.',
