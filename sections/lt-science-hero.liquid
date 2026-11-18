@@ -37,21 +37,34 @@
 <section id="section-{{ section.id }}" class="lsh lsh--band">
   <div class="lsh__band{% if section.settings.band_verlauf == 'stark' %} lsh__band--stark{% endif %}" style="--lsh-band-bg: {{ section.settings.band_bg }};{% if section.settings.position_desktop != blank %} --lsh-pos-d: {{ section.settings.position_desktop | escape }};{% endif %}{% if section.settings.position_mobile != blank %} --lsh-pos-m: {{ section.settings.position_mobile | escape }};{% endif %}">
     <div class="lsh__band-bild">
+      {%- comment -%}
+        Breiten wie im Vollbild-Hero der Startseite (18.11.2026): bis 3344 Desktop und 2244 mobil,
+        sonst wird ein HD-Bild auf Retina hochskaliert und wirkt verpixelt. Mobil nur Stufen bis zur
+        echten Bildbreite, plus die Bildbreite selbst, damit kein w-Wert mehr verspricht als die Datei hat.
+      {%- endcomment -%}
+      {%- assign lsh_stufen = '600,900,1320,1800,2244' | split: ',' -%}
+      {%- capture lsh_mobil_srcset -%}
+        {%- for stufe in lsh_stufen -%}
+          {%- assign lsh_w = stufe | plus: 0 -%}
+          {%- if lsh_w < lsh_mobil.width -%}{{ lsh_mobil | image_url: width: lsh_w }} {{ lsh_w }}w, {% endif -%}
+        {%- endfor -%}
+        {{- lsh_mobil | image_url: width: lsh_mobil.width }} {{ lsh_mobil.width }}w
+      {%- endcapture -%}
       <picture>
         <source
           media="(max-width: 768px)"
-          srcset="{{ lsh_mobil | image_url: width: 600 }} 600w, {{ lsh_mobil | image_url: width: 900 }} 900w, {{ lsh_mobil | image_url: width: 1122 }} 1122w"
+          srcset="{{ lsh_mobil_srcset | strip }}"
           sizes="100vw"
           width="{{ lsh_mobil.width }}"
           height="{{ lsh_mobil.height }}"
         >
         {{
           section.settings.image
-          | image_url: width: 2000
+          | image_url: width: 3344
           | image_tag:
             loading: 'eager',
             fetchpriority: 'high',
-            widths: '900, 1200, 1672, 2000',
+            widths: '900, 1200, 1672, 2200, 2800, 3344',
             sizes: '100vw',
             class: 'lsh__band-img',
             alt: lsh_alt
