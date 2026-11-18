@@ -335,14 +335,19 @@ window.PP_KONFIG = {
     var leiste = document.querySelector('[data-pp-sticky]');
     var anker = document.querySelector('[data-pp-hero-ende]');
     var schluss = document.querySelector('[data-pp-schluss]');
-    if (!leiste || !anker || !('IntersectionObserver' in window)) return;
-    var nachHero = false, amSchluss = false;
-    function setzen() { leiste.classList.toggle('pp-sticky--an', nachHero && !amSchluss); }
-    new IntersectionObserver(function (e) {
-      nachHero = !e[0].isIntersecting && e[0].boundingClientRect.top < 0;
-      setzen();
-    }).observe(anker);
-    if (schluss) new IntersectionObserver(function (e) { amSchluss = e[0].isIntersecting; setzen(); }).observe(schluss);
+    if (!leiste || !anker) return;
+    // Bei jedem Scrollen neu rechnen: Ein Beobachter meldet keinen Sprung von unten direkt nach oben
+    var geplant = false;
+    function setzen() {
+      geplant = false;
+      var nachHero = anker.getBoundingClientRect().top < 0;
+      var amSchluss = false;
+      if (schluss) { var r = schluss.getBoundingClientRect(); amSchluss = r.top < window.innerHeight && r.bottom > 0; }
+      leiste.classList.toggle('pp-sticky--an', nachHero && !amSchluss);
+    }
+    window.addEventListener('scroll', function () { if (!geplant) { geplant = true; requestAnimationFrame(setzen); } }, { passive: true });
+    window.addEventListener('resize', setzen);
+    setzen();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', aufbauen);
