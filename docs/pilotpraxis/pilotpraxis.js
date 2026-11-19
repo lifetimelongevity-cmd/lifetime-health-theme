@@ -114,12 +114,11 @@ window.PP_KONFIG = {
   if (F.appDemo) html.classList.add('ppan-appdemo');
   html.setAttribute('data-pp-zustand', zustand);
 
-  // Headline aus fester Liste (4b § 10), ohne Parameter A1
+  // Headline aus fester Liste (4b § 10), ohne Parameter A2. A1 entfällt (BJ 18.11.2026: konstruierte Situation); h=a1 zeigt den Standard
   var HEADLINES = {
-    a1: 'Ihre Patienten fragen nach ihrem biologischen Alter. Kennen Sie Ihres?',
     a2: 'Kein Außendienst, kein Prospekt. Prüfen Sie es an sich selbst, bevor Sie es einem Patienten empfehlen.',
     a3: 'Sie messen jeden Tag bei anderen. Was misst man bei Ihnen?',
-    t1: 'Testen Sie AGE&DNA an sich selbst, bevor der erste Patient danach fragt.'
+    t1: 'Testen Sie AGE&DNA zuerst an sich selbst. Dann entscheiden Sie, ob es in Ihre Sprechstunde gehört.'
   };
   var HEADLINES_FACH = {
     orthopaedie: {
@@ -136,7 +135,7 @@ window.PP_KONFIG = {
   var hKey = (q.get('h') || '').toLowerCase();
   var headline = HEADLINES[hKey] || (HEADLINES_FACH[fach] || {})[hKey] || null;
   if (headline) html.classList.add('ppan-h-wahl');
-  if (headline && headline.length > 90) html.classList.add('ppan-h-lang');
+  if ((headline || HEADLINES.a2).length > 90) html.classList.add('ppan-h-lang');
 
   // Weg der Bestellung: kanal und ad aus der URL, ohne Cookie, ohne Speicher
   var KANAELE = ['meta-formular', 'lead-mail', 'meta-direkt', 'netz', 'direkt'];
@@ -222,7 +221,7 @@ window.PP_KONFIG = {
     videoZustand();
     appDemo();
     sticky();
-    melden('seite_geladen', { h: hKey || 'a1' });
+    melden('seite_geladen', { h: headline ? hKey : 'a2' });
   }
 
   // ---------- Mail-Feld: Vormerkung und Warteliste (Klaviyo Client-API) ----------

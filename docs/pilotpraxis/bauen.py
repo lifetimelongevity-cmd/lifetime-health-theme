@@ -33,6 +33,9 @@ GESPERRT = [r'\bBefund', r'Selbstkostenpreis', r'Black\s*Week', r'\bDeal\b', r'\
             r'Rabatt', r'\bSale\b', r'\bNMN\b', r'Lp\(a\)', r'Omega-3', r'\bSalz']
 # Sachlich falsch vor Orthopäden: Das MRT zeigt die Rückenmuskulatur. Richtig: „misst kaum jemand“
 GESPERRT += [r'Muskel[^.]{0,80}zeig(t|en)[^.]{0,30}nicht', r'zeig(t|en) (es|ihn|sie) (den Muskel )?nicht\b']
+# Kein konstruierter Anlass (BJ 18.11.2026): nichts, was voraussetzt, dass Patienten nach dem Test fragen
+GESPERRT += [r'Patient(en|in)? (fragen|fragt) nach', r'danach fragt', r'bevor der erste Patient', r'(mitbringen|mitbringt) würde',
+             r'Gentests aus dem Internet', r'zum ersten Mal']
 # Was der Test liefert (BJ 18.11.2026, präzisiert): Genetik = Anlagen als Wahrscheinlichkeit,
 # Epigenetik = Werte aus der DNA-Methylierung. Gesperrt ist nur die Behauptung eines akuten Status.
 GESPERRT += [r'zeigt (Ihnen )?Ihren (Mangel|Nährstoffstatus|Vitaminstatus)', r'Mangel (wird |werden )?(festgestellt|nachgewiesen|erkannt|diagnostiziert)',
