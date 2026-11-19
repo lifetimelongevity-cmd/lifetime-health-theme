@@ -33,6 +33,8 @@ GESPERRT = [r'\bBefund', r'Selbstkostenpreis', r'Black\s*Week', r'\bDeal\b', r'\
             r'Rabatt', r'\bSale\b', r'\bNMN\b', r'Lp\(a\)', r'Omega-3', r'\bSalz']
 # Sachlich falsch vor Orthopäden: Das MRT zeigt die Rückenmuskulatur. Richtig: „misst kaum jemand“
 GESPERRT += [r'Muskel[^.]{0,80}zeig(t|en)[^.]{0,30}nicht', r'zeig(t|en) (es|ihn|sie) (den Muskel )?nicht\b']
+# Nachmessung immer „nach 6 bis 12 Monaten“ (BJ 19.11.2026). Das Kundenzitat „In 6 Monaten mache ich den Retest“ bleibt erlaubt
+GESPERRT += [r'(Nachmessung|nachmessen|Nachmessen)[^.<]{0,40}(sechs|6) Monat', r'nach (etwa |rund )?(sechs|6) Monaten']
 # Kein konstruierter Anlass (BJ 18.11.2026): nichts, was voraussetzt, dass Patienten nach dem Test fragen
 GESPERRT += [r'Patient(en|in)? (fragen|fragt) nach', r'danach fragt', r'bevor der erste Patient', r'(mitbringen|mitbringt) würde',
              r'Gentests aus dem Internet', r'zum ersten Mal']
