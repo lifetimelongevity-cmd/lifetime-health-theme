@@ -35,7 +35,7 @@ window.PP_KONFIG = {
       code: 'PILOTPRAXIS',  // Praxis-Code (Shopify DiscountCodeNode/2418591859063: 96 € auf die Variante „Test“, bis 15.12.2026 23:59, einmal je Kunde). Der Knopf setzt ihn in den Kauflink, leer = kein Code
       video45: '',          // VSL 4:5 (Shopify-Dateien-URL), das Format des Films (BJ 24.11.2026)
       videoHoch: '',        // VSL 9:16, nur als Ausweichdatei, falls es keine 4:5-Datei gibt
-      videoDauer: '1:33',   // steht am Knopf „Mit Ton ansehen“ (Rohfassung 8 vom 24.11.2026: 92,7 s)
+      videoDauer: '1:33',   // steht am Knopf „Mit Ton ansehen“ (Rohfassung 9 vom 24.11.2026: 92,7 s)
       musterPdf: ''         // Muster-Auswertung als PDF (Shopify S2), ohne Adresse erscheint kein Link
     },
     orthopaedie: {

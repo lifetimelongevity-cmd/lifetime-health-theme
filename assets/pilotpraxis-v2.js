@@ -1,5 +1,5 @@
 /* ERZEUGT von docs/pilotpraxis/bauen.py aus docs/pilotpraxis/pilotpraxis-v2.js. Nicht von Hand ändern.
-   Pruefsumme: e8b26c0fb5a2105dc1a8ce6858ceb4ebc2b91a1e6a846ab1a63edb771c5379b3 */
+   Pruefsumme: 62b8530942cc8428faf2d0d89f4f2824b76c95263dd97f913fa3a41be8aeb228 */
 /* Pilotpraxis-Verkaufsseite, Fassung 2 (VSL-Aufbau, 23.11.2026). Quelle: docs/pilotpraxis/pilotpraxis-v2.js
    Wird im <head> ohne defer geladen: setzt Zustand und Schalter, bevor die Seite malt.
 
@@ -37,7 +37,7 @@ window.PP_KONFIG = {
       code: 'PILOTPRAXIS',  // Praxis-Code (Shopify DiscountCodeNode/2418591859063: 96 € auf die Variante „Test“, bis 15.12.2026 23:59, einmal je Kunde). Der Knopf setzt ihn in den Kauflink, leer = kein Code
       video45: '',          // VSL 4:5 (Shopify-Dateien-URL), das Format des Films (BJ 24.11.2026)
       videoHoch: '',        // VSL 9:16, nur als Ausweichdatei, falls es keine 4:5-Datei gibt
-      videoDauer: '1:33',   // steht am Knopf „Mit Ton ansehen“ (Rohfassung 8 vom 24.11.2026: 92,7 s)
+      videoDauer: '1:33',   // steht am Knopf „Mit Ton ansehen“ (Rohfassung 9 vom 24.11.2026: 92,7 s)
       musterPdf: ''         // Muster-Auswertung als PDF (Shopify S2), ohne Adresse erscheint kein Link
     },
     orthopaedie: {
