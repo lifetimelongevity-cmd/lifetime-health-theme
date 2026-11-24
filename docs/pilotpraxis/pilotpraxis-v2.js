@@ -115,7 +115,7 @@ window.PP_KONFIG = {
   var HEADLINES = {
     a2: 'Kein Außendienst, kein Prospekt. Prüfen Sie es an sich selbst, bevor Sie es einem Patienten empfehlen.',
     a3: 'Sie messen jeden Tag bei anderen. Was misst man bei Ihnen?',
-    t1: 'Testen Sie AGE&DNA zuerst an sich selbst. Dann entscheiden Sie, ob es in Ihre Sprechstunde gehört.'
+    t1: 'Testen Sie unseren Epigenetik & DNA-Test zuerst an sich selbst. Dann entscheiden Sie, ob er in Ihre Sprechstunde gehört.'
   };
   var HEADLINES_FACH = {
     orthopaedie: {

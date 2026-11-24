@@ -1,5 +1,5 @@
 /* ERZEUGT von docs/pilotpraxis/bauen.py aus docs/pilotpraxis/pilotpraxis-v2.js. Nicht von Hand ändern.
-   Pruefsumme: a19af5329aae13140ea32d23557c5b86ce26c19bf17314fba2b18b1b602bf9bc */
+   Pruefsumme: 4a2419b946a7a8655a7ec7ce716fc159cd7610d6d705d93a930b20a00481d1e9 */
 /* Pilotpraxis-Verkaufsseite, Fassung 2 (VSL-Aufbau, 23.11.2026). Quelle: docs/pilotpraxis/pilotpraxis-v2.js
    Wird im <head> ohne defer geladen: setzt Zustand und Schalter, bevor die Seite malt.
 
@@ -117,7 +117,7 @@ window.PP_KONFIG = {
   var HEADLINES = {
     a2: 'Kein Außendienst, kein Prospekt. Prüfen Sie es an sich selbst, bevor Sie es einem Patienten empfehlen.',
     a3: 'Sie messen jeden Tag bei anderen. Was misst man bei Ihnen?',
-    t1: 'Testen Sie AGE&DNA zuerst an sich selbst. Dann entscheiden Sie, ob es in Ihre Sprechstunde gehört.'
+    t1: 'Testen Sie unseren Epigenetik & DNA-Test zuerst an sich selbst. Dann entscheiden Sie, ob er in Ihre Sprechstunde gehört.'
   };
   var HEADLINES_FACH = {
     orthopaedie: {
