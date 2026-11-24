@@ -11,7 +11,7 @@
   if template.suffix contains 'kardiologie'
     assign pp_fach = 'kardiologie'
     assign pp_name = 'Kardiologie'
-    assign pp_beschreibung = 'Für Kardiologinnen und Kardiologen: Testen Sie AGE&DNA an sich selbst. Ihr Test, Ihre Auswertung für die Praxis und das Kollegengespräch mit Prof. Dr. med. Volker Limmroth.'
+    assign pp_beschreibung = 'Für niedergelassene Kardiologinnen und Kardiologen: Sehen Sie vorab, welcher Patient mehr braucht als den üblichen Rat. Testen Sie AGE&DNA zuerst an sich selbst und besprechen Sie Ihre Auswertung mit Prof. Dr. med. Volker Limmroth.'
   else
     assign pp_fach = 'orthopaedie'
     assign pp_name = 'Orthopädie'
@@ -40,11 +40,20 @@
   <meta property="og:image:height" content="900">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://cdn.shopify.com">
-  {{ 'pilotpraxis.css' | asset_url | stylesheet_tag }}
+  {%- comment -%} Kardiologie läuft seit 24.11.2026 auf Fassung 2 (pilotpraxis-v2.css und .js), Orthopädie auf Fassung 1. Dieselbe Zuordnung steht in docs/pilotpraxis/bauen.py (FASSUNG) {%- endcomment -%}
+  {%- if pp_fach == 'kardiologie' -%}
+    {{ 'pilotpraxis-v2.css' | asset_url | stylesheet_tag }}
+  {%- else -%}
+    {{ 'pilotpraxis.css' | asset_url | stylesheet_tag }}
+  {%- endif %}
   {{ content_for_header }}
   {%- comment -%} Synchron nach content_for_header: setzt Zustand und Schalter vor dem ersten Malen und liest Shopify.theme.role für die Vorschau-Parameter {%- endcomment -%}
   {% # theme-check-disable ParserBlockingScript %}
+  {%- if pp_fach == 'kardiologie' %}
+  <script src="{{ 'pilotpraxis-v2.js' | asset_url }}"></script>
+  {%- else %}
   <script src="{{ 'pilotpraxis.js' | asset_url }}"></script>
+  {%- endif %}
   {% # theme-check-enable ParserBlockingScript %}
   <!-- Google Tag Manager -->
   <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':

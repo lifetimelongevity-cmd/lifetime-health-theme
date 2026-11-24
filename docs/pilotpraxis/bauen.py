@@ -2,10 +2,12 @@
 """Erzeugt die Shopify-Dateien der Pilotpraxis-Verkaufsseite aus docs/pilotpraxis/.
 
 Quelle (nur hier ändern)            Erzeugt (nie von Hand ändern)
-docs/pilotpraxis/orthopaedie.html → templates/page.pilotpraxis-orthopaedie.liquid
-docs/pilotpraxis/kardiologie.html → templates/page.pilotpraxis-kardiologie.liquid
-docs/pilotpraxis/pilotpraxis.css  → assets/pilotpraxis.css
-docs/pilotpraxis/pilotpraxis.js   → assets/pilotpraxis.js
+docs/pilotpraxis/orthopaedie.html    → templates/page.pilotpraxis-orthopaedie.liquid
+docs/pilotpraxis/kardiologie-v2.html → templates/page.pilotpraxis-kardiologie.liquid
+docs/pilotpraxis/pilotpraxis.css     → assets/pilotpraxis.css      (Fassung 1, nur noch Orthopädie)
+docs/pilotpraxis/pilotpraxis.js      → assets/pilotpraxis.js
+docs/pilotpraxis/pilotpraxis-v2.css  → assets/pilotpraxis-v2.css   (Fassung 2, Kardiologie)
+docs/pilotpraxis/pilotpraxis-v2.js   → assets/pilotpraxis-v2.js
 docs/pilotpraxis/img/pilotpraxis-* → assets/pilotpraxis-*
 
 Aufruf aus dem Theme-Ordner oder von überall:
@@ -25,11 +27,15 @@ import sys
 QUELLE = os.path.dirname(os.path.abspath(__file__))
 THEME = os.path.abspath(os.path.join(QUELLE, '..', '..'))
 FAECHER = ['orthopaedie', 'kardiologie']
+# Fassung je Fach: Kardiologie läuft seit 24.11.2026 auf Fassung 2 (VSL-Aufbau) mit eigener Quelle, eigenem CSS und JS.
+# Orthopädie bleibt auf Fassung 1, bis sie nachgezogen oder gestrichen wird. layout/pilotpraxis.liquid wählt die Dateien genauso.
+FASSUNG = {'orthopaedie': '', 'kardiologie': '-v2'}
 ANFANG = '<!-- PP-RUMPF-ANFANG'
 ENDE = '<!-- PP-RUMPF-ENDE -->'
 
 # Leitplanken aus dem Gesamtplan: diese Wörter kommen im Seitentext nicht vor
-GESPERRT = [r'\bBefund', r'Selbstkostenpreis', r'Black\s*Week', r'\bDeal\b', r'\bAktion\b',
+# „Selbstkostenpreis“ ist seit 24.11.2026 wieder erlaubt (BJ: „auf jeden Fall noch dazu schreiben“), davor laut Gesamtplan gesperrt
+GESPERRT = [r'\bBefund', r'Black\s*Week', r'\bDeal\b', r'\bAktion\b',
             r'Rabatt', r'\bSale\b', r'\bNMN\b', r'Lp\(a\)', r'Omega-3', r'\bSalz']
 # Sachlich falsch vor Orthopäden: Das MRT zeigt die Rückenmuskulatur. Richtig: „misst kaum jemand“
 GESPERRT += [r'Muskel[^.]{0,80}zeig(t|en)[^.]{0,30}nicht', r'zeig(t|en) (es|ihn|sie) (den Muskel )?nicht\b']
@@ -123,17 +129,20 @@ def main():
     erzwingen = '--erzwingen' in sys.argv
     print('Pilotpraxis bauen (%s)' % ('nur prüfen' if nur_pruefen else 'schreiben'))
     # Headlines und andere sichtbare Texte im Skript (Zeichenketten in einfachen Anführungszeichen)
-    js = open(os.path.join(QUELLE, 'pilotpraxis.js'), encoding='utf-8').read()
-    js_texte = ' | '.join(re.findall(r"'((?:[^'\\\n]|\\.)*)'", js))
-    text_pruefen('pilotpraxis.js', js_texte)
+    fassungen = sorted(set(FASSUNG[f] for f in FAECHER))
+    for fassung in fassungen:
+        js = open(os.path.join(QUELLE, 'pilotpraxis%s.js' % fassung), encoding='utf-8').read()
+        js_texte = ' | '.join(re.findall(r"'((?:[^'\\\n]|\\.)*)'", js))
+        text_pruefen('pilotpraxis%s.js' % fassung, js_texte)
     bilder_quelle = os.path.join(QUELLE, 'img')
     bilder = sorted(f for f in os.listdir(bilder_quelle) if f.startswith('pilotpraxis-'))
 
     # 1. Templates
     for fach in FAECHER:
-        quelle = os.path.join(QUELLE, fach + '.html')
+        quelle_name = fach + FASSUNG[fach] + '.html'
+        quelle = os.path.join(QUELLE, quelle_name)
         if not os.path.exists(quelle):
-            print('  (fehlt noch) docs/pilotpraxis/%s.html' % fach)
+            print('  (fehlt noch) docs/pilotpraxis/' + quelle_name)
             continue
         html = open(quelle, encoding='utf-8').read()
         a = html.find(ANFANG)
@@ -157,11 +166,11 @@ def main():
         if handarbeit_pruefen(ziel, '{%- endcomment -%}\n') and not erzwingen:
             fehler('templates/%s wurde von Hand geändert. Änderung in die Quelle übernehmen, dann mit --erzwingen bauen.' % os.path.basename(ziel))
         # Erst die Layout-Anweisung, dann der Erzeugt-Vermerk, dann reines HTML
-        kopf = kopf_liquid('docs/pilotpraxis/%s.html' % fach, rumpf_liquid)
+        kopf = kopf_liquid('docs/pilotpraxis/' + quelle_name, rumpf_liquid)
         schreiben(ziel, "{% layout 'pilotpraxis' %}\n" + kopf + rumpf_liquid, nur_pruefen)
 
     # 2. CSS und JS
-    for datei in ['pilotpraxis.css', 'pilotpraxis.js']:
+    for datei in ['pilotpraxis%s.%s' % (fa, endung) for fa in fassungen for endung in ('css', 'js')]:
         inhalt = open(os.path.join(QUELLE, datei), encoding='utf-8').read()
         if '{{' in inhalt and datei.endswith('.css'):
             fehler(datei + ': enthält {{')
@@ -184,7 +193,7 @@ def main():
         shutil.copyfile(q, z)
         print('  kopiert      assets/' + datei)
     verwaist = [f for f in os.listdir(os.path.join(THEME, 'assets'))
-                if f.startswith('pilotpraxis-') and f not in bilder]
+                if f.startswith('pilotpraxis-') and f not in bilder and not f.endswith(('.css', '.js'))]
     for f in verwaist:
         print('  Hinweis: assets/%s hat keine Quelle mehr in docs/pilotpraxis/img/' % f)
     print('Fertig.')
