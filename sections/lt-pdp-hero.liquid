@@ -1080,7 +1080,10 @@
               </script>
             {%- endif -%}
             {%- if section.settings.show_promo_banner and section.settings.promo_banner_title != blank and lt_show_packages == false -%}
-              <div class="lt-promo-banner" role="note"{% if section.settings.promo_banner_bw_only %} data-lt-bw-only{% endif %}>
+              {%- comment -%} bw_gift_enable heisst: dieser Banner bewirbt das Geschenk der
+                  Black Week, und das endet am Do 26.11.2026 (Phase 1). Ab Fr 27.11. steht an
+                  seiner Stelle der Code-Banner aus snippets/lt-bw-code-banner.liquid. {%- endcomment -%}
+              <div class="lt-promo-banner" role="note"{% if section.settings.promo_banner_bw_only %} data-lt-bw-only{% endif %}{% if section.settings.bw_gift_enable %} data-lt-bw-p1-only{% endif %}>
                 <span class="lt-promo-banner__tag">{{ section.settings.promo_banner_tag | default: 'Aktion' | escape }}</span>
                 <span class="lt-promo-banner__text">
                   <span class="lt-promo-banner__title">{{ section.settings.promo_banner_title | escape }}</span>
@@ -1096,6 +1099,9 @@
               </div>
               {{ lt_promo_countdown_script }}
             {%- endif -%}
+            {%- unless lt_show_packages -%}
+              {%- render 'lt-bw-code-banner', product: product, countdown_script: lt_promo_countdown_script -%}
+            {%- endunless -%}
             {%- liquid
               assign lt_show_sizes = false
               if section.settings.show_size_selector and product.variants.size > 1
@@ -1868,6 +1874,7 @@
               <p
                 class="lt-bw-gift"
                 data-lt-bw-only
+                data-lt-bw-p1-only
                 data-lt-bw-gift
                 data-gift-id="{{ product.variants.first.id }}"
                 data-gift-buy="{{ lt_bw_gift_buy }}"
@@ -3319,9 +3326,12 @@
     // kleinste Größe schon im Korb, kommt keine zweite dazu. Außerhalb des Zeitfensters
     // (window.LTBlackWeek.on) ist der Block tot. Steht NACH dem Zusatzartikel-Hook, weil
     // beide am selben Submit hängen und dieser hier dessen items[] fortschreibt.
+    // Seit 24.11.2026 endet das Geschenk am Do 26.11. 23:59:59 (Shopify-Rabatt). Ab Phase 2
+    // (window.LTBlackWeek.p2, Fr 27.11. 00:00) legt das Skript nichts mehr dazu, sonst
+    // stünden die 30 g zum vollen Preis im Korb.
     const bwGift = section.querySelector('[data-lt-bw-gift]');
     const bwForm = section.querySelector('form[data-type="add-to-cart-form"]');
-    if (bwGift && bwForm && window.LTBlackWeek && window.LTBlackWeek.on) {
+    if (bwGift && bwForm && window.LTBlackWeek && window.LTBlackWeek.on && !window.LTBlackWeek.p2) {
       const bwGiftId = bwGift.dataset.giftId;
       const bwBuy = (bwGift.dataset.giftBuy || '').split(',').filter(Boolean);
       let bwGiftInCart = false;
@@ -3346,7 +3356,7 @@
 
       bwForm.addEventListener('submit', function () {
         const s = bwState();
-        if (!window.LTBlackWeek.on || !s.qualifies || bwGiftInCart) return;
+        if (!window.LTBlackWeek.on || window.LTBlackWeek.p2 || !s.qualifies || bwGiftInCart) return;
         const has = name => !!bwForm.querySelector('input[type="hidden"][name="' + name + '"]');
         const extra = [];
         const put = (name, value) => {

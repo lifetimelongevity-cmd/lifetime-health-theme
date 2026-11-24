@@ -1,24 +1,31 @@
 {%- comment -%}
-  Black Week 2026: Zeile für die Ankündigungsleiste (10.11.2026).
+  Black Week 2026: Zeile für die Ankündigungsleiste (10.11.2026, zwei Phasen seit 24.11.).
   Wird von snippets/lt-black-week.liquid in ein <template> gerendert und während der
-  Aktion per Skript in den ersten Eintrag der Leiste gesetzt. Auf den zwei
-  Aktions-Produktseiten nennt sie das Angebot, sonst führt sie zum Katalog
-  (bis 24.11. zur Sammelseite /pages/black-week, die nie veröffentlicht war: 404).
-  Kurz halten, die Leiste ist mobil einzeilig.
+  Aktion per Skript in den ersten Eintrag der Leiste gesetzt.
+  Phase 1 (bis Do 26.11. 23:59): NMN-Geschenk auf der NMN-Seite, sonst Link zum Katalog.
+  Phase 2 (ab Fr 27.11. 00:00): Code BLACK40, 40 % auf Nährstoffe, NMN und Bundles.
+  Die Testseite nennt in beiden Phasen den Code BLACKFRIDAY. Welche Phase gilt, schaltet
+  data-lt-bw-p1-only / data-lt-bw-p2-only (CSS in lt-black-week.liquid).
+  Der Link führt zum Katalog (bis 24.11. zur Sammelseite /pages/black-week, die nie
+  veröffentlicht war: 404). Kurz halten, die Leiste ist mobil einzeilig.
 {%- endcomment -%}
 {%- liquid
-  assign bw_bar_text = 'Black Week bis 30.11. · Zu den Angeboten'
   assign bw_bar_url = '/collections/all'
+  assign bw_bar_p1 = 'Black Week bis 30.11. · Zu den Angeboten'
+  assign bw_bar_p2 = '40 % auf Supplements und NMN · Code BLACK40'
+  assign bw_bar_linked = true
   if product.handle == 'lifetime-nmn'
-    assign bw_bar_text = 'Black Week: 30 g NMN geschenkt · bis 30.11.'
-    assign bw_bar_url = blank
+    assign bw_bar_p1 = 'Black Week: 30 g NMN geschenkt · bis Do 26.11.'
+    assign bw_bar_p2 = '40 % auf NMN mit Code BLACK40 · bis 30.11.'
+    assign bw_bar_linked = false
   elsif product.handle == 'lifetime-age-dna'
-    assign bw_bar_text = 'Test: 50 € Rabatt mit Code BLACKFRIDAY · bis 30.11.'
-    assign bw_bar_url = blank
+    assign bw_bar_p1 = 'Test: 50 € Rabatt mit Code BLACKFRIDAY · bis 30.11.'
+    assign bw_bar_p2 = bw_bar_p1
+    assign bw_bar_linked = false
   endif
 -%}
-{%- if bw_bar_url != blank -%}
-  <a href="{{ bw_bar_url }}">{{ bw_bar_text | escape }}</a>
+{%- if bw_bar_linked -%}
+  <a href="{{ bw_bar_url }}"><span data-lt-bw-p1-only>{{ bw_bar_p1 | escape }}</span><span data-lt-bw-p2-only>{{ bw_bar_p2 | escape }}</span></a>
 {%- else -%}
-  {{- bw_bar_text | escape -}}
+  <span data-lt-bw-p1-only>{{ bw_bar_p1 | escape }}</span><span data-lt-bw-p2-only>{{ bw_bar_p2 | escape }}</span>
 {%- endif -%}

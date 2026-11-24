@@ -1,0 +1,33 @@
+{%- comment -%}
+  Black Friday 2026, Phase 2 (Fr 27.11. 00:00 bis Mo 30.11. 23:59:59): Banner mit dem Code
+  BLACK40 in der Kaufzone von lt-pdp-hero. Erscheint genau auf den Produkten, für die der
+  Shopify-Code gilt (DiscountCodeNode/2418603196791: Kollektionen naehrstoffe, nmn, bundles),
+  deshalb hängt er an den Kollektionen und nicht an einem Template-Setting.
+  Sichtbar nur in Phase 2 (data-lt-bw-only + data-lt-bw-p2-only, Zeitschaltung in
+  snippets/lt-black-week.liquid). Die Frist ist das endsAt des Codes, also echt.
+  Nach der Aktion: Snippet und render-Zeile in sections/lt-pdp-hero.liquid entfernen.
+
+  Erwartet: product, countdown_script (das Countdown-Skript der Section, muss direkt
+  hinter dem Banner stehen).
+{%- endcomment -%}
+{%- liquid
+  assign bw_code_show = false
+  for bw_collection in product.collections
+    if bw_collection.handle == 'naehrstoffe' or bw_collection.handle == 'nmn' or bw_collection.handle == 'bundles'
+      assign bw_code_show = true
+    endif
+  endfor
+-%}
+{%- if bw_code_show -%}
+  <div class="lt-promo-banner" role="note" data-lt-bw-only data-lt-bw-p2-only>
+    <span class="lt-promo-banner__tag">Black Friday</span>
+    <span class="lt-promo-banner__text">
+      <span class="lt-promo-banner__title">40 % mit Code BLACK40</span>
+      <span class="lt-promo-banner__note">Code an der Kasse eingeben.</span>
+      <span class="lt-promo-banner__timer" data-lt-promo-deadline="2026-11-30T23:59:59+01:00" hidden>
+        Endet in <strong data-lt-promo-countdown>–</strong>
+      </span>
+    </span>
+  </div>
+  {{ countdown_script }}
+{%- endif -%}

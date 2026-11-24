@@ -1,10 +1,16 @@
 {%- comment -%}
   Black Week 2026, zentrale Zeitschaltung (10.11.2026).
 
-  Ein Ort für die drei Zeitpunkte. Sie müssen zum endsAt der Shopify-Rabatte passen:
-  automatischer Rabatt „Black Week: 30 g NMN gratis“ (22.11. 18:00 bis 30.11. 23:59:59)
-  und seit 24.11. der Code BLACKFRIDAY (50 € auf den AGE & DNA-Test, bis 30.11. 23:59:59).
+  Ein Ort für die Zeitpunkte. Sie müssen zu startsAt und endsAt der Shopify-Rabatte passen
+  (Stand BJ 24.11.2026):
+  - „Black Week: 30 g NMN gratis“ (automatisch): 22.11. 18:00 bis Do 26.11. 23:59:59.
+  - Code BLACK40, 40 % auf Nährstoffe, NMN und Bundles: Fr 27.11. 00:00 bis 30.11. 23:59:59.
+  - Code BLACKFRIDAY, 50 € auf den AGE & DNA-Test: seit 24.11. bis 30.11. 23:59:59.
   Den automatischen 96-€-Rabatt auf den Test gibt es seit 24.11.2026 nicht mehr.
+
+  Zwei Phasen: bis P2 (Fr 27.11. 00:00) das NMN-Geschenk, ab P2 der 40-%-Code. Ab P2 trägt
+  html zusätzlich data-lt-bw-p2. Elemente mit data-lt-bw-p1-only verschwinden dann,
+  Elemente mit data-lt-bw-p2-only sind nur in Phase 2 sichtbar.
 
   Setzt html[data-lt-bw] auf before, on oder after:
   - on gilt öffentlich ab START, mit ?bw=1 (Link aus der Frühzugangs-Mail) schon ab EARLY.
@@ -14,7 +20,7 @@
   also vorher live gehen. Die Rabatte selbst erzwingt Shopify, nicht dieses Skript.
 
   Test vor dem Start: nur auf einem nicht veröffentlichten Theme schaltet ?bw=test
-  die Aktion an (die Kasse rechnet den Rabatt dann noch nicht).
+  die Aktion an (die Kasse rechnet den Rabatt dann noch nicht), ?bw=p2 zusätzlich Phase 2.
 
   Nach der Aktion: die render-Zeile in layout/theme.liquid entfernen.
 {%- endcomment -%}
@@ -22,24 +28,33 @@
   (function () {
     var EARLY = Date.parse('2026-11-22T18:00:00+01:00');
     var START = Date.parse('2026-11-23T00:00:00+01:00');
+    var P2 = Date.parse('2026-11-27T00:00:00+01:00');
     var END = Date.parse('2026-11-30T23:59:59+01:00');
     var DEV = {{ theme.role | json }} !== 'main';
     var now = Date.now();
     var early = false;
     var test = false;
+    var testP2 = false;
     try {
       if (/[?&]bw=1(?:&|$)/.test(location.search)) localStorage.setItem('lt_bw', '1');
       early = localStorage.getItem('lt_bw') === '1';
       if (DEV) {
         if (/[?&]bw=test(?:&|$)/.test(location.search)) sessionStorage.setItem('lt_bw_test', '1');
+        if (/[?&]bw=p2(?:&|$)/.test(location.search)) {
+          sessionStorage.setItem('lt_bw_test', '1');
+          sessionStorage.setItem('lt_bw_p2', '1');
+        }
         test = sessionStorage.getItem('lt_bw_test') === '1';
+        testP2 = sessionStorage.getItem('lt_bw_p2') === '1';
       }
     } catch (e) {}
     var on = test || (now < END && (now >= START || (early && now >= EARLY)));
     var phase = on ? 'on' : now >= END ? 'after' : 'before';
     var root = document.documentElement;
     root.setAttribute('data-lt-bw', phase);
-    window.LTBlackWeek = { on: on, phase: phase, end: END };
+    var p2 = on && (testP2 || now >= P2);
+    if (p2) root.setAttribute('data-lt-bw-p2', '');
+    window.LTBlackWeek = { on: on, phase: phase, end: END, p2: p2 };
     // Ankündigungsleiste: während der Aktion ersetzt die Aktionszeile den Standardtext des
     // ersten Eintrags. Per Skript statt in sections/announcement-bar.liquid, damit die
     // Combine-Section unangetastet bleibt. Der Text kommt aus snippets/lt-black-week-bar.liquid.
@@ -63,10 +78,20 @@
         bar(true);
       }
     }
+    // Seite bleibt über Mitternacht offen: Phase 2 beginnt, ohne dass jemand neu lädt.
+    if (on && !test && !p2 && P2 - now < 2147483647) {
+      window.setTimeout(function () {
+        if (!window.LTBlackWeek.on) return;
+        root.setAttribute('data-lt-bw-p2', '');
+        window.LTBlackWeek.p2 = true;
+      }, P2 - now);
+    }
     if (on && !test && END - now < 2147483647) {
       window.setTimeout(function () {
         root.setAttribute('data-lt-bw', 'after');
+        root.removeAttribute('data-lt-bw-p2');
         window.LTBlackWeek.on = false;
+        window.LTBlackWeek.p2 = false;
         window.LTBlackWeek.phase = 'after';
         bar(false);
       }, END - now);
@@ -77,4 +102,6 @@
 <style>
   html:not([data-lt-bw='on']) [data-lt-bw-only] { display: none !important; }
   html[data-lt-bw='on'] [data-lt-bw-hide] { display: none !important; }
+  html[data-lt-bw-p2] [data-lt-bw-p1-only] { display: none !important; }
+  html:not([data-lt-bw-p2]) [data-lt-bw-p2-only] { display: none !important; }
 </style>
