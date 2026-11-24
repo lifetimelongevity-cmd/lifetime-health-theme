@@ -1,5 +1,5 @@
 /* ERZEUGT von docs/pilotpraxis/bauen.py aus docs/pilotpraxis/pilotpraxis-v2.js. Nicht von Hand ändern.
-   Pruefsumme: 4a2419b946a7a8655a7ec7ce716fc159cd7610d6d705d93a930b20a00481d1e9 */
+   Pruefsumme: e8b26c0fb5a2105dc1a8ce6858ceb4ebc2b91a1e6a846ab1a63edb771c5379b3 */
 /* Pilotpraxis-Verkaufsseite, Fassung 2 (VSL-Aufbau, 23.11.2026). Quelle: docs/pilotpraxis/pilotpraxis-v2.js
    Wird im <head> ohne defer geladen: setzt Zustand und Schalter, bevor die Seite malt.
 
@@ -283,11 +283,12 @@ window.PP_KONFIG = {
   function video() {
     var box = document.querySelector('[data-pp-vsl]');
     if (!box) return;
-    var quelle = F.video45 || F.videoHoch;
+    var v = box.querySelector('video');
+    // Quelle: Adresse aus der Konfiguration (Shopify-Dateien), sonst die Datei, die mit dem Theme mitreist (data-src am <video>)
+    var quelle = F.video45 || F.videoHoch || v.getAttribute('data-src') || '';
     if (!quelle) return;
     box.classList.add('pp-vsl--video');
-    if (!F.video45) box.classList.add('pp-vsl--hoch');
-    var v = box.querySelector('video');
+    if (!F.video45 && quelle === F.videoHoch) box.classList.add('pp-vsl--hoch');
     v.muted = true;
     v.setAttribute('muted', '');
     v.setAttribute('playsinline', '');

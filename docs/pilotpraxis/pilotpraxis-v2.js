@@ -281,11 +281,12 @@ window.PP_KONFIG = {
   function video() {
     var box = document.querySelector('[data-pp-vsl]');
     if (!box) return;
-    var quelle = F.video45 || F.videoHoch;
+    var v = box.querySelector('video');
+    // Quelle: Adresse aus der Konfiguration (Shopify-Dateien), sonst die Datei, die mit dem Theme mitreist (data-src am <video>)
+    var quelle = F.video45 || F.videoHoch || v.getAttribute('data-src') || '';
     if (!quelle) return;
     box.classList.add('pp-vsl--video');
-    if (!F.video45) box.classList.add('pp-vsl--hoch');
-    var v = box.querySelector('video');
+    if (!F.video45 && quelle === F.videoHoch) box.classList.add('pp-vsl--hoch');
     v.muted = true;
     v.setAttribute('muted', '');
     v.setAttribute('playsinline', '');
