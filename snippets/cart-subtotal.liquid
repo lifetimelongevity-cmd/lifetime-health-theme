@@ -12,9 +12,50 @@
 
   {%- liquid
     if settings.show_currency_codes
-      assign iso_code = localization.country.currency.iso_code | prepend: ' ' 
+      assign iso_code = localization.country.currency.iso_code | prepend: ' '
     endif
   -%}
+
+  {%- comment -%}
+    Black Friday 2026 (BJ 26.11.2026), nur Fr 27.11. bis Mo 30.11.: Hinweis auf die nächste
+    Stufe der Staffel (20 % auf ein Produkt, 30 % ab zwei, 40 % ab drei). Gezählt werden die
+    Stücke aus den Kollektionen, für die die drei automatischen Rabatte gelten. Sichtbar
+    schaltet ihn das CSS in snippets/lt-black-week.liquid (Phase 2), die Uhr füllt dessen
+    Skript. Nach der Aktion: diesen Block entfernen.
+  {%- endcomment -%}
+  {%- liquid
+    assign bw_korb_n = 0
+    for bw_item in cart.items
+      assign bw_korb_hit = false
+      for bw_c in bw_item.product.collections
+        if bw_c.handle == 'naehrstoffe' or bw_c.handle == 'nmn' or bw_c.handle == 'bundles'
+          assign bw_korb_hit = true
+        endif
+      endfor
+      if bw_korb_hit
+        assign bw_korb_n = bw_korb_n | plus: bw_item.quantity
+      endif
+    endfor
+  -%}
+  {%- if bw_korb_n > 0 -%}
+    <div class="lt-bw-korb" role="note" style="display:none">
+      <p class="lt-bw-korb__text">
+        {%- if bw_korb_n == 1 -%}
+          <strong>20&nbsp;% Black-Friday-Rabatt</strong> sind drin. Noch 1 Produkt, dann sind es <strong>30&nbsp;%</strong> auf alles.
+        {%- elsif bw_korb_n == 2 -%}
+          <strong>30&nbsp;% Black-Friday-Rabatt</strong> sind drin. Noch 1 Produkt, dann sind es <strong>40&nbsp;%</strong> auf alles.
+        {%- else -%}
+          <strong>40&nbsp;% Black-Friday-Rabatt</strong> sind drin. Das ist die höchste Stufe.
+        {%- endif -%}
+      </p>
+      <div class="lt-bw-korb__stufen" aria-hidden="true">
+        <span class="is-an"></span>
+        <span{% if bw_korb_n >= 2 %} class="is-an"{% endif %}></span>
+        <span{% if bw_korb_n >= 3 %} class="is-an"{% endif %}></span>
+      </div>
+      <p class="lt-bw-korb__uhr">Endet in <span class="lt-bw-clock" data-lt-bw-clock></span></p>
+    </div>
+  {%- endif -%}
 
 	{%- if type == 'page' -%}
 

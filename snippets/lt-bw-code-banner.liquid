@@ -7,10 +7,16 @@
   bundles), deshalb hängt er an den Kollektionen und nicht an einem Template-Setting.
   Sichtbar nur in Phase 2 (data-lt-bw-only + data-lt-bw-p2-only, Zeitschaltung in
   snippets/lt-black-week.liquid). Die Frist ist das endsAt der Rabatte, also echt.
+
+  BJ 26.11.2026 nachmittags: „Das muss auffällig sein“. Deshalb dunkler Block mit den drei
+  Stufen als Kacheln und laufender Uhr. Die Uhr füllt das zentrale Skript in
+  snippets/lt-black-week.liquid ([data-lt-bw-clock]), nicht mehr das Countdown-Skript der
+  Section. Knappheit wird nicht behauptet: Der Bestand ist nicht begrenzt, begrenzt ist
+  nur die Zeit.
+
   Nach der Aktion: Snippet und render-Zeile in sections/lt-pdp-hero.liquid entfernen.
 
-  Erwartet: product, countdown_script (das Countdown-Skript der Section, muss direkt
-  hinter dem Banner stehen).
+  Erwartet: product. countdown_script wird noch übergeben, aber nicht mehr gebraucht.
 {%- endcomment -%}
 {%- liquid
   assign bw_code_show = false
@@ -21,15 +27,61 @@
   endfor
 -%}
 {%- if bw_code_show -%}
-  <div class="lt-promo-banner" role="note" data-lt-bw-only data-lt-bw-p2-only>
-    <span class="lt-promo-banner__tag">Black Friday</span>
-    <span class="lt-promo-banner__text">
-      <span class="lt-promo-banner__title">20 % · ab 2 Produkten 30 % · ab 3 Produkten 40 %</span>
-      <span class="lt-promo-banner__note">Frei kombinierbar. Der Rabatt zieht sich im Warenkorb von selbst ab.</span>
-      <span class="lt-promo-banner__timer" data-lt-promo-deadline="2026-11-30T23:59:59+01:00" hidden>
-        Endet in <strong data-lt-promo-countdown>–</strong>
-      </span>
-    </span>
+  <div class="lt-bw-staffel" role="note" data-lt-bw-only data-lt-bw-p2-only>
+    <div class="lt-bw-staffel__kopf">
+      <span class="lt-bw-staffel__tag">Black Friday</span>
+      <span class="lt-bw-staffel__frist">Nur bis Montag, 23:59 Uhr</span>
+    </div>
+    <p class="lt-bw-staffel__titel">Je mehr du nimmst, desto mehr sparst du</p>
+    <ol class="lt-bw-staffel__stufen">
+      <li class="lt-bw-staffel__stufe"><b>20&nbsp;%</b><span>1 Produkt</span></li>
+      <li class="lt-bw-staffel__stufe"><b>30&nbsp;%</b><span>2 Produkte</span></li>
+      <li class="lt-bw-staffel__stufe lt-bw-staffel__stufe--top"><b>40&nbsp;%</b><span>ab 3 Produkten</span></li>
+    </ol>
+    <p class="lt-bw-staffel__uhr">Endet in <span class="lt-bw-clock" data-lt-bw-clock></span></p>
+    <p class="lt-bw-staffel__note">Frei kombinierbar, auch dreimal dasselbe. Der Rabatt zieht sich im Warenkorb von selbst ab.</p>
   </div>
-  {{ countdown_script }}
+  <style>
+    .lt-bw-staffel {
+      margin: var(--space-4, 16px) 0;
+      padding: 18px 18px 16px;
+      border-radius: var(--radius-md, 12px);
+      background: var(--color-dark, #364f56);
+      color: var(--color-paper, #f7f7f4);
+      font-family: var(--font-body);
+    }
+    .lt-bw-staffel__kopf { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; }
+    .lt-bw-staffel__tag {
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: var(--color-teal, #65c0b6);
+      color: var(--color-ink, #26251e);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      line-height: 1;
+    }
+    .lt-bw-staffel__frist { font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.2; }
+    .lt-bw-staffel__titel { margin: 14px 0 12px; font-family: var(--font-heading); font-size: 20px; line-height: 1.2; color: inherit; }
+    .lt-bw-staffel__stufen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0; padding: 0; list-style: none; }
+    .lt-bw-staffel__stufe {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      margin: 0;
+      padding: 12px 4px 10px;
+      border: 1px solid rgba(247, 247, 244, 0.28);
+      border-radius: var(--radius-sm, 8px);
+      text-align: center;
+    }
+    .lt-bw-staffel__stufe b { font-family: var(--font-heading); font-size: 28px; font-weight: 500; line-height: 1; color: var(--color-teal, #65c0b6); white-space: nowrap; }
+    .lt-bw-staffel__stufe span { font-size: 12px; line-height: 1.25; }
+    .lt-bw-staffel__stufe--top { background: var(--color-teal, #65c0b6); border-color: var(--color-teal, #65c0b6); color: var(--color-ink, #26251e); }
+    .lt-bw-staffel__stufe--top b { color: var(--color-ink, #26251e); }
+    .lt-bw-staffel__stufe--top span { font-weight: 700; }
+    .lt-bw-staffel__uhr { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin: 14px 0 0; font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: inherit; }
+    .lt-bw-staffel__note { margin: 10px 0 0; font-size: 12px; line-height: 1.45; color: inherit; opacity: 0.82; }
+  </style>
 {%- endif -%}

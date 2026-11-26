@@ -5,16 +5,21 @@
   Phase 1 (bis Do 26.11. 23:59): NMN-Geschenk auf der NMN-Seite, sonst Link zum Katalog.
   Phase 2 (ab Fr 27.11. 00:00): Staffel ohne Code auf Nährstoffe, NMN und Bundles,
   20 % auf ein Produkt, 30 % ab zwei, 40 % ab drei (BJ 26.11.2026, ersetzt den Code BLACK40).
+  In Phase 2 läuft in der Leiste die Uhr auf das echte Ende (30.11. 23:59:59), BJ 26.11.:
+  „Das muss auffällig sein“. Die Uhr füllt das Skript in lt-black-week.liquid
+  ([data-lt-bw-clock]). Mobil steht die kurze Fassung, ab 750 px die lange.
   Die Testseite nennt in beiden Phasen den Code BLACKFRIDAY. Welche Phase gilt, schaltet
   data-lt-bw-p1-only / data-lt-bw-p2-only (CSS in lt-black-week.liquid).
   Der Link führt zum Katalog (bis 24.11. zur Sammelseite /pages/black-week, die nie
-  veröffentlicht war: 404). Kurz halten, die Leiste ist mobil einzeilig.
+  veröffentlicht war: 404).
 {%- endcomment -%}
 {%- liquid
   assign bw_bar_url = '/collections/all'
   assign bw_bar_p1 = 'Black Week bis 30.11. · Zu den Angeboten'
   assign bw_bar_p2 = 'Bis zu 40 % auf Supplements und auch auf NMN'
+  assign bw_bar_p2_kurz = 'Bis zu 40 %'
   assign bw_bar_linked = true
+  assign bw_bar_clock = true
   if product.handle == 'lifetime-nmn'
     assign bw_bar_p1 = 'Black Week: 30 g NMN geschenkt · bis Do 26.11.'
     assign bw_bar_p2 = '20 % auf NMN · 30 % ab 2 · 40 % ab 3 Produkten'
@@ -22,11 +27,26 @@
   elsif product.handle == 'lifetime-age-dna'
     assign bw_bar_p1 = 'Test: 50 € Rabatt mit Code BLACKFRIDAY · bis 30.11.'
     assign bw_bar_p2 = bw_bar_p1
+    assign bw_bar_p2_kurz = bw_bar_p1
     assign bw_bar_linked = false
+    assign bw_bar_clock = false
   endif
 -%}
+{%- capture bw_bar_inner -%}
+  <span data-lt-bw-p1-only>{{ bw_bar_p1 | escape }}</span>
+  <span class="lt-bw-bar" data-lt-bw-p2-only>
+    {%- if bw_bar_clock -%}
+      <strong class="lt-bw-bar__tag">Black Friday</strong>
+      <span class="lt-bw-bar__lang">{{ bw_bar_p2 | escape }}</span>
+      <span class="lt-bw-bar__kurz">{{ bw_bar_p2_kurz | escape }}</span>
+      <span class="lt-bw-clock lt-bw-clock--bar" data-lt-bw-clock></span>
+    {%- else -%}
+      {{ bw_bar_p2 | escape }}
+    {%- endif -%}
+  </span>
+{%- endcapture -%}
 {%- if bw_bar_linked -%}
-  <a href="{{ bw_bar_url }}"><span data-lt-bw-p1-only>{{ bw_bar_p1 | escape }}</span><span data-lt-bw-p2-only>{{ bw_bar_p2 | escape }}</span></a>
+  <a href="{{ bw_bar_url }}">{{ bw_bar_inner }}</a>
 {%- else -%}
-  <span data-lt-bw-p1-only>{{ bw_bar_p1 | escape }}</span><span data-lt-bw-p2-only>{{ bw_bar_p2 | escape }}</span>
+  {{ bw_bar_inner }}
 {%- endif -%}

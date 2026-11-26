@@ -98,6 +98,28 @@
         bar(false);
       }, END - now);
     }
+    // Laufende Uhr auf das echte Ende (endsAt der Shopify-Rabatte). Füllt jedes
+    // [data-lt-bw-clock], auch solche, die erst später in die Seite kommen (Leiste,
+    // neu gerenderter Warenkorb). Nach dem Ende bleibt nichts stehen: die Elemente
+    // hängen an data-lt-bw-only und verschwinden mit der Phase.
+    function pad(n) { return n < 10 ? '0' + n : '' + n; }
+    function clock() {
+      if (!window.LTBlackWeek.on) return;
+      var diff = END - Date.now();
+      if (diff <= 0) return;
+      var d = Math.floor(diff / 86400000);
+      var h = Math.floor((diff % 86400000) / 3600000);
+      var m = Math.floor((diff % 3600000) / 60000);
+      var s = Math.floor((diff % 60000) / 1000);
+      var html = (d > 0 ? '<b>' + d + '</b><i>' + (d === 1 ? 'Tag' : 'Tage') + '</i>' : '')
+        + '<b>' + pad(h) + '</b><i>Std</i><b>' + pad(m) + '</b><i>Min</i><b>' + pad(s) + '</b><i>Sek</i>';
+      var els = document.querySelectorAll('[data-lt-bw-clock]');
+      for (var i = 0; i < els.length; i++) els[i].innerHTML = html;
+    }
+    if (on) {
+      clock();
+      window.setInterval(clock, 1000);
+    }
   })();
 </script>
 <template id="lt-bw-bar">{%- render 'lt-black-week-bar' -%}</template>
@@ -106,4 +128,44 @@
   html[data-lt-bw='on'] [data-lt-bw-hide] { display: none !important; }
   html[data-lt-bw-p2] [data-lt-bw-p1-only] { display: none !important; }
   html:not([data-lt-bw-p2]) [data-lt-bw-p2-only] { display: none !important; }
+
+  /* Uhr: Zahl in Mint, Einheit klein dahinter (wie die Fristleiste der Pilotpraxis-Seite) */
+  .lt-bw-clock { display: inline-flex; align-items: baseline; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .lt-bw-clock b { font-family: var(--font-heading); font-size: 22px; font-weight: 500; line-height: 1; color: var(--color-teal, #65c0b6); min-width: 1.2em; text-align: right; }
+  .lt-bw-clock i { margin: 0 9px 0 4px; font-size: 11px; font-style: normal; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; line-height: 1; opacity: 0.8; }
+  .lt-bw-clock i:last-child { margin-right: 0; }
+
+  /* Leiste in Phase 2 */
+  .lt-bw-bar { display: inline-flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 2px 12px; }
+  .lt-bw-bar__tag { font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+  .lt-bw-bar__lang { display: none; }
+  .lt-bw-clock--bar b { font-size: 18px; }
+  .lt-bw-clock--bar i { margin-right: 7px; font-size: 10px; }
+  @media (min-width: 750px) {
+    .lt-bw-bar__lang { display: inline; }
+    .lt-bw-bar__kurz { display: none; }
+    .lt-bw-clock--bar b { font-size: 22px; }
+  }
+  @media (min-width: 990px) {
+    .lt-bw-bar { flex-wrap: nowrap; white-space: nowrap; gap: 0 16px; }
+  }
+  @media (max-width: 400px) {
+    .lt-bw-bar__tag { letter-spacing: 0.04em; }
+    .lt-bw-clock--bar b { font-size: 16px; min-width: 1.1em; }
+    .lt-bw-clock--bar i { margin: 0 5px 0 3px; }
+  }
+
+  /* Warenkorb: Hinweis auf die nächste Stufe (snippets/cart-subtotal.liquid). Steht per
+     Inline-Style auf display:none und wird nur in Phase 2 eingeblendet, damit Layouts ohne
+     dieses Snippet ihn nie zeigen. */
+  html[data-lt-bw='on'][data-lt-bw-p2] .lt-bw-korb { display: block !important; }
+  .lt-bw-korb { margin: 0 0 14px; padding: 14px 14px 12px; border-radius: var(--radius-md, 12px); background: var(--color-dark, #364f56); color: var(--color-paper, #f7f7f4); font-family: var(--font-body); }
+  .lt-bw-korb__text { margin: 0; font-size: 14px; line-height: 1.4; color: inherit; }
+  .lt-bw-korb__text strong { color: var(--color-teal, #65c0b6); }
+  .lt-bw-korb__stufen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; margin: 10px 0 0; }
+  .lt-bw-korb__stufen span { height: 6px; border-radius: 999px; background: rgba(247, 247, 244, 0.25); }
+  .lt-bw-korb__stufen span.is-an { background: var(--color-teal, #65c0b6); }
+  .lt-bw-korb__uhr { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; margin: 10px 0 0; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: inherit; }
+  .lt-bw-korb .lt-bw-clock b { font-size: 16px; }
+  .lt-bw-korb .lt-bw-clock i { font-size: 10px; margin-right: 6px; }
 </style>
