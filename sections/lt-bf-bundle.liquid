@@ -713,7 +713,9 @@
           if (!v) return;
           var pid = v.produkt.id;
           if (alsAuswahl) {
-            if (!jeProdukt[pid] || z.quantity > jeProdukt[pid].quantity) jeProdukt[pid] = z;
+            // bei gleicher Menge gewinnt die teurere Größe (ein geschenktes 30-g-NMN soll nicht die Auswahl werden)
+            var alt = jeProdukt[pid];
+            if (!alt || z.quantity > alt.quantity || (z.quantity === alt.quantity && v.preis > self.nachVariante[alt.variant_id].preis)) jeProdukt[pid] = z;
           } else if (self.aktiv[pid] === v.id && !jeProdukt[pid]) {
             jeProdukt[pid] = z;
           }
