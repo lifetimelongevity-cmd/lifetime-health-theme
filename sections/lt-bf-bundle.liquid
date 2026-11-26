@@ -33,8 +33,9 @@
   endcapture
   assign bfb_ship = bfb_ship | split: '|'
   assign bfb_rabatt_kollektionen = 'naehrstoffe,nmn,bundles' | split: ','
-  assign bfb_heading = section.settings.heading | default: '40 % Rabatt ab 3 Produkten.'
-  assign bfb_sub = section.settings.subheading | default: 'Nur bis Montag.'
+  assign bfb_zahl = section.settings.zahl | default: '−40 %'
+  assign bfb_heading = section.settings.heading | default: 'ab 3 Produkten!'
+  assign bfb_sub = section.settings.subheading | default: 'Auf alle Supplements und auch auf NMN.'
   assign bfb_karte_nr = 0
 -%}
 
@@ -68,28 +69,36 @@
     </div>
 
     <div class="lt-bfb__an">
-      {%- render 'section-heading-crs',
-        heading: bfb_heading,
-        subheading: bfb_sub,
-        heading_tag: 'h1',
-        headline_lg: true,
-        extra_class: 'lt-bfb__kopf'
-      -%}
+      {%- comment -%}
+        Kopf als Deal-Block (BJ 26.11.2026: „zu wenig Action“, Überschrift und Unterzeile
+        sollen den Deal laut sagen). Riesige Zahl, Zeile mit Ausrufezeichen, laufende Uhr.
+        Bewusst eigenes Überschriften-Markup statt section-heading-crs: die Zahl ist das
+        eine dominante Element der Seite. Alles in einer Farbe.
+      {%- endcomment -%}
+      <div class="lt-bfb__deal">
+        <div class="lt-bfb__deal-text">
+          <span class="lt-bw-staffel__tag">Black Friday Deal</span>
+          <h1 class="lt-bfb__deal-h1">
+            <span class="lt-bfb__deal-zahl">{{ bfb_zahl | escape }}</span>
+            <span class="lt-bfb__deal-zeile">{{ bfb_heading | escape }}</span>
+          </h1>
+          {%- if bfb_sub != blank -%}
+            <p class="lt-bfb__deal-sub">{{ bfb_sub | escape }}</p>
+          {%- endif -%}
+        </div>
+        <div class="lt-bfb__deal-zeit">
+          <span class="lt-bfb__deal-endet">Endet in</span>
+          <span class="lt-bw-clock lt-bfb__deal-uhr" data-lt-bw-clock></span>
+        </div>
+        <ol class="lt-bw-staffel__stufen lt-bfb__deal-stufen">
+          <li class="lt-bw-staffel__stufe" data-stufe="1"><b>20&nbsp;%</b><span>1 Produkt</span></li>
+          <li class="lt-bw-staffel__stufe" data-stufe="2"><b>30&nbsp;%</b><span>2 Produkte</span></li>
+          <li class="lt-bw-staffel__stufe" data-stufe="3"><b>40&nbsp;%</b><span>ab 3 Produkten</span></li>
+        </ol>
+      </div>
 
       <div class="lt-bfb__layout">
         <div class="lt-bfb__haupt">
-
-          <div class="lt-bw-staffel lt-bfb__staffel" role="note">
-            <div class="lt-bw-staffel__kopf">
-              <span class="lt-bw-staffel__tag">Black Friday</span>
-              <span class="lt-bw-clock" data-lt-bw-clock></span>
-            </div>
-            <ol class="lt-bw-staffel__stufen">
-              <li class="lt-bw-staffel__stufe" data-stufe="1"><b>20&nbsp;%</b><span>1 Produkt</span></li>
-              <li class="lt-bw-staffel__stufe" data-stufe="2"><b>30&nbsp;%</b><span>2 Produkte</span></li>
-              <li class="lt-bw-staffel__stufe" data-stufe="3"><b>40&nbsp;%</b><span>ab 3 Produkten</span></li>
-            </ol>
-          </div>
 
           {%- if section.blocks.size > 0 -%}
             <div class="lt-bfb__stapel">
@@ -253,10 +262,44 @@
   html[data-lt-bw='on'] .lt-bfb__aus-nach { display: none; }
   .lt-bfb__aus .lt-bfb__knopf { margin-top: var(--space-5); }
 
-  .lt-bfb__kopf { margin: 0 0 var(--space-4); }
 
   /* Stufen-Kacheln oben: leuchten mit der Auswahl */
-  .lt-bfb__staffel { margin: 0 0 var(--space-4); }
+  /* Deal-Block im Kopf */
+  .lt-bfb__deal {
+    margin: 0 0 var(--space-4);
+    padding: 20px 18px 18px;
+    border-radius: var(--radius-lg);
+    background: var(--color-dark);
+    color: var(--color-paper);
+  }
+  .lt-bfb__deal-h1 { margin: 12px 0 0; color: inherit; font-family: var(--font-heading); font-weight: 500; }
+  .lt-bfb__deal-zahl {
+    display: block;
+    font-size: clamp(84px, 27vw, 128px);
+    line-height: 0.92;
+    letter-spacing: -0.04em;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+    animation: lt-bfb-rein 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+    transform-origin: left bottom;
+  }
+  .lt-bfb__deal-zeile { display: block; margin-top: 6px; font-size: 30px; line-height: 1.1; letter-spacing: -0.01em; }
+  .lt-bfb__deal-sub { margin: 10px 0 0; font-size: 16px; line-height: 1.4; color: inherit; opacity: 0.85; }
+  .lt-bfb__deal-zeit { display: flex; flex-direction: column; gap: 6px; margin: 18px 0 0; }
+  .lt-bfb__deal-endet { font-size: 12px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; line-height: 1; opacity: 0.85; }
+  .lt-bfb .lt-bfb__deal-uhr b { font-size: 30px; }
+  .lt-bfb .lt-bfb__deal-uhr i { margin: 0 8px 0 4px; font-size: 11px; }
+  /* Die Uhr wird jede Sekunde neu gesetzt: die Sekunden blinken dabei kurz auf */
+  .lt-bfb .lt-bfb__deal-uhr b:nth-last-child(2) { animation: lt-bfb-tick 1s ease-out; }
+  .lt-bfb__deal-stufen { margin-top: 18px; }
+  @keyframes lt-bfb-rein {
+    0% { opacity: 0; transform: scale(0.7); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+  @keyframes lt-bfb-tick {
+    0% { opacity: 0.45; }
+    100% { opacity: 1; }
+  }
   .lt-bfb .lt-bw-staffel__stufe { transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease; }
   .lt-bfb .lt-bw-staffel__stufe b { color: var(--color-paper); transition: color 0.25s ease; }
   .lt-bfb .lt-bw-staffel__stufe.is-an { background: var(--color-teal); border-color: var(--color-teal); color: var(--color-ink); }
@@ -528,6 +571,8 @@
   @media (prefers-reduced-motion: reduce) {
     .lt-bfb.is-blitz [data-preis],
     .lt-bfb.is-blitz [data-gesamt] { animation: none; }
+    .lt-bfb__deal-zahl,
+    .lt-bfb .lt-bfb__deal-uhr b:nth-last-child(2) { animation: none; }
     .lt-bfb * { transition: none !important; }
   }
 
@@ -538,9 +583,16 @@
 
   @media (min-width: 990px) {
     .lt-bfb__wrap { padding: var(--space-7) var(--space-6) var(--space-8); }
-    .lt-bfb__kopf { margin-bottom: var(--space-5); }
     .lt-bfb__layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: var(--space-7); align-items: start; }
-    .lt-bfb__staffel { display: none; }
+    .lt-bfb__deal { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: var(--space-6); margin-bottom: var(--space-6); padding: 36px 40px; }
+    .lt-bfb__deal-h1 { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 28px; margin-top: 16px; }
+    .lt-bfb__deal-zahl { font-size: 168px; line-height: 0.88; }
+    .lt-bfb__deal-zeile { margin-top: 0; font-size: 52px; }
+    .lt-bfb__deal-sub { margin-top: 14px; font-size: 20px; }
+    .lt-bfb__deal-zeit { margin: 0; gap: 10px; }
+    .lt-bfb .lt-bfb__deal-uhr b { font-size: 56px; }
+    .lt-bfb .lt-bfb__deal-uhr i { margin: 0 16px 0 6px; font-size: 14px; }
+    .lt-bfb__deal-stufen { display: none; }
     .lt-bfb__stapel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 var(--space-5); padding: 0; overflow: visible; }
     .lt-bfb__stapel-karte { grid-template-columns: 1fr; gap: 6px; padding: 14px; }
     .lt-bfb__stapel-bilder { grid-row: auto; }
@@ -993,15 +1045,21 @@
   "settings": [
     {
       "type": "text",
+      "id": "zahl",
+      "label": "Große Zahl",
+      "default": "−40 %"
+    },
+    {
+      "type": "text",
       "id": "heading",
-      "label": "Überschrift",
-      "default": "40 % Rabatt ab 3 Produkten."
+      "label": "Zeile neben der Zahl",
+      "default": "ab 3 Produkten!"
     },
     {
       "type": "text",
       "id": "subheading",
       "label": "Unterzeile",
-      "default": "Nur bis Montag."
+      "default": "Auf alle Supplements und auch auf NMN."
     },
     {
       "type": "textarea",
