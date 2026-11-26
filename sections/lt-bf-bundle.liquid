@@ -1,0 +1,1042 @@
+{%- comment -%}
+  Black Friday 2026: dynamische Bundle-Seite zur Staffel (BJ 26.11.2026).
+  Template: templates/page.black-friday.json.
+
+  Die Staffel selbst kommt von Shopify (drei automatische Rabatte auf die Kollektionen
+  naehrstoffe, nmn, bundles: 20 % auf ein Stück, 30 % ab zwei, 40 % ab drei, Fr 27.11.
+  00:00 bis Mo 30.11. 23:59:59). Diese Seite rechnet sie nur vor: Stufe nach Stückzahl über
+  alle gewählten Produkte, Rabatt je Zeile gerundet, Versandschwelle nach Rabatt aus
+  snippets/lt-shipping-rule.liquid. Der Knopf gleicht den Warenkorb mit der Auswahl ab
+  (Einmalkauf) und führt zur Kasse.
+
+  Zeitschaltung: snippets/lt-black-week.liquid. Der Baukasten ist nur sichtbar, solange
+  html[data-lt-bw='on'][data-lt-bw-p2] gilt. Davor und danach steht nur ein Satz und ein
+  Knopf zum Shop, ohne Preise und ohne Versprechen. Fehlt das Zeitschaltungs-Snippet
+  (nach dem Rückbau), bleibt der Baukasten unsichtbar.
+
+  Gestaltung nach BJs Vorgabe vom 26.11.2026 (visual-first, wenig Denkaufwand): Stufen als
+  Kacheln, Preise fallen sichtbar mit jeder Stufe, laufende Uhr, kein Hilfstext. Die
+  Klassen .lt-bw-staffel und .lt-bw-clock kommen aus snippets/lt-black-week.liquid.
+  NMN erscheint nur mit Name, Größe und Preis (VSW-Vergleich: keine Dosis, keine Wirkung).
+
+  Bildstellen: keine eigenen, die Kacheln zeigen die Produktbilder aus Shopify.
+
+  Nach der Aktion: Section, Template und snippets/lt-bfb-icon.liquid entfernen, die Seite
+  in Shopify auf „verborgen“ stellen.
+{%- endcomment -%}
+{%- liquid
+  assign bfb_handles = section.settings.handles | default: 'nad-booster,lifetime-nmn,spermidin-kapseln,resveratrol-kapseln,caakg-kapseln,fisetin-kapseln,betain-tmg-kapseln,hyaluron,schlafspray-mit-melatonin,vitamin-d3-k2-spray,kreatin-monohydrat-pulver,vitamin-b-komplex-kapseln,astaxanthin-kapseln' | remove: ' ' | split: ','
+  capture bfb_ship
+    render 'lt-shipping-rule'
+  endcapture
+  assign bfb_ship = bfb_ship | split: '|'
+  assign bfb_rabatt_kollektionen = 'naehrstoffe,nmn,bundles' | split: ','
+  assign bfb_heading = section.settings.heading | default: 'Nimm 3, spar 40 %.'
+  assign bfb_sub = section.settings.subheading | default: 'Auf alle Supplements und auch auf NMN.'
+  assign bfb_karte_nr = 0
+-%}
+
+<lt-bf-bundle
+  class="lt-bfb"
+  data-symbol="{{ cart.currency.symbol | default: '€' | escape }}"
+  data-versand-kosten="{{ bfb_ship[0] | plus: 0 }}"
+  data-versand-frei="{{ bfb_ship[1] | plus: 0 }}"
+  data-vorauswahl="{{ section.settings.vorauswahl }}"
+>
+  <div class="lt-bfb__wrap">
+
+    <div class="lt-bfb__aus">
+      <div class="lt-bfb__aus-vor">
+        {%- render 'section-heading-crs',
+          heading: 'Black Friday',
+          subheading: section.settings.text_vor,
+          heading_tag: 'h2',
+          headline_lg: true
+        -%}
+      </div>
+      <div class="lt-bfb__aus-nach">
+        {%- render 'section-heading-crs',
+          heading: 'Black Friday',
+          subheading: section.settings.text_nach,
+          heading_tag: 'h2',
+          headline_lg: true
+        -%}
+      </div>
+      <a class="lt-bfb__knopf lt-bfb__knopf--hell" href="{{ routes.all_products_collection_url }}">Zum Shop</a>
+    </div>
+
+    <div class="lt-bfb__an">
+      {%- render 'section-heading-crs',
+        heading: bfb_heading,
+        subheading: bfb_sub,
+        heading_tag: 'h1',
+        headline_lg: true,
+        extra_class: 'lt-bfb__kopf'
+      -%}
+
+      <div class="lt-bfb__layout">
+        <div class="lt-bfb__haupt">
+
+          <div class="lt-bw-staffel lt-bfb__staffel" role="note">
+            <div class="lt-bw-staffel__kopf">
+              <span class="lt-bw-staffel__tag">Black Friday</span>
+              <span class="lt-bw-clock" data-lt-bw-clock></span>
+            </div>
+            <ol class="lt-bw-staffel__stufen">
+              <li class="lt-bw-staffel__stufe" data-stufe="1"><b>20&nbsp;%</b><span>1 Produkt</span></li>
+              <li class="lt-bw-staffel__stufe" data-stufe="2"><b>30&nbsp;%</b><span>2 Produkte</span></li>
+              <li class="lt-bw-staffel__stufe" data-stufe="3"><b>40&nbsp;%</b><span>ab 3 Produkten</span></li>
+            </ol>
+          </div>
+
+          {%- if section.blocks.size > 0 -%}
+            <div class="lt-bfb__stapel">
+              {%- for block in section.blocks -%}
+                {%- if block.settings.items != blank -%}
+                  <button
+                    type="button"
+                    class="lt-bfb__stapel-karte"
+                    data-stapel="{{ block.settings.items | escape }}"
+                    aria-pressed="false"
+                    hidden
+                    {{ block.shopify_attributes }}
+                  ></button>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          {%- endif -%}
+
+          <ul class="lt-bfb__grid">
+            {%- for bfb_handle in bfb_handles -%}
+              {%- assign bfb_p = all_products[bfb_handle] -%}
+              {%- if bfb_p.id != blank and bfb_p.available and bfb_p.requires_selling_plan == false -%}
+                {%- assign bfb_karte_nr = bfb_karte_nr | plus: 1 -%}
+                {%- assign bfb_v_erste = bfb_p.selected_or_first_available_variant -%}
+                <li
+                  class="lt-bfb__karte"
+                  data-karte
+                  data-pid="{{ bfb_p.id }}"
+                  data-handle="{{ bfb_p.handle | escape }}"
+                  data-titel="{{ bfb_p.title | escape }}"
+                >
+                  <script type="application/json" data-varianten>
+                    [
+                      {%- assign bfb_v_erst = true -%}
+                      {%- for bfb_v in bfb_p.variants -%}
+                        {%- if bfb_v.available -%}
+                          {%- liquid
+                            assign bfb_bezug = ''
+                            if bfb_v.unit_price_measurement
+                              if bfb_v.unit_price_measurement.reference_value != 1
+                                assign bfb_bezug = bfb_v.unit_price_measurement.reference_value | append: ' '
+                              endif
+                              assign bfb_bezug = bfb_bezug | append: bfb_v.unit_price_measurement.reference_unit
+                            endif
+                          -%}
+                          {%- unless bfb_v_erst -%},{%- endunless -%}
+                          {%- assign bfb_v_erst = false -%}
+                          {"id": {{ bfb_v.id }}, "titel": {{ bfb_v.title | json }}, "preis": {{ bfb_v.price | plus: 0 }}, "grund": {{ bfb_v.unit_price | default: 0 | plus: 0 }}, "bezug": {{ bfb_bezug | json }}}
+                        {%- endif -%}
+                      {%- endfor -%}
+                    ]
+                  </script>
+                  <div class="lt-bfb__bildrahmen">
+                    <button type="button" class="lt-bfb__bild" data-waehlen aria-label="{{ bfb_p.title | escape }} wählen">
+                      {%- if bfb_p.featured_image -%}
+                        <img
+                          src="{{ bfb_p.featured_image | image_url: width: 480 }}"
+                          srcset="{{ bfb_p.featured_image | image_url: width: 360 }} 360w, {{ bfb_p.featured_image | image_url: width: 480 }} 480w, {{ bfb_p.featured_image | image_url: width: 720 }} 720w"
+                          sizes="(min-width: 990px) 250px, 45vw"
+                          width="480"
+                          height="480"
+                          alt="{{ bfb_p.featured_image.alt | default: bfb_p.title | escape }}"
+                          loading="{% if bfb_karte_nr <= 4 %}eager{% else %}lazy{% endif %}"
+                          data-bild
+                        >
+                      {%- endif -%}
+                    </button>
+                    <span class="lt-bfb__haken" aria-hidden="true">{%- render 'lt-bfb-icon', icon: 'check' -%}</span>
+                    <a class="lt-bfb__info" href="{{ bfb_p.url }}" target="_blank" rel="noopener" aria-label="Details zu {{ bfb_p.title | escape }}">
+                      {%- render 'lt-bfb-icon', icon: 'info' -%}
+                    </a>
+                    <div class="lt-bfb__menge">
+                      <button type="button" class="lt-bfb__weniger" data-minus aria-label="Ein {{ bfb_p.title | escape }} weniger">{%- render 'lt-bfb-icon', icon: 'minus' -%}</button>
+                      <span class="lt-bfb__anzahl" data-anzahl aria-live="polite">0</span>
+                      <button type="button" class="lt-bfb__mehr" data-plus aria-label="Ein {{ bfb_p.title | escape }} mehr">{%- render 'lt-bfb-icon', icon: 'plus' -%}</button>
+                    </div>
+                  </div>
+                  <p class="lt-bfb__name">{{ bfb_p.title | escape }}</p>
+                  {%- if bfb_p.variants.size > 1 -%}
+                    <div class="lt-bfb__groessen" role="radiogroup" aria-label="Größe">
+                      {%- for bfb_v in bfb_p.variants -%}
+                        {%- if bfb_v.available -%}
+                          <button type="button" role="radio" aria-checked="false" data-variante="{{ bfb_v.id }}">{{ bfb_v.title | escape }}</button>
+                        {%- endif -%}
+                      {%- endfor -%}
+                    </div>
+                  {%- endif -%}
+                  <p class="lt-bfb__preis">
+                    <b data-preis>{{ bfb_v_erste.price | money }}</b>
+                    <s data-alt></s>
+                  </p>
+                  <p class="lt-bfb__grund" data-grund></p>
+                </li>
+              {%- endif -%}
+            {%- endfor -%}
+          </ul>
+        </div>
+
+        <aside class="lt-bfb__kasse is-leer" data-kasse aria-label="Deine Auswahl">
+          <div class="lt-bfb__kasse-kopf">
+            <span class="lt-bw-staffel__tag">Black Friday</span>
+            <span class="lt-bw-clock" data-lt-bw-clock></span>
+          </div>
+          <ol class="lt-bfb__pillen" aria-label="Rabattstufen">
+            <li data-stufe="1"><b>20&nbsp;%</b><span data-noch></span></li>
+            <li data-stufe="2"><b>30&nbsp;%</b><span data-noch></span></li>
+            <li data-stufe="3"><b>40&nbsp;%</b><span data-noch></span></li>
+          </ol>
+          <ul class="lt-bfb__liste" data-liste></ul>
+          <p class="lt-bfb__extra" data-extra hidden></p>
+          <div class="lt-bfb__summe">
+            <div class="lt-bfb__zahl" aria-live="polite">
+              <p class="lt-bfb__gesamt"><b data-gesamt></b> <s data-gesamt-alt></s></p>
+              <p class="lt-bfb__spar"><span data-spar></span><span class="lt-bfb__versand" data-versand></span></p>
+              <p class="lt-bfb__leer">Tippe Produkte an</p>
+            </div>
+            <div class="lt-bfb__los">
+              <button type="button" class="lt-bfb__knopf" data-kaufen disabled>Zur Kasse</button>
+              <span class="lt-bw-clock lt-bfb__uhr" data-lt-bw-clock></span>
+            </div>
+          </div>
+          <p class="lt-bfb__fehler" data-fehler role="alert" hidden></p>
+        </aside>
+      </div>
+    </div>
+
+  </div>
+
+  <template data-icon-truck>{%- render 'lt-bfb-icon', icon: 'truck' -%}</template>
+  <script type="application/json" data-rabatt-ids>
+    [
+      {%- for bfb_c in bfb_rabatt_kollektionen -%}
+        {%- for bfb_cp in collections[bfb_c].products -%}
+          {{ bfb_cp.id }},
+        {%- endfor -%}
+      {%- endfor -%}
+      0
+    ]
+  </script>
+</lt-bf-bundle>
+
+<style>
+  .lt-bfb {
+    display: block;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+  }
+  .lt-bfb__wrap { max-width: 1240px; margin: 0 auto; padding: var(--space-5) var(--space-4) 0; }
+  .lt-bfb [hidden] { display: none !important; }
+
+  /* Zustand: Baukasten nur, solange die Staffel läuft */
+  .lt-bfb__an { display: none; }
+  html[data-lt-bw='on'][data-lt-bw-p2] .lt-bfb__an { display: block; }
+  html[data-lt-bw='on'][data-lt-bw-p2] .lt-bfb__aus { display: none; }
+  .lt-bfb__aus { padding: var(--space-5) 0 var(--space-8); }
+  .lt-bfb__aus-vor { display: none; }
+  html[data-lt-bw='before'] .lt-bfb__aus-vor,
+  html[data-lt-bw='on'] .lt-bfb__aus-vor { display: block; }
+  html[data-lt-bw='before'] .lt-bfb__aus-nach,
+  html[data-lt-bw='on'] .lt-bfb__aus-nach { display: none; }
+  .lt-bfb__aus .lt-bfb__knopf { margin-top: var(--space-5); }
+
+  .lt-bfb__kopf { margin: 0 0 var(--space-4); }
+
+  /* Stufen-Kacheln oben: leuchten mit der Auswahl */
+  .lt-bfb__staffel { margin: 0 0 var(--space-4); }
+  .lt-bfb .lt-bw-staffel__stufe { transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease; }
+  .lt-bfb .lt-bw-staffel__stufe b { transition: color 0.25s ease; }
+  .lt-bfb .lt-bw-staffel__stufe.is-an { background: var(--color-teal); border-color: var(--color-teal); color: var(--color-ink); }
+  .lt-bfb .lt-bw-staffel__stufe.is-an b { color: var(--color-ink); }
+  .lt-bfb .lt-bw-staffel__stufe.is-an span { font-weight: 700; }
+  .lt-bfb .lt-bw-staffel__stufe.is-naechste { border-color: var(--color-teal); }
+
+  /* Fertige Stapel */
+  .lt-bfb__stapel {
+    display: flex;
+    gap: 10px;
+    margin: 0 calc(-1 * var(--space-4)) var(--space-4);
+    padding: 0 var(--space-4);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: var(--space-4);
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .lt-bfb__stapel::-webkit-scrollbar { display: none; }
+  .lt-bfb__stapel-karte {
+    flex: 0 0 74%;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 2px 12px;
+    scroll-snap-align: start;
+    margin: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-white);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  }
+  .lt-bfb__stapel-karte[aria-pressed='true'] {
+    border-color: var(--color-teal);
+    box-shadow: inset 0 0 0 1px var(--color-teal);
+    background: var(--color-benefit-bg);
+  }
+  .lt-bfb__stapel-bilder { grid-row: 1 / span 2; display: flex; }
+  .lt-bfb__stapel-bilder img {
+    width: 46px;
+    height: 46px;
+    margin-left: -14px;
+    border: 2px solid var(--color-white);
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--color-light-warm);
+  }
+  .lt-bfb__stapel-bilder img:first-child { margin-left: 0; }
+  .lt-bfb__stapel-preis { display: flex; align-items: baseline; gap: 6px; font-variant-numeric: tabular-nums; }
+  .lt-bfb__stapel-preis b { font-family: var(--font-heading); font-size: 20px; font-weight: 500; line-height: 1.1; }
+  .lt-bfb__stapel-preis s { font-size: 13px; color: var(--color-ink-muted); }
+  .lt-bfb__stapel-namen { font-size: 12px; line-height: 1.3; color: var(--color-ink-muted); }
+
+  /* Produktkacheln */
+  .lt-bfb__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 0;
+    padding: 0 0 var(--space-5);
+    list-style: none;
+  }
+  .lt-bfb__karte {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 8px 8px 12px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-md);
+    background: var(--color-white);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+  }
+  .lt-bfb__karte.is-gewaehlt {
+    border-color: var(--color-teal);
+    box-shadow: inset 0 0 0 1px var(--color-teal);
+    background: var(--color-benefit-bg);
+  }
+  .lt-bfb__bildrahmen { position: relative; }
+  .lt-bfb__bild {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: var(--color-light-warm);
+    aspect-ratio: 1;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .lt-bfb__bild img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .lt-bfb__haken {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--color-teal);
+    color: var(--color-ink);
+    font-size: 16px;
+    pointer-events: none;
+  }
+  .lt-bfb__karte.is-gewaehlt .lt-bfb__haken { display: flex; }
+  .lt-bfb__info {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    color: var(--color-ink-muted);
+    font-size: 22px;
+    text-decoration: none;
+  }
+  .lt-bfb__menge {
+    position: absolute;
+    right: 8px;
+    bottom: 8px;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    border-radius: var(--radius-full);
+    background: var(--color-dark);
+    color: var(--color-paper);
+  }
+  .lt-bfb__menge button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    font-size: 20px;
+    cursor: pointer;
+  }
+  .lt-bfb__anzahl { min-width: 18px; font-family: var(--font-heading); font-size: 17px; font-weight: 500; line-height: 1; text-align: center; font-variant-numeric: tabular-nums; }
+  .lt-bfb__karte:not(.is-gewaehlt) .lt-bfb__weniger,
+  .lt-bfb__karte:not(.is-gewaehlt) .lt-bfb__anzahl { display: none; }
+  .lt-bfb__karte.is-gewaehlt .lt-bfb__menge { background: var(--color-teal); color: var(--color-ink); }
+  .lt-bfb__name { margin: 10px 2px 0; font-size: 15px; font-weight: 700; line-height: 1.25; color: var(--color-ink); }
+  .lt-bfb__groessen { display: flex; gap: 4px; margin: 8px 0 0; }
+  .lt-bfb__groessen button {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 34px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-full);
+    background: transparent;
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 13px;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .lt-bfb__groessen button[aria-checked='true'] { border-color: var(--color-dark); background: var(--color-dark); color: var(--color-paper); font-weight: 700; }
+  .lt-bfb__preis { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; margin: auto 2px 0; padding-top: 8px; font-variant-numeric: tabular-nums; }
+  .lt-bfb__preis b { font-family: var(--font-heading); font-size: 20px; font-weight: 500; line-height: 1.1; color: var(--color-ink); }
+  .lt-bfb__preis s { font-size: 13px; color: var(--color-ink-muted); }
+  .lt-bfb__grund { margin: 2px 2px 0; font-size: 11px; line-height: 1.3; color: var(--color-ink-muted); font-variant-numeric: tabular-nums; }
+  .lt-bfb__grund:empty { display: none; }
+
+  /* Kasse: mobil Leiste am unteren Rand, am Desktop Karte rechts */
+  .lt-bfb__kasse {
+    position: sticky;
+    bottom: 0;
+    z-index: 999;
+    margin: 0 calc(-1 * var(--space-4));
+    padding: 12px var(--space-4) calc(12px + env(safe-area-inset-bottom, 0px));
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    background: var(--color-dark);
+    color: var(--color-paper);
+  }
+  .lt-bfb__kasse-kopf { display: none; }
+  .lt-bfb__pillen { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 0 0 10px; padding: 0; list-style: none; }
+  .lt-bfb__pillen li {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 5px;
+    margin: 0;
+    padding: 6px 0;
+    border: 1px solid rgba(247, 247, 244, 0.28);
+    border-radius: var(--radius-full);
+    line-height: 1;
+    white-space: nowrap;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+  }
+  .lt-bfb__pillen b { font-size: 13px; font-weight: 700; }
+  .lt-bfb__pillen span { font-size: 11px; opacity: 0.75; }
+  .lt-bfb__pillen span:empty { display: none; }
+  .lt-bfb__pillen li.is-an { border-color: var(--color-teal); background: var(--color-teal); color: var(--color-ink); }
+  .lt-bfb__pillen li.is-naechste { border-color: var(--color-teal); color: var(--color-teal); }
+  .lt-bfb__pillen li.is-naechste span { opacity: 1; }
+  .lt-bfb__liste { display: none; }
+  .lt-bfb__extra { margin: 0 0 8px; font-size: 12px; opacity: 0.8; }
+  .lt-bfb__summe { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .lt-bfb__zahl { min-width: 0; }
+  .lt-bfb__gesamt { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; margin: 0; color: inherit; font-variant-numeric: tabular-nums; }
+  .lt-bfb__gesamt b { font-family: var(--font-heading); font-size: 28px; font-weight: 500; line-height: 1.1; white-space: nowrap; }
+  .lt-bfb__gesamt s { font-size: 14px; opacity: 0.7; white-space: nowrap; }
+  .lt-bfb__spar { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 10px; margin: 4px 0 0; font-size: 13px; line-height: 1.3; color: inherit; font-variant-numeric: tabular-nums; }
+  .lt-bfb__spar [data-spar] { font-weight: 700; color: var(--color-teal); }
+  .lt-bfb__versand { display: inline-flex; align-items: center; gap: 5px; opacity: 0.85; }
+  .lt-bfb__versand svg { font-size: 16px; }
+  .lt-bfb__leer { display: none; margin: 10px 0 0; font-family: var(--font-heading); font-size: 18px; line-height: 1.2; color: inherit; }
+  .lt-bfb__kasse.is-leer .lt-bfb__leer { display: block; }
+  .lt-bfb__kasse.is-leer .lt-bfb__gesamt,
+  .lt-bfb__kasse.is-leer .lt-bfb__spar { display: none; }
+  .lt-bfb__los { flex: 0 0 auto; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .lt-bfb__knopf {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 48px;
+    margin: 0;
+    padding: 0 26px;
+    border: 0;
+    border-radius: var(--radius-full);
+    background: var(--color-teal);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: transform 0.2s ease, opacity 0.2s ease;
+  }
+  .lt-bfb__knopf:disabled { opacity: 0.45; cursor: default; }
+  .lt-bfb__knopf.is-laedt { opacity: 0.7; cursor: progress; }
+  .lt-bfb__knopf--hell { background: var(--color-dark); color: var(--color-paper); }
+  .lt-bfb .lt-bfb__uhr b { font-size: 14px; }
+  .lt-bfb .lt-bfb__uhr i { margin: 0 5px 0 2px; font-size: 9px; }
+  .lt-bfb__fehler { margin: 8px 0 0; font-size: 13px; color: var(--color-promo-on-dark); }
+
+  .lt-bfb button:focus-visible,
+  .lt-bfb a:focus-visible { outline: 2px solid var(--color-teal-dark); outline-offset: 2px; }
+  .lt-bfb__kasse button:focus-visible { outline-color: var(--color-paper); }
+
+  /* Stufe gewechselt: Preise zucken einmal */
+  @keyframes lt-bfb-blitz {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.14); }
+    100% { transform: scale(1); }
+  }
+  .lt-bfb.is-blitz [data-preis],
+  .lt-bfb.is-blitz [data-gesamt] { display: inline-block; animation: lt-bfb-blitz 0.45s ease; transform-origin: left center; }
+  @media (prefers-reduced-motion: reduce) {
+    .lt-bfb.is-blitz [data-preis],
+    .lt-bfb.is-blitz [data-gesamt] { animation: none; }
+    .lt-bfb * { transition: none !important; }
+  }
+
+  @media (min-width: 600px) {
+    .lt-bfb__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .lt-bfb__stapel-karte { flex-basis: 44%; }
+  }
+
+  @media (min-width: 990px) {
+    .lt-bfb__wrap { padding: var(--space-7) var(--space-6) var(--space-8); }
+    .lt-bfb__kopf { margin-bottom: var(--space-5); }
+    .lt-bfb__layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: var(--space-7); align-items: start; }
+    .lt-bfb__staffel { display: none; }
+    .lt-bfb__stapel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 0 0 var(--space-5); padding: 0; overflow: visible; }
+    .lt-bfb__stapel-karte { grid-template-columns: 1fr; gap: 6px; padding: 14px; }
+    .lt-bfb__stapel-bilder { grid-row: auto; }
+    .lt-bfb__grid { gap: 14px; padding-bottom: 0; }
+    .lt-bfb__karte { padding: 10px 10px 14px; }
+    .lt-bfb__name { font-size: 16px; }
+
+    .lt-bfb__kasse { top: var(--lt-bfb-top, 24px); bottom: auto; margin: 0; padding: 22px; border-radius: var(--radius-lg); }
+    .lt-bfb__kasse-kopf { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; margin: 0 0 14px; }
+    .lt-bfb__pillen { gap: 8px; margin-bottom: 18px; }
+    .lt-bfb__pillen li { flex-direction: column; align-items: center; gap: 5px; padding: 14px 4px 12px; border-radius: var(--radius-sm); }
+    .lt-bfb__pillen b { font-family: var(--font-heading); font-size: 28px; font-weight: 500; color: var(--color-teal); }
+    .lt-bfb__pillen li.is-an b { color: var(--color-ink); }
+    .lt-bfb__pillen span { font-size: 12px; opacity: 1; }
+    .lt-bfb__pillen span:empty { display: block; }
+    .lt-bfb__pillen span:empty::before { content: 'erreicht'; font-weight: 700; }
+    .lt-bfb__liste { display: block; margin: 0 0 16px; padding: 0; list-style: none; }
+    .lt-bfb__liste li { display: grid; grid-template-columns: 44px 1fr auto; align-items: center; gap: 12px; margin: 0; padding: 8px 0; border-top: 1px solid rgba(247, 247, 244, 0.2); font-size: 14px; line-height: 1.3; }
+    .lt-bfb__liste li:first-child { border-top: 0; }
+    .lt-bfb__liste img { display: block; width: 44px; height: 44px; border-radius: var(--radius-sm); object-fit: cover; background: var(--color-light-warm); }
+    .lt-bfb__liste span { min-width: 0; }
+    .lt-bfb__liste b { font-weight: 400; font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .lt-bfb__summe { flex-direction: column; align-items: stretch; gap: 16px; padding-top: 16px; border-top: 1px solid rgba(247, 247, 244, 0.2); }
+    .lt-bfb__gesamt b { font-size: 40px; }
+    .lt-bfb__gesamt s { font-size: 16px; }
+    .lt-bfb__spar { margin-top: 8px; font-size: 14px; }
+    .lt-bfb__los { align-items: stretch; }
+    .lt-bfb__knopf { height: 54px; font-size: 17px; }
+    .lt-bfb__knopf:not(:disabled):hover { transform: translateY(-1px); }
+    .lt-bfb__uhr { display: none; }
+    .lt-bfb__aus .lt-bfb__knopf { height: 48px; font-size: 16px; }
+  }
+</style>
+
+<script>
+  (function () {
+    if (customElements.get('lt-bf-bundle')) return;
+
+    var SPEICHER = 'lt_bfb_auswahl';
+    var MAX_JE_PRODUKT = 9;
+
+    function stufe(n) { return n >= 3 ? 40 : n === 2 ? 30 : n === 1 ? 20 : 0; }
+    function esc(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+    function kurz(titel) { return titel.replace(/\s+(Kapseln|Pulver)$/i, '').replace(/\s*\([^)]*\)/g, ''); }
+
+    class LtBfBundle extends HTMLElement {
+      connectedCallback() {
+        if (this.bereit) return;
+        this.bereit = true;
+        var self = this;
+
+        this.symbol = this.dataset.symbol || '€';
+        this.versandKosten = Number(this.dataset.versandKosten) || 0;
+        this.versandFrei = Number(this.dataset.versandFrei) || 0;
+        this.wurzel = (window.Shopify && window.Shopify.routes && window.Shopify.routes.root) || '/';
+        this.truck = (this.querySelector('[data-icon-truck]') || {}).innerHTML || '';
+
+        this.rabattIds = {};
+        try {
+          JSON.parse(this.querySelector('[data-rabatt-ids]').textContent).forEach(function (id) { self.rabattIds[id] = true; });
+        } catch (e) {}
+
+        // Produkte aus den Kacheln lesen
+        this.produkte = [];
+        this.nachVariante = {};
+        this.nachHandle = {};
+        this.querySelectorAll('[data-karte]').forEach(function (karte) {
+          var varianten = [];
+          try { varianten = JSON.parse(karte.querySelector('[data-varianten]').textContent); } catch (e) {}
+          if (!varianten.length) { karte.hidden = true; return; }
+          var bild = karte.querySelector('[data-bild]');
+          var p = {
+            id: Number(karte.dataset.pid),
+            handle: karte.dataset.handle,
+            titel: karte.dataset.titel,
+            bild: bild ? bild.currentSrc || bild.src : '',
+            varianten: varianten,
+            karte: karte
+          };
+          varianten.forEach(function (v) { v.produkt = p; self.nachVariante[v.id] = v; });
+          self.nachHandle[p.handle] = p;
+          self.produkte.push(p);
+        });
+
+        this.menge = {};     // Varianten-ID -> Stück
+        this.aktiv = {};     // Produkt-ID -> gezeigte Variante
+        this.beruehrt = {};  // Varianten, die diese Seite im Warenkorb führt
+        this.korb = [];      // Zeilen des Warenkorbs beim Laden
+        this.letztePct = null;
+
+        // Fertige Stapel auflösen
+        this.stapel = [];
+        this.querySelectorAll('[data-stapel]').forEach(function (knopf) {
+          var teile = [];
+          var ok = true;
+          knopf.dataset.stapel.split(',').forEach(function (roh) {
+            var s = roh.trim();
+            if (!s) return;
+            var handle = s.split(':')[0].trim();
+            var groesse = (s.split(':')[1] || '').trim().toLowerCase();
+            var p = self.nachHandle[handle];
+            if (!p) { ok = false; return; }
+            var v = p.varianten[0];
+            if (groesse) {
+              v = p.varianten.filter(function (x) { return x.titel.toLowerCase() === groesse; })[0];
+              if (!v) { ok = false; return; }
+            }
+            teile.push(v);
+          });
+          if (!ok || !teile.length) return;
+          knopf.hidden = false;
+          self.stapel.push({ knopf: knopf, teile: teile });
+        });
+
+        // Gezeigte Größe je Produkt: die aus dem ersten Stapel, sonst die erste
+        this.produkte.forEach(function (p) { self.aktiv[p.id] = p.varianten[0].id; });
+        for (var i = this.stapel.length - 1; i >= 0; i--) {
+          this.stapel[i].teile.forEach(function (v) { self.aktiv[v.produkt.id] = v.id; });
+        }
+
+        this.addEventListener('click', this.klick.bind(this));
+        this.chatPlatz();
+
+        var gemerkt = this.lesen();
+        if (gemerkt) this.zeichne();
+        this.korbLaden().then(function (zeilen) {
+          self.korb = zeilen;
+          self.korbUebernehmen(!gemerkt);
+          self.zeichne();
+        });
+      }
+
+      // ---------- Zustand ----------
+      lesen() {
+        try {
+          var roh = JSON.parse(sessionStorage.getItem(SPEICHER) || 'null');
+          if (!roh || !roh.a) return false;
+          var self = this;
+          Object.keys(roh.a).forEach(function (pid) {
+            var v = self.nachVariante[roh.a[pid]];
+            if (v && v.produkt.id === Number(pid)) self.aktiv[pid] = v.id;
+          });
+          Object.keys(roh.m || {}).forEach(function (vid) {
+            var v = self.nachVariante[vid];
+            var q = Number(roh.m[vid]) || 0;
+            if (v && q > 0 && self.aktiv[v.produkt.id] === v.id) self.menge[v.id] = Math.min(q, MAX_JE_PRODUKT);
+          });
+          return true;
+        } catch (e) { return false; }
+      }
+      merken() {
+        try { sessionStorage.setItem(SPEICHER, JSON.stringify({ a: this.aktiv, m: this.menge })); } catch (e) {}
+      }
+      korbLaden() {
+        return fetch(this.wurzel + 'cart.js', { credentials: 'same-origin', headers: { Accept: 'application/json' } })
+          .then(function (r) { return r.json(); })
+          .then(function (c) { return (c && c.items) || []; })
+          .catch(function () { return []; });
+      }
+      // Einmalkauf-Zeilen der Produkte dieser Seite gehören der Seite: je Produkt eine Größe.
+      // Alles andere (Abo-Zeilen, zweite Größe, fremde Produkte) bleibt im Warenkorb, wie es ist.
+      korbUebernehmen(alsAuswahl) {
+        var self = this;
+        var jeProdukt = {};
+        this.korb.forEach(function (z) {
+          if (z.selling_plan_allocation) return;
+          var v = self.nachVariante[z.variant_id];
+          if (!v) return;
+          var pid = v.produkt.id;
+          if (alsAuswahl) {
+            if (!jeProdukt[pid] || z.quantity > jeProdukt[pid].quantity) jeProdukt[pid] = z;
+          } else if (self.aktiv[pid] === v.id && !jeProdukt[pid]) {
+            jeProdukt[pid] = z;
+          }
+        });
+        var treffer = Object.keys(jeProdukt);
+        treffer.forEach(function (pid) {
+          var z = jeProdukt[pid];
+          self.beruehrt[z.variant_id] = true;
+          if (alsAuswahl) {
+            self.aktiv[pid] = z.variant_id;
+            self.menge[z.variant_id] = Math.min(z.quantity, MAX_JE_PRODUKT);
+          }
+        });
+        if (alsAuswahl && !treffer.length && this.dataset.vorauswahl === 'true' && this.stapel.length) {
+          this.stapelSetzen(this.stapel[0]);
+        }
+      }
+      fremd() {
+        var self = this;
+        var f = { stueck: 0, summe: 0, abo: false };
+        this.korb.forEach(function (z) {
+          var abo = !!z.selling_plan_allocation;
+          if (!abo && self.beruehrt[z.variant_id]) return;
+          if (abo) f.abo = true;
+          f.summe += Number(z.final_line_price) || 0;
+          if (self.rabattIds[z.product_id]) f.stueck += Number(z.quantity) || 0;
+        });
+        return f;
+      }
+      rechne() {
+        var self = this;
+        var zeilen = [];
+        var n = 0;
+        this.produkte.forEach(function (p) {
+          var v = self.nachVariante[self.aktiv[p.id]];
+          var q = (v && self.menge[v.id]) || 0;
+          if (q > 0) { zeilen.push({ v: v, q: q }); n += q; }
+        });
+        var f = this.fremd();
+        var pct = stufe(n + f.stueck);
+        var normal = 0;
+        var summe = 0;
+        zeilen.forEach(function (z) {
+          z.normal = z.v.preis * z.q;
+          // wie Shopify: Rabatt je Zeile, kaufmännisch gerundet
+          z.summe = z.normal - Math.round(z.normal * pct / 100);
+          normal += z.normal;
+          summe += z.summe;
+        });
+        var frei = f.abo || this.versandFrei <= 0 || summe + f.summe >= this.versandFrei;
+        return {
+          zeilen: zeilen, n: n, nGesamt: n + f.stueck, pct: pct, normal: normal, summe: summe,
+          frei: frei, fehlt: Math.max(0, this.versandFrei - summe - f.summe), fremd: f
+        };
+      }
+      geld(cent) {
+        var s = (Math.round(cent) / 100).toFixed(2).replace('.', ',');
+        return s.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ' ' + this.symbol;
+      }
+      stapelSetzen(st) {
+        var self = this;
+        this.menge = {};
+        st.teile.forEach(function (v) {
+          self.aktiv[v.produkt.id] = v.id;
+          self.menge[v.id] = (self.menge[v.id] || 0) + 1;
+        });
+      }
+      stapelAktiv(st, r) {
+        if (r.zeilen.length !== st.teile.length) return false;
+        var self = this;
+        return st.teile.every(function (v) { return self.aktiv[v.produkt.id] === v.id && self.menge[v.id] === 1; });
+      }
+
+      // ---------- Bedienung ----------
+      klick(e) {
+        var ziel = e.target.closest('[data-waehlen],[data-plus],[data-minus],[data-variante],[data-stapel],[data-kaufen]');
+        if (!ziel || !this.contains(ziel)) return;
+        if (ziel.hasAttribute('data-kaufen')) { this.kaufen(); return; }
+        if (ziel.hasAttribute('data-stapel')) {
+          var st = this.stapel.filter(function (s) { return s.knopf === ziel; })[0];
+          if (st) { this.stapelSetzen(st); this.merken(); this.zeichne(); }
+          return;
+        }
+        var karte = ziel.closest('[data-karte]');
+        if (!karte) return;
+        var pid = Number(karte.dataset.pid);
+        var vid = this.aktiv[pid];
+        var q = this.menge[vid] || 0;
+        if (ziel.hasAttribute('data-variante')) {
+          var neu = Number(ziel.dataset.variante);
+          if (neu === vid || !this.nachVariante[neu]) return;
+          delete this.menge[vid];
+          this.aktiv[pid] = neu;
+          if (q > 0) this.menge[neu] = q;
+        } else if (ziel.hasAttribute('data-waehlen')) {
+          if (q > 0) return;
+          this.menge[vid] = 1;
+        } else if (ziel.hasAttribute('data-plus')) {
+          this.menge[vid] = Math.min(q + 1, MAX_JE_PRODUKT);
+        } else if (ziel.hasAttribute('data-minus')) {
+          if (q <= 1) delete this.menge[vid]; else this.menge[vid] = q - 1;
+        }
+        this.merken();
+        this.zeichne();
+      }
+
+      // ---------- Anzeige ----------
+      zeichne() {
+        var self = this;
+        var r = this.rechne();
+        var pctKarte = stufe(Math.max(r.nGesamt, 1));
+
+        this.produkte.forEach(function (p) {
+          var v = self.nachVariante[self.aktiv[p.id]];
+          var q = self.menge[v.id] || 0;
+          var k = p.karte;
+          k.classList.toggle('is-gewaehlt', q > 0);
+          k.querySelector('[data-anzahl]').textContent = q;
+          k.querySelector('[data-preis]').textContent = self.geld(v.preis - Math.round(v.preis * pctKarte / 100));
+          k.querySelector('[data-alt]').textContent = self.geld(v.preis);
+          k.querySelector('[data-grund]').textContent = v.grund > 0 && v.bezug
+            ? self.geld(v.grund - Math.round(v.grund * pctKarte / 100)) + ' / ' + v.bezug
+            : '';
+          k.querySelectorAll('[data-variante]').forEach(function (b) {
+            b.setAttribute('aria-checked', Number(b.dataset.variante) === v.id ? 'true' : 'false');
+          });
+        });
+
+        this.querySelectorAll('[data-stufe]').forEach(function (el) {
+          var ab = Number(el.dataset.stufe);
+          var an = r.nGesamt >= ab;
+          el.classList.toggle('is-an', an);
+          el.classList.toggle('is-naechste', ab === r.nGesamt + 1);
+          var noch = el.querySelector('[data-noch]');
+          if (noch) noch.textContent = an ? '' : 'noch ' + (ab - r.nGesamt);
+        });
+
+        this.stapel.forEach(function (st) {
+          var normal = 0;
+          var pct = stufe(st.teile.length);
+          var summe = 0;
+          st.teile.forEach(function (v) { normal += v.preis; summe += v.preis - Math.round(v.preis * pct / 100); });
+          if (!st.gebaut) {
+            st.gebaut = true;
+            st.knopf.innerHTML =
+              '<span class="lt-bfb__stapel-bilder">' + st.teile.map(function (v) {
+                return v.produkt.bild ? '<img src="' + esc(v.produkt.bild) + '" alt="" width="46" height="46" loading="lazy">' : '';
+              }).join('') + '</span>' +
+              '<span class="lt-bfb__stapel-preis"><b>' + self.geld(summe) + '</b><s>' + self.geld(normal) + '</s></span>' +
+              '<span class="lt-bfb__stapel-namen">' + st.teile.map(function (v) {
+                return esc(kurz(v.produkt.titel) + (v.produkt.varianten.length > 1 ? ' ' + v.titel : ''));
+              }).join(' + ') + '</span>';
+          }
+          st.knopf.setAttribute('aria-pressed', self.stapelAktiv(st, r) ? 'true' : 'false');
+        });
+
+        var kasse = this.querySelector('[data-kasse]');
+        kasse.classList.toggle('is-leer', r.n === 0);
+        this.querySelector('[data-gesamt]').textContent = this.geld(r.summe);
+        this.querySelector('[data-gesamt-alt]').textContent = r.normal > r.summe ? this.geld(r.normal) : '';
+        this.querySelector('[data-spar]').textContent = r.normal > r.summe ? 'Du sparst ' + this.geld(r.normal - r.summe) : '';
+        this.querySelector('[data-versand]').innerHTML = this.truck + '<span>' +
+          (r.frei ? 'Versandfrei' : 'Noch ' + this.geld(r.fehlt) + ' bis versandfrei') + '</span>';
+        var extra = this.querySelector('[data-extra]');
+        extra.hidden = r.fremd.stueck === 0;
+        extra.textContent = r.fremd.stueck === 0 ? '' : 'Plus ' + r.fremd.stueck + (r.fremd.stueck === 1 ? ' Produkt' : ' Produkte') + ' aus deinem Warenkorb';
+        this.querySelector('[data-liste]').innerHTML = r.zeilen.map(function (z) {
+          var p = z.v.produkt;
+          return '<li>' + (p.bild ? '<img src="' + esc(p.bild) + '" alt="" width="44" height="44" loading="lazy">' : '<i></i>') +
+            '<span>' + (z.q > 1 ? z.q + ' × ' : '') + esc(p.titel) + (p.varianten.length > 1 ? ' ' + esc(z.v.titel) : '') + '</span>' +
+            '<b>' + self.geld(z.summe) + '</b></li>';
+        }).join('');
+        var knopf = this.querySelector('[data-kaufen]');
+        if (!knopf.classList.contains('is-laedt')) knopf.disabled = r.n === 0;
+
+        if (this.letztePct !== null && this.letztePct !== r.pct) {
+          this.classList.remove('is-blitz');
+          void this.offsetWidth;
+          this.classList.add('is-blitz');
+          window.clearTimeout(this.blitzT);
+          this.blitzT = window.setTimeout(function () { self.classList.remove('is-blitz'); }, 500);
+        }
+        this.letztePct = r.pct;
+      }
+
+      // Chat-Blase (Shopify Inbox) mobil über die Leiste heben, solange die Leiste im Bild ist.
+      // Nutzt die Variable aus snippets/lt-chat-guard.liquid.
+      chatPlatz() {
+        var kasse = this.querySelector('[data-kasse]');
+        if (!kasse || !('IntersectionObserver' in window)) return;
+        var mq = window.matchMedia('(max-width: 749px)');
+        var root = document.documentElement;
+        var imBild = false;
+        function setze() {
+          var hoch = imBild && mq.matches && kasse.offsetHeight > 0 ? kasse.offsetHeight - 8 : 0;
+          root.style.setProperty('--lt-chat-lift', hoch + 'px');
+        }
+        new IntersectionObserver(function (es) {
+          es.forEach(function (en) { imBild = en.isIntersecting; });
+          setze();
+        }).observe(kasse);
+        window.addEventListener('resize', setze);
+      }
+
+      // ---------- Kauf ----------
+      senden(pfad, daten) {
+        return fetch(this.wurzel + pfad, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify(daten)
+        }).then(function (res) {
+          return res.json().catch(function () { return {}; }).then(function (j) {
+            if (!res.ok) throw new Error(j.description || j.message || 'Fehler');
+            return j;
+          });
+        });
+      }
+      kaufen() {
+        var self = this;
+        var bw = window.LTBlackWeek;
+        if (!bw || !bw.on || !bw.p2) return;
+        var r = this.rechne();
+        var knopf = this.querySelector('[data-kaufen]');
+        if (!r.n || knopf.classList.contains('is-laedt')) return;
+        var fehler = this.querySelector('[data-fehler]');
+        fehler.hidden = true;
+        knopf.classList.add('is-laedt');
+        knopf.disabled = true;
+        r.zeilen.forEach(function (z) { self.beruehrt[z.v.id] = true; });
+
+        this.korbLaden().then(function (zeilen) {
+          var updates = {};
+          var aendern = false;
+          var gefunden = {};
+          zeilen.forEach(function (z) {
+            if (z.selling_plan_allocation || !self.beruehrt[z.variant_id] || gefunden[z.variant_id]) return;
+            var v = self.nachVariante[z.variant_id];
+            if (!v) return;
+            gefunden[z.variant_id] = true;
+            var soll = self.aktiv[v.produkt.id] === v.id ? (self.menge[v.id] || 0) : 0;
+            if (z.quantity !== soll) { updates[z.key] = soll; aendern = true; }
+          });
+          var neu = r.zeilen
+            .filter(function (z) { return !gefunden[z.v.id]; })
+            .map(function (z) { return { id: z.v.id, quantity: z.q }; });
+          var kette = Promise.resolve();
+          if (aendern) kette = kette.then(function () { return self.senden('cart/update.js', { updates: updates }); });
+          if (neu.length) kette = kette.then(function () { return self.senden('cart/add.js', { items: neu }); });
+          return kette;
+        }).then(function () {
+          try { sessionStorage.removeItem(SPEICHER); } catch (e) {}
+          window.location.href = self.wurzel + 'checkout';
+        }).catch(function (err) {
+          knopf.classList.remove('is-laedt');
+          knopf.disabled = false;
+          fehler.textContent = (err && err.message && err.message !== 'Fehler') ? err.message : 'Das hat nicht geklappt. Bitte versuch es noch einmal.';
+          fehler.hidden = false;
+        });
+      }
+    }
+
+    customElements.define('lt-bf-bundle', LtBfBundle);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "BF Bundle-Seite",
+  "tag": "section",
+  "class": "lt-bf-bundle-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Überschrift",
+      "default": "Nimm 3, spar 40 %."
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Unterzeile",
+      "default": "Auf alle Supplements und auch auf NMN."
+    },
+    {
+      "type": "textarea",
+      "id": "handles",
+      "label": "Produkte (Handles mit Komma, in Reihenfolge)",
+      "default": "nad-booster,lifetime-nmn,spermidin-kapseln,resveratrol-kapseln,caakg-kapseln,fisetin-kapseln,betain-tmg-kapseln,hyaluron,schlafspray-mit-melatonin,vitamin-d3-k2-spray,kreatin-monohydrat-pulver,vitamin-b-komplex-kapseln,astaxanthin-kapseln"
+    },
+    {
+      "type": "checkbox",
+      "id": "vorauswahl",
+      "label": "Ersten Stapel vorbelegen",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "text_vor",
+      "label": "Text vor dem Start",
+      "default": "Die Staffel startet in Kürze."
+    },
+    {
+      "type": "text",
+      "id": "text_nach",
+      "label": "Text nach dem Ende",
+      "default": "Die Aktion ist vorbei. Es gelten wieder die normalen Preise."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "stapel",
+      "name": "Stapel",
+      "limit": 3,
+      "settings": [
+        {
+          "type": "text",
+          "id": "items",
+          "label": "Produkte",
+          "info": "Handles mit Komma. Größe mit Doppelpunkt: lifetime-nmn:60 g"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
