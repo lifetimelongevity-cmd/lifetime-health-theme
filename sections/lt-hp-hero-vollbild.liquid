@@ -173,21 +173,47 @@
                 </picture>
               {%- endif -%}
             </div>
+            {%- comment -%}
+              Black Friday 2026 (BJ 26.11.2026): Ist „Black Friday: Headline“ gesetzt, tauscht die Folie
+              während der Staffel (html[data-lt-bw-p2], snippets/lt-black-week.liquid) ihren Text gegen
+              die Aktionszeile mit laufender Uhr. Außerhalb davon bleibt alles wie gehabt.
+            {%- endcomment -%}
+            {%- liquid
+              assign bw_aus = ''
+              if block.settings.bw_heading != blank
+                assign bw_aus = ' lthv__bw-aus'
+              endif
+            -%}
             <div class="lthv__text">
               {%- if block.settings.heading != blank -%}
                 {%- if forloop.first -%}
-                  <h1 class="lthv__titel">{{ block.settings.heading | escape }}</h1>
+                  <h1 class="lthv__titel{{ bw_aus }}">{{ block.settings.heading | escape }}</h1>
                 {%- else -%}
-                  <p class="lthv__titel">{{ block.settings.heading | escape }}</p>
+                  <p class="lthv__titel{{ bw_aus }}">{{ block.settings.heading | escape }}</p>
                 {%- endif -%}
               {%- endif -%}
               {%- if block.settings.subheading != blank -%}
-                <p class="lthv__sub">{{ block.settings.subheading | escape }}</p>
+                <p class="lthv__sub{{ bw_aus }}">{{ block.settings.subheading | escape }}</p>
               {%- endif -%}
               {%- if block.settings.cta_label != blank -%}
-                <div class="lthv__knoepfe">
+                <div class="lthv__knoepfe{{ bw_aus }}">
                   <a class="lthv__knopf lthv__knopf--weiss" href="{{ block.settings.cta_url | default: '/collections/all' }}">{{ block.settings.cta_label | escape }} <span aria-hidden="true">→</span></a>
                 </div>
+              {%- endif -%}
+              {%- if block.settings.bw_heading != blank -%}
+                <p class="lthv__bw-kopf lthv__bw-an">
+                  <span class="lt-bw-staffel__tag">Black Friday</span>
+                  <span class="lt-bw-clock" data-lt-bw-clock></span>
+                </p>
+                <p class="lthv__titel lthv__bw-an">{{ block.settings.bw_heading | escape }}</p>
+                {%- if block.settings.bw_subheading != blank -%}
+                  <p class="lthv__sub lthv__bw-an">{{ block.settings.bw_subheading | escape }}</p>
+                {%- endif -%}
+                {%- if block.settings.bw_cta_label != blank -%}
+                  <div class="lthv__knoepfe lthv__bw-an">
+                    <a class="lthv__knopf lthv__knopf--bw" href="{{ block.settings.bw_cta_url | default: '/pages/black-friday' }}">{{ block.settings.bw_cta_label | escape }} <span aria-hidden="true">→</span></a>
+                  </div>
+                {%- endif -%}
               {%- endif -%}
             </div>
           </article>
@@ -339,6 +365,16 @@
   color: var(--color-paper);
 }
 .lthv__knoepfe { display: flex; gap: var(--space-3); width: 100%; }
+/* Black Friday 2026: Aktionszeile nur in Phase 2 der Zeitschaltung, sonst der normale Text */
+html:not([data-lt-bw-p2]) .lthv__bw-an { display: none !important; }
+html[data-lt-bw-p2] .lthv__bw-aus { display: none !important; }
+.lthv__bw-kopf { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); margin: 0 0 var(--space-3); color: var(--color-paper); }
+.lthv__knopf--bw { background: var(--color-teal); color: var(--color-ink); }
+@media (max-width: 640px) {
+  .lthv__bw-kopf { gap: var(--space-2) var(--space-3); }
+  .lthv__bw-kopf .lt-bw-clock b { font-size: 18px; }
+  .lthv__bw-kopf .lt-bw-clock i { margin: 0 6px 0 3px; font-size: 10px; }
+}
 .lthv__knopf {
   display: inline-flex;
   align-items: center;
@@ -554,7 +590,12 @@
         { "type": "text", "id": "heading", "label": "Headline", "default": "Alles für dein biologisches Alter" },
         { "type": "textarea", "id": "subheading", "label": "Unterzeile" },
         { "type": "text", "id": "cta_label", "label": "Knopf (weiß)", "default": "Alle Produkte ansehen" },
-        { "type": "url", "id": "cta_url", "label": "Ziel des Knopfs" }
+        { "type": "url", "id": "cta_url", "label": "Ziel des Knopfs" },
+        { "type": "header", "content": "Black Friday (nur in der Aktion)" },
+        { "type": "text", "id": "bw_heading", "label": "Black Friday: Headline", "info": "Leer: die Folie bleibt auch in der Aktion unverändert." },
+        { "type": "textarea", "id": "bw_subheading", "label": "Black Friday: Unterzeile" },
+        { "type": "text", "id": "bw_cta_label", "label": "Black Friday: Knopf" },
+        { "type": "text", "id": "bw_cta_url", "label": "Black Friday: Ziel des Knopfs", "info": "Leer: /pages/black-friday" }
       ]
     }
   ],

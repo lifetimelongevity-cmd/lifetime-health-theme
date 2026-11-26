@@ -1,0 +1,60 @@
+{%- comment -%}
+  Black Friday 2026 (BJ 26.11.2026): farbig unterlegter Menüpunkt zur Bundle-Seite
+  /pages/black-friday (sections/lt-bf-bundle.liquid), nur während der Staffel
+  (Fr 27.11. 00:00 bis Mo 30.11. 23:59:59).
+
+  Sichtbar nur, solange html[data-lt-bw-p2] gesetzt ist (Zeitschaltung in
+  snippets/lt-black-week.liquid). Fehlt das Attribut oder die Zeitschaltung, bleibt der
+  Punkt unsichtbar. Die Uhr in der Karte füllt das zentrale Skript ([data-lt-bw-clock]).
+
+  Erwartet: type ('classic' = Eintrag in der Desktop-Leiste, 'karte' = Karte im mobilen Menü)
+
+  Nach der Aktion: Snippet und die render-Zeilen in sections/header.liquid und
+  snippets/lt-menu-cards.liquid entfernen.
+{%- endcomment -%}
+{%- if type == 'karte' -%}
+  <style>
+    html:not([data-lt-bw-p2]) .lt-bw-nav { display: none !important; }
+    .lt-bw-nav--karte {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-3, 12px);
+      padding: var(--space-4, 16px) var(--space-4, 16px) var(--space-4, 16px) var(--space-5, 24px);
+      border-radius: var(--radius-md, 12px);
+      background: var(--color-teal, #65c0b6);
+      color: var(--color-ink, #26251e);
+      font-family: var(--font-body);
+      text-decoration: none;
+    }
+    .lt-bw-nav__text { display: flex; flex-direction: column; gap: 2px; line-height: 1.2; }
+    .lt-bw-nav__text strong { font-size: 18px; font-weight: 700; white-space: nowrap; }
+    .lt-bw-nav__text span { font-size: 14px; }
+    .lt-bw-nav--karte .lt-bw-clock b { font-size: 16px; color: var(--color-ink, #26251e); }
+    .lt-bw-nav--karte .lt-bw-clock i { margin: 0 6px 0 3px; font-size: 10px; opacity: 1; }
+  </style>
+  <a class="lt-bw-nav lt-bw-nav--karte" href="/pages/black-friday">
+    <span class="lt-bw-nav__text"><strong>Black Friday</strong><span>Bis zu 40&nbsp;%</span></span>
+    <span class="lt-bw-clock" data-lt-bw-clock></span>
+  </a>
+{%- else -%}
+  <li class="lt-bw-nav" id="menu-item-black-friday-classic">
+    <style>
+      html:not([data-lt-bw-p2]) .lt-bw-nav { display: none !important; }
+      .lt-bw-nav__pille {
+        position: relative;
+        top: -3px;
+        display: inline-block;
+        margin: -9px 0;
+        padding: 9px 16px;
+        border-radius: var(--radius-full, 999px);
+        background: var(--color-teal, #65c0b6);
+        color: var(--color-ink, #26251e);
+        font-weight: 700;
+        line-height: 1;
+        white-space: nowrap;
+      }
+    </style>
+    <a class="menu-link no-focus-link" href="/pages/black-friday"><span><span class="lt-bw-nav__pille">Black Friday</span></span></a>
+  </li>
+{%- endif -%}
