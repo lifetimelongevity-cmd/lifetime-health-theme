@@ -10,9 +10,10 @@
   - Code BLACKFRIDAY, 50 € auf den AGE & DNA-Test: seit 24.11. bis 30.11. 23:59:59.
   Den automatischen 96-€-Rabatt auf den Test gibt es seit 24.11.2026 nicht mehr.
 
-  Zwei Phasen: bis P2 (Fr 27.11. 00:00) das NMN-Geschenk, ab P2 der 40-%-Code. Ab P2 trägt
-  html zusätzlich data-lt-bw-p2. Elemente mit data-lt-bw-p1-only verschwinden dann,
-  Elemente mit data-lt-bw-p2-only sind nur in Phase 2 sichtbar.
+  Zwei Phasen, seit 26.11.2026 mit Überlappung: Die Staffel (P2) startet Do 26.11. 16:45,
+  das NMN-Geschenk endet Do 26.11. 23:59:59 (P1END). Ab P2 trägt html data-lt-bw-p2:
+  Elemente mit data-lt-bw-p2-only werden sichtbar. Ab P1END trägt html data-lt-bw-p1-aus:
+  Elemente mit data-lt-bw-p1-only verschwinden, window.LTBlackWeek.geschenk wird false.
 
   Setzt html[data-lt-bw] auf before, on oder after:
   - on gilt öffentlich ab START, mit ?bw=1 (Link aus der Frühzugangs-Mail) schon ab EARLY.
@@ -30,7 +31,10 @@
   (function () {
     var EARLY = Date.parse('2026-11-22T18:00:00+01:00');
     var START = Date.parse('2026-11-23T00:00:00+01:00');
-    var P2 = Date.parse('2026-11-27T00:00:00+01:00');
+    // BJ 26.11.2026: Die Staffel startet schon heute (erste Mail 19:30 Uhr). P2 ist ihr Start,
+    // P1END das Ende des NMN-Geschenks. Dazwischen gilt beides, Shopify zieht das bessere.
+    var P2 = Date.parse('2026-11-26T16:45:00+01:00');
+    var P1END = Date.parse('2026-11-27T00:00:00+01:00');
     var END = Date.parse('2026-11-30T23:59:59+01:00');
     var DEV = {{ theme.role | json }} !== 'main';
     var now = Date.now();
@@ -56,7 +60,9 @@
     root.setAttribute('data-lt-bw', phase);
     var p2 = on && (testP2 || now >= P2);
     if (p2) root.setAttribute('data-lt-bw-p2', '');
-    window.LTBlackWeek = { on: on, phase: phase, end: END, p2: p2 };
+    var p1aus = on && (testP2 || now >= P1END);
+    if (p1aus) root.setAttribute('data-lt-bw-p1-aus', '');
+    window.LTBlackWeek = { on: on, phase: phase, end: END, p2: p2, geschenk: on && !p1aus };
     // Ankündigungsleiste: während der Aktion ersetzt die Aktionszeile den Standardtext des
     // ersten Eintrags. Per Skript statt in sections/announcement-bar.liquid, damit die
     // Combine-Section unangetastet bleibt. Der Text kommt aus snippets/lt-black-week-bar.liquid.
@@ -88,10 +94,20 @@
         window.LTBlackWeek.p2 = true;
       }, P2 - now);
     }
+    // Um Mitternacht endet das NMN-Geschenk: seine Elemente (data-lt-bw-p1-only) verschwinden.
+    if (on && !test && !p1aus && P1END - now < 2147483647) {
+      window.setTimeout(function () {
+        if (!window.LTBlackWeek.on) return;
+        root.setAttribute('data-lt-bw-p1-aus', '');
+        window.LTBlackWeek.geschenk = false;
+      }, P1END - now);
+    }
     if (on && !test && END - now < 2147483647) {
       window.setTimeout(function () {
         root.setAttribute('data-lt-bw', 'after');
         root.removeAttribute('data-lt-bw-p2');
+        root.removeAttribute('data-lt-bw-p1-aus');
+        window.LTBlackWeek.geschenk = false;
         window.LTBlackWeek.on = false;
         window.LTBlackWeek.p2 = false;
         window.LTBlackWeek.phase = 'after';
@@ -126,7 +142,9 @@
 <style>
   html:not([data-lt-bw='on']) [data-lt-bw-only] { display: none !important; }
   html[data-lt-bw='on'] [data-lt-bw-hide] { display: none !important; }
-  html[data-lt-bw-p2] [data-lt-bw-p1-only] { display: none !important; }
+  html[data-lt-bw-p1-aus] [data-lt-bw-p1-only] { display: none !important; }
+  /* In der Leiste ist nur Platz für eine Zeile: sobald die Staffel läuft, steht dort die Staffel. */
+  html[data-lt-bw-p2] announcement-bar [data-lt-bw-p1-only] { display: none !important; }
   html:not([data-lt-bw-p2]) [data-lt-bw-p2-only] { display: none !important; }
 
   /* Uhr: Zahl in Mint, Einheit klein dahinter (wie die Fristleiste der Pilotpraxis-Seite) */
