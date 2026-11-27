@@ -1,5 +1,5 @@
 /* ERZEUGT von docs/pilotpraxis/bauen.py aus docs/pilotpraxis/pilotpraxis-v2.js. Nicht von Hand ändern.
-   Pruefsumme: 60e3b339a908659f0672c21f011775a113e482ede6ff5368a3afe27a94d9f936 */
+   Pruefsumme: 69422a7be94895fd010530d7cfebff810d4e857a835af6cab490d3c5547c0301 */
 /* Pilotpraxis-Verkaufsseite, Fassung 2 (VSL-Aufbau, 23.11.2026). Quelle: docs/pilotpraxis/pilotpraxis-v2.js
    Wird im <head> ohne defer geladen: setzt Zustand und Schalter, bevor die Seite malt.
 
@@ -34,7 +34,7 @@ window.PP_KONFIG = {
       name: 'Kardiologie',
       quelle: 'pilot-kardio',
       variante: null,       // Pilot-Variante Kardiologie (Shopify S1), ohne sie liegt nur der Test in der Kasse
-      code: 'PILOTPRAXIS',  // Praxis-Code (Shopify DiscountCodeNode/2418591859063: muss 130 € auf die Variante „Test“ abziehen, stand am 27.11.2026 noch auf 96 €; bis 15.12.2026 23:59, einmal je Kunde). Der Knopf setzt ihn in den Kauflink, leer = kein Code
+      code: 'PILOTPRAXIS',  // Praxis-Code (Shopify DiscountCodeNode/2418591859063: 130 € auf die Variante „Test“ seit 27.11.2026, davor 96 €, bis 15.12.2026 23:59, einmal je Kunde). Der Knopf setzt ihn in den Kauflink, leer = kein Code
       video45: '',          // VSL 4:5 (Shopify-Dateien-URL), das Format des Films (BJ 24.11.2026)
       videoHoch: '',        // VSL 9:16, nur als Ausweichdatei, falls es keine 4:5-Datei gibt
       videoDauer: '1:20',   // steht am Knopf „Mit Ton ansehen“ (Rohfassung 10 vom 27.11.2026 ohne den Problem-Teil: 79,7 s)

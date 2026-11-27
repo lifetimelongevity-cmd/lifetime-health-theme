@@ -32,7 +32,7 @@ window.PP_KONFIG = {
       name: 'Kardiologie',
       quelle: 'pilot-kardio',
       variante: null,       // Pilot-Variante Kardiologie (Shopify S1), ohne sie liegt nur der Test in der Kasse
-      code: 'PILOTPRAXIS',  // Praxis-Code (Shopify DiscountCodeNode/2418591859063: muss 130 € auf die Variante „Test“ abziehen, stand am 27.11.2026 noch auf 96 €; bis 15.12.2026 23:59, einmal je Kunde). Der Knopf setzt ihn in den Kauflink, leer = kein Code
+      code: 'PILOTPRAXIS',  // Praxis-Code (Shopify DiscountCodeNode/2418591859063: 130 € auf die Variante „Test“ seit 27.11.2026, davor 96 €, bis 15.12.2026 23:59, einmal je Kunde). Der Knopf setzt ihn in den Kauflink, leer = kein Code
       video45: '',          // VSL 4:5 (Shopify-Dateien-URL), das Format des Films (BJ 24.11.2026)
       videoHoch: '',        // VSL 9:16, nur als Ausweichdatei, falls es keine 4:5-Datei gibt
       videoDauer: '1:20',   // steht am Knopf „Mit Ton ansehen“ (Rohfassung 10 vom 27.11.2026 ohne den Problem-Teil: 79,7 s)
