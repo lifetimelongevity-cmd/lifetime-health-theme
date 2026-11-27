@@ -1,5 +1,5 @@
 /* ERZEUGT von docs/pilotpraxis/bauen.py aus docs/pilotpraxis/pilotpraxis-v2.js. Nicht von Hand ändern.
-   Pruefsumme: ac2419841659baff13ff7a7f7e710daaee5ad4efca99348e162166f79b1d7058 */
+   Pruefsumme: 60e3b339a908659f0672c21f011775a113e482ede6ff5368a3afe27a94d9f936 */
 /* Pilotpraxis-Verkaufsseite, Fassung 2 (VSL-Aufbau, 23.11.2026). Quelle: docs/pilotpraxis/pilotpraxis-v2.js
    Wird im <head> ohne defer geladen: setzt Zustand und Schalter, bevor die Seite malt.
 
@@ -9,7 +9,7 @@
 window.PP_KONFIG = {
   // Zeitpunkte, Europe/Berlin (im November und Dezember gilt +01:00)
   start: '2026-11-22T18:00:00+01:00',
-  preisende: '2026-12-15T23:59:59+01:00',       // 299 € gelten bis zum Anmeldeschluss (BJ 24.11.2026). Der Shopify-Rabatt 2409825337719 muss zur selben Sekunde enden
+  preisende: '2026-12-15T23:59:59+01:00',       // 265 € gelten bis zum Anmeldeschluss (BJ 27.11.2026, davor 299 €). Der Shopify-Rabatt 2409825337719 muss zur selben Sekunde enden
   anmeldeschluss: '2026-12-15T23:59:59+01:00',  // BJ 23.11.2026
 
   schalter: {
@@ -17,7 +17,7 @@ window.PP_KONFIG = {
     chat: false        // Chat-Blase (Shopify Inbox) liegt mobil auf dem Knopf
   },
 
-  preis: { jetzt: 299, regulaer: 395 },
+  preis: { jetzt: 265, regulaer: 395 },
   testVariante: 42825878929508,
   produktHandle: 'agedna-pilotpraxis',          // Zustand „voll“ über /products/<handle>.js
   testseite: '/products/lifetime-age-dna',
@@ -34,7 +34,7 @@ window.PP_KONFIG = {
       name: 'Kardiologie',
       quelle: 'pilot-kardio',
       variante: null,       // Pilot-Variante Kardiologie (Shopify S1), ohne sie liegt nur der Test in der Kasse
-      code: 'PILOTPRAXIS',  // Praxis-Code (Shopify DiscountCodeNode/2418591859063: 96 € auf die Variante „Test“, bis 15.12.2026 23:59, einmal je Kunde). Der Knopf setzt ihn in den Kauflink, leer = kein Code
+      code: 'PILOTPRAXIS',  // Praxis-Code (Shopify DiscountCodeNode/2418591859063: muss 130 € auf die Variante „Test“ abziehen, stand am 27.11.2026 noch auf 96 €; bis 15.12.2026 23:59, einmal je Kunde). Der Knopf setzt ihn in den Kauflink, leer = kein Code
       video45: '',          // VSL 4:5 (Shopify-Dateien-URL), das Format des Films (BJ 24.11.2026)
       videoHoch: '',        // VSL 9:16, nur als Ausweichdatei, falls es keine 4:5-Datei gibt
       videoDauer: '1:20',   // steht am Knopf „Mit Ton ansehen“ (Rohfassung 10 vom 27.11.2026 ohne den Problem-Teil: 79,7 s)

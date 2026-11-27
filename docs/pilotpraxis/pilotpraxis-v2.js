@@ -7,7 +7,7 @@
 window.PP_KONFIG = {
   // Zeitpunkte, Europe/Berlin (im November und Dezember gilt +01:00)
   start: '2026-11-22T18:00:00+01:00',
-  preisende: '2026-12-15T23:59:59+01:00',       // 299 € gelten bis zum Anmeldeschluss (BJ 24.11.2026). Der Shopify-Rabatt 2409825337719 muss zur selben Sekunde enden
+  preisende: '2026-12-15T23:59:59+01:00',       // 265 € gelten bis zum Anmeldeschluss (BJ 27.11.2026, davor 299 €). Der Shopify-Rabatt 2409825337719 muss zur selben Sekunde enden
   anmeldeschluss: '2026-12-15T23:59:59+01:00',  // BJ 23.11.2026
 
   schalter: {
@@ -15,7 +15,7 @@ window.PP_KONFIG = {
     chat: false        // Chat-Blase (Shopify Inbox) liegt mobil auf dem Knopf
   },
 
-  preis: { jetzt: 299, regulaer: 395 },
+  preis: { jetzt: 265, regulaer: 395 },
   testVariante: 42825878929508,
   produktHandle: 'agedna-pilotpraxis',          // Zustand „voll“ über /products/<handle>.js
   testseite: '/products/lifetime-age-dna',
@@ -32,10 +32,10 @@ window.PP_KONFIG = {
       name: 'Kardiologie',
       quelle: 'pilot-kardio',
       variante: null,       // Pilot-Variante Kardiologie (Shopify S1), ohne sie liegt nur der Test in der Kasse
-      code: 'PILOTPRAXIS',  // Praxis-Code (Shopify DiscountCodeNode/2418591859063: 96 € auf die Variante „Test“, bis 15.12.2026 23:59, einmal je Kunde). Der Knopf setzt ihn in den Kauflink, leer = kein Code
+      code: 'PILOTPRAXIS',  // Praxis-Code (Shopify DiscountCodeNode/2418591859063: muss 130 € auf die Variante „Test“ abziehen, stand am 27.11.2026 noch auf 96 €; bis 15.12.2026 23:59, einmal je Kunde). Der Knopf setzt ihn in den Kauflink, leer = kein Code
       video45: '',          // VSL 4:5 (Shopify-Dateien-URL), das Format des Films (BJ 24.11.2026)
       videoHoch: '',        // VSL 9:16, nur als Ausweichdatei, falls es keine 4:5-Datei gibt
-      videoDauer: '1:33',   // steht am Knopf „Mit Ton ansehen“ (Rohfassung 9 vom 24.11.2026: 92,7 s)
+      videoDauer: '1:20',   // steht am Knopf „Mit Ton ansehen“ (Rohfassung 10 vom 27.11.2026 ohne den Problem-Teil: 79,7 s)
       musterPdf: ''         // Muster-Auswertung als PDF (Shopify S2), ohne Adresse erscheint kein Link
     },
     orthopaedie: {
@@ -111,7 +111,8 @@ window.PP_KONFIG = {
   if (F.musterPdf) html.classList.add('ppan-musterpdf');
   html.setAttribute('data-pp-zustand', zustand);
 
-  // Headline aus fester Liste: Die Anzeige setzt ihren Hook über ?h=, ohne Parameter steht der Hook des Videos
+  // Headline aus fester Liste: Die Anzeige setzt ihren Hook über ?h=, ohne Parameter steht der Hook des Videos.
+  // Ein Eintrag ist ein Satz oder ein Paar [Satz, leisere zweite Zeile, kleine Zeile darunter]; das Paar ersetzt auch die Zeile unter der Headline
   var HEADLINES = {
     a2: 'Kein Außendienst, kein Prospekt. Prüfen Sie es an sich selbst, bevor Sie es einem Patienten empfehlen.',
     a3: 'Sie messen jeden Tag bei anderen. Was misst man bei Ihnen?',
@@ -124,13 +125,19 @@ window.PP_KONFIG = {
       o1s: 'Ihr eigener Muskelschwund-Wert, epigenetisch gemessen: In sechs Wochen haben Sie ihn.'
     },
     kardiologie: {
-      k1: '„Ich esse doch gesund.“ Und das LDL bleibt hoch. Nur 28 % der behandelten Patienten in Deutschland erreichen ihr LDL-Ziel.',
+      // Meta-Anzeigen Kardiologie (26.11.2026): Satz und Zahl der Anzeige stehen im ersten Bildschirm
+      p1: ['Personalisierte Kardiologie beginnt mit der DNA.', 'LDL 160, gleicher Rat: 132 und 157.', 'Zwei Patienten nach 3 Monaten. Beispielwerte.'],
+      s1: ['Bieten Sie den Epigenetik & DNA-Test in Ihrer Praxis an.', 'Testen Sie ihn zuerst an sich selbst, zum Selbstkostenpreis.'],
+      // ohne die 28 %: Der Beleg dazu steht seit 25.11.2026 nicht mehr auf der Seite
+      k1: ['„Ich esse doch gesund.“ Und das LDL bleibt hoch.', 'Die DNA zeigt vorab, bei wem Ernährung allein nicht reicht.'],
       k1s: 'Wie ist Ihr eigenes Cholesterin veranlagt? In sechs Wochen sehen Sie es auf einer Skala.',
       k3: 'Belastungs-EKG unauffällig. Wie alt arbeitet der Körper dahinter?'
     }
   };
   var hKey = (q.get('h') || '').toLowerCase();
   var headline = HEADLINES[hKey] || (HEADLINES_FACH[fach] || {})[hKey] || null;
+  var headlineLeise = '', headlineKlein = '';
+  if (headline && typeof headline !== 'string') { headlineLeise = headline[1] || ''; headlineKlein = headline[2] || ''; headline = headline[0]; }
   if (headline) html.classList.add('ppan-h-wahl');
   if (headline && headline.length > 90) html.classList.add('ppan-h-lang');
 
@@ -179,7 +186,14 @@ window.PP_KONFIG = {
 
   function aufbauen() {
     if (headline) {
-      alle('[data-pp-headline]').forEach(function (el) { el.textContent = headline; });
+      alle('[data-pp-headline]').forEach(function (el) { el.textContent = headline; el.classList.remove('pp-wechsel'); el.removeAttribute('aria-label'); });
+      if (headlineLeise) {
+        var unter = document.querySelector('.pp-hero__unter');
+        var ziel = unter;
+        if (unter) unter.textContent = headlineLeise;
+        else alle('[data-pp-headline]').forEach(function (el) { ziel = document.createElement('span'); ziel.textContent = headlineLeise; el.appendChild(ziel); });
+        if (headlineKlein && ziel) { var kl = document.createElement('small'); kl.textContent = headlineKlein; ziel.appendChild(kl); }
+      }
       html.classList.remove('ppan-h-wahl');
     }
 
@@ -201,12 +215,20 @@ window.PP_KONFIG = {
     function fristAktualisieren() {
       alle('[data-pp-rest]').forEach(function (el) { el.textContent = restText(ziel); });
       var ms = Math.max(0, ziel - jetztZeit());
-      var werte = { tage: Math.floor(ms / 864e5), std: Math.floor(ms / 36e5) % 24, min: Math.floor(ms / 6e4) % 60 };
+      var werte = { tage: Math.floor(ms / 864e5), std: Math.floor(ms / 36e5) % 24, min: Math.floor(ms / 6e4) % 60, sek: Math.floor(ms / 1000) % 60 };
       var uhr = werte.tage + (werte.tage === 1 ? ' Tag ' : ' Tage ') + werte.std + ' Std. ' + werte.min + ' Min.';
       alle('[data-pp-uhr]').forEach(function (el) { if (el.textContent !== uhr) el.textContent = uhr; });
+      // Leiste oben: Tage, Stunden, Minuten, Sekunden bis zum echten Ende (der Praxis-Code läuft zur selben Sekunde ab)
+      ziffern.forEach(function (el) {
+        var name = el.getAttribute('data-pp-z');
+        var text = name === 'tage' ? String(werte.tage) : (werte[name] < 10 ? '0' : '') + werte[name];
+        if (el.textContent !== text) el.textContent = text;
+        if (name === 'tage' && el.nextElementSibling) el.nextElementSibling.textContent = werte.tage === 1 ? 'Tag' : 'Tage';
+      });
     }
+    var ziffern = alle('[data-pp-z]');
     fristAktualisieren();
-    setInterval(fristAktualisieren, 20000);
+    setInterval(fristAktualisieren, 1000);
 
     // Zustand „voll“: Verfügbarkeit der eigenen Pilot-Variante, ohne Zahl.
     // Schlägt der Abruf fehl, bleibt die Seite offen; den Überverkauf sperrt die Kasse.
@@ -339,7 +361,7 @@ window.PP_KONFIG = {
   function tafel() {
     var el = document.querySelector('[data-pp-tafel]');
     if (!el) return;
-    var DAUER = [3400, 3800, 3000, 7000];
+    var DAUER = [3400, 3800, 3000, 5200, 4600];   // je Textzeile; Bildzustände gibt es vier, Zeile 5 steht auf Bild 4
     var knoepfe = alle('[data-pp-schritt]', el);
     var ldl = alle('[data-pp-ldl]', el);
     var schritt = -1, uhr = null, sichtbar = false, gehalten = false;
@@ -347,7 +369,8 @@ window.PP_KONFIG = {
     function setzen(i) {
       var vorher = schritt;
       schritt = i;
-      el.setAttribute('data-schritt', String(i + 1));
+      el.setAttribute('data-schritt', String(Math.min(i + 1, 4)));
+      el.setAttribute('data-zeile', String(i + 1));
       el.style.setProperty('--pp-dauer', DAUER[i] + 'ms');
       knoepfe.forEach(function (k, n) {
         k.setAttribute('aria-current', n === i ? 'step' : 'false');
@@ -364,12 +387,12 @@ window.PP_KONFIG = {
       clearTimeout(uhr);
       el.classList.toggle('laeuft', sichtbar && !gehalten && !ruhig);
       if (!sichtbar || gehalten || ruhig) return;
-      uhr = setTimeout(function () { setzen((schritt + 1) % 4); }, DAUER[schritt]);
+      uhr = setTimeout(function () { setzen((schritt + 1) % DAUER.length); }, DAUER[schritt]);
     }
     knoepfe.forEach(function (k, n) {
       k.addEventListener('click', function () { gehalten = true; setzen(n); melden('tafel_schritt', { schritt: n + 1 }); });
     });
-    if (ruhig || !('IntersectionObserver' in window)) { setzen(3); return; }
+    if (ruhig || !('IntersectionObserver' in window)) { setzen(DAUER.length - 1); return; }
     setzen(0);
     new IntersectionObserver(function (e) {
       var war = sichtbar;
@@ -478,6 +501,8 @@ window.PP_KONFIG = {
         var ort = a.getAttribute('data-pp-kauf');
         if (ort !== 'sticky' && ort !== 'kopf') io.observe(a);
       });
+      // Solange „Mit Ton ansehen“ im Bild ist, bleibt die Leiste weg: Sie läge sonst auf dem Knopf (26.11.2026)
+      alle('.pp-ton').forEach(function (k) { io.observe(k); });
     }
     var geplant = false;
     function setzen() {

@@ -8,10 +8,10 @@
 window.PP_KONFIG = {
   // Zeitpunkte, Europe/Berlin (im November und Dezember gilt +01:00)
   start: '2026-11-22T18:00:00+01:00',        // vormerken → offen
-  preisende: '2026-11-30T23:59:59+01:00',    // bis hier 299 € statt 395 €
+  preisende: '2026-11-30T23:59:59+01:00',    // bis hier 265 € statt 395 € (BJ 27.11.2026, davor 299 €)
   anmeldeschluss: '2026-11-30T23:59:59+01:00',
   // Vorschlag A (Entscheidung 1, BJ bis Do 19.11.): true schaltet auf
-  // „299 € bis 30.11., danach 395 €, Anmeldeschluss 15.12.“ samt eigenem Wortlaut.
+  // „265 € bis 30.11., danach 395 €, Anmeldeschluss 15.12.“ samt eigenem Wortlaut.
   vorschlagA: false,
   anmeldeschlussA: '2026-12-15T23:59:59+01:00',
 
@@ -25,7 +25,7 @@ window.PP_KONFIG = {
     chat: false        // Chat-Blase (Shopify Inbox). 4b: kein Chat auf der Verkaufsseite; mobil lag sie auf dem Knopf
   },
 
-  preis: { jetzt: 299, regulaer: 395 },
+  preis: { jetzt: 265, regulaer: 395 },
   testVariante: 42825878929508,
   produktHandle: 'agedna-pilotpraxis',       // P5, Zustand „voll“ über /products/<handle>.js
   testseite: '/products/lifetime-age-dna',
